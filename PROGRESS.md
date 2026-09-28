@@ -2,41 +2,68 @@
 
 ## Phase en cours
 
-**Phase 0 — Mise en place** : terminée (en attente de merge sur `main` et de test sur téléphone).
+**Phase 1 — Prototype de mouvement** (spec §42.1) : implémentée, **en attente d'essai sur téléphone et de validation** (spec §43.0.1).
 
-Prochaine : **Phase 1 — Prototype de mouvement** (spec §42.1).
+Prochaine, après validation du mouvement : **à confirmer** entre Phase 2 — Plateforme (ordre de la spec §42) et les contrôles mobiles définitifs (CLAUDE.md : « juste après le mouvement de base »).
 
 ## Fait
 
+### Phase 0 — Mise en place
+
 - Analyse de la spec et décisions techniques → `docs/DECISIONS.md`.
 - Projet Vite 8 + TypeScript 6 strict + Phaser 4.2, ESLint, Prettier, Vitest.
-- Écran minimal : canvas paysage 640–800 × 360 mis à l'échelle (FIT), rectangle placeholder, message « Tourne ton téléphone » en portrait. Vérifié par captures Chromium (16:9, 19,5:9, > 20:9, portrait, rotation).
-- Test Vitest sur le calcul de la largeur logique.
+- Écran minimal paysage 640–800 × 360 (FIT), message « Tourne ton téléphone » en portrait.
 - Workflow GitHub Actions : vérifications + déploiement Pages depuis `main`.
 
-## À vérifier par l'utilisateur
+### Phase 1 — Prototype de mouvement
 
-- [ ] Merge sur `main`, workflow vert, page ouverte sur https://kalypst.github.io/Maria/
-- [ ] Sur téléphone : paysage plein écran sans barres parasites, message en portrait, pas de zoom au double-tap.
+- **D-12** : build de debug publié sur `/Maria/debug/` ; le build principal reste sans outils de debug (vérifié en CI par `npm run check:no-debug`).
+- `src/config/movement.ts` : tous les paramètres (valeurs **provisoires**), bornes de réglage, valeurs dérivées par pas (`deriveMovement`). Le saut est défini par sa hauteur en tuiles et son temps de montée.
+- Entrées : `InputAction` (masque de bits, sans allocation), `InputController` (fronts de pression mémorisés jusqu'à leur consommation par un pas), `KeyboardSource` (codes physiques : flèches, ZQSD/WASD, Espace/K), `TouchSource` **provisoire** (gauche/droite/saut en DOM, multi-touch, affiché sur appareil tactile seulement).
+- `FixedStepClock` : pas fixe 1/120 s, 8 pas max par image, interpolation d'affichage (`alpha`). La scène utilise le delta **brut** de Phaser (non lissé).
+- `gridCollision` : AABB par axes, balayage de toutes les tuiles traversées (aucune traversée), bords semi-ouverts (pas d'accrochage aux jointures), plateformes traversables par le dessous.
+- `PlayerPhysics` : accélération/décélération sol et air, demi-tour plus vif, saut à hauteur variable (coupure au relâchement), coyote time et jump buffering en pas entiers, intégration exacte à gravité constante, correction de coin de plafond (4 px). Machine à états Idle/Run/Jump/Fall/Land (Land visuel uniquement).
+- Salle de test ASCII `src/levels/test-room.txt` (40 × 22) + parseur `parseAsciiLevel` → `LevelData`.
+- `GameScene` : simulation + affichage interpolé ; placeholder de Céleste avec lunettes rondes roses ; salle dessinée une fois dans une texture.
+- Overlay de debug (dev et build de debug seulement) : bouton **DEBUG** en haut à droite ; curseurs pour chaque paramètre (valeurs modifiées en rose, conservées en `localStorage`), hitbox, état, vitesses, position, FPS, temps de simulation, pas abandonnés ; **Exporter JSON** (presse-papiers + fichier), valeurs par défaut, replacer Céleste. Le panneau laisse libres les commandes tactiles.
+- Mesure physique maison vs Arcade : `bench/arcade.html`, publiée sur `/Maria/debug/bench/arcade.html`.
 
-## Point ouvert à trancher avant la Phase 1
+### Mesures (Chromium headless sur ordinateur, build minifié)
 
-`CLAUDE.md` interdit les outils de debug dans le build de production, mais les tests sur téléphone se font sur le déploiement de `main` (build de production). Sans solution, l'overlay de réglage en direct serait inaccessible sur téléphone. Proposition : publier en plus un build de debug sur un sous-chemin (ex. `/Maria/debug/`), le build principal restant sans outils de debug.
+|                                    | µs / pas  | µs / image à 60 Hz |
+| ---------------------------------- | --------- | ------------------ |
+| Physique maison                    | 0,15–0,24 | 0,3–0,5            |
+| Arcade (même salle, mêmes entrées) | 0,76–0,79 | ~1,6               |
 
-## Prochaines étapes — Phase 1 (prototype de mouvement)
-
-- `src/config/movement.ts` : tous les paramètres (accélération/décélération sol et air, vitesse max, saut défini par hauteur en tuiles + temps jusqu'au sommet, gravité de chute, coupure de saut, coyote ~100 ms, buffer ~100 ms, vitesse de chute max).
-- `InputAction` + source clavier + **tactile provisoire minimal** (gauche/droite/saut) pour tester sur téléphone.
-- Boucle à pas de temps fixe 1/120 s (fonction pure) + interpolation d'affichage.
-- Collisions AABB contre grille, plateformes traversables par le haut.
-- `PlayerPhysics` + machine à états Idle/Run/Jump/Fall/Land.
-- Salle de test ASCII + parseur.
-- Overlay de debug : réglages en direct, hitbox, vitesse, état, export JSON des valeurs.
+- Maison **3 à 5× plus rapide** qu'Arcade sur ordinateur. À confirmer sur téléphone avec la page de mesure.
+- **Allocations** (profileur de tas de Chromium, objets collectés inclus, 120 000 pas) : ~0 octet/pas dans la simulation. Deux pièges corrigés : un flottant passé en argument à une fonction non inlinée est alloué (déplacements transmis par `box.dx`/`box.dy`) ; un champ de classe d'abord `undefined` fait allouer chaque écriture de flottant (champs toujours initialisés à un nombre).
+- Le temps de simulation affiché par l'overlay est grossier (précision de `performance.now()` réduite par les navigateurs) ; la page de mesure donne des valeurs précises.
 
 ### Critères d'acceptation Phase 1
 
-- [ ] Tests : accélération/décélération ; saut court/moyen/complet ; coyote et buffer aux bornes ; coins de tuiles sans accrochage ; pas de traversée à vitesse max ; plateforme traversable ; trajectoire identique à 60/90/120/144 Hz.
-- [ ] Aucune valeur de gameplay hors `src/config/` ; aucune allocation par frame dans la simulation.
-- [ ] Performance au moins équivalente à Arcade (condition D-05) : 60 FPS stables sur téléphone réel.
-- [ ] Jouable au clavier et au tactile provisoire ; réglages modifiables en direct sur téléphone.
+- [x] Tests (64) : accélération/décélération, demi-tour, contrôle aérien ; saut court/moyen/complet et hauteur configurée ; coyote et buffer aux bornes exactes ; sol et murs de tuiles sans accrochage ; coins de plafond ; pas de traversée à vitesse max ni ×10 ; plateforme traversable ; **trajectoire identique à 60/90/120/144 Hz** ; budget de performance.
+- [x] Aucune valeur de gameplay hors `src/config/` ; aucune allocation par pas dans la simulation (mesuré).
+- [ ] Performance au moins équivalente à Arcade (D-05) : **remplie sur ordinateur** ; reste à vérifier 60 FPS stables sur téléphone réel (page de mesure + FPS de l'overlay).
+- [x] Jouable au clavier et au tactile provisoire (multi-touch vérifié en émulation Chromium) ; réglages modifiables en direct.
 - [ ] Validation par l'utilisateur après essai réel (spec §43.0.1).
+
+## À vérifier par l'utilisateur
+
+- [ ] Merge sur `main`, workflow vert.
+- [ ] Sur téléphone, https://kalypst.github.io/Maria/debug/ : ressenti du mouvement (§43.0.1 : déplacement compréhensible, accélération perceptible, arrêt contrôlable, saut précis, hauteur variable, coyote, buffer, contrôle aérien). Régler avec **DEBUG**, puis **Exporter JSON** et me transmettre les valeurs à reporter dans `src/config/movement.ts`.
+- [ ] Sur téléphone, https://kalypst.github.io/Maria/debug/bench/arcade.html : noter les µs/pas maison et Arcade.
+- [ ] FPS stable à 60 (ou à la fréquence de l'écran) dans l'overlay, « pas perdus » qui n'augmente pas en jeu.
+- [ ] https://kalypst.github.io/Maria/ (build principal) : pas de bouton DEBUG.
+
+## Points connus / limites
+
+- Entrées lues une fois par image : une pression peut tomber sur des pas différents selon la fréquence d'affichage (au plus une image d'écart). La physique elle-même est identique à toutes les fréquences (testé).
+- Pas de descente à travers une plateforme (bas + saut) ni d'apex hang : prévus plus tard si besoin.
+- Pas de caméra mobile : la salle tient sur un écran (caméra : spec §43.0.3, phase ultérieure).
+- `pixelArt: true` arrondit l'affichage au pixel logique : mouvement par pas de 1 px logique (3 px physiques). À réévaluer avec la direction artistique.
+- Commandes tactiles provisoires, à remplacer en Phase 3 (D-08).
+
+## Prochaines étapes
+
+1. Essai sur téléphone et réglage des valeurs (voir ci-dessus) ; report des valeurs validées dans `src/config/movement.ts`.
+2. Phase suivante (ordre à confirmer, voir en haut).
