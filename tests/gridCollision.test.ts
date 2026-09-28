@@ -3,14 +3,24 @@ import { TILE_SIZE as T } from '../src/config/display';
 import { parseAsciiLevel } from '../src/core/level/parseAsciiLevel';
 import {
   HitY,
-  isAreaFree,
+  isBoxFree,
   isGrounded,
-  moveX,
-  moveY,
-  type Box,
+  moveX as moveBoxX,
+  moveY as moveBoxY,
+  type MovingBox,
 } from '../src/core/physics/gridCollision';
+import type { LevelData } from '../src/core/level/LevelData';
 
-const box = (x: number, y: number): Box => ({ x, y, width: 12, height: 22 });
+const box = (x: number, y: number): MovingBox => ({ x, y, width: 12, height: 22, dx: 0, dy: 0 });
+
+function moveX(level: LevelData, b: MovingBox, dx: number): boolean {
+  b.dx = dx;
+  return moveBoxX(level, b);
+}
+function moveY(level: LevelData, b: MovingBox, dy: number): number {
+  b.dy = dy;
+  return moveBoxY(level, b);
+}
 
 // 10 × 6 : sol et murs faits de tuiles séparées, plateforme traversable en ligne 2.
 const room = parseAsciiLevel(
@@ -67,7 +77,7 @@ describe('moveY', () => {
 
   it('traverse une plateforme par le dessous puis s’y pose par le dessus', () => {
     // Petite boîte : la salle est trop basse pour passer entièrement au-dessus avec 22 px.
-    const b: Box = { x: 4 * T, y: 5 * T - 8, width: 12, height: 8 };
+    const b: MovingBox = { x: 4 * T, y: 5 * T - 8, width: 12, height: 8, dx: 0, dy: 0 };
     expect(moveY(room, b, -2 * T - 1)).toBe(HitY.None);
     expect(b.y + b.height).toBeLessThan(3 * T);
     expect(moveY(room, b, -T)).toBe(HitY.None);
@@ -94,14 +104,14 @@ describe('moveY', () => {
   });
 });
 
-describe('isGrounded / isAreaFree', () => {
+describe('isGrounded / isBoxFree', () => {
   it('ne détecte pas de sol en l’air', () => {
     expect(isGrounded(room, box(7 * T, 3 * T))).toBe(false);
   });
 
   it('teste une zone contre les tuiles pleines seulement', () => {
-    expect(isAreaFree(room, 3 * T, 2 * T, 12, 22)).toBe(true);
-    expect(isAreaFree(room, 0, 2 * T, 12, 22)).toBe(false);
-    expect(isAreaFree(room, T, T, 14, 14)).toBe(true);
+    expect(isBoxFree(room, box(3 * T, 2 * T))).toBe(true);
+    expect(isBoxFree(room, box(0, 2 * T))).toBe(false);
+    expect(isBoxFree(room, { x: T, y: T, width: 14, height: 14 })).toBe(true);
   });
 });

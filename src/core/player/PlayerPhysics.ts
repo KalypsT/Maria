@@ -5,7 +5,14 @@ import {
   type MovementParams,
 } from '../../config/movement';
 import type { LevelData } from '../level/LevelData';
-import { HitY, isAreaFree, isGrounded, moveX, moveY, type Box } from '../physics/gridCollision';
+import {
+  HitY,
+  isBoxFree,
+  isGrounded,
+  moveX,
+  moveY,
+  type MovingBox,
+} from '../physics/gridCollision';
 import { PlayerState, nextPlayerState } from './playerState';
 
 /** Entrées lues par un pas de simulation. */
@@ -20,19 +27,14 @@ export interface PlayerInput {
 /** Compteur « jamais » : grand entier, pour ne pas dépasser en incrémentant. */
 const NEVER = 1 << 30;
 
-function approach(value: number, target: number, maxDelta: number): number {
-  if (value < target) {
-    return Math.min(value + maxDelta, target);
-  }
-  return Math.max(value - maxDelta, target);
-}
-
 /**
  * Physique de Céleste, indépendante de Phaser. Un appel à `step` = un pas fixe (1/120 s).
- * Aucune allocation dans `step` : l'état est muté en place.
+ * Aucune allocation dans `step` : l'état est muté en place, et aucun flottant n'est passé en
+ * argument ni retourné par une fonction non inlinée (V8 l'allouerait sur le tas), d'où les
+ * déplacements transmis par `box.dx` / `box.dy`. Vérifié au profileur de tas (bench/arcade.html).
  */
 export class PlayerPhysics {
-  readonly box: Box;
+  readonly box: MovingBox;
   vx = 0;
   vy = 0;
   /** Position au début du dernier pas, pour l'interpolation d'affichage. */
@@ -59,7 +61,7 @@ export class PlayerPhysics {
   ) {
     this.params = { ...params };
     this.derived = deriveMovement(this.params);
-    this.box = { x, y, width: PLAYER_HITBOX.width, height: PLAYER_HITBOX.height };
+    this.box = { x, y, width: PLAYER_HITBOX.width, height: PLAYER_HITBOX.height, dx: 0, dy: 0 };
     this.prevX = x;
     this.prevY = y;
     this.grounded = isGrounded(level, this.box);
@@ -113,7 +115,12 @@ export class PlayerPhysics {
     } else {
       accel = this.grounded ? p.groundDeceleration : p.airDeceleration;
     }
-    this.vx = approach(this.vx, moveInput * p.maxRunSpeed, accel * dt);
+    const targetVx = moveInput * p.maxRunSpeed;
+    const maxDelta = accel * dt;
+    this.vx =
+      this.vx < targetVx
+        ? Math.min(this.vx + maxDelta, targetVx)
+        : Math.max(this.vx - maxDelta, targetVx);
 
     // Saut : buffer (pression récente) × coyote (sol récent).
     if (input.jumpPressed) {
@@ -139,16 +146,16 @@ export class PlayerPhysics {
     const gravity = this.vy < 0 ? d.riseGravity : d.fallGravity;
     const startVy = this.vy;
     this.vy = Math.min(startVy + gravity * dt, p.maxFallSpeed);
-    const dy = (startVy + this.vy) * 0.5 * dt;
+    box.dy = (startVy + this.vy) * 0.5 * dt;
+    box.dx = this.vx * dt;
 
-    if (moveX(this.level, box, this.vx * dt)) {
+    if (moveX(this.level, box)) {
       this.vx = 0;
     }
-    const startY = box.y;
-    const hit = moveY(this.level, box, dy);
+    const hit = moveY(this.level, box);
     if (hit === HitY.Floor) {
       this.vy = 0;
-    } else if (hit === HitY.Ceiling && !this.tryCornerCorrection(startY + dy, moveInput)) {
+    } else if (hit === HitY.Ceiling && !this.tryCornerCorrection(input)) {
       this.vy = 0;
       this.jumpCutAvailable = false;
     }
@@ -174,7 +181,7 @@ export class PlayerPhysics {
     this.state = nextPlayerState(
       this.state,
       this.grounded,
-      this.vy,
+      this.vy < 0,
       this.vx !== 0 || moveInput !== 0,
       this.landStepsRemaining,
     );
@@ -183,24 +190,32 @@ export class PlayerPhysics {
   /**
    * En montée contre un coin de plafond, décale horizontalement de quelques pixels si cela libère
    * le passage : un saut qui frôle un coin n'est pas stoppé net (précision avant réalisme).
+   * La hauteur visée est `prevY + box.dy` (moveX ne modifie pas y).
    */
-  private tryCornerCorrection(targetY: number, moveInput: number): boolean {
+  private tryCornerCorrection(input: PlayerInput): boolean {
     const box = this.box;
-    const preferred = moveInput < 0 ? -1 : 1;
+    const blockedX = box.x;
+    const blockedY = box.y;
+    const targetY = this.prevY + box.dy;
+    const preferred = input.moveX < 0 ? -1 : 1;
     for (let offset = 1; offset <= this.params.cornerCorrectionPx; offset++) {
       for (let side = 0; side < 2; side++) {
-        const dir = side === 0 ? preferred : -preferred;
-        const x = box.x + dir * offset;
-        if (
-          isAreaFree(this.level, x, box.y, box.width, box.height) &&
-          isAreaFree(this.level, x, targetY, box.width, box.height)
-        ) {
-          box.x = x;
-          moveY(this.level, box, targetY - box.y);
+        box.x = blockedX + (side === 0 ? preferred : -preferred) * offset;
+        box.y = blockedY;
+        if (!isBoxFree(this.level, box)) {
+          continue;
+        }
+        box.y = targetY;
+        if (isBoxFree(this.level, box)) {
+          box.y = blockedY;
+          box.dy = targetY - blockedY;
+          moveY(this.level, box);
           return true;
         }
       }
     }
+    box.x = blockedX;
+    box.y = blockedY;
     return false;
   }
 }
