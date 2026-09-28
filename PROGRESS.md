@@ -2,11 +2,11 @@
 
 ## Phase en cours
 
-**Phase 2 — Prototype plateforme** (spec §42.2, §37, §43.0.3) : implémentée sur la branche `claude/phase-2-platforming`, **en attente de validation puis d'essai sur téléphone**.
+**Passe de fluidité** (après la caméra, avant la Phase 4) : implémentée sur la branche `claude/fluidity-pass`, **en attente de validation puis d'essai sur téléphone**. Toutes les options sont **désactivées par défaut** : rien ne change tant qu'elles ne sont pas activées.
 
-Phase 1 (mouvement) : mergée, FPS validés sur téléphone, mouvement jugé « pas mal », pas encore formellement validé (§43.0.1). Phase 3 (contrôles mobiles) : mergée. Une passe de **fluidité** est prévue après la caméra (voir « Idées mises de côté »).
+Phase 2 (plateforme) : mergée, en attente d'essai sur téléphone. Phase 1 (mouvement) : pas encore formellement validée (§43.0.1). Phase 3 (contrôles mobiles) : mergée.
 
-Prochaine : à confirmer (passe de fluidité, ou Phase 4 — combat minimal).
+Prochaine : Phase 4 — combat minimal (ou PWA / hors ligne, D-09, en petite session à part).
 
 ## Fait
 
@@ -40,6 +40,24 @@ Prochaine : à confirmer (passe de fluidité, ou Phase 4 — combat minimal).
 - **Traversée de plateforme** (**D-14**, validée) : Bas + Saut sur une plateforme traversable. Paramètres `dropInputThreshold` et `dropThroughMs`, réglables dans l'overlay.
 - Debug : doigts actifs, valeurs du joystick, masque des boutons ; `?touch` force les commandes tactiles sur ordinateur (dev / build de debug seulement).
 - Tests : 134 (dont joystick, disposition sur 4 écrans × 3 échelles × avec/sans encoche, combinaisons multi-touch, annulations, réglages, traversée). Vérifié en émulation Chromium avec de vrais événements tactiles : joystick + saut simultanés, pause, réglage, persistance après rechargement, build principal sans debug.
+
+### Passe de fluidité
+
+- **Résolution de rendu** (**D-18**) : menu pause → Affichage → Résolution « Logique » (par défaut) ou « Écran » (canvas à la hauteur physique, échelle ≤ 3, zoom de caméra = échelle), conservée (`maria.settings.display`, versionné). Vérifié dans Chromium : en « Écran », Céleste avance d'un pixel physique par tiers de pixel logique (au lieu de sauts de 3 px). Coût : ≈ 9 fois plus de pixels (Chromium sans GPU du conteneur : 14 FPS contre 57, non représentatif d'un téléphone). Échelle affichée dans l'overlay (« rendu ×3 »).
+- **Forme du saut** (**D-19**, désactivée par défaut, section Mouvement de l'overlay) : `jumpReleaseMode` 1 = gravité × `releaseGravityMultiplier` au relâchement au lieu de la coupure (même hauteur complète, sans cassure de vitesse) ; `apexHangSpeed` > 0 = gravité × `apexGravityMultiplier` près du sommet, Saut maintenu. Effet mesuré par l'analyse (D-16) : le relâchement progressif ne change ni le profil ni les parcours ; le flottement (60 px/s) donne +117 ms en l'air, +2 px de hauteur et **+1 tuile de portée** : « Précision » passerait de 67 ms (difficile) à 192 ms (moyen), « Chaîne » de 133 à 250 ms (facile). S'il est adopté, les tests des parcours échoueront volontairement : il faudra recalibrer les parcours.
+- **Sensations visuelles** (désactivées par défaut, section « Fluidité (visuel) » de l'overlay, `src/config/feel.ts`) : `PlayerFeel` (pur, au pas fixe) — étirement au décollage, écrasement à la réception selon l'impact, petit écrasement au demi-tour, ressort amorti, inclinaison en course ; sprite ancré aux pieds. Poussière (décollage, réception, demi-tour) : 8 images réutilisées, aucun objet créé en jeu (vérifié). En résolution logique, l'écrasement du placeholder (12 × 22 px) perd des rangées de pixels ; plus propre en résolution écran.
+- **Mesures** (profileur de tas, boucle chaude de 120 000 pas) : joueur avec les options de saut et `PlayerFeel` activés : aucune allocation au-delà du bruit de fond de Phaser (0,78 octet/pas contre 0,7).
+- Tests : 189 (échelle de rendu et réglages d'affichage, options de saut dont trajectoire identique à 60/90/120/144 Hz avec les options, sensations : désactivées = identité, étirement/écrasement, retour au repos, inclinaison, ressort borné).
+
+### À vérifier sur téléphone (passe de fluidité)
+
+Sur https://kalypst.github.io/Maria/debug/ (après merge) :
+
+- [ ] **Résolution** (menu pause → Affichage) : « Écran » est-il visiblement plus fluide que « Logique » en course et en saut ? **FPS** de l'overlay en « Écran » : stable à 60 (ou à la fréquence de l'écran) ? Le téléphone chauffe-t-il ?
+- [ ] **Relâchement progressif** (DEBUG → Mouvement → `jumpReleaseMode` = 1) : petits sauts plus agréables qu'avec la coupure ? Régler `releaseGravityMultiplier`.
+- [ ] **Flottement au sommet** (`apexHangSpeed` 40–80) : plus facile de viser, ou saut « lunaire » ? (Attention : il change la difficulté des parcours.)
+- [ ] **Sensations** (DEBUG → Fluidité : `squashEnabled` = 1, `dustEnabled` = 1) : écrasement, inclinaison, poussière agréables ou distrayants ? À comparer en « Logique » et « Écran ».
+- [ ] Ce qui est retenu : **Exporter JSON** et me transmettre les valeurs (mouvement, caméra, sensations).
 
 ### Phase 2 — Prototype plateforme
 
@@ -135,6 +153,6 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. Validation de la Phase 2, PR et merge, puis essai sur téléphone (liste « Phase 2 » ci-dessus) ; reporter les réglages exportés dans `src/config/camera.ts` et, si besoin, les seuils de `src/config/levelDesign.ts`.
-2. Essai sur téléphone des commandes (liste « Phase 3 »).
-3. Passe de fluidité, puis Phase 4 (combat minimal).
+1. Validation de la passe de fluidité, PR et merge, puis essai sur téléphone (listes « fluidité », « Phase 2 » et « Phase 3 ») ; reporter les réglages exportés dans `src/config/` et décider des options à adopter (D-18, D-19, sensations).
+2. Si le flottement au sommet est adopté : recalibrer les parcours et les seuils de difficulté.
+3. Phase 4 (combat minimal), ou PWA / hors ligne (D-09) en petite session à part.
