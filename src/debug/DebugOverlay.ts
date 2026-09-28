@@ -196,6 +196,13 @@ export function installDebugOverlay(scene: GameScene): void {
         `x ${player.box.x.toFixed(1)}  y ${player.box.y.toFixed(1)}\n` +
         `simu ${((simMsSum / frames) * 1000).toFixed(0)} µs/img (max ${(simMsMax * 1000).toFixed(0)})  ` +
         `pas perdus ${scene.clock.droppedSteps}`;
+      const touch = scene.touch;
+      if (touch) {
+        const stick = touch.controller.joystick;
+        stats.textContent +=
+          `\ndoigts ${touch.activeCount}  joystick ${stick.outX.toFixed(2)} ${stick.outY.toFixed(2)}` +
+          `  boutons ${touch.controller.heldMask.toString(2).padStart(6, '0')}`;
+      }
       lastStats = time;
       simMsSum = 0;
       simMsMax = 0;
