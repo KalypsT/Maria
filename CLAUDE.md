@@ -51,7 +51,6 @@ npm run format        # Prettier --write
 npm run format:check  # Prettier --check (vérifié en CI)
 npm run test          # Vitest (tests/**/*.test.ts)
 npm run test:watch    # Vitest en mode watch
-npm run bench         # mesures de performance (Vitest bench)
 ```
 
 Le déploiement se fait via GitHub Pages (`.github/workflows/deploy.yml`) : chaque push sur `main` lance typecheck, lint, format, tests, build puis publie sur https://kalypst.github.io/Maria/ (build de debug sur https://kalypst.github.io/Maria/debug/). Les PR lancent les mêmes vérifications sans déployer.

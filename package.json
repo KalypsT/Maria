@@ -17,8 +17,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "bench": "vitest bench --run"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "phaser": "^4.2.1"

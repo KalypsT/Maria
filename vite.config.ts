@@ -15,6 +15,10 @@ export default defineConfig(({ mode }) => {
     build: {
       target: 'es2022',
       outDir: isDebugBuild ? 'dist/debug' : 'dist',
+      // Le build de debug publie aussi la mesure physique maison vs Arcade (condition D-05).
+      rollupOptions: isDebugBuild
+        ? { input: { main: 'index.html', arcadeBench: 'bench/arcade.html' } }
+        : {},
       // Phaser seul pèse ~1,5 Mo minifié.
       chunkSizeWarningLimit: 2000,
     },
