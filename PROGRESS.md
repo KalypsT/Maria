@@ -2,11 +2,11 @@
 
 ## Phase en cours
 
-**Phase 3 — Contrôles mobiles** (spec §12, §40, §42.3) : implémentée, **en attente d'essai sur téléphone** (spec §43.0.2).
+**Phase 2 — Prototype plateforme** (spec §42.2, §37, §43.0.3) : implémentée sur la branche `claude/phase-2-platforming`, **en attente de validation puis d'essai sur téléphone**.
 
-Phase 1 (mouvement) : mergée, FPS validés sur téléphone, mouvement jugé « pas mal » ; une passe de **fluidité** est prévue plus tard (voir « Idées mises de côté »).
+Phase 1 (mouvement) : mergée, FPS validés sur téléphone, mouvement jugé « pas mal », pas encore formellement validé (§43.0.1). Phase 3 (contrôles mobiles) : mergée. Une passe de **fluidité** est prévue après la caméra (voir « Idées mises de côté »).
 
-Prochaine : à confirmer (Phase 2 — Plateforme, ou passe de fluidité sur le mouvement).
+Prochaine : à confirmer (passe de fluidité, ou Phase 4 — combat minimal).
 
 ## Fait
 
@@ -40,6 +40,41 @@ Prochaine : à confirmer (Phase 2 — Plateforme, ou passe de fluidité sur le m
 - **Traversée de plateforme** (**D-14**, validée) : Bas + Saut sur une plateforme traversable. Paramètres `dropInputThreshold` et `dropThroughMs`, réglables dans l'overlay.
 - Debug : doigts actifs, valeurs du joystick, masque des boutons ; `?touch` force les commandes tactiles sur ordinateur (dev / build de debug seulement).
 - Tests : 134 (dont joystick, disposition sur 4 écrans × 3 échelles × avec/sans encoche, combinaisons multi-touch, annulations, réglages, traversée). Vérifié en émulation Chromium avec de vrais événements tactiles : joystick + saut simultanés, pause, réglage, persistance après rechargement, build principal sans debug.
+
+### Phase 2 — Prototype plateforme
+
+- **Caméra** (**D-15**) : `CameraController` pur (`src/core/camera`), avancé au pas fixe avec le joueur et interpolé. Zone morte horizontale, anticipation dans le sens de la course (après 250 ms de course : les tapotements ne bougent pas la vue ; reste en place à l'arrêt), cadrage vertical sur le dernier sol (**un saut ne bouge pas la vue**), bande haute/basse, suivi serré et anticipation vers le bas pendant une grande chute, atterrissage sans rebond, marge garantie aux bords de la vue, bornes de la salle, zoom (pas de 0,25), regard haut/bas au joystick (désactivé par défaut). Largeur 640–800 : même cadrage autour de Céleste (distances en px absolus). 20 paramètres dans `src/config/camera.ts`.
+- **Grandes salles** (**D-17**) : rendu par blocs de 32 × 32 tuiles ; arrivée `G` et métadonnées `; @name:` / `; @difficulty:` dans le format ASCII ; registre `src/levels/index.ts`.
+- **Faisabilité** (**D-16**, `src/core/analysis`, pur) : `computeJumpProfile` (hauteur, durée, distance, plus grand trou par dénivelé avec sa fenêtre) et `analyzeLevel` (surfaces praticables, passages simulés avec la vraie physique : sauts en courant à chaque instant de pression, maintiens courts, air control relâché, sauts sans élan, chutes, Bas + Saut ; chemin dont le passage le plus dur est le plus facile). `PlayerPhysics.copyFrom` (copie d'état, sans effet sur le mouvement) permet d'essayer chaque instant sans tout rejouer.
+- **Seuils de difficulté** (provisoires, `src/config/levelDesign.ts`) : fenêtre du passage le plus dur ≥ 200 ms (facile), 100–200 ms (moyen), 50–100 ms (difficile).
+- **Parcours d'essai** (`src/levels/courses/`, sans danger : une chute ramène plus bas, jamais bloquée) :
+
+  | Parcours        | Taille (tuiles) | Difficulté | Passage le plus dur (paramètres actuels)        |
+  | --------------- | --------------- | ---------- | ----------------------------------------------- |
+  | 1. Premiers pas | 128 × 30        | facile     | marche de +3 sur 3 tuiles, 317 ms               |
+  | 2. Chaîne       | 150 × 32        | moyen      | trou de 6 tuiles à plat depuis 3 tuiles, 133 ms |
+  | 3. Tour         | 60 × 80         | facile     | zigzag +3, 417 ms ; longue chute dans le puits  |
+  | 4. Précision    | 120 × 32        | difficile  | +3 sur 5 tuiles, 67 ms                          |
+
+- **Tests** (174) : caméra (immobile à l'arrêt, aucun mouvement vertical pendant un saut, tapotement ignoré, anticipation sans oscillation, recadrage sans dépassement, Céleste visible et ≥ 150 px visibles sous ses pieds en chute rapide, atterrissage sans rebond, bornes, petite salle centrée, même cadrage en 640 et 800, zoom, regard) ; profil de saut (hauteur configurée, monotonie, **suit les paramètres** : saut plus haut, course plus rapide, sans coyote) ; analyse (surfaces, trou franchissable ou non, Bas + Saut, chemin le plus sûr) ; **chaque parcours** : faisable, difficulté déclarée exacte, et **aucune surface sans retour** (ce test a trouvé deux pièges dans le parcours 1, corrigés).
+- **Profil de saut actuel** : 56 px (3,5 tuiles, corniche max 3 tuiles), 650 ms en l'air, 88 px en courant ; trou max 6 tuiles à plat (133 ms), 5 tuiles pour +3 (67 ms), 7 tuiles pour −2 (100 ms). Tableau complet dans la sortie de `npm run test`.
+- **Choix du parcours** : liste dans l'overlay de debug et entrée **provisoire** « Parcours d'essai » dans le menu pause (les deux builds) ; le dernier choix est conservé (`localStorage`).
+- **Overlay** : sections repliables Mouvement / Caméra, repères de caméra (zone morte, bande, cible d'anticipation, centre), position et avance de la caméra ; l'export JSON contient mouvement et caméra.
+- Vérifié dans Chromium (émulation téléphone 844 × 390, vrais événements tactiles par CDP) : course, sauts, arrêt et saut sur place sans aucune inversion de la caméra ; chute dans la tour (pieds à 249 px sur 360 au pire, 292 avant correction) ; joystick + Saut simultanés (6 sauts sur 6) ; choix d'un parcours dans le menu pause.
+
+### À vérifier sur téléphone (Phase 2)
+
+Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir dans le menu pause (faire défiler jusqu'à « Parcours d'essai ») :
+
+- [ ] **Caméra, course** : la vue anticipe dans le sens de la course sans à-coups ; de petits tapotements gauche/droite ne la font pas bouger ; pas de va-et-vient à l'arrêt.
+- [ ] **Caméra, sauts** : la vue ne monte pas et ne descend pas pendant un saut ordinaire ; recadrage doux après une montée (parcours 1, escalier ; parcours 3, tour).
+- [ ] **Caméra, chute** (parcours 3, puits) : on voit assez loin sous Céleste ; à l'arrivée, la vue se pose sans rebondir.
+- [ ] **Tremblement** : Céleste ne « vibre » pas d'un pixel par rapport au décor pendant la course (arrondi au pixel logique, `pixelArt`).
+- [ ] **Boutons** : le terrain utile n'est pas caché sous Saut / Action (en bas à droite) ; sinon, augmenter `verticalOffsetPx` ou `lookAheadPx` dans l'overlay.
+- [ ] **Difficulté ressentie** : 1 facile, 2 moyen, 3 facile, 4 difficile ? Noter les sauts ratés souvent : ils servent à calibrer les seuils (200 / 100 / 50 ms).
+- [ ] **Wall jump** : un passage semble-t-il vraiment le demander ? (aucun n'en a besoin, D-16 le vérifie).
+- [ ] **FPS** stable dans les grandes salles (overlay), « pas perdus » qui n'augmente pas.
+- [ ] Réglages caméra : ajuster dans **DEBUG → Caméra**, puis **Exporter JSON** et me transmettre les valeurs.
 
 ### À vérifier sur téléphone (Phase 3)
 
@@ -81,9 +116,12 @@ Prochaine : à confirmer (Phase 2 — Plateforme, ou passe de fluidité sur le m
 
 ## Points connus / limites
 
+- **Allocation de la caméra** (profileur de tas de Chromium, boucle chaude de 120 000 pas, méthode de la Phase 1) : ~3 octets par pas au sol (un nombre de 12 octets tous les ~4 pas), le joueur restant à 0. Dichotomie : lié aux écritures des hauteurs de référence dans la branche « au sol », pas à la représentation des champs (un `Float64Array` ne change rien) ; cause V8 non identifiée. En jeu réel (Chromium, 20 s après 40 s de jeu), aucune allocation attribuée à la caméra, et Phaser alloue ~4,5 Ko par pas équivalent : impact négligeable. À revoir si des pauses de GC apparaissent sur téléphone.
+- Les fenêtres de timing supposent une arrivée en courant depuis l'arrêt, au bout de la plateforme de départ, et des entrées tenues parfaitement : elles mesurent la tolérance du saut, pas la difficulté au pouce.
+- Le choix « Parcours d'essai » du menu pause est provisoire (prototype) : à retirer quand le monde sera structuré (Phase 6).
+
 - Entrées lues une fois par image : une pression peut tomber sur des pas différents selon la fréquence d'affichage (au plus une image d'écart). La physique elle-même est identique à toutes les fréquences (testé).
 - Pas de descente à travers une plateforme (bas + saut) ni d'apex hang : prévus plus tard si besoin.
-- Pas de caméra mobile : la salle tient sur un écran (caméra : spec §43.0.3, phase ultérieure).
 - `pixelArt: true` arrondit l'affichage au pixel logique : mouvement par pas de 1 px logique (3 px physiques). À réévaluer avec la direction artistique.
 - Pas de repositionnement des boutons par glisser-déposer ni de manette (Gamepad API) : reportés à plus tard.
 - Le bouton Action n'a pas d'effet avant la phase combat.
@@ -91,10 +129,12 @@ Prochaine : à confirmer (Phase 2 — Plateforme, ou passe de fluidité sur le m
 ## Idées mises de côté (à reprendre en passe de fluidité)
 
 - **Affichage** : option d'affichage au sous-pixel pour Céleste (actuellement arrondi au pixel logique, ~3 px physiques), à comparer sur téléphone ; la physique ne change pas.
-- **Ressenti sans toucher à la physique** : écrasement/étirement au décollage et à la réception, inclinaison en courant, poussière (réception, demi-tour), caméra douce avec anticipation.
+- **Ressenti sans toucher à la physique** : écrasement/étirement au décollage et à la réception, inclinaison en courant, poussière (réception, demi-tour).
+- **Caméra** : option sous-pixel pour le défilement si un tremblement d'un pixel est visible sur téléphone.
 - **Courbe du saut** (à valider) : gravité accrue au relâchement au lieu de la coupure nette ; léger flottement au sommet. Chaque option avec un interrupteur dans l'overlay, désactivée par défaut.
 
 ## Prochaines étapes
 
-1. Essai sur téléphone des commandes (liste ci-dessus) et réglage des valeurs de `src/config/controls.ts`.
-2. Phase suivante à confirmer.
+1. Validation de la Phase 2, PR et merge, puis essai sur téléphone (liste « Phase 2 » ci-dessus) ; reporter les réglages exportés dans `src/config/camera.ts` et, si besoin, les seuils de `src/config/levelDesign.ts`.
+2. Essai sur téléphone des commandes (liste « Phase 3 »).
+3. Passe de fluidité, puis Phase 4 (combat minimal).
