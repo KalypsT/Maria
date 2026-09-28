@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { CAMERA_PARAM_RANGES, DEFAULT_CAMERA, type CameraParams } from '../config/camera';
+import { COMBAT_PARAM_RANGES, DEFAULT_COMBAT, type CombatParams } from '../config/combat';
 import { DEFAULT_FEEL, FEEL_PARAM_RANGES, type FeelParams } from '../config/feel';
 import {
   DEFAULT_MOVEMENT,
@@ -11,10 +12,12 @@ import { LEVELS, levelName } from '../levels';
 import type { GameScene } from '../scenes/GameScene';
 import {
   cameraToJson,
+  combatToJson,
   feelToJson,
   movementToJson,
   orderedParams,
   sanitizeCameraOverrides,
+  sanitizeCombatOverrides,
   sanitizeFeelOverrides,
   sanitizeMovementOverrides,
 } from './movementOverrides';
@@ -24,6 +27,10 @@ const OVERLAY_ID = 'maria-debug-overlay';
 const STORAGE_KEY = 'maria.debug.movement';
 const CAMERA_STORAGE_KEY = 'maria.debug.camera';
 const FEEL_STORAGE_KEY = 'maria.debug.feel';
+const COMBAT_STORAGE_KEY = 'maria.debug.combat';
+const ATTACK_COLOR = 0xff5d5d;
+const ENEMY_BOX_COLOR = 0xffa24d;
+const ENEMY_STATE_LABEL = ['patrouille', 'étourdi', 'dispersé'] as const;
 const HITBOX_COLOR = 0x5dff8a;
 const CAMERA_GUIDE_COLOR = 0xffd166;
 /** Rafraîchissement du texte de stats (ms) : inutile de toucher au DOM à chaque image. */
@@ -162,6 +169,8 @@ export function installDebugOverlay(scene: GameScene): void {
   scene.applyCamera();
   Object.assign(scene.feelParams, load(FEEL_STORAGE_KEY, sanitizeFeelOverrides));
   scene.applyFeel();
+  Object.assign(scene.combatParams, load(COMBAT_STORAGE_KEY, sanitizeCombatOverrides));
+  scene.applyCombat();
 
   const style = document.createElement('style');
   style.textContent = STYLE;
@@ -234,6 +243,17 @@ export function installDebugOverlay(scene: GameScene): void {
     },
   });
 
+  const refreshCombat = addSliders<CombatParams>(panel, {
+    title: 'Combat',
+    values: scene.combatParams,
+    defaults: DEFAULT_COMBAT,
+    ranges: COMBAT_PARAM_RANGES,
+    onChange: () => {
+      scene.applyCombat();
+      save(COMBAT_STORAGE_KEY, combatToJson(scene.combatParams));
+    },
+  });
+
   // Actions.
   const actions = element('div', panel, 'dbg-actions');
   const exportButton = element('button', actions, undefined, 'Exporter JSON');
@@ -243,6 +263,7 @@ export function installDebugOverlay(scene: GameScene): void {
         movement: orderedParams(scene.movement, MOVEMENT_PARAM_RANGES),
         camera: orderedParams(scene.cameraParams, CAMERA_PARAM_RANGES),
         feel: orderedParams(scene.feelParams, FEEL_PARAM_RANGES),
+        combat: orderedParams(scene.combatParams, COMBAT_PARAM_RANGES),
       },
       null,
       2,
@@ -274,13 +295,23 @@ export function installDebugOverlay(scene: GameScene): void {
     Object.assign(scene.feelParams, DEFAULT_FEEL);
     scene.applyFeel();
     save(FEEL_STORAGE_KEY, feelToJson(scene.feelParams));
+    Object.assign(scene.combatParams, DEFAULT_COMBAT);
+    scene.applyCombat();
+    save(COMBAT_STORAGE_KEY, combatToJson(scene.combatParams));
     refreshMovement();
     refreshCamera();
     refreshFeel();
+    refreshCombat();
   });
   element('button', actions, undefined, 'Replacer Céleste').addEventListener('click', () => {
     scene.respawn();
   });
+  element('button', actions, undefined, 'Réinitialiser les ennemis').addEventListener(
+    'click',
+    () => {
+      scene.resetEnemies();
+    },
+  );
 
   // Hitbox, repères et stats, dessinés après la mise à jour de la scène.
   const graphics = scene.add.graphics().setDepth(1000);
@@ -300,6 +331,22 @@ export function installDebugOverlay(scene: GameScene): void {
         PLAYER_HITBOX.width - 1,
         PLAYER_HITBOX.height - 1,
       );
+    }
+    if (showHitbox) {
+      // Zone de frappe (pendant la frappe active) et hurtboxes des ennemis.
+      const combat = scene.combat;
+      const hit = combat.attackBox;
+      if (combat.attack.active) {
+        graphics.lineStyle(1, ATTACK_COLOR, 1);
+        graphics.strokeRect(hit.x + 0.5, hit.y + 0.5, hit.width - 1, hit.height - 1);
+      }
+      graphics.lineStyle(1, ENEMY_BOX_COLOR, 1);
+      for (const enemy of combat.enemies) {
+        if (!enemy.dispersed) {
+          const b = enemy.box;
+          graphics.strokeRect(b.x + 0.5, b.y + 0.5, b.width - 1, b.height - 1);
+        }
+      }
     }
     if (showCamera) {
       const p = scene.cameraParams;
@@ -346,6 +393,11 @@ export function installDebugOverlay(scene: GameScene): void {
         `vue ${camera.viewWidth.toFixed(0)}×${camera.viewHeight.toFixed(0)} rendu ×${scene.renderScale.toFixed(2)}\n` +
         `simu ${((simMsSum / frames) * 1000).toFixed(0)} µs/img (max ${(simMsMax * 1000).toFixed(0)})  ` +
         `pas perdus ${scene.clock.droppedSteps}`;
+      const combat = scene.combat;
+      const states = combat.enemies.map((enemy) => ENEMY_STATE_LABEL[enemy.state]).join(' ');
+      stats.textContent +=
+        `\ncombat coup ${combat.attack.phase} n°${combat.attack.swing}  invuln. ${combat.invulnerableSteps}` +
+        (states ? `  ennemis ${states}` : '');
       const touch = scene.touch;
       if (touch) {
         const stick = touch.controller.joystick;
