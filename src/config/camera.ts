@@ -27,6 +27,8 @@ export interface CameraParams {
   bandDownPx: number;
   /** Constante de temps du recadrage vertical (ms), après un atterrissage. */
   verticalTimeMs: number;
+  /** Constante de temps du suivi vertical quand Céleste tombe sous la bande (ms) : serré, pour voir où elle va. */
+  fallFollowTimeMs: number;
   /** Anticipation vers le bas pendant une grande chute (px). */
   fallLookAheadPx: number;
   /**
@@ -62,9 +64,10 @@ export const DEFAULT_CAMERA: Readonly<CameraParams> = {
   bandUpPx: 72,
   bandDownPx: 56,
   verticalTimeMs: 180,
-  fallLookAheadPx: 72,
+  fallFollowTimeMs: 60,
+  fallLookAheadPx: 96,
   fallLookTriggerPx: 64,
-  fallLookTimeMs: 300,
+  fallLookTimeMs: 180,
   screenMarginPx: 40,
   lookEnabled: 0,
   lookDistancePx: 80,
@@ -89,6 +92,7 @@ export const CAMERA_PARAM_RANGES: Readonly<
   bandUpPx: { min: 0, max: 200, step: 2 },
   bandDownPx: { min: 0, max: 200, step: 2 },
   verticalTimeMs: { min: 0, max: 800, step: 5 },
+  fallFollowTimeMs: { min: 0, max: 500, step: 5 },
   fallLookAheadPx: { min: 0, max: 160, step: 2 },
   fallLookTriggerPx: { min: 0, max: 320, step: 4 },
   fallLookTimeMs: { min: 0, max: 1500, step: 10 },
