@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_HEIGHT, PLACEHOLDER_COLORS } from './config/display';
 import { computeGameWidth } from './core/gameSize';
-import { SandboxScene } from './scenes/SandboxScene';
+import { GameScene } from './scenes/GameScene';
 
 function getParent(): HTMLElement {
   const element = document.getElementById('game');
@@ -24,7 +24,7 @@ const game = new Phaser.Game({
     width: computeGameWidth(parent.clientWidth, parent.clientHeight),
     height: GAME_HEIGHT,
   },
-  scene: [SandboxScene],
+  scene: [GameScene],
 });
 
 function fitGameWidth(): void {

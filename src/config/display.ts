@@ -12,7 +12,10 @@ export const TILE_SIZE = 16;
 export const PLACEHOLDER_COLORS = {
   background: 0x1b1a24,
   celeste: 0xf4a6c8,
+  /** Lunettes rondes roses (spec §2). */
+  glasses: 0xff4fa3,
+  face: 0xf6e3d4,
+  solid: 0x4a4760,
+  solidEdge: 0x6b678a,
+  oneWay: 0x8a7fb0,
 } as const;
-
-/** Taille du rectangle placeholder de Céleste, en pixels logiques (provisoire). */
-export const CELESTE_PLACEHOLDER_SIZE = { width: 12, height: 22 } as const;
