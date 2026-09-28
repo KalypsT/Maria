@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
+import { CAMERA_PARAM_RANGES, DEFAULT_CAMERA } from '../src/config/camera';
 import { DEFAULT_MOVEMENT, MOVEMENT_PARAM_RANGES } from '../src/config/movement';
-import { movementToJson, sanitizeMovementOverrides } from '../src/debug/movementOverrides';
+import {
+  cameraToJson,
+  movementToJson,
+  sanitizeCameraOverrides,
+  sanitizeMovementOverrides,
+} from '../src/debug/movementOverrides';
 
 describe('sanitizeMovementOverrides', () => {
   it('garde les clés connues et numériques, bornées', () => {
@@ -25,5 +31,17 @@ describe('sanitizeMovementOverrides', () => {
   it('relit sans perte un export JSON', () => {
     const json = movementToJson(DEFAULT_MOVEMENT);
     expect(sanitizeMovementOverrides(JSON.parse(json))).toEqual(DEFAULT_MOVEMENT);
+  });
+});
+
+describe('sanitizeCameraOverrides', () => {
+  it('borne les réglages de caméra et relit un export', () => {
+    expect(sanitizeCameraOverrides({ zoom: 10, deadZoneWidthPx: 30, other: 1 })).toEqual({
+      zoom: CAMERA_PARAM_RANGES.zoom.max,
+      deadZoneWidthPx: 30,
+    });
+    expect(sanitizeCameraOverrides(JSON.parse(cameraToJson(DEFAULT_CAMERA)))).toEqual(
+      DEFAULT_CAMERA,
+    );
   });
 });
