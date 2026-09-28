@@ -1,4 +1,4 @@
-import { Tile, type LevelData, type TilePos } from './LevelData';
+import { EntityType, Tile, type LevelData, type LevelEntity, type TilePos } from './LevelData';
 
 const LEGEND: Readonly<Record<string, number>> = {
   '.': Tile.Empty,
@@ -6,7 +6,10 @@ const LEGEND: Readonly<Record<string, number>> = {
   '=': Tile.OneWay,
   P: Tile.Empty,
   G: Tile.Empty,
+  e: Tile.Empty,
 };
+/** Marqueurs d'entités (la tuile elle-même est vide). */
+const ENTITIES: Readonly<Record<string, EntityType>> = { e: EntityType.Patroller };
 const SPAWN = 'P';
 const GOAL = 'G';
 const COMMENT = ';';
@@ -17,7 +20,8 @@ const META = /^;\s*@([\w-]+)\s*:\s*(.*)$/;
  * Convertit une carte ASCII (décision D-06) en `LevelData`.
  * Lignes vides en début et fin ignorées, lignes commençant par `;` ignorées (commentaires).
  * Légende : `#` plein, `=` traversable par le dessous, `.` vide, `P` départ (une seule fois),
- * `G` arrivée d'un parcours (au plus une fois). Les commentaires `; @clé: valeur` sont des métadonnées.
+ * `G` arrivée d'un parcours (au plus une fois), `e` patrouilleur. Les commentaires `; @clé: valeur`
+ * sont des métadonnées.
  */
 export function parseAsciiLevel(id: string, text: string): LevelData {
   const rows: { text: string; line: number }[] = [];
@@ -48,6 +52,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   const tiles = new Uint8Array(width * height);
   let spawn: TilePos | undefined;
   let goal: TilePos | null = null;
+  const entities: LevelEntity[] = [];
 
   rows.forEach(({ text: rowText, line }, row) => {
     if (rowText.length !== width) {
@@ -74,6 +79,10 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         }
         goal = { col, row };
       }
+      const entity = ENTITIES[char];
+      if (entity) {
+        entities.push({ type: entity, col, row });
+      }
       tiles[row * width + col] = tile;
     }
   });
@@ -81,5 +90,5 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   if (!spawn) {
     throw new Error(`Niveau ${id} : point de départ « ${SPAWN} » manquant`);
   }
-  return { id, width, height, tiles, spawn, goal, meta };
+  return { id, width, height, tiles, spawn, goal, meta, entities };
 }
