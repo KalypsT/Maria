@@ -1,6 +1,12 @@
 import Phaser from 'phaser';
 import { DEFAULT_CAMERA, type CameraParams } from '../config/camera';
-import { LEVEL_CHUNK_TILES, PLACEHOLDER_COLORS, TILE_SIZE } from '../config/display';
+import {
+  GAME_HEIGHT,
+  LEVEL_CHUNK_TILES,
+  PLACEHOLDER_COLORS,
+  TILE_SIZE,
+  type DisplaySettings,
+} from '../config/display';
 import {
   DEFAULT_MOVEMENT,
   MAX_STEPS_PER_FRAME,
@@ -18,6 +24,7 @@ import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../core/player/PlayerPhysics';
 import { LEVELS, levelName, type LevelSource } from '../levels';
 import { loadControlSettings, saveControlSettings } from '../ui/controlSettingsStorage';
+import { loadDisplaySettings, saveDisplaySettings } from '../ui/displaySettingsStorage';
 import { PauseMenu } from '../ui/PauseMenu';
 
 const PLAYER_TEXTURE = 'celeste-placeholder';
@@ -39,6 +46,9 @@ function loadLevelChoice(): LevelSource {
   }
   return LEVELS.find((level) => level.id === id) ?? first;
 }
+
+/** Événement du jeu émis quand les réglages d'affichage changent (main.ts redimensionne le canvas). */
+export const DISPLAY_SETTINGS_EVENT = 'maria-display-settings';
 
 /** Mesures de la dernière image, lues par l'overlay de debug. */
 export interface FrameStats {
@@ -64,6 +74,8 @@ export class GameScene extends Phaser.Scene {
   /** Commandes tactiles, absentes sur ordinateur. */
   touch?: TouchSource;
   paused = false;
+  /** Réglages d'affichage courants (D-18). */
+  displaySettings!: DisplaySettings;
   private pauseMenu?: PauseMenu;
   private playerSprite!: Phaser.GameObjects.Image;
   private readonly levelImages: Phaser.GameObjects.Image[] = [];
@@ -99,8 +111,13 @@ export class GameScene extends Phaser.Scene {
       this.controls.sources.push(this.touch);
       detachTouch = this.touch.attach(window);
     }
+    this.displaySettings = loadDisplaySettings();
     this.pauseMenu = new PauseMenu({
       settings: controlSettings,
+      display: this.displaySettings,
+      onDisplayChange: (settings) => {
+        this.setDisplaySettings(settings);
+      },
       showTouchSettings: this.touch !== undefined,
       onResume: () => {
         this.setPaused(false);
@@ -208,8 +225,19 @@ export class GameScene extends Phaser.Scene {
   /** Applique les paramètres de caméra courants (après un réglage en direct ou un changement de zoom). */
   applyCamera(): void {
     this.camera.setParams(this.cameraParams);
-    this.cameras.main.setZoom(this.cameraParams.zoom);
     this.onResize();
+  }
+
+  /** Change la résolution de rendu (D-18) : conservée, puis appliquée par main.ts. */
+  setDisplaySettings(settings: Readonly<DisplaySettings>): void {
+    this.displaySettings = { ...settings };
+    saveDisplaySettings(this.displaySettings);
+    this.game.events.emit(DISPLAY_SETTINGS_EVENT, this.displaySettings);
+  }
+
+  /** Échelle de rendu courante (D-18) : 1 à la résolution logique. */
+  get renderScale(): number {
+    return this.scale.height / GAME_HEIGHT;
   }
 
   respawn(): void {
@@ -238,9 +266,14 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.centerOn(camera.x, camera.y);
   }
 
-  /** Largeur logique variable (D-01) : la vue de la caméra suit la taille du jeu. */
+  /**
+   * Largeur logique variable (D-01) et échelle de rendu (D-18) : la vue de la caméra est la taille
+   * logique ; le zoom Phaser est le zoom de caméra × l'échelle de rendu.
+   */
   private readonly onResize = (): void => {
-    this.camera.setView(this.scale.width, this.scale.height);
+    const scale = this.renderScale;
+    this.camera.setView(this.scale.width / scale, this.scale.height / scale);
+    this.cameras.main.setZoom(this.cameraParams.zoom * scale);
     this.cameras.main.centerOn(this.camera.x, this.camera.y);
   };
 

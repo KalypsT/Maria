@@ -5,6 +5,22 @@ export const GAME_BASE_WIDTH = 640;
 /** Largeur maximale (écran 20:9). Au-delà, bandes noires latérales. */
 export const GAME_MAX_WIDTH = 800;
 
+/**
+ * Résolution de rendu (décision D-18) : `logical` = canvas à la taille logique, agrandi par le CSS
+ * (déplacements par pixel logique) ; `screen` = canvas à la résolution de l'écran, zoom de caméra
+ * égal à l'échelle (déplacements au pixel physique, pixel art toujours net).
+ */
+export type RenderMode = 'logical' | 'screen';
+
+export interface DisplaySettings {
+  renderMode: RenderMode;
+}
+
+export const DEFAULT_DISPLAY_SETTINGS: Readonly<DisplaySettings> = { renderMode: 'logical' };
+
+/** Échelle maximale du rendu à la résolution de l'écran (coût GPU : ≈ échelle² pixels). */
+export const MAX_RENDER_SCALE = 3;
+
 /** Taille d'une tuile en pixels logiques (décision D-02). */
 export const TILE_SIZE = 16;
 
