@@ -18,10 +18,6 @@ function smoothingFactor(timeMs: number, stepHz: number): number {
   return timeMs <= 0 ? 1 : 1 - Math.exp(-1000 / (timeMs * stepHz));
 }
 
-function clamp(value: number, min: number, max: number): number {
-  return value < min ? min : value > max ? max : value;
-}
-
 /**
  * Caméra de platforming (décision D-15), indépendante de Phaser. `step` avance d'un pas fixe, au
  * même rythme que la simulation du joueur ; l'affichage interpole entre `prevX/prevY` et `x/y`.
@@ -215,16 +211,24 @@ export class CameraController {
     this.clampToBounds();
   }
 
-  /** Garde Céleste à `screenMarginPx` des bords de la vue (le lissage ne doit jamais la perdre). */
+  /**
+   * Garde Céleste à `screenMarginPx` des bords de la vue (le lissage ne doit jamais la perdre).
+   * Bornes écrites en ligne, sans fonction utilitaire : un flottant passé en argument à une fonction
+   * non inlinée est alloué sur le tas par V8 (mesuré au profileur de tas).
+   */
   private clampToMargins(box: Box): void {
     const margin = this.params.screenMarginPx;
     const halfW = this.viewWidth / 2;
     const halfH = this.viewHeight / 2;
     if (halfW > margin + box.width) {
-      this.x = clamp(this.x, box.x + box.width + margin - halfW, box.x - margin + halfW);
+      const minX = box.x + box.width + margin - halfW;
+      const maxX = box.x - margin + halfW;
+      this.x = this.x < minX ? minX : this.x > maxX ? maxX : this.x;
     }
     if (halfH > margin + box.height) {
-      this.y = clamp(this.y, box.y + box.height + margin - halfH, box.y - margin + halfH);
+      const minY = box.y + box.height + margin - halfH;
+      const maxY = box.y - margin + halfH;
+      this.y = this.y < minY ? minY : this.y > maxY ? maxY : this.y;
     }
   }
 
@@ -232,13 +236,19 @@ export class CameraController {
   private clampToBounds(): void {
     const halfW = this.viewWidth / 2;
     const halfH = this.viewHeight / 2;
-    this.x =
-      this.boundsWidth <= this.viewWidth
-        ? this.boundsWidth / 2
-        : clamp(this.x, halfW, this.boundsWidth - halfW);
-    this.y =
-      this.boundsHeight <= this.viewHeight
-        ? this.boundsHeight / 2
-        : clamp(this.y, halfH, this.boundsHeight - halfH);
+    if (this.boundsWidth <= this.viewWidth) {
+      this.x = this.boundsWidth / 2;
+    } else if (this.x < halfW) {
+      this.x = halfW;
+    } else if (this.x > this.boundsWidth - halfW) {
+      this.x = this.boundsWidth - halfW;
+    }
+    if (this.boundsHeight <= this.viewHeight) {
+      this.y = this.boundsHeight / 2;
+    } else if (this.y < halfH) {
+      this.y = halfH;
+    } else if (this.y > this.boundsHeight - halfH) {
+      this.y = this.boundsHeight - halfH;
+    }
   }
 }
