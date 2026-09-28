@@ -420,14 +420,14 @@ describe('déterminisme selon la fréquence d’affichage', () => {
 
 describe('nextPlayerState', () => {
   it('décrit l’air selon le sens de la vitesse verticale', () => {
-    expect(nextPlayerState(PlayerState.Idle, false, -1, false, 0)).toBe(PlayerState.Jump);
-    expect(nextPlayerState(PlayerState.Jump, false, 0, false, 0)).toBe(PlayerState.Fall);
+    expect(nextPlayerState(PlayerState.Idle, false, true, false, 0)).toBe(PlayerState.Jump);
+    expect(nextPlayerState(PlayerState.Jump, false, false, false, 0)).toBe(PlayerState.Fall);
   });
 
   it('passe par Land à la réception, sauf en courant', () => {
-    expect(nextPlayerState(PlayerState.Fall, true, 0, false, 3)).toBe(PlayerState.Land);
-    expect(nextPlayerState(PlayerState.Fall, true, 0, true, 3)).toBe(PlayerState.Run);
-    expect(nextPlayerState(PlayerState.Land, true, 0, false, 0)).toBe(PlayerState.Idle);
-    expect(nextPlayerState(PlayerState.Idle, true, 0, false, 3)).toBe(PlayerState.Idle);
+    expect(nextPlayerState(PlayerState.Fall, true, false, false, 3)).toBe(PlayerState.Land);
+    expect(nextPlayerState(PlayerState.Fall, true, false, true, 3)).toBe(PlayerState.Run);
+    expect(nextPlayerState(PlayerState.Land, true, false, false, 0)).toBe(PlayerState.Idle);
+    expect(nextPlayerState(PlayerState.Idle, true, false, false, 3)).toBe(PlayerState.Idle);
   });
 });

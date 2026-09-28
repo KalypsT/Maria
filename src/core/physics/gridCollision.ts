@@ -9,6 +9,16 @@ export interface Box {
   height: number;
 }
 
+/**
+ * Rectangle mobile. Le déplacement demandé est lu dans `dx` / `dy` plutôt que passé en argument :
+ * V8 alloue sur le tas un flottant passé à une fonction non inlinée, pas un flottant écrit en place
+ * dans un champ (objectif : aucune allocation par pas de simulation).
+ */
+export interface MovingBox extends Box {
+  dx: number;
+  dy: number;
+}
+
 export const HitY = { None: 0, Floor: 1, Ceiling: 2 } as const;
 export type HitY = (typeof HitY)[keyof typeof HitY];
 
@@ -59,10 +69,11 @@ function rowBlocked(
 }
 
 /**
- * Déplace horizontalement en balayant toutes les colonnes traversées (aucune traversée possible,
+ * Déplace de `box.dx` en balayant toutes les colonnes traversées (aucune traversée possible,
  * quelle que soit la vitesse). Retourne vrai si un mur a arrêté le déplacement.
  */
-export function moveX(level: LevelData, box: Box, dx: number): boolean {
+export function moveX(level: LevelData, box: MovingBox): boolean {
+  const dx = box.dx;
   if (dx === 0) {
     return false;
   }
@@ -91,11 +102,12 @@ export function moveX(level: LevelData, box: Box, dx: number): boolean {
 }
 
 /**
- * Déplace verticalement en balayant toutes les lignes traversées. En descente, une plateforme
+ * Déplace de `box.dy` en balayant toutes les lignes traversées. En descente, une plateforme
  * traversable bloque seulement si le bas du rectangle était au-dessus d'elle avant le pas ; en
  * montée, elle ne bloque jamais.
  */
-export function moveY(level: LevelData, box: Box, dy: number): HitY {
+export function moveY(level: LevelData, box: MovingBox): HitY {
+  const dy = box.dy;
   if (dy === 0) {
     return HitY.None;
   }
@@ -133,18 +145,12 @@ export function isGrounded(level: LevelData, box: Box): boolean {
   return rowBlocked(level, row, firstCol(box), lastCol(box), true);
 }
 
-/** Vrai si le rectangle donné ne chevauche aucune tuile pleine (les traversables sont ignorées). */
-export function isAreaFree(
-  level: LevelData,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-): boolean {
-  const colFrom = Math.floor(x / TILE_SIZE);
-  const colTo = Math.floor((x + width - EDGE_EPSILON) / TILE_SIZE);
-  const rowTo = Math.floor((y + height - EDGE_EPSILON) / TILE_SIZE);
-  for (let row = Math.floor(y / TILE_SIZE); row <= rowTo; row++) {
+/** Vrai si le rectangle ne chevauche aucune tuile pleine (les traversables sont ignorées). */
+export function isBoxFree(level: LevelData, box: Box): boolean {
+  const colFrom = firstCol(box);
+  const colTo = lastCol(box);
+  const rowTo = lastRow(box);
+  for (let row = firstRow(box); row <= rowTo; row++) {
     if (rowBlocked(level, row, colFrom, colTo, false)) {
       return false;
     }

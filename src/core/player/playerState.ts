@@ -16,12 +16,12 @@ export type PlayerState = (typeof PlayerState)[keyof typeof PlayerState];
 export function nextPlayerState(
   previous: PlayerState,
   grounded: boolean,
-  vy: number,
+  rising: boolean,
   moving: boolean,
   landStepsRemaining: number,
 ): PlayerState {
   if (!grounded) {
-    return vy < 0 ? PlayerState.Jump : PlayerState.Fall;
+    return rising ? PlayerState.Jump : PlayerState.Fall;
   }
   if (moving) {
     return PlayerState.Run;
