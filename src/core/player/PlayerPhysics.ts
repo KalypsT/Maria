@@ -53,6 +53,8 @@ export class PlayerPhysics {
   stepsSinceGrounded = NEVER;
   /** Pas écoulés depuis la dernière pression de saut non consommée (jump buffering). */
   stepsSinceJumpPressed = NEVER;
+  /** Pas restants de perte de contrôle après avoir été touchée (D-20). */
+  hurtSteps = 0;
   private jumpCutAvailable = false;
   /** Saut relâché pendant la montée, en mode « gravité au relâchement » (D-19). */
   private releaseGravityActive = false;
@@ -104,6 +106,7 @@ export class PlayerPhysics {
     this.stepsSinceJumpPressed = NEVER;
     this.jumpCutAvailable = false;
     this.releaseGravityActive = false;
+    this.hurtSteps = 0;
     this.landStepsRemaining = 0;
     this.dropStepsRemaining = 0;
     this.box.passOneWay = false;
@@ -136,8 +139,22 @@ export class PlayerPhysics {
     this.stepsSinceJumpPressed = other.stepsSinceJumpPressed;
     this.jumpCutAvailable = other.jumpCutAvailable;
     this.releaseGravityActive = other.releaseGravityActive;
+    this.hurtSteps = other.hurtSteps;
     this.landStepsRemaining = other.landStepsRemaining;
     this.dropStepsRemaining = other.dropStepsRemaining;
+  }
+
+  /**
+   * Touchée (D-20) : le recul est déjà écrit dans `vx` / `vy` par l'appelant (aucun flottant en
+   * argument) ; pendant `steps` pas, direction et saut sont ignorés.
+   */
+  startHurt(steps: number): void {
+    this.hurtSteps = steps;
+    this.grounded = false;
+    this.stepsSinceGrounded = NEVER;
+    this.stepsSinceJumpPressed = NEVER;
+    this.jumpCutAvailable = false;
+    this.releaseGravityActive = false;
   }
 
   step(input: PlayerInput): void {
@@ -148,8 +165,13 @@ export class PlayerPhysics {
     this.prevX = box.x;
     this.prevY = box.y;
 
+    // Touchée : direction et saut ignorés pendant la perte de contrôle.
+    const hurt = this.hurtSteps > 0;
+    const jumpPressed = input.jumpPressed && !hurt;
+    const jumpHeld = input.jumpHeld && !hurt;
+
     // Horizontal : accélération vers la vitesse visée, demi-tour plus vif, décélération sans entrée.
-    const moveInput = input.moveX;
+    const moveInput = hurt ? 0 : input.moveX;
     let accel: number;
     if (moveInput !== 0) {
       const turning = this.vx !== 0 && Math.sign(this.vx) !== Math.sign(moveInput);
@@ -171,7 +193,7 @@ export class PlayerPhysics {
 
     // Bas + Saut sur une plateforme traversable : on la traverse au lieu de sauter.
     if (
-      input.jumpPressed &&
+      jumpPressed &&
       input.moveY > p.dropInputThreshold &&
       this.grounded &&
       !isGrounded(this.level, box, false)
@@ -180,7 +202,7 @@ export class PlayerPhysics {
       this.grounded = false;
       this.stepsSinceGrounded = NEVER;
       this.stepsSinceJumpPressed = NEVER;
-    } else if (input.jumpPressed) {
+    } else if (jumpPressed) {
       this.stepsSinceJumpPressed = 0;
     }
 
@@ -198,7 +220,7 @@ export class PlayerPhysics {
     }
     // Hauteur variable : relâcher pendant la montée coupe la vitesse (ou, en mode 1, alourdit la
     // gravité jusqu'au sommet), une fois par saut.
-    if (this.jumpCutAvailable && this.vy < 0 && !input.jumpHeld) {
+    if (this.jumpCutAvailable && this.vy < 0 && !jumpHeld) {
       if (p.jumpReleaseMode >= 1) {
         this.releaseGravityActive = true;
       } else {
@@ -215,7 +237,7 @@ export class PlayerPhysics {
     // Flottement au sommet : Saut maintenu et vitesse verticale faible (D-19).
     if (
       p.apexHangSpeed > 0 &&
-      input.jumpHeld &&
+      jumpHeld &&
       !this.grounded &&
       this.vy > -p.apexHangSpeed &&
       this.vy < p.apexHangSpeed
@@ -262,12 +284,16 @@ export class PlayerPhysics {
     } else if (this.landStepsRemaining > 0) {
       this.landStepsRemaining--;
     }
+    if (this.hurtSteps > 0) {
+      this.hurtSteps--;
+    }
     this.state = nextPlayerState(
       this.state,
       this.grounded,
       this.vy < 0,
       this.vx !== 0 || moveInput !== 0,
       this.landStepsRemaining,
+      this.hurtSteps > 0,
     );
   }
 
