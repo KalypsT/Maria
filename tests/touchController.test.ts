@@ -69,7 +69,7 @@ describe('TouchController : rôles des doigts', () => {
   it('accepte un appui légèrement à côté d’un bouton (marge généreuse)', () => {
     const c = make();
     expect(c.pointerDown(1, jump.x - jump.r - TOUCH_METRICS.hitMargin + 1, jump.y)).toBe(true);
-    expect(c.pointerDown(2, attack.x, attack.y - attack.r - TOUCH_METRICS.hitMargin - 2)).toBe(
+    expect(c.pointerDown(2, attack.x + attack.r + TOUCH_METRICS.hitMargin + 2, attack.y)).toBe(
       false,
     );
   });
@@ -173,6 +173,18 @@ describe('TouchController : glissements et annulations', () => {
     c.pointerMove(1, attack.x, attack.y);
     expect(readInput(c).held).toBe(BUTTON_BIT.Attack);
     c.pointerMove(1, jump.x, jump.y);
+    expect(readInput(c).held).toBe(BUTTON_BIT.Jump);
+  });
+
+  it('un pouce qui dérive un peu sur Saut ne déclenche pas Action', () => {
+    const c = make();
+    c.pointerDown(1, jump.x, jump.y);
+    // Bord de Saut du côté d'Action, encore dans la zone d'appui de Saut (marge comprise).
+    const dx = attack.x - jump.x;
+    const dy = attack.y - jump.y;
+    const dist = Math.hypot(dx, dy);
+    const reach = jump.r + TOUCH_METRICS.hitMargin - 1;
+    c.pointerMove(1, jump.x + (dx / dist) * reach, jump.y + (dy / dist) * reach);
     expect(readInput(c).held).toBe(BUTTON_BIT.Jump);
   });
 

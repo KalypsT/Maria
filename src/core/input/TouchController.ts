@@ -14,8 +14,9 @@ function inRect(rect: Rect, x: number, y: number): boolean {
 
 /**
  * Attribue chaque doigt à un rôle et produit l'entrée. Indépendant du DOM (testable) :
- * - un doigt posé sur un bouton (avec marge généreuse) reste un doigt de bouton, et peut glisser
- *   d'un bouton à l'autre : à chaque lecture, le bouton visé est le plus proche ;
+ * - un doigt posé sur un bouton (avec marge généreuse) reste un doigt de bouton. Il garde ce
+ *   bouton tant qu'il reste dans sa zone d'appui ; il ne passe à un autre que s'il en sort (un
+ *   pouce qui dérive un peu ne déclenche pas le bouton voisin) ;
  * - un doigt posé dans la zone gauche fait apparaître le joystick (un seul à la fois) et le garde
  *   jusqu'au relâchement, même s'il sort de la zone ;
  * - les autres doigts sont ignorés.
@@ -28,6 +29,8 @@ export class TouchController {
   private layout: TouchLayout;
   private readonly ids = new Int32Array(MAX_POINTERS).fill(-1);
   private readonly roles = new Uint8Array(MAX_POINTERS);
+  /** Bouton tenu par chaque doigt de bouton (index dans `layout.buttons`). */
+  private readonly heldButton = new Int8Array(MAX_POINTERS).fill(-1);
   private readonly xs = new Float32Array(MAX_POINTERS);
   private readonly ys = new Float32Array(MAX_POINTERS);
 
@@ -63,8 +66,10 @@ export class TouchController {
       return false;
     }
     let role: number = Role.None;
-    if (this.buttonAt(x, y) !== -1) {
+    const button = this.buttonAt(x, y);
+    if (button !== -1) {
       role = Role.Button;
+      this.heldButton[slot] = button;
     } else if (!this.joystick.active && inRect(this.layout.joystickZone, x, y)) {
       role = Role.Joystick;
       this.joystick.begin(x, y);
@@ -102,12 +107,14 @@ export class TouchController {
     }
     this.ids[slot] = -1;
     this.roles[slot] = Role.None;
+    this.heldButton[slot] = -1;
   }
 
   /** Relâche tout (perte de focus, pause, rotation) : aucune commande ne reste « collée ». */
   releaseAll(): void {
     this.ids.fill(-1);
     this.roles.fill(Role.None);
+    this.heldButton.fill(-1);
     this.joystick.end();
     this.heldMask = 0;
   }
@@ -117,7 +124,17 @@ export class TouchController {
     let mask = 0;
     for (let i = 0; i < MAX_POINTERS; i++) {
       if (this.ids[i] !== -1 && this.roles[i] === Role.Button) {
-        const button = this.buttonAt(this.xs[i] ?? 0, this.ys[i] ?? 0);
+        const x = this.xs[i] ?? 0;
+        const y = this.ys[i] ?? 0;
+        let button = this.heldButton[i] ?? -1;
+        const current = this.layout.buttons[button];
+        if (
+          !current ||
+          Math.hypot(x - current.x, y - current.y) - current.r > TOUCH_METRICS.hitMargin
+        ) {
+          button = this.buttonAt(x, y);
+          this.heldButton[i] = button;
+        }
         const target = this.layout.buttons[button];
         if (target) {
           mask |= BUTTON_BIT[target.action];
