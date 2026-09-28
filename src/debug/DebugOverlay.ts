@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { CAMERA_PARAM_RANGES, DEFAULT_CAMERA, type CameraParams } from '../config/camera';
+import { DEFAULT_FEEL, FEEL_PARAM_RANGES, type FeelParams } from '../config/feel';
 import {
   DEFAULT_MOVEMENT,
   MOVEMENT_PARAM_RANGES,
@@ -10,9 +11,11 @@ import { LEVELS, levelName } from '../levels';
 import type { GameScene } from '../scenes/GameScene';
 import {
   cameraToJson,
+  feelToJson,
   movementToJson,
   orderedParams,
   sanitizeCameraOverrides,
+  sanitizeFeelOverrides,
   sanitizeMovementOverrides,
 } from './movementOverrides';
 
@@ -20,6 +23,7 @@ import {
 const OVERLAY_ID = 'maria-debug-overlay';
 const STORAGE_KEY = 'maria.debug.movement';
 const CAMERA_STORAGE_KEY = 'maria.debug.camera';
+const FEEL_STORAGE_KEY = 'maria.debug.feel';
 const HITBOX_COLOR = 0x5dff8a;
 const CAMERA_GUIDE_COLOR = 0xffd166;
 /** Rafraîchissement du texte de stats (ms) : inutile de toucher au DOM à chaque image. */
@@ -156,6 +160,8 @@ export function installDebugOverlay(scene: GameScene): void {
   scene.applyMovement();
   Object.assign(scene.cameraParams, load(CAMERA_STORAGE_KEY, sanitizeCameraOverrides));
   scene.applyCamera();
+  Object.assign(scene.feelParams, load(FEEL_STORAGE_KEY, sanitizeFeelOverrides));
+  scene.applyFeel();
 
   const style = document.createElement('style');
   style.textContent = STYLE;
@@ -217,6 +223,17 @@ export function installDebugOverlay(scene: GameScene): void {
     },
   });
 
+  const refreshFeel = addSliders<FeelParams>(panel, {
+    title: 'Fluidité (visuel)',
+    values: scene.feelParams,
+    defaults: DEFAULT_FEEL,
+    ranges: FEEL_PARAM_RANGES,
+    onChange: () => {
+      scene.applyFeel();
+      save(FEEL_STORAGE_KEY, feelToJson(scene.feelParams));
+    },
+  });
+
   // Actions.
   const actions = element('div', panel, 'dbg-actions');
   const exportButton = element('button', actions, undefined, 'Exporter JSON');
@@ -225,6 +242,7 @@ export function installDebugOverlay(scene: GameScene): void {
       {
         movement: orderedParams(scene.movement, MOVEMENT_PARAM_RANGES),
         camera: orderedParams(scene.cameraParams, CAMERA_PARAM_RANGES),
+        feel: orderedParams(scene.feelParams, FEEL_PARAM_RANGES),
       },
       null,
       2,
@@ -253,8 +271,12 @@ export function installDebugOverlay(scene: GameScene): void {
     Object.assign(scene.cameraParams, DEFAULT_CAMERA);
     scene.applyCamera();
     save(CAMERA_STORAGE_KEY, cameraToJson(scene.cameraParams));
+    Object.assign(scene.feelParams, DEFAULT_FEEL);
+    scene.applyFeel();
+    save(FEEL_STORAGE_KEY, feelToJson(scene.feelParams));
     refreshMovement();
     refreshCamera();
+    refreshFeel();
   });
   element('button', actions, undefined, 'Replacer Céleste').addEventListener('click', () => {
     scene.respawn();
