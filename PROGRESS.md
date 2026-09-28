@@ -2,9 +2,11 @@
 
 ## Phase en cours
 
-**Phase 1 — Prototype de mouvement** (spec §42.1) : implémentée, **en attente d'essai sur téléphone et de validation** (spec §43.0.1).
+**Phase 3 — Contrôles mobiles** (spec §12, §40, §42.3) : implémentée, **en attente d'essai sur téléphone** (spec §43.0.2).
 
-Prochaine, après validation du mouvement : **à confirmer** entre Phase 2 — Plateforme (ordre de la spec §42) et les contrôles mobiles définitifs (CLAUDE.md : « juste après le mouvement de base »).
+Phase 1 (mouvement) : mergée, FPS validés sur téléphone, mouvement jugé « pas mal » ; une passe de **fluidité** est prévue plus tard (voir « Idées mises de côté »).
+
+Prochaine : à confirmer (Phase 2 — Plateforme, ou passe de fluidité sur le mouvement).
 
 ## Fait
 
@@ -27,6 +29,28 @@ Prochaine, après validation du mouvement : **à confirmer** entre Phase 2 — P
 - `GameScene` : simulation + affichage interpolé ; placeholder de Céleste avec lunettes rondes roses ; salle dessinée une fois dans une texture.
 - Overlay de debug (dev et build de debug seulement) : bouton **DEBUG** en haut à droite ; curseurs pour chaque paramètre (valeurs modifiées en rose, conservées en `localStorage`), hitbox, état, vitesses, position, FPS, temps de simulation, pas abandonnés ; **Exporter JSON** (presse-papiers + fichier), valeurs par défaut, replacer Céleste. Le panneau laisse libres les commandes tactiles.
 - Mesure physique maison vs Arcade : `bench/arcade.html`, publiée sur `/Maria/debug/bench/arcade.html`.
+
+### Phase 3 — Contrôles mobiles
+
+- **Joystick flottant** (`FloatingJoystick`, pur) : la base apparaît sous le pouce dans la zone gauche (hors bande de sécurité iOS de 28 px), suit le pouce au-delà du rayon. Numérique par défaut (seuils avec **hystérésis**, haut/bas détectés) ; analogique en option.
+- **Boutons** : Saut (le plus gros, bas droite), Action (**sans effet avant la phase combat**), Pause (haut gauche). Capacité, Carte et Interaction sont prévus dans la disposition mais masqués (`TOUCH_BUTTONS_ENABLED`). Hit areas généreuses (marge 14 px) ; un pouce glisse d'un bouton à l'autre.
+- `computeTouchLayout` (pur) : disposition selon la taille de l'écran, les zones sûres (mesurées via `env()`) et l'échelle réglable. `TouchController` (pur) : attribution des doigts (10 suivis), combinaisons de la spec §12.3, `releaseAll`.
+- `TouchSource` : rendu DOM (mises à jour seulement en cas de changement), relâchement de tout à la perte de focus, rotation, onglet masqué et `pointercancel`, menu contextuel Android neutralisé.
+- **Menu pause** (bouton, Échap/P, ou onglet masqué) : simulation arrêtée, taille des boutons (70–150 %), opacité, mode du joystick, réinitialisation ; aperçu en direct. Réglages validés et conservés en `localStorage` (**D-13**, à migrer avec la sauvegarde en Phase 5).
+- **Traversée de plateforme** (**D-14**, validée) : Bas + Saut sur une plateforme traversable. Paramètres `dropInputThreshold` et `dropThroughMs`, réglables dans l'overlay.
+- Debug : doigts actifs, valeurs du joystick, masque des boutons ; `?touch` force les commandes tactiles sur ordinateur (dev / build de debug seulement).
+- Tests : 134 (dont joystick, disposition sur 4 écrans × 3 échelles × avec/sans encoche, combinaisons multi-touch, annulations, réglages, traversée). Vérifié en émulation Chromium avec de vrais événements tactiles : joystick + saut simultanés, pause, réglage, persistance après rechargement, build principal sans debug.
+
+### À vérifier sur téléphone (Phase 3)
+
+- [ ] Joystick : apparition sous le pouce, seuils confortables (ni trop sensible ni trop mou), demi-tour rapide, pas de mouvement parasite en lâchant.
+- [ ] Saut + déplacement + Action simultanés, sans perte d'entrée ; glisser d'un bouton à l'autre.
+- [ ] Bas du joystick + Saut sur une plateforme traversable (échelle à droite de la salle).
+- [ ] Tailles : boutons atteignables au pouce sans repositionner la main (essayer 100 % et 130 %) ; position de Saut/Action.
+- [ ] Encoche / barre d'accueil : commandes hors des zones grises ; iOS : pas de balayage retour au bord gauche, pas de zoom, pas de menu d'appui long.
+- [ ] Rotation en jeu : aucune commande « collée ». Mise en veille / changement d'onglet : pause automatique.
+- [ ] Menu pause lisible et utilisable au pouce ; réglages conservés après rechargement.
+- Plusieurs téléphones si possible (spec §42.3).
 
 ### Mesures (Chromium headless sur ordinateur, build minifié)
 
@@ -61,9 +85,16 @@ Prochaine, après validation du mouvement : **à confirmer** entre Phase 2 — P
 - Pas de descente à travers une plateforme (bas + saut) ni d'apex hang : prévus plus tard si besoin.
 - Pas de caméra mobile : la salle tient sur un écran (caméra : spec §43.0.3, phase ultérieure).
 - `pixelArt: true` arrondit l'affichage au pixel logique : mouvement par pas de 1 px logique (3 px physiques). À réévaluer avec la direction artistique.
-- Commandes tactiles provisoires, à remplacer en Phase 3 (D-08).
+- Pas de repositionnement des boutons par glisser-déposer ni de manette (Gamepad API) : reportés à plus tard.
+- Le bouton Action n'a pas d'effet avant la phase combat.
+
+## Idées mises de côté (à reprendre en passe de fluidité)
+
+- **Affichage** : option d'affichage au sous-pixel pour Céleste (actuellement arrondi au pixel logique, ~3 px physiques), à comparer sur téléphone ; la physique ne change pas.
+- **Ressenti sans toucher à la physique** : écrasement/étirement au décollage et à la réception, inclinaison en courant, poussière (réception, demi-tour), caméra douce avec anticipation.
+- **Courbe du saut** (à valider) : gravité accrue au relâchement au lieu de la coupure nette ; léger flottement au sommet. Chaque option avec un interrupteur dans l'overlay, désactivée par défaut.
 
 ## Prochaines étapes
 
-1. Essai sur téléphone et réglage des valeurs (voir ci-dessus) ; report des valeurs validées dans `src/config/movement.ts`.
-2. Phase suivante (ordre à confirmer, voir en haut).
+1. Essai sur téléphone des commandes (liste ci-dessus) et réglage des valeurs de `src/config/controls.ts`.
+2. Phase suivante à confirmer.
