@@ -68,3 +68,46 @@ body {
     display: flex;
   }
 }
+
+/* Commandes tactiles PROVISOIRES (Phase 1) : remplacées en Phase 3 (décision D-08). */
+#touch-controls {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.touch-button {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border: 2px solid rgb(255 255 255 / 35%);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 10%);
+  color: rgb(255 255 255 / 60%);
+  font-size: 1rem;
+  bottom: calc(var(--safe-bottom) + 20px);
+}
+
+.touch-button.active {
+  background: rgb(244 166 200 / 40%);
+  border-color: rgb(244 166 200 / 80%);
+}
+
+/* Décalé du bord gauche : le balayage retour d'iOS ne peut pas être neutralisé (décision D-03). */
+#touch-left {
+  left: calc(var(--safe-left) + 28px);
+}
+
+#touch-right {
+  left: calc(var(--safe-left) + 28px + 64px + 16px);
+}
+
+#touch-jump {
+  right: calc(var(--safe-right) + 28px);
+  width: 84px;
+  height: 84px;
+}
