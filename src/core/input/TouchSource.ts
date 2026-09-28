@@ -103,8 +103,12 @@ export class TouchSource implements InputSource {
     if (this.rectsDirty) {
       this.measure();
     }
+    const target = event.target;
+    if (target instanceof Element && target.closest('[data-ui-overlay]')) {
+      return; // Interface par-dessus le jeu (overlay de debug…) : pas une commande.
+    }
     if (this.hitTest(event.clientX, event.clientY) === 0) {
-      return; // Laisse passer les touches hors des boutons (overlay de debug, etc.).
+      return; // Laisse passer les touches hors des boutons.
     }
     event.preventDefault();
     const slot = this.pointerIds.indexOf(-1);
