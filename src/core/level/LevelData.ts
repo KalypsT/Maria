@@ -19,7 +19,16 @@ export interface LevelData {
   /** Tuiles ligne par ligne : index = row * width + col. */
   readonly tiles: Uint8Array;
   /** Tuile de départ de Céleste : ses pieds reposent sur le bas de cette tuile. */
-  readonly spawn: { readonly col: number; readonly row: number };
+  readonly spawn: TilePos;
+  /** Tuile d'arrivée d'un parcours (atteinte quand Céleste la touche), absente d'une salle libre. */
+  readonly goal: TilePos | null;
+  /** Métadonnées lues dans les commentaires `; @clé: valeur` (nom, difficulté…). */
+  readonly meta: Readonly<Record<string, string>>;
+}
+
+export interface TilePos {
+  readonly col: number;
+  readonly row: number;
 }
 
 /** Tuile à une position de grille. Hors de la grille : plein (le niveau est fermé). */

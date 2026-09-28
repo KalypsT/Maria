@@ -8,6 +8,9 @@ export const GAME_MAX_WIDTH = 800;
 /** Taille d'une tuile en pixels logiques (décision D-02). */
 export const TILE_SIZE = 16;
 
+/** Côté d'un bloc de rendu de salle, en tuiles (décision D-17 : 512 px, sous les limites de texture). */
+export const LEVEL_CHUNK_TILES = 32;
+
 /** Couleurs des placeholders géométriques (provisoires, direction artistique non validée). */
 export const PLACEHOLDER_COLORS = {
   background: 0x1b1a24,
@@ -18,4 +21,6 @@ export const PLACEHOLDER_COLORS = {
   solid: 0x4a4760,
   solidEdge: 0x6b678a,
   oneWay: 0x8a7fb0,
+  /** Arrivée d'un parcours (placeholder). */
+  goal: 0x7fe0c0,
 } as const;
