@@ -10,6 +10,7 @@ import {
 import { FixedStepClock } from '../core/FixedStepClock';
 import { InputController } from '../core/input/InputController';
 import { KeyboardSource } from '../core/input/KeyboardSource';
+import { TouchSource } from '../core/input/TouchSource';
 import { Tile, spawnPosition, tileAt, type LevelData } from '../core/level/LevelData';
 import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../core/player/PlayerPhysics';
@@ -55,11 +56,18 @@ export class GameScene extends Phaser.Scene {
     const keyboard = new KeyboardSource();
     this.controls.sources.push(keyboard);
     const detachKeyboard = keyboard.attach(window);
+    let detachTouch: (() => void) | undefined;
+    if (TouchSource.isTouchDevice()) {
+      const touch = new TouchSource(document.body);
+      this.controls.sources.push(touch);
+      detachTouch = touch.attach(window);
+    }
 
     this.centerCamera();
     this.scale.on(Phaser.Scale.Events.RESIZE, this.centerCamera);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       detachKeyboard();
+      detachTouch?.();
       this.scale.off(Phaser.Scale.Events.RESIZE, this.centerCamera);
     });
 
