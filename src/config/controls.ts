@@ -37,7 +37,7 @@ export const JOYSTICK = {
   /** …et sous laquelle elle se relâche (hystérésis : évite le scintillement autour du seuil). */
   digitalExit: 0.25,
   /** La base suit le pouce quand il s'éloigne au-delà du rayon. */
-  baseFollowsThumb: true,
+  baseFollowsThumb: true as boolean,
 } as const;
 
 /** Boutons affichés. Attaque n'a pas d'effet avant la phase combat (affiché pour l'ergonomie). */
