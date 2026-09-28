@@ -109,6 +109,33 @@ export class PlayerPhysics {
     this.state = this.grounded ? PlayerState.Idle : PlayerState.Fall;
   }
 
+  /**
+   * Copie l'état complet d'un autre joueur (même salle, mêmes paramètres). Sert à l'analyse de
+   * faisabilité (D-16) : essayer plusieurs entrées à partir d'un même instant sans tout rejouer.
+   */
+  copyFrom(other: PlayerPhysics): void {
+    const box = this.box;
+    const from = other.box;
+    box.x = from.x;
+    box.y = from.y;
+    box.dx = from.dx;
+    box.dy = from.dy;
+    box.passOneWay = from.passOneWay;
+    this.level = other.level;
+    this.vx = other.vx;
+    this.vy = other.vy;
+    this.prevX = other.prevX;
+    this.prevY = other.prevY;
+    this.grounded = other.grounded;
+    this.state = other.state;
+    this.facing = other.facing;
+    this.stepsSinceGrounded = other.stepsSinceGrounded;
+    this.stepsSinceJumpPressed = other.stepsSinceJumpPressed;
+    this.jumpCutAvailable = other.jumpCutAvailable;
+    this.landStepsRemaining = other.landStepsRemaining;
+    this.dropStepsRemaining = other.dropStepsRemaining;
+  }
+
   step(input: PlayerInput): void {
     const p = this.params;
     const d = this.derived;
