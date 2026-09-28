@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { DEFAULT_CAMERA } from '../src/config/camera';
 import { PHYSICS_STEP_HZ } from '../src/config/movement';
+import { CameraController } from '../src/core/camera/CameraController';
 import { createScriptedRun } from './scriptedRun';
 
 /**
@@ -18,6 +20,22 @@ describe('performance de la simulation', () => {
     const player = run(steps);
     const micros = ((performance.now() - start) * 1000) / steps;
     expect(Number.isFinite(player.box.x)).toBe(true);
+    expect(micros).toBeLessThan(BUDGET_MICROS_PER_STEP);
+  });
+
+  it(`caméra comprise : reste sous ${BUDGET_MICROS_PER_STEP} µs par pas`, () => {
+    const run = createScriptedRun();
+    const camera = new CameraController(DEFAULT_CAMERA);
+    camera.setView(640, 360);
+    camera.setBounds(40 * 16, 22 * 16);
+    camera.reset(run(0));
+    const steps = 60 * PHYSICS_STEP_HZ * 5;
+    const start = performance.now();
+    for (let i = 0; i < steps; i++) {
+      camera.step(run(1));
+    }
+    const micros = ((performance.now() - start) * 1000) / steps;
+    expect(Number.isFinite(camera.x + camera.y)).toBe(true);
     expect(micros).toBeLessThan(BUDGET_MICROS_PER_STEP);
   });
 });
