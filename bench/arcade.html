@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Maria — mesure physique maison vs Arcade</title>
+    <style>
+      body {
+        margin: 16px;
+        background: #1b1a24;
+        color: #eee;
+        font:
+          14px/1.4 ui-monospace,
+          monospace;
+      }
+      #game {
+        position: fixed;
+        left: -9999px;
+      }
+      table {
+        border-collapse: collapse;
+      }
+      td,
+      th {
+        border: 1px solid #555;
+        padding: 4px 8px;
+        text-align: right;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Physique maison vs Arcade (condition D-05)</h1>
+    <p id="status">Mesure en cours…</p>
+    <div id="result"></div>
+    <div id="game"></div>
+    <script type="module" src="./arcadeBench.ts"></script>
+  </body>
+</html>

@@ -37,9 +37,12 @@ export class PlayerPhysics {
   readonly box: MovingBox;
   vx = 0;
   vy = 0;
-  /** Position au début du dernier pas, pour l'interpolation d'affichage. */
-  prevX: number;
-  prevY: number;
+  /**
+   * Position au début du dernier pas, pour l'interpolation d'affichage. Initialisée à un nombre dès
+   * la déclaration : un champ d'abord `undefined` ferait allouer chaque écriture de flottant par V8.
+   */
+  prevX = 0;
+  prevY = 0;
   grounded = false;
   state: PlayerState = PlayerState.Fall;
   /** 1 à droite, -1 à gauche. */
