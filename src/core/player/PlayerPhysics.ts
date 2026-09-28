@@ -54,6 +54,8 @@ export class PlayerPhysics {
   /** Pas écoulés depuis la dernière pression de saut non consommée (jump buffering). */
   stepsSinceJumpPressed = NEVER;
   private jumpCutAvailable = false;
+  /** Saut relâché pendant la montée, en mode « gravité au relâchement » (D-19). */
+  private releaseGravityActive = false;
   private landStepsRemaining = 0;
   private dropStepsRemaining = 0;
   private params: MovementParams;
@@ -101,6 +103,7 @@ export class PlayerPhysics {
     this.vx = this.vy = 0;
     this.stepsSinceJumpPressed = NEVER;
     this.jumpCutAvailable = false;
+    this.releaseGravityActive = false;
     this.landStepsRemaining = 0;
     this.dropStepsRemaining = 0;
     this.box.passOneWay = false;
@@ -132,6 +135,7 @@ export class PlayerPhysics {
     this.stepsSinceGrounded = other.stepsSinceGrounded;
     this.stepsSinceJumpPressed = other.stepsSinceJumpPressed;
     this.jumpCutAvailable = other.jumpCutAvailable;
+    this.releaseGravityActive = other.releaseGravityActive;
     this.landStepsRemaining = other.landStepsRemaining;
     this.dropStepsRemaining = other.dropStepsRemaining;
   }
@@ -190,15 +194,34 @@ export class PlayerPhysics {
       this.stepsSinceGrounded = NEVER;
       this.stepsSinceJumpPressed = NEVER;
       this.jumpCutAvailable = true;
+      this.releaseGravityActive = false;
     }
-    // Hauteur variable : relâcher pendant la montée coupe la vitesse, une fois par saut.
+    // Hauteur variable : relâcher pendant la montée coupe la vitesse (ou, en mode 1, alourdit la
+    // gravité jusqu'au sommet), une fois par saut.
     if (this.jumpCutAvailable && this.vy < 0 && !input.jumpHeld) {
-      this.vy *= p.jumpCutMultiplier;
+      if (p.jumpReleaseMode >= 1) {
+        this.releaseGravityActive = true;
+      } else {
+        this.vy *= p.jumpCutMultiplier;
+      }
       this.jumpCutAvailable = false;
     }
 
     // Vertical : intégration exacte à gravité constante sur le pas (trapèze sur la vitesse).
-    const gravity = this.vy < 0 ? d.riseGravity : d.fallGravity;
+    let gravity = this.vy < 0 ? d.riseGravity : d.fallGravity;
+    if (this.releaseGravityActive && this.vy < 0) {
+      gravity *= p.releaseGravityMultiplier;
+    }
+    // Flottement au sommet : Saut maintenu et vitesse verticale faible (D-19).
+    if (
+      p.apexHangSpeed > 0 &&
+      input.jumpHeld &&
+      !this.grounded &&
+      this.vy > -p.apexHangSpeed &&
+      this.vy < p.apexHangSpeed
+    ) {
+      gravity *= p.apexGravityMultiplier;
+    }
     const startVy = this.vy;
     this.vy = Math.min(startVy + gravity * dt, p.maxFallSpeed);
     box.dy = (startVy + this.vy) * 0.5 * dt;
@@ -214,6 +237,7 @@ export class PlayerPhysics {
     } else if (hit === HitY.Ceiling && !this.tryCornerCorrection(input)) {
       this.vy = 0;
       this.jumpCutAvailable = false;
+      this.releaseGravityActive = false;
     }
 
     const wasGrounded = this.grounded;
@@ -223,6 +247,7 @@ export class PlayerPhysics {
     }
     if (this.vy >= 0) {
       this.jumpCutAvailable = false;
+      this.releaseGravityActive = false;
     }
     if (this.grounded) {
       this.stepsSinceGrounded = 0;
