@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { DEFAULT_CAMERA, type CameraParams } from '../config/camera';
 import { LEVEL_CHUNK_TILES, PLACEHOLDER_COLORS, TILE_SIZE } from '../config/display';
 import {
   DEFAULT_MOVEMENT,
@@ -7,6 +8,7 @@ import {
   PLAYER_HITBOX,
   type MovementParams,
 } from '../config/movement';
+import { CameraController } from '../core/camera/CameraController';
 import { FixedStepClock } from '../core/FixedStepClock';
 import { InputController } from '../core/input/InputController';
 import { KeyboardSource } from '../core/input/KeyboardSource';
@@ -14,13 +16,29 @@ import { TouchSource } from '../core/input/TouchSource';
 import { Tile, spawnPosition, tileAt, type LevelData } from '../core/level/LevelData';
 import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../core/player/PlayerPhysics';
-import testRoomText from '../levels/test-room.txt?raw';
+import { LEVELS, type LevelSource } from '../levels';
 import { loadControlSettings, saveControlSettings } from '../ui/controlSettingsStorage';
 import { PauseMenu } from '../ui/PauseMenu';
 
 const PLAYER_TEXTURE = 'celeste-placeholder';
 /** Durée d'image maximale prise en compte (onglet en arrière-plan, pause du navigateur). */
 const MAX_FRAME_SECONDS = 0.25;
+/** Dernière salle choisie (prototype : choix des parcours d'essai), conservée au rechargement. */
+const LEVEL_STORAGE_KEY = 'maria.prototype.level';
+
+function loadLevelChoice(): LevelSource {
+  let id: string | null = null;
+  try {
+    id = localStorage.getItem(LEVEL_STORAGE_KEY);
+  } catch {
+    // Stockage indisponible : première salle.
+  }
+  const first = LEVELS[0];
+  if (!first) {
+    throw new Error('Aucune salle déclarée dans src/levels/index.ts');
+  }
+  return LEVELS.find((level) => level.id === id) ?? first;
+}
 
 /** Mesures de la dernière image, lues par l'overlay de debug. */
 export interface FrameStats {
@@ -36,6 +54,9 @@ export class GameScene extends Phaser.Scene {
   readonly controls = new InputController();
   /** Paramètres courants (modifiables en direct par l'overlay de debug). */
   readonly movement: MovementParams = { ...DEFAULT_MOVEMENT };
+  /** Paramètres de caméra courants (modifiables en direct par l'overlay de debug). */
+  readonly cameraParams: CameraParams = { ...DEFAULT_CAMERA };
+  readonly camera = new CameraController(this.cameraParams);
   readonly clock = new FixedStepClock(1 / PHYSICS_STEP_HZ, MAX_STEPS_PER_FRAME);
   readonly frameStats: FrameStats = { steps: 0, simulationMs: 0 };
   level!: LevelData;
@@ -58,12 +79,13 @@ export class GameScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.level = parseAsciiLevel('test-room', testRoomText);
+    const source = loadLevelChoice();
+    this.level = parseAsciiLevel(source.id, source.text);
     this.drawLevel();
     this.createPlayerTexture();
     const { x, y } = spawnPosition(this.level, PLAYER_HITBOX.width, PLAYER_HITBOX.height);
     this.player = new PlayerPhysics(this.level, this.movement, x, y);
-    this.playerSprite = this.add.image(x, y, PLAYER_TEXTURE).setOrigin(0, 0);
+    this.playerSprite = this.add.image(x, y, PLAYER_TEXTURE).setOrigin(0, 0).setDepth(10);
 
     const keyboard = new KeyboardSource();
     this.controls.sources.push(keyboard);
@@ -95,14 +117,15 @@ export class GameScene extends Phaser.Scene {
     };
     document.addEventListener('visibilitychange', onVisibility);
 
-    this.centerCamera();
-    this.scale.on(Phaser.Scale.Events.RESIZE, this.centerCamera);
+    this.applyCamera();
+    this.resetCamera();
+    this.scale.on(Phaser.Scale.Events.RESIZE, this.onResize);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       detachKeyboard();
       detachTouch?.();
       document.removeEventListener('visibilitychange', onVisibility);
       this.pauseMenu?.destroy();
-      this.scale.off(Phaser.Scale.Events.RESIZE, this.centerCamera);
+      this.scale.off(Phaser.Scale.Events.RESIZE, this.onResize);
     });
 
     if (__DEBUG_TOOLS__) {
@@ -124,12 +147,15 @@ export class GameScene extends Phaser.Scene {
     const steps = this.clock.advance(frameSeconds);
     const start = __DEBUG_TOOLS__ ? performance.now() : 0;
     const input = this.playerInput;
+    const camera = this.camera;
     for (let i = 0; i < steps; i++) {
       input.moveX = this.controls.moveX;
       input.moveY = this.controls.moveY;
       input.jumpPressed = this.controls.consumePressed('Jump');
       input.jumpHeld = this.controls.isHeld('Jump');
       this.player.step(input);
+      camera.lookInput = input.moveY;
+      camera.step(this.player);
     }
     if (__DEBUG_TOOLS__) {
       this.frameStats.steps = steps;
@@ -143,6 +169,10 @@ export class GameScene extends Phaser.Scene {
       player.prevY + (player.box.y - player.prevY) * alpha,
     );
     this.playerSprite.setFlipX(player.facing < 0);
+    this.cameras.main.centerOn(
+      camera.prevX + (camera.x - camera.prevX) * alpha,
+      camera.prevY + (camera.y - camera.prevY) * alpha,
+    );
   }
 
   /** Met le jeu en pause (simulation arrêtée, menu affiché) ou le reprend. */
@@ -167,17 +197,43 @@ export class GameScene extends Phaser.Scene {
     this.player.setParams(this.movement);
   }
 
-  respawn(): void {
-    const { x, y } = spawnPosition(this.level, PLAYER_HITBOX.width, PLAYER_HITBOX.height);
-    this.player.reset(x, y);
-    this.clock.reset();
+  /** Applique les paramètres de caméra courants (après un réglage en direct ou un changement de zoom). */
+  applyCamera(): void {
+    this.camera.setParams(this.cameraParams);
+    this.cameras.main.setZoom(this.cameraParams.zoom);
+    this.onResize();
   }
 
-  private readonly centerCamera = (): void => {
-    this.cameras.main.centerOn(
-      (this.level.width * TILE_SIZE) / 2,
-      (this.level.height * TILE_SIZE) / 2,
-    );
+  respawn(): void {
+    const { x, y } = spawnPosition(this.level, PLAYER_HITBOX.width, PLAYER_HITBOX.height);
+    this.player.reset(x, y, this.level);
+    this.clock.reset();
+    this.resetCamera();
+  }
+
+  /** Charge une autre salle et y replace Céleste ; le choix est conservé au rechargement. */
+  loadLevel(source: LevelSource): void {
+    this.level = parseAsciiLevel(source.id, source.text);
+    this.drawLevel();
+    this.respawn();
+    try {
+      localStorage.setItem(LEVEL_STORAGE_KEY, source.id);
+    } catch {
+      // Stockage indisponible : le choix vaut pour la session.
+    }
+  }
+
+  private resetCamera(): void {
+    const camera = this.camera;
+    camera.setBounds(this.level.width * TILE_SIZE, this.level.height * TILE_SIZE);
+    camera.reset(this.player);
+    this.cameras.main.centerOn(camera.x, camera.y);
+  }
+
+  /** Largeur logique variable (D-01) : la vue de la caméra suit la taille du jeu. */
+  private readonly onResize = (): void => {
+    this.camera.setView(this.scale.width, this.scale.height);
+    this.cameras.main.centerOn(this.camera.x, this.camera.y);
   };
 
   /**
