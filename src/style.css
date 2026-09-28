@@ -69,45 +69,71 @@ body {
   }
 }
 
-/* Commandes tactiles PROVISOIRES (Phase 1) : remplacées en Phase 3 (décision D-08). */
+/* Commandes tactiles (décision D-08). Positions et tailles calculées en JavaScript (touchLayout). */
 #touch-controls {
   position: fixed;
   inset: 0;
-  z-index: 5;
+  z-index: 25;
   pointer-events: none;
+  --touch-opacity: 0.7;
+}
+
+/* Sonde des zones sûres : le navigateur résout env() en pixels, lus par TouchSource. */
+#touch-safe-probe {
+  position: absolute;
+  visibility: hidden;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+
+.touch-button,
+.touch-joystick-base,
+.touch-joystick-knob {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  border-radius: 50%;
+  will-change: transform;
 }
 
 .touch-button {
-  position: absolute;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
-  border: 2px solid rgb(255 255 255 / 35%);
-  border-radius: 50%;
-  background: rgb(255 255 255 / 10%);
-  color: rgb(255 255 255 / 60%);
-  font-size: 1rem;
-  bottom: calc(var(--safe-bottom) + 20px);
+  border: 2px solid rgb(255 255 255 / 45%);
+  background: rgb(255 255 255 / 12%);
+  color: rgb(255 255 255 / 80%);
+  font-size: 0.85rem;
+  opacity: var(--touch-opacity);
 }
 
 .touch-button.active {
-  background: rgb(244 166 200 / 40%);
-  border-color: rgb(244 166 200 / 80%);
+  background: rgb(244 166 200 / 45%);
+  border-color: rgb(244 166 200 / 90%);
 }
 
-/* Décalé du bord gauche : le balayage retour d'iOS ne peut pas être neutralisé (décision D-03). */
-#touch-left {
-  left: calc(var(--safe-left) + 28px);
+.touch-jump {
+  font-size: 1.05rem;
 }
 
-#touch-right {
-  left: calc(var(--safe-left) + 28px + 64px + 16px);
+.touch-joystick-base,
+.touch-joystick-knob {
+  display: none;
+  opacity: var(--touch-opacity);
 }
 
-#touch-jump {
-  right: calc(var(--safe-right) + 28px);
-  width: 84px;
-  height: 84px;
+.touch-joystick-base.visible,
+.touch-joystick-knob.visible {
+  display: block;
+}
+
+.touch-joystick-base {
+  border: 2px solid rgb(255 255 255 / 40%);
+  background: rgb(255 255 255 / 8%);
+}
+
+.touch-joystick-knob {
+  background: rgb(244 166 200 / 55%);
+  border: 2px solid rgb(244 166 200 / 90%);
 }
