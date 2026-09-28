@@ -1,4 +1,5 @@
 import { CAMERA_PARAM_RANGES, type CameraParams } from '../config/camera';
+import { COMBAT_PARAM_RANGES, type CombatParams } from '../config/combat';
 import { FEEL_PARAM_RANGES, type FeelParams } from '../config/feel';
 import { MOVEMENT_PARAM_RANGES, type MovementParams } from '../config/movement';
 
@@ -64,4 +65,13 @@ export function sanitizeFeelOverrides(raw: unknown): Partial<FeelParams> {
 /** JSON des sensations visuelles, prêt à être reporté dans `src/config/feel.ts`. */
 export function feelToJson(params: Readonly<FeelParams>): string {
   return JSON.stringify(orderedParams(params, FEEL_PARAM_RANGES), null, 2);
+}
+
+export function sanitizeCombatOverrides(raw: unknown): Partial<CombatParams> {
+  return sanitizeOverrides<CombatParams>(raw, COMBAT_PARAM_RANGES);
+}
+
+/** JSON des réglages de combat, prêt à être reporté dans `src/config/combat.ts`. */
+export function combatToJson(params: Readonly<CombatParams>): string {
+  return JSON.stringify(orderedParams(params, COMBAT_PARAM_RANGES), null, 2);
 }

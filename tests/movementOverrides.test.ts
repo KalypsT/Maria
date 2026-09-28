@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { CAMERA_PARAM_RANGES, DEFAULT_CAMERA } from '../src/config/camera';
+import { DEFAULT_COMBAT } from '../src/config/combat';
 import { DEFAULT_FEEL } from '../src/config/feel';
 import { DEFAULT_MOVEMENT, MOVEMENT_PARAM_RANGES } from '../src/config/movement';
 import {
   cameraToJson,
+  combatToJson,
   feelToJson,
   movementToJson,
   sanitizeCameraOverrides,
+  sanitizeCombatOverrides,
   sanitizeFeelOverrides,
   sanitizeMovementOverrides,
 } from '../src/debug/movementOverrides';
@@ -56,5 +59,17 @@ describe('sanitizeFeelOverrides', () => {
       leanDeg: 3,
     });
     expect(sanitizeFeelOverrides(JSON.parse(feelToJson(DEFAULT_FEEL)))).toEqual(DEFAULT_FEEL);
+  });
+});
+
+describe('sanitizeCombatOverrides', () => {
+  it('borne les réglages de combat et relit un export', () => {
+    expect(sanitizeCombatOverrides({ patrollerHits: 99, hitstopMs: 30, x: 1 })).toEqual({
+      patrollerHits: 5,
+      hitstopMs: 30,
+    });
+    expect(sanitizeCombatOverrides(JSON.parse(combatToJson(DEFAULT_COMBAT)))).toEqual(
+      DEFAULT_COMBAT,
+    );
   });
 });
