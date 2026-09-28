@@ -9,13 +9,16 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
+    "build:debug": "vite build --mode debug",
+    "check:no-debug": "node scripts/check-no-debug.js",
     "preview": "vite preview --host",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "bench": "vitest bench --run"
   },
   "dependencies": {
     "phaser": "^4.2.1"

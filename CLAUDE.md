@@ -41,7 +41,9 @@ Node ≥ 22.12 (`.nvmrc`). Installer avec `npm ci`.
 
 ```
 npm run dev           # serveur de dev Vite sur http://<ip-locale>:5173/Maria/ (--host : accessible sur le réseau local)
-npm run build         # build de production dans dist/
+npm run build         # build de production dans dist/ (sans outils de debug)
+npm run build:debug   # build de debug dans dist/debug/ (à lancer après build, publié sur /Maria/debug/, D-12)
+npm run check:no-debug # vérifie l'absence d'outils de debug dans le build principal
 npm run preview       # sert dist/ localement (http://<ip-locale>:4173/Maria/)
 npm run typecheck     # tsc --noEmit
 npm run lint          # ESLint (typescript-eslint strictTypeChecked)
@@ -49,9 +51,10 @@ npm run format        # Prettier --write
 npm run format:check  # Prettier --check (vérifié en CI)
 npm run test          # Vitest (tests/**/*.test.ts)
 npm run test:watch    # Vitest en mode watch
+npm run bench         # mesures de performance (Vitest bench)
 ```
 
-Le déploiement se fait via GitHub Pages (`.github/workflows/deploy.yml`) : chaque push sur `main` lance typecheck, lint, format, tests, build puis publie sur https://kalypst.github.io/Maria/. Les PR lancent les mêmes vérifications sans déployer.
+Le déploiement se fait via GitHub Pages (`.github/workflows/deploy.yml`) : chaque push sur `main` lance typecheck, lint, format, tests, build puis publie sur https://kalypst.github.io/Maria/ (build de debug sur https://kalypst.github.io/Maria/debug/). Les PR lancent les mêmes vérifications sans déployer.
 
 ## Conventions de code
 
