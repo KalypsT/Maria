@@ -51,18 +51,28 @@ describe('computeTouchLayout', () => {
     }
   });
 
-  it('place Saut en bas à droite, le plus gros, et Pause en haut à gauche', () => {
+  it('place Action dans le coin bas droit, Saut au-dessus, Pause en haut à gauche', () => {
     const { buttons } = computeTouchLayout(844, 390, NO_INSETS, DEFAULT_CONTROL_SETTINGS);
     const jump = buttons.find((b) => b.action === 'Jump');
     const attack = buttons.find((b) => b.action === 'Attack');
     const pause = buttons.find((b) => b.action === 'Pause');
-    expect(jump && attack && pause).toBeTruthy();
-    expect(jump?.x).toBeGreaterThan(844 / 2);
-    expect(jump?.y).toBeGreaterThan(390 / 2);
-    expect(jump?.r).toBeGreaterThan(attack?.r ?? Infinity);
-    expect(attack?.x).toBeLessThan(jump?.x ?? 0);
-    expect(pause?.x).toBeLessThan(844 / 2);
-    expect(pause?.y).toBeLessThan(390 / 2);
+    if (!jump || !attack || !pause) {
+      throw new Error('boutons manquants');
+    }
+    expect(jump.x).toBeGreaterThan(844 / 2);
+    expect(attack.y).toBeGreaterThan(jump.y); // Action est sous Saut
+    expect(jump.r).toBeGreaterThan(attack.r);
+    expect(pause.x).toBeLessThan(844 / 2);
+    expect(pause.y).toBeLessThan(390 / 2);
+  });
+
+  it('éloigne les boutons du bord droit (marge d’au moins rightMargin)', () => {
+    for (const insets of [NO_INSETS, NOTCH]) {
+      const { buttons } = computeTouchLayout(844, 390, insets, DEFAULT_CONTROL_SETTINGS);
+      for (const b of buttons.filter((candidate) => candidate.action !== 'Pause')) {
+        expect(844 - insets.right - (b.x + b.r)).toBeGreaterThanOrEqual(TOUCH_METRICS.rightMargin);
+      }
+    }
   });
 
   it('n’affiche pas les boutons désactivés (Capacité, Carte, Interaction)', () => {

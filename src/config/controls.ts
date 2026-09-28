@@ -5,18 +5,21 @@ import type { ButtonAction } from '../core/input/InputAction';
  * téléphone ; l'utilisateur peut aussi ajuster taille et opacité dans le menu pause (spec §40).
  */
 export const TOUCH_METRICS = {
-  /** Marge entre les commandes et le bord de l'écran (hors zones sûres). */
+  /** Marge entre les commandes et le bord bas de l'écran (hors zones sûres). */
   margin: 20,
+  /** Marge côté droit, plus large : un pouce trop près du bord appuie à côté (essais sur téléphone). */
+  rightMargin: 56,
   jumpRadius: 46,
   attackRadius: 36,
   abilityRadius: 32,
   /** Rayon des petites icônes (Pause, Carte). */
   iconRadius: 22,
   /** Écart entre deux boutons voisins. */
-  buttonGap: 10,
-  /** Position d'Attaque et de Capacité autour de Saut (degrés, 180 = à gauche, 90 = au-dessus). */
-  attackAngleDeg: 172,
-  abilityAngleDeg: 108,
+  buttonGap: 16,
+  /** Action est dans le coin bas droit ; Saut est placé au-dessus (degrés autour d'Action : 90 = au-dessus). */
+  jumpAngleDeg: 100,
+  /** Capacité est à gauche de Saut (degrés autour de Saut : 180 = à gauche). */
+  abilityAngleDeg: 165,
   /** Bande gauche non tactile : le balayage retour d'iOS ne peut pas être neutralisé (D-03). */
   edgeGuard: 28,
   /** Distance maximale de la base du joystick à son bouton (déplacement du pouce). */

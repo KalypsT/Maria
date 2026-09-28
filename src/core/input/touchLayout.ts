@@ -47,8 +47,15 @@ export function computeTouchLayout(
   settings: Readonly<ControlSettings>,
 ): TouchLayout {
   const m = TOUCH_METRICS;
-  const scale = settings.buttonScale;
   const margin = m.margin;
+  // Fenêtre très basse (barre du navigateur) : la pile Saut/Action est réduite pour tenir.
+  const stackHeight =
+    m.attackRadius +
+    Math.sin((m.jumpAngleDeg * Math.PI) / 180) * (m.attackRadius + m.jumpRadius + m.buttonGap) +
+    m.jumpRadius;
+  const available = height - insets.top - insets.bottom - margin * 2;
+  const scale =
+    settings.buttonScale * Math.min(1, available / (stackHeight * settings.buttonScale));
   const gap = m.buttonGap * scale;
   const jumpR = m.jumpRadius * scale;
   const attackR = m.attackRadius * scale;
@@ -56,16 +63,19 @@ export function computeTouchLayout(
   const iconR = m.iconRadius * scale;
   const buttons: TouchButtonLayout[] = [];
 
-  const jumpX = width - insets.right - margin - jumpR;
-  const jumpY = height - insets.bottom - margin - jumpR;
+  // Action dans le coin bas droit, Saut au-dessus (légèrement à gauche) : le pouce qui dérive
+  // vers le bas ou le bord n'atteint pas Saut par erreur, et inversement.
+  const rightEdge = width - insets.right - m.rightMargin;
+  const attackX = rightEdge - attackR;
+  const attackY = height - insets.bottom - margin - attackR;
+  const [jumpX, jumpY] = polar(attackX, attackY, attackR + jumpR + gap, m.jumpAngleDeg);
   const enabled = TOUCH_BUTTONS_ENABLED;
 
   if (enabled.Jump) {
     buttons.push({ action: 'Jump', x: jumpX, y: jumpY, r: jumpR });
   }
   if (enabled.Attack) {
-    const [x, y] = polar(jumpX, jumpY, jumpR + attackR + gap, m.attackAngleDeg);
-    buttons.push({ action: 'Attack', x, y, r: attackR });
+    buttons.push({ action: 'Attack', x: attackX, y: attackY, r: attackR });
   }
   if (enabled.Ability) {
     const [x, y] = polar(jumpX, jumpY, jumpR + abilityR + gap, m.abilityAngleDeg);
