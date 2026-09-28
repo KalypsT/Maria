@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { DEFAULT_CONTROL_SETTINGS } from '../config/controls';
 import { PLACEHOLDER_COLORS, TILE_SIZE } from '../config/display';
 import {
   DEFAULT_MOVEMENT,
@@ -16,6 +15,8 @@ import { Tile, spawnPosition, tileAt, type LevelData } from '../core/level/Level
 import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../core/player/PlayerPhysics';
 import testRoomText from '../levels/test-room.txt?raw';
+import { loadControlSettings, saveControlSettings } from '../ui/controlSettingsStorage';
+import { PauseMenu } from '../ui/PauseMenu';
 
 const PLAYER_TEXTURE = 'celeste-placeholder';
 /** Durée d'image maximale prise en compte (onglet en arrière-plan, pause du navigateur). */
@@ -39,6 +40,10 @@ export class GameScene extends Phaser.Scene {
   readonly frameStats: FrameStats = { steps: 0, simulationMs: 0 };
   level!: LevelData;
   player!: PlayerPhysics;
+  /** Commandes tactiles, absentes sur ordinateur. */
+  touch?: TouchSource;
+  paused = false;
+  private pauseMenu?: PauseMenu;
   private playerSprite!: Phaser.GameObjects.Image;
   private readonly playerInput: PlayerInput = {
     moveX: 0,
@@ -63,19 +68,39 @@ export class GameScene extends Phaser.Scene {
     this.controls.sources.push(keyboard);
     const detachKeyboard = keyboard.attach(window);
     let detachTouch: (() => void) | undefined;
+    const controlSettings = loadControlSettings();
     // En dev et dans le build de debug, `?touch` force l'affichage sur ordinateur (essai à la souris).
     const forceTouch = __DEBUG_TOOLS__ && new URLSearchParams(location.search).has('touch');
     if (forceTouch || TouchSource.isTouchDevice()) {
-      const touch = new TouchSource(document.body, DEFAULT_CONTROL_SETTINGS);
-      this.controls.sources.push(touch);
-      detachTouch = touch.attach(window);
+      this.touch = new TouchSource(document.body, controlSettings);
+      this.controls.sources.push(this.touch);
+      detachTouch = this.touch.attach(window);
     }
+    this.pauseMenu = new PauseMenu({
+      settings: controlSettings,
+      showTouchSettings: this.touch !== undefined,
+      onResume: () => {
+        this.setPaused(false);
+      },
+      onSettingsChange: (settings) => {
+        saveControlSettings(settings);
+        this.touch?.setSettings(settings);
+      },
+    });
+    const onVisibility = () => {
+      if (document.hidden) {
+        this.setPaused(true);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
 
     this.centerCamera();
     this.scale.on(Phaser.Scale.Events.RESIZE, this.centerCamera);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       detachKeyboard();
       detachTouch?.();
+      document.removeEventListener('visibilitychange', onVisibility);
+      this.pauseMenu?.destroy();
       this.scale.off(Phaser.Scale.Events.RESIZE, this.centerCamera);
     });
 
@@ -89,6 +114,12 @@ export class GameScene extends Phaser.Scene {
   override update(): void {
     const frameSeconds = Math.min(this.game.loop.rawDelta / 1000, MAX_FRAME_SECONDS);
     this.controls.update();
+    if (this.controls.consumePressed('Pause')) {
+      this.setPaused(!this.paused);
+    }
+    if (this.paused) {
+      return;
+    }
     const steps = this.clock.advance(frameSeconds);
     const start = __DEBUG_TOOLS__ ? performance.now() : 0;
     const input = this.playerInput;
@@ -111,6 +142,23 @@ export class GameScene extends Phaser.Scene {
       player.prevY + (player.box.y - player.prevY) * alpha,
     );
     this.playerSprite.setFlipX(player.facing < 0);
+  }
+
+  /** Met le jeu en pause (simulation arrêtée, menu affiché) ou le reprend. */
+  setPaused(paused: boolean): void {
+    if (paused === this.paused) {
+      return;
+    }
+    this.paused = paused;
+    this.clock.reset();
+    this.touch?.releaseAll();
+    if (paused) {
+      this.pauseMenu?.open();
+    } else {
+      this.pauseMenu?.close();
+      // Une pression de saut faite pendant la pause ne doit pas partir à la reprise.
+      this.controls.consumePressed('Jump');
+    }
   }
 
   /** Applique les paramètres courants au joueur (après un réglage en direct). */
