@@ -11,7 +11,15 @@ import {
 } from '../src/core/physics/gridCollision';
 import type { LevelData } from '../src/core/level/LevelData';
 
-const box = (x: number, y: number): MovingBox => ({ x, y, width: 12, height: 22, dx: 0, dy: 0 });
+const box = (x: number, y: number): MovingBox => ({
+  x,
+  y,
+  width: 12,
+  height: 22,
+  dx: 0,
+  dy: 0,
+  passOneWay: false,
+});
 
 function moveX(level: LevelData, b: MovingBox, dx: number): boolean {
   b.dx = dx;
@@ -77,7 +85,15 @@ describe('moveY', () => {
 
   it('traverse une plateforme par le dessous puis s’y pose par le dessus', () => {
     // Petite boîte : la salle est trop basse pour passer entièrement au-dessus avec 22 px.
-    const b: MovingBox = { x: 4 * T, y: 5 * T - 8, width: 12, height: 8, dx: 0, dy: 0 };
+    const b: MovingBox = {
+      x: 4 * T,
+      y: 5 * T - 8,
+      width: 12,
+      height: 8,
+      dx: 0,
+      dy: 0,
+      passOneWay: false,
+    };
     expect(moveY(room, b, -2 * T - 1)).toBe(HitY.None);
     expect(b.y + b.height).toBeLessThan(3 * T);
     expect(moveY(room, b, -T)).toBe(HitY.None);

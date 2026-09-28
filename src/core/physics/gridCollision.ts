@@ -17,6 +17,8 @@ export interface Box {
 export interface MovingBox extends Box {
   dx: number;
   dy: number;
+  /** Vrai : les plateformes traversables sont ignorées (descente volontaire). */
+  passOneWay: boolean;
 }
 
 export const HitY = { None: 0, Floor: 1, Ceiling: 2 } as const;
@@ -117,7 +119,7 @@ export function moveY(level: LevelData, box: MovingBox): HitY {
     const bottom = box.y + box.height;
     const rowTo = Math.floor((bottom + dy - EDGE_EPSILON) / TILE_SIZE);
     for (let row = Math.floor((bottom - EDGE_EPSILON) / TILE_SIZE) + 1; row <= rowTo; row++) {
-      if (rowBlocked(level, row, colFrom, colTo, true)) {
+      if (rowBlocked(level, row, colFrom, colTo, !box.passOneWay)) {
         box.y = row * TILE_SIZE - box.height;
         return HitY.Floor;
       }
@@ -135,14 +137,14 @@ export function moveY(level: LevelData, box: MovingBox): HitY {
   return HitY.None;
 }
 
-/** Vrai si le rectangle repose exactement sur un sol (plein ou traversable). */
-export function isGrounded(level: LevelData, box: Box): boolean {
+/** Vrai si le rectangle repose exactement sur un sol plein, ou aussi traversable si demandé. */
+export function isGrounded(level: LevelData, box: Box, includeOneWay = true): boolean {
   const bottom = box.y + box.height;
   const row = Math.round(bottom / TILE_SIZE);
   if (Math.abs(bottom - row * TILE_SIZE) > GROUND_EPSILON) {
     return false;
   }
-  return rowBlocked(level, row, firstCol(box), lastCol(box), true);
+  return rowBlocked(level, row, firstCol(box), lastCol(box), includeOneWay);
 }
 
 /** Vrai si le rectangle ne chevauche aucune tuile pleine (les traversables sont ignorées). */

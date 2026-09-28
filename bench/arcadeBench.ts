@@ -38,7 +38,7 @@ function median(values: number[]): number {
 function makeOurs(level: LevelData) {
   const { x, y } = spawnPosition(level, PLAYER_HITBOX.width, PLAYER_HITBOX.height);
   const player = new PlayerPhysics(level, DEFAULT_MOVEMENT, x, y);
-  const input: PlayerInput = { moveX: 0, jumpPressed: false, jumpHeld: false };
+  const input: PlayerInput = { moveX: 0, moveY: 0, jumpPressed: false, jumpHeld: false };
   let step = 0;
   return (count: number) => {
     for (let i = 0; i < count; i++) {
@@ -96,7 +96,7 @@ class ArcadeBenchScene extends Phaser.Scene {
     const world = this.physics.world;
     world.pause(); // pas avancés manuellement
 
-    const input: PlayerInput = { moveX: 0, jumpPressed: false, jumpHeld: false };
+    const input: PlayerInput = { moveX: 0, moveY: 0, jumpPressed: false, jumpHeld: false };
     let step = 0;
     const runArcade = (count: number) => {
       for (let i = 0; i < count; i++) {

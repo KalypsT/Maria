@@ -39,7 +39,12 @@ export class GameScene extends Phaser.Scene {
   level!: LevelData;
   player!: PlayerPhysics;
   private playerSprite!: Phaser.GameObjects.Image;
-  private readonly playerInput: PlayerInput = { moveX: 0, jumpPressed: false, jumpHeld: false };
+  private readonly playerInput: PlayerInput = {
+    moveX: 0,
+    moveY: 0,
+    jumpPressed: false,
+    jumpHeld: false,
+  };
 
   constructor() {
     super('Game');
@@ -86,6 +91,7 @@ export class GameScene extends Phaser.Scene {
     const input = this.playerInput;
     for (let i = 0; i < steps; i++) {
       input.moveX = this.controls.moveX;
+      input.moveY = this.controls.moveY;
       input.jumpPressed = this.controls.consumePressed('Jump');
       input.jumpHeld = this.controls.isHeld('Jump');
       this.player.step(input);

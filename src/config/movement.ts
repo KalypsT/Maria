@@ -39,6 +39,10 @@ export interface MovementParams {
   cornerCorrectionPx: number;
   /** Durée de l'état Land (visuel uniquement, ne bloque pas le contrôle, ms). */
   landDurationMs: number;
+  /** Axe vertical (0–1) au-delà duquel « Bas + Saut » traverse une plateforme traversable. */
+  dropInputThreshold: number;
+  /** Durée pendant laquelle les plateformes traversables sont ignorées après « Bas + Saut » (ms). */
+  dropThroughMs: number;
 }
 
 export const DEFAULT_MOVEMENT: Readonly<MovementParams> = {
@@ -58,6 +62,8 @@ export const DEFAULT_MOVEMENT: Readonly<MovementParams> = {
   jumpBufferMs: 100,
   cornerCorrectionPx: 4,
   landDurationMs: 80,
+  dropInputThreshold: 0.6,
+  dropThroughMs: 100,
 };
 
 /** Bornes des réglages en direct de l'overlay de debug. */
@@ -80,6 +86,8 @@ export const MOVEMENT_PARAM_RANGES: Readonly<
   jumpBufferMs: { min: 0, max: 250, step: 1 },
   cornerCorrectionPx: { min: 0, max: 8, step: 1 },
   landDurationMs: { min: 0, max: 300, step: 10 },
+  dropInputThreshold: { min: 0.3, max: 0.95, step: 0.05 },
+  dropThroughMs: { min: 20, max: 300, step: 10 },
 };
 
 /** Hitbox de Céleste (px, PROVISOIRE). Largeur < 1 tuile, hauteur < 2 tuiles : passe dans un couloir de 2. */
@@ -103,6 +111,7 @@ export interface DerivedMovement {
   coyoteSteps: number;
   jumpBufferSteps: number;
   landSteps: number;
+  dropSteps: number;
 }
 
 export function msToSteps(ms: number, stepHz: number = PHYSICS_STEP_HZ): number {
@@ -121,6 +130,7 @@ export function deriveMovement(
     coyoteSteps: 0,
     jumpBufferSteps: 0,
     landSteps: 0,
+    dropSteps: 0,
   },
 ): DerivedMovement {
   const heightPx = params.jumpHeightTiles * TILE_SIZE;
@@ -132,5 +142,6 @@ export function deriveMovement(
   out.coyoteSteps = msToSteps(params.coyoteTimeMs, stepHz);
   out.jumpBufferSteps = msToSteps(params.jumpBufferMs, stepHz);
   out.landSteps = msToSteps(params.landDurationMs, stepHz);
+  out.dropSteps = msToSteps(params.dropThroughMs, stepHz);
   return out;
 }

@@ -19,6 +19,8 @@ import { PlayerState, nextPlayerState } from './playerState';
 export interface PlayerInput {
   /** -1 à 1. */
   moveX: number;
+  /** -1 (haut) à 1 (bas) ; « Bas + Saut » traverse une plateforme traversable. */
+  moveY: number;
   /** Front de pression du saut depuis le pas précédent. */
   jumpPressed: boolean;
   jumpHeld: boolean;
@@ -53,6 +55,7 @@ export class PlayerPhysics {
   stepsSinceJumpPressed = NEVER;
   private jumpCutAvailable = false;
   private landStepsRemaining = 0;
+  private dropStepsRemaining = 0;
   private params: MovementParams;
   readonly derived: DerivedMovement;
 
@@ -64,7 +67,15 @@ export class PlayerPhysics {
   ) {
     this.params = { ...params };
     this.derived = deriveMovement(this.params);
-    this.box = { x, y, width: PLAYER_HITBOX.width, height: PLAYER_HITBOX.height, dx: 0, dy: 0 };
+    this.box = {
+      x,
+      y,
+      width: PLAYER_HITBOX.width,
+      height: PLAYER_HITBOX.height,
+      dx: 0,
+      dy: 0,
+      passOneWay: false,
+    };
     this.prevX = x;
     this.prevY = y;
     this.grounded = isGrounded(level, this.box);
@@ -91,6 +102,8 @@ export class PlayerPhysics {
     this.stepsSinceJumpPressed = NEVER;
     this.jumpCutAvailable = false;
     this.landStepsRemaining = 0;
+    this.dropStepsRemaining = 0;
+    this.box.passOneWay = false;
     this.grounded = isGrounded(level, this.box);
     this.stepsSinceGrounded = this.grounded ? 0 : NEVER;
     this.state = this.grounded ? PlayerState.Idle : PlayerState.Fall;
@@ -125,10 +138,22 @@ export class PlayerPhysics {
         ? Math.min(this.vx + maxDelta, targetVx)
         : Math.max(this.vx - maxDelta, targetVx);
 
-    // Saut : buffer (pression récente) × coyote (sol récent).
-    if (input.jumpPressed) {
+    // Bas + Saut sur une plateforme traversable : on la traverse au lieu de sauter.
+    if (
+      input.jumpPressed &&
+      input.moveY > p.dropInputThreshold &&
+      this.grounded &&
+      !isGrounded(this.level, box, false)
+    ) {
+      this.dropStepsRemaining = d.dropSteps;
+      this.grounded = false;
+      this.stepsSinceGrounded = NEVER;
+      this.stepsSinceJumpPressed = NEVER;
+    } else if (input.jumpPressed) {
       this.stepsSinceJumpPressed = 0;
     }
+
+    // Saut : buffer (pression récente) × coyote (sol récent).
     if (
       this.stepsSinceJumpPressed <= d.jumpBufferSteps &&
       this.stepsSinceGrounded <= d.coyoteSteps
@@ -155,6 +180,7 @@ export class PlayerPhysics {
     if (moveX(this.level, box)) {
       this.vx = 0;
     }
+    box.passOneWay = this.dropStepsRemaining > 0;
     const hit = moveY(this.level, box);
     if (hit === HitY.Floor) {
       this.vy = 0;
@@ -164,7 +190,10 @@ export class PlayerPhysics {
     }
 
     const wasGrounded = this.grounded;
-    this.grounded = this.vy >= 0 && isGrounded(this.level, box);
+    this.grounded = this.vy >= 0 && isGrounded(this.level, box, !box.passOneWay);
+    if (this.dropStepsRemaining > 0) {
+      this.dropStepsRemaining--;
+    }
     if (this.vy >= 0) {
       this.jumpCutAvailable = false;
     }
