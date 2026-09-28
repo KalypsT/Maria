@@ -76,7 +76,7 @@ Le déploiement se fait via GitHub Pages (`.github/workflows/deploy.yml`) : chaq
 
 ## Outils de debug
 
-Activés en développement uniquement (jamais dans le build de production) : hitboxes, vitesse, état du joueur, téléportation de zone, déblocage des capacités, changement de phase de croissance, déclenchement d'événements, IDs de checkpoints, inspection de la sauvegarde.
+Activés en développement et dans le build de debug uniquement (jamais dans le build principal ; `?touch` force les commandes tactiles sur ordinateur) : hitboxes, vitesse, état du joueur, téléportation de zone, déblocage des capacités, changement de phase de croissance, déclenchement d'événements, IDs de checkpoints, inspection de la sauvegarde.
 
 ## Sauvegarde
 
