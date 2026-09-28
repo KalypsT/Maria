@@ -16,7 +16,7 @@ import { TouchSource } from '../core/input/TouchSource';
 import { Tile, spawnPosition, tileAt, type LevelData } from '../core/level/LevelData';
 import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../core/player/PlayerPhysics';
-import { LEVELS, type LevelSource } from '../levels';
+import { LEVELS, levelName, type LevelSource } from '../levels';
 import { loadControlSettings, saveControlSettings } from '../ui/controlSettingsStorage';
 import { PauseMenu } from '../ui/PauseMenu';
 
@@ -108,6 +108,14 @@ export class GameScene extends Phaser.Scene {
       onSettingsChange: (settings) => {
         saveControlSettings(settings);
         this.touch?.setSettings(settings);
+      },
+      levels: LEVELS.map((level) => ({ id: level.id, name: levelName(level) })),
+      currentLevelId: () => this.level.id,
+      onLevelChange: (id) => {
+        const level = LEVELS.find((candidate) => candidate.id === id);
+        if (level) {
+          this.loadLevel(level);
+        }
       },
     });
     const onVisibility = () => {

@@ -233,3 +233,10 @@ body {
   display: flex;
   gap: 6px;
 }
+
+/* Choix des parcours d'essai (prototype, Phase 2). */
+.pause-levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

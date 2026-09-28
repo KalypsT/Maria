@@ -12,6 +12,10 @@ export interface PauseMenuOptions {
   showTouchSettings: boolean;
   onResume: () => void;
   onSettingsChange: (settings: ControlSettings) => void;
+  /** Parcours d'essai proposés (PROVISOIRE, prototype de la Phase 2). */
+  levels: readonly { id: string; name: string }[];
+  currentLevelId: () => string;
+  onLevelChange: (id: string) => void;
 }
 
 function element<K extends keyof HTMLElementTagNameMap>(
@@ -63,6 +67,9 @@ export class PauseMenu {
         });
       });
     }
+    if (options.levels.length > 1) {
+      this.addLevelChoice(panel);
+    }
     document.body.appendChild(this.root);
   }
 
@@ -72,6 +79,9 @@ export class PauseMenu {
 
   open(): void {
     this.root.hidden = false;
+    this.refreshers.forEach((refresh) => {
+      refresh();
+    });
   }
 
   close(): void {
@@ -134,6 +144,28 @@ export class PauseMenu {
     const refresh = () => {
       for (const { mode, button } of buttons) {
         button.classList.toggle('selected', mode === this.settings.joystickMode);
+      }
+    };
+    refresh();
+    this.refreshers.push(refresh);
+  }
+
+  /** Parcours d'essai : en choisir un y replace Céleste et reprend le jeu. */
+  private addLevelChoice(parent: HTMLElement): void {
+    element('h3', parent, undefined, "Parcours d'essai");
+    const group = element('div', parent, 'pause-levels');
+    const buttons = this.options.levels.map(({ id, name }) => {
+      const button = element('button', group, undefined, name);
+      button.addEventListener('click', () => {
+        this.options.onLevelChange(id);
+        this.options.onResume();
+      });
+      return { id, button };
+    });
+    const refresh = () => {
+      const current = this.options.currentLevelId();
+      for (const { id, button } of buttons) {
+        button.classList.toggle('selected', id === current);
       }
     };
     refresh();
