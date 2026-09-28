@@ -1,4 +1,5 @@
 import { CAMERA_PARAM_RANGES, type CameraParams } from '../config/camera';
+import { FEEL_PARAM_RANGES, type FeelParams } from '../config/feel';
 import { MOVEMENT_PARAM_RANGES, type MovementParams } from '../config/movement';
 
 type ParamRanges<T> = Readonly<Record<keyof T, { min: number; max: number }>>;
@@ -54,4 +55,13 @@ export function movementToJson(params: Readonly<MovementParams>): string {
 /** JSON des paramètres de caméra, prêt à être reporté dans `src/config/camera.ts`. */
 export function cameraToJson(params: Readonly<CameraParams>): string {
   return JSON.stringify(orderedParams(params, CAMERA_PARAM_RANGES), null, 2);
+}
+
+export function sanitizeFeelOverrides(raw: unknown): Partial<FeelParams> {
+  return sanitizeOverrides<FeelParams>(raw, FEEL_PARAM_RANGES);
+}
+
+/** JSON des sensations visuelles, prêt à être reporté dans `src/config/feel.ts`. */
+export function feelToJson(params: Readonly<FeelParams>): string {
+  return JSON.stringify(orderedParams(params, FEEL_PARAM_RANGES), null, 2);
 }

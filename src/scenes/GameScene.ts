@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { DEFAULT_CAMERA, type CameraParams } from '../config/camera';
+import { DEFAULT_FEEL, type FeelParams } from '../config/feel';
 import {
   GAME_HEIGHT,
   LEVEL_CHUNK_TILES,
@@ -22,10 +23,12 @@ import { TouchSource } from '../core/input/TouchSource';
 import { Tile, spawnPosition, tileAt, type LevelData } from '../core/level/LevelData';
 import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../core/player/PlayerPhysics';
+import { PlayerFeel } from '../core/player/playerFeel';
 import { LEVELS, levelName, type LevelSource } from '../levels';
 import { loadControlSettings, saveControlSettings } from '../ui/controlSettingsStorage';
 import { loadDisplaySettings, saveDisplaySettings } from '../ui/displaySettingsStorage';
 import { PauseMenu } from '../ui/PauseMenu';
+import { DustPool } from './DustPool';
 
 const PLAYER_TEXTURE = 'celeste-placeholder';
 /** Durée d'image maximale prise en compte (onglet en arrière-plan, pause du navigateur). */
@@ -67,6 +70,10 @@ export class GameScene extends Phaser.Scene {
   /** Paramètres de caméra courants (modifiables en direct par l'overlay de debug). */
   readonly cameraParams: CameraParams = { ...DEFAULT_CAMERA };
   readonly camera = new CameraController(this.cameraParams);
+  /** Sensations visuelles (écrasement, inclinaison, poussière), modifiables par l'overlay. */
+  readonly feelParams: FeelParams = { ...DEFAULT_FEEL };
+  readonly feel = new PlayerFeel(this.feelParams);
+  private dust!: DustPool;
   readonly clock = new FixedStepClock(1 / PHYSICS_STEP_HZ, MAX_STEPS_PER_FRAME);
   readonly frameStats: FrameStats = { steps: 0, simulationMs: 0 };
   level!: LevelData;
@@ -97,7 +104,11 @@ export class GameScene extends Phaser.Scene {
     this.createPlayerTexture();
     const { x, y } = spawnPosition(this.level, PLAYER_HITBOX.width, PLAYER_HITBOX.height);
     this.player = new PlayerPhysics(this.level, this.movement, x, y);
-    this.playerSprite = this.add.image(x, y, PLAYER_TEXTURE).setOrigin(0, 0).setDepth(10);
+    // Origine aux pieds : l'écrasement et l'inclinaison se font autour du point d'appui.
+    this.playerSprite = this.add.image(x, y, PLAYER_TEXTURE).setOrigin(0.5, 1).setDepth(10);
+    this.dust = new DustPool(this, this.feelParams);
+    this.applyMovement();
+    this.feel.reset(this.player);
 
     const keyboard = new KeyboardSource();
     this.controls.sources.push(keyboard);
@@ -173,6 +184,7 @@ export class GameScene extends Phaser.Scene {
     const start = __DEBUG_TOOLS__ ? performance.now() : 0;
     const input = this.playerInput;
     const camera = this.camera;
+    const feel = this.feel;
     for (let i = 0; i < steps; i++) {
       input.moveX = this.controls.moveX;
       input.moveY = this.controls.moveY;
@@ -181,6 +193,10 @@ export class GameScene extends Phaser.Scene {
       this.player.step(input);
       camera.lookInput = input.moveY;
       camera.step(this.player);
+      feel.step(this.player);
+      if (feel.events !== 0) {
+        this.dust.emit(feel.events, this.player.box, this.player.facing);
+      }
     }
     if (__DEBUG_TOOLS__) {
       this.frameStats.steps = steps;
@@ -189,11 +205,16 @@ export class GameScene extends Phaser.Scene {
 
     const alpha = this.clock.alpha;
     const player = this.player;
-    this.playerSprite.setPosition(
-      player.prevX + (player.box.x - player.prevX) * alpha,
-      player.prevY + (player.box.y - player.prevY) * alpha,
-    );
-    this.playerSprite.setFlipX(player.facing < 0);
+    const box = player.box;
+    this.playerSprite
+      .setPosition(
+        player.prevX + (box.x - player.prevX) * alpha + box.width / 2,
+        player.prevY + (box.y - player.prevY) * alpha + box.height,
+      )
+      .setScale(feel.scaleX, feel.scaleY)
+      .setRotation(feel.lean)
+      .setFlipX(player.facing < 0);
+    this.dust.update();
     this.cameras.main.centerOn(
       camera.prevX + (camera.x - camera.prevX) * alpha,
       camera.prevY + (camera.y - camera.prevY) * alpha,
@@ -220,6 +241,13 @@ export class GameScene extends Phaser.Scene {
   /** Applique les paramètres courants au joueur (après un réglage en direct). */
   applyMovement(): void {
     this.player.setParams(this.movement);
+    this.feel.maxRunSpeed = this.movement.maxRunSpeed;
+    this.feel.maxFallSpeed = this.movement.maxFallSpeed;
+  }
+
+  /** Applique les réglages de sensations visuelles (overlay). */
+  applyFeel(): void {
+    this.feel.setParams(this.feelParams);
   }
 
   /** Applique les paramètres de caméra courants (après un réglage en direct ou un changement de zoom). */
@@ -243,6 +271,7 @@ export class GameScene extends Phaser.Scene {
   respawn(): void {
     const { x, y } = spawnPosition(this.level, PLAYER_HITBOX.width, PLAYER_HITBOX.height);
     this.player.reset(x, y, this.level);
+    this.feel.reset(this.player);
     this.clock.reset();
     this.resetCamera();
   }
