@@ -150,6 +150,8 @@ function addCheck(
  * caméra en direct, choix de la salle, hitbox et repères de caméra, mesures, export JSON.
  */
 export function installDebugOverlay(scene: GameScene): void {
+  // Accès depuis la console ou un script de test (Playwright) : build de debug uniquement.
+  (window as unknown as { mariaScene?: GameScene }).mariaScene = scene;
   Object.assign(scene.movement, load(STORAGE_KEY, sanitizeMovementOverrides));
   scene.applyMovement();
   Object.assign(scene.cameraParams, load(CAMERA_STORAGE_KEY, sanitizeCameraOverrides));

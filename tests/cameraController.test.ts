@@ -216,6 +216,56 @@ describe('CameraController', () => {
     expect(r.player.grounded).toBe(true);
   });
 
+  it('montre le terrain sous Céleste pendant une chute rapide, puis se pose sans rebond', () => {
+    const level = room(60, 90, (grid) => {
+      const spawnRow = grid[69];
+      if (spawnRow) {
+        spawnRow[30] = '.';
+      }
+      const ledge = grid[10];
+      if (ledge) {
+        for (let col = 1; col < 20; col++) {
+          ledge[col] = '#';
+        }
+      }
+      const top = grid[9];
+      if (top) {
+        top[17] = 'P';
+      }
+    });
+    const r = rig(level);
+    r.input.moveX = 1;
+    r.run(80);
+    r.input.moveX = 0;
+    let fastSteps = 0;
+    let previousY = r.camera.y;
+    let direction = 0;
+    let reversals = 0;
+    r.run(900, () => {
+      const below = r.camera.y + r.camera.viewHeight / 2 - (r.player.box.y + r.player.box.height);
+      if (!r.player.grounded && r.player.vy >= DEFAULT_MOVEMENT.maxFallSpeed - 1) {
+        fastSteps++;
+        // Au moins 150 px (≈ 0,4 s de chute) visibles sous les pieds une fois la chute lancée.
+        if (fastSteps > 90) {
+          expect(below).toBeGreaterThanOrEqual(150);
+        }
+      }
+      const d = r.camera.y - previousY;
+      if (Math.abs(d) > 1e-9) {
+        const sign = Math.sign(d);
+        if (direction !== 0 && sign !== direction) {
+          reversals++;
+        }
+        direction = sign;
+      }
+      previousY = r.camera.y;
+    });
+    expect(fastSteps).toBeGreaterThan(120);
+    expect(r.player.grounded).toBe(true);
+    // Descente pendant la chute, puis au plus un changement de sens (remontée douce à l'arrivée).
+    expect(reversals).toBeLessThanOrEqual(1);
+  });
+
   it('ne montre jamais l’extérieur de la salle', () => {
     const r = rig(room(80, 40));
     const halfW = r.camera.viewWidth / 2;

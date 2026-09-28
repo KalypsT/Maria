@@ -55,6 +55,8 @@ export class CameraController {
   private kFollow = 1;
   private kLookAhead = 1;
   private kVertical = 1;
+  private kFallFollow = 1;
+  private wasGrounded = false;
   private kFall = 1;
   private kLook = 1;
   private lookAheadDelaySteps = 0;
@@ -80,6 +82,7 @@ export class CameraController {
     this.kFollow = smoothingFactor(p.followTimeMs, hz);
     this.kLookAhead = smoothingFactor(p.lookAheadTimeMs, hz);
     this.kVertical = smoothingFactor(p.verticalTimeMs, hz);
+    this.kFallFollow = smoothingFactor(p.fallFollowTimeMs, hz);
     this.kFall = smoothingFactor(p.fallLookTimeMs, hz);
     this.kLook = smoothingFactor(p.lookTimeMs, hz);
     this.lookAheadDelaySteps = Math.round((p.lookAheadDelayMs * hz) / 1000);
@@ -111,6 +114,7 @@ export class CameraController {
     this.fallOffset = 0;
     this.lookOffset = 0;
     this.lookSteps = 0;
+    this.wasGrounded = subject.grounded;
     this.refFeetY = feet;
     this.groundFeetY = feet;
     this.x = box.x + box.width / 2;
@@ -162,11 +166,13 @@ export class CameraController {
 
     // Vertical : la référence est le dernier sol ; en l'air elle ne bouge que si Céleste sort de la
     // bande (grande chute, montée d'une tour), jamais pendant un saut ordinaire.
+    let falling = false;
     if (subject.grounded) {
       this.refFeetY = feet;
       this.groundFeetY = feet;
     } else if (feet > this.refFeetY + p.bandDownPx) {
       this.refFeetY = feet - p.bandDownPx;
+      falling = true;
     } else if (feet < this.refFeetY - p.bandUpPx) {
       this.refFeetY = feet + p.bandUpPx;
     }
@@ -195,8 +201,15 @@ export class CameraController {
         : 0;
     this.lookOffset += (lookTarget - this.lookOffset) * this.kLook;
 
-    const targetY = this.refFeetY - p.verticalOffsetPx + this.fallOffset + this.lookOffset;
-    this.y += (targetY - this.y) * this.kVertical;
+    const restY = this.refFeetY - p.verticalOffsetPx + this.lookOffset;
+    if (subject.grounded && !this.wasGrounded) {
+      // Atterrissage : l'avance de chute restante est ramenée à la position actuelle de la vue,
+      // qui remonte ensuite en douceur au lieu de descendre encore puis revenir.
+      this.fallOffset = Math.max(0, Math.min(this.fallOffset, this.y - restY));
+    }
+    this.wasGrounded = subject.grounded;
+    const targetY = restY + this.fallOffset;
+    this.y += (targetY - this.y) * (falling ? this.kFallFollow : this.kVertical);
 
     this.clampToMargins(box);
     this.clampToBounds();
