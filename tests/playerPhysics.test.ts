@@ -102,8 +102,8 @@ const dt = 1 / PHYSICS_STEP_HZ;
 const p = DEFAULT_MOVEMENT;
 
 /** Hauteur maximale (px) d'un saut dont le bouton est maintenu `holdSteps` pas. */
-function jumpHeight(holdSteps: number): number {
-  const player = makePlayer(FLOOR);
+function jumpHeight(holdSteps: number, overrides: Partial<MovementParams> = {}): number {
+  const player = makePlayer(FLOOR, overrides);
   const startY = player.box.y;
   let minY = startY;
   for (let i = 0; i < 240; i++) {
@@ -219,6 +219,70 @@ describe('saut', () => {
       wasGrounded = player.grounded;
     }
     expect(jumps).toBe(1);
+  });
+});
+
+/** Options de forme du saut (D-19), activées. */
+const SHAPE_OPTIONS: Partial<MovementParams> = { jumpReleaseMode: 1, apexHangSpeed: 60 };
+
+describe('forme du saut (D-19, options désactivées par défaut)', () => {
+  it('sont désactivées par défaut', () => {
+    expect(p.jumpReleaseMode).toBe(0);
+    expect(p.apexHangSpeed).toBe(0);
+  });
+
+  it('relâchement progressif : hauteur variable conservée, sans cassure de vitesse', () => {
+    const release = { jumpReleaseMode: 1 };
+    const short = jumpHeight(1, release);
+    const medium = jumpHeight(20, release);
+    const full = jumpHeight(1000, release);
+    expect(medium).toBeGreaterThan(short + T / 2);
+    expect(full).toBeGreaterThan(medium + T / 2);
+    expect(full).toBeCloseTo(p.jumpHeightTiles * T, 1);
+
+    // Plus grand changement de vitesse verticale d'un pas à l'autre, relâché après 10 pas.
+    const maxDelta = (overrides: Partial<MovementParams>) => {
+      const player = makePlayer(FLOOR, overrides);
+      let previous = 0;
+      let max = 0;
+      for (let i = 0; i < 120; i++) {
+        step(player, 0, i < 10, i === 0);
+        if (player.grounded) {
+          break;
+        }
+        if (i > 0) {
+          max = Math.max(max, Math.abs(player.vy - previous));
+        }
+        previous = player.vy;
+      }
+      return max;
+    };
+    const derived = new PlayerPhysics(parseAsciiLevel('t', 'P'), p, 0, 0).derived;
+    expect(maxDelta(release)).toBeLessThanOrEqual(
+      derived.riseGravity * p.releaseGravityMultiplier * dt + 1e-9,
+    );
+    // Avec la coupure (Phase 1), la vitesse est divisée d'un coup.
+    expect(maxDelta({})).toBeGreaterThan(derived.jumpVelocity * 0.2);
+  });
+
+  it('flottement au sommet : plus long en l’air, un peu plus haut, seulement Saut maintenu', () => {
+    const airtime = (holdSteps: number, overrides: Partial<MovementParams>) => {
+      const player = makePlayer(FLOOR, overrides);
+      let steps = 0;
+      step(player, 0, holdSteps > 0, true);
+      while (!player.grounded && steps < 500) {
+        step(player, 0, steps < holdSteps);
+        steps++;
+      }
+      return steps;
+    };
+    const hang = { apexHangSpeed: 60 };
+    expect(airtime(1000, hang)).toBeGreaterThan(airtime(1000, {}) + 6);
+    const full = jumpHeight(1000, hang);
+    expect(full).toBeGreaterThan(p.jumpHeightTiles * T);
+    expect(full).toBeLessThan(p.jumpHeightTiles * T * 1.25);
+    // Bouton relâché tôt : pas de flottement.
+    expect(airtime(4, hang)).toBe(airtime(4, {}));
   });
 });
 
@@ -470,10 +534,14 @@ describe('déterminisme selon la fréquence d’affichage', () => {
     }
   }
 
-  function simulate(hz: number, seconds: number): number[] {
+  function simulate(
+    hz: number,
+    seconds: number,
+    params: MovementParams = DEFAULT_MOVEMENT,
+  ): number[] {
     const level = parseAsciiLevel('test-room', testRoom);
     const { x, y } = spawnPosition(level, PLAYER_HITBOX.width, PLAYER_HITBOX.height);
-    const player = new PlayerPhysics(level, DEFAULT_MOVEMENT, x, y);
+    const player = new PlayerPhysics(level, params, x, y);
     const clock = new FixedStepClock(1 / PHYSICS_STEP_HZ, MAX_STEPS_PER_FRAME);
     const controller = new InputController();
     const source = new ScriptedSource();
@@ -502,6 +570,15 @@ describe('déterminisme selon la fréquence d’affichage', () => {
     expect(new Set(reference.filter((_, i) => i % 2 === 1)).size).toBeGreaterThan(20);
     for (const hz of [60, 90, 144]) {
       expect(simulate(hz, 5), `${hz} Hz`).toEqual(reference);
+    }
+  });
+
+  it('reste identique à toutes les fréquences avec les options de saut (D-19)', () => {
+    const params = { ...DEFAULT_MOVEMENT, ...SHAPE_OPTIONS };
+    const reference = simulate(120, 5, params);
+    expect(reference).not.toEqual(simulate(120, 5));
+    for (const hz of [60, 90, 144]) {
+      expect(simulate(hz, 5, params), `${hz} Hz`).toEqual(reference);
     }
   });
 });

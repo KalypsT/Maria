@@ -29,6 +29,20 @@ export interface MovementParams {
   fallGravityMultiplier: number;
   /** Facteur appliqué à la vitesse de montée quand le bouton est relâché (hauteur variable). */
   jumpCutMultiplier: number;
+  /**
+   * Relâchement du saut (D-19) : 0 = coupure de la vitesse (`jumpCutMultiplier`, Phase 1) ;
+   * 1 = gravité multipliée par `releaseGravityMultiplier` jusqu'au sommet (saut court plus arrondi).
+   */
+  jumpReleaseMode: number;
+  /** Multiplicateur de gravité en montée après le relâchement (mode 1). */
+  releaseGravityMultiplier: number;
+  /**
+   * Flottement au sommet (D-19) : sous cette vitesse verticale (px/s), Saut maintenu, la gravité est
+   * multipliée par `apexGravityMultiplier`. 0 = désactivé. Le saut complet monte un peu plus haut.
+   */
+  apexHangSpeed: number;
+  /** Multiplicateur de gravité pendant le flottement au sommet. */
+  apexGravityMultiplier: number;
   /** Vitesse de chute maximale (px/s). */
   maxFallSpeed: number;
   /** Coyote time : saut encore permis après avoir quitté le sol (ms). */
@@ -57,6 +71,10 @@ export const DEFAULT_MOVEMENT: Readonly<MovementParams> = {
   jumpTimeToApex: 0.36,
   fallGravityMultiplier: 1.6,
   jumpCutMultiplier: 0.5,
+  jumpReleaseMode: 0,
+  releaseGravityMultiplier: 3,
+  apexHangSpeed: 0,
+  apexGravityMultiplier: 0.5,
   maxFallSpeed: 380,
   coyoteTimeMs: 100,
   jumpBufferMs: 100,
@@ -81,6 +99,10 @@ export const MOVEMENT_PARAM_RANGES: Readonly<
   jumpTimeToApex: { min: 0.15, max: 0.8, step: 0.01 },
   fallGravityMultiplier: { min: 0.5, max: 4, step: 0.05 },
   jumpCutMultiplier: { min: 0, max: 1, step: 0.05 },
+  jumpReleaseMode: { min: 0, max: 1, step: 1 },
+  releaseGravityMultiplier: { min: 1, max: 8, step: 0.1 },
+  apexHangSpeed: { min: 0, max: 200, step: 5 },
+  apexGravityMultiplier: { min: 0.1, max: 1, step: 0.05 },
   maxFallSpeed: { min: 100, max: 900, step: 10 },
   coyoteTimeMs: { min: 0, max: 250, step: 1 },
   jumpBufferMs: { min: 0, max: 250, step: 1 },
