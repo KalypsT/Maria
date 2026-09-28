@@ -39,4 +39,9 @@ export const PLACEHOLDER_COLORS = {
   oneWay: 0x8a7fb0,
   /** Arrivée d'un parcours (placeholder). */
   goal: 0x7fe0c0,
+  /** Patrouilleur (placeholder neutre, design ouvert). */
+  enemy: 0x2e2a3d,
+  enemyEyes: 0xe8e0a0,
+  /** Bâton de Céleste (placeholder). */
+  stick: 0xc9a46b,
 } as const;

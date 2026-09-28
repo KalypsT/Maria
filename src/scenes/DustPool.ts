@@ -13,6 +13,8 @@ interface Particle {
   y: number;
   vx: number;
   vy: number;
+  /** Éclat d'ennemi : affiché même si la poussière de Céleste est désactivée. */
+  forced: boolean;
 }
 
 /**
@@ -36,7 +38,7 @@ export class DustPool {
     }
     for (let i = 0; i < DUST_POOL_SIZE; i++) {
       const image = scene.add.image(0, 0, DUST_TEXTURE).setVisible(false).setDepth(9);
-      this.particles.push({ image, bornMs: -1, x: 0, y: 0, vx: 0, vy: 0 });
+      this.particles.push({ image, bornMs: -1, x: 0, y: 0, vx: 0, vy: 0, forced: false });
     }
   }
 
@@ -62,6 +64,27 @@ export class DustPool {
     }
   }
 
+  /**
+   * Éclat en étoile au centre d'une hitbox (ennemi dispersé, D-20) : indépendant du réglage de la
+   * poussière, qui ne concerne que Céleste.
+   */
+  burst(box: Box): void {
+    const speed = 70;
+    const cx = box.x + box.width / 2;
+    const cy = box.y + box.height / 2;
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2;
+      const particle = this.take();
+      particle.bornMs = this.scene.time.now;
+      particle.x = cx;
+      particle.y = cy;
+      particle.vx = Math.cos(angle) * speed;
+      particle.vy = Math.sin(angle) * speed;
+      particle.forced = true;
+      particle.image.setVisible(true).setPosition(cx, cy).setAlpha(1).setScale(1);
+    }
+  }
+
   /** Met à jour l'affichage (une fois par image). */
   update(): void {
     const now = this.scene.time.now;
@@ -71,7 +94,7 @@ export class DustPool {
         continue;
       }
       const age = now - particle.bornMs;
-      if (age >= life || this.params.dustEnabled < 1) {
+      if (age >= life || (this.params.dustEnabled < 1 && !particle.forced)) {
         particle.bornMs = -1;
         particle.image.setVisible(false);
         continue;
@@ -85,12 +108,19 @@ export class DustPool {
     }
   }
 
-  private spawn(box: Box, vx: number, lift: number): void {
+  /** Particule suivante du stock (la plus ancienne est recyclée). */
+  private take(): Particle {
     const particle = this.particles[this.next];
     this.next = (this.next + 1) % this.particles.length;
     if (!particle) {
-      return;
+      throw new Error('Stock de particules vide');
     }
+    return particle;
+  }
+
+  private spawn(box: Box, vx: number, lift: number): void {
+    const particle = this.take();
+    particle.forced = false;
     particle.bornMs = this.scene.time.now;
     particle.x = box.x + box.width / 2 + (vx > 0 ? 3 : vx < 0 ? -3 : 0);
     particle.y = box.y + box.height - 1;

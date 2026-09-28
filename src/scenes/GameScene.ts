@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { DEFAULT_CAMERA, type CameraParams } from '../config/camera';
+import { DEFAULT_COMBAT, type CombatParams } from '../config/combat';
 import { DEFAULT_FEEL, type FeelParams } from '../config/feel';
 import {
   GAME_HEIGHT,
@@ -16,6 +17,7 @@ import {
   type MovementParams,
 } from '../config/movement';
 import { CameraController } from '../core/camera/CameraController';
+import { CombatWorld } from '../core/combat/CombatWorld';
 import { FixedStepClock } from '../core/FixedStepClock';
 import { InputController } from '../core/input/InputController';
 import { KeyboardSource } from '../core/input/KeyboardSource';
@@ -28,6 +30,7 @@ import { LEVELS, levelName, type LevelSource } from '../levels';
 import { loadControlSettings, saveControlSettings } from '../ui/controlSettingsStorage';
 import { loadDisplaySettings, saveDisplaySettings } from '../ui/displaySettingsStorage';
 import { PauseMenu } from '../ui/PauseMenu';
+import { CombatView } from './CombatView';
 import { DustPool } from './DustPool';
 
 const PLAYER_TEXTURE = 'celeste-placeholder';
@@ -74,6 +77,10 @@ export class GameScene extends Phaser.Scene {
   readonly feelParams: FeelParams = { ...DEFAULT_FEEL };
   readonly feel = new PlayerFeel(this.feelParams);
   private dust!: DustPool;
+  /** Combat minimal (D-20), modifiable par l'overlay. */
+  readonly combatParams: CombatParams = { ...DEFAULT_COMBAT };
+  combat!: CombatWorld;
+  private combatView!: CombatView;
   readonly clock = new FixedStepClock(1 / PHYSICS_STEP_HZ, MAX_STEPS_PER_FRAME);
   readonly frameStats: FrameStats = { steps: 0, simulationMs: 0 };
   level!: LevelData;
@@ -107,6 +114,8 @@ export class GameScene extends Phaser.Scene {
     // Origine aux pieds : l'écrasement et l'inclinaison se font autour du point d'appui.
     this.playerSprite = this.add.image(x, y, PLAYER_TEXTURE).setOrigin(0.5, 1).setDepth(10);
     this.dust = new DustPool(this, this.feelParams);
+    this.combat = new CombatWorld(this.level, this.combatParams);
+    this.combatView = new CombatView(this, this.combat, this.combatParams, this.dust);
     this.applyMovement();
     this.feel.reset(this.player);
 
@@ -185,12 +194,23 @@ export class GameScene extends Phaser.Scene {
     const input = this.playerInput;
     const camera = this.camera;
     const feel = this.feel;
+    const combat = this.combat;
     for (let i = 0; i < steps; i++) {
+      if (combat.hitstopSteps > 0) {
+        // Arrêt sur image : toute la simulation est suspendue, les pressions restent mémorisées.
+        combat.hitstopSteps--;
+        this.freezeInterpolation();
+        continue;
+      }
       input.moveX = this.controls.moveX;
       input.moveY = this.controls.moveY;
       input.jumpPressed = this.controls.consumePressed('Jump');
       input.jumpHeld = this.controls.isHeld('Jump');
       this.player.step(input);
+      combat.step(this.player, this.controls.consumePressed('Attack'));
+      if (combat.events !== 0) {
+        this.combatView.onEvents(combat.events);
+      }
       camera.lookInput = input.moveY;
       camera.step(this.player);
       feel.step(this.player);
@@ -214,6 +234,7 @@ export class GameScene extends Phaser.Scene {
       .setScale(feel.scaleX, feel.scaleY)
       .setRotation(feel.lean)
       .setFlipX(player.facing < 0);
+    this.combatView.render(alpha, player, this.playerSprite);
     this.dust.update();
     this.cameras.main.centerOn(
       camera.prevX + (camera.x - camera.prevX) * alpha,
@@ -245,6 +266,29 @@ export class GameScene extends Phaser.Scene {
     this.feel.maxFallSpeed = this.movement.maxFallSpeed;
   }
 
+  /** Applique les réglages de combat (overlay). */
+  applyCombat(): void {
+    this.combat.setParams(this.combatParams);
+  }
+
+  /** Ennemis remis à leur départ (overlay). */
+  resetEnemies(): void {
+    this.combat.reset();
+  }
+
+  /** Pendant l'arrêt sur image, l'interpolation ne doit pas faire osciller l'affichage. */
+  private freezeInterpolation(): void {
+    const player = this.player;
+    player.prevX = player.box.x;
+    player.prevY = player.box.y;
+    this.camera.prevX = this.camera.x;
+    this.camera.prevY = this.camera.y;
+    for (const enemy of this.combat.enemies) {
+      enemy.prevX = enemy.box.x;
+      enemy.prevY = enemy.box.y;
+    }
+  }
+
   /** Applique les réglages de sensations visuelles (overlay). */
   applyFeel(): void {
     this.feel.setParams(this.feelParams);
@@ -272,6 +316,7 @@ export class GameScene extends Phaser.Scene {
     const { x, y } = spawnPosition(this.level, PLAYER_HITBOX.width, PLAYER_HITBOX.height);
     this.player.reset(x, y, this.level);
     this.feel.reset(this.player);
+    this.combat.reset();
     this.clock.reset();
     this.resetCamera();
   }
@@ -280,6 +325,8 @@ export class GameScene extends Phaser.Scene {
   loadLevel(source: LevelSource): void {
     this.level = parseAsciiLevel(source.id, source.text);
     this.drawLevel();
+    this.combat.load(this.level);
+    this.combatView.rebuild();
     this.respawn();
     try {
       localStorage.setItem(LEVEL_STORAGE_KEY, source.id);
