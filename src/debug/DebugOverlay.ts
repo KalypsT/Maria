@@ -321,7 +321,7 @@ export function installDebugOverlay(scene: GameScene): void {
         `vx ${player.vx.toFixed(0).padStart(4)}  vy ${player.vy.toFixed(0).padStart(4)}  ` +
         `x ${player.box.x.toFixed(1)}  y ${player.box.y.toFixed(1)}\n` +
         `cam ${camera.x.toFixed(0)} ${camera.y.toFixed(0)}  avance ${camera.lookAheadOffset.toFixed(0)}  ` +
-        `vue ${camera.viewWidth.toFixed(0)}×${camera.viewHeight.toFixed(0)}\n` +
+        `vue ${camera.viewWidth.toFixed(0)}×${camera.viewHeight.toFixed(0)} rendu ×${scene.renderScale.toFixed(2)}\n` +
         `simu ${((simMsSum / frames) * 1000).toFixed(0)} µs/img (max ${(simMsMax * 1000).toFixed(0)})  ` +
         `pas perdus ${scene.clock.droppedSteps}`;
       const touch = scene.touch;

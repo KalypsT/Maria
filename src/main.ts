@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, PLACEHOLDER_COLORS } from './config/display';
-import { computeGameWidth } from './core/gameSize';
-import { GameScene } from './scenes/GameScene';
+import { PLACEHOLDER_COLORS, type DisplaySettings } from './config/display';
+import { computeGameWidth, computeRenderScale, renderSize } from './core/gameSize';
+import { DISPLAY_SETTINGS_EVENT, GameScene } from './scenes/GameScene';
+import { loadDisplaySettings } from './ui/displaySettingsStorage';
 
 function getParent(): HTMLElement {
   const element = document.getElementById('game');
@@ -12,7 +13,19 @@ function getParent(): HTMLElement {
 }
 
 const parent = getParent();
+let display = loadDisplaySettings();
 
+/** Taille du canvas : largeur logique (D-01) × échelle de rendu (D-18). */
+function canvasSize(): { width: number; height: number } {
+  const scale = computeRenderScale(
+    display.renderMode,
+    parent.clientHeight,
+    window.devicePixelRatio,
+  );
+  return renderSize(computeGameWidth(parent.clientWidth, parent.clientHeight), scale);
+}
+
+const initial = canvasSize();
 const game = new Phaser.Game({
   type: Phaser.AUTO,
   parent,
@@ -21,17 +34,21 @@ const game = new Phaser.Game({
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: computeGameWidth(parent.clientWidth, parent.clientHeight),
-    height: GAME_HEIGHT,
+    width: initial.width,
+    height: initial.height,
   },
   scene: [GameScene],
 });
 
-function fitGameWidth(): void {
-  const width = computeGameWidth(parent.clientWidth, parent.clientHeight);
-  if (width !== game.scale.gameSize.width) {
-    game.scale.setGameSize(width, GAME_HEIGHT);
+function fitGameSize(): void {
+  const { width, height } = canvasSize();
+  if (width !== game.scale.gameSize.width || height !== game.scale.gameSize.height) {
+    game.scale.setGameSize(width, height);
   }
 }
 
-window.addEventListener('resize', fitGameWidth);
+window.addEventListener('resize', fitGameSize);
+game.events.on(DISPLAY_SETTINGS_EVENT, (settings: DisplaySettings) => {
+  display = settings;
+  fitGameSize();
+});

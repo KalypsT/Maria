@@ -4,10 +4,13 @@ import {
   type ControlSettings,
   type JoystickMode,
 } from '../config/controls';
+import type { DisplaySettings, RenderMode } from '../config/display';
 import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 
 export interface PauseMenuOptions {
   settings: ControlSettings;
+  display: DisplaySettings;
+  onDisplayChange: (settings: DisplaySettings) => void;
   /** Afficher les réglages tactiles (inutile sans commandes tactiles). */
   showTouchSettings: boolean;
   onResume: () => void;
@@ -67,6 +70,7 @@ export class PauseMenu {
         });
       });
     }
+    this.addRenderChoice(panel);
     if (options.levels.length > 1) {
       this.addLevelChoice(panel);
     }
@@ -148,6 +152,34 @@ export class PauseMenu {
     };
     refresh();
     this.refreshers.push(refresh);
+  }
+
+  /** Résolution de rendu (D-18) : logique (par défaut) ou écran (déplacements plus fins). */
+  private addRenderChoice(parent: HTMLElement): void {
+    element('h3', parent, undefined, 'Affichage');
+    const row = element('div', parent, 'pause-row');
+    element('span', row, undefined, 'Résolution');
+    const group = element('div', row, 'pause-choice');
+    let current = this.options.display.renderMode;
+    const choices: readonly [RenderMode, string][] = [
+      ['logical', 'Logique'],
+      ['screen', 'Écran'],
+    ];
+    const buttons = choices.map(([mode, text]) => {
+      const button = element('button', group, undefined, text);
+      button.addEventListener('click', () => {
+        current = mode;
+        this.options.onDisplayChange({ renderMode: mode });
+        refresh();
+      });
+      return { mode, button };
+    });
+    const refresh = () => {
+      for (const { mode, button } of buttons) {
+        button.classList.toggle('selected', mode === current);
+      }
+    };
+    refresh();
   }
 
   /** Parcours d'essai : en choisir un y replace Céleste et reprend le jeu. */
