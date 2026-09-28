@@ -2,7 +2,7 @@
 
 Jeu d'action-platformer 2D / Metroidvania compact pour **navigateur mobile (paysage)**.
 Héroïne : **Céleste**, petite fille qui grandit et cherche son poupon **Maria**.
-Stack : **Phaser 3 + TypeScript strict + Vite**. Solo, hors ligne après chargement.
+Stack : **Phaser 4 + TypeScript strict + Vite** (Phaser 4 plutôt que 3 : voir `docs/DECISIONS.md`, D-04). Solo, hors ligne après chargement.
 
 ## Documents de référence
 
@@ -37,17 +37,21 @@ Ne pas inventer comme définitifs : design visuel final, coiffures par phase, d�
 
 ## Commandes
 
-À compléter par l'agent une fois le projet initialisé :
+Node ≥ 22.12 (`.nvmrc`). Installer avec `npm ci`.
 
 ```
-npm run dev        # serveur de dev (accessible sur le réseau local pour tester sur téléphone)
-npm run build      # build de production
-npm run typecheck  # tsc --noEmit
-npm run lint       # ESLint
-npm run test       # Vitest
+npm run dev           # serveur de dev Vite sur http://<ip-locale>:5173/Maria/ (--host : accessible sur le réseau local)
+npm run build         # build de production dans dist/
+npm run preview       # sert dist/ localement (http://<ip-locale>:4173/Maria/)
+npm run typecheck     # tsc --noEmit
+npm run lint          # ESLint (typescript-eslint strictTypeChecked)
+npm run format        # Prettier --write
+npm run format:check  # Prettier --check (vérifié en CI)
+npm run test          # Vitest (tests/**/*.test.ts)
+npm run test:watch    # Vitest en mode watch
 ```
 
-Le déploiement se fait via GitHub Pages (workflow GitHub Actions). Chaque merge sur `main` doit produire une version jouable sur téléphone.
+Le déploiement se fait via GitHub Pages (`.github/workflows/deploy.yml`) : chaque push sur `main` lance typecheck, lint, format, tests, build puis publie sur https://kalypst.github.io/Maria/. Les PR lancent les mêmes vérifications sans déployer.
 
 ## Conventions de code
 
@@ -64,7 +68,7 @@ Le déploiement se fait via GitHub Pages (workflow GitHub Actions). Chaque merge
 
 ## Mouvement (priorité n°1)
 
-- Pas de temps fixe pour la simulation du joueur.
+- Simulation du joueur à pas de temps fixe (voir `docs/DECISIONS.md`, D-05).
 - Doit inclure : accélération/décélération, saut à hauteur variable, coyote time, jump buffering, contrôle aérien. Valeurs de départ dans la spec §14, à régler par essais sur téléphone.
 - Ne jamais figer des valeurs « à l'aveugle » : prévoir un overlay de debug avec réglage en direct.
 
