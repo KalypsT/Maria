@@ -2,11 +2,11 @@
 
 ## Phase en cours
 
-**Passe de fluidité** (après la caméra, avant la Phase 4) : implémentée sur la branche `claude/fluidity-pass`, **en attente de validation puis d'essai sur téléphone**. Toutes les options sont **désactivées par défaut** : rien ne change tant qu'elles ne sont pas activées.
+**Phase 4 — Combat minimal** (spec §17, §18, §42.4, §43.0.4) : implémentée sur la branche `claude/phase-4-combat`, **en attente de validation puis d'essai sur téléphone**.
 
-Phase 2 (plateforme) : mergée, en attente d'essai sur téléphone. Phase 1 (mouvement) : pas encore formellement validée (§43.0.1). Phase 3 (contrôles mobiles) : mergée.
+Passe de fluidité et Phase 2 : mergées, en attente d'essai sur téléphone. Phase 1 (mouvement) : pas encore formellement validée (§43.0.1).
 
-Prochaine : Phase 4 — combat minimal (ou PWA / hors ligne, D-09, en petite session à part).
+Prochaine : Phase 5 — checkpoint / sauvegarde (mort douce et retour au checkpoint, D-20), ou PWA / hors ligne (D-09) en petite session à part.
 
 ## Fait
 
@@ -40,6 +40,32 @@ Prochaine : Phase 4 — combat minimal (ou PWA / hors ligne, D-09, en petite ses
 - **Traversée de plateforme** (**D-14**, validée) : Bas + Saut sur une plateforme traversable. Paramètres `dropInputThreshold` et `dropThroughMs`, réglables dans l'overlay.
 - Debug : doigts actifs, valeurs du joystick, masque des boutons ; `?touch` force les commandes tactiles sur ordinateur (dev / build de debug seulement).
 - Tests : 134 (dont joystick, disposition sur 4 écrans × 3 échelles × avec/sans encoche, combinaisons multi-touch, annulations, réglages, traversée). Vérifié en émulation Chromium avec de vrais événements tactiles : joystick + saut simultanés, pause, réglage, persistance après rechargement, build principal sans debug.
+
+### Phase 4 — Combat minimal
+
+- **D-20** (validée) : être touchée = recul + courte perte de contrôle + invulnérabilité ; ni jauge ni mort avant la Phase 5. Patrouilleur dispersé en **2 coups** (le premier le repousse et l'étourdit).
+- **Coup de bâton** (`PlayerAttack`, pur) : préparation 40 ms, frappe 100 ms, récupération 120 ms, recharge 60 ms, pression mémorisée 100 ms ; zone de frappe devant Céleste (18 × 16 px), orientation figée pendant le coup, un impact par coup et par ennemi. Même coup au sol et en l'air ; **pas de frappe vers le bas avec rebond** (ce serait une capacité, pilier n° 3). **Aucune immobilisation ni perte de vitesse** : un test vérifie que la trajectoire de Céleste est identique avec ou sans attaque.
+- **Patrouilleur** (`Patroller`, pur, même collision que Céleste) : marche sur sa plateforme, demi-tour au bord et au mur ; étourdi = penché, terni, inoffensif ; dispersé = éclat de particules (pas de gore). Placeholder ocre neutre (design ouvert). Marqueur `e` dans les cartes ASCII.
+- **Touchée** : état `Hurt` et `startHurt` dans `PlayerPhysics` (direction et saut ignorés pendant la perte de contrôle, aucun saut mémorisé) ; le reste du mouvement est inchangé (tests de la Phase 1 verts). Clignotement pendant l'invulnérabilité.
+- **Feedback** : arrêt sur image de 50 ms (simulation suspendue, pressions conservées, interpolation figée), clignotement blanc de l'ennemi touché, arc de frappe, geste du bâton, éclat de dispersion (stock de particules réutilisé). Tremblement de caméra **désactivé** par défaut (§37).
+- **Parcours 5. Combat** (facile, 342 ms) : sol dégagé entre deux murets, plateforme étroite au-dessus d'une fosse, zone d'atterrissage gardée, couloir bas (impossible de sauter par-dessus : frapper ou passer pendant le demi-tour), plateforme traversable occupée. Faisable sans attaquer et sans surface sans retour (D-16).
+- **Overlay** : section Combat (22 réglages, conservés, exportés), zone de frappe (rouge) et hurtboxes (orange) avec la hitbox, phase du coup, invulnérabilité et états des ennemis, bouton « Réinitialiser les ennemis ».
+- Tests : 209 (phases exactes du coup, mémoire de pression à la borne, recharge, côté de la zone de frappe, patrouille sans chute et demi-tour au mur, étourdi puis dispersé, un impact par coup + arrêt sur image, recul à l'opposé et invulnérabilité, ennemi étourdi inoffensif, trajectoire inchangée en attaquant, réinitialisation, validation des réglages).
+- Vérifié dans Chromium avec de vrais événements tactiles (bouton Action) : coup, étourdissement, dispersion au second coup, contact et recul. Deux défauts corrigés après essai : patrouilleur sombre invisible sur le fond (→ ocre) et bâton seul illisible (→ arc de frappe).
+- Mesure (profileur de tas, boucle chaude de 120 000 pas, parcours 5 avec attaques) : 0,07 octet/pas pour le combat et la physique (bruit : un nombre de 12 octets tous les ~170 pas, 5 patrouilleurs).
+
+### À vérifier sur téléphone (Phase 4)
+
+Sur https://kalypst.github.io/Maria/debug/ (après merge), parcours « 5. Combat » (menu pause) ; bouton **Action** (J au clavier) :
+
+- [ ] **Attaque fiable** : chaque appui donne un coup ; un appui juste avant la fin du coup précédent n'est pas perdu ; pas de coup « fantôme ».
+- [ ] **Hitbox correcte** : la portée paraît juste (ni trop courte, ni « à distance ») ; on touche en l'air comme au sol.
+- [ ] **Ennemi identifiable** : patrouilleur visible, étourdi reconnaissable, dispersion lisible et non violente.
+- [ ] **Combat secondaire** : l'attaque ne ralentit pas ; passer par-dessus ou éviter reste plus naturel que combattre, sauf dans le couloir bas.
+- [ ] **Touchée** : recul compréhensible, pas frustrant ; clignotement visible ; pas de double contact.
+- [ ] **Arrêt sur image** (50 ms) : donne de l'impact sans gêner la précision ? (régler `hitstopMs`, 0 = aucun).
+- [ ] Action + saut + déplacement simultanés au pouce sans perte d'entrée.
+- [ ] Réglages retenus : **Exporter JSON** (section `combat`).
 
 ### Passe de fluidité
 
@@ -142,7 +168,6 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 - Pas de descente à travers une plateforme (bas + saut) ni d'apex hang : prévus plus tard si besoin.
 - `pixelArt: true` arrondit l'affichage au pixel logique : mouvement par pas de 1 px logique (3 px physiques). À réévaluer avec la direction artistique.
 - Pas de repositionnement des boutons par glisser-déposer ni de manette (Gamepad API) : reportés à plus tard.
-- Le bouton Action n'a pas d'effet avant la phase combat.
 
 ## Idées mises de côté (à reprendre en passe de fluidité)
 
@@ -153,6 +178,6 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. Validation de la passe de fluidité, PR et merge, puis essai sur téléphone (listes « fluidité », « Phase 2 » et « Phase 3 ») ; reporter les réglages exportés dans `src/config/` et décider des options à adopter (D-18, D-19, sensations).
-2. Si le flottement au sommet est adopté : recalibrer les parcours et les seuils de difficulté.
-3. Phase 4 (combat minimal), ou PWA / hors ligne (D-09) en petite session à part.
+1. Validation de la Phase 4, PR et merge.
+2. Essai sur téléphone : listes « Phase 4 », « fluidité », « Phase 2 » et « Phase 3 » ; reporter les réglages exportés dans `src/config/` et décider des options à adopter (D-18, D-19, sensations). Si le flottement au sommet est adopté : recalibrer les parcours et les seuils de difficulté.
+3. Phase 5 (checkpoint, mort douce et retour, sauvegarde), ou PWA / hors ligne (D-09) en petite session à part.
