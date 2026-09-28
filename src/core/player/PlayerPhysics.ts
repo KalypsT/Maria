@@ -150,6 +150,7 @@ export class PlayerPhysics {
    */
   startHurt(steps: number): void {
     this.hurtSteps = steps;
+    this.state = PlayerState.Hurt;
     this.grounded = false;
     this.stepsSinceGrounded = NEVER;
     this.stepsSinceJumpPressed = NEVER;

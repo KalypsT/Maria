@@ -24,6 +24,17 @@ export interface LevelData {
   readonly goal: TilePos | null;
   /** Métadonnées lues dans les commentaires `; @clé: valeur` (nom, difficulté…). */
   readonly meta: Readonly<Record<string, string>>;
+  /** Ennemis et autres entités, posés au bas de leur tuile. */
+  readonly entities: readonly LevelEntity[];
+}
+
+export const EntityType = { Patroller: 'patroller' } as const;
+export type EntityType = (typeof EntityType)[keyof typeof EntityType];
+
+export interface LevelEntity {
+  readonly type: EntityType;
+  readonly col: number;
+  readonly row: number;
 }
 
 export interface TilePos {

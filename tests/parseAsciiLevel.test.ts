@@ -48,6 +48,13 @@ describe('parseAsciiLevel', () => {
     expect(() => parseAsciiLevel('t', 'PGG')).toThrow(/plusieurs arrivées/);
   });
 
+  it('lit les patrouilleurs (tuile vide)', () => {
+    const level = parseAsciiLevel('t', '#####\n#Pe.#\n#####');
+    expect(level.entities).toEqual([{ type: 'patroller', col: 2, row: 1 }]);
+    expect(tileAt(level, 2, 1)).toBe(Tile.Empty);
+    expect(parseAsciiLevel('t', 'P').entities).toEqual([]);
+  });
+
   it('charge la salle de test de la Phase 1', () => {
     const level = parseAsciiLevel('test-room', testRoom);
     expect(level.width).toBe(40);
