@@ -83,9 +83,16 @@ function makePlayer(map: string[] | string, overrides: Partial<MovementParams> =
   return new PlayerPhysics(level, { ...DEFAULT_MOVEMENT, ...overrides }, x, y);
 }
 
-const input: PlayerInput = { moveX: 0, jumpPressed: false, jumpHeld: false };
-function step(player: PlayerPhysics, moveX = 0, jumpHeld = false, jumpPressed = false): void {
+const input: PlayerInput = { moveX: 0, moveY: 0, jumpPressed: false, jumpHeld: false };
+function step(
+  player: PlayerPhysics,
+  moveX = 0,
+  jumpHeld = false,
+  jumpPressed = false,
+  moveY = 0,
+): void {
   input.moveX = moveX;
+  input.moveY = moveY;
   input.jumpHeld = jumpHeld;
   input.jumpPressed = jumpPressed;
   player.step(input);
@@ -363,6 +370,87 @@ describe('collisions du joueur', () => {
     }
     expect(player.box.x).toBe(x);
     expect(minY).toBe(4 * T);
+  });
+});
+
+describe('traversée d’une plateforme (Bas + Saut)', () => {
+  // Plateforme traversable en ligne 5 (dessus à 5 * T), sol plein en ligne 8, plateforme basse en ligne 7.
+  const STACK = [
+    '##########',
+    '#........#',
+    '#........#',
+    '#........#',
+    '#........#',
+    '#..====..#',
+    '#........#',
+    '#..====..#',
+    '#P.......#',
+    '##########',
+  ];
+  const LOWER_PLATFORM = 7;
+
+  function standOnUpperPlatform(map: string[] = STACK): PlayerPhysics {
+    const player = makePlayer(map);
+    player.reset(4 * T, 5 * T - PLAYER_HITBOX.height);
+    step(player); // se pose
+    expect(player.grounded).toBe(true);
+    return player;
+  }
+
+  it('descend à travers la plateforme au lieu de sauter', () => {
+    const player = standOnUpperPlatform(
+      STACK.map((row, i) => (i === LOWER_PLATFORM ? '#........#' : row)),
+    );
+    step(player, 0, true, true, 1);
+    expect(player.vy).toBeGreaterThanOrEqual(0);
+    for (let i = 0; i < 200; i++) {
+      step(player, 0, false, false, 1);
+    }
+    expect(player.grounded).toBe(true);
+    expect(player.box.y + player.box.height).toBe(9 * T);
+  });
+
+  it('se pose ensuite sur la plateforme suivante', () => {
+    const player = standOnUpperPlatform();
+    step(player, 0, true, true, 1);
+    for (let i = 0; i < 200; i++) {
+      step(player, 0, false, false, 0);
+    }
+    expect(player.grounded).toBe(true);
+    expect(player.box.y + player.box.height).toBe(7 * T);
+  });
+
+  it('ne donne pas de saut supplémentaire (le saut mémorisé est consommé)', () => {
+    const player = standOnUpperPlatform();
+    step(player, 0, true, true, 1);
+    let minVy = 0;
+    for (let i = 0; i < 100; i++) {
+      step(player, 0, true, false, 1);
+      minVy = Math.min(minVy, player.vy);
+    }
+    expect(minVy).toBe(0);
+  });
+
+  it('saute normalement sur un sol plein, même en tenant Bas', () => {
+    const player = makePlayer(FLOOR);
+    step(player);
+    step(player, 0, true, true, 1);
+    expect(player.vy).toBeLessThan(0);
+  });
+
+  it('respecte le seuil de l’axe vertical', () => {
+    const player = standOnUpperPlatform();
+    step(player, 0, true, true, DEFAULT_MOVEMENT.dropInputThreshold);
+    expect(player.vy).toBeLessThan(0);
+  });
+
+  it('reste posé sur une plateforme si le saut n’est pas demandé', () => {
+    const player = standOnUpperPlatform();
+    for (let i = 0; i < 100; i++) {
+      step(player, 0, false, false, 1);
+    }
+    expect(player.grounded).toBe(true);
+    expect(player.box.y + player.box.height).toBe(5 * T);
   });
 });
 
