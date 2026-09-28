@@ -286,6 +286,34 @@ describe('forme du saut (D-19, options désactivées par défaut)', () => {
   });
 });
 
+describe('touchée (D-20)', () => {
+  it('recule, ignore direction et saut pendant la perte de contrôle, puis rend la main', () => {
+    const player = makePlayer(FLOOR);
+    player.vx = 150;
+    player.vy = -200;
+    player.startHurt(24);
+    expect(player.grounded).toBe(false);
+    for (let i = 0; i < 23; i++) {
+      step(player, -1, true, true);
+      expect(player.state).toBe(PlayerState.Hurt);
+      expect(player.facing).toBe(1);
+    }
+    // Pendant le recul, la direction tenue à gauche n'a pas freiné le recul vers la droite.
+    expect(player.vx).toBeGreaterThan(0);
+    step(player, 1);
+    expect(player.state).not.toBe(PlayerState.Hurt);
+    // Le saut pressé pendant le recul n'a pas été mémorisé.
+    for (let i = 0; i < 120; i++) {
+      step(player, 0);
+    }
+    expect(player.grounded).toBe(true);
+    expect(player.vy).toBe(0);
+    // Contrôle rendu : on court et on saute normalement.
+    step(player, 1, true, true);
+    expect(player.vy).toBeLessThan(0);
+  });
+});
+
 describe('coyote time', () => {
   /** Saute alors que `airSteps` pas se sont écoulés depuis le dernier contact avec le sol. */
   function jumpAfterLeaving(airSteps: number): boolean {
