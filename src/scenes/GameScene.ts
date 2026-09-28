@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { DEFAULT_CONTROL_SETTINGS } from '../config/controls';
 import { PLACEHOLDER_COLORS, TILE_SIZE } from '../config/display';
 import {
   DEFAULT_MOVEMENT,
@@ -62,8 +63,10 @@ export class GameScene extends Phaser.Scene {
     this.controls.sources.push(keyboard);
     const detachKeyboard = keyboard.attach(window);
     let detachTouch: (() => void) | undefined;
-    if (TouchSource.isTouchDevice()) {
-      const touch = new TouchSource(document.body);
+    // En dev et dans le build de debug, `?touch` force l'affichage sur ordinateur (essai à la souris).
+    const forceTouch = __DEBUG_TOOLS__ && new URLSearchParams(location.search).has('touch');
+    if (forceTouch || TouchSource.isTouchDevice()) {
+      const touch = new TouchSource(document.body, DEFAULT_CONTROL_SETTINGS);
       this.controls.sources.push(touch);
       detachTouch = touch.attach(window);
     }
