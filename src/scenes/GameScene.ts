@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { PLACEHOLDER_COLORS, TILE_SIZE } from '../config/display';
+import { LEVEL_CHUNK_TILES, PLACEHOLDER_COLORS, TILE_SIZE } from '../config/display';
 import {
   DEFAULT_MOVEMENT,
   MAX_STEPS_PER_FRAME,
@@ -45,6 +45,7 @@ export class GameScene extends Phaser.Scene {
   paused = false;
   private pauseMenu?: PauseMenu;
   private playerSprite!: Phaser.GameObjects.Image;
+  private readonly levelImages: Phaser.GameObjects.Image[] = [];
   private readonly playerInput: PlayerInput = {
     moveX: 0,
     moveY: 0,
@@ -179,37 +180,86 @@ export class GameScene extends Phaser.Scene {
     );
   };
 
-  /** Dessine la grille une seule fois dans une texture : une seule image affichée par la suite. */
+  /**
+   * Dessine la salle une seule fois, par blocs (D-17) : une image par bloc, et les blocs hors
+   * écran ne sont pas dessinés par Phaser. Remplace le dessin de la salle précédente.
+   */
   private drawLevel(): void {
-    const g = this.make.graphics({}, false);
-    const level = this.level;
-    for (let row = 0; row < level.height; row++) {
-      for (let col = 0; col < level.width; col++) {
-        const tile = tileAt(level, col, row);
-        const x = col * TILE_SIZE;
-        const y = row * TILE_SIZE;
-        if (tile === Tile.Solid) {
-          g.fillStyle(PLACEHOLDER_COLORS.solid);
-          g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-          if (tileAt(level, col, row - 1) !== Tile.Solid) {
-            g.fillStyle(PLACEHOLDER_COLORS.solidEdge);
-            g.fillRect(x, y, TILE_SIZE, 2);
-          }
-        } else if (tile === Tile.OneWay) {
-          g.fillStyle(PLACEHOLDER_COLORS.oneWay);
-          g.fillRect(x, y, TILE_SIZE, 3);
-          g.fillStyle(PLACEHOLDER_COLORS.oneWay, 0.25);
-          g.fillRect(x, y + 3, TILE_SIZE, 5);
-        }
-      }
-    }
-    const key = `level-${level.id}`;
-    if (this.textures.exists(key)) {
+    for (const image of this.levelImages) {
+      const key = image.texture.key;
+      image.destroy();
       this.textures.remove(key);
     }
-    g.generateTexture(key, level.width * TILE_SIZE, level.height * TILE_SIZE);
+    this.levelImages.length = 0;
+    const level = this.level;
+    const chunkPx = LEVEL_CHUNK_TILES * TILE_SIZE;
+    const g = this.make.graphics({}, false);
+    for (let chunkRow = 0; chunkRow * LEVEL_CHUNK_TILES < level.height; chunkRow++) {
+      for (let chunkCol = 0; chunkCol * LEVEL_CHUNK_TILES < level.width; chunkCol++) {
+        const col0 = chunkCol * LEVEL_CHUNK_TILES;
+        const row0 = chunkRow * LEVEL_CHUNK_TILES;
+        const cols = Math.min(LEVEL_CHUNK_TILES, level.width - col0);
+        const rows = Math.min(LEVEL_CHUNK_TILES, level.height - row0);
+        g.clear();
+        let drawn = false;
+        for (let row = row0; row < row0 + rows; row++) {
+          for (let col = col0; col < col0 + cols; col++) {
+            drawn =
+              this.drawTile(g, col, row, (col - col0) * TILE_SIZE, (row - row0) * TILE_SIZE) ||
+              drawn;
+          }
+        }
+        if (!drawn) {
+          continue;
+        }
+        const key = `level-${level.id}-${chunkCol}-${chunkRow}`;
+        if (this.textures.exists(key)) {
+          this.textures.remove(key);
+        }
+        g.generateTexture(key, cols * TILE_SIZE, rows * TILE_SIZE);
+        this.levelImages.push(
+          this.add.image(chunkCol * chunkPx, chunkRow * chunkPx, key).setOrigin(0, 0),
+        );
+      }
+    }
     g.destroy();
-    this.add.image(0, 0, key).setOrigin(0, 0);
+  }
+
+  /** Dessine une tuile à (x, y) dans le bloc ; retourne faux si elle est vide. */
+  private drawTile(
+    g: Phaser.GameObjects.Graphics,
+    col: number,
+    row: number,
+    x: number,
+    y: number,
+  ): boolean {
+    const level = this.level;
+    const tile = tileAt(level, col, row);
+    if (tile === Tile.Solid) {
+      g.fillStyle(PLACEHOLDER_COLORS.solid);
+      g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+      if (tileAt(level, col, row - 1) !== Tile.Solid) {
+        g.fillStyle(PLACEHOLDER_COLORS.solidEdge);
+        g.fillRect(x, y, TILE_SIZE, 2);
+      }
+      return true;
+    }
+    if (tile === Tile.OneWay) {
+      g.fillStyle(PLACEHOLDER_COLORS.oneWay);
+      g.fillRect(x, y, TILE_SIZE, 3);
+      g.fillStyle(PLACEHOLDER_COLORS.oneWay, 0.25);
+      g.fillRect(x, y + 3, TILE_SIZE, 5);
+      return true;
+    }
+    const goal = level.goal;
+    if (goal?.col === col && goal.row === row) {
+      // Placeholder d'arrivée : un fanion.
+      g.fillStyle(PLACEHOLDER_COLORS.goal);
+      g.fillRect(x + 3, y, 2, TILE_SIZE);
+      g.fillTriangle(x + 5, y, x + 15, y + 4, x + 5, y + 8);
+      return true;
+    }
+    return false;
   }
 
   /** Placeholder de Céleste (D-07) : corps rose et lunettes rondes roses, tourné vers la droite. */

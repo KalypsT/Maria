@@ -36,6 +36,18 @@ describe('parseAsciiLevel', () => {
     expect(() => parseAsciiLevel('t', '')).toThrow(/vide/);
   });
 
+  it('lit l’arrivée et les métadonnées', () => {
+    const level = parseAsciiLevel(
+      't',
+      '; @name: Essai\n;@difficulty :  medium\n; @ sans clé\n#####\n#P.G#\n#####',
+    );
+    expect(level.goal).toEqual({ col: 3, row: 1 });
+    expect(tileAt(level, 3, 1)).toBe(Tile.Empty);
+    expect(level.meta).toEqual({ name: 'Essai', difficulty: 'medium' });
+    expect(parseAsciiLevel('t', 'P').goal).toBeNull();
+    expect(() => parseAsciiLevel('t', 'PGG')).toThrow(/plusieurs arrivées/);
+  });
+
   it('charge la salle de test de la Phase 1', () => {
     const level = parseAsciiLevel('test-room', testRoom);
     expect(level.width).toBe(40);
