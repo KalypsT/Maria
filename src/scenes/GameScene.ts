@@ -122,9 +122,9 @@ export class GameScene extends Phaser.Scene {
     );
   };
 
-  /** Dessine la grille une seule fois (statique). */
+  /** Dessine la grille une seule fois dans une texture : une seule image affichée par la suite. */
   private drawLevel(): void {
-    const g = this.add.graphics();
+    const g = this.make.graphics({}, false);
     const level = this.level;
     for (let row = 0; row < level.height; row++) {
       for (let col = 0; col < level.width; col++) {
@@ -146,6 +146,13 @@ export class GameScene extends Phaser.Scene {
         }
       }
     }
+    const key = `level-${level.id}`;
+    if (this.textures.exists(key)) {
+      this.textures.remove(key);
+    }
+    g.generateTexture(key, level.width * TILE_SIZE, level.height * TILE_SIZE);
+    g.destroy();
+    this.add.image(0, 0, key).setOrigin(0, 0);
   }
 
   /** Placeholder de Céleste (D-07) : corps rose et lunettes rondes roses, tourné vers la droite. */
