@@ -294,6 +294,24 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
 - **Céleste garde ses couleurs dans le monde étrange** : en silhouette, elle était presque invisible (pilier 1 : lisibilité). Elle est la seule chose « réelle » au milieu des ombres.
 - **Sauvegarde** : aucune migration (nouvelles étapes dans `story.flags`).
 
+## D-33 — Ralentir l'histoire (retours de l'utilisateur)
+
+- **Constat** (essai de l'utilisateur) : bulles trop petites et trop brèves, soirée trop courte pour s'attacher à Maria, nuit et bascule trop rapides.
+- **Décisions** :
+  - **Bulles 1,6 fois plus grandes** (pictogrammes compris), affichées 3 s au lieu de 1,8 s.
+  - **Soirée rallongée** :
+    - jouer se fait en deux temps, un câlin (cœur) puis une histoire du soir (livre) ;
+    - **petite quête** : la couverture de Maria est sur l'étagère au-dessus du bureau, à aller chercher en sautant ; on ne peut coucher Maria qu'avec elle ;
+    - une fois Maria couchée, Céleste la regarde (cœur) ;
+    - au lit, Céleste s'assoit et a un dernier regard (cœur) avant la nuit.
+  - **Transitions plus lentes** :
+    - la nuit : 1,9 s de fondu, 2 s de noir, 2,6 s de retour ;
+    - la bascule vers le monde étrange : 0,3 s de clignement, 0,7 s de noir, 1,5 s de retour.
+  - **Céleste s'arrête pour regarder** (environ 1,4 s, commandes suspendues) : devant les traces, en apercevant Maria, devant le bandeau.
+  - **Ennemis du monde étrange** : toujours en ombre, mais gris-bleu avec un liseré turquoise (au lieu de presque noir).
+  - Un objet peut être **ramassé** : il disparaît aussitôt, même à l'écran (la couverture). **Jamais Maria** : la validation des données le refuse.
+- **Sauvegarde** : nouvelle étape `evening.blanket`, ajoutée aussi aux étapes données à une ancienne partie migrée. Une partie en cours de soirée reprend simplement à la couverture.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

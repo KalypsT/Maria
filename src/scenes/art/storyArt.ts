@@ -185,6 +185,20 @@ function drawBottle(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   ctx.fill();
 }
 
+/** Couverture de Maria, pliée : rose à pois clairs, bord festonné. */
+function drawBlanket(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  ctx.fillStyle = '#f19bb5';
+  ctx.beginPath();
+  ctx.roundRect(0.5, h - 4.5, w - 1, 4.5, 1.2);
+  ctx.fill();
+  ctx.fillStyle = '#e07f9e';
+  ctx.fillRect(0.5, h - 2.5, w - 1, 0.8);
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  for (let x = 2; x < w - 1; x += 2.5) {
+    ctx.fillRect(x, h - 4, 0.8, 0.8);
+  }
+}
+
 /** Bandeau de Maria, posé à plat : anneau rose et nœud fleuri. */
 function drawHeadband(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   ctx.strokeStyle = '#f6b6c8';
@@ -234,6 +248,9 @@ export function drawProp(
       break;
     case 'headband':
       drawHeadband(ctx, w, h);
+      break;
+    case 'blanket':
+      drawBlanket(ctx, w, h);
       break;
   }
 }
@@ -298,6 +315,44 @@ export function drawThought(
       ctx.fillStyle = '#f3ead7';
       ctx.fillRect(cx - 6, cy - 0.5, 3.5, 1.8);
       moon(ctx, cx + 6, cy - 4);
+      break;
+    case 'book': {
+      // Livre ouvert : l'histoire du soir.
+      ctx.fillStyle = '#6d86c2';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + 4);
+      ctx.lineTo(cx - 8, cy + 2);
+      ctx.lineTo(cx - 8, cy - 4);
+      ctx.lineTo(cx, cy - 2);
+      ctx.lineTo(cx + 8, cy - 4);
+      ctx.lineTo(cx + 8, cy + 2);
+      ctx.fill();
+      ctx.fillStyle = '#fdf8ee';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + 3);
+      ctx.lineTo(cx - 7, cy + 1);
+      ctx.lineTo(cx - 7, cy - 4.5);
+      ctx.lineTo(cx, cy - 2.5);
+      ctx.lineTo(cx + 7, cy - 4.5);
+      ctx.lineTo(cx + 7, cy + 1);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(91,74,68,0.5)';
+      for (let i = 0; i < 3; i++) {
+        ctx.fillRect(cx - 6, cy - 2.5 + i * 1.5, 4.5, 0.5);
+        ctx.fillRect(cx + 1.5, cy - 2.5 + i * 1.5, 4.5, 0.5);
+      }
+      ctx.fillStyle = PINK;
+      ctx.beginPath();
+      ctx.arc(cx + 4, cy - 6.5, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'blanket':
+      ctx.save();
+      ctx.translate(cx - 7.5, cy - 4);
+      ctx.scale(1.5, 1.5);
+      drawBlanket(ctx, 10, 5);
+      ctx.restore();
       break;
     case 'maria':
       mariaHead(ctx, cx, cy, 6, maria);

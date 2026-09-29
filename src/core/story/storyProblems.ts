@@ -95,6 +95,9 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
     const what = `objet ${prop.id}`;
     inRoom(prop.room, { col: prop.col, row: prop.row, w: 1, h: 1 }, what);
     knownFlags(prop.when, what);
+    if (prop.instant && prop.kind.includes('maria')) {
+      problems.push(`${what} : Maria ne disparaît jamais à l'écran`);
+    }
     const level = zone.rooms.get(prop.room);
     if (level) {
       const box = propBox(prop);

@@ -237,19 +237,28 @@ export function installDebugOverlay(scene: GameScene): void {
   const steps: [string, string[]][] = [
     ['Histoire : le soir (début)', []],
     ['Histoire : a joué avec Maria', [F.EveningPlayed]],
-    ['Histoire : Maria couchée', [F.EveningPlayed, F.EveningTucked]],
-    ['Histoire : le matin', [F.EveningPlayed, F.EveningTucked, F.Slept]],
+    ['Histoire : couverture prise', [F.EveningPlayed, F.EveningBlanket]],
+    ['Histoire : Maria couchée', [F.EveningPlayed, F.EveningBlanket, F.EveningTucked]],
+    ['Histoire : le matin', [F.EveningPlayed, F.EveningBlanket, F.EveningTucked, F.Slept]],
     [
       'Histoire : traces vues',
-      [F.EveningPlayed, F.EveningTucked, F.Slept, F.TraceHall, F.TraceStairs],
+      [F.EveningPlayed, F.EveningBlanket, F.EveningTucked, F.Slept, F.TraceHall, F.TraceStairs],
     ],
     [
       'Histoire : Maria disparue (salon étrange)',
-      [F.EveningPlayed, F.EveningTucked, F.Slept, F.MariaSeen, F.MariaVanished],
+      [F.EveningPlayed, F.EveningBlanket, F.EveningTucked, F.Slept, F.MariaSeen, F.MariaVanished],
     ],
     [
       'Histoire : retour au réel (bandeau sur le lit)',
-      [F.EveningPlayed, F.EveningTucked, F.Slept, F.MariaSeen, F.MariaVanished, F.LivingLeft],
+      [
+        F.EveningPlayed,
+        F.EveningBlanket,
+        F.EveningTucked,
+        F.Slept,
+        F.MariaSeen,
+        F.MariaVanished,
+        F.LivingLeft,
+      ],
     ],
   ];
   const current = [...scene.story.flags].sort().join();

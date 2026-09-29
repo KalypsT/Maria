@@ -49,7 +49,7 @@ export class PropStage {
         continue;
       }
       const wanted = checkCondition(flags, prop.when);
-      if (wanted !== this.shown[i] && canChangeProp(box, view, veil)) {
+      if (wanted !== this.shown[i] && (prop.instant === true || canChangeProp(box, view, veil))) {
         this.shown[i] = wanted;
         changed = true;
       }

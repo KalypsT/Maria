@@ -21,7 +21,15 @@ export interface TileArea {
 }
 
 /** Bulles de pensée : des pictogrammes, jamais de texte (pilier 6). */
-export const THOUGHT_ICONS = ['heart', 'cradle', 'bed', 'maria', 'maria-missing'] as const;
+export const THOUGHT_ICONS = [
+  'heart',
+  'book',
+  'blanket',
+  'cradle',
+  'bed',
+  'maria',
+  'maria-missing',
+] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
 /** Poses imposées par un script (Céleste assise pour jouer, puis au réveil). */
@@ -68,6 +76,7 @@ export const PROP_KINDS = [
   'slipper',
   'bottle',
   'headband',
+  'blanket',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 
@@ -80,6 +89,11 @@ export interface StoryProp {
   readonly row: number;
   /** Tourné vers la gauche. */
   readonly flip?: boolean;
+  /**
+   * Objet ramassé par Céleste : il disparaît aussitôt, même à l'écran. Jamais Maria (pilier 5,
+   * vérifié par `storyProblems`).
+   */
+  readonly instant?: boolean;
   readonly when: FlagCondition;
 }
 
