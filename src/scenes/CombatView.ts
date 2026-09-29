@@ -1,16 +1,19 @@
 import Phaser from 'phaser';
 import type { CombatParams } from '../config/combat';
 import type { ArtPalette } from '../config/art';
-import { PATROLLER_HITBOX } from '../config/combat';
-import { PLACEHOLDER_COLORS } from '../config/display';
+import { PATROLLER_HITBOX, SPIDER_HITBOX } from '../config/combat';
+import { PLACEHOLDER_COLORS, TILE_SIZE } from '../config/display';
 import { msToSteps } from '../config/movement';
 import { AttackPhase } from '../core/combat/PlayerAttack';
 import { CombatEvent, type CombatWorld } from '../core/combat/CombatWorld';
-import { PatrollerState } from '../core/combat/Patroller';
+import { EnemyKind, PatrollerState } from '../core/combat/Patroller';
+import { Tile, tileAt } from '../core/level/LevelData';
 import type { PlayerPhysics } from '../core/player/PlayerPhysics';
 import type { DustPool } from './DustPool';
 
 const PATROLLER_TEXTURE = 'patroller-placeholder';
+const SPIDER_TEXTURE = 'spider-placeholder';
+const THREAD_TEXTURE = 'spider-thread';
 const STICK_TEXTURE = 'stick-placeholder';
 const SLASH_TEXTURE = 'slash-placeholder';
 /** Rayon de l'arc de frappe (px), environ la portée du coup. */
@@ -28,6 +31,9 @@ const BLINK_STEPS = 8;
  */
 export class CombatView {
   private enemySprites: Phaser.GameObjects.Image[] = [];
+  /** Fil de chaque araignée (null pour un jouet), et hauteur où il s'attache (px). */
+  private threads: (Phaser.GameObjects.Image | null)[] = [];
+  private threadTops: number[] = [];
   private readonly stick: Phaser.GameObjects.Image;
   /** Arc de frappe : rend le coup lisible (le bâton seul est fin et bref). */
   private readonly slash: Phaser.GameObjects.Image;
@@ -59,12 +65,37 @@ export class CombatView {
     for (const sprite of this.enemySprites) {
       sprite.destroy();
     }
-    this.enemySprites = this.world.enemies.map(() =>
+    for (const thread of this.threads) {
+      thread?.destroy();
+    }
+    const level = this.world.room;
+    this.enemySprites = this.world.enemies.map((enemy) =>
       this.scene.add
-        .image(0, 0, PATROLLER_TEXTURE)
+        .image(0, 0, enemy.kind === EnemyKind.Spider ? SPIDER_TEXTURE : PATROLLER_TEXTURE)
         .setOrigin(0.5, 1)
         .setScale(1 / this.artScale)
         .setDepth(8),
+    );
+    // Le fil monte jusqu'à la première surface au-dessus (branche, frondaison, plafond).
+    this.threadTops = this.world.enemies.map((enemy) => {
+      let row = enemy.spawnRow - 1;
+      while (row > 0) {
+        const tile = tileAt(level, enemy.spawnCol, row);
+        if (tile === Tile.Solid || tile === Tile.OneWay) {
+          break;
+        }
+        row--;
+      }
+      return (row + 1) * TILE_SIZE;
+    });
+    this.threads = this.world.enemies.map((enemy) =>
+      enemy.kind === EnemyKind.Spider
+        ? this.scene.add
+            .image((enemy.spawnCol + 0.5) * TILE_SIZE, 0, THREAD_TEXTURE)
+            .setOrigin(0.5, 0)
+            .setAlpha(0.75)
+            .setDepth(7)
+        : null,
     );
   }
 
@@ -94,20 +125,34 @@ export class CombatView {
       if (!enemy || !sprite) {
         continue;
       }
+      const thread = this.threads[i];
       if (enemy.state === PatrollerState.Dispersed) {
         sprite.setVisible(false);
+        thread?.setVisible(false);
         continue;
       }
       const box = enemy.box;
+      if (thread) {
+        const top = this.threadTops[i] ?? 0;
+        const y = enemy.prevY + (box.y - enemy.prevY) * alpha;
+        thread
+          .setVisible(true)
+          .setPosition(thread.x, top)
+          .setDisplaySize(1, Math.max(1, y - top + 2));
+      }
       sprite
         .setVisible(true)
         .setPosition(
           enemy.prevX + (box.x - enemy.prevX) * alpha + box.width / 2,
           enemy.prevY + (box.y - enemy.prevY) * alpha + box.height,
         )
-        .setFlipX(enemy.dir < 0)
+        .setFlipX(enemy.kind === EnemyKind.Walker && enemy.dir < 0)
         // Étourdi : penché et terni (lisible sans violence).
-        .setRotation(enemy.state === PatrollerState.Stunned ? 0.35 * enemy.dir : 0)
+        .setRotation(
+          enemy.state === PatrollerState.Stunned && enemy.kind === EnemyKind.Walker
+            ? 0.35 * enemy.dir
+            : 0,
+        )
         .setAlpha(enemy.state === PatrollerState.Stunned ? 0.6 : 1);
       if (enemy.flashSteps > 0) {
         sprite.setTint(0xffffff).setTintMode(Phaser.TintModes.FILL);
@@ -232,7 +277,61 @@ export class CombatView {
       textures.remove(PATROLLER_TEXTURE);
     }
     textures.addCanvas(PATROLLER_TEXTURE, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
+    this.drawSpider(scale, dark, palette);
     this.rebuild();
+  }
+
+  /**
+   * Araignée du jardin (D-46), placeholder : petit corps rond et doux, huit pattes fines, deux
+   * yeux clairs. Plutôt drôle qu'effrayante (pilier 8).
+   */
+  private drawSpider(scale: number, dark: boolean, palette: Readonly<ArtPalette>): void {
+    const { width: w, height: h } = SPIDER_HITBOX;
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.ceil(w * scale);
+    canvas.height = Math.ceil(h * scale);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
+    ctx.scale(scale, scale);
+    const body = dark ? '#2a3140' : '#3b3440';
+    ctx.strokeStyle = body;
+    ctx.lineWidth = 0.9;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    for (let i = 0; i < 4; i++) {
+      const y = h * 0.35 + i * 1.3;
+      ctx.moveTo(w / 2 - 2, y);
+      ctx.quadraticCurveTo(w / 2 - 5, y - 2.5 + i, 0.6, y + 1.5 + i * 0.6);
+      ctx.moveTo(w / 2 + 2, y);
+      ctx.quadraticCurveTo(w / 2 + 5, y - 2.5 + i, w - 0.6, y + 1.5 + i * 0.6);
+    }
+    ctx.stroke();
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.ellipse(w / 2, h * 0.45, 3.4, 3.6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    if (dark) {
+      ctx.strokeStyle = palette.rim;
+      ctx.globalAlpha = 0.55;
+      ctx.lineWidth = 0.6;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+    ctx.fillStyle = '#f3ead7';
+    ctx.beginPath();
+    ctx.arc(w / 2 - 1.2, h * 0.55, 0.9, 0, Math.PI * 2);
+    ctx.arc(w / 2 + 1.2, h * 0.55, 0.9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#2b2530';
+    ctx.fillRect(w / 2 - 1.2, h * 0.58, 0.5, 0.5);
+    ctx.fillRect(w / 2 + 1, h * 0.58, 0.5, 0.5);
+    const textures = this.scene.textures;
+    if (textures.exists(SPIDER_TEXTURE)) {
+      textures.remove(SPIDER_TEXTURE);
+    }
+    textures.addCanvas(SPIDER_TEXTURE, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
   }
 
   private createTextures(): void {
@@ -247,6 +346,21 @@ export class CombatView {
       g.fillRect(width - 6, 3, 2, 3);
       g.fillRect(width - 10, 3, 2, 3);
       g.generateTexture(PATROLLER_TEXTURE, width, height);
+      g.destroy();
+    }
+    if (!textures.exists(SPIDER_TEXTURE)) {
+      const { width, height } = SPIDER_HITBOX;
+      const g = this.scene.make.graphics({}, false);
+      g.fillStyle(PLACEHOLDER_COLORS.enemy);
+      g.fillCircle(width / 2, height / 2, height / 2);
+      g.generateTexture(SPIDER_TEXTURE, width, height);
+      g.destroy();
+    }
+    if (!textures.exists(THREAD_TEXTURE)) {
+      const g = this.scene.make.graphics({}, false);
+      g.fillStyle(0xf3ead7);
+      g.fillRect(0, 0, 1, 1);
+      g.generateTexture(THREAD_TEXTURE, 1, 1);
       g.destroy();
     }
     if (!textures.exists(SLASH_TEXTURE)) {

@@ -1,9 +1,16 @@
-import { PATROLLER_HITBOX } from '../../config/combat';
+import { PATROLLER_HITBOX, SPIDER_HITBOX } from '../../config/combat';
 import { TILE_SIZE as T } from '../../config/display';
 import { Tile, tileAt, type LevelData } from '../level/LevelData';
 import { HitY, isGrounded, moveX, moveY, type MovingBox } from '../physics/gridCollision';
 
 export const PatrollerState = { Patrol: 0, Stunned: 1, Dispersed: 2 } as const;
+
+/**
+ * Sorte d'ennemi : jouet qui marche sur sa plateforme (D-20), ou araignée qui monte et descend au
+ * bout de son fil (jardin, D-46), sous son point d'attache (le haut de sa tuile de départ).
+ */
+export const EnemyKind = { Walker: 0, Spider: 1 } as const;
+export type EnemyKind = (typeof EnemyKind)[keyof typeof EnemyKind];
 export type PatrollerState = (typeof PatrollerState)[keyof typeof PatrollerState];
 
 /** Réglages du patrouilleur exprimés par pas, partagés par tous (calculés par `CombatWorld`). */
@@ -17,6 +24,9 @@ export interface PatrollerTuning {
   hits: number;
   stunSteps: number;
   flashSteps: number;
+  /** Araignée : descente (px) et avance de la phase par pas (rad). */
+  spiderDrop: number;
+  spiderPhaseStep: number;
 }
 
 /** Petit saut du patrouilleur repoussé, pour que le coup se lise (px/s vers le haut). */
@@ -42,16 +52,20 @@ export class Patroller {
   /** Pas restants de clignotement après un coup. */
   flashSteps = 0;
   private lastSwing = -1;
+  /** Araignée : phase de la montée et descente (rad), 0 en haut. */
+  phase = 0;
 
   constructor(
     readonly spawnCol: number,
     readonly spawnRow: number,
+    readonly kind: EnemyKind = EnemyKind.Walker,
   ) {
+    const hitbox = kind === EnemyKind.Spider ? SPIDER_HITBOX : PATROLLER_HITBOX;
     this.box = {
       x: 0,
       y: 0,
-      width: PATROLLER_HITBOX.width,
-      height: PATROLLER_HITBOX.height,
+      width: hitbox.width,
+      height: hitbox.height,
       dx: 0,
       dy: 0,
       passOneWay: false,
@@ -59,10 +73,18 @@ export class Patroller {
     this.reset();
   }
 
+  /** Point d'attache du fil de l'araignée (px) : le haut de sa tuile de départ. */
+  get anchorY(): number {
+    return this.spawnRow * T;
+  }
+
   /** Remet à la position de départ, en patrouille, vers la droite. */
   reset(): void {
     this.box.x = this.prevX = (this.spawnCol + 0.5) * T - this.box.width / 2;
-    this.box.y = this.prevY = (this.spawnRow + 1) * T - this.box.height;
+    this.box.y = this.prevY =
+      this.kind === EnemyKind.Spider ? this.anchorY : (this.spawnRow + 1) * T - this.box.height;
+    // Araignées voisines décalées : elles ne montent pas toutes ensemble.
+    this.phase = ((this.spawnCol * 0.618) % 1) * 2 * Math.PI;
     this.vx = this.vy = 0;
     this.dir = 1;
     this.state = PatrollerState.Patrol;
@@ -100,6 +122,10 @@ export class Patroller {
     }
     this.state = PatrollerState.Stunned;
     this.stunSteps = tuning.stunSteps;
+    if (this.kind === EnemyKind.Spider) {
+      // L'araignée effrayée remonte vers son point d'attache.
+      return true;
+    }
     this.vx = (fromDir < 0 ? -1 : 1) * tuning.knockback;
     this.vy = -STUN_HOP;
     this.grounded = false;
@@ -115,6 +141,10 @@ export class Patroller {
     }
     if (this.flashSteps > 0) {
       this.flashSteps--;
+    }
+    if (this.kind === EnemyKind.Spider) {
+      this.stepSpider(tuning);
+      return;
     }
     const dt = tuning.dt;
     if (this.state === PatrollerState.Stunned) {
@@ -145,6 +175,32 @@ export class Patroller {
       this.vy = 0;
     }
     this.grounded = this.vy >= 0 && isGrounded(level, box);
+  }
+
+  /**
+   * Araignée (D-46) : descente et remontée douces sous le point d'attache, sans collision (on la
+   * place dans le vide). Effrayée, elle remonte d'abord jusqu'en haut, inoffensive, puis reprend.
+   */
+  private stepSpider(tuning: Readonly<PatrollerTuning>): void {
+    if (this.state === PatrollerState.Stunned) {
+      this.stunSteps--;
+      // Remonte (la phase revient vers 0 ou 2π, le haut) deux fois plus vite.
+      const up = this.phase % (2 * Math.PI);
+      this.phase =
+        up < Math.PI
+          ? Math.max(0, up - 2 * tuning.spiderPhaseStep)
+          : Math.min(2 * Math.PI, up + 2 * tuning.spiderPhaseStep);
+      if (this.stunSteps <= 0) {
+        this.state = PatrollerState.Patrol;
+      }
+    } else {
+      this.phase += tuning.spiderPhaseStep;
+      if (this.phase > 2 * Math.PI) {
+        this.phase -= 2 * Math.PI;
+      }
+    }
+    this.dir = this.phase < Math.PI ? 1 : -1;
+    this.box.y = this.anchorY + tuning.spiderDrop * 0.5 * (1 - Math.cos(this.phase));
   }
 
   /** Vrai si le sol s'arrête juste devant (bord de plateforme) : on fait demi-tour sans tomber. */

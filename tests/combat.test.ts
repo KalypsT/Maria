@@ -204,3 +204,67 @@ describe('CombatWorld', () => {
     expect(enemy?.hitsTaken).toBe(0);
   });
 });
+
+describe('araignée au bout de son fil (D-46)', () => {
+  const SPIDER_ROOM = [
+    '##############',
+    '#.....a......#',
+    '#............#',
+    '#............#',
+    '#............#',
+    '#............#',
+    '#............#',
+    '#P...........#',
+    '##############',
+  ];
+  const period = msToSteps(DEFAULT_COMBAT.spiderPeriodMs);
+
+  it('monte et descend sous son point d’attache, sans en sortir', () => {
+    const r = rig(SPIDER_ROOM);
+    const spider = r.world.enemies[0];
+    if (!spider) {
+      throw new Error('araignée absente');
+    }
+    let top = Infinity;
+    let bottom = -Infinity;
+    r.run(period + 2, () => {
+      top = Math.min(top, spider.box.y);
+      bottom = Math.max(bottom, spider.box.y);
+      expect(spider.box.x).toBe((6 + 0.5) * T - spider.box.width / 2);
+    });
+    expect(top).toBeGreaterThanOrEqual(1 * T - 1e-9);
+    expect(top).toBeLessThan(1 * T + 2);
+    expect(bottom).toBeGreaterThan(1 * T + DEFAULT_COMBAT.spiderDropTiles * T - 2);
+    expect(bottom).toBeLessThanOrEqual(1 * T + DEFAULT_COMBAT.spiderDropTiles * T + 1e-9);
+  });
+
+  it('effrayée par un coup, elle remonte, inoffensive, puis reprend ; deux coups la dispersent', () => {
+    const r = rig(SPIDER_ROOM);
+    const spider = r.world.enemies[0];
+    if (!spider) {
+      throw new Error('araignée absente');
+    }
+    r.run(Math.round(period / 2));
+    const low = spider.box.y;
+    expect(spider.hit(1, 1, r.world.tuning)).toBe(true);
+    expect(spider.dangerous).toBe(false);
+    r.run(msToSteps(DEFAULT_COMBAT.patrollerStunMs) - 2);
+    expect(spider.box.y).toBeLessThan(low);
+    r.run(4);
+    expect(spider.dangerous).toBe(true);
+    spider.hit(2, 1, r.world.tuning);
+    expect(spider.dispersed).toBe(true);
+  });
+
+  it('touche Céleste au contact, pendant sa descente', () => {
+    const r = rig(SPIDER_ROOM, { spiderDropTiles: 6 });
+    const spider = r.world.enemies[0];
+    if (!spider) {
+      throw new Error('araignée absente');
+    }
+    // Céleste attend sous l'araignée.
+    r.player.reset(6 * T + 2, 8 * T - PLAYER_HITBOX.height);
+    r.run(period);
+    expect(r.takeEvents() & CombatEvent.Hurt).not.toBe(0);
+  });
+});
