@@ -189,6 +189,7 @@ export class GameScene extends Phaser.Scene {
     this.dust = new DustPool(this, this.feelParams);
     this.combat = new CombatWorld(this.level, this.combatParams);
     this.combatView = new CombatView(this, this.combat, this.combatParams, this.dust);
+    this.combatView.setArt(this.artScale, this.palette());
     this.worldView = new WorldView(this, this.run, this.pickups);
     this.worldView.setArtScale(this.artScale);
     this.hud = new Hud();
@@ -666,6 +667,7 @@ export class GameScene extends Phaser.Scene {
   /** Redessine la salle et Céleste (échelle ou palette changée). */
   private redrawArt(): void {
     this.worldView.setArtScale(this.artScale);
+    this.combatView.setArt(this.artScale, this.palette());
     this.drawLevel();
     this.puppet.redraw(this.artScale, this.palette(), this.artImages());
   }

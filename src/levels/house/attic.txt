@@ -3,6 +3,13 @@
 ; @ambient: #2c2a31
 ; @note: poutres jusqu'au recoin sous le toit : secret de plateforme, difficulté moyenne (D-27).
 ; @note-2: lucarne (colonnes 26-28) hors de portée même en grimpant : pour une capacité future.
+; @wall: planks
+; @decor: lamp 30 8 1 2
+; @decor: trunk 9 18 5 2
+; @decor: boxes 21 17 4 3
+; @decor: rolledrug 38 19 6 1
+; @decor: beam 46 6 6 1
+; @decor: skylight 25 3 3 1
 ; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), ^ briques de jeu (danger), e jouet mécanique, C veilleuse (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 ########################################################
 #############..............................#############

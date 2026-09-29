@@ -11,8 +11,8 @@ describe('habillage des salles (D-28)', () => {
     expect(decorProblems(room('; @decor: bed 2 1 1 1'))).toEqual([
       'tuile de meuble (colonne 4, ligne 2) sans habillage',
     ]);
-    expect(decorProblems(room('; @decor: bed 2 1 2 1\n; @decor: sofa 1 1 1 1'))).toEqual([
-      'élément inconnu « sofa »',
+    expect(decorProblems(room('; @decor: bed 2 1 2 1\n; @decor: spaceship 1 1 1 1'))).toEqual([
+      'élément inconnu « spaceship »',
     ]);
   });
 

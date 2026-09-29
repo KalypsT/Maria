@@ -3,6 +3,14 @@
 ; @ambient: #29303a
 ; @ability: climb
 ; @note: machine, placard mural, rebord de la trappe (sortie 1) : chaîne d'escalade (D-26).
+; @wall: tiles
+; @decor: window 28 4 6 5
+; @decor: lamp 32 11 1 2
+; @decor: ledge 1 10 6 1
+; @decor: wallshelf 4 14 7 1
+; @decor: laundry 10 21 3 3
+; @decor: machine 13 18 9 6
+; @decor: laundry 22 21 5 3
 ; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), ^ briques de jeu (danger), e jouet mécanique, C veilleuse (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 ##############################################
 #............................................#

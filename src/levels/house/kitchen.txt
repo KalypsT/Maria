@@ -2,6 +2,17 @@
 ; @name: Cuisine
 ; @ambient: #2f3036
 ; @note: dessus des placards hauts (colonnes 39-51) : en grimpant par la hotte (D-26).
+; @wall: tiles
+; @decor: window 23 5 7 6
+; @decor: clock 12 7 2 2
+; @decor: lamp 13 12 1 2
+; @decor: chair 4 19 3 3
+; @decor: table 7 18 14 4
+; @decor: chair 21 19 3 3
+; @decor: bench 34 20 2 2
+; @decor: counter 36 17 21 5
+; @decor: cupboard 38 9 13 3
+; @decor: hood 53 13 3 1
 ; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), ^ briques de jeu (danger), e jouet mécanique, C veilleuse (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 ##########################################################
 #........................................................#
