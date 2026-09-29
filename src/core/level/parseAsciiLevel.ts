@@ -7,9 +7,14 @@ const LEGEND: Readonly<Record<string, number>> = {
   P: Tile.Empty,
   G: Tile.Empty,
   e: Tile.Empty,
+  C: Tile.Empty,
+  '^': Tile.Hazard,
 };
 /** Marqueurs d'entités (la tuile elle-même est vide). */
-const ENTITIES: Readonly<Record<string, EntityType>> = { e: EntityType.Patroller };
+const ENTITIES: Readonly<Record<string, EntityType>> = {
+  e: EntityType.Patroller,
+  C: EntityType.Checkpoint,
+};
 const SPAWN = 'P';
 const GOAL = 'G';
 const COMMENT = ';';
@@ -20,8 +25,8 @@ const META = /^;\s*@([\w-]+)\s*:\s*(.*)$/;
  * Convertit une carte ASCII (décision D-06) en `LevelData`.
  * Lignes vides en début et fin ignorées, lignes commençant par `;` ignorées (commentaires).
  * Légende : `#` plein, `=` traversable par le dessous, `.` vide, `P` départ (une seule fois),
- * `G` arrivée d'un parcours (au plus une fois), `e` patrouilleur. Les commentaires `; @clé: valeur`
- * sont des métadonnées.
+ * `G` arrivée d'un parcours (au plus une fois), `e` patrouilleur, `C` checkpoint, `^` danger.
+ * Les commentaires `; @clé: valeur` sont des métadonnées.
  */
 export function parseAsciiLevel(id: string, text: string): LevelData {
   const rows: { text: string; line: number }[] = [];

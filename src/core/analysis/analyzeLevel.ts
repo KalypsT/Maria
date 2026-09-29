@@ -2,6 +2,7 @@ import { TILE_SIZE as T } from '../../config/display';
 import { MOVE_SEARCH } from '../../config/levelDesign';
 import { PLAYER_HITBOX, deriveMovement, type MovementParams } from '../../config/movement';
 import { Tile, tileAt, type LevelData } from '../level/LevelData';
+import { touchesHazard } from '../physics/gridCollision';
 import { PlayerPhysics, type PlayerInput } from '../player/PlayerPhysics';
 import { findSurfaces, surfaceUnder, type Surface, type SurfaceMap } from './surfaces';
 
@@ -209,6 +210,11 @@ class MoveExplorer {
       input.jumpPressed = false;
       input.jumpHeld = false;
       main.step(input);
+      if (touchesHazard(this.level, main.box)) {
+        // La course elle-même mène au danger : rien au-delà n'est atteignable ainsi.
+        stuck = 5;
+        break;
+      }
     }
     this.offerWindows(surface.id, families, this.stepMs, offer);
 
@@ -299,6 +305,9 @@ class MoveExplorer {
       input.jumpHeld = holdSteps === 0 || s < holdSteps;
       input.moveX = airRelease && s > 0 ? 0 : dir;
       probe.step(input);
+      if (touchesHazard(this.level, probe.box)) {
+        return -1;
+      }
       airborne ||= !probe.grounded;
     }
     return this.finish(0);
@@ -318,6 +327,9 @@ class MoveExplorer {
     let s = 0;
     while (!probe.grounded && s < MOVE_SEARCH.maxSteps) {
       probe.step(input);
+      if (touchesHazard(this.level, probe.box)) {
+        return -1;
+      }
       s++;
     }
     input.moveX = 0;
@@ -326,6 +338,9 @@ class MoveExplorer {
         break;
       }
       probe.step(input);
+      if (touchesHazard(this.level, probe.box)) {
+        return -1;
+      }
     }
     return probe.grounded ? this.surfaceOf(probe) : -1;
   }

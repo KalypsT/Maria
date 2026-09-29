@@ -417,6 +417,21 @@ export class GameScene extends Phaser.Scene {
       }
       return true;
     }
+    if (tile === Tile.Hazard) {
+      // Placeholder de danger (design ouvert, §45) : rangée de pointes émoussées, sans violence.
+      g.fillStyle(PLACEHOLDER_COLORS.hazard);
+      for (let i = 0; i < 4; i++) {
+        g.fillTriangle(
+          x + i * 4,
+          y + TILE_SIZE,
+          x + i * 4 + 2,
+          y + 6,
+          x + i * 4 + 4,
+          y + TILE_SIZE,
+        );
+      }
+      return true;
+    }
     if (tile === Tile.OneWay) {
       g.fillStyle(PLACEHOLDER_COLORS.oneWay);
       g.fillRect(x, y, TILE_SIZE, 3);

@@ -42,6 +42,11 @@ export const PLACEHOLDER_COLORS = {
   /** Patrouilleur (placeholder neutre, design ouvert) : ocre, distinct de Céleste et du décor. */
   enemy: 0xc9823f,
   enemyEyes: 0x1b1a24,
+  /** Danger (placeholder, D-21). */
+  hazard: 0x9c4d86,
+  /** Checkpoint éteint / allumé (placeholders, D-21). */
+  checkpoint: 0x6b678a,
+  checkpointLit: 0xffd98a,
   /** Bâton de Céleste et arc de frappe (placeholders). */
   stick: 0xc9a46b,
   slash: 0xfff1d6,
