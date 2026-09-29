@@ -225,6 +225,17 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
   - le style illustré gagne nettement en mode « résolution de l'écran » (D-18). Passer ce mode par défaut est à décider après l'essai sur téléphone (performance) ;
   - les salles non habillées gardent le rendu par tuiles jusqu'à leur habillage.
 
+## D-29 — Céleste en « papier découpé »
+
+- **Décision** (validée) : Céleste est une marionnette de pièces fixes : tête avec lunettes rondes roses, deux couettes, torse, bras, jambes à chaussons. Enfant de **5-6 ans** (tête ronde assez grosse), pyjama rose à pois. Allure **sobre avec un peu de vie** : gestes nets, souplesse portée par les couettes.
+- **Mise en œuvre** :
+  - poses calculées par une fonction pure testée (`CelestePoser`) : respiration, course, saut, chute, suspension (bras tendus vers le rebord), hissage, coup reçu, bras qui accompagne le bâton ;
+  - le pas suit la distance parcourue, et les couettes sont un ressort amorti ;
+  - rendu par un conteneur de pièces, sans allocation par image ; écrasement et inclinaison (`PlayerFeel`) conservés ;
+  - réglages dans `src/config/puppet.ts` et l'overlay.
+- **Images** : chaque pièce peut être remplacée par une image `celeste-head`, `celeste-pigtail`, `celeste-torso`, `celeste-arm`, `celeste-leg` (D-28). Le bras et la jambe servent des deux côtés ; le côté caché est assombri.
+- **Conséquences** : purement visuel, la hitbox et la physique ne changent pas. Le dessin dépasse la hitbox de quelques pixels vers le haut (la tête).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
