@@ -1,0 +1,10 @@
+<!-- Icône PLACEHOLDER (D-23) : lunettes rondes roses de Céleste (spec §2). Design final ouvert (§45). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#1b1a24"/>
+  <circle cx="256" cy="268" r="176" fill="#f6e3d4"/>
+  <circle cx="172" cy="262" r="56" fill="none" stroke="#ff4fa3" stroke-width="22"/>
+  <circle cx="340" cy="262" r="56" fill="none" stroke="#ff4fa3" stroke-width="22"/>
+  <path d="M228 256 Q256 236 284 256" fill="none" stroke="#ff4fa3" stroke-width="16" stroke-linecap="round"/>
+  <path d="M96 232 Q84 150 150 104" fill="none" stroke="#f4a6c8" stroke-width="30" stroke-linecap="round"/>
+  <path d="M416 232 Q428 150 362 104" fill="none" stroke="#f4a6c8" stroke-width="30" stroke-linecap="round"/>
+</svg>
