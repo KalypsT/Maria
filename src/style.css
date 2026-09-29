@@ -472,3 +472,52 @@ body {
   font-size: 0.78rem;
   opacity: 0.85;
 }
+
+/* Carte dessinée par Céleste (§24) : une page du cahier, par-dessus le jeu en pause. */
+#map-page {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  background: var(--scrim);
+}
+
+#map-page[hidden] {
+  display: none;
+}
+
+.map-panel {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: min(92vw, 820px);
+  height: min(90vh, 460px);
+  padding: 8px 14px 12px;
+  border: 2px solid var(--pencil);
+  border-radius: var(--sketch-radius-panel);
+  background:
+    linear-gradient(
+      90deg,
+      transparent 38px,
+      var(--paper-margin) 38px,
+      var(--paper-margin) 40px,
+      transparent 40px
+    ),
+    repeating-linear-gradient(transparent 0 21px, var(--paper-line) 21px 22px), var(--paper);
+  box-shadow: 3px 4px 0 var(--drop-shadow);
+}
+
+.map-title {
+  margin: 0 0 4px 34px;
+  color: var(--ink-soft);
+  font: italic 600 16px/1.2 var(--ui-font);
+}
+
+.map-canvas {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+}

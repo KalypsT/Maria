@@ -35,4 +35,16 @@ export const HOUSE: ZoneSource = {
     ['staircase:3', 'attic:1'],
     ['attic:2', 'bedroom:2'],
   ],
+  // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
+  // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur
+  // gauche). Carte imparfaite (§24.1) : le grenier et la trappe relient des salles éloignées.
+  map: {
+    bedroom: { x: 0, y: 2.2, w: 3, h: 1.9 },
+    hall: { x: 3.4, y: 2.5, w: 3.8, h: 1.6 },
+    staircase: { x: 7.6, y: 2.2, w: 2.2, h: 4.5 },
+    attic: { x: 10.2, y: 0.3, w: 6.8, h: 1.6 },
+    living: { x: 10.2, y: 4.9, w: 2.2, h: 1.8 },
+    kitchen: { x: 12.8, y: 4.9, w: 2.4, h: 1.8 },
+    laundry: { x: 15.6, y: 4.4, w: 2.4, h: 2.3 },
+  },
 };

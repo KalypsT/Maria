@@ -34,7 +34,13 @@ import { ABILITY_HINTS, ABILITY_HINT_MS, Ability, isAbility } from '../config/ab
 import { PickupKind, Pickups } from '../core/world/Pickups';
 import { RoomTransition } from '../core/world/RoomTransition';
 import { RunEvent, RunState } from '../core/world/RunState';
-import { arrivalPosition, touchedExit, type ExitRef, type Zone } from '../core/world/zone';
+import {
+  arrivalPosition,
+  touchedExit,
+  type ExitRef,
+  type MapBox,
+  type Zone,
+} from '../core/world/zone';
 import { Hud } from '../ui/Hud';
 import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
 import { PauseMenu } from '../ui/PauseMenu';
@@ -42,6 +48,8 @@ import { ART_IMAGES, MAX_ART_SCALE, REAL_PALETTE, STRANGE_PALETTE } from '../con
 import { CombatView } from './CombatView';
 import { CelestePuppet } from './CelestePuppet';
 import { RoomArtView } from './RoomArtView';
+import { MapPage } from '../ui/MapPage';
+import { buildMapModel } from '../core/world/mapModel';
 import { DEFAULT_PUPPET, type PuppetParams } from '../config/puppet';
 import { CelestePoser, PoseAttack } from '../core/player/celestePose';
 import { AttackPhase } from '../core/combat/PlayerAttack';
@@ -67,6 +75,19 @@ const SOLID_COLORS: Readonly<Partial<Record<number, SolidColors>>> = {
   [Material.Wood]: { fill: PLACEHOLDER_COLORS.wood, edge: PLACEHOLDER_COLORS.woodEdge },
   [Material.Fabric]: { fill: PLACEHOLDER_COLORS.fabric, edge: PLACEHOLDER_COLORS.fabricEdge },
 };
+
+/** Titre de la carte de chaque zone (écrit par Céleste). */
+const MAP_TITLES: Readonly<Record<string, string>> = { house: 'Ma maison' };
+
+/** Boîte englobant toutes les salles de la carte d'une zone (disposition stable). */
+function mapBounds(zone: Zone): MapBox {
+  const boxes = Object.values(zone.map);
+  const x = Math.min(...boxes.map((b) => b.x));
+  const y = Math.min(...boxes.map((b) => b.y));
+  const right = Math.max(...boxes.map((b) => b.x + b.w));
+  const bottom = Math.max(...boxes.map((b) => b.y + b.h));
+  return { x, y, w: right - x, h: bottom - y };
+}
 
 /** Identifiant de la maison dans la liste du menu pause (retour à la partie). */
 export const HOME_CHOICE = 'home';
@@ -121,6 +142,11 @@ export class GameScene extends Phaser.Scene {
   private roomArt!: RoomArtView;
   /** Échelle des textures dessinées (habillage, Céleste) : celle de l'écran, plafonnée. */
   private artScale = 1;
+  /** Carte (§24) et salles déjà dessinées lors d'une ouverture précédente (tracé animé). */
+  private readonly mapPage = new MapPage(() => {
+    this.closeMap();
+  });
+  private readonly mapSeen = new Set<string>();
   /** Changement de salle en cours (D-25). */
   readonly transition = new RoomTransition(this.worldParams);
   session!: SaveSession;
@@ -221,6 +247,10 @@ export class GameScene extends Phaser.Scene {
       onResume: () => {
         this.setPaused(false);
       },
+      onOpenMap: () => {
+        this.setPaused(false);
+        this.openMap();
+      },
       onSettingsChange: (settings) => {
         void this.session.setControls(settings);
         this.touch?.setSettings(settings);
@@ -268,6 +298,7 @@ export class GameScene extends Phaser.Scene {
       detachTouch?.();
       document.removeEventListener('visibilitychange', onVisibility);
       this.pauseMenu?.destroy();
+      this.mapPage.destroy();
       this.hud.destroy();
       this.scale.off(Phaser.Scale.Events.RESIZE, this.onResize);
     });
@@ -282,10 +313,22 @@ export class GameScene extends Phaser.Scene {
   override update(): void {
     const frameSeconds = Math.min(this.game.loop.rawDelta / 1000, MAX_FRAME_SECONDS);
     this.controls.update();
+    const mapPressed = this.controls.consumePressed('Map');
+    if (this.mapPage.isOpen) {
+      // Carte ouverte (§24) : Carte ou Pause la referment, le jeu reste arrêté.
+      if (mapPressed || this.controls.consumePressed('Pause')) {
+        this.closeMap();
+      }
+      return;
+    }
     if (this.controls.consumePressed('Pause')) {
       this.setPaused(!this.paused);
     }
     if (this.paused) {
+      return;
+    }
+    if (mapPressed) {
+      this.openMap();
       return;
     }
     const steps = this.clock.advance(frameSeconds);
@@ -383,6 +426,39 @@ export class GameScene extends Phaser.Scene {
       camera.prevX + (camera.x - camera.prevX) * alpha,
       camera.prevY + (camera.y - camera.prevY) * alpha,
     );
+  }
+
+  /**
+   * Carte dessinée par Céleste (§24) : salles visitées et devinées, veilleuses allumées,
+   * trouvailles, Céleste. Seulement dans une zone (pas dans les parcours d'essai).
+   */
+  openMap(): void {
+    const zone = this.zone;
+    if (!zone) {
+      return;
+    }
+    const data = this.session.data;
+    const box = this.player.box;
+    const model = buildMapModel(zone, {
+      visited: data.progression.mapRevealed,
+      seen: this.mapSeen,
+      activatedCheckpoints: data.activatedCheckpoints,
+      checkpoint: data.checkpoint,
+      collectibles: data.progression.collectibles,
+      celeste: { room: this.level.id, x: box.x + box.width / 2, y: box.y + box.height },
+    });
+    for (const room of data.progression.mapRevealed) {
+      this.mapSeen.add(room);
+    }
+    this.clock.reset();
+    this.touch?.releaseAll();
+    this.mapPage.open(model, MAP_TITLES[zone.id] ?? zone.id, mapBounds(zone));
+  }
+
+  private closeMap(): void {
+    this.mapPage.close();
+    this.clock.reset();
+    this.controls.consumePressed('Jump');
   }
 
   /** Met le jeu en pause (simulation arrêtée, menu affiché) ou le reprend. */

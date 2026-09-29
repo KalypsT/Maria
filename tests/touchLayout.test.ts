@@ -75,9 +75,9 @@ describe('computeTouchLayout', () => {
     }
   });
 
-  it('n’affiche pas les boutons désactivés (Capacité, Carte, Interaction)', () => {
+  it('n’affiche pas les boutons désactivés (Capacité, Interaction)', () => {
     const { buttons } = computeTouchLayout(844, 390, NO_INSETS, DEFAULT_CONTROL_SETTINGS);
-    expect(buttons.map((b) => b.action).sort()).toEqual(['Attack', 'Jump', 'Pause']);
+    expect(buttons.map((b) => b.action).sort()).toEqual(['Attack', 'Jump', 'Map', 'Pause']);
   });
 
   it('agrandit les boutons avec l’échelle', () => {
@@ -105,7 +105,10 @@ describe('computeTouchLayout', () => {
       expect(zone.bottom).toBe(h);
       expect(zone.right).toBeGreaterThan(zone.left);
       for (const b of layout.buttons) {
-        if (b.action !== 'Pause') {
+        if (b.action === 'Pause' || b.action === 'Map') {
+          // Petites icônes en haut à gauche : au-dessus de la zone du joystick.
+          expect(b.y + b.r).toBeLessThan(zone.top);
+        } else {
           expect(b.x - b.r).toBeGreaterThan(zone.right);
         }
       }

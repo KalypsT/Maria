@@ -1,5 +1,6 @@
 ; Couloir de l'étage.
 ; @name: Couloir
+; @icon: door
 ; @ambient: #2a2d38
 ; @note: trappe à linge (sortie 3) : rebord à atteindre en grimpant depuis l'étagère murale (D-26).
 ; @wall: stripes

@@ -1,5 +1,6 @@
 ; Chambre de Céleste : départ d'une nouvelle partie (dans le lit).
 ; @name: Chambre
+; @icon: bed
 ; @ambient: #2b2f3d
 ; @note: dessus de l'armoire (colonnes 2-6) : en grimpant depuis la tête de lit (D-26) ;
 ; @note-2: derrière l'armoire, passage vers le grenier (sortie 2) : raccourci du retour (D-27).

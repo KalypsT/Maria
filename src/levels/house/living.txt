@@ -1,5 +1,6 @@
 ; Salon : canapé et poufs, briques de jeu sur le tapis, table basse, bibliothèque.
 ; @name: Salon
+; @icon: sofa
 ; @ambient: #2e2b33
 ; @note: dessus de la bibliothèque (colonnes 47-56) : en grimpant depuis l'étagère haute (D-26).
 ; @wall: dots
