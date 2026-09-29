@@ -3,6 +3,7 @@
 ; @icon: house
 ; @wall: planks
 ; @ambient: #3a3228
+; @walls: #b58a5f #94704c
 ; @ability: wall-jump
 ; @difficulty: easy
 ; @note: dessus du coffre suspendu : trouvaille par la cheminée (saut mural, facile).
