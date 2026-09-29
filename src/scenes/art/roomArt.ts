@@ -328,6 +328,25 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     ctx.lineWidth = 1;
     ctx.strokeRect(r.x + 11, r.y + r.h * 0.34 + 55, 7, 5);
   },
+  linencabinet(a, r) {
+    // Armoire haute et étroite sur quatre pieds fins (on passe dessous), deux portes, des draps
+    // pliés qui dépassent en haut.
+    const { ctx, palette: p } = a;
+    ctx.fillStyle = p.woodDark;
+    ctx.fillRect(r.x + 2, r.y + r.h, 2, 3 * T);
+    ctx.fillRect(r.x + r.w - 4, r.y + r.h, 2, 3 * T);
+    wood(a, r);
+    if (p.silhouettes) {
+      return;
+    }
+    ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(r.x + 3, r.y + 4, r.w / 2 - 4, r.h - 8);
+    ctx.strokeRect(r.x + r.w / 2 + 1, r.y + 4, r.w / 2 - 4, r.h - 8);
+    ctx.fillStyle = '#f2c879';
+    ctx.fillRect(r.x + r.w / 2 - 3, r.y + r.h / 2, 1.5, 4);
+    ctx.fillRect(r.x + r.w / 2 + 1.5, r.y + r.h / 2, 1.5, 4);
+  },
   jarshelf(a, r) {
     // Étagère murale et ses bocaux (pâtes, confiture, biscuits).
     DRAWERS.wallshelf?.(a, r);
