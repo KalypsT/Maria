@@ -63,6 +63,16 @@ export class SaveSession {
     return this.persist();
   }
 
+  /** Étape de l'histoire vécue (§33, D-31), enregistrée aussitôt ; sans effet si déjà notée. */
+  addStoryFlag(flag: string): Promise<void> {
+    const flags = this.current.story.flags;
+    if (flags.includes(flag)) {
+      return Promise.resolve();
+    }
+    flags.push(flag);
+    return this.persist();
+  }
+
   setControls(controls: Readonly<ControlSettings>): Promise<void> {
     this.current.settings.controls = { ...controls };
     return this.persist();

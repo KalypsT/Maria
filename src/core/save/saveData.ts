@@ -2,12 +2,13 @@ import { DEFAULT_CONTROL_SETTINGS, type ControlSettings } from '../../config/con
 import { DEFAULT_DISPLAY_SETTINGS, type DisplaySettings } from '../../config/display';
 import { parseControlSettings, sanitizeControlSettings } from '../settings/controlSettings';
 import { parseDisplaySettings, sanitizeDisplaySettings } from '../settings/displaySettings';
+import { LEGACY_STORY_FLAGS } from '../../config/story';
 
 /**
  * Sauvegarde (décision D-22) : format versionné, validé strictement, protégé par une somme de
  * contrôle. Pur et indépendant du stockage (IndexedDB, localStorage ou mémoire).
  */
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 const RECORD_FORMAT = 'maria-save';
 const CODE_PREFIX = 'MARIA1';
 const MAX_ID_LENGTH = 64;
@@ -29,6 +30,8 @@ export interface SaveData {
     memories: string[];
     mapRevealed: string[];
   };
+  /** Histoire (§33, version 2) : étapes déjà vécues (drapeaux des événements). */
+  story: { flags: string[] };
 }
 
 /** Enregistrement stocké : le contenu sérialisé et sa somme de contrôle. */
@@ -83,6 +86,7 @@ export function createNewSave(
     activatedCheckpoints: [],
     settings: { controls: { ...settings.controls }, display: { ...settings.display } },
     progression: { abilities: [], collectibles: [], memories: [], mapRevealed: [] },
+    story: { flags: [] },
   };
 }
 
@@ -148,6 +152,11 @@ export function validateSaveData(raw: unknown): SaveData | null {
   if (!activated || !isRecord(settings) || !isRecord(progression)) {
     return null;
   }
+  const story = raw['story'];
+  const flags = isRecord(story) ? stringList(story['flags']) : null;
+  if (!flags) {
+    return null;
+  }
   const abilities = stringList(progression['abilities']);
   const collectibles = stringList(progression['collectibles']);
   const memories = stringList(progression['memories']);
@@ -165,7 +174,24 @@ export function validateSaveData(raw: unknown): SaveData | null {
       display: sanitizeDisplaySettings(settings['display']),
     },
     progression: { abilities, collectibles, memories, mapRevealed },
+    story: { flags },
   };
+}
+
+/**
+ * Migrations (D-22) : contenu d'une version antérieure → contenu de la version courante, avant
+ * validation. Une donnée inattendue est laissée telle quelle : la validation la refusera.
+ */
+export function migrateSaveData(raw: unknown): unknown {
+  if (!isRecord(raw) || typeof raw['version'] !== 'number') {
+    return raw;
+  }
+  let data = raw;
+  if (data['version'] === 1) {
+    // v1 → v2 (D-31) : une partie commencée avant l'histoire a déjà « vécu » le prologue.
+    data = { ...data, version: 2, story: { flags: [...LEGACY_STORY_FLAGS] } };
+  }
+  return data;
 }
 
 export function encodeRecord(data: Readonly<SaveData>): SaveRecord {
@@ -179,8 +205,8 @@ export function serializeSave(data: Readonly<SaveData>): string {
 }
 
 /**
- * Contenu (après vérification de la somme de contrôle) → données valides. Point d'entrée des
- * migrations futures : une version antérieure serait convertie ici avant validation.
+ * Contenu (après vérification de la somme de contrôle) → données valides : une version antérieure
+ * est d'abord migrée (`migrateSaveData`).
  */
 function decodePayload(version: number, payload: string): DecodeResult {
   if (version > SAVE_VERSION) {
@@ -192,7 +218,7 @@ function decodePayload(version: number, payload: string): DecodeResult {
   } catch {
     return { ok: false, problem: 'unreadable' };
   }
-  const data = validateSaveData(raw);
+  const data = validateSaveData(migrateSaveData(raw));
   return data ? { ok: true, data } : { ok: false, problem: 'schema' };
 }
 
@@ -265,7 +291,17 @@ export function decodeSaveCode(code: string): DecodeResult {
   if (checksum(payload) !== parts[2]) {
     return { ok: false, problem: 'checksum' };
   }
-  return decodePayload(SAVE_VERSION, payload);
+  // Le code ne porte pas de version à part : celle du contenu fait foi (migration comprise).
+  let version = SAVE_VERSION;
+  try {
+    const raw: unknown = JSON.parse(payload);
+    if (isRecord(raw) && typeof raw['version'] === 'number') {
+      version = raw['version'];
+    }
+  } catch {
+    return { ok: false, problem: 'unreadable' };
+  }
+  return decodePayload(version, payload);
 }
 
 /** Message lisible pour un refus (interface en français). */

@@ -54,4 +54,19 @@ describe('SaveSession', () => {
     expect(reloaded?.progression.mapRevealed).toEqual(['hall']);
     expect(reloaded?.checkpoint).toEqual({ levelId: 'bedroom', checkpointId: 'c20-19' });
   });
+
+  it('note une étape de l’histoire une seule fois, relue après « fermeture »', async () => {
+    const storage = new MemorySaveStorage();
+    let clock = 0;
+    const session = new SaveSession(
+      new SaveManager(storage),
+      createNewSave('bedroom', 0),
+      () => ++clock,
+    );
+    await session.addStoryFlag('evening.played');
+    await session.addStoryFlag('evening.played');
+    expect(clock).toBe(1);
+    const reloaded = (await new SaveManager(storage).load()).data;
+    expect(reloaded?.story.flags).toEqual(['evening.played']);
+  });
 });
