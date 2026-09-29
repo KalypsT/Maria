@@ -12,6 +12,7 @@ import {
   surfaceAt,
   where,
   zone,
+  roomOf,
   zoneGraph,
   type Node,
 } from './zoneGraph';
@@ -50,10 +51,14 @@ describe.each([false, true])('maison (D-25), escalade %s', (climb) => {
     'toutes les salles sont atteignables depuis le lit (grenier et monde étrange en grimpant)',
     { timeout: TIMEOUT },
     () => {
+      // Le jardin (D-46) reste fermé tant que Céleste n'a pas grandi : voir garden.test.ts.
       const seen = reachable(zoneGraph(climb, roomDifficulty), home());
       const rooms = new Set([...seen].map((n) => n.split('#')[0]));
-      const missing = [...zone.rooms.keys()].filter((room) => !rooms.has(room));
+      const missing = [...zone.rooms.keys()].filter(
+        (room) => !rooms.has(room) && !room.startsWith('garden-'),
+      );
       expect(missing).toEqual(climb ? [] : ['attic', 'living-strange', 'shadows']);
+      expect([...seen].filter((n) => roomOf(n).startsWith('garden-'))).toEqual([]);
     },
   );
 
@@ -199,22 +204,23 @@ describe('Céleste a grandi (D-43)', () => {
   );
 });
 
-describe('saut mural dans la maison (D-44)', () => {
+describe('saut mural dans la maison (D-44, D-46)', () => {
   it(
-    'ne rend rien de la maison réelle plus facile : mêmes endroits, en facile comme en moyen',
+    'n’ouvre que le dessus de l’armoire à linge de la buanderie, facilement',
     { timeout: TIMEOUT },
     () => {
-      const real = (n: Node) => {
-        const data = zone.rooms.get(n.split('#')[0] ?? '');
-        return data !== undefined && !isStrangeRoom(data);
+      const house = (n: Node) => {
+        const data = zone.rooms.get(roomOf(n));
+        return data !== undefined && !isStrangeRoom(data) && !roomOf(n).startsWith('garden-');
       };
+      const cabinet = node('laundry', surfaceAt('laundry', 40, 4));
       for (const difficulty of ['easy', 'medium'] as const) {
         const rule = byDifficulty(difficulty);
         const before = reachable(zoneGraph(true, rule, 2), home());
         const after = reachable(zoneGraph(true, rule, 2, true), home());
-        const opened = [...after].filter((n) => real(n) && !before.has(n));
-        const closed = [...before].filter((n) => real(n) && !after.has(n));
-        expect(where(opened, true), `${difficulty} : ouverts`).toEqual([]);
+        const opened = [...after].filter((n) => house(n) && !before.has(n));
+        const closed = [...before].filter((n) => house(n) && !after.has(n));
+        expect(opened, `${difficulty} : ouverts`).toEqual([cabinet]);
         expect(where(closed, true), `${difficulty} : fermés`).toEqual([]);
       }
     },

@@ -3,7 +3,8 @@ import { GROWTH_PHASES, phaseMovement, type GrowthPhase } from '../src/config/gr
 import { DEFAULT_MOVEMENT } from '../src/config/movement';
 import { analyzeLevel, type LevelAnalysis } from '../src/core/analysis/analyzeLevel';
 import { findSurfaces, surfaceUnder, type SurfaceMap } from '../src/core/analysis/surfaces';
-import type { StoryData } from '../src/core/story/story';
+import { StoryFlag } from '../src/config/story';
+import { checkCondition, type StoryData } from '../src/core/story/story';
 import { buildZone } from '../src/core/world/zone';
 import { HOUSE_STORY } from '../src/levels/house/story';
 import { HOUSE } from '../src/levels/house/zone';
@@ -140,6 +141,18 @@ export function zoneGraph(
     set.add(to);
     graph.set(from, set);
   };
+  // Portes fermées selon la phase de croissance (la porte de derrière, D-46), dans les deux sens.
+  const phaseFlags = new Set<string>(growth >= 2 ? [StoryFlag.Grown] : []);
+  const closed = new Set<string>();
+  for (const lock of HOUSE_STORY.lockedRooms) {
+    if (lock.exit !== undefined && checkCondition(phaseFlags, lock.when)) {
+      closed.add(`${lock.room}:${String(lock.exit)}`);
+      const other = zone.destination(lock.room, lock.exit);
+      if (other) {
+        closed.add(`${other.room}:${String(other.exit)}`);
+      }
+    }
+  }
   for (const [room, data] of zone.rooms) {
     const min = rule ? rule(room) : 0;
     for (const move of analysis(room, climb, growth, wallJump).moves) {
@@ -149,13 +162,16 @@ export function zoneGraph(
     }
     for (const exit of data.exits) {
       const to = zone.destination(room, exit.id);
-      if (to) {
+      if (to && !closed.has(`${room}:${String(exit.id)}`)) {
         edge(node(room, exitSurface(room, exit.id)), node(to.room, exitSurface(to.room, to.exit)));
       }
     }
   }
-  for (const [from, to] of storyPassages()) {
-    edge(from, to);
+  // Les passages de l'histoire (monde étrange) ont tous lieu avant que Céleste grandisse.
+  if (growth < 2) {
+    for (const [from, to] of storyPassages()) {
+      edge(from, to);
+    }
   }
   return graph;
 }
@@ -173,6 +189,9 @@ export function reachable(graph: Map<Node, Set<Node>>, from: Node): Set<Node> {
   }
   return seen;
 }
+
+/** Salle d'un nœud du graphe. */
+export const roomOf = (n: Node): string => n.split('#')[0] ?? '';
 
 export function where(nodes: Iterable<Node>, climb: boolean): string[] {
   return [...nodes].map((n) => {
