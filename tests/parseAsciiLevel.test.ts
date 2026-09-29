@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Tile, tileAt } from '../src/core/level/LevelData';
+import { Material, Tile, tileAt } from '../src/core/level/LevelData';
 import { parseAsciiLevel } from '../src/core/level/parseAsciiLevel';
 import testRoom from '../src/levels/test-room.txt?raw';
 
@@ -53,6 +53,30 @@ describe('parseAsciiLevel', () => {
     expect(level.entities).toEqual([{ type: 'patroller', col: 2, row: 1 }]);
     expect(tileAt(level, 2, 1)).toBe(Tile.Empty);
     expect(parseAsciiLevel('t', 'P').entities).toEqual([]);
+  });
+
+  it('lit les matériaux et les sorties latérales (D-25)', () => {
+    const level = parseAsciiLevel(
+      't',
+      ['#######', '#.....#', '1.....2', '1.tbb.2', '#P-b..#', '#######'].join('\n'),
+    );
+    expect(level.exits).toEqual([
+      { id: 1, side: 'left', col: 0, rowMin: 2, rowMax: 3 },
+      { id: 2, side: 'right', col: 6, rowMin: 2, rowMax: 3 },
+    ]);
+    expect(tileAt(level, 0, 2)).toBe(Tile.Empty);
+    expect(tileAt(level, 2, 3)).toBe(Tile.Solid);
+    expect(tileAt(level, 2, 4)).toBe(Tile.OneWay);
+    expect(level.materials[3 * level.width + 2]).toBe(Material.Fabric);
+    expect(level.materials[3 * level.width + 3]).toBe(Material.Wood);
+    expect(level.materials[4 * level.width + 2]).toBe(Material.Wood);
+    expect(level.materials[0]).toBe(Material.Default);
+  });
+
+  it('refuse une sortie hors d’un mur latéral ou trop basse', () => {
+    expect(() => parseAsciiLevel('t', '#####\n#P1.#\n#.1.#\n#####')).toThrow(/mur gauche ou droit/);
+    expect(() => parseAsciiLevel('t', '#####\n1P..#\n#...#\n#####')).toThrow(/au moins 2 tuiles/);
+    expect(() => parseAsciiLevel('t', '#####\n1P..#\n#...#\n1...#\n#####')).toThrow(/continue/);
   });
 
   it('charge la salle de test de la Phase 1', () => {
