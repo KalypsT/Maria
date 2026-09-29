@@ -39,7 +39,10 @@ describe.each(COURSE_IDS)('parcours %s', (id) => {
   }
   const level = parseAsciiLevel(id, source.text);
   let cached: LevelAnalysis | undefined;
-  const analysis = () => (cached ??= analyzeLevel(level, DEFAULT_MOVEMENT));
+  // Capacités prêtées par le parcours (`; @abilities:`, D-44).
+  const lent = (level.meta.abilities ?? '').split(/\s+/);
+  const abilities = { climb: lent.includes('climb'), wallJump: lent.includes('wall-jump') };
+  const analysis = () => (cached ??= analyzeLevel(level, DEFAULT_MOVEMENT, abilities));
 
   it(
     'est faisable du départ à l’arrivée',

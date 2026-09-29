@@ -4,6 +4,7 @@ import tour from './courses/03-tour.txt?raw';
 import precision from './courses/04-precision.txt?raw';
 import combat from './courses/05-combat.txt?raw';
 import checkpoints from './courses/06-checkpoints.txt?raw';
+import sautMural from './courses/07-saut-mural.txt?raw';
 import testRoomText from './test-room.txt?raw';
 import type { LevelData } from '../core/level/LevelData';
 import { buildZone, type Zone } from '../core/world/zone';
@@ -26,6 +27,7 @@ export const LEVELS: readonly LevelSource[] = [
   { id: 'precision', text: precision },
   { id: 'combat', text: combat },
   { id: 'checkpoints', text: checkpoints },
+  { id: 'saut-mural', text: sautMural },
   { id: 'test-room', text: testRoomText },
 ];
 
@@ -37,6 +39,7 @@ export const COURSE_IDS: readonly string[] = [
   'precision',
   'combat',
   'checkpoints',
+  'saut-mural',
 ];
 
 const NAME = /^;\s*@name\s*:\s*(.*)$/m;

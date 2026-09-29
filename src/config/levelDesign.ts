@@ -31,3 +31,20 @@ export const MOVE_SEARCH = {
   /** Durée maximale pour s'arrêter après l'atterrissage (pas). */
   settleSteps: 120,
 } as const;
+
+/**
+ * Recherche des passages par le saut mural (D-44) : depuis chaque appui (entrée en glissade), un
+ * rebond est essayé à intervalles réguliers de la glissade.
+ */
+export const WALL_SEARCH = {
+  /** Intervalle entre deux essais de rebond (pas de 1/120 s) : résolution de la fenêtre. */
+  sampleSteps: 2,
+  /** Durée de glissade explorée depuis un appui (pas) : au-delà, la fenêtre est déjà large. */
+  maxSlideSteps: 72,
+  /** Durées de maintien du saut essayées pour un rebond (sous-ensemble de `jumpHoldSteps`). */
+  jumpHoldSteps: [0, 8] as readonly number[],
+  /** Deux appuis sur le même mur à moins de cette hauteur (px) sont confondus. */
+  heightStepPx: 8,
+  /** Garde-fou : nombre maximal d'appuis dans une salle. */
+  maxNodes: 4000,
+} as const;

@@ -1,9 +1,10 @@
 import { TILE_SIZE as T } from '../../config/display';
-import { MOVE_SEARCH } from '../../config/levelDesign';
+import { MOVE_SEARCH, WALL_SEARCH } from '../../config/levelDesign';
 import { PLAYER_HITBOX, deriveMovement, type MovementParams } from '../../config/movement';
 import { Tile, tileAt, type LevelData } from '../level/LevelData';
 import { touchesHazard } from '../physics/gridCollision';
 import { PlayerPhysics, type PlayerInput } from '../player/PlayerPhysics';
+import { PlayerState } from '../player/playerState';
 import { findSurfaces, surfaceUnder, type Surface, type SurfaceMap } from './surfaces';
 
 export const MoveKind = {
@@ -15,6 +16,14 @@ export const MoveKind = {
   WalkOff: 'walk-off',
   /** Bas + Saut à travers une plateforme traversable : aucun timing. */
   Drop: 'drop',
+  /**
+   * Saut mural (D-44) : un rebond depuis une glissade contre un mur ; la fenêtre est la durée de
+   * glissade pendant laquelle la pression réussit. Un passage d'une surface à une autre qui
+   * enchaîne des appuis sur les murs est de ce type, avec le détail dans `chain`.
+   */
+  WallJump: 'wall-jump',
+  /** Lâcher un mur pendant la glissade (ou glisser jusqu'en bas) : aucun timing. */
+  WallLetGo: 'wall-let-go',
 } as const;
 export type MoveKind = (typeof MoveKind)[keyof typeof MoveKind];
 
@@ -31,6 +40,29 @@ export interface Move {
   readonly airRelease: boolean;
   /** Fenêtre de réussite (ms) ; `Infinity` pour une marche ou une descente sans timing. */
   readonly windowMs: number;
+  /** Passage par les appuis sur les murs (D-44) : type du premier élan. */
+  readonly start?: MoveKind;
+}
+
+/**
+ * Essais bruts d'une famille de passages (saut mural, D-44) : la surface ou l'appui atteint par
+ * chaque essai successif, espacés de `msPerTry` (`Infinity` pour un passage sans timing).
+ */
+interface TryRecord {
+  readonly from: number;
+  readonly kind: MoveKind;
+  readonly dir: number;
+  readonly holdSteps: number;
+  readonly airRelease: boolean;
+  readonly targets: readonly number[];
+  readonly msPerTry: number;
+}
+
+/** Appui sur un mur (D-44) : Céleste vient d'entrer en glissade ; état complet de la simulation. */
+interface WallNode {
+  readonly id: number;
+  readonly dir: number;
+  readonly snapshot: PlayerPhysics;
 }
 
 export interface LevelAnalysis {
@@ -44,6 +76,8 @@ export interface LevelAnalysis {
   readonly path: readonly Move[] | null;
   /** Passage le plus dur de ce chemin (null si chemin sans saut ou impossible). */
   readonly critical: Move | null;
+  /** Appuis sur les murs explorés (saut mural, D-44). */
+  readonly wallNodeCount: number;
 }
 
 interface Family {
@@ -71,6 +105,13 @@ class MoveExplorer {
   private readonly reachPx: number;
   /** Hauteur prudente au-dessus des pieds balayée par un saut (tuiles). */
   private readonly reachUpTiles: number;
+  /** Appuis sur les murs découverts (D-44), numérotés après les surfaces. */
+  readonly wallNodes: WallNode[] = [];
+  private readonly wallIds = new Map<string, number>();
+  /** Appuis pas encore explorés. */
+  private readonly wallQueue: WallNode[] = [];
+  /** Essais bruts, gardés seulement avec le saut mural (fenêtres à travers les appuis). */
+  readonly records: TryRecord[] = [];
 
   constructor(
     private readonly level: LevelData,
@@ -78,11 +119,14 @@ class MoveExplorer {
     private readonly map: SurfaceMap,
     canClimb: boolean,
     private readonly hitbox: Readonly<{ width: number; height: number }>,
+    private readonly canWallJump = false,
   ) {
     this.main = new PlayerPhysics(level, params, 0, 0, hitbox);
     this.probe = new PlayerPhysics(level, params, 0, 0, hitbox);
     this.main.canClimb = canClimb;
     this.probe.canClimb = canClimb;
+    this.main.canWallJump = canWallJump;
+    this.probe.canWallJump = canWallJump;
     const derived = deriveMovement(params);
     this.stepMs = derived.dt * 1000;
     this.coyoteSteps = derived.coyoteSteps;
@@ -98,6 +142,7 @@ class MoveExplorer {
   explore(surface: Surface): Move[] {
     const best = new Map<number, Move>();
     const offer = (move: Move) => {
+      this.recordSingle(move);
       if (move.to < 0 || move.to === move.from) {
         return;
       }
@@ -128,6 +173,13 @@ class MoveExplorer {
     return families;
   }
 
+  /** Garde un passage sans timing comme un essai brut (saut mural seulement). */
+  private recordSingle(move: Move): void {
+    if (this.canWallJump && !Number.isFinite(move.windowMs)) {
+      this.records.push({ ...move, targets: [move.to], msPerTry: move.windowMs });
+    }
+  }
+
   /** Plus longue suite d'essais consécutifs menant à chaque surface, convertie en fenêtre. */
   private offerWindows(
     from: number,
@@ -136,6 +188,9 @@ class MoveExplorer {
     offer: (move: Move) => void,
   ): void {
     for (const family of families) {
+      if (this.canWallJump) {
+        this.records.push({ ...family, from, msPerTry });
+      }
       const bestRun = new Map<number, number>();
       let runTarget = -2;
       let run = 0;
@@ -310,11 +365,138 @@ class MoveExplorer {
       input.jumpPressed = s === 0;
       input.jumpHeld = holdSteps === 0 || s < holdSteps;
       input.moveX = airRelease && s > 0 ? 0 : dir;
+      const before = probe.state;
       probe.step(input);
       if (touchesHazard(this.level, probe.box)) {
         return -1;
       }
+      if (this.enteredWall(before)) {
+        return this.wallNodeOf(probe);
+      }
       airborne ||= !probe.grounded;
+    }
+    return this.finish(0);
+  }
+
+  /** Vrai si `probe` vient d'entrer en glissade contre un mur (appui du saut mural, D-44). */
+  private enteredWall(before: PlayerState): boolean {
+    return (
+      this.canWallJump &&
+      this.probe.state === PlayerState.WallSlide &&
+      before !== PlayerState.WallSlide
+    );
+  }
+
+  /**
+   * Nœud de l'appui où se trouve `probe` : même mur, même hauteur à 4 px près, même mur quitté.
+   * Le premier état rencontré sert de point de départ à tous (la glissade ramène la chute à la
+   * même vitesse : les états se rejoignent).
+   */
+  private wallNodeOf(player: PlayerPhysics): number {
+    const key = `${String(player.wallDir)}:${String(player.wallCol)}:${String(
+      Math.round(player.box.y / WALL_SEARCH.heightStepPx),
+    )}:${String(player.releasedWall)}`;
+    const known = this.wallIds.get(key);
+    if (known !== undefined) {
+      return known;
+    }
+    if (this.wallNodes.length >= WALL_SEARCH.maxNodes) {
+      throw new Error(`Analyse : plus de ${String(WALL_SEARCH.maxNodes)} appuis sur les murs`);
+    }
+    const snapshot = new PlayerPhysics(this.level, this.params, 0, 0, this.hitbox);
+    snapshot.copyFrom(player);
+    const node: WallNode = {
+      id: this.map.surfaces.length + this.wallNodes.length,
+      dir: player.wallDir,
+      snapshot,
+    };
+    this.wallNodes.push(node);
+    this.wallQueue.push(node);
+    this.wallIds.set(key, node.id);
+    return node.id;
+  }
+
+  /** Prochain appui à explorer (null : tous explorés). */
+  nextWallNode(): WallNode | null {
+    return this.wallQueue.shift() ?? null;
+  }
+
+  /**
+   * Passages depuis un appui (D-44) : rebondir à chaque instant de la glissade (plusieurs
+   * durées de maintien, direction ensuite vers le large, relâchée ou vers le mur quitté), ou
+   * lâcher le mur (glisser jusqu'en bas, se laisser tomber, s'en écarter).
+   */
+  exploreWall(node: WallNode): Move[] {
+    const best = new Map<number, Move>();
+    const offer = (move: Move) => {
+      this.recordSingle(move);
+      if (move.to < 0 || move.to === move.from) {
+        return;
+      }
+      const current = best.get(move.to);
+      if (!current || move.windowMs > current.windowMs) {
+        best.set(move.to, move);
+      }
+    };
+    const w = node.dir;
+    const families = this.families(MoveKind.WallJump, [-w, 0, w], false).filter((family) =>
+      WALL_SEARCH.jumpHoldSteps.includes(family.holdSteps),
+    );
+    const main = this.main;
+    main.copyFrom(node.snapshot);
+    const input = this.input;
+    for (let k = 0; k < WALL_SEARCH.maxSlideSteps; k++) {
+      if (main.grounded || main.onLedge || main.wallDir === 0) {
+        break;
+      }
+      if (k % WALL_SEARCH.sampleSteps === 0) {
+        for (const family of families) {
+          family.targets.push(this.tryKick(main, family.dir, family.holdSteps));
+        }
+      }
+      input.moveX = w;
+      input.moveY = 0;
+      input.jumpPressed = false;
+      input.jumpHeld = false;
+      main.step(input);
+      if (touchesHazard(this.level, main.box)) {
+        break;
+      }
+    }
+    this.offerWindows(node.id, families, WALL_SEARCH.sampleSteps * this.stepMs, offer);
+    for (const dir of [w, 0, -w]) {
+      this.probe.copyFrom(node.snapshot);
+      offer({
+        from: node.id,
+        to: this.finish(dir),
+        kind: MoveKind.WallLetGo,
+        dir,
+        holdSteps: 0,
+        airRelease: false,
+        windowMs: Number.POSITIVE_INFINITY,
+      });
+    }
+    return [...best.values()];
+  }
+
+  /** Depuis la glissade de `from`, rebondit maintenant ; retourne la surface ou l'appui atteint. */
+  private tryKick(from: PlayerPhysics, dir: number, holdSteps: number): number {
+    const probe = this.probe;
+    probe.copyFrom(from);
+    const input = this.input;
+    input.moveY = 0;
+    for (let s = 0; s < MOVE_SEARCH.maxSteps && !probe.grounded; s++) {
+      input.jumpPressed = s === 0;
+      input.jumpHeld = holdSteps === 0 || s < holdSteps;
+      input.moveX = dir;
+      const before = probe.state;
+      probe.step(input);
+      if (touchesHazard(this.level, probe.box)) {
+        return -1;
+      }
+      if (this.enteredWall(before)) {
+        return this.wallNodeOf(probe);
+      }
     }
     return this.finish(0);
   }
@@ -332,9 +514,13 @@ class MoveExplorer {
     input.jumpHeld = false;
     let s = 0;
     while (!probe.grounded && s < MOVE_SEARCH.maxSteps) {
+      const before = probe.state;
       probe.step(input);
       if (touchesHazard(this.level, probe.box)) {
         return -1;
+      }
+      if (this.enteredWall(before)) {
+        return this.wallNodeOf(probe);
       }
       s++;
     }
@@ -422,6 +608,8 @@ function widestPath(
 export interface AnalysisAbilities {
   /** Grimper aux rebords (D-26) : les sauts qui poussent vers un mur s'y accrochent et s'y hissent. */
   readonly climb?: boolean;
+  /** Saut mural (D-44) : glissade contre les murs et rebonds, enchaînés d'un mur à l'autre. */
+  readonly wallJump?: boolean;
   /** Hitbox de Céleste (croissance, D-43) ; par défaut, celle de la première phase. */
   readonly hitbox?: Readonly<{ width: number; height: number }>;
 }
@@ -437,11 +625,15 @@ export function analyzeLevel(
 ): LevelAnalysis {
   const hitbox = abilities.hitbox ?? PLAYER_HITBOX;
   const map = findSurfaces(level, hitbox.height);
-  const explorer = new MoveExplorer(level, params, map, abilities.climb ?? false, hitbox);
-  const moves: Move[] = [];
-  for (const surface of map.surfaces) {
-    moves.push(...explorer.explore(surface));
-  }
+  const explorer = new MoveExplorer(
+    level,
+    params,
+    map,
+    abilities.climb ?? false,
+    hitbox,
+    abilities.wallJump ?? false,
+  );
+  const moves = exploreAll(explorer, map);
   const start = surfaceUnder(level, map, level.spawn.col, level.spawn.row);
   const goal = level.goal ? surfaceUnder(level, map, level.goal.col, level.goal.row) : -1;
   const path = start >= 0 && goal >= 0 ? widestPath(map.surfaces.length, moves, start, goal) : null;
@@ -451,7 +643,7 @@ export function analyzeLevel(
       critical = move;
     }
   }
-  return { map, moves, start, goal, path, critical };
+  return { map, moves, start, goal, path, critical, wallNodeCount: explorer.wallNodes.length };
 }
 
 /** Passages depuis une seule surface (plus rapide qu'une analyse complète). */
@@ -463,15 +655,170 @@ export function movesFrom(
   abilities: AnalysisAbilities = {},
 ): Move[] {
   const surface = map.surfaces[surfaceId];
-  return surface
-    ? new MoveExplorer(
-        level,
-        params,
-        map,
-        abilities.climb ?? false,
-        abilities.hitbox ?? PLAYER_HITBOX,
-      ).explore(surface)
-    : [];
+  if (!surface) {
+    return [];
+  }
+  const explorer = new MoveExplorer(
+    level,
+    params,
+    map,
+    abilities.climb ?? false,
+    abilities.hitbox ?? PLAYER_HITBOX,
+    abilities.wallJump ?? false,
+  );
+  const moves = explorer.explore(surface);
+  if (explorer.wallNodes.length === 0) {
+    return moves;
+  }
+  return exploreAll(explorer, map).filter((move) => move.from === surfaceId);
+}
+
+/**
+ * Tous les passages entre surfaces. Avec le saut mural (D-44), les appuis sur les murs sont des
+ * étapes intermédiaires : voir `wallWindows`. Un passage par les appuis n'est retenu que s'il fait
+ * mieux qu'un passage direct.
+ */
+function exploreAll(explorer: MoveExplorer, map: SurfaceMap): Move[] {
+  const surfaceCount = map.surfaces.length;
+  const direct: Move[] = [];
+  for (const surface of map.surfaces) {
+    direct.push(...explorer.explore(surface));
+  }
+  if (explorer.wallNodes.length === 0) {
+    return direct;
+  }
+  for (let node = explorer.nextWallNode(); node; node = explorer.nextWallNode()) {
+    explorer.exploreWall(node);
+  }
+  const best = new Map<string, Move>();
+  for (const move of direct) {
+    if (move.to < surfaceCount) {
+      best.set(`${String(move.from)}:${String(move.to)}`, move);
+    }
+  }
+  for (const move of wallWindows(explorer.records, surfaceCount, explorer.wallNodes.length)) {
+    const key = `${String(move.from)}:${String(move.to)}`;
+    const current = best.get(key);
+    if (!current || move.windowMs > current.windowMs) {
+      best.set(key, move);
+    }
+  }
+  return [...best.values()];
+}
+
+/**
+ * Fenêtre d'une famille d'essais quand chaque résultat vaut `value(cible)` : la plus grande valeur
+ * v telle qu'une suite d'essais consécutifs, tous de valeur ≥ v, dure au moins v. Généralise la
+ * fenêtre d'un passage direct (valeur infinie pour la surface visée, nulle ailleurs).
+ */
+function recordWindow(record: TryRecord, value: (target: number) => number): number {
+  const values = record.targets.map(value);
+  let best = 0;
+  for (const threshold of new Set(values)) {
+    if (threshold <= best) {
+      continue;
+    }
+    let run = 0;
+    let longest = 0;
+    for (const v of values) {
+      run = v >= threshold ? run + 1 : 0;
+      longest = Math.max(longest, run);
+    }
+    best = Math.max(best, Math.min(threshold, longest * record.msPerTry));
+  }
+  return best;
+}
+
+/**
+ * Passages de surface à surface à travers les appuis sur les murs (D-44). Pendant une glissade,
+ * rebondir un peu plus tôt ou un peu plus tard mène à des appuis voisins, souvent tous bons : la
+ * fenêtre d'un rebond est donc la durée pendant laquelle il mène à un appui d'où l'on peut encore
+ * finir le passage avec une marge au moins égale. Calcul par point fixe (les valeurs ne font que
+ * croître), pour chaque surface visée.
+ */
+function wallWindows(
+  records: readonly TryRecord[],
+  surfaceCount: number,
+  nodeCount: number,
+): Move[] {
+  const byNode: TryRecord[][] = Array.from({ length: nodeCount }, () => []);
+  const fromSurfaces: TryRecord[] = [];
+  /** Appuis dont un essai mène à l'appui (ou à la surface) donné. */
+  const dependents = new Map<number, Set<number>>();
+  const goals = new Set<number>();
+  for (const record of records) {
+    if (record.from >= surfaceCount) {
+      byNode[record.from - surfaceCount]?.push(record);
+      for (const target of record.targets) {
+        if (target < 0) {
+          continue;
+        }
+        if (target < surfaceCount) {
+          goals.add(target);
+        }
+        let set = dependents.get(target);
+        if (!set) {
+          set = new Set();
+          dependents.set(target, set);
+        }
+        set.add(record.from);
+      }
+    } else if (record.targets.some((target) => target >= surfaceCount)) {
+      fromSurfaces.push(record);
+    }
+  }
+  const moves: Move[] = [];
+  const nodeValue = new Float64Array(nodeCount);
+  for (const goal of goals) {
+    nodeValue.fill(0);
+    const value = (target: number) =>
+      target === goal
+        ? Number.POSITIVE_INFINITY
+        : target >= surfaceCount
+          ? (nodeValue[target - surfaceCount] ?? 0)
+          : 0;
+    const queue = [...(dependents.get(goal) ?? [])];
+    const queued = new Set(queue);
+    for (let node = queue.pop(); node !== undefined; node = queue.pop()) {
+      queued.delete(node);
+      let v = 0;
+      for (const record of byNode[node - surfaceCount] ?? []) {
+        v = Math.max(v, recordWindow(record, value));
+      }
+      if (v <= (nodeValue[node - surfaceCount] ?? 0)) {
+        continue;
+      }
+      nodeValue[node - surfaceCount] = v;
+      for (const dependent of dependents.get(node) ?? []) {
+        if (!queued.has(dependent)) {
+          queued.add(dependent);
+          queue.push(dependent);
+        }
+      }
+    }
+    const bestFrom = new Map<number, Move>();
+    for (const record of fromSurfaces) {
+      if (record.from === goal) {
+        continue;
+      }
+      const windowMs = recordWindow(record, value);
+      const current = bestFrom.get(record.from);
+      if (windowMs > 0 && (!current || windowMs > current.windowMs)) {
+        bestFrom.set(record.from, {
+          from: record.from,
+          to: goal,
+          kind: MoveKind.WallJump,
+          dir: record.dir,
+          holdSteps: record.holdSteps,
+          airRelease: record.airRelease,
+          windowMs,
+          start: record.kind,
+        });
+      }
+    }
+    moves.push(...bestFrom.values());
+  }
+  return moves;
 }
 
 const KIND_LABEL: Readonly<Record<MoveKind, string>> = {
@@ -479,6 +826,8 @@ const KIND_LABEL: Readonly<Record<MoveKind, string>> = {
   'standing-jump': 'saut sans élan',
   'walk-off': 'chute',
   drop: 'descente Bas + Saut',
+  'wall-jump': 'saut mural',
+  'wall-let-go': 'glissade',
 };
 
 /** Description lisible d'un passage (rapports de test, debug). Colonnes et lignes comptées depuis 1. */
@@ -490,6 +839,10 @@ export function describeMove(move: Move, map: SurfaceMap): string {
   const arrow = move.dir > 0 ? '→' : move.dir < 0 ? '←' : '↑';
   const hold = move.holdSteps === 0 ? 'maintenu' : `maintien ${move.holdSteps} pas`;
   const air = move.airRelease ? ', direction relâchée' : '';
+  if (move.start) {
+    const timing = Number.isFinite(move.windowMs) ? `, fenêtre ${move.windowMs.toFixed(0)} ms` : '';
+    return `${where(move.from)} → ${where(move.to)} : ${KIND_LABEL[move.start]} ${arrow} puis appuis sur les murs${timing}`;
+  }
   const timing =
     move.kind === MoveKind.WalkOff || move.kind === MoveKind.Drop
       ? ''

@@ -1,0 +1,47 @@
+; Parcours 7 : saut mural (moyen, D-44). Capacités prêtées par le parcours (hors partie) : on
+; n'a pas besoin de les avoir trouvées. Première cheminée large de 4 tuiles (facile), puis une
+; cheminée de 5 tuiles au-dessus de briques de jeu (moyen), jusqu'au haut du grand meuble.
+; @name: 7. Saut mural
+; @difficulty: medium
+; @abilities: climb wall-jump
+; Légende : # plein, b bois (plein), ^ briques de jeu (danger), . vide, P départ, G arrivée.
+########################
+#......................#
+#......................#
+#......................#
+#......................#
+#..................G...#
+#...............bbbbbbb#
+#...............bbbbbbb#
+#.........b.....bbbbbbb#
+#.........b.....bbbbbbb#
+#.........b.....bbbbbbb#
+#.........b.....bbbbbbb#
+#.........b.....bbbbbbb#
+#.........b.....bbbbbbb#
+#.........b.....bbbbbbb#
+#.........b.....bbbbbbb#
+#.........b.....bbbbbbb#
+#.........b.....bbbbbbb#
+#.........b.....bbbbbbb#
+#.........b.....bbbbbbb#
+#...............bbbbbbb#
+#...............bbbbbbb#
+#....bbbbbb.....bbbbbbb#
+#....bbbbbb.....bbbbbbb#
+#....bbbbbb.....bbbbbbb#
+#....bbbbbb.....bbbbbbb#
+#....bbbbbb.....bbbbbbb#
+#....bbbbbb.....bbbbbbb#
+#....bbbbbb.....bbbbbbb#
+#....bbbbbb^^^^^bbbbbbb#
+#....bbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbb#
+#......................#
+#......................#
+#......................#
+#......................#
+#..P...................#
+########################
