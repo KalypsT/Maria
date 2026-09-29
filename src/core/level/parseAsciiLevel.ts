@@ -19,12 +19,14 @@ const LEGEND: Readonly<Record<string, number>> = {
   G: Tile.Empty,
   e: Tile.Empty,
   C: Tile.Empty,
+  A: Tile.Empty,
   '^': Tile.Hazard,
 };
 /** Marqueurs d'entités (la tuile elle-même est vide). */
 const ENTITIES: Readonly<Record<string, EntityType>> = {
   e: EntityType.Patroller,
   C: EntityType.Checkpoint,
+  A: EntityType.Ability,
 };
 /** Matériaux d'affichage (D-25). */
 const MATERIALS: Readonly<Record<string, Material>> = {
@@ -45,7 +47,8 @@ const META = /^;\s*@([\w-]+)\s*:\s*(.*)$/;
  * Lignes vides en début et fin ignorées, lignes commençant par `;` ignorées (commentaires).
  * Légende : `#` plein, `=` traversable par le dessous, `.` vide, `P` départ (une seule fois),
  * `G` arrivée d'un parcours (au plus une fois), `e` patrouilleur, `C` checkpoint, `^` danger,
- * `b` bois et `t` tissu (pleins), `-` étagère (traversable), `1`-`9` sortie dans un mur latéral.
+ * `b` bois et `t` tissu (pleins), `-` étagère (traversable), `1`-`9` sortie dans un mur latéral,
+ * `A` objet de capacité (au plus un, capacité nommée par `; @ability:`).
  * Les commentaires `; @clé: valeur` sont des métadonnées.
  */
 export function parseAsciiLevel(id: string, text: string): LevelData {
@@ -123,6 +126,10 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
 
   if (!spawn) {
     throw new Error(`Niveau ${id} : point de départ « ${SPAWN} » manquant`);
+  }
+  const abilities = entities.filter((entity) => entity.type === EntityType.Ability).length;
+  if (abilities > 1 || (abilities === 1) !== (meta.ability !== undefined)) {
+    throw new Error(`Niveau ${id} : un objet « A » va de pair avec « ; @ability: » (un seul)`);
   }
   const exits = [...exitTiles.entries()]
     .sort(([a], [b]) => a - b)

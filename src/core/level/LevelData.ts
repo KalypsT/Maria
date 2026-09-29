@@ -48,7 +48,12 @@ export interface LevelExit {
   readonly rowMax: number;
 }
 
-export const EntityType = { Patroller: 'patroller', Checkpoint: 'checkpoint' } as const;
+export const EntityType = {
+  Patroller: 'patroller',
+  Checkpoint: 'checkpoint',
+  /** Objet qui donne une capacité, nommée par `; @ability:` (D-26). */
+  Ability: 'ability',
+} as const;
 export type EntityType = (typeof EntityType)[keyof typeof EntityType];
 
 export interface LevelEntity {

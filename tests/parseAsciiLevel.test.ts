@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Material, Tile, tileAt } from '../src/core/level/LevelData';
+import { EntityType, Material, Tile, tileAt } from '../src/core/level/LevelData';
 import { parseAsciiLevel } from '../src/core/level/parseAsciiLevel';
 import testRoom from '../src/levels/test-room.txt?raw';
 
@@ -77,6 +77,19 @@ describe('parseAsciiLevel', () => {
     expect(() => parseAsciiLevel('t', '#####\n#P1.#\n#.1.#\n#####')).toThrow(/mur gauche ou droit/);
     expect(() => parseAsciiLevel('t', '#####\n1P..#\n#...#\n#####')).toThrow(/au moins 2 tuiles/);
     expect(() => parseAsciiLevel('t', '#####\n1P..#\n#...#\n1...#\n#####')).toThrow(/continue/);
+  });
+
+  it('lit l’objet de capacité et sa capacité (D-26)', () => {
+    const level = parseAsciiLevel('t', '; @ability: climb\n#####\n#PA.#\n#####');
+    expect(level.entities).toEqual([{ type: EntityType.Ability, col: 2, row: 1 }]);
+    expect(level.meta.ability).toBe('climb');
+    expect(() => parseAsciiLevel('t', '#####\n#PA.#\n#####')).toThrow(/@ability/);
+    expect(() => parseAsciiLevel('t', '; @ability: climb\n#####\n#P..#\n#####')).toThrow(
+      /@ability/,
+    );
+    expect(() => parseAsciiLevel('t', '; @ability: climb\n#####\n#PAA#\n#####')).toThrow(
+      /@ability/,
+    );
   });
 
   it('charge la salle de test de la Phase 1', () => {
