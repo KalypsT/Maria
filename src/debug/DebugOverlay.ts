@@ -225,6 +225,10 @@ export function installDebugOverlay(scene: GameScene): void {
   addCheck(panel, 'Repères de caméra', showCamera, (checked) => {
     showCamera = checked;
   });
+  // Aperçu du monde étrange (D-28) : mêmes formes, autre palette et lumière.
+  addCheck(panel, 'Monde étrange (aperçu)', scene.strangeWorld, (checked) => {
+    scene.setStrangeWorld(checked);
+  });
   // Déblocage des capacités (D-26) : pour la partie en cours seulement, sans sauvegarde.
   addCheck(panel, 'Capacité : grimper aux rebords', scene.debugClimb, (checked) => {
     scene.debugClimb = checked;

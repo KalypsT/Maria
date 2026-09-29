@@ -92,6 +92,20 @@ describe('parseAsciiLevel', () => {
     );
   });
 
+  it('lit l’habillage @decor (D-28), répétable', () => {
+    const text = '; @decor: bed 1 1 2 1\n; @decor: window 0 0 4 1\n####\n#P.#\n####';
+    const level = parseAsciiLevel('t', text);
+    expect(level.decor).toEqual([
+      { kind: 'bed', col: 1, row: 1, width: 2, height: 1 },
+      { kind: 'window', col: 0, row: 0, width: 4, height: 1 },
+    ]);
+    expect(level.meta.decor).toBeUndefined();
+    expect(() => parseAsciiLevel('t', '; @decor: bed 1 1\n####\n#P.#\n####')).toThrow(/@decor/);
+    expect(() => parseAsciiLevel('t', '; @decor: bed 3 1 2 1\n####\n#P.#\n####')).toThrow(
+      /hors de la salle/,
+    );
+  });
+
   it('charge la salle de test de la Phase 1', () => {
     const level = parseAsciiLevel('test-room', testRoom);
     expect(level.width).toBe(40);
