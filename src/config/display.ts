@@ -27,27 +27,42 @@ export const TILE_SIZE = 16;
 /** Côté d'un bloc de rendu de salle, en tuiles (décision D-17 : 512 px, sous les limites de texture). */
 export const LEVEL_CHUNK_TILES = 32;
 
-/** Couleurs des placeholders géométriques (provisoires, direction artistique non validée). */
+/**
+ * Couleurs des placeholders géométriques (PROVISOIRES, direction artistique ouverte §45, thème « C ») :
+ * la maison la nuit, douce et mate (aucun néon) ; le rose est réservé à Céleste (lunettes, §2).
+ * Interface : variables CSS de src/style.css (le cahier de Céleste).
+ */
 export const PLACEHOLDER_COLORS = {
-  background: 0x1b1a24,
-  celeste: 0xf4a6c8,
+  /** Fond par défaut (une salle peut avoir sa propre ambiance). */
+  background: 0x262a35,
+  celeste: 0xf1c9d2,
   /** Lunettes rondes roses (spec §2). */
-  glasses: 0xff4fa3,
+  glasses: 0xe0598b,
   face: 0xf6e3d4,
-  solid: 0x4a4760,
-  solidEdge: 0x6b678a,
-  oneWay: 0x8a7fb0,
+  /** Murs et planchers. */
+  solid: 0x51493f,
+  solidEdge: 0x6f6356,
+  /** Planches traversables. */
+  oneWay: 0xa08563,
+  /** Meubles en bois (lit, table, chaise, étagère). */
+  wood: 0x7d5f45,
+  woodEdge: 0x9d7a58,
+  /** Tissus (lit, canapé, coussins). */
+  fabric: 0x5f6f8e,
+  fabricEdge: 0x7e8eab,
   /** Arrivée d'un parcours (placeholder). */
-  goal: 0x7fe0c0,
+  goal: 0xe6c27a,
   /** Patrouilleur (placeholder neutre, design ouvert) : ocre, distinct de Céleste et du décor. */
   enemy: 0xc9823f,
-  enemyEyes: 0x1b1a24,
-  /** Danger (placeholder, D-21). */
-  hazard: 0x9c4d86,
-  /** Checkpoint éteint / allumé (placeholders, D-21). */
-  checkpoint: 0x6b678a,
-  checkpointLit: 0xffd98a,
+  enemyEyes: 0x262a35,
+  /** Danger (placeholder, D-21) : rouge brique éteint. */
+  hazard: 0xa0584a,
+  /** Checkpoint éteint / allumé (placeholders, D-21) : une veilleuse. */
+  checkpoint: 0x7a7066,
+  checkpointLit: 0xf2c879,
+  /** Sortie vers une autre salle (placeholder, D-25). */
+  exit: 0xf2e6c9,
   /** Bâton de Céleste et arc de frappe (placeholders). */
   stick: 0xc9a46b,
-  slash: 0xfff1d6,
+  slash: 0xfff4e0,
 } as const;

@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-const BACKGROUND = '#1b1a24';
+/** Papier du cahier (écran de départ) : couleur de lancement et de la barre d'état. */
+const BACKGROUND = '#f3ead7';
 
 // GitHub Pages sert le site sous https://kalypst.github.io/Maria/ ; même base en dev pour éviter les écarts.
 // Le mode `debug` produit le build de debug publié sous /Maria/debug/ (décision D-12).
