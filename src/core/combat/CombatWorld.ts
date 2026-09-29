@@ -1,10 +1,11 @@
 import type { CombatParams } from '../../config/combat';
+import { TILE_SIZE } from '../../config/display';
 import { PHYSICS_STEP_HZ, msToSteps } from '../../config/movement';
 import { EntityType, type LevelData } from '../level/LevelData';
 import type { Box } from '../physics/gridCollision';
 import type { PlayerPhysics } from '../player/PlayerPhysics';
 import { PlayerAttack } from './PlayerAttack';
-import { Patroller, type PatrollerTuning } from './Patroller';
+import { EnemyKind, Patroller, type PatrollerTuning } from './Patroller';
 
 /** Événements du dernier pas (masque de bits), pour le feedback. */
 export const CombatEvent = { None: 0, Hit: 1, Disperse: 2, Hurt: 4 } as const;
@@ -41,6 +42,8 @@ export class CombatWorld {
     hits: 1,
     stunSteps: 0,
     flashSteps: 0,
+    spiderDrop: 0,
+    spiderPhaseStep: 0,
   };
   private hitstopTotal = 0;
   private hurtSteps = 0;
@@ -56,6 +59,11 @@ export class CombatWorld {
     this.attack = new PlayerAttack(params, stepHz);
     this.setParams(params);
     this.load(level);
+  }
+
+  /** Salle courante (l'affichage y cherche où s'attache le fil des araignées). */
+  get room(): LevelData {
+    return this.level;
   }
 
   get settings(): Readonly<CombatParams> {
@@ -79,14 +87,23 @@ export class CombatWorld {
     t.hits = p.patrollerHits;
     t.stunSteps = msToSteps(p.patrollerStunMs, hz);
     t.flashSteps = msToSteps(p.hitFlashMs, hz);
+    t.spiderDrop = p.spiderDropTiles * TILE_SIZE;
+    t.spiderPhaseStep = (2 * Math.PI * 1000) / (p.spiderPeriodMs * hz);
   }
 
   /** Nouvelle salle : ennemis créés depuis ses marqueurs (allocation au chargement seulement). */
   load(level: LevelData): void {
     this.level = level;
     this.enemies = level.entities
-      .filter((entity) => entity.type === EntityType.Patroller)
-      .map((entity) => new Patroller(entity.col, entity.row));
+      .filter((e) => e.type === EntityType.Patroller || e.type === EntityType.Spider)
+      .map(
+        (e) =>
+          new Patroller(
+            e.col,
+            e.row,
+            e.type === EntityType.Spider ? EnemyKind.Spider : EnemyKind.Walker,
+          ),
+      );
     this.reset();
   }
 
