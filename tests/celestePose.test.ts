@@ -1,0 +1,104 @@
+import { describe, expect, it } from 'vitest';
+import { DEFAULT_PUPPET } from '../src/config/puppet';
+import { CelestePoser, PoseAttack, type PoseSubject } from '../src/core/player/celestePose';
+import { PlayerState } from '../src/core/player/playerState';
+
+const DT = 1 / 120;
+const MAX_RUN = 136;
+
+function subject(state: PlayerState, vx = 0, vy = 0): PoseSubject {
+  return { state, vx, vy, facing: 1 };
+}
+
+function run(poser: CelestePoser, s: PoseSubject, steps: number): void {
+  for (let i = 0; i < steps; i++) {
+    poser.step(s, PoseAttack.None, 0);
+  }
+}
+
+describe('Céleste en papier découpé (D-29)', () => {
+  it('le pas suit la distance parcourue : un cycle tous les strideLengthPx', () => {
+    const poser = new CelestePoser(DEFAULT_PUPPET, DT, MAX_RUN);
+    const steps = 240;
+    run(poser, subject(PlayerState.Run, MAX_RUN), steps);
+    const distance = MAX_RUN * DT * steps;
+    expect(poser.runPhase / (2 * Math.PI)).toBeCloseTo(distance / DEFAULT_PUPPET.strideLengthPx, 6);
+    // Deux fois plus vite : deux fois plus de pas pour la même durée.
+    const slow = new CelestePoser(DEFAULT_PUPPET, DT, MAX_RUN);
+    run(slow, subject(PlayerState.Run, MAX_RUN / 2), steps);
+    expect(slow.runPhase).toBeCloseTo(poser.runPhase / 2, 6);
+  });
+
+  it('en course, bras et jambes s’opposent ; à l’arrêt, ils reviennent au repos', () => {
+    const poser = new CelestePoser(DEFAULT_PUPPET, DT, MAX_RUN);
+    run(poser, subject(PlayerState.Run, MAX_RUN), 50);
+    const pose = poser.pose;
+    expect(Math.sign(pose.legFront)).toBe(-Math.sign(pose.legBack));
+    expect(Math.sign(pose.armFront)).toBe(-Math.sign(pose.legFront));
+    run(poser, subject(PlayerState.Idle), 240);
+    expect(Math.abs(pose.legFront)).toBeLessThan(0.01);
+    expect(Math.abs(pose.armFront)).toBeLessThan(0.15);
+  });
+
+  it('suspendue, les bras montent vers le rebord', () => {
+    const poser = new CelestePoser(DEFAULT_PUPPET, DT, MAX_RUN);
+    run(poser, subject(PlayerState.Hang), 60);
+    expect(poser.pose.armFront).toBeGreaterThan(2.5);
+    expect(poser.pose.armBack).toBeGreaterThan(2.3);
+  });
+
+  it('les mouvements restent continus (pas de saut de pose entre deux pas)', () => {
+    const poser = new CelestePoser(DEFAULT_PUPPET, DT, MAX_RUN);
+    const states = [
+      subject(PlayerState.Run, MAX_RUN),
+      subject(PlayerState.Jump, MAX_RUN, -300),
+      subject(PlayerState.Fall, MAX_RUN, 300),
+      subject(PlayerState.Hang),
+      subject(PlayerState.Climb),
+      subject(PlayerState.Idle),
+      subject(PlayerState.Hurt, -80, -100),
+    ];
+    const keys = [
+      'bodyY',
+      'bodyTilt',
+      'headTilt',
+      'armFront',
+      'armBack',
+      'legFront',
+      'legBack',
+      'pigtails',
+    ] as const;
+    let previous = { ...poser.pose };
+    for (const s of states) {
+      for (let i = 0; i < 60; i++) {
+        poser.step(s, PoseAttack.None, 0);
+        for (const key of keys) {
+          const value = poser.pose[key];
+          expect(Number.isFinite(value), key).toBe(true);
+          // Radians, sauf bodyY (px).
+          expect(Math.abs(value - previous[key]), `${key} (${s.state})`).toBeLessThan(
+            key === 'bodyY' ? 1 : 0.5,
+          );
+        }
+        previous = { ...poser.pose };
+      }
+    }
+  });
+
+  it('les couettes partent vers l’arrière en course et se reposent à l’arrêt', () => {
+    const poser = new CelestePoser(DEFAULT_PUPPET, DT, MAX_RUN);
+    run(poser, subject(PlayerState.Run, MAX_RUN), 120);
+    expect(poser.pose.pigtails).toBeGreaterThan(0.1);
+    run(poser, subject(PlayerState.Idle), 600);
+    expect(Math.abs(poser.pose.pigtails)).toBeLessThan(0.02);
+    expect(poser.pose.pigtails).toBeLessThanOrEqual((DEFAULT_PUPPET.pigtailMaxDeg * Math.PI) / 180);
+  });
+
+  it('le bras avant suit le bâton pendant l’attaque', () => {
+    const poser = new CelestePoser(DEFAULT_PUPPET, DT, MAX_RUN);
+    poser.step(subject(PlayerState.Idle), PoseAttack.Startup, 0);
+    expect(poser.pose.armFront).toBeCloseTo((150 * Math.PI) / 180, 6);
+    poser.step(subject(PlayerState.Idle), PoseAttack.Active, 0.5);
+    expect(poser.pose.armFront).toBeCloseTo((70 * Math.PI) / 180, 6);
+  });
+});

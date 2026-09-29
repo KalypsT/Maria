@@ -14,6 +14,7 @@ import {
   MAX_STEPS_PER_FRAME,
   PHYSICS_STEP_HZ,
   PLAYER_HITBOX,
+  msToSteps,
   type MovementParams,
 } from '../config/movement';
 import { CameraController } from '../core/camera/CameraController';
@@ -38,13 +39,15 @@ import { Hud } from '../ui/Hud';
 import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
 import { PauseMenu } from '../ui/PauseMenu';
 import { ART_IMAGES, MAX_ART_SCALE, REAL_PALETTE, STRANGE_PALETTE } from '../config/art';
-import { CELESTE_ART, drawCeleste } from './art/celesteArt';
 import { CombatView } from './CombatView';
+import { CelestePuppet } from './CelestePuppet';
 import { RoomArtView } from './RoomArtView';
+import { DEFAULT_PUPPET, type PuppetParams } from '../config/puppet';
+import { CelestePoser, PoseAttack } from '../core/player/celestePose';
+import { AttackPhase } from '../core/combat/PlayerAttack';
 import { DustPool } from './DustPool';
 import { WorldView } from './WorldView';
 
-const PLAYER_TEXTURE = 'celeste';
 /** Durée d'image maximale prise en compte (onglet en arrière-plan, pause du navigateur). */
 const MAX_FRAME_SECONDS = 0.25;
 /** Clé du registre Phaser où main.ts dépose la partie en cours (D-22). */
@@ -137,7 +140,15 @@ export class GameScene extends Phaser.Scene {
   /** Réglages d'affichage courants (D-18). */
   displaySettings!: DisplaySettings;
   private pauseMenu?: PauseMenu;
-  private playerSprite!: Phaser.GameObjects.Image;
+  /** Céleste en « papier découpé » (D-29). */
+  private puppet!: CelestePuppet;
+  /** Animation de la marionnette, modifiable par l'overlay. */
+  readonly puppetParams: PuppetParams = { ...DEFAULT_PUPPET };
+  readonly poser = new CelestePoser(
+    this.puppetParams,
+    1 / PHYSICS_STEP_HZ,
+    DEFAULT_MOVEMENT.maxRunSpeed,
+  );
   private readonly levelImages: Phaser.GameObjects.Image[] = [];
   private readonly playerInput: PlayerInput = {
     moveX: 0,
@@ -166,7 +177,6 @@ export class GameScene extends Phaser.Scene {
     this.level = room.level;
     this.zone = room.zone;
     this.drawLevel();
-    this.createPlayerTexture();
     this.run = new RunState(this.level, this.worldParams);
     this.run.load(this.level, save.activatedCheckpoints, checkpointId);
     this.pickups.load(this.level, save.progression.abilities, save.progression.collectibles);
@@ -174,8 +184,8 @@ export class GameScene extends Phaser.Scene {
     const { x, y } = this.respawnPosition();
     this.player = new PlayerPhysics(this.level, this.movement, x, y);
     // Origine aux pieds : l'écrasement et l'inclinaison se font autour du point d'appui.
-    this.playerSprite = this.add.image(x, y, PLAYER_TEXTURE).setOrigin(0.5, 1).setDepth(10);
-    this.playerSprite.texture.setFilter(Phaser.Textures.FilterMode.LINEAR);
+    this.puppet = new CelestePuppet(this);
+    this.puppet.redraw(this.artScale, this.palette(), this.artImages());
     this.dust = new DustPool(this, this.feelParams);
     this.combat = new CombatWorld(this.level, this.combatParams);
     this.combatView = new CombatView(this, this.combat, this.combatParams, this.dust);
@@ -185,6 +195,7 @@ export class GameScene extends Phaser.Scene {
     this.applyMovement();
     this.applyAbilities();
     this.feel.reset(this.player);
+    this.poser.reset();
 
     const keyboard = new KeyboardSource();
     this.controls.sources.push(keyboard);
@@ -341,6 +352,7 @@ export class GameScene extends Phaser.Scene {
       camera.lookInput = input.moveY;
       camera.step(this.player);
       feel.step(this.player);
+      this.stepPose();
       if (feel.events !== 0) {
         this.dust.emit(feel.events, this.player.box, this.player.facing);
       }
@@ -353,15 +365,16 @@ export class GameScene extends Phaser.Scene {
     const alpha = this.clock.alpha;
     const player = this.player;
     const box = player.box;
-    this.playerSprite
-      .setPosition(
-        player.prevX + (box.x - player.prevX) * alpha + box.width / 2,
-        player.prevY + (box.y - player.prevY) * alpha + box.height,
-      )
-      .setScale(feel.scaleX / this.artScale, feel.scaleY / this.artScale)
-      .setRotation(feel.lean)
-      .setFlipX(player.facing < 0);
-    this.combatView.render(alpha, player, this.playerSprite);
+    this.puppet.render(
+      player.prevX + (box.x - player.prevX) * alpha + box.width / 2,
+      player.prevY + (box.y - player.prevY) * alpha + box.height,
+      player.facing,
+      feel.scaleX,
+      feel.scaleY,
+      feel.lean,
+      this.poser.pose,
+    );
+    this.combatView.render(alpha, player, this.puppet);
     this.worldView.render();
     this.renderRunState();
     this.dust.update();
@@ -393,6 +406,7 @@ export class GameScene extends Phaser.Scene {
     this.player.setParams(this.movement);
     this.feel.maxRunSpeed = this.movement.maxRunSpeed;
     this.feel.maxFallSpeed = this.movement.maxFallSpeed;
+    this.poser.setParams(this.puppetParams, this.movement.maxRunSpeed);
   }
 
   /** Applique les réglages de combat (overlay). */
@@ -476,7 +490,7 @@ export class GameScene extends Phaser.Scene {
     if (run.fainting) {
       const progress = run.faintProgress;
       this.hud.setVeil(Math.max(progress, this.transition.veil));
-      this.playerSprite.setAlpha(1 - progress);
+      this.puppet.setAlpha(1 - progress);
       return;
     }
     let veil = this.transition.veil;
@@ -495,6 +509,7 @@ export class GameScene extends Phaser.Scene {
     const { x, y } = this.respawnPosition();
     this.player.reset(x, y, this.level);
     this.feel.reset(this.player);
+    this.poser.reset();
     this.combat.reset();
     this.clock.reset();
     this.transition.cancel();
@@ -534,6 +549,7 @@ export class GameScene extends Phaser.Scene {
       room.level,
     );
     this.feel.reset(this.player);
+    this.poser.reset();
     this.clock.reset();
     this.transition.cancel();
     this.resetCamera();
@@ -562,6 +578,7 @@ export class GameScene extends Phaser.Scene {
     this.player.reset(x, y, room.level);
     this.player.vx = vx;
     this.feel.reset(this.player);
+    this.poser.reset();
     this.resetCamera();
   }
 
@@ -650,7 +667,7 @@ export class GameScene extends Phaser.Scene {
   private redrawArt(): void {
     this.worldView.setArtScale(this.artScale);
     this.drawLevel();
-    this.createPlayerTexture();
+    this.puppet.redraw(this.artScale, this.palette(), this.artImages());
   }
 
   /** Images fournies chargées (nom d'élément → image). */
@@ -791,31 +808,29 @@ export class GameScene extends Phaser.Scene {
     return false;
   }
 
-  /**
-   * Céleste dessinée par le code (D-28), à l'échelle de l'écran ; une image fournie sous le nom
-   * « celeste » la remplace. Redessinée si l'échelle ou la palette change.
-   */
-  private createPlayerTexture(): void {
-    const scale = this.artScale;
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.ceil(CELESTE_ART.width * scale);
-    canvas.height = Math.ceil(CELESTE_ART.height * scale);
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      return;
+  /** Pose de la marionnette (D-29), un pas : état de Céleste et coup de bâton en cours. */
+  private stepPose(): void {
+    const attack = this.combat.attack;
+    let phase: number = PoseAttack.None;
+    let progress = 0;
+    if (attack.phase === AttackPhase.Startup) {
+      phase = PoseAttack.Startup;
+    } else if (attack.phase === AttackPhase.Active) {
+      phase = PoseAttack.Active;
+      progress = 1 - attack.phaseSteps / Math.max(1, msToSteps(this.combatParams.attackActiveMs));
+    } else if (attack.phase === AttackPhase.Recovery) {
+      phase = PoseAttack.Recovery;
     }
-    const image = this.artImages().get('celeste');
-    if (image) {
-      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-    } else {
-      ctx.scale(scale, scale);
-      drawCeleste(ctx, this.strangeWorld ? STRANGE_PALETTE : REAL_PALETTE);
-    }
-    const sprite = this.playerSprite as Phaser.GameObjects.Image | undefined;
-    if (this.textures.exists(PLAYER_TEXTURE)) {
-      this.textures.remove(PLAYER_TEXTURE);
-    }
-    this.textures.addCanvas(PLAYER_TEXTURE, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
-    sprite?.setTexture(PLAYER_TEXTURE);
+    this.poser.step(this.player, phase, progress);
+  }
+
+  /** Applique les réglages de la marionnette (overlay). */
+  applyPuppet(): void {
+    this.poser.setParams(this.puppetParams, this.movement.maxRunSpeed);
+  }
+
+  /** Palette courante : maison réelle ou monde étrange (D-28). */
+  private palette() {
+    return this.strangeWorld ? STRANGE_PALETTE : REAL_PALETTE;
   }
 }
