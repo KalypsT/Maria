@@ -2,11 +2,22 @@
 
 ## Phase en cours
 
-**Maison vivante, PR 1 à 3** (la famille D-37, mouvements et souvenirs D-38, rez-de-chaussée D-39) : sur la branche `ccr-5c5df983-6feqj3`, **en attente de PR et d'essai sur téléphone**.
+**Retours du téléphone sur la maison vivante** (D-40 : présage près de Maria, mains des parents) : sur la branche `ccr-5c5df983-6feqj3`, **en attente de PR et d'essai sur téléphone**. La maison vivante (D-37 à D-39) est fusionnée.
 
-Prochaine : essai sur téléphone de la maison vivante, puis la croissance (§42 phase 7).
+Prochaine : décider de l'usage de l'image de Céleste fournie, puis la croissance (§42 phase 7).
 
 ## Fait
+
+### Retours du téléphone (D-40)
+
+- Le présage du salon dépend de la distance à Maria (rayon 13 tuiles), plus de la hauteur : rien sur la tringle ni sur le canapé.
+- Les mains des parents ne sont plus coupées : le cadre du dessin a une marge de chaque côté.
+- Image de Céleste fournie par l'utilisateur (pyjama bleu à myrtilles, nœuds roses, chaussons lapin) : usage à choisir.
+
+### À vérifier sur téléphone (retours)
+
+- Le salon : l'effet étrange ne vient qu'en s'approchant de la bibliothèque, et monte bien près de Maria.
+- Les mains : papa à la porte, sa tasse, maman au lit et son livre.
 
 ### Rez-de-chaussée retravaillé (D-39)
 

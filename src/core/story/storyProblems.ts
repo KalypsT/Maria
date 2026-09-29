@@ -169,9 +169,9 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
   for (const omen of story.omens) {
     const what = `présage ${omen.room}`;
     knownFlags(omen.when, what);
-    inRoom(omen.room, { col: 0, row: omen.toRow, w: 1, h: omen.fromRow - omen.toRow + 1 }, what);
-    if (omen.toRow >= omen.fromRow) {
-      problems.push(`${what} : la ligne d'arrivée doit être plus haute que celle du départ`);
+    inRoom(omen.room, { col: omen.col, row: omen.row, w: 1, h: 1 }, what);
+    if (omen.radius <= 0) {
+      problems.push(`${what} : rayon nul`);
     }
   }
   for (const lock of story.lockedRooms) {

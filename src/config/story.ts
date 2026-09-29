@@ -113,11 +113,11 @@ export const PROP_SIZE = {
   headband: { w: 10, h: 5 },
   blanket: { w: 10, h: 5 },
   // Parents (D-37) : à hauteur d'enfant, bien plus grands que Céleste (environ 26 px) ; taille
-  // réglée par PARENT_SCALE (le dessin s'agrandit).
-  'dad-door': { w: 26 * PARENT_SCALE, h: 62 * PARENT_SCALE },
-  'dad-kitchen': { w: 28 * PARENT_SCALE, h: 62 * PARENT_SCALE },
-  'mom-bed': { w: 28 * PARENT_SCALE, h: 44 * PARENT_SCALE },
-  'mom-sofa': { w: 30 * PARENT_SCALE, h: 44 * PARENT_SCALE },
+  // réglée par PARENT_SCALE (le dessin s'agrandit). Largeur avec la marge de la main tendue.
+  'dad-door': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  'dad-kitchen': { w: 40 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  'mom-bed': { w: 36 * PARENT_SCALE, h: 44 * PARENT_SCALE },
+  'mom-sofa': { w: 38 * PARENT_SCALE, h: 44 * PARENT_SCALE },
   // Le chat gris.
   'cat-sleep': { w: 16, h: 8 },
   'cat-sit': { w: 12, h: 14 },

@@ -62,7 +62,7 @@ function story(steps: StoryStep[], on: 'interact' | 'touch' = 'interact', lock =
     props: [],
     times: [{ when: { all: ['done'] }, time: 'morning' }],
     lockedRooms: [{ room: 'r', when: { none: ['done'] } }],
-    omens: [{ room: 'r', when: { none: ['done'] }, fromRow: 10, toRow: 4 }],
+    omens: [{ room: 'r', when: { none: ['done'] }, col: 10, row: 4, radius: 10 }],
   };
 }
 
@@ -151,18 +151,29 @@ describe('StoryDirector', () => {
     expect(d.exitsLocked('r')).toBe(false);
   });
 
-  it('présage : l’étrangeté monte avec la hauteur de Céleste, puis s’éteint (D-35)', () => {
+  it('présage : l’étrangeté monte en approchant du point visé, seulement là (D-40)', () => {
     const { host } = recorder();
     const d = new StoryDirector(story([]), host, HZ);
-    const feet = (row: number) => (row + 1) * T;
-    expect(d.omen('r', feet(12))).toBe(0);
-    expect(d.omen('r', feet(10))).toBe(0);
-    expect(d.omen('r', feet(7))).toBeCloseTo(0.5);
-    expect(d.omen('r', feet(4))).toBe(1);
-    expect(d.omen('r', feet(1))).toBe(1);
-    expect(d.omen('autre', feet(4))).toBe(0);
+    const at = (col: number, row: number) => d.omen('r', (col + 0.5) * T, (row + 0.5) * T);
+    expect(at(10, 4)).toBe(1);
+    expect(at(10, 9)).toBeCloseTo(0.5);
+    expect(at(20, 4)).toBe(0);
+    // À la même hauteur, mais loin : rien (le défaut constaté sur téléphone).
+    expect(at(30, 4)).toBe(0);
+    expect(d.omen('autre', 10.5 * T, 4.5 * T)).toBe(0);
     d.setFlags(['done']);
-    expect(d.omen('r', feet(4))).toBe(0);
+    expect(at(10, 4)).toBe(0);
+  });
+
+  it('dans le salon, le présage ne se déclenche pas à l’autre bout de la pièce en hauteur', () => {
+    const { host } = recorder();
+    const d = new StoryDirector(HOUSE_STORY, host, HZ);
+    d.setFlags([...LEGACY_STORY_FLAGS]);
+    const at = (col: number, row: number) => d.omen('living', (col + 0.5) * T, (row + 0.5) * T);
+    expect(at(28, 4), 'tringle du rideau').toBe(0);
+    expect(at(14, 21), 'canapé').toBe(0);
+    expect(at(50, 20), 'pied de la bibliothèque').toBeGreaterThan(0);
+    expect(at(51, 8), 'près de Maria').toBeGreaterThan(0.9);
   });
 
   it('fondu en cercle : la forme suit l’étape, le voile garde son sens (D-35)', () => {
