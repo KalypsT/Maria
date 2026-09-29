@@ -2,11 +2,35 @@
 
 ## Phase en cours
 
-**Croissance, première phase** (§42 phase 7, D-43) : sur la branche `ccr-5c5df983-6feqj3`, **en attente de PR et d'essai sur téléphone**. Chat agrandi (D-42) sur la même branche. D-40 et D-41 sont fusionnés.
+**Saut mural** (§15, D-44, D-45), PR 1 du jardin : sur la branche `ccr-53d22df4-9euiqo`, **en attente de PR et d'essai sur téléphone** (parcours d'essai 7). La croissance (D-43) et le chat agrandi (D-42) sont fusionnés.
 
-Prochaine : la zone suivante (le jardin, phase 2 de la spec §7.2), avec une difficulté qui monte (D-36).
+Prochaine : PR 2, **le jardin** (§7.2), construit sur les valeurs du saut mural réglées au téléphone, avec une difficulté qui monte (D-36) et la revisite de la maison par le saut mural.
 
 ## Fait
+
+### Saut mural (D-44, D-45)
+
+- Glissade contre un mur en descente, en poussant vers lui (seuil 0,5) ; saut mural à l'opposé (2,5 tuiles, 150 px/s), direction ignorée 130 ms ; 80 ms de tolérance après avoir quitté le mur.
+- Un seul mur ne se remonte pas : le mur quitté ne retient plus Céleste avant le sol, un rebord ou un autre mur.
+- Priorités : au sol, Saut reste un saut normal ; un rebord attrapable passe avant la glissade.
+- État `WallSlide`, pose dos au mur. Réglages `wall*` dans l'overlay. Case « Capacité : saut mural » dans l'overlay.
+- Parcours d'essai 7 « Saut mural » (menu pause), qui prête l'escalade et le saut mural (`; @abilities:`) : cheminée facile, puis cheminée moyenne au-dessus de briques.
+- Analyse de faisabilité : appuis sur les murs comme étapes, fenêtre d'un rebond sur toute la glissade.
+- Maison : le saut mural n'y ouvre rien (testé, phase 2). **La lucarne du grenier était déjà atteignable en phase 2** : la revisite par le saut mural est reportée au jardin.
+- Tests : 377 (glissade, seuil, montée, rebond, verrou, sol, tolérance, cheminée, un seul mur, sol qui rend le mur, `copyFrom`, analyse inchangée sans capacité, cheminée, un seul mur, parcours 7, maison).
+- Vérifié dans Chromium : glissade à 60 px/s, première cheminée remontée en 7 rebonds au clavier.
+
+### À vérifier sur téléphone (saut mural)
+
+Sur https://kalypst.github.io/Maria/debug/ (après merge), menu pause → Parcours d'essai → « 7. Saut mural » :
+
+- [ ] La glissade arrive quand on pousse vers le mur, **et pas quand on ne le veut pas** (retombée le long d'un meuble, diagonale du pouce). Régler `wallInputThreshold`.
+- [ ] Le rythme de la cheminée : attendre le haut du saut, rebondir, changer de direction. Pénible ou agréable ?
+- [ ] L'élan du rebond (`wallJumpSpeedX`, `wallJumpHeightTiles`) et le verrou (`wallJumpLockMs`) : trop raide, trop mou ?
+- [ ] La vitesse de glissade (`wallSlideSpeed`).
+- [ ] La deuxième cheminée (moyenne) : juste assez exigeante ?
+- [ ] La pose dos au mur se lit-elle ?
+- Exporter le JSON du debug et me transmettre les valeurs.
 
 ### Croissance : quelques mois plus tard (D-43)
 
@@ -650,7 +674,6 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. PR de la maison vivante (D-37 à D-39) et merge, puis essai sur téléphone.
-2. La croissance (§42 phase 7).
-3. La croissance (§42 phase 7).
-4. Avant d'offrir le jeu : installation facile (PWA), sauvegarde sûre sur iPhone, option « réduire les effets ».
+1. PR du saut mural, merge, essai sur téléphone et réglage des valeurs.
+2. Le jardin (PR 2) : zone, obtention du saut mural, revisite de la maison.
+3. Avant d'offrir le jeu : installation facile (PWA), sauvegarde sûre sur iPhone, option « réduire les effets ».

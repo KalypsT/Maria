@@ -462,6 +462,32 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
 - **Porte du jardin écartée pour l'instant** : sans le jardin, ce serait une porte qui ne mène nulle part. Elle viendra avec la zone suivante.
 - **Debug** : une étape d'histoire « quelques mois plus tard » et une case « Croissance : Céleste a grandi ».
 
+## D-44 — Deuxième capacité : le saut mural (§15)
+
+- **Plan validé** : le saut mural d'abord, testé seul dans un parcours d'essai, puis le jardin (où il s'obtiendra) sur ses valeurs réglées. Un seul mur ne se remonte pas. Tous les murs pleins comptent (règle unique, pilier 3).
+- **Geste** (aucun nouveau bouton) :
+  - **glissade** : en l'air, en descente, contre une tuile pleine touchée à hauteur des mains, en poussant vers elle au-delà de `wallInputThreshold` (0,5, plus haut que l'escalade : une diagonale molle ne fait pas glisser). La chute est aussitôt ramenée à `wallSlideSpeed` (60 px/s). Céleste est dos au mur. En montée, le mur ne retient jamais.
+  - **saut mural** : Saut contre le mur (ou jusqu'à `wallCoyoteMs`, 80 ms, après l'avoir quitté ; le jump buffer compte aussi) : impulsion à l'opposé du mur (`wallJumpSpeedX`, 150 px/s) et vers le haut (`wallJumpHeightTiles`, 2,5 tuiles, hauteur variable comme un saut normal).
+  - **verrou** : pendant `wallJumpLockMs` (130 ms), la direction est ignorée et l'élan conservé.
+  - **un seul mur ne se remonte pas** : le mur quitté par un saut mural ne retient plus Céleste (ni glissade ni appui) tant qu'elle n'a pas touché le sol, un rebord ou un autre mur. Règle structurelle, indépendante des réglages (avec des réglages plausibles, revenir sur le même mur faisait gagner de la hauteur).
+  - **priorités** : au sol (ou pendant le coyote time), Saut reste un saut normal ; un rebord attrapable (escalade) passe avant la glissade. Les étagères traversables, les dangers et les sorties ne retiennent pas.
+- **Réglages** dans `src/config/movement.ts` (`wall*`), dans l'overlay et l'export JSON. PROVISOIRES, à régler sur téléphone. Sans la capacité, le mouvement est **inchangé** (testé).
+- **État** `WallSlide` dans la machine à états ; pose de la marionnette dos au mur, une main et un pied contre lui.
+- **Capacité** `wall-jump`, enregistrée dans `progression.abilities` : **aucune migration**. Indice de prototype écrit (comme l'escalade), pour le jardin.
+- **Parcours d'essai 7 « Saut mural »** (menu pause, hors partie) : une cheminée de 4 tuiles (facile), puis une de 5 tuiles au-dessus de briques de jeu (moyen). Nouvelle directive `; @abilities:` : les capacités sont **prêtées** par un parcours d'essai, jamais par une salle de zone. Overlay : case « Capacité : saut mural ».
+- **Écart avec le plan annoncé : la lucarne du grenier**. Le plan en faisait la revisite du saut mural. L'analyse montre que le dessus de la lucarne est **déjà atteignable en phase 2** (saut plus haut et escalade, difficulté moyenne) : D-27 le disait hors de portée, ce qui n'est vrai qu'en phase 1. La revisite de la maison par le saut mural est **reportée à la PR du jardin**, où la capacité s'obtient (en PR 1, elle ne s'obtient que par le debug : une revisite ne serait pas testable en jeu).
+- **Maison vérifiée** (phase 2, escalade) : le saut mural n'ouvre **rien** de la maison réelle, ni en facile ni en moyen (testé). Seule la trouvaille difficile du passage d'ombres devient atteignable en difficile.
+
+## D-45 — Analyse de faisabilité avec le saut mural (D-16 étendue)
+
+- **Appuis sur les murs** : quand la simulation entre en glissade, l'état est gardé comme un **appui** (même mur, même hauteur à 8 px près, même mur quitté). Depuis chaque appui : un rebond essayé tous les 2 pas pendant 0,6 s de glissade (direction ensuite vers le large, relâchée ou vers le mur quitté ; saut maintenu ou court), et lâcher le mur (glisser jusqu'en bas, se laisser tomber, s'écarter).
+- **Fenêtre d'un rebond** : pendant une glissade, rebondir un peu plus tôt ou plus tard mène à des appuis voisins, souvent tous bons. La fenêtre est donc la durée pendant laquelle le rebond mène à un appui d'où l'on peut encore finir le passage avec une marge au moins égale (calcul par point fixe). Un premier essai qui exigeait le même appui exact donnait des fenêtres absurdes (67 ms pour une cheminée facile).
+- **Résultat** : des passages de surface à surface « par les murs » (`MoveKind.WallJump`), comparés aux passages directs. Les tests et le graphe de zone n'ont pas changé d'interface.
+- **Limites** :
+  - la fenêtre mesure la tolérance du timing, pas le rythme d'une cheminée (alterner la direction à chaque rebond) : à juger sur téléphone ;
+  - un rebond pendant la montée (possible en jeu) n'est pas essayé : l'analyse est prudente ;
+  - coût : 1 à 2 s par salle de la maison avec le saut mural (au lieu de moins d'une seconde).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
