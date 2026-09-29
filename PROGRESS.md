@@ -2,13 +2,72 @@
 
 ## Phase en cours
 
-**PWA / hors ligne** (D-09, D-23) : implémentée sur la branche `claude/pwa`, **en attente de validation puis d'essai sur téléphone**.
+**Phase 6 — la maison, première zone** (D-24, D-25, D-26) : implémentée sur la branche `claude/phase-6-house`, **en attente de validation puis d'essai sur téléphone**.
 
-Phase 5 (checkpoints, sauvegarde) : mergée, en attente d'essai sur téléphone. Mouvement, commandes et combat : validation provisoire par l'utilisateur, à confirmer en jeu réel.
+PWA (D-23) et Phase 5 : mergées, en attente d'essai sur téléphone. Mouvement, commandes et combat : validation provisoire par l'utilisateur, à confirmer en jeu réel.
 
-Prochaine : Phase 6 — première zone réelle (vertical slice, spec §53).
+Prochaine : petite phase « grimper aux rebords » (D-26), plan à valider d'abord.
 
 ## Fait
+
+### Phase 6 — La maison (première zone)
+
+- **Thème (D-24)** : l'interface est le cahier de Céleste (papier, crayon, rose des lunettes). Le jeu montre la maison la nuit, adoucie. Le néon a disparu. Couleurs de l'interface uniquement dans les variables CSS `:root`, couleurs du jeu uniquement dans `PLACEHOLDER_COLORS`. Icônes et couleur de lancement (PWA) refaites.
+- **Format des salles (D-25)** :
+  - matériaux `b` bois et `t` tissu (pleins), `-` étagère (traversable) ;
+  - sorties `1`–`9` dans un mur latéral (au moins 2 tuiles, continues : sinon erreur explicite) ;
+  - métadonnées `@ambient` (couleur de la salle) et `@note` (repères de level design).
+- **Zone (pure, `src/core/world/zone.ts`)** : liaisons `salle:sortie` ↔ `salle:sortie` décrites en données (`src/levels/house/zone.ts`). Validation au chargement :
+  - salle inconnue, sortie absente ou reliée deux fois, sortie reliée à rien ;
+  - deux murs du même côté ;
+  - pas de sol à l'arrivée.
+
+  Détection des sorties sans allocation.
+
+- **La maison** (placeholders à l'échelle d'une enfant), six salles : chambre (départ dans le lit), couloir, escalier, salon, cuisine, buanderie.
+  - Les pieds des meubles bloquent le sol : on passe par-dessus (tabouret, chaises, poufs, marchepied).
+  - Dangers : briques de jeu sur le tapis. Veilleuses (checkpoints) : chambre, palier de l'escalier, cuisine.
+  - Quatre jouets mécaniques (patrouilleurs) : couloir, salon, cuisine, buanderie.
+  - **Signposting D-26** : armoire, bibliothèque et placards hauts trop hauts ; la trappe à linge du couloir est sur un rebord inaccessible.
+  - La trappe est un raccourci vers la buanderie. Il fermera la boucle couloir → escalier → salon → cuisine → buanderie → couloir une fois l'escalade acquise.
+- **Vérification automatique** (analyse D-16, vraie physique) :
+  - toutes les salles sont atteignables depuis le lit par des passages **faciles** (fenêtre ≥ 200 ms) ;
+  - **tout** endroit atteignable, même par un saut raté, ramène à la chambre par des passages faciles (aucune fosse d'une tuile) ;
+  - la trappe à linge est **inaccessible sans grimper**.
+- **Changement de salle** :
+  - fondu au noir de 150 ms (jeu suspendu) ;
+  - arrivée juste à l'intérieur de la sortie liée, **élan horizontal conservé** ;
+  - retour à l'image en 200 ms, jeu en marche.
+
+  Durées dans `src/config/world.ts`, réglables dans l'overlay.
+
+- **Point de retour de zone** :
+  - un évanouissement ramène au dernier checkpoint, **même dans une autre salle** ;
+  - changer de salle ne le déplace pas ;
+  - la jauge de peur suit Céleste d'une salle à l'autre ;
+  - salles visitées enregistrées dans `progression.mapRevealed` (pour la carte, Phase 8).
+- **Parcours d'essai hors partie** : jouables depuis le menu pause, ils **ne modifient plus la sauvegarde**. « La maison (partie) » ramène au point de retour. Une ancienne sauvegarde pointant vers un parcours reprend dans la chambre.
+- **Rendu** : bois, tissu et murs distincts ; sorties marquées d'une ouverture à peine éclairée ; ambiance par salle.
+- **Overlay** : téléportation dans les salles de la maison ; durées de transition.
+- Tests : 260.
+  - Format : matériaux, sorties.
+  - Zone : validation, arrivée, détection.
+  - Maison : atteignabilité, pas d'endroit sans retour, trappe fermée.
+  - Transition, `revealRoom`, registre des salles.
+- **Vérifié dans Chromium** : nouvelle partie dans le lit → course vers la droite → couloir (élan conservé, carte révélée) → retour à la chambre ; checkpoint de la cuisine → évanouissement au salon → retour à la cuisine ; parcours d'essai sans effet sur la sauvegarde → « La maison » → rechargement → Continuer (« Cuisine ») dans la cuisine.
+- **Mesure** (build de debug minifié, même parcours que `main`) : allocations identiques à `main` après correction du fond de caméra (+~350 octets/pas avant). Détection des sorties et transition : aucune allocation attribuée (build de dev).
+
+### À vérifier sur téléphone (Phase 6)
+
+Sur https://kalypst.github.io/Maria/ ou /debug/ (après merge) :
+
+- [ ] **Thème** : écran de départ, menu pause, dialogues et commandes tactiles lisibles et doux (cahier, crayon) ; rien ne rappelle le néon.
+- [ ] **Maison** : les meubles sont-ils lisibles comme des meubles géants vus par une enfant ? Le départ dans le lit est-il clair ?
+- [ ] **Passages** : sauts sur chaises, tabourets, poufs, marchepied agréables, ni trop faciles ni pénibles ; escalier (marches d'une tuile, sautées une à une) pas fastidieux.
+- [ ] **Changement de salle** : fondu assez court, pas désorientant ; l'élan conservé est agréable ; pas de retour involontaire par la sortie.
+- [ ] **Évanouissement** dans une autre salle que la veilleuse : retour compréhensible.
+- [ ] **Signposting** : les endroits trop hauts (armoire, bibliothèque, placards, trappe à linge) donnent-ils envie de revenir ?
+- [ ] Ambiance (couleur de chaque salle) : perceptible sans être criarde.
 
 ### Phase 0 — Mise en place
 
@@ -210,7 +269,8 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 - **Allocation de la caméra** (profileur de tas de Chromium, boucle chaude de 120 000 pas, méthode de la Phase 1) : ~3 octets par pas au sol (un nombre de 12 octets tous les ~4 pas), le joueur restant à 0. Dichotomie : lié aux écritures des hauteurs de référence dans la branche « au sol », pas à la représentation des champs (un `Float64Array` ne change rien) ; cause V8 non identifiée. En jeu réel (Chromium, 20 s après 40 s de jeu), aucune allocation attribuée à la caméra, et Phaser alloue ~4,5 Ko par pas équivalent : impact négligeable. À revoir si des pauses de GC apparaissent sur téléphone.
 - Les fenêtres de timing supposent une arrivée en courant depuis l'arrêt, au bout de la plateforme de départ, et des entrées tenues parfaitement : elles mesurent la tolérance du saut, pas la difficulté au pouce.
-- Le choix « Parcours d'essai » du menu pause est provisoire (prototype) : à retirer quand le monde sera structuré (Phase 6).
+- Le choix « Parcours d'essai » du menu pause reste un outil de prototype, hors partie (D-25) : à retirer ou déplacer (overlay seulement) quand le level design sera validé.
+- La téléportation de l'overlay révèle la salle sur la carte (outil de debug, sauvegarde de test).
 
 - Entrées lues une fois par image : une pression peut tomber sur des pas différents selon la fréquence d'affichage (au plus une image d'écart). La physique elle-même est identique à toutes les fréquences (testé).
 - Pas de descente à travers une plateforme (bas + saut) ni d'apex hang : prévus plus tard si besoin.
@@ -226,5 +286,6 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. Validation de la PWA, PR et merge, puis essai sur téléphone (listes « PWA » et « Phase 5 »).
-2. Phase 6 — première zone réelle (vertical slice, spec §53) : boucle, secret, capacité permettant une revisite (§43.0.5).
+1. Validation de la Phase 6, PR et merge, puis essai sur téléphone (listes « Phase 6 », « PWA » et « Phase 5 »).
+2. **Grimper aux rebords** (D-26), petite phase dédiée : s'accrocher au bord d'un meuble et se hisser. Elle ouvre l'armoire, la bibliothèque, les placards et la trappe à linge (boucle de la maison). Plan à valider d'abord, car elle modifie le mouvement.
+3. Ensuite (§42) : croissance, carte et secrets (un premier secret dans la maison), narration.
