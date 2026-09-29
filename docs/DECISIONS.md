@@ -224,6 +224,13 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
   - mémoire des textures : environ 19 Mo pour la chambre à l'échelle 3 (deux calques), à surveiller sur téléphone ;
   - le style illustré gagne nettement en mode « résolution de l'écran » (D-18). Passer ce mode par défaut est à décider après l'essai sur téléphone (performance) ;
   - les salles non habillées gardent le rendu par tuiles jusqu'à leur habillage.
+- **Toute la maison habillée** :
+  - les meubles sont dessinés **d'après leurs tuiles** (forme exacte de la collision, coins adoucis), avec des détails propres à chaque type : un meuble nouveau ne demande que sa déclaration ;
+  - chaque salle choisit son revêtement de mur (`; @wall:` pois, rayures, planches, carrelage) ;
+  - les lampes de décor éclairent comme les veilleuses ;
+  - jouets mécaniques en souris à remonter ;
+  - les parcours d'essai restent en rendu par tuiles.
+- **Coût mesuré** (Chromium sur ordinateur, échelle 3) : 160 à 300 ms pour dessiner une salle, pendant le fondu de changement de salle. Sur téléphone ce sera plus long : à mesurer, et au besoin dessiner à l'échelle 2 ou garder en cache les salles voisines.
 
 ## D-29 — Céleste en « papier découpé »
 
