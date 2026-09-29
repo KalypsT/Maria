@@ -1,4 +1,4 @@
-/** États du joueur (spec §30). Les autres (WallSlide, Dash…) viendront avec les capacités. */
+/** États du joueur (spec §30). Les autres (WallSlide, Dash…) viendront avec leurs capacités. */
 export const PlayerState = {
   Idle: 'Idle',
   Run: 'Run',
@@ -8,6 +8,10 @@ export const PlayerState = {
   Land: 'Land',
   /** Touchée par un ennemi : recul et courte perte de contrôle (D-20). */
   Hurt: 'Hurt',
+  /** Suspendue à un rebord (D-26). */
+  Hang: 'Hang',
+  /** Se hisse sur un rebord (D-26). */
+  Climb: 'Climb',
 } as const;
 export type PlayerState = (typeof PlayerState)[keyof typeof PlayerState];
 

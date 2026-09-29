@@ -57,6 +57,31 @@ export interface MovementParams {
   dropInputThreshold: number;
   /** Durée pendant laquelle les plateformes traversables sont ignorées après « Bas + Saut » (ms). */
   dropThroughMs: number;
+  /**
+   * Grimper aux rebords (D-26) : un bord est attrapé si son dessus est au plus à cette distance
+   * au-dessus du haut de la hitbox (px, les mains dépassent un peu de la tête).
+   */
+  ledgeGrabAbovePx: number;
+  /**
+   * … et au plus à cette distance sous le haut de la hitbox (px). Les pieds sont alors nettement
+   * sous le bord : un saut qui suffisait pour s'y poser n'est jamais interrompu.
+   */
+  ledgeGrabBelowPx: number;
+  /** Distance maximale entre la hitbox et le mur pour attraper le bord (px). */
+  ledgeGrabSidePx: number;
+  /** Axe (0–1) au-delà duquel on pousse vers le bord (accrocher, se hisser) ou on le quitte. */
+  ledgeInputThreshold: number;
+  /** Suspendue, le haut de la hitbox dépasse le bord de cette hauteur (px). */
+  ledgeHangOffsetPx: number;
+  /**
+   * Durée minimale de suspension avant de se hisser en poussant vers le bord ou vers le haut (ms).
+   * Saut hisse tout de suite.
+   */
+  ledgeHangMinMs: number;
+  /** Durée du hissage, de la suspension à debout sur le rebord (ms). */
+  ledgeClimbMs: number;
+  /** Après avoir lâché un bord, délai avant de pouvoir se raccrocher (ms). */
+  ledgeRegrabMs: number;
 }
 
 export const DEFAULT_MOVEMENT: Readonly<MovementParams> = {
@@ -82,6 +107,14 @@ export const DEFAULT_MOVEMENT: Readonly<MovementParams> = {
   landDurationMs: 80,
   dropInputThreshold: 0.6,
   dropThroughMs: 100,
+  ledgeGrabAbovePx: 6,
+  ledgeGrabBelowPx: 10,
+  ledgeGrabSidePx: 2,
+  ledgeInputThreshold: 0.3,
+  ledgeHangOffsetPx: 3,
+  ledgeHangMinMs: 120,
+  ledgeClimbMs: 240,
+  ledgeRegrabMs: 250,
 };
 
 /** Bornes des réglages en direct de l'overlay de debug. */
@@ -110,7 +143,20 @@ export const MOVEMENT_PARAM_RANGES: Readonly<
   landDurationMs: { min: 0, max: 300, step: 10 },
   dropInputThreshold: { min: 0.3, max: 0.95, step: 0.05 },
   dropThroughMs: { min: 20, max: 300, step: 10 },
+  ledgeGrabAbovePx: { min: 0, max: 16, step: 1 },
+  ledgeGrabBelowPx: { min: 0, max: 20, step: 1 },
+  ledgeGrabSidePx: { min: 0, max: 6, step: 1 },
+  ledgeInputThreshold: { min: 0.1, max: 0.9, step: 0.05 },
+  ledgeHangOffsetPx: { min: 0, max: 12, step: 1 },
+  ledgeHangMinMs: { min: 0, max: 500, step: 10 },
+  ledgeClimbMs: { min: 60, max: 600, step: 10 },
+  ledgeRegrabMs: { min: 0, max: 800, step: 10 },
 };
+
+/** Hissé sur un rebord, Céleste se tient à cette distance du bord (px), bien posée. */
+export const LEDGE_STAND_INSET_PX = 2;
+/** Part du hissage consacrée à la montée ; le reste avance sur le rebord. */
+export const LEDGE_CLIMB_RISE_SHARE = 0.6;
 
 /** Hitbox de Céleste (px, PROVISOIRE). Largeur < 1 tuile, hauteur < 2 tuiles : passe dans un couloir de 2. */
 export const PLAYER_HITBOX = { width: 12, height: 22 } as const;
@@ -134,6 +180,9 @@ export interface DerivedMovement {
   jumpBufferSteps: number;
   landSteps: number;
   dropSteps: number;
+  ledgeHangMinSteps: number;
+  ledgeClimbSteps: number;
+  ledgeRegrabSteps: number;
 }
 
 export function msToSteps(ms: number, stepHz: number = PHYSICS_STEP_HZ): number {
@@ -153,6 +202,9 @@ export function deriveMovement(
     jumpBufferSteps: 0,
     landSteps: 0,
     dropSteps: 0,
+    ledgeHangMinSteps: 0,
+    ledgeClimbSteps: 0,
+    ledgeRegrabSteps: 0,
   },
 ): DerivedMovement {
   const heightPx = params.jumpHeightTiles * TILE_SIZE;
@@ -165,5 +217,8 @@ export function deriveMovement(
   out.jumpBufferSteps = msToSteps(params.jumpBufferMs, stepHz);
   out.landSteps = msToSteps(params.landDurationMs, stepHz);
   out.dropSteps = msToSteps(params.dropThroughMs, stepHz);
+  out.ledgeHangMinSteps = msToSteps(params.ledgeHangMinMs, stepHz);
+  out.ledgeClimbSteps = Math.max(1, msToSteps(params.ledgeClimbMs, stepHz));
+  out.ledgeRegrabSteps = msToSteps(params.ledgeRegrabMs, stepHz);
   return out;
 }

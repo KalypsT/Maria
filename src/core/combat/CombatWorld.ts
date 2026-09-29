@@ -108,7 +108,7 @@ export class CombatWorld {
     const attack = this.attack;
     const enemies = this.enemies;
     const tuning = this.tuning;
-    attack.step(attackPressed && player.hurtSteps === 0, player.facing);
+    attack.step(attackPressed && player.hurtSteps === 0 && !player.onLedge, player.facing);
     if (attack.hitbox(player.box, this.attackBox)) {
       for (let i = 0; i < enemies.length; i++) {
         const enemy = enemies[i];
