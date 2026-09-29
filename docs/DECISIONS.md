@@ -201,6 +201,12 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
   1. une **passe de level design** sur la maison, avec l'escalade : vraie boucle, embranchements, verticalité, un premier secret (§25.2). Elle pourra passer par un éditeur visuel (par exemple Tiled) à la place du script de génération ;
   2. une courte **phase de direction artistique** : 2 ou 3 écrans de test dans des styles différents sur la même salle, choix par l'utilisateur, et décision sur qui produit les images (dessin par le code, packs d'assets, illustrations, images générées puis retravaillées).
 - **Raison** : la spec ne prévoit aucune phase de production graphique, alors que le vertical slice (§53) doit montrer le contraste monde réel / monde étrange. Le level design est la priorité n°2 (§52) et ne doit pas attendre la fin.
+- **Passe de level design, mise en œuvre (validée)** :
+  - **Outil** : salles en texte ASCII, pas d'éditeur visuel (l'utilisateur n'a pas d'ordinateur pour l'instant). Des images de chaque salle en entier et un plan de la zone servent à valider.
+  - **Grimper ouvre deux branches** : l'escalier mène au **grenier**, dont on ressort **derrière l'armoire** de la chambre (raccourci vers le départ). La maison a deux boucles : la trappe à linge, et chambre → couloir → escalier → grenier.
+  - **Premier secret** (§27.0.2, plateforme) : poutres du grenier jusqu'au recoin sous le toit. `S` dans l'ASCII, trouvaille enregistrée dans `progression.collectibles` sous l'identifiant `salle:s<col>-<row>`, **sans compteur affiché** avant la carte (§23). Difficulté **moyenne** vérifiée : ni atteignable par des passages faciles seulement, ni au-delà de « moyen ».
+  - **Signposting d'une capacité future** : lucarne du grenier, hors de portée même en grimpant.
+  - **Rez-de-chaussée gardé tel quel pour l'instant** (salon, cuisine, couloir, buanderie). Il sera retravaillé plus tard : verticalité, placement des jouets, récompenses en haut de la bibliothèque et des placards (pilier 2).
 
 ## Risques identifiés à suivre
 
