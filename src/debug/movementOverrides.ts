@@ -1,6 +1,7 @@
 import { CAMERA_PARAM_RANGES, type CameraParams } from '../config/camera';
 import { COMBAT_PARAM_RANGES, type CombatParams } from '../config/combat';
 import { FEEL_PARAM_RANGES, type FeelParams } from '../config/feel';
+import { WORLD_PARAM_RANGES, type WorldParams } from '../config/world';
 import { MOVEMENT_PARAM_RANGES, type MovementParams } from '../config/movement';
 
 type ParamRanges<T> = Readonly<Record<keyof T, { min: number; max: number }>>;
@@ -74,4 +75,13 @@ export function sanitizeCombatOverrides(raw: unknown): Partial<CombatParams> {
 /** JSON des réglages de combat, prêt à être reporté dans `src/config/combat.ts`. */
 export function combatToJson(params: Readonly<CombatParams>): string {
   return JSON.stringify(orderedParams(params, COMBAT_PARAM_RANGES), null, 2);
+}
+
+export function sanitizeWorldOverrides(raw: unknown): Partial<WorldParams> {
+  return sanitizeOverrides<WorldParams>(raw, WORLD_PARAM_RANGES);
+}
+
+/** JSON des réglages d'échec et de peur, prêt à être reporté dans `src/config/world.ts`. */
+export function worldToJson(params: Readonly<WorldParams>): string {
+  return JSON.stringify(orderedParams(params, WORLD_PARAM_RANGES), null, 2);
 }

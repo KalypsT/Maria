@@ -174,6 +174,13 @@ export class RunState {
     }
   }
 
+  /** Déclenche un évanouissement (outil de debug : déclenchement d'événements). */
+  triggerFaint(): void {
+    if (this.phase === LifePhase.Alive) {
+      this.startFaint(FaintCause.Hazard);
+    }
+  }
+
   private startFaint(cause: FaintCause): void {
     this.phase = LifePhase.Fainting;
     this.phaseSteps = this.faintTotal;

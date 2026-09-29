@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { CAMERA_PARAM_RANGES, DEFAULT_CAMERA } from '../src/config/camera';
 import { DEFAULT_COMBAT } from '../src/config/combat';
 import { DEFAULT_FEEL } from '../src/config/feel';
+import { DEFAULT_WORLD } from '../src/config/world';
 import { DEFAULT_MOVEMENT, MOVEMENT_PARAM_RANGES } from '../src/config/movement';
 import {
   cameraToJson,
@@ -12,6 +13,8 @@ import {
   sanitizeCombatOverrides,
   sanitizeFeelOverrides,
   sanitizeMovementOverrides,
+  sanitizeWorldOverrides,
+  worldToJson,
 } from '../src/debug/movementOverrides';
 
 describe('sanitizeMovementOverrides', () => {
@@ -71,5 +74,15 @@ describe('sanitizeCombatOverrides', () => {
     expect(sanitizeCombatOverrides(JSON.parse(combatToJson(DEFAULT_COMBAT)))).toEqual(
       DEFAULT_COMBAT,
     );
+  });
+});
+
+describe('sanitizeWorldOverrides', () => {
+  it('borne les réglages d’échec et relit un export', () => {
+    expect(sanitizeWorldOverrides({ fearMax: 50, faintMs: 300 })).toEqual({
+      fearMax: 6,
+      faintMs: 300,
+    });
+    expect(sanitizeWorldOverrides(JSON.parse(worldToJson(DEFAULT_WORLD)))).toEqual(DEFAULT_WORLD);
   });
 });
