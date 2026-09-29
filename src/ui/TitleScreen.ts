@@ -1,3 +1,4 @@
+import { TITLE_IMAGE } from '../config/art';
 import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 import type { InstallHint } from '../core/platform/install';
 import type { LoadReport } from '../core/save/SaveManager';
@@ -47,6 +48,10 @@ export function showTitleScreen(
     const root = element('div', document.body);
     root.id = 'title-screen';
     root.setAttribute(UI_OVERLAY_ATTRIBUTE, '');
+    const portrait = element('img', root, 'title-celeste');
+    portrait.src = TITLE_IMAGE;
+    portrait.alt = '';
+    portrait.draggable = false;
     const panel = element('div', root, 'title-panel');
     element('h1', panel, undefined, 'MARIA');
     let unsubscribe = () => {

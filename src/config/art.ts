@@ -90,6 +90,12 @@ export const ART_IMAGES: Readonly<Record<string, string>> = {
   maria: 'maria.png',
 };
 
+/**
+ * Illustration de Céleste fournie par l'utilisateur (D-41), détourée : écran de départ seulement.
+ * En jeu, Céleste reste la marionnette dessinée par le code (D-29), inspirée de cette image.
+ */
+export const TITLE_IMAGE = 'art/celeste.png';
+
 /** Palette d'une salle habillée ; le monde étrange en est une variante (§6.2). */
 export interface ArtPalette {
   wallTop: string;

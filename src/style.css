@@ -368,6 +368,21 @@ body {
   color: var(--ink);
 }
 
+/* Illustration de Céleste (D-41), à gauche du menu. */
+.title-celeste {
+  height: min(88vh, 560px);
+  width: auto;
+  margin-right: 5vw;
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (orientation: portrait) {
+  .title-celeste {
+    display: none;
+  }
+}
+
 .title-panel {
   display: flex;
   flex-direction: column;
