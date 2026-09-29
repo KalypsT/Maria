@@ -50,6 +50,19 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   lamp: { furniture: false },
   coatrack: { furniture: false },
   clock: { furniture: false },
+  // Maison déformée (monde étrange, D-35) : fond seulement, jamais de collision.
+  door: { furniture: false },
+  'door-upside': { furniture: false },
+  wallstairs: { furniture: false },
+  peel: { furniture: false },
+  'giant-chair': { furniture: false },
+  'giant-pencil': { furniture: false },
+  'bedroom-window': { furniture: false },
+  'toy-shadow': { furniture: false },
+  'narrow-left': { furniture: false },
+  'narrow-right': { furniture: false },
+  /** Yeux dans l'ombre : rien de dessiné dans le décor, animés par les effets (D-35). */
+  eyes: { furniture: false },
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */

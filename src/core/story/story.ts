@@ -35,11 +35,17 @@ export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 /** Poses imposées par un script (Céleste assise pour jouer, puis au réveil). */
 export type ScriptPose = 'sit' | 'stand';
 
+/**
+ * Forme d'un fondu : uniforme, ou en cercle centré sur Céleste (`iris`, D-35 : le monde étrange se
+ * révèle autour d'elle, ou se referme sur elle).
+ */
+export type FadeShape = 'plain' | 'iris';
+
 export type StoryStep =
   /** Fondu au noir (bloquant). */
-  | { readonly do: 'fadeOut'; readonly ms: number }
+  | { readonly do: 'fadeOut'; readonly ms: number; readonly shape?: FadeShape }
   /** Retour de l'image (bloquant). */
-  | { readonly do: 'fadeIn'; readonly ms: number }
+  | { readonly do: 'fadeIn'; readonly ms: number; readonly shape?: FadeShape }
   | { readonly do: 'wait'; readonly ms: number }
   /** Étape vécue, sauvegardée aussitôt. */
   | { readonly do: 'flag'; readonly id: string }
@@ -59,7 +65,11 @@ export type StoryStep =
       readonly facing: 1 | -1;
       readonly returnPoint?: boolean;
     }
-  | { readonly do: 'pose'; readonly pose: ScriptPose };
+  | { readonly do: 'pose'; readonly pose: ScriptPose }
+  /** Scintillements étranges dans une zone de la salle (non bloquant, D-35). */
+  | { readonly do: 'sparkle'; readonly area: TileArea; readonly ms: number }
+  /** Tremblement de l'image (non bloquant, D-35) ; amplitude dans `src/config/strangeFx.ts`. */
+  | { readonly do: 'shake'; readonly ms: number; readonly strength: number };
 
 export interface StoryTrigger {
   readonly id: string;
@@ -111,6 +121,17 @@ export interface StoryProp {
 
 export type TimeOfDay = 'evening' | 'morning';
 
+/**
+ * Présage (D-35) : dans une salle, tant que la condition est vraie, l'étrangeté monte avec la
+ * hauteur de Céleste, de 0 (pieds sur la ligne `fromRow`) à 1 (sur la ligne `toRow`, plus haute).
+ */
+export interface StoryOmen {
+  readonly room: string;
+  readonly when: FlagCondition;
+  readonly fromRow: number;
+  readonly toRow: number;
+}
+
 export interface StoryData {
   readonly triggers: readonly StoryTrigger[];
   readonly props: readonly StoryProp[];
@@ -118,6 +139,7 @@ export interface StoryData {
   readonly times: readonly { readonly when: FlagCondition; readonly time: TimeOfDay }[];
   /** Salles dont les sorties sont fermées tant que la condition est vraie. */
   readonly lockedRooms: readonly { readonly room: string; readonly when: FlagCondition }[];
+  readonly omens: readonly StoryOmen[];
 }
 
 export function checkCondition(flags: ReadonlySet<string>, when: FlagCondition): boolean {

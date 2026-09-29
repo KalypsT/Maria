@@ -60,6 +60,7 @@ import type { TimeOfDay } from '../core/story/story';
 import { HOUSE_STORY } from '../levels/house/story';
 import type { Box } from '../core/physics/gridCollision';
 import { StoryView } from './StoryView';
+import { StrangeFxView } from './StrangeFxView';
 import { CombatView } from './CombatView';
 import { CelestePuppet } from './CelestePuppet';
 import { RoomArtView } from './RoomArtView';
@@ -195,6 +196,10 @@ export class GameScene extends Phaser.Scene {
   story!: StoryDirector;
   readonly props = new PropStage();
   private storyView!: StoryView;
+  /** Effets du monde étrange (D-35) : présage, scintillements, tremblements, vie des salles. */
+  private fx!: StrangeFxView;
+  private readonly fxView = new Phaser.Geom.Rectangle();
+  private readonly irisPoint = { x: 0, y: 0 };
   /** Moment de la journée et monde étrange de la salle dessinée. */
   private drawnTime: TimeOfDay = 'evening';
   private drawnStrange = false;
@@ -238,6 +243,12 @@ export class GameScene extends Phaser.Scene {
       think: (icon, ms) => {
         this.storyView.think(icon, ms);
       },
+      sparkle: (area, ms) => {
+        this.fx.sparkle(area, ms);
+      },
+      shake: (ms, strength) => {
+        this.fx.shake(ms, strength);
+      },
     });
     this.story.setFlags(this.session.data.story.flags);
     this.drawnTime = this.story.timeOfDay();
@@ -268,6 +279,8 @@ export class GameScene extends Phaser.Scene {
     this.props.load(this.story.data.props, this.level.id, this.story.flags);
     this.storyView = new StoryView(this, this.props, this.story);
     this.storyView.setArt(this.artScale, this.artImages());
+    this.fx = new StrangeFxView(this);
+    this.fx.load(this.level, isStrangeRoom(this.level), this.palette());
     this.hud = new Hud();
     this.applyMovement();
     this.applyAbilities();
@@ -488,12 +501,26 @@ export class GameScene extends Phaser.Scene {
     this.combatView.render(alpha, player, this.puppet);
     this.storyView.render(this.puppet.x, this.puppet.y, box.height);
     this.worldView.render();
-    this.renderRunState();
     this.dust.update();
-    this.cameras.main.centerOn(
+    const main = this.cameras.main;
+    main.centerOn(
       camera.prevX + (camera.x - camera.prevX) * alpha,
       camera.prevY + (camera.y - camera.prevY) * alpha,
     );
+    // Monde étrange (D-35) : présage en grimpant, effets, tremblement (visuel seulement).
+    const fx = this.fx;
+    fx.setOmen(this.story.omen(this.level.id, this.puppet.y));
+    const view = this.fxView;
+    view.setTo(
+      camera.x - camera.viewWidth / 2,
+      camera.y - camera.viewHeight / 2,
+      camera.viewWidth,
+      camera.viewHeight,
+    );
+    fx.update(view, this.puppet.x, this.puppet.y - box.height / 2);
+    main.scrollX += fx.offsetX;
+    main.scrollY += fx.offsetY;
+    this.renderRunState();
   }
 
   /**
@@ -647,7 +674,7 @@ export class GameScene extends Phaser.Scene {
         this.reappearAtMs = -1;
       }
     }
-    this.hud.setVeil(veil);
+    this.hud.setVeil(veil, this.story.veilShape === 'iris' ? this.irisCenter() : null);
   }
 
   respawn(): void {
@@ -754,6 +781,8 @@ export class GameScene extends Phaser.Scene {
     this.storyView.rebuild();
     this.storyView.clearThought();
     this.poser.sitting = false;
+    this.fx.reset();
+    this.fx.load(level, isStrangeRoom(level), this.palette());
   }
 
   /** Capacités acquises (sauvegarde) ou débloquées par l'overlay, appliquées à Céleste. */
@@ -1024,6 +1053,17 @@ export class GameScene extends Phaser.Scene {
       this.redrawArt();
     }
     this.touch?.setLabel('Attack', story.interactable >= 0 && !story.busy ? 'Agir' : null);
+  }
+
+  /** Centre du fondu en cercle (D-35) : Céleste, en px CSS de la page. */
+  private irisCenter(): { x: number; y: number } {
+    const main = this.cameras.main;
+    const bounds = this.game.canvas.getBoundingClientRect();
+    const k = bounds.width / this.scale.width;
+    const y = this.puppet.y - PLAYER_HITBOX.height / 2;
+    this.irisPoint.x = bounds.left + (this.puppet.x - main.worldView.x) * main.zoom * k;
+    this.irisPoint.y = bounds.top + (y - main.worldView.y) * main.zoom * k;
+    return this.irisPoint;
   }
 
   /** Céleste placée debout sur une tuile par l'histoire (dans le noir d'un fondu). */

@@ -14,6 +14,7 @@ import {
   type LevelData,
   type LevelDecor,
 } from '../../core/level/LevelData';
+import { floatingDecor } from '../../core/level/decor';
 
 /**
  * Dessin d'une salle habillée (D-28) avec l'API Canvas : fond et meubles sous les personnages,
@@ -431,7 +432,11 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     ctx.beginPath();
     ctx.arc(cx, cy, r.w / 2 - 2, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = p.silhouettes ? p.moon : '#3b3330';
+    if (p.silhouettes) {
+      // Monde étrange : sans aiguilles dans le décor ; une aiguille animée recule (D-35).
+      return;
+    }
+    ctx.strokeStyle = '#3b3330';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(cx, cy);
@@ -637,6 +642,10 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
   },
   frame(a, r) {
     const { ctx, palette: p } = a;
+    if (p.silhouettes) {
+      // Monde étrange : les cadres penchent (D-35).
+      tilted(ctx, r, ((r.x * 7 + r.y * 3) % 5) * 0.09 - 0.2);
+    }
     ctx.fillStyle = p.silhouettes ? p.structure : p.linen;
     rounded(ctx, r, 2);
     ctx.fill();
@@ -649,6 +658,9 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
       ctx.lineTo(r.x + r.w / 2, r.y + r.h / 2 - 2);
       ctx.lineTo(r.x + r.w - 2, r.y + r.h - 2);
       ctx.fill();
+    }
+    if (p.silhouettes) {
+      ctx.restore();
     }
   },
   drawing(a, r) {
@@ -672,6 +684,146 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     ctx.fill();
     ctx.restore();
   },
+  door(a, r) {
+    drawDoor(a, r, false);
+  },
+  'door-upside'(a, r) {
+    drawDoor(a, r, true);
+  },
+  wallstairs(a, r) {
+    // Un escalier qui monte… et entre dans le mur.
+    const { ctx, palette: p } = a;
+    const steps = Math.max(3, Math.round(r.h / 8));
+    const sw = r.w / steps;
+    const sh = r.h / steps;
+    // Pâle, sans liseré : ce n'est jamais une surface praticable (pilier 1).
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    ctx.beginPath();
+    ctx.moveTo(r.x, r.y + r.h);
+    for (let i = 0; i < steps; i++) {
+      ctx.lineTo(r.x + i * sw, r.y + r.h - (i + 1) * sh);
+      ctx.lineTo(r.x + (i + 1) * sw, r.y + r.h - (i + 1) * sh);
+    }
+    ctx.lineTo(r.x + r.w, r.y + r.h);
+    ctx.fill();
+    // Le haut se fond dans le mur.
+    const fade = ctx.createLinearGradient(r.x + r.w * 0.6, 0, r.x + r.w, 0);
+    fade.addColorStop(0, 'rgba(0,0,0,0)');
+    fade.addColorStop(1, p.wallTop);
+    ctx.fillStyle = fade;
+    ctx.fillRect(r.x + r.w * 0.6, r.y, r.w * 0.4 + 1, r.h);
+  },
+  peel(a, r) {
+    // Papier peint qui pèle : des lambeaux qui s'enroulent, le mur nu dessous.
+    const { ctx, palette: p } = a;
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    for (let x = r.x; x < r.x + r.w; x += 7) {
+      const len = r.h * (0.45 + (((x * 13) % 7) / 7) * 0.55);
+      ctx.beginPath();
+      ctx.moveTo(x, r.y);
+      ctx.lineTo(x + 5, r.y);
+      ctx.lineTo(x + 4, r.y + len);
+      ctx.lineTo(x + 1, r.y + len - 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = p.silhouettes ? p.wallpaper : 'rgba(255,236,200,0.3)';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.arc(x + 3, r.y + len, 2.2, Math.PI * 0.1, Math.PI * 1.3);
+      ctx.stroke();
+    }
+  },
+  'giant-chair'(a, r) {
+    // Chaise démesurée, en arrière-plan : dossier, assise, pieds.
+    const { ctx } = a;
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    const leg = Math.max(3, r.w * 0.08);
+    const seat = r.y + r.h * 0.55;
+    ctx.fillRect(r.x, r.y, leg, r.h);
+    ctx.fillRect(r.x + r.w * 0.12, r.y + r.h * 0.08, r.w * 0.05, seat - r.y - r.h * 0.08);
+    ctx.fillRect(r.x + r.w * 0.24, r.y + r.h * 0.08, r.w * 0.05, seat - r.y - r.h * 0.08);
+    ctx.fillRect(r.x, r.y, r.w * 0.35, leg);
+    ctx.fillRect(r.x, seat, r.w, leg * 1.4);
+    ctx.fillRect(r.x + r.w - leg, seat, leg, r.y + r.h - seat);
+  },
+  'giant-pencil'(a, r) {
+    const { ctx, palette: p } = a;
+    tilted(ctx, r, -0.5);
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.moveTo(r.x, r.y + r.h * 0.3);
+    ctx.lineTo(r.x + r.w * 0.82, r.y + r.h * 0.3);
+    ctx.lineTo(r.x + r.w, r.y + r.h / 2);
+    ctx.lineTo(r.x + r.w * 0.82, r.y + r.h * 0.7);
+    ctx.lineTo(r.x, r.y + r.h * 0.7);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = p.silhouettes ? p.wallpaper : 'rgba(0,0,0,0.3)';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+    ctx.restore();
+  },
+  'bedroom-window'(a, r) {
+    // Fenêtre trop haute qui donne… sur la chambre de Céleste, chaude et lointaine.
+    const { ctx, palette: p } = a;
+    ctx.fillStyle = p.structure;
+    rounded(ctx, { x: r.x - 3, y: r.y - 3, w: r.w + 6, h: r.h + 6 }, 4);
+    ctx.fill();
+    const inside = ctx.createLinearGradient(0, r.y, 0, r.y + r.h);
+    inside.addColorStop(0, '#3a4470');
+    inside.addColorStop(1, '#6a5242');
+    ctx.fillStyle = inside;
+    rounded(ctx, r, 3);
+    ctx.fill();
+    const floorY = r.y + r.h * 0.82;
+    ctx.fillStyle = '#9a7352';
+    ctx.fillRect(r.x + r.w * 0.08, floorY - r.h * 0.3, r.w * 0.22, r.h * 0.3);
+    ctx.fillStyle = '#6d86c2';
+    ctx.fillRect(r.x + r.w * 0.34, floorY - r.h * 0.09, r.w * 0.5, r.h * 0.09);
+    ctx.fillStyle = '#ffcf7a';
+    ctx.beginPath();
+    ctx.arc(r.x + r.w * 0.78, floorY - r.h * 0.4, 1.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,207,122,0.18)';
+    ctx.beginPath();
+    ctx.arc(r.x + r.w * 0.78, floorY - r.h * 0.4, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = p.structure;
+    ctx.fillRect(r.x + r.w / 2 - 1, r.y, 2, r.h);
+    for (let y = r.y + r.h / 3; y < r.y + r.h - 1; y += r.h / 3) {
+      ctx.fillRect(r.x, y - 1, r.w, 2);
+    }
+  },
+  'toy-shadow'(a, r) {
+    // Ombre géante d'un ours en peluche sur le mur (le jouet, lui, n'est nulle part).
+    const { ctx } = a;
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    const cx = r.x + r.w / 2;
+    const head = r.w * 0.26;
+    ctx.beginPath();
+    ctx.arc(cx, r.y + head, head, 0, Math.PI * 2);
+    ctx.arc(cx - head * 0.85, r.y + head * 0.3, head * 0.38, 0, Math.PI * 2);
+    ctx.arc(cx + head * 0.85, r.y + head * 0.3, head * 0.38, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(cx, r.y + head * 2 + r.h * 0.22, r.w * 0.36, r.h * 0.3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(cx - r.w * 0.36, r.y + r.h * 0.5, r.w * 0.12, r.h * 0.08, -0.6, 0, Math.PI * 2);
+    ctx.ellipse(cx + r.w * 0.36, r.y + r.h * 0.5, r.w * 0.12, r.h * 0.08, 0.6, 0, Math.PI * 2);
+    ctx.ellipse(cx - r.w * 0.2, r.y + r.h * 0.9, r.w * 0.14, r.h * 0.1, 0, 0, Math.PI * 2);
+    ctx.ellipse(cx + r.w * 0.2, r.y + r.h * 0.9, r.w * 0.14, r.h * 0.1, 0, 0, Math.PI * 2);
+    ctx.fill();
+  },
+  'narrow-left'(a, r) {
+    narrowing(a, r, -1);
+  },
+  'narrow-right'(a, r) {
+    narrowing(a, r, 1);
+  },
+  eyes() {
+    // Animés par les effets du monde étrange (StrangeFxView).
+  },
   rug(a, r) {
     const { ctx, palette: p } = a;
     if (p.silhouettes) {
@@ -688,6 +840,76 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     ctx.setLineDash([]);
   },
 };
+
+/** Ouvre une transformation penchée autour du centre de `r` (à fermer par `ctx.restore()`). */
+function tilted(ctx: CanvasRenderingContext2D, r: Rect, angle: number): void {
+  ctx.save();
+  ctx.translate(r.x + r.w / 2, r.y + r.h / 2);
+  ctx.rotate(angle);
+  ctx.translate(-(r.x + r.w / 2), -(r.y + r.h / 2));
+}
+
+/** Porte de la maison (fond) ; `upside` : accrochée au plafond, à l'envers. */
+function drawDoor(a: ArtContext, r: Rect, upside: boolean): void {
+  const { ctx, palette: p } = a;
+  ctx.save();
+  if (upside) {
+    ctx.translate(r.x + r.w / 2, r.y + r.h / 2);
+    ctx.rotate(Math.PI);
+    ctx.translate(-(r.x + r.w / 2), -(r.y + r.h / 2));
+  }
+  ctx.fillStyle = p.structure;
+  rounded(ctx, { x: r.x - 2, y: r.y - 2, w: r.w + 4, h: r.h + 2 }, [4, 4, 0, 0]);
+  ctx.fill();
+  ctx.fillStyle = p.silhouettes ? p.wood : p.woodDark;
+  rounded(ctx, r, [3, 3, 0, 0]);
+  ctx.fill();
+  ctx.strokeStyle = p.silhouettes ? p.wallpaper : 'rgba(0,0,0,0.2)';
+  ctx.lineWidth = 0.8;
+  ctx.strokeRect(r.x + 3, r.y + 4, r.w - 6, r.h * 0.35);
+  ctx.strokeRect(r.x + 3, r.y + r.h * 0.5, r.w - 6, r.h * 0.42);
+  ctx.fillStyle = p.silhouettes ? p.moon : '#e6c27a';
+  ctx.beginPath();
+  ctx.arc(r.x + r.w - 5, r.y + r.h * 0.52, 1.3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+/** Mur qui se resserre vers le haut (`side` : -1 mur gauche, 1 mur droit). */
+function narrowing(a: ArtContext, r: Rect, side: number): void {
+  const { ctx, palette: p } = a;
+  const g = ctx.createLinearGradient(0, r.y, 0, r.y + r.h);
+  g.addColorStop(0, p.structure);
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  if (side < 0) {
+    ctx.moveTo(r.x, r.y);
+    ctx.lineTo(r.x + r.w, r.y);
+    ctx.quadraticCurveTo(r.x + r.w * 0.2, r.y + r.h * 0.4, r.x, r.y + r.h);
+  } else {
+    ctx.moveTo(r.x + r.w, r.y);
+    ctx.lineTo(r.x, r.y);
+    ctx.quadraticCurveTo(r.x + r.w * 0.8, r.y + r.h * 0.4, r.x + r.w, r.y + r.h);
+  }
+  ctx.closePath();
+  ctx.fill();
+  // Planches courbées : quelques lignes qui suivent la courbe.
+  ctx.strokeStyle = p.wallpaper;
+  ctx.lineWidth = 0.8;
+  for (let i = 1; i < 4; i++) {
+    const k = i / 4;
+    ctx.beginPath();
+    if (side < 0) {
+      ctx.moveTo(r.x + r.w * k, r.y);
+      ctx.quadraticCurveTo(r.x + r.w * k * 0.2, r.y + r.h * 0.4, r.x, r.y + r.h * k);
+    } else {
+      ctx.moveTo(r.x + r.w * (1 - k), r.y);
+      ctx.quadraticCurveTo(r.x + r.w * (1 - k * 0.2), r.y + r.h * 0.4, r.x + r.w, r.y + r.h * k);
+    }
+    ctx.stroke();
+  }
+}
 
 function star(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number): void {
   ctx.beginPath();
@@ -814,18 +1036,7 @@ export function drawRoomBackground(a: ArtContext): void {
  */
 function drawFloatingGlow(a: ArtContext): void {
   const { ctx, level, palette: p } = a;
-  for (const d of level.decor) {
-    if (!(DECOR_KINDS[d.kind]?.furniture ?? false)) {
-      continue;
-    }
-    const below = d.row + d.height;
-    let floating = below < level.height;
-    for (let col = d.col; floating && col < d.col + d.width; col++) {
-      floating = tileAt(level, col, below) === Tile.Empty;
-    }
-    if (!floating) {
-      continue;
-    }
+  for (const d of floatingDecor(level)) {
     const r = rect(d);
     const cx = r.x + r.w / 2;
     const cy = r.y + r.h;
