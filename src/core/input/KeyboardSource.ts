@@ -28,6 +28,18 @@ function buildKeyMap(): Map<string, { direction: number; button: number }> {
 }
 
 /** Source clavier. `handleKey` est indépendant du DOM (testable) ; `attach` branche la fenêtre. */
+function isEditable(target: EventTarget | null): boolean {
+  return (
+    typeof HTMLElement !== 'undefined' &&
+    target instanceof HTMLElement &&
+    (target.isContentEditable ||
+      target.tagName === 'TEXTAREA' ||
+      (target.tagName === 'INPUT' &&
+        (target as HTMLInputElement).type !== 'range' &&
+        (target as HTMLInputElement).type !== 'checkbox'))
+  );
+}
+
 export class KeyboardSource implements InputSource {
   private readonly keyMap = buildKeyMap();
   private readonly down = new Set<string>();
@@ -62,6 +74,10 @@ export class KeyboardSource implements InputSource {
 
   attach(target: Window): () => void {
     const onKey = (event: KeyboardEvent) => {
+      // Saisie dans un champ (code de sauvegarde, overlay) : les touches ne pilotent pas le jeu.
+      if (isEditable(event.target)) {
+        return;
+      }
       if (this.handleKey(event.code, event.type === 'keydown')) {
         event.preventDefault();
       }

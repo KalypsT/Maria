@@ -4,9 +4,10 @@ import { computeGameWidth, computeRenderScale, renderSize } from './core/gameSiz
 import { SaveManager } from './core/save/SaveManager';
 import { SaveSession } from './core/save/SaveSession';
 import { createNewSave, migrateLegacySettings, type SaveData } from './core/save/saveData';
-import { LEVELS } from './levels';
+import { LEVELS, levelName } from './levels';
 import { openBrowserSaveStorage, requestPersistentStorage } from './platform/browserSaveStorage';
 import { DISPLAY_SETTINGS_EVENT, GameScene, SESSION_KEY } from './scenes/GameScene';
+import { showTitleScreen } from './ui/TitleScreen';
 
 function getParent(): HTMLElement {
   const element = document.getElementById('game');
@@ -76,8 +77,22 @@ async function boot(): Promise<void> {
   const parent = getParent();
   const manager = new SaveManager(await openBrowserSaveStorage());
   const report = await manager.load();
+  const saved = report.data;
+  const source = saved ? LEVELS.find((level) => level.id === saved.checkpoint.levelId) : undefined;
+  const choice = await showTitleScreen(report, source ? levelName(source) : null);
+  // Demandé après un geste de l'utilisateur : certains navigateurs l'exigent.
   void requestPersistentStorage();
-  const session = new SaveSession(manager, report.data ?? newGame());
+  const data =
+    choice.kind === 'continue' && saved
+      ? saved
+      : choice.kind === 'import'
+        ? choice.data
+        : newGame();
+  const session = new SaveSession(manager, data);
+  if (choice.kind !== 'continue') {
+    // Nouvelle partie ou import : écrite tout de suite (l'ancienne devient l'état précédent).
+    await session.persist();
+  }
   startGame(parent, session);
 }
 

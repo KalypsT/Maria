@@ -15,6 +15,9 @@ export interface PauseMenuOptions {
   showTouchSettings: boolean;
   onResume: () => void;
   onSettingsChange: (settings: ControlSettings) => void;
+  /** Code de sauvegarde (D-22) : afficher pour copier, ou importer. */
+  onExportSave: () => void;
+  onImportSave: () => void;
   /** Parcours d'essai proposés (PROVISOIRE, prototype de la Phase 2). */
   levels: readonly { id: string; name: string }[];
   currentLevelId: () => string;
@@ -71,6 +74,16 @@ export class PauseMenu {
       });
     }
     this.addRenderChoice(panel);
+    element('h3', panel, undefined, 'Sauvegarde');
+    const saveRow = element('div', panel, 'pause-levels');
+    element('button', saveRow, undefined, 'Code de sauvegarde').addEventListener(
+      'click',
+      options.onExportSave,
+    );
+    element('button', saveRow, undefined, 'Importer un code').addEventListener(
+      'click',
+      options.onImportSave,
+    );
     if (options.levels.length > 1) {
       this.addLevelChoice(panel);
     }

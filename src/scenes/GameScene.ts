@@ -31,6 +31,7 @@ import { DEFAULT_WORLD, type WorldParams } from '../config/world';
 import type { SaveSession } from '../core/save/SaveSession';
 import { RunEvent, RunState } from '../core/world/RunState';
 import { Hud } from '../ui/Hud';
+import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
 import { PauseMenu } from '../ui/PauseMenu';
 import { CombatView } from './CombatView';
 import { DustPool } from './DustPool';
@@ -160,6 +161,18 @@ export class GameScene extends Phaser.Scene {
       onSettingsChange: (settings) => {
         void this.session.setControls(settings);
         this.touch?.setSettings(settings);
+      },
+      onExportSave: () => {
+        showExportDialog(this.session.data);
+      },
+      onImportSave: () => {
+        void showImportDialog().then(async (data) => {
+          if (data) {
+            // La partie importée remplace l'actuelle (qui devient l'état précédent), puis relance.
+            await this.session.replace(data);
+            location.reload();
+          }
+        });
       },
       levels: LEVELS.map((level) => ({ id: level.id, name: levelName(level) })),
       currentLevelId: () => this.level.id,
