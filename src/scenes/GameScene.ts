@@ -23,12 +23,13 @@ import { FixedStepClock } from '../core/FixedStepClock';
 import { InputController } from '../core/input/InputController';
 import { KeyboardSource } from '../core/input/KeyboardSource';
 import { TouchSource } from '../core/input/TouchSource';
-import { Material, Tile, tileAt, type LevelData } from '../core/level/LevelData';
+import { EntityType, Material, Tile, tileAt, type LevelData } from '../core/level/LevelData';
 import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../core/player/PlayerPhysics';
 import { PlayerFeel } from '../core/player/playerFeel';
 import { LEVELS, levelName, startRoom, zoneRoom, type LevelSource, type ZoneRoom } from '../levels';
 import { DEFAULT_WORLD, type WorldParams } from '../config/world';
+import { checkpointId } from '../core/save/saveData';
 import type { SaveSession } from '../core/save/SaveSession';
 import { ABILITY_HINTS, ABILITY_HINT_MS, Ability, isAbility } from '../config/abilities';
 import { PickupKind, Pickups } from '../core/world/Pickups';
@@ -36,6 +37,7 @@ import { RoomTransition } from '../core/world/RoomTransition';
 import { RunEvent, RunState } from '../core/world/RunState';
 import {
   arrivalPosition,
+  isStrangeRoom,
   touchedExit,
   type ExitRef,
   type MapBox,
@@ -226,6 +228,9 @@ export class GameScene extends Phaser.Scene {
       },
       place: (col, row, facing) => {
         this.placeCeleste(col, row, facing);
+      },
+      room: (room, col, row, facing, returnPoint) => {
+        this.storyRoom(room, col, row, facing, returnPoint);
       },
       pose: (pose) => {
         this.poser.sitting = pose === 'sit';
@@ -729,10 +734,10 @@ export class GameScene extends Phaser.Scene {
   private setRoom(level: LevelData, zone: Zone | null, checkpointId: string | null): void {
     this.level = level;
     this.zone = zone;
-    if (zone) {
+    if (zone && !isStrangeRoom(level)) {
       void this.session.revealRoom(level.id);
     }
-    if (this.story.isStrange(level.id) !== this.drawnStrange) {
+    if (isStrangeRoom(level) !== this.drawnStrange) {
       this.redrawArt(); // Céleste et les jouets changent aussi de palette.
     } else {
       this.drawLevel();
@@ -814,7 +819,7 @@ export class GameScene extends Phaser.Scene {
   /** Redessine la salle et Céleste (échelle ou palette changée). */
   private redrawArt(): void {
     this.drawnTime = this.story.timeOfDay();
-    this.drawnStrange = this.story.isStrange(this.level.id);
+    this.drawnStrange = isStrangeRoom(this.level);
     this.worldView.setArtScale(this.artScale);
     this.storyView.setArt(this.artScale, this.artImages());
     this.combatView.setArt(this.artScale, this.palette());
@@ -982,7 +987,7 @@ export class GameScene extends Phaser.Scene {
 
   /** Palette courante : monde étrange (D-28), ou maison le soir ou le matin (D-31). */
   private palette() {
-    if (this.strangeWorld || this.story.isStrange(this.level.id)) {
+    if (this.strangeWorld || isStrangeRoom(this.level)) {
       return STRANGE_PALETTE;
     }
     return this.story.timeOfDay() === 'morning' ? DAY_PALETTE : REAL_PALETTE;
@@ -1013,10 +1018,7 @@ export class GameScene extends Phaser.Scene {
     if (this.props.update(story.flags, view, veil)) {
       this.storyView.refresh();
     }
-    if (
-      veil >= 1 &&
-      (story.timeOfDay() !== this.drawnTime || story.isStrange(this.level.id) !== this.drawnStrange)
-    ) {
+    if (veil >= 1 && story.timeOfDay() !== this.drawnTime) {
       this.redrawArt();
     }
     this.touch?.setLabel('Attack', story.interactable >= 0 && !story.busy ? 'Agir' : null);
@@ -1033,6 +1035,31 @@ export class GameScene extends Phaser.Scene {
     this.feel.reset(this.player);
     this.poser.reset();
     this.resetCamera();
+  }
+
+  /**
+   * Céleste passe dans une autre salle par l'histoire (dans le noir, D-34) ; le script continue.
+   * `returnPoint` : la veilleuse de cette salle devient le point de retour (sauvegardé).
+   */
+  private storyRoom(
+    id: string,
+    col: number,
+    row: number,
+    facing: 1 | -1,
+    returnPoint: boolean,
+  ): void {
+    const room = zoneRoom(id);
+    if (!room) {
+      return;
+    }
+    if (returnPoint) {
+      const lamp = room.level.entities.find((e) => e.type === EntityType.Checkpoint);
+      void this.session.setCheckpoint(id, lamp ? checkpointId(lamp.col, lamp.row) : null);
+    }
+    const saved = this.session.data.checkpoint;
+    this.setRoom(room.level, room.zone, saved.levelId === id ? saved.checkpointId : null);
+    this.transition.cancel();
+    this.placeCeleste(col, row, facing);
   }
 
   /** Outil de debug : étapes de l'histoire remplacées (sans sauvegarde), salle redessinée. */

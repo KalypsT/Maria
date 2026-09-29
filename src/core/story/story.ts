@@ -47,6 +47,18 @@ export type StoryStep =
   | { readonly do: 'thought'; readonly icon: ThoughtIcon; readonly ms: number }
   /** Céleste placée debout sur la tuile (col, row), tournée vers `facing` (seulement dans le noir). */
   | { readonly do: 'place'; readonly col: number; readonly row: number; readonly facing: 1 | -1 }
+  /**
+   * Céleste passe dans une autre salle, debout sur la tuile (col, row) (seulement dans le noir).
+   * `returnPoint` : le point de retour devient la veilleuse de cette salle (sauvegardé).
+   */
+  | {
+      readonly do: 'room';
+      readonly room: string;
+      readonly col: number;
+      readonly row: number;
+      readonly facing: 1 | -1;
+      readonly returnPoint?: boolean;
+    }
   | { readonly do: 'pose'; readonly pose: ScriptPose };
 
 export interface StoryTrigger {
@@ -106,8 +118,6 @@ export interface StoryData {
   readonly times: readonly { readonly when: FlagCondition; readonly time: TimeOfDay }[];
   /** Salles dont les sorties sont fermées tant que la condition est vraie. */
   readonly lockedRooms: readonly { readonly room: string; readonly when: FlagCondition }[];
-  /** Salles basculées dans le monde étrange (§6.2) tant que la condition est vraie. */
-  readonly strangeRooms: readonly { readonly room: string; readonly when: FlagCondition }[];
 }
 
 export function checkCondition(flags: ReadonlySet<string>, when: FlagCondition): boolean {

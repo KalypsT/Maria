@@ -2,7 +2,7 @@ import { TILE_SIZE as T } from '../../config/display';
 import { EntityType } from '../level/LevelData';
 import { checkpointId } from '../save/saveData';
 import { secretId } from './Pickups';
-import type { MapBox, Zone } from './zone';
+import { isStrangeRoom, type MapBox, type Zone } from './zone';
 
 /** Point sur la carte (unités de carte). */
 export interface MapPoint {
@@ -170,12 +170,17 @@ function exitPoint(zone: Zone, roomId: string, exitId: number): MapPoint | null 
   return { x: exit.side === 'left' ? box.x : box.x + box.w, y: box.y + middle * box.h };
 }
 
-/** Cohérence de la carte d'une zone : une boîte par salle, sans chevauchement. */
+/**
+ * Cohérence de la carte d'une zone : une boîte par salle, sans chevauchement. Les salles du monde
+ * étrange n'y figurent jamais (D-34).
+ */
 export function mapProblems(zone: Zone): string[] {
   const problems: string[] = [];
-  const boxes = [...zone.rooms.keys()].map((id) => ({ id, box: zone.map[id] }));
-  for (const { id, box } of boxes) {
-    if (!box) {
+  const boxes = [...zone.rooms].map(([id, level]) => ({ id, level, box: zone.map[id] }));
+  for (const { id, level, box } of boxes) {
+    if (isStrangeRoom(level) && box) {
+      problems.push(`salle étrange ${id} dessinée sur la carte`);
+    } else if (!isStrangeRoom(level) && !box) {
       problems.push(`salle ${id} absente de la carte`);
     }
   }

@@ -18,12 +18,16 @@ export const StoryFlag = {
   TraceStairs: 'trace.stairs',
   /** Maria aperçue en haut de la bibliothèque du salon. */
   MariaSeen: 'living.seen',
-  /** Céleste est arrivée en haut : Maria n'y est plus, le salon a basculé (monde étrange). */
+  /**
+   * Céleste est arrivée en haut : Maria n'y est plus, Céleste est passée dans le salon étrange
+   * (première fois ; ensuite, le haut de la bibliothèque y ramène tant que la fin n'est pas vécue).
+   */
   MariaVanished: 'living.vanished',
-  /** Céleste a quitté le salon basculé : tout est redevenu normal. */
-  LivingLeft: 'living.left',
-  /** Le bandeau de Maria, trouvé sur le lit de Céleste. */
-  HeadbandFound: 'headband.found',
+  /**
+   * Fin du monde étrange (D-34) : le berceau vide en haut du passage d'ombres ; Céleste se
+   * retrouve sur son lit, à côté du bandeau de Maria.
+   */
+  StrangeDone: 'strange.done',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -55,7 +59,7 @@ export const STORY_TIMING = {
   thoughtFadeMs: 250,
   /** Plan fixe (Céleste joue avec Maria, la regarde dormir). */
   holdMs: 2600,
-  /** Céleste s'arrête pour regarder (trace, Maria aperçue, bandeau). */
+  /** Céleste s'arrête pour regarder (trace, Maria aperçue, retour dans la chambre). */
   lookMs: 1400,
   /** Délai minimal entre deux bulles « c'est l'heure de dormir » à une porte fermée. */
   lockedExitThoughtMs: 3500,
@@ -63,6 +67,8 @@ export const STORY_TIMING = {
   blinkOutMs: 300,
   blinkBlackMs: 700,
   blinkInMs: 1500,
+  /** Retour dans le monde étrange après un échec : clignement plus bref, sans bulle. */
+  reblinkInMs: 800,
 } as const;
 
 /** Agrandissement des bulles de pensée (retour de l'utilisateur : mieux lisibles sur téléphone). */

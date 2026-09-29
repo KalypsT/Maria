@@ -1,8 +1,18 @@
 import { TILE_SIZE } from '../../config/display';
-import { Tile, tileAt } from '../level/LevelData';
+import { EntityType, Tile, tileAt, type LevelData } from '../level/LevelData';
 import type { Zone } from '../world/zone';
 import { propBox } from './PropStage';
 import type { FlagCondition, StoryData, TileArea } from './story';
+
+/** Tuile libre (Céleste y tient debout, deux tuiles de haut) au-dessus d'un sol. */
+function standable(level: LevelData, col: number, row: number): boolean {
+  const below = tileAt(level, col, row + 1);
+  return (
+    tileAt(level, col, row) === Tile.Empty &&
+    tileAt(level, col, row - 1) === Tile.Empty &&
+    (below === Tile.Solid || below === Tile.OneWay)
+  );
+}
 
 function conditionFlags(when: FlagCondition): string[] {
   return [...(when.all ?? []), ...(when.none ?? [])];
@@ -13,7 +23,8 @@ function conditionFlags(when: FlagCondition): string[] {
  * bien) :
  * - salles et positions existantes ;
  * - chaque déclencheur se désactive lui-même (il note une étape que sa condition exclut) ;
- * - Céleste n'est déplacée que dans le noir (entre un fondu au noir et le retour de l'image) ;
+ * - Céleste n'est déplacée ou ne change de salle que dans le noir (entre un fondu au noir et le
+ *   retour de l'image), debout sur un sol ;
  * - les étapes des conditions sont notées par un déclencheur ;
  * - les objets reposent sur une surface.
  */
@@ -68,23 +79,46 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
       problems.push(`${what} : sans repère (étincelle)`);
     }
     knownFlags(t.when, what);
+    // Un script qui emmène Céleste dans une autre salle ne peut pas se rejouer tout de suite : il
+    // peut rester disponible (entrée dans le monde étrange, rejouée après un échec).
     const selfDisabling = t.steps.some(
-      (step) => step.do === 'flag' && (t.when.none ?? []).includes(step.id),
+      (step) =>
+        (step.do === 'flag' && (t.when.none ?? []).includes(step.id)) ||
+        (step.do === 'room' && step.room !== t.room),
     );
     if (!selfDisabling) {
       problems.push(`${what} : ne se désactive pas (rejoué sans fin)`);
     }
     let dark = false;
+    let room = t.room;
     for (const step of t.steps) {
       if (step.do === 'fadeOut') {
         dark = true;
       } else if (step.do === 'fadeIn') {
         dark = false;
-      } else if (step.do === 'place') {
+      } else if (step.do === 'place' || step.do === 'room') {
         if (!dark) {
           problems.push(`${what} : Céleste déplacée sous les yeux du joueur`);
         }
-        inRoom(t.room, { col: step.col, row: step.row, w: 1, h: 1 }, what);
+        if (step.do === 'room') {
+          room = step.room;
+          if (t.on === 'leave') {
+            problems.push(`${what} : changement de salle en quittant la salle`);
+          }
+          const level = zone.rooms.get(room);
+          if (
+            step.returnPoint &&
+            level &&
+            !level.entities.some((e) => e.type === EntityType.Checkpoint)
+          ) {
+            problems.push(`${what} : point de retour sans veilleuse dans ${room}`);
+          }
+        }
+        inRoom(room, { col: step.col, row: step.row, w: 1, h: 1 }, what);
+        const level = zone.rooms.get(room);
+        if (level && !standable(level, step.col, step.row)) {
+          problems.push(`${what} : Céleste placée dans le vide ou dans un meuble`);
+        }
       }
     }
     if (dark) {
@@ -114,12 +148,6 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
   }
   for (const rule of story.times) {
     knownFlags(rule.when, 'moment de la journée');
-  }
-  for (const rule of story.strangeRooms) {
-    knownFlags(rule.when, `monde étrange ${rule.room}`);
-    if (!zone.rooms.has(rule.room)) {
-      problems.push(`monde étrange : salle ${rule.room} inconnue`);
-    }
   }
   for (const lock of story.lockedRooms) {
     knownFlags(lock.when, `porte fermée ${lock.room}`);

@@ -1,105 +1,32 @@
 import { describe, expect, it } from 'vitest';
 import { DIFFICULTY_MIN_WINDOW_MS } from '../src/config/levelDesign';
-import { DEFAULT_MOVEMENT } from '../src/config/movement';
-import { analyzeLevel, type LevelAnalysis } from '../src/core/analysis/analyzeLevel';
-import { surfaceUnder } from '../src/core/analysis/surfaces';
 import { EntityType } from '../src/core/level/LevelData';
-import { buildZone } from '../src/core/world/zone';
-import { HOUSE } from '../src/levels/house/zone';
+import { isStrangeRoom } from '../src/core/world/zone';
+import {
+  analysis,
+  byDifficulty,
+  exitSurface,
+  node,
+  reachable,
+  roomDifficulty,
+  surfaceAt,
+  where,
+  zone,
+  zoneGraph,
+  type Node,
+} from './zoneGraph';
 
 const TIMEOUT = 120_000;
-/** La maison est la première zone : chaque passage nécessaire reste facile (D-16). */
+/** La maison est la première zone : chaque passage nécessaire de la maison réelle reste facile (D-16). */
 const MIN_WINDOW_MS = DIFFICULTY_MIN_WINDOW_MS.easy;
-
-const zone = buildZone(HOUSE);
-function level(room: string) {
-  const result = zone.rooms.get(room);
-  if (!result) {
-    throw new Error(`salle ${room} absente`);
-  }
-  return result;
-}
-
-/** Analyse de chaque salle, sans puis avec l'escalade (les surfaces sont les mêmes). */
-const analyses = new Map<string, LevelAnalysis>();
-function analysis(room: string, climb: boolean): LevelAnalysis {
-  const key = `${room}:${String(climb)}`;
-  let result = analyses.get(key);
-  if (!result) {
-    result = analyzeLevel(level(room), DEFAULT_MOVEMENT, { climb });
-    analyses.set(key, result);
-  }
-  return result;
-}
-
-/** Surface sous une tuile (col, row) : celle où l'on se tient à cet endroit. */
-function surfaceAt(room: string, col: number, row: number): number {
-  return surfaceUnder(level(room), analysis(room, false).map, col, row);
-}
-
-/** Surface sur laquelle on arrive par une sortie (et d'où on la franchit). */
-function exitSurface(room: string, exitId: number): number {
-  const exit = level(room).exits.find((e) => e.id === exitId);
-  if (!exit) {
-    throw new Error(`sortie ${room}:${exitId} absente`);
-  }
-  return surfaceAt(room, exit.side === 'left' ? exit.col + 1 : exit.col - 1, exit.rowMax);
-}
-
-type Node = string;
-const node = (room: string, surface: number): Node => `${room}#${surface}`;
-
-/**
- * Graphe de la zone : passages dans chaque salle (seulement les faciles si `easyOnly`), sorties
- * entre les salles.
- */
-function zoneGraph(
-  climb: boolean,
-  easyOnly: boolean,
-  minWindowMs = MIN_WINDOW_MS,
-): Map<Node, Set<Node>> {
-  const graph = new Map<Node, Set<Node>>();
-  const edge = (from: Node, to: Node) => {
-    const set = graph.get(from) ?? new Set<Node>();
-    set.add(to);
-    graph.set(from, set);
-  };
-  for (const [room, data] of zone.rooms) {
-    for (const move of analysis(room, climb).moves) {
-      if (!easyOnly || move.windowMs >= minWindowMs) {
-        edge(node(room, move.from), node(room, move.to));
-      }
-    }
-    for (const exit of data.exits) {
-      const to = zone.destination(room, exit.id);
-      if (to) {
-        edge(node(room, exitSurface(room, exit.id)), node(to.room, exitSurface(to.room, to.exit)));
-      }
-    }
-  }
-  return graph;
-}
-
-function reachable(graph: Map<Node, Set<Node>>, from: Node): Set<Node> {
-  const seen = new Set([from]);
-  const queue = [from];
-  for (let n = queue.shift(); n !== undefined; n = queue.shift()) {
-    for (const next of graph.get(n) ?? []) {
-      if (!seen.has(next)) {
-        seen.add(next);
-        queue.push(next);
-      }
-    }
-  }
-  return seen;
-}
+const easy = byDifficulty('easy');
 
 const home = () => node(zone.start, analysis(zone.start, false).start);
 
 /** Surface où est posé le premier objet d'un type (capacité D-26, trouvaille D-27). */
 function entityNode(type: EntityType): Node {
   for (const [room, data] of zone.rooms) {
-    const entity = data.entities.find((e) => e.type === type);
+    const entity = isStrangeRoom(data) ? undefined : data.entities.find((e) => e.type === type);
     if (entity) {
       return node(room, surfaceAt(room, entity.col, entity.row));
     }
@@ -117,23 +44,15 @@ const CLIMB_SPOTS: readonly [string, string, number, number][] = [
   ['grenier', 'attic', 2, 19],
 ];
 
-function where(nodes: Iterable<Node>, climb: boolean): string[] {
-  return [...nodes].map((n) => {
-    const [room, id] = n.split('#');
-    const s = room ? analysis(room, climb).map.surfaces[Number(id)] : undefined;
-    return s ? `${room} ligne ${s.row + 1}, col. ${s.colStart + 1}–${s.colEnd + 1}` : n;
-  });
-}
-
 describe.each([false, true])('maison (D-25), escalade %s', (climb) => {
   it(
-    'toutes les salles sont atteignables depuis le lit (grenier en grimpant)',
+    'toutes les salles sont atteignables depuis le lit (grenier et monde étrange en grimpant)',
     { timeout: TIMEOUT },
     () => {
-      const seen = reachable(zoneGraph(climb, true), home());
+      const seen = reachable(zoneGraph(climb, roomDifficulty), home());
       const rooms = new Set([...seen].map((n) => n.split('#')[0]));
       const missing = [...zone.rooms.keys()].filter((room) => !rooms.has(room));
-      expect(missing).toEqual(climb ? [] : ['attic']);
+      expect(missing).toEqual(climb ? [] : ['attic', 'living-strange', 'shadows']);
     },
   );
 
@@ -142,10 +61,11 @@ describe.each([false, true])('maison (D-25), escalade %s', (climb) => {
     { timeout: TIMEOUT },
     () => {
       // Tout ce qu'on peut atteindre, même par un saut raté ou risqué, doit ramener à la chambre
-      // par des passages faciles.
-      const easy = zoneGraph(climb, true);
-      const stuck = [...reachable(zoneGraph(climb, false), home())].filter(
-        (n) => !reachable(easy, n).has(home()),
+      // par des passages de la difficulté de chaque salle (faciles dans la maison réelle, moyens au
+      // plus dans le monde étrange, dont la fin ramène à la chambre).
+      const safe = zoneGraph(climb, roomDifficulty);
+      const stuck = [...reachable(zoneGraph(climb, null), home())].filter(
+        (n) => !reachable(safe, n).has(home()),
       );
       expect(where(stuck, climb), 'surfaces sans retour possible').toEqual([]);
     },
@@ -154,11 +74,11 @@ describe.each([false, true])('maison (D-25), escalade %s', (climb) => {
 
 describe('grimper aux rebords dans la maison (D-26)', () => {
   it('l’objet de capacité est atteignable sans grimper', { timeout: TIMEOUT }, () => {
-    expect(reachable(zoneGraph(false, true), home()).has(pickup())).toBe(true);
+    expect(reachable(zoneGraph(false, easy), home()).has(pickup())).toBe(true);
   });
 
   it('sans grimper, les endroits prévus restent hors d’atteinte', { timeout: TIMEOUT }, () => {
-    const seen = reachable(zoneGraph(false, false), home());
+    const seen = reachable(zoneGraph(false, null), home());
     const open = CLIMB_SPOTS.filter(([, room, col, row]) =>
       seen.has(node(room, surfaceAt(room, col, row))),
     );
@@ -166,7 +86,7 @@ describe('grimper aux rebords dans la maison (D-26)', () => {
   });
 
   it('en grimpant, ils sont atteignables facilement', { timeout: TIMEOUT }, () => {
-    const seen = reachable(zoneGraph(true, true), pickup());
+    const seen = reachable(zoneGraph(true, easy), pickup());
     for (const [name, room, col, row] of CLIMB_SPOTS) {
       expect(surfaceAt(room, col, row), name).toBeGreaterThanOrEqual(0);
       expect(seen.has(node(room, surfaceAt(room, col, row))), name).toBe(true);
@@ -174,7 +94,7 @@ describe('grimper aux rebords dans la maison (D-26)', () => {
   });
 
   it('la trappe à linge ferme la boucle : de la buanderie au couloir', { timeout: TIMEOUT }, () => {
-    const seen = reachable(zoneGraph(true, true), pickup());
+    const seen = reachable(zoneGraph(true, easy), pickup());
     expect(seen.has(node('hall', exitSurface('hall', 3)))).toBe(true);
     // Dans la buanderie même : du sol (porte de la cuisine) jusqu'à la trappe, en grimpant.
     const laundry = new Map<Node, Set<Node>>();
@@ -190,9 +110,9 @@ describe('grimper aux rebords dans la maison (D-26)', () => {
 
   it('le premier secret est un passage de difficulté moyenne (D-27)', { timeout: TIMEOUT }, () => {
     const secret = entityNode(EntityType.Secret);
-    expect(reachable(zoneGraph(false, false), home()).has(secret), 'sans grimper').toBe(false);
-    expect(reachable(zoneGraph(true, true), home()).has(secret), 'trop facile').toBe(false);
-    const medium = zoneGraph(true, true, DIFFICULTY_MIN_WINDOW_MS.medium);
+    expect(reachable(zoneGraph(false, null), home()).has(secret), 'sans grimper').toBe(false);
+    expect(reachable(zoneGraph(true, easy), home()).has(secret), 'trop facile').toBe(false);
+    const medium = zoneGraph(true, byDifficulty('medium'));
     expect(reachable(medium, home()).has(secret), 'trop difficile').toBe(true);
   });
 
@@ -204,7 +124,7 @@ describe('grimper aux rebords dans la maison (D-26)', () => {
       // Seulement le grenier et la chambre : sortie derrière l'armoire, puis on descend.
       const inside = (n: Node) => /^(attic|bedroom)#/.test(n);
       const graph = new Map<Node, Set<Node>>();
-      for (const [from, next] of zoneGraph(true, true)) {
+      for (const [from, next] of zoneGraph(true, easy)) {
         if (inside(from)) {
           graph.set(from, new Set([...next].filter(inside)));
         }

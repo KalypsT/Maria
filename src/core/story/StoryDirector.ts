@@ -18,6 +18,8 @@ export interface StoryHost {
   /** Étape vécue : à sauvegarder aussitôt. */
   flagSet(id: string): void;
   place(col: number, row: number, facing: 1 | -1): void;
+  /** Céleste passe dans la salle `room` (dans le noir) ; le script continue. */
+  room(room: string, col: number, row: number, facing: 1 | -1, returnPoint: boolean): void;
   pose(pose: ScriptPose): void;
   think(icon: ThoughtIcon, ms: number): void;
 }
@@ -87,16 +89,6 @@ export class StoryDirector {
   exitsLocked(room: string): boolean {
     for (const lock of this.data.lockedRooms) {
       if (lock.room === room && this.check(lock.when)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /** Salle basculée dans le monde étrange (§6.2). */
-  isStrange(room: string): boolean {
-    for (const rule of this.data.strangeRooms) {
-      if (rule.room === room && this.check(rule.when)) {
         return true;
       }
     }
@@ -207,6 +199,9 @@ export class StoryDirector {
         break;
       case 'place':
         this.host.place(step.col, step.row, step.facing);
+        break;
+      case 'room':
+        this.host.room(step.room, step.col, step.row, step.facing, step.returnPoint ?? false);
         break;
       case 'pose':
         this.host.pose(step.pose);

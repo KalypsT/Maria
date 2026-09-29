@@ -22,6 +22,10 @@ function recorder() {
   const host: StoryHost = {
     flagSet: (id) => log.push(`flag ${id}`),
     place: (col, row, facing) => log.push(`place ${String(col)},${String(row)},${String(facing)}`),
+    room: (room, col, row, facing, returnPoint) =>
+      log.push(
+        `room ${room} ${String(col)},${String(row)},${String(facing)}${returnPoint ? ' retour' : ''}`,
+      ),
     pose: (pose) => log.push(`pose ${pose}`),
     think: (icon) => log.push(`think ${icon}`),
   };
@@ -54,7 +58,6 @@ function story(steps: StoryStep[], on: 'interact' | 'touch' = 'interact', lock =
     props: [],
     times: [{ when: { all: ['done'] }, time: 'morning' }],
     lockedRooms: [{ room: 'r', when: { none: ['done'] } }],
-    strangeRooms: [{ room: 'r', when: { all: ['done'] } }],
   };
 }
 
@@ -247,6 +250,34 @@ describe('histoire de la maison (D-31)', () => {
     expect(problems).toContain('objet p : ne repose sur rien');
   });
 
+  it('détecte un changement de salle visible, dans le vide, ou sans veilleuse (D-34)', () => {
+    const bad: StoryData = {
+      ...HOUSE_STORY,
+      triggers: [
+        {
+          id: 'y',
+          room: 'living',
+          on: 'touch',
+          area: { col: 1, row: 1, w: 1, h: 1 },
+          when: {},
+          lock: true,
+          steps: [
+            { do: 'room', room: 'hall', col: 5, row: 5, facing: 1, returnPoint: true },
+            { do: 'fadeOut', ms: 100 },
+            { do: 'place', col: 30, row: 2, facing: 1 },
+            { do: 'fadeIn', ms: 100 },
+          ],
+        },
+      ],
+    };
+    const problems = storyProblems(bad, zone);
+    // Un script qui change de salle peut rester disponible (il emmène Céleste ailleurs).
+    expect(problems).not.toContain('déclencheur y : ne se désactive pas (rejoué sans fin)');
+    expect(problems).toContain('déclencheur y : Céleste déplacée sous les yeux du joueur');
+    expect(problems).toContain('déclencheur y : point de retour sans veilleuse dans hall');
+    expect(problems).toContain('déclencheur y : Céleste placée dans le vide ou dans un meuble');
+  });
+
   it('le prologue se joue en entier : jouer, coucher Maria, se coucher, réveil', () => {
     const { log, host } = recorder();
     const d = new StoryDirector(HOUSE_STORY, host, HZ);
@@ -327,7 +358,7 @@ describe('histoire de la maison (D-31)', () => {
     expect(reach(at(25, 17)).has(at(12, 15))).toBe(true);
   });
 
-  it('en haut de la bibliothèque : Maria disparaît dans le noir seulement, le salon bascule', () => {
+  it('en haut de la bibliothèque : Maria disparaît dans le noir, Céleste passe dans le salon étrange', () => {
     const { log, host } = recorder();
     const d = new StoryDirector(HOUSE_STORY, host, HZ);
     d.setFlags([F.EveningPlayed, F.EveningTucked, F.Slept]);
@@ -346,28 +377,62 @@ describe('histoire de la maison (D-31)', () => {
     }
     const top = standing(50, 8);
     let veilAtChange = -1;
+    let veilAtRoom = -1;
     d.step('living', top, false);
     expect(d.locked).toBe(true);
     for (let i = 0; i < 2000 && d.busy; i++) {
       const before = stage.shown[maria];
+      const moved = log.length;
       stage.update(d.flags, view, d.veil);
       if (before !== stage.shown[maria]) {
         veilAtChange = d.veil;
       }
-      d.step('living', top, false);
+      // La scène change de salle quand le script le demande (ici, le journal).
+      const room = log.some((line) => line.startsWith('room')) ? 'living-strange' : 'living';
+      d.step(room, top, false);
+      if (log.length > moved && log.at(-1)?.startsWith('room')) {
+        veilAtRoom = d.veil;
+      }
     }
     // Elle a disparu sous les yeux de Céleste… mais dans le noir complet du clignement.
     expect(veilAtChange).toBe(1);
+    expect(veilAtRoom).toBe(1);
     expect(stage.shown[maria]).toBe(false);
-    expect(d.isStrange('living')).toBe(true);
+    expect(log).toContain('room living-strange 50,8,-1');
     expect(log).toContain('think maria-missing');
-    // Céleste quitte le salon : tout redevient normal ; le bandeau l'attend sur son lit.
-    d.step('kitchen', standing(3, 3), false);
-    expect(d.isStrange('living')).toBe(false);
+  });
+
+  it('après un échec, le haut de la bibliothèque ramène au monde étrange, jusqu’à la fin', () => {
+    const { log, host } = recorder();
+    const d = new StoryDirector(HOUSE_STORY, host, HZ);
+    d.setFlags([F.EveningPlayed, F.EveningTucked, F.Slept, F.MariaSeen, F.MariaVanished]);
+    const run = (room: string, box: Box) => {
+      d.step(room, box, false);
+      for (let i = 0; i < 3000 && d.busy; i++) {
+        d.step(room, box, false);
+      }
+    };
+    // Retour au point de retour réel (évanouissement), puis de nouveau en haut : clignement bref.
+    run('living', standing(50, 8));
+    expect(log).toEqual(['room living-strange 50,8,-1']);
+    // Tout en haut du passage d'ombres : le berceau vide ; Agir.
+    const cradle = standing(26, 5);
+    d.step('shadows', cradle, false);
+    expect(d.interactable).toBeGreaterThanOrEqual(0);
+    d.step('shadows', cradle, true);
+    for (let i = 0; i < 3000 && d.busy; i++) {
+      d.step('shadows', cradle, false);
+    }
+    expect(d.flags.has(F.StrangeDone)).toBe(true);
+    expect(log).toContain('room bedroom 12,15,1 retour');
+    expect(log).toContain('think maria');
+    // Le bandeau est posé à côté d'elle ; le haut de la bibliothèque ne fait plus rien.
+    const stage = new PropStage();
     stage.load(HOUSE_STORY.props, 'bedroom', d.flags);
     expect(stage.props.filter((_, i) => stage.shown[i]).map((p) => p.id)).toContain('headband');
-    d.step('bedroom', standing(15, 15), false);
-    expect(d.flags.has(F.HeadbandFound)).toBe(true);
+    const before = log.length;
+    run('living', standing(50, 8));
+    expect(log).toHaveLength(before);
   });
 
   it('un déclencheur « en quittant la salle » ne part pas au premier pas', () => {

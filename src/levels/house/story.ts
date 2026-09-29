@@ -1,10 +1,22 @@
 import { STORY_TIMING as S, StoryFlag as F } from '../../config/story';
-import type { StoryData } from '../../core/story/story';
+import type { StoryData, StoryStep, TileArea } from '../../core/story/story';
+
+/** Haut de la bibliothèque du salon, là où Maria était assise. */
+const LIVING_TOP: TileArea = { col: 46, row: 5, w: 10, h: 3 };
+/** Arrivée dans le salon étrange : à la même place, sur la bibliothèque (dans le noir). */
+const STRANGE_ARRIVAL: StoryStep = {
+  do: 'room',
+  room: 'living-strange',
+  col: 50,
+  row: 8,
+  facing: -1,
+};
 
 /**
  * Histoire de la maison (§5.2, D-31), PLACEHOLDER : le soir, Céleste joue avec Maria, la couche
  * dans son berceau, puis se couche ; au matin, Maria n'est plus là et des traces mènent vers le
- * rez-de-chaussée. Maria ne change de place que dans le noir d'un fondu (pilier 5).
+ * rez-de-chaussée ; Maria aperçue en haut de la bibliothèque du salon, puis le monde étrange
+ * (D-34). Maria ne change de place que dans le noir d'un fondu (pilier 5).
  */
 export const HOUSE_STORY: StoryData = {
   triggers: [
@@ -130,16 +142,18 @@ export const HOUSE_STORY: StoryData = {
       ],
     },
     {
-      // En haut : un clignement, Maria n'y est plus, le salon a basculé.
+      // En haut : un clignement ; dans le noir, Maria n'y est plus et Céleste est passée dans le
+      // salon étrange, à la même place (D-34).
       id: 'living-vanish',
       room: 'living',
       on: 'touch',
-      area: { col: 46, row: 5, w: 10, h: 3 },
+      area: LIVING_TOP,
       when: { all: [F.Slept], none: [F.MariaVanished] },
       lock: true,
       steps: [
         { do: 'fadeOut', ms: S.blinkOutMs },
         { do: 'flag', id: F.MariaVanished },
+        STRANGE_ARRIVAL,
         { do: 'wait', ms: S.blinkBlackMs },
         { do: 'fadeIn', ms: S.blinkInMs },
         { do: 'wait', ms: 500 },
@@ -148,26 +162,42 @@ export const HOUSE_STORY: StoryData = {
       ],
     },
     {
-      // En quittant le salon (sortie, réapparition), tout redevient normal.
-      id: 'living-leave',
+      // Après un évanouissement dans le monde étrange (retour au point de retour réel), le haut de
+      // la bibliothèque y ramène, tant que la fin n'est pas vécue.
+      id: 'living-reenter',
       room: 'living',
-      on: 'leave',
-      when: { all: [F.MariaVanished], none: [F.LivingLeft] },
-      lock: false,
-      steps: [{ do: 'flag', id: F.LivingLeft }],
-    },
-    {
-      // Conséquence dans le monde réel (§6.3) : le bandeau de Maria sur le lit, sans explication.
-      id: 'headband',
-      room: 'bedroom',
       on: 'touch',
-      area: { col: 13, row: 13, w: 5, h: 3 },
-      when: { all: [F.MariaVanished], none: [F.HeadbandFound] },
+      area: LIVING_TOP,
+      when: { all: [F.MariaVanished], none: [F.StrangeDone] },
       lock: true,
       steps: [
-        { do: 'flag', id: F.HeadbandFound },
+        { do: 'fadeOut', ms: S.blinkOutMs },
+        STRANGE_ARRIVAL,
+        { do: 'wait', ms: S.blinkBlackMs },
+        { do: 'fadeIn', ms: S.reblinkInMs },
+      ],
+    },
+    {
+      // Fin (D-34) : le berceau vide, tout en haut du passage d'ombres. Long fondu : Céleste est
+      // assise sur son lit, le bandeau de Maria à côté d'elle. Aucune explication.
+      id: 'shadows-cradle',
+      room: 'shadows',
+      on: 'interact',
+      area: { col: 23, row: 3, w: 7, h: 3 },
+      mark: { col: 26, row: 4 },
+      when: { all: [F.MariaVanished], none: [F.StrangeDone] },
+      lock: true,
+      steps: [
+        { do: 'fadeOut', ms: S.nightFadeOutMs },
+        { do: 'flag', id: F.StrangeDone },
+        { do: 'room', room: 'bedroom', col: 12, row: 15, facing: 1, returnPoint: true },
+        { do: 'pose', pose: 'sit' },
+        { do: 'wait', ms: S.nightBlackMs },
+        { do: 'fadeIn', ms: S.nightFadeInMs },
+        { do: 'wait', ms: 1200 },
         { do: 'thought', icon: 'maria', ms: S.thoughtMs + 800 },
         { do: 'wait', ms: S.lookMs + 600 },
+        { do: 'pose', pose: 'stand' },
       ],
     },
   ],
@@ -232,15 +262,25 @@ export const HOUSE_STORY: StoryData = {
       when: { all: [F.Slept], none: [F.MariaVanished] },
     },
     {
+      // Aperçue de l'autre côté du vide, hors d'atteinte ; elle est là dès l'entrée et ne bouge
+      // jamais (pilier 5).
+      id: 'maria-shadows',
+      room: 'shadows',
+      kind: 'maria-sit',
+      col: 4,
+      row: 19,
+      when: { none: [F.StrangeDone] },
+    },
+    { id: 'cradle-shadows', room: 'shadows', kind: 'cradle', col: 26, row: 5, when: {} },
+    {
       id: 'headband',
       room: 'bedroom',
       kind: 'headband',
       col: 15,
       row: 15,
-      when: { all: [F.MariaVanished] },
+      when: { all: [F.StrangeDone] },
     },
   ],
   times: [{ when: { all: [F.Slept] }, time: 'morning' }],
   lockedRooms: [{ room: 'bedroom', when: { none: [F.Slept] } }],
-  strangeRooms: [{ room: 'living', when: { all: [F.MariaVanished], none: [F.LivingLeft] } }],
 };
