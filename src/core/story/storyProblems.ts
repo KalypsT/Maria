@@ -1,4 +1,5 @@
 import { TILE_SIZE } from '../../config/display';
+import { isMemory } from '../../config/memories';
 import { EntityType, Tile, tileAt, type LevelData } from '../level/LevelData';
 import type { Zone } from '../world/zone';
 import { propBox } from './PropStage';
@@ -86,13 +87,22 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
         (step.do === 'flag' && (t.when.none ?? []).includes(step.id)) ||
         (step.do === 'room' && step.room !== t.room),
     );
-    if (!selfDisabling) {
+    if (t.repeat) {
+      const harmless = t.steps.every(
+        (step) => step.do === 'thought' || step.do === 'wait' || step.do === 'memory',
+      );
+      if (t.on !== 'interact' || !harmless) {
+        problems.push(`${what} : rejouable seulement avec Agir, sans effet sur l'histoire`);
+      }
+    } else if (!selfDisabling) {
       problems.push(`${what} : ne se désactive pas (rejoué sans fin)`);
     }
     let dark = false;
     let room = t.room;
     for (const step of t.steps) {
-      if (step.do === 'sparkle') {
+      if (step.do === 'memory' && !isMemory(step.id)) {
+        problems.push(`${what} : souvenir inconnu ${step.id}`);
+      } else if (step.do === 'sparkle') {
         inRoom(room, step.area, what);
       } else if (step.do === 'thought' && step.by !== undefined) {
         const by = step.by;

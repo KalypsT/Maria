@@ -121,4 +121,7 @@ export const PROP_SIZE = {
   // Le chat gris.
   'cat-sleep': { w: 16, h: 8 },
   'cat-sit': { w: 12, h: 14 },
+  // Objets à regarder (D-38).
+  'music-box': { w: 10, h: 11 },
+  plant: { w: 10, h: 16 },
 } as const satisfies Readonly<Record<PropKind, { w: number; h: number }>>;

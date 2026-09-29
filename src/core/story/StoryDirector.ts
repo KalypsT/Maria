@@ -28,6 +28,8 @@ export interface StoryHost {
   /** Scintillements étranges dans une zone (tuiles) de la salle courante. */
   sparkle(area: TileArea, ms: number): void;
   shake(ms: number, strength: number): void;
+  /** Souvenir trouvé (D-38). */
+  memory(id: string): void;
 }
 
 /**
@@ -247,6 +249,9 @@ export class StoryDirector {
         break;
       case 'shake':
         this.host.shake(step.ms, step.strength);
+        break;
+      case 'memory':
+        this.host.memory(step.id);
         break;
       default:
         break;

@@ -249,6 +249,9 @@ export class GameScene extends Phaser.Scene {
       shake: (ms, strength) => {
         this.fx.shake(ms, strength);
       },
+      memory: (id) => {
+        void this.session.addMemory(id);
+      },
     });
     this.story.setFlags(this.session.data.story.flags);
     this.drawnTime = this.story.timeOfDay();
@@ -280,7 +283,12 @@ export class GameScene extends Phaser.Scene {
     this.storyView = new StoryView(this, this.props, this.story);
     this.storyView.setArt(this.artScale, this.artImages());
     this.fx = new StrangeFxView(this);
-    this.fx.load(this.level, isStrangeRoom(this.level), this.palette());
+    this.fx.load(
+      this.level,
+      isStrangeRoom(this.level),
+      this.palette(),
+      this.story.timeOfDay() === 'morning',
+    );
     this.hud = new Hud();
     this.applyMovement();
     this.applyAbilities();
@@ -552,7 +560,12 @@ export class GameScene extends Phaser.Scene {
     }
     this.clock.reset();
     this.touch?.releaseAll();
-    this.mapPage.open(model, MAP_TITLES[zone.id] ?? zone.id, mapBounds(zone));
+    this.mapPage.open(
+      model,
+      MAP_TITLES[zone.id] ?? zone.id,
+      mapBounds(zone),
+      data.progression.memories,
+    );
   }
 
   private closeMap(): void {
@@ -787,7 +800,7 @@ export class GameScene extends Phaser.Scene {
     this.storyView.clearThought();
     this.poser.sitting = false;
     this.fx.reset();
-    this.fx.load(level, isStrangeRoom(level), this.palette());
+    this.fx.load(level, isStrangeRoom(level), this.palette(), this.story.timeOfDay() === 'morning');
   }
 
   /** Capacités acquises (sauvegarde) ou débloquées par l'overlay, appliquées à Céleste. */

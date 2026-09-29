@@ -13,9 +13,10 @@ import {
   type Tremor,
 } from '../core/fx/strangeLife';
 import { floatingDecor } from '../core/level/decor';
-import type { LevelData } from '../core/level/LevelData';
+import { EntityType, type LevelData } from '../core/level/LevelData';
 import type { TileArea } from '../core/story/story';
-import { drawToyShadow } from './art/roomArt';
+import { drawToyShadow, floorRow } from './art/roomArt';
+import { HOUSE_LIFE as LIFE } from '../config/strangeFx';
 
 /** Échelle des textures des effets (nettes jusqu'à l'échelle 3 de l'écran). */
 const S = 3;
@@ -98,6 +99,11 @@ export class StrangeFxView {
     startMs: number;
   }[] = [];
   private tremor: Tremor = createTremor(0, FX, this.rand);
+  // Vie de la maison réelle (D-38).
+  private motes: (Particle & { readonly zone: Phaser.Geom.Rectangle })[] = [];
+  private seconds: Phaser.GameObjects.Image[] = [];
+  private breaths: Swaying[] = [];
+  private drums: { readonly image: Phaser.GameObjects.Image; readonly y: number }[] = [];
   private tremorK = 0;
 
   constructor(private readonly scene: Phaser.Scene) {
@@ -153,7 +159,7 @@ export class StrangeFxView {
    * Nouvelle salle : la vie du monde étrange n'existe que dans ses salles. `palette` : couleurs
    * des rideaux et des objets.
    */
-  load(level: LevelData, strange: boolean, palette: Readonly<ArtPalette>): void {
+  load(level: LevelData, strange: boolean, palette: Readonly<ArtPalette>, morning = false): void {
     for (const image of this.roomObjects) {
       image.destroy();
     }
@@ -170,8 +176,13 @@ export class StrangeFxView {
     this.bedroomLamps = [];
     this.bears = [];
     this.tremorK = 0;
+    this.motes = [];
+    this.seconds = [];
+    this.breaths = [];
+    this.drums = [];
     this.level = strange ? level : null;
     if (!strange) {
+      this.loadHouseLife(level, palette, morning);
       return;
     }
     const now = this.scene.time.now;
@@ -324,6 +335,7 @@ export class StrangeFxView {
     this.updateShake(now);
     this.updateSparkles(now);
     if (!this.level) {
+      this.updateHouseLife(now, dt);
       return;
     }
     this.updateDust(now, dt, view);
@@ -516,6 +528,128 @@ export class StrangeFxView {
     }
   }
 
+  /**
+   * Maison réelle (D-38) : poussière dans la lumière des fenêtres, trotteuse des horloges, rideaux
+   * qui bougent à peine, veilleuses qui respirent ; le matin, la machine à laver tourne. Doux,
+   * jamais inquiétant (le contraste avec le monde étrange).
+   */
+  private loadHouseLife(level: LevelData, palette: Readonly<ArtPalette>, morning: boolean): void {
+    const own = (image: Phaser.GameObjects.Image) => {
+      this.roomObjects.push(image);
+      return image;
+    };
+    const floorY = floorRow(level) * T;
+    const curtain = Phaser.Display.Color.HexStringToColor(palette.curtain).color;
+    const [lr = 255, lg = 220, lb = 170] = palette.lamp.split(',').map(Number);
+    const warm = Phaser.Display.Color.GetColor(lr, lg, lb);
+    for (const d of level.decor) {
+      const x = d.col * T;
+      const y = d.row * T;
+      const w = d.width * T;
+      const h = d.height * T;
+      if (d.kind === 'window') {
+        // Poussière dans le rayon de lumière, sous la fenêtre.
+        const zone = new Phaser.Geom.Rectangle(x, y + h * 0.3, w + 48, Math.max(16, floorY - y));
+        for (let i = 0; i < LIFE.motesPerWindow; i++) {
+          const p = this.particle('fx-mote', ABOVE_LIGHT, true);
+          p.image.setTint(0xfff1d6);
+          own(p.image);
+          this.motes.push({ ...p, zone });
+        }
+        for (const [left, phase] of [
+          [x - 5, 0],
+          [x + w + 5, 2.1],
+        ] as const) {
+          const image = own(
+            this.scene.add
+              .image(left, y - 8, 'fx-curtain')
+              .setOrigin(0.5, 0)
+              .setScale(1 / S, (h + 18) / 64 / S)
+              .setTint(curtain)
+              .setDepth(BEHIND_LIGHT),
+          );
+          this.curtains.push({ image, phase, base: 1 / S });
+        }
+      } else if (d.kind === 'clock') {
+        this.seconds.push(
+          own(
+            this.scene.add
+              .image(x + w / 2, y + h / 2, 'fx-hand')
+              .setOrigin(0.5, 1)
+              .setScale(0.5 / S, (h / 2.6 / 8) * (1 / S))
+              .setTint(0xb85f75)
+              .setDepth(BEHIND_LIGHT),
+          ),
+        );
+      } else if (d.kind === 'machine' && morning) {
+        const cx = x + w / 2;
+        const cy = y + h / 2 + 4;
+        const r = Math.min(w, h) * 0.22;
+        const image = own(
+          this.scene.add
+            .image(cx, cy, 'fx-drum')
+            .setScale((2 * r) / 16 / S)
+            .setDepth(BEHIND_LIGHT),
+        );
+        this.drums.push({ image, y: cy });
+      }
+    }
+    for (const e of level.entities) {
+      if (e.type === EntityType.Checkpoint) {
+        const image = own(
+          this.scene.add
+            .image((e.col + 0.5) * T, (e.row + 1) * T - 10, 'fx-halo')
+            .setScale(40 / 64 / S)
+            .setTint(warm)
+            .setBlendMode(Phaser.BlendModes.ADD)
+            .setDepth(ABOVE_LIGHT),
+        );
+        this.breaths.push({ image, phase: this.rand() * Math.PI * 2, base: 1 });
+      }
+    }
+  }
+
+  private updateHouseLife(now: number, dt: number): void {
+    for (const p of this.motes) {
+      const z = p.zone;
+      if (p.bornMs < 0 || now - p.bornMs >= p.lifeMs) {
+        p.x = z.x + this.rand() * z.width;
+        p.y = z.y + this.rand() * z.height;
+        p.vx = (this.rand() - 0.5) * 3;
+        p.vy = (this.rand() - 0.5) * 2;
+        p.bornMs = now - this.rand() * LIFE.moteLifeMs * 0.5;
+        p.lifeMs = LIFE.moteLifeMs * (0.7 + this.rand() * 0.6);
+        p.phase = this.rand() * 10;
+      }
+      p.x += (p.vx * dt) / 1000;
+      p.y += (p.vy * dt) / 1000;
+      const t = (now - p.bornMs) / p.lifeMs;
+      p.image
+        .setVisible(true)
+        .setPosition(p.x + Math.sin(now / 1700 + p.phase) * 2, p.y)
+        .setAlpha(Math.sin(Math.max(0, Math.min(1, t)) * Math.PI) * LIFE.moteAlpha);
+    }
+    const tick = Math.floor(now / 1000);
+    const snap = Math.min(1, (now % 1000) / 80);
+    for (const hand of this.seconds) {
+      hand.rotation = ((tick - 1 + snap) * Math.PI * 2) / 60;
+    }
+    for (const c of this.curtains) {
+      // Un léger balancement depuis la tringle, sans changer de largeur (le rideau du décor reste
+      // caché dessous).
+      c.image.rotation =
+        LIFE.curtainSway * Math.sin((now / LIFE.curtainMs) * Math.PI * 2 + c.phase);
+    }
+    for (const b of this.breaths) {
+      const k = 0.5 + 0.5 * Math.sin((now / LIFE.breathMs) * Math.PI * 2 + b.phase);
+      b.image.setAlpha(LIFE.breathMin + (LIFE.breathMax - LIFE.breathMin) * k);
+    }
+    for (const drum of this.drums) {
+      drum.image.rotation = (now / LIFE.drumTurnMs) * Math.PI * 2;
+      drum.image.y = drum.y + Math.sin(now / 45) * 0.35;
+    }
+  }
+
   /** Scintillements qui tombent doucement ; ils s'effacent près de Céleste (jamais devant elle). */
   private updateSnow(
     now: number,
@@ -661,6 +795,25 @@ export class StrangeFxView {
     });
     make('fx-halo', 64, 64, (ctx) => {
       radial(ctx, 64, 64, 'rgba(255,255,255,0.5)');
+    });
+    make('fx-drum', 16, 16, (ctx) => {
+      // Hublot de la machine : linge qui tourne (une chaussette rose, un torchon bleu).
+      ctx.fillStyle = '#5f79a8';
+      ctx.beginPath();
+      ctx.arc(8, 8, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#f19bb5';
+      ctx.beginPath();
+      ctx.ellipse(8, 3.5, 3.5, 1.8, 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#9fc0e8';
+      ctx.beginPath();
+      ctx.ellipse(6, 11.5, 3, 1.6, -0.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.beginPath();
+      ctx.arc(5.5, 5.5, 2, 0, Math.PI * 2);
+      ctx.fill();
     });
     make('fx-dark', 4, 4, (ctx) => {
       ctx.fillStyle = '#05040a';

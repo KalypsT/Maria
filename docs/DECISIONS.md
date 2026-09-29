@@ -390,6 +390,17 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
 - **Données** : nouvelles étapes `evening.goodnight`, `morning.dad`, `morning.mom`, `cat.petted`, `end.dad`. `evening.goodnight` est ajoutée aux étapes données à une ancienne partie migrée. Pas de migration.
 - **Limite connue** : les jouets mécaniques (ennemis de la maison) patrouillent près des parents sans réaction ; à revoir (par exemple, ils ne s'animent que la nuit ou hors de la présence d'un adulte).
 
+## D-38 — Maison vivante (PR 2) : mouvements, objets à regarder, souvenirs dans le cahier
+
+- **Décisions de l'utilisateur** : liste des souvenirs validée ; souvenirs pas encore trouvés en **cases vides en pointillés** ; tout **dessiné par le code** pour l'instant.
+- **Mouvements de la maison réelle** (doux, jamais inquiétants) : poussière dans la lumière des fenêtres, trotteuse des horloges, rideaux qui se balancent à peine, veilleuses qui respirent, machine à laver qui tourne le matin, plante dont les feuilles frémissent, danseuse de la boîte à musique. Même système que le monde étrange (`StrangeFxView`), réglages `HOUSE_LIFE`.
+- **Objets à regarder (Agir)** : photo de famille (salon, nouvel élément de décor `photo`), dessin de Céleste (chambre), boîte à musique (étagère au-dessus du lit), plante (plan de travail de la cuisine). Une bulle pictogramme (famille, dessin, notes, fleur). **Rejouables** (`repeat`) : seulement avec Agir, et sans effet sur l'histoire (bulles, attentes, souvenir), ce que la validation vérifie.
+- **Souvenirs** (spec §22.1) :
+  - la première fois qu'on regarde un objet, il devient un souvenir (étape `memory`, sauvegardé dans `progression.memories`, champ déjà prévu : **aucune migration**) ;
+  - le bandeau de Maria devient un souvenir à la fin du monde étrange ;
+  - la case « en haut de la bibliothèque » attend le rez-de-chaussée retravaillé (PR 3).
+- **Cahier de Céleste** : deux onglets manuscrits, « Ma maison » (la carte) et « Mes souvenirs » ; une case par souvenir, dessiné s'il est trouvé, en pointillés sinon (complétion explicite, §23) ; toucher un souvenir l'affiche en grand. Pas d'autre texte que les titres (pilier 6).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
