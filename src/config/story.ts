@@ -14,6 +14,14 @@ export const StoryFlag = {
   /** Traces de Maria aperçues (couloir, escalier). */
   TraceHall: 'trace.hall',
   TraceStairs: 'trace.stairs',
+  /** Maria aperçue en haut de la bibliothèque du salon. */
+  MariaSeen: 'living.seen',
+  /** Céleste est arrivée en haut : Maria n'y est plus, le salon a basculé (monde étrange). */
+  MariaVanished: 'living.vanished',
+  /** Céleste a quitté le salon basculé : tout est redevenu normal. */
+  LivingLeft: 'living.left',
+  /** Le bandeau de Maria, trouvé sur le lit de Céleste. */
+  HeadbandFound: 'headband.found',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -43,6 +51,10 @@ export const STORY_TIMING = {
   holdMs: 1100,
   /** Délai minimal entre deux bulles « c'est l'heure de dormir » à une porte fermée. */
   lockedExitThoughtMs: 2500,
+  /** Bascule vers le monde étrange : un clignement (fondu très court), puis le retour lent. */
+  blinkOutMs: 160,
+  blinkBlackMs: 240,
+  blinkInMs: 700,
 } as const;
 
 /**
@@ -56,4 +68,5 @@ export const PROP_SIZE = {
   'cradle-undone': { w: 30, h: 16 },
   slipper: { w: 7, h: 4 },
   bottle: { w: 9, h: 5 },
+  headband: { w: 10, h: 5 },
 } as const satisfies Readonly<Record<PropKind, { w: number; h: number }>>;

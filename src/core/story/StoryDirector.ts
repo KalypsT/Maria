@@ -7,6 +7,7 @@ import {
   type FlagCondition,
   type ScriptPose,
   type StoryData,
+  type StoryStep,
   type StoryTrigger,
   type ThoughtIcon,
   type TimeOfDay,
@@ -36,6 +37,8 @@ export class StoryDirector {
   private stepElapsed = 0;
   private stepTotal = 0;
   private veilFrom = 0;
+  /** Salle du pas précédent (déclencheurs `leave`) ; null avant le premier pas. */
+  private lastRoom: string | null = null;
 
   constructor(
     readonly data: StoryData,
@@ -90,6 +93,16 @@ export class StoryDirector {
     return false;
   }
 
+  /** Salle basculée dans le monde étrange (§6.2). */
+  isStrange(room: string): boolean {
+    for (const rule of this.data.strangeRooms) {
+      if (rule.room === room && this.check(rule.when)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /** Arrête le script en cours et lève le voile (changement de salle, réapparition). */
   cancel(): void {
     this.running = null;
@@ -102,11 +115,23 @@ export class StoryDirector {
    * `interact`), puis un déclencheur de contact.
    */
   step(room: string, box: Box, interact: boolean): void {
+    const left = this.lastRoom !== null && this.lastRoom !== room ? this.lastRoom : null;
+    this.lastRoom = room;
+    const triggers = this.data.triggers;
+    if (left !== null) {
+      // Salle quittée : ses déclencheurs `leave` (instantanés, ils ne bloquent rien).
+      for (const t of triggers) {
+        if (t.on === 'leave' && t.room === left && this.check(t.when)) {
+          for (const step of t.steps) {
+            this.apply(step);
+          }
+        }
+      }
+    }
     if (this.running) {
       this.advance();
       return;
     }
-    const triggers = this.data.triggers;
     this.interactable = -1;
     for (let i = 0; i < triggers.length; i++) {
       const t = triggers[i];
@@ -129,7 +154,8 @@ export class StoryDirector {
   }
 
   private ready(trigger: StoryTrigger, box: Box): boolean {
-    return areaOverlaps(trigger.area, box, TILE_SIZE) && this.check(trigger.when);
+    const area = trigger.area;
+    return area !== undefined && areaOverlaps(area, box, TILE_SIZE) && this.check(trigger.when);
   }
 
   private start(trigger: StoryTrigger): void {
@@ -161,22 +187,32 @@ export class StoryDirector {
           this.stepTotal = msToSteps(step.ms, this.stepHz);
           this.veilFrom = this.veil;
           return;
-        case 'flag':
-          if (!this.flags.has(step.id)) {
-            this.flags.add(step.id);
-            this.host.flagSet(step.id);
-          }
-          break;
-        case 'thought':
-          this.host.think(step.icon, step.ms);
-          break;
-        case 'place':
-          this.host.place(step.col, step.row, step.facing);
-          break;
-        case 'pose':
-          this.host.pose(step.pose);
-          break;
+        default:
+          this.apply(step);
       }
+    }
+  }
+
+  /** Étape instantanée (les étapes bloquantes sont ignorées ici). */
+  private apply(step: StoryStep): void {
+    switch (step.do) {
+      case 'flag':
+        if (!this.flags.has(step.id)) {
+          this.flags.add(step.id);
+          this.host.flagSet(step.id);
+        }
+        break;
+      case 'thought':
+        this.host.think(step.icon, step.ms);
+        break;
+      case 'place':
+        this.host.place(step.col, step.row, step.facing);
+        break;
+      case 'pose':
+        this.host.pose(step.pose);
+        break;
+      default:
+        break;
     }
   }
 

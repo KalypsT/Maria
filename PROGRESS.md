@@ -2,11 +2,28 @@
 
 ## Phase en cours
 
-**Vertical slice** (D-30, D-31) : **prologue du soir, réveil et traces** (PR 1 de « Maria et le monde étrange ») implémentés sur la branche `ccr-f0e3d7f5-a38dwj`, **en attente d'essai sur téléphone**.
+**Vertical slice** (D-30 à D-32) : **Maria dans la bibliothèque et premier passage vers le monde étrange** (PR 2 de « Maria et le monde étrange ») implémentés sur la branche `ccr-f0e3d7f5-a38dwj`, **en attente d'essai sur téléphone**. Avec la PR 1, la séquence narrative du slice est complète.
 
-Prochaine (PR 2) : Maria en haut de la bibliothèque du salon, bascule du salon vers le monde étrange, bandeau de Maria sur le lit de Céleste.
+Prochaine : essai du slice complet sur téléphone, puis retours (maison plus vivante, rez-de-chaussée), ou la croissance.
 
 ## Fait
+
+### Maria dans la bibliothèque, monde étrange, bandeau (§6, D-32)
+
+- **Salon, au matin** : Maria assise en haut de la bibliothèque, visible du sol ; en l'apercevant, bulle avec son visage.
+- **En haut** (en grimpant) : clignement, Maria n'y est plus, le salon bascule dans le **monde étrange** (bulle « Maria ? »). En quittant le salon, tout redevient normal.
+- **Chambre** : le **bandeau de Maria** est sur le lit ; bulle avec son visage en s'approchant.
+- **Céleste en couleurs** dans le monde étrange (lisibilité).
+- **Debug** : liste « Histoire » complétée (Maria disparue, retour au réel).
+- Tests : 318 (disparition seulement dans le noir, bascule et retour, bandeau, déclencheur en quittant la salle).
+- **Vérifié dans Chromium** : Maria vue du sol, escalade de la bibliothèque, clignement et salon étrange, retour par la cuisine, bandeau sur le lit.
+
+### À vérifier sur téléphone (monde étrange)
+
+- [ ] Maria se remarque en haut de la bibliothèque et donne envie d'y monter.
+- [ ] Le clignement surprend sans faire peur ; le salon étrange inquiète un peu, jamais horreur.
+- [ ] Le bandeau sur le lit se remarque ; le moment serre un peu le cœur.
+- [ ] Céleste reste lisible dans le monde étrange.
 
 ### Prologue : le soir, le réveil, les traces (§5.2, §33, D-31)
 
