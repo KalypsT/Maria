@@ -517,7 +517,7 @@ export class GameScene extends Phaser.Scene {
       camera.viewWidth,
       camera.viewHeight,
     );
-    fx.update(view, this.puppet.x, this.puppet.y - box.height / 2);
+    fx.update(view, this.puppet.x, this.puppet.y - box.height / 2, player.grounded);
     main.scrollX += fx.offsetX;
     main.scrollY += fx.offsetY;
     this.renderRunState();

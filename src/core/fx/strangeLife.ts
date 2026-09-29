@@ -100,3 +100,54 @@ export function seededRandom(seed: number): () => number {
     return state / 0x100000000;
   };
 }
+
+export interface TremorParams {
+  readonly tremorEveryMinMs: number;
+  readonly tremorEveryMaxMs: number;
+  readonly tremorMinMs: number;
+  readonly tremorMaxMs: number;
+}
+
+/** Frissons du monde étrange (D-36) : de temps en temps, jamais pendant un saut. */
+export interface Tremor {
+  /** Prochain frisson possible (ms). */
+  nextAt: number;
+  /** Fin du frisson en cours (ms), -1 sans frisson. */
+  until: number;
+  /** Durée du frisson en cours (ms). */
+  lengthMs: number;
+}
+
+export function createTremor(nowMs: number, params: TremorParams, rand: () => number): Tremor {
+  return { nextAt: nowMs + delay(params, rand), until: -1, lengthMs: 1 };
+}
+
+function delay(params: TremorParams, rand: () => number): number {
+  return params.tremorEveryMinMs + rand() * (params.tremorEveryMaxMs - params.tremorEveryMinMs);
+}
+
+/**
+ * Un pas : un frisson commence à son heure, seulement quand Céleste a les pieds au sol (sinon il
+ * attend qu'elle se pose : un tremblement en plein saut fausserait le timing, pilier 1). Renvoie
+ * l'intensité du frisson (0 à 1, qui s'apaise sur la fin).
+ */
+export function stepTremor(
+  tremor: Tremor,
+  nowMs: number,
+  grounded: boolean,
+  params: TremorParams,
+  rand: () => number,
+): number {
+  if (tremor.until >= 0 && nowMs >= tremor.until) {
+    tremor.until = -1;
+    tremor.nextAt = nowMs + delay(params, rand);
+  }
+  if (tremor.until < 0 && nowMs >= tremor.nextAt && grounded) {
+    tremor.lengthMs = params.tremorMinMs + rand() * (params.tremorMaxMs - params.tremorMinMs);
+    tremor.until = nowMs + tremor.lengthMs;
+  }
+  if (tremor.until < 0) {
+    return 0;
+  }
+  return Math.min(1, ((tremor.until - nowMs) / tremor.lengthMs) * 2);
+}
