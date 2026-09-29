@@ -185,6 +185,27 @@ function drawBottle(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   ctx.fill();
 }
 
+/** Bandeau de Maria, posé à plat : anneau rose et nœud fleuri. */
+function drawHeadband(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  ctx.strokeStyle = '#f6b6c8';
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.ellipse(w / 2 + 1, h - 2, w / 2 - 1.8, 1.4, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.fillStyle = PINK;
+  ctx.beginPath();
+  ctx.ellipse(2.4, h - 3, 1.9, 1.4, -0.5, 0, Math.PI * 2);
+  ctx.ellipse(4.8, h - 3.4, 1.9, 1.4, 0.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#fff4d0';
+  ctx.fillRect(2.2, h - 3.6, 0.8, 0.8);
+  ctx.fillRect(4.6, h - 3.8, 0.8, 0.8);
+  ctx.fillStyle = '#a0405f';
+  ctx.beginPath();
+  ctx.arc(3.6, h - 3.2, 0.8, 0, Math.PI * 2);
+  ctx.fill();
+}
+
 export function drawProp(
   ctx: CanvasRenderingContext2D,
   kind: PropKind,
@@ -210,6 +231,9 @@ export function drawProp(
       break;
     case 'bottle':
       drawBottle(ctx, w, h);
+      break;
+    case 'headband':
+      drawHeadband(ctx, w, h);
       break;
   }
 }

@@ -243,6 +243,14 @@ export function installDebugOverlay(scene: GameScene): void {
       'Histoire : traces vues',
       [F.EveningPlayed, F.EveningTucked, F.Slept, F.TraceHall, F.TraceStairs],
     ],
+    [
+      'Histoire : Maria disparue (salon étrange)',
+      [F.EveningPlayed, F.EveningTucked, F.Slept, F.MariaSeen, F.MariaVanished],
+    ],
+    [
+      'Histoire : retour au réel (bandeau sur le lit)',
+      [F.EveningPlayed, F.EveningTucked, F.Slept, F.MariaSeen, F.MariaVanished, F.LivingLeft],
+    ],
   ];
   const current = [...scene.story.flags].sort().join();
   for (const [label, flags] of steps) {

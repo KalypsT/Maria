@@ -54,6 +54,7 @@ function story(steps: StoryStep[], on: 'interact' | 'touch' = 'interact', lock =
     props: [],
     times: [{ when: { all: ['done'] }, time: 'morning' }],
     lockedRooms: [{ room: 'r', when: { none: ['done'] } }],
+    strangeRooms: [{ room: 'r', when: { all: ['done'] } }],
   };
 }
 
@@ -282,5 +283,69 @@ describe('histoire de la maison (D-31)', () => {
     // Du lit à Maria (sur le tapis), puis du berceau (où Céleste se retrouve) au lit.
     expect(reach(at(12, 15)).has(at(19, 19))).toBe(true);
     expect(reach(at(25, 17)).has(at(12, 15))).toBe(true);
+  });
+
+  it('en haut de la bibliothèque : Maria disparaît dans le noir seulement, le salon bascule', () => {
+    const { log, host } = recorder();
+    const d = new StoryDirector(HOUSE_STORY, host, HZ);
+    d.setFlags([F.EveningPlayed, F.EveningTucked, F.Slept]);
+    const stage = new PropStage();
+    stage.load(HOUSE_STORY.props, 'living', d.flags);
+    const maria = stage.props.findIndex((p) => p.id === 'maria-bookcase');
+    expect(stage.shown[maria]).toBe(true);
+    // Vue fixe qui montre toute la bibliothèque (Céleste est juste à côté de Maria).
+    const view: Box = { x: 30 * T, y: 0, width: 30 * T, height: 24 * T };
+    d.step('living', standing(44, 21), false);
+    expect(d.flags.has(F.MariaSeen)).toBe(true);
+    const top = standing(50, 8);
+    let veilAtChange = -1;
+    d.step('living', top, false);
+    expect(d.locked).toBe(true);
+    for (let i = 0; i < 300 && d.busy; i++) {
+      const before = stage.shown[maria];
+      stage.update(d.flags, view, d.veil);
+      if (before !== stage.shown[maria]) {
+        veilAtChange = d.veil;
+      }
+      d.step('living', top, false);
+    }
+    // Elle a disparu sous les yeux de Céleste… mais dans le noir complet du clignement.
+    expect(veilAtChange).toBe(1);
+    expect(stage.shown[maria]).toBe(false);
+    expect(d.isStrange('living')).toBe(true);
+    expect(log).toContain('think maria-missing');
+    // Céleste quitte le salon : tout redevient normal ; le bandeau l'attend sur son lit.
+    d.step('kitchen', standing(3, 3), false);
+    expect(d.isStrange('living')).toBe(false);
+    stage.load(HOUSE_STORY.props, 'bedroom', d.flags);
+    expect(stage.props.filter((_, i) => stage.shown[i]).map((p) => p.id)).toContain('headband');
+    d.step('bedroom', standing(15, 15), false);
+    expect(d.flags.has(F.HeadbandFound)).toBe(true);
+  });
+
+  it('un déclencheur « en quittant la salle » ne part pas au premier pas', () => {
+    const { log, host } = recorder();
+    const d = new StoryDirector(
+      {
+        ...story([]),
+        triggers: [
+          {
+            id: 'l',
+            room: 'r',
+            on: 'leave',
+            when: { none: ['left'] },
+            lock: false,
+            steps: [{ do: 'flag', id: 'left' }],
+          },
+        ],
+      },
+      host,
+      HZ,
+    );
+    d.step('r', standing(0, 0), false);
+    d.step('r', standing(0, 0), false);
+    expect(log).toEqual([]);
+    d.step('s', standing(0, 0), false);
+    expect(log).toEqual(['flag left']);
   });
 });

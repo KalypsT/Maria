@@ -193,8 +193,9 @@ export class GameScene extends Phaser.Scene {
   story!: StoryDirector;
   readonly props = new PropStage();
   private storyView!: StoryView;
-  /** Moment de la journée de la salle dessinée. */
+  /** Moment de la journée et monde étrange de la salle dessinée. */
   private drawnTime: TimeOfDay = 'evening';
+  private drawnStrange = false;
   /** Vue de la caméra (px logiques), pour les objets de mise en scène (pilier 5). */
   private readonly viewBox: Box = { x: 0, y: 0, width: 0, height: 0 };
   /** Heure (ms) avant laquelle une porte fermée ne redonne pas de bulle. */
@@ -250,7 +251,7 @@ export class GameScene extends Phaser.Scene {
     this.player = new PlayerPhysics(this.level, this.movement, x, y);
     // Origine aux pieds : l'écrasement et l'inclinaison se font autour du point d'appui.
     this.puppet = new CelestePuppet(this);
-    this.puppet.redraw(this.artScale, this.palette(), this.artImages());
+    this.puppet.redraw(this.artScale, this.celestePalette(), this.artImages());
     this.dust = new DustPool(this, this.feelParams);
     this.combat = new CombatWorld(this.level, this.combatParams);
     this.combatView = new CombatView(this, this.combat, this.combatParams, this.dust);
@@ -731,7 +732,11 @@ export class GameScene extends Phaser.Scene {
     if (zone) {
       void this.session.revealRoom(level.id);
     }
-    this.drawLevel();
+    if (this.story.isStrange(level.id) !== this.drawnStrange) {
+      this.redrawArt(); // Céleste et les jouets changent aussi de palette.
+    } else {
+      this.drawLevel();
+    }
     this.combat.load(level);
     this.combatView.rebuild();
     this.run.load(level, this.session.data.activatedCheckpoints, checkpointId);
@@ -809,11 +814,12 @@ export class GameScene extends Phaser.Scene {
   /** Redessine la salle et Céleste (échelle ou palette changée). */
   private redrawArt(): void {
     this.drawnTime = this.story.timeOfDay();
+    this.drawnStrange = this.story.isStrange(this.level.id);
     this.worldView.setArtScale(this.artScale);
     this.storyView.setArt(this.artScale, this.artImages());
     this.combatView.setArt(this.artScale, this.palette());
     this.drawLevel();
-    this.puppet.redraw(this.artScale, this.palette(), this.artImages());
+    this.puppet.redraw(this.artScale, this.celestePalette(), this.artImages());
   }
 
   /** Images fournies chargées (nom d'élément → image). */
@@ -976,10 +982,19 @@ export class GameScene extends Phaser.Scene {
 
   /** Palette courante : monde étrange (D-28), ou maison le soir ou le matin (D-31). */
   private palette() {
-    if (this.strangeWorld) {
+    if (this.strangeWorld || this.story.isStrange(this.level.id)) {
       return STRANGE_PALETTE;
     }
     return this.story.timeOfDay() === 'morning' ? DAY_PALETTE : REAL_PALETTE;
+  }
+
+  /**
+   * Céleste garde ses couleurs dans le monde étrange (D-31) : lisible (pilier 1), seule chose
+   * « réelle » au milieu des silhouettes.
+   */
+  private celestePalette() {
+    const palette = this.palette();
+    return palette.silhouettes ? REAL_PALETTE : palette;
   }
 
   /**
@@ -998,7 +1013,10 @@ export class GameScene extends Phaser.Scene {
     if (this.props.update(story.flags, view, veil)) {
       this.storyView.refresh();
     }
-    if (veil >= 1 && story.timeOfDay() !== this.drawnTime) {
+    if (
+      veil >= 1 &&
+      (story.timeOfDay() !== this.drawnTime || story.isStrange(this.level.id) !== this.drawnStrange)
+    ) {
       this.redrawArt();
     }
     this.touch?.setLabel('Attack', story.interactable >= 0 && !story.busy ? 'Agir' : null);

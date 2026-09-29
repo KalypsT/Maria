@@ -282,6 +282,18 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
 - **Maria** : image fournie par l'utilisateur, détourée (`public/art/maria.png`, clé `maria`) ; la tête sert aussi dans le berceau et les bulles. Repli : un poupon dessiné par le code. À juger sur téléphone (décalage de style possible avec le papier découpé) ; si besoin, version simplifiée dessinée d'après l'image.
 - **Sauvegarde v2 (signalée, pilier 10)** : nouveau champ `story.flags`. Migration v1 → v2 à la lecture (sauvegarde et code) : une partie commencée avant l'histoire reçoit le **prologue comme vécu** (pas de retour au coucher). Testé : ancienne sauvegarde, ancien code, schéma.
 
+## D-32 — Maria dans la bibliothèque, premier passage vers le monde étrange
+
+- **Séquence (plan validé, PLACEHOLDER)** :
+  1. au matin, Maria est assise **en haut de la bibliothèque du salon**, visible depuis le sol, atteignable seulement en grimpant ; en l'apercevant, bulle avec son visage ;
+  2. quand Céleste arrive en haut : **un clignement** (fondu très court), Maria n'y est plus, **le salon a basculé** dans le monde étrange (silhouettes, lumière turquoise, jouets en ombres aux yeux lumineux, même comportement), bulle « Maria ? » ;
+  3. dès que Céleste **quitte le salon** (sortie, réapparition), tout redevient normal, pour de bon ;
+  4. **conséquence dans le monde réel** (§6.3) : le **bandeau de Maria** est posé sur le lit de Céleste ; en s'en approchant, bulle avec le visage de Maria. Aucune explication.
+- **Pilier 5** : Maria disparaît sous les yeux de Céleste, mais **dans le noir complet** du clignement (testé : le changement n'a lieu qu'avec un voile à 1).
+- **Événements** : nouveau déclencheur « en quittant la salle » (étapes instantanées seulement), salles basculées dans le monde étrange selon les étapes (`strangeRooms`).
+- **Céleste garde ses couleurs dans le monde étrange** : en silhouette, elle était presque invisible (pilier 1 : lisibilité). Elle est la seule chose « réelle » au milieu des ombres.
+- **Sauvegarde** : aucune migration (nouvelles étapes dans `story.flags`).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

@@ -44,9 +44,13 @@ export type StoryStep =
 export interface StoryTrigger {
   readonly id: string;
   readonly room: string;
-  /** `interact` : bouton Agir dans la zone ; `touch` : Céleste entre dans la zone. */
-  readonly on: 'interact' | 'touch';
-  readonly area: TileArea;
+  /**
+   * `interact` : bouton Agir dans la zone ; `touch` : Céleste entre dans la zone ; `leave` :
+   * Céleste quitte la salle (par une sortie, une réapparition…).
+   */
+  readonly on: 'interact' | 'touch' | 'leave';
+  /** Zone (tuiles) des déclencheurs `interact` et `touch`. */
+  readonly area?: TileArea;
   /** Tuile où une petite étincelle signale ce qu'on peut faire (déclencheur Agir). */
   readonly mark?: { readonly col: number; readonly row: number };
   readonly when: FlagCondition;
@@ -63,6 +67,7 @@ export const PROP_KINDS = [
   'cradle-undone',
   'slipper',
   'bottle',
+  'headband',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 
@@ -87,6 +92,8 @@ export interface StoryData {
   readonly times: readonly { readonly when: FlagCondition; readonly time: TimeOfDay }[];
   /** Salles dont les sorties sont fermées tant que la condition est vraie. */
   readonly lockedRooms: readonly { readonly room: string; readonly when: FlagCondition }[];
+  /** Salles basculées dans le monde étrange (§6.2) tant que la condition est vraie. */
+  readonly strangeRooms: readonly { readonly room: string; readonly when: FlagCondition }[];
 }
 
 export function checkCondition(flags: ReadonlySet<string>, when: FlagCondition): boolean {

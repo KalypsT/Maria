@@ -56,7 +56,14 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
       problems.push(`${what} : identifiant en double`);
     }
     ids.add(t.id);
-    inRoom(t.room, t.area, what);
+    if (t.area) {
+      inRoom(t.room, t.area, what);
+    } else if (t.on !== 'leave') {
+      problems.push(`${what} : sans zone`);
+    }
+    if (t.on === 'leave' && t.steps.some((step) => step.do !== 'flag' && step.do !== 'thought')) {
+      problems.push(`${what} : en quittant la salle, seulement des étapes instantanées`);
+    }
     if (t.on === 'interact' && !t.mark) {
       problems.push(`${what} : sans repère (étincelle)`);
     }
@@ -104,6 +111,12 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
   }
   for (const rule of story.times) {
     knownFlags(rule.when, 'moment de la journée');
+  }
+  for (const rule of story.strangeRooms) {
+    knownFlags(rule.when, `monde étrange ${rule.room}`);
+    if (!zone.rooms.has(rule.room)) {
+      problems.push(`monde étrange : salle ${rule.room} inconnue`);
+    }
   }
   for (const lock of story.lockedRooms) {
     knownFlags(lock.when, `porte fermée ${lock.room}`);

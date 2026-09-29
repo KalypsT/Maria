@@ -90,6 +90,57 @@ export const HOUSE_STORY: StoryData = {
         { do: 'thought', icon: 'maria', ms: S.thoughtMs },
       ],
     },
+    {
+      // Maria aperçue en haut de la bibliothèque, là où une poupée n'a rien à faire.
+      id: 'living-see',
+      room: 'living',
+      on: 'touch',
+      area: { col: 38, row: 14, w: 26, h: 8 },
+      when: { all: [F.Slept], none: [F.MariaSeen, F.MariaVanished] },
+      lock: false,
+      steps: [
+        { do: 'flag', id: F.MariaSeen },
+        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+      ],
+    },
+    {
+      // En haut : un clignement, Maria n'y est plus, le salon a basculé.
+      id: 'living-vanish',
+      room: 'living',
+      on: 'touch',
+      area: { col: 46, row: 5, w: 10, h: 3 },
+      when: { all: [F.Slept], none: [F.MariaVanished] },
+      lock: true,
+      steps: [
+        { do: 'fadeOut', ms: S.blinkOutMs },
+        { do: 'flag', id: F.MariaVanished },
+        { do: 'wait', ms: S.blinkBlackMs },
+        { do: 'fadeIn', ms: S.blinkInMs },
+        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
+      ],
+    },
+    {
+      // En quittant le salon (sortie, réapparition), tout redevient normal.
+      id: 'living-leave',
+      room: 'living',
+      on: 'leave',
+      when: { all: [F.MariaVanished], none: [F.LivingLeft] },
+      lock: false,
+      steps: [{ do: 'flag', id: F.LivingLeft }],
+    },
+    {
+      // Conséquence dans le monde réel (§6.3) : le bandeau de Maria sur le lit, sans explication.
+      id: 'headband',
+      room: 'bedroom',
+      on: 'touch',
+      area: { col: 13, row: 13, w: 5, h: 3 },
+      when: { all: [F.MariaVanished], none: [F.HeadbandFound] },
+      lock: false,
+      steps: [
+        { do: 'flag', id: F.HeadbandFound },
+        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+      ],
+    },
   ],
   props: [
     {
@@ -134,7 +185,24 @@ export const HOUSE_STORY: StoryData = {
       flip: true,
       when: { all: [F.Slept] },
     },
+    {
+      id: 'maria-bookcase',
+      room: 'living',
+      kind: 'maria-sit',
+      col: 51,
+      row: 8,
+      when: { all: [F.Slept], none: [F.MariaVanished] },
+    },
+    {
+      id: 'headband',
+      room: 'bedroom',
+      kind: 'headband',
+      col: 15,
+      row: 15,
+      when: { all: [F.MariaVanished] },
+    },
   ],
   times: [{ when: { all: [F.Slept] }, time: 'morning' }],
   lockedRooms: [{ room: 'bedroom', when: { none: [F.Slept] } }],
+  strangeRooms: [{ room: 'living', when: { all: [F.MariaVanished], none: [F.LivingLeft] } }],
 };
