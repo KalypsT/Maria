@@ -1,8 +1,8 @@
 ; Couloir de l'étage.
 ; @name: Couloir
 ; @ambient: #2a2d38
-; @note: trappe à linge (sortie 3) sur un rebord trop haut : raccourci vers la buanderie en grimpant (D-26).
-; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), ^ briques de jeu (danger), e jouet mécanique, C veilleuse (checkpoint), P repère de départ, 1-9 sorties (liaisons dans zone.ts).
+; @note: trappe à linge (sortie 3) : rebord à atteindre en grimpant depuis l'étagère murale (D-26).
+; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), ^ briques de jeu (danger), e jouet mécanique, C veilleuse (checkpoint), P repère de départ, A objet de capacité, 1-9 sorties (liaisons dans zone.ts).
 ################################################################
 #..............................................................#
 #..............................................................#
@@ -15,7 +15,7 @@
 #.......................................................b......#
 #.......................................................b......#
 #.......................................................b......#
-#.......................................................b......#
+#.................................................bbb...b......#
 1.....bbbbbbb..................................................2
 1.....b.....b.....ttttt.................bbbbbbb................2
 1..P..b.....b.....ttttt.......e.........bbbbbbb................2

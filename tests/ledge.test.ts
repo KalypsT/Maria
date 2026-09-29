@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { TILE_SIZE as T } from '../src/config/display';
 import { DEFAULT_MOVEMENT, PLAYER_HITBOX } from '../src/config/movement';
+import { analyzeLevel } from '../src/core/analysis/analyzeLevel';
+import { surfaceUnder } from '../src/core/analysis/surfaces';
 import { spawnPosition } from '../src/core/level/LevelData';
 import { parseAsciiLevel } from '../src/core/level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../src/core/player/PlayerPhysics';
@@ -171,5 +173,16 @@ describe('grimper aux rebords (D-26)', () => {
       step(copy, 1);
     }
     expect(copy.box.y).toBe(floorY(7));
+  });
+
+  it('l’analyse de faisabilité trouve le hissage seulement avec la capacité', () => {
+    const level = parseAsciiLevel('ledge', room(7).join('\n'));
+    const reaches = (climb: boolean) => {
+      const analysis = analyzeLevel(level, DEFAULT_MOVEMENT, { climb });
+      const top = surfaceUnder(level, analysis.map, 10, 6);
+      return analysis.moves.find((move) => move.from === analysis.start && move.to === top);
+    };
+    expect(reaches(false)).toBeUndefined();
+    expect(reaches(true)?.windowMs).toBeGreaterThan(0);
   });
 });

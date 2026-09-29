@@ -43,6 +43,16 @@ export class SaveSession {
     return this.persist();
   }
 
+  /** Capacité obtenue (D-26), enregistrée aussitôt ; sans effet si elle est déjà acquise. */
+  unlockAbility(ability: string): Promise<void> {
+    const abilities = this.current.progression.abilities;
+    if (abilities.includes(ability)) {
+      return Promise.resolve();
+    }
+    abilities.push(ability);
+    return this.persist();
+  }
+
   setControls(controls: Readonly<ControlSettings>): Promise<void> {
     this.current.settings.controls = { ...controls };
     return this.persist();

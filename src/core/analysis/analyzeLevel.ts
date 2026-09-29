@@ -76,9 +76,12 @@ class MoveExplorer {
     private readonly level: LevelData,
     private readonly params: Readonly<MovementParams>,
     private readonly map: SurfaceMap,
+    canClimb: boolean,
   ) {
     this.main = new PlayerPhysics(level, params, 0, 0);
     this.probe = new PlayerPhysics(level, params, 0, 0);
+    this.main.canClimb = canClimb;
+    this.probe.canClimb = canClimb;
     const derived = deriveMovement(params);
     this.stepMs = derived.dt * 1000;
     this.coyoteSteps = derived.coyoteSteps;
@@ -86,7 +89,9 @@ class MoveExplorer {
     const airtime =
       derived.jumpVelocity / derived.riseGravity + Math.sqrt((2 * apexPx) / derived.fallGravity);
     this.reachPx = 1.5 * params.maxRunSpeed * airtime + 3 * T;
-    this.reachUpTiles = Math.ceil((apexPx + PLAYER_HITBOX.height) / T) + 2;
+    // En grimpant, les mains atteignent un bord au-dessus de la tête (D-26).
+    const grabPx = canClimb ? PLAYER_HITBOX.height + params.ledgeGrabAbovePx : 0;
+    this.reachUpTiles = Math.ceil((apexPx + PLAYER_HITBOX.height + grabPx) / T) + 2;
   }
 
   explore(surface: Surface): Move[] {
@@ -412,13 +417,23 @@ function widestPath(
   return path;
 }
 
+/** Capacités prises en compte par l'analyse. */
+export interface AnalysisAbilities {
+  /** Grimper aux rebords (D-26) : les sauts qui poussent vers un mur s'y accrochent et s'y hissent. */
+  readonly climb?: boolean;
+}
+
 /**
  * Analyse de faisabilité d'une salle avec des paramètres de mouvement donnés (décision D-16).
  * Pure et indépendante de Phaser : reste valable si les paramètres changent.
  */
-export function analyzeLevel(level: LevelData, params: Readonly<MovementParams>): LevelAnalysis {
+export function analyzeLevel(
+  level: LevelData,
+  params: Readonly<MovementParams>,
+  abilities: AnalysisAbilities = {},
+): LevelAnalysis {
   const map = findSurfaces(level, PLAYER_HITBOX.height);
-  const explorer = new MoveExplorer(level, params, map);
+  const explorer = new MoveExplorer(level, params, map, abilities.climb ?? false);
   const moves: Move[] = [];
   for (const surface of map.surfaces) {
     moves.push(...explorer.explore(surface));
@@ -441,9 +456,12 @@ export function movesFrom(
   params: Readonly<MovementParams>,
   map: SurfaceMap,
   surfaceId: number,
+  abilities: AnalysisAbilities = {},
 ): Move[] {
   const surface = map.surfaces[surfaceId];
-  return surface ? new MoveExplorer(level, params, map).explore(surface) : [];
+  return surface
+    ? new MoveExplorer(level, params, map, abilities.climb ?? false).explore(surface)
+    : [];
 }
 
 const KIND_LABEL: Readonly<Record<MoveKind, string>> = {
