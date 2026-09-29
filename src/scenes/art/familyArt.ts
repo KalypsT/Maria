@@ -249,8 +249,33 @@ function catSit(ctx: CanvasRenderingContext2D, h: number, frame: number): void {
   ctx.fillRect(10.6, h - 9.6, 0.8, 0.7);
 }
 
+/**
+ * Taille de référence du dessin de chaque personnage (px logiques) : la taille à l'écran
+ * (`PROP_SIZE`, réglable dans la configuration) en est un agrandissement.
+ */
+const DRAWN_SIZE: Readonly<Partial<Record<PropKind, { w: number; h: number }>>> = {
+  'dad-door': { w: 26, h: 62 },
+  'dad-kitchen': { w: 28, h: 62 },
+  'mom-bed': { w: 28, h: 44 },
+  'mom-sofa': { w: 30, h: 44 },
+};
+
 export function drawCharacter(ctx: CanvasRenderingContext2D, kind: PropKind, frame: number): void {
-  const { w, h } = PROP_SIZE[kind];
+  const size = PROP_SIZE[kind];
+  const { w, h } = DRAWN_SIZE[kind] ?? size;
+  ctx.save();
+  ctx.scale(size.w / w, size.h / h);
+  drawAt(ctx, kind, frame, w, h);
+  ctx.restore();
+}
+
+function drawAt(
+  ctx: CanvasRenderingContext2D,
+  kind: PropKind,
+  frame: number,
+  w: number,
+  h: number,
+): void {
   switch (kind) {
     case 'dad-door': {
       // Papa dans l'embrasure, la main tendue vers Céleste ; il penche un peu la tête.
