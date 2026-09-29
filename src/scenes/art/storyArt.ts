@@ -1,6 +1,6 @@
 import { PROP_SIZE } from '../../config/story';
 import type { PropKind, ThoughtIcon } from '../../core/story/story';
-import { drawMemory, drawNotes } from './memoryArt';
+import { drawMemory, drawNotes, heightChart } from './memoryArt';
 
 /**
  * Dessins de l'histoire (D-31), PLACEHOLDERS du style D-28 : objets de mise en scène (berceau,
@@ -257,6 +257,13 @@ export function drawProp(
       // Photo encadrée posée debout, en haut de la bibliothèque.
       drawMemory(ctx, 'bookcase', w / 2, h / 2, Math.min(w / 0.8, h / 0.88));
       break;
+    case 'height-chart':
+    case 'height-chart-grown':
+      ctx.save();
+      ctx.translate(w / 2, h / 2);
+      heightChart(ctx, w, h, kind === 'height-chart-grown');
+      ctx.restore();
+      break;
     default:
       break;
   }
@@ -394,6 +401,9 @@ export function drawThought(
       break;
     case 'baby':
       drawMemory(ctx, 'bookcase', cx, cy, 17);
+      break;
+    case 'height':
+      drawMemory(ctx, 'height', cx, cy, 18);
       break;
     case 'question':
       // « ? » seul, au crayon : un parent qui ne sait pas (D-37).

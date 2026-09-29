@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type { ArtPalette } from '../config/art';
+import type { GrowthPhase } from '../config/growth';
 import type { CelestePose } from '../core/player/celestePose';
 import { CELESTE_PARTS, drawCelestePart, type CelestePart } from './art/celesteArt';
 
@@ -32,6 +33,7 @@ export class CelestePuppet {
   private readonly pigtailFront: PartImage;
   private readonly torso: PartImage;
   private readonly legFront: PartImage;
+  private readonly skirt: PartImage;
   private readonly head: PartImage;
   private readonly armFront: PartImage;
   /** Repère courant de `place` et échelle des textures (champs : aucune allocation par image). */
@@ -40,6 +42,8 @@ export class CelestePuppet {
   private cos = 1;
   private sin = 0;
   private scale = 1;
+  /** Croissance (D-43) : allongement du corps et des couettes ; la tête ne grandit pas. */
+  private body = 1;
 
   constructor(private readonly scene: Phaser.Scene) {
     const part = (name: CelestePart) => {
@@ -51,6 +55,7 @@ export class CelestePuppet {
     this.pigtailBack = part('pigtail').setTint(BACK_TINT);
     this.torso = part('torso');
     this.legFront = part('leg');
+    this.skirt = part('skirt');
     this.pigtailFront = part('pigtail');
     this.head = part('head');
     this.armFront = part('arm');
@@ -61,6 +66,7 @@ export class CelestePuppet {
         this.pigtailBack,
         this.torso,
         this.legFront,
+        this.skirt,
         this.pigtailFront,
         this.head,
         this.armFront,
@@ -81,13 +87,18 @@ export class CelestePuppet {
     return this;
   }
 
-  /** Redessine les pièces à l'échelle de l'écran (ou reprend les images fournies). */
+  /**
+   * Redessine les pièces à l'échelle de l'écran (ou reprend les images fournies), à la phase de
+   * croissance donnée (tenue, proportions).
+   */
   redraw(
     scale: number,
     palette: Readonly<ArtPalette>,
     images: ReadonlyMap<string, CanvasImageSource>,
+    growth: GrowthPhase,
   ): void {
     this.scale = scale;
+    this.body = growth.bodyScale;
     const textures = this.scene.textures;
     for (const name of Object.keys(CELESTE_PARTS) as CelestePart[]) {
       const { width, height } = CELESTE_PARTS[name];
@@ -104,7 +115,7 @@ export class CelestePuppet {
         ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
       } else {
         ctx.scale(scale, scale);
-        drawCelestePart(ctx, name, palette);
+        drawCelestePart(ctx, name, palette, growth.outfit);
       }
       if (textures.exists(key)) {
         textures.remove(key);
@@ -112,16 +123,18 @@ export class CelestePuppet {
       textures.addCanvas(key, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
     }
     const inverse = 1 / scale;
-    const assign = (image: PartImage, name: CelestePart) =>
-      image.setTexture(`celeste-${name}`).setScale(inverse);
+    const assign = (image: PartImage, name: CelestePart, stretch = 1) =>
+      image.setTexture(`celeste-${name}`).setScale(inverse, inverse * stretch);
     assign(this.armBack, 'arm');
     assign(this.armFront, 'arm');
-    assign(this.legBack, 'leg');
-    assign(this.legFront, 'leg');
-    assign(this.pigtailBack, 'pigtail');
-    assign(this.pigtailFront, 'pigtail');
-    assign(this.torso, 'torso');
+    assign(this.legBack, 'leg', growth.bodyScale);
+    assign(this.legFront, 'leg', growth.bodyScale);
+    assign(this.pigtailBack, 'pigtail', growth.hairScale);
+    assign(this.pigtailFront, 'pigtail', growth.hairScale);
+    assign(this.torso, 'torso', growth.bodyScale);
+    assign(this.skirt, 'skirt', growth.bodyScale);
     assign(this.head, 'head');
+    this.skirt.setVisible(growth.outfit === 'dress');
   }
 
   /**
@@ -144,15 +157,17 @@ export class CelestePuppet {
     const tilt = pose.bodyTilt;
     this.cos = Math.cos(tilt);
     this.sin = Math.sin(tilt);
+    const body = this.body;
     this.hipX = HIP.x;
-    this.hipY = HIP.y + pose.bodyY;
-    const reach = pose.armReach / this.scale;
+    this.hipY = HIP.y * body + pose.bodyY;
+    const reach = (pose.armReach * body) / this.scale;
     this.torso.setPosition(this.hipX, this.hipY).setRotation(tilt);
-    this.place(this.armBack, SHOULDER_BACK.x, SHOULDER_BACK.y, tilt - pose.armBack);
-    this.place(this.armFront, SHOULDER_FRONT.x, SHOULDER_FRONT.y, tilt - pose.armFront);
+    this.skirt.setPosition(this.hipX, this.hipY).setRotation(tilt);
+    this.place(this.armBack, SHOULDER_BACK.x, SHOULDER_BACK.y * body, tilt - pose.armBack);
+    this.place(this.armFront, SHOULDER_FRONT.x, SHOULDER_FRONT.y * body, tilt - pose.armFront);
     this.armBack.scaleY = reach;
     this.armFront.scaleY = reach;
-    this.place(this.head, NECK.x, NECK.y, tilt + pose.headTilt);
+    this.place(this.head, NECK.x, NECK.y * body, tilt + pose.headTilt);
     this.legBack
       .setPosition(this.hipX + LEG_BACK.x, this.hipY + LEG_BACK.y)
       .setRotation(-pose.legBack);

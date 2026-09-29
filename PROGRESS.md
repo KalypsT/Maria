@@ -2,11 +2,30 @@
 
 ## Phase en cours
 
-**Retours du téléphone sur la maison vivante** (D-40 : présage près de Maria, mains des parents ; D-41 : Céleste d'après l'illustration) : sur la branche `ccr-5c5df983-6feqj3`, **en attente de PR et d'essai sur téléphone**. La maison vivante (D-37 à D-39) est fusionnée.
+**Croissance, première phase** (§42 phase 7, D-43) : sur la branche `ccr-5c5df983-6feqj3`, **en attente de PR et d'essai sur téléphone**. Chat agrandi (D-42) sur la même branche. D-40 et D-41 sont fusionnés.
 
-Prochaine : la croissance (§42 phase 7).
+Prochaine : la zone suivante (le jardin, phase 2 de la spec §7.2), avec une difficulté qui monte (D-36).
 
 ## Fait
+
+### Croissance : quelques mois plus tard (D-43)
+
+- La phase de croissance se déduit du drapeau `growth.2` (déjà sauvegardé, aucune migration). La configuration est dans `src/config/growth.ts` : hitbox, facteurs de mouvement, proportions, tenue.
+- La hitbox est paramétrable dans la physique (`setHitbox`) et dans l'analyse de faisabilité (`hitbox` en option). `tests/zoneGraph.ts` analyse chaque phase.
+- Passage du temps : après la visite de papa, se recoucher donne le noir le plus long, puis Céleste grandie, en robe.
+- Toise de la chambre avec un nouveau trait, qui devient un souvenir.
+- Trouvaille sur l'étagère haute du couloir, atteignable seulement en phase 2.
+- Marionnette : robe rose à fleurs, sabots, couettes plus longues, corps allongé.
+- Écran de départ : illustration en robe pour une partie en phase 2.
+- Debug : étape « quelques mois plus tard » et case « Céleste a grandi ».
+
+### À vérifier sur téléphone (croissance)
+
+- Le passage du temps : durée du noir, retour, bulle « Maria ? ».
+- Céleste grandie : se lit-elle bien, la robe est-elle reconnaissable, les proportions sont-elles justes ?
+- Le saut plus haut : la sensation reste-t-elle la même, en un peu plus ample ?
+- La trouvaille du couloir : visible avant, atteignable après en grimpant depuis la console, pas trop facile.
+- La toise : le nouveau trait se remarque-t-il ?
 
 ### Chat agrandi (D-42)
 

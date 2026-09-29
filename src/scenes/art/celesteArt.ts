@@ -1,9 +1,10 @@
 import type { ArtPalette } from '../../config/art';
+import type { CelesteOutfit } from '../../config/growth';
 
 /**
  * Pièces de Céleste en « papier découpé » (D-29), dessinées par le code dans le style D-28 :
  * enfant de 5-6 ans (tête ronde assez grosse), couettes basses à nœuds roses, lunettes rondes
- * roses, taches de rousseur. Tenue d'après l'illustration de l'utilisateur (D-41). Monde étrange :
+ * roses, taches de rousseur. Tenues d'après les illustrations de l'utilisateur (D-41, D-43). Monde étrange :
  * silhouettes, seules les lunettes restent roses.
  * Chaque pièce a sa taille (px logiques) et son point d'attache (origine, en fraction).
  */
@@ -13,6 +14,8 @@ export const CELESTE_PARTS = {
   torso: { width: 11, height: 9, originX: 0.5, originY: 1 },
   arm: { width: 4, height: 8, originX: 0.5, originY: 0.1 },
   leg: { width: 6, height: 9, originX: 2.5 / 6, originY: 0.05 },
+  /** Jupe de la robe (D-43), attachée à la hanche, devant les jambes ; vide en pyjama. */
+  skirt: { width: 14, height: 7, originX: 0.5, originY: 1.5 / 7 },
 } as const;
 export type CelestePart = keyof typeof CELESTE_PARTS;
 
@@ -27,6 +30,18 @@ const BERRY = '#3d55b0';
 const PIPING = '#f7c1cf';
 const SLIPPER = '#f3aabb';
 const SLIPPER_FACE = '#fbe9dc';
+/**
+ * Tenue de la phase 2 (D-43) : robe rose à fleurs, col blanc, manches ballon, sabots roses. Le
+ * rose se détache bien des murs bleus de la maison.
+ */
+const DRESS = '#f4b1c0';
+const DRESS_EDGE = 'rgba(120,50,70,0.5)';
+const FLOWER = '#fdf6ef';
+const FLOWER_PINK = '#e7708f';
+const COLLAR = '#fffaf4';
+const CLOG = '#f39ab2';
+const CLOG_HOLE = '#c9607e';
+const SKIN_EDGE = 'rgba(150,80,60,0.45)';
 const SKIN = '#f0c19e';
 const HAIR = '#6b4329';
 const RIBBON = '#f08aa6';
@@ -44,8 +59,13 @@ export function drawCelestePart(
   ctx: CanvasRenderingContext2D,
   part: CelestePart,
   palette: Readonly<ArtPalette>,
+  outfit: CelesteOutfit = 'pyjama',
 ): void {
   const dark = palette.silhouettes;
+  if (outfit === 'dress' && part !== 'head' && part !== 'pigtail') {
+    drawDressPart(ctx, part, dark);
+    return;
+  }
   switch (part) {
     case 'head': {
       const cx = 8;
@@ -181,6 +201,109 @@ export function drawCelestePart(
         ctx.fillStyle = SLIPPER_FACE;
         circle(ctx, 4.6, 7.9, 0.7);
       }
+      break;
+    case 'skirt':
+      // Pas de jupe en pyjama.
+      break;
+  }
+}
+
+/** Petites fleurs de la robe (blanches et roses), en points. */
+function flowers(ctx: CanvasRenderingContext2D, spots: readonly (readonly [number, number])[]) {
+  spots.forEach(([x, y], i) => {
+    ctx.fillStyle = i % 2 === 0 ? FLOWER : FLOWER_PINK;
+    circle(ctx, x, y, 0.65);
+  });
+}
+
+/** Robe de la phase 2 (D-43) : corsage, manches ballon, jupe évasée ; jambes nues, sabots. */
+function drawDressPart(ctx: CanvasRenderingContext2D, part: CelestePart, dark: boolean): void {
+  switch (part) {
+    case 'torso':
+      ctx.fillStyle = dark ? SILHOUETTE : DRESS;
+      ctx.beginPath();
+      ctx.roundRect(0.5, 0, 10, 9, [3.5, 3.5, 1, 1]);
+      ctx.fill();
+      if (!dark) {
+        ctx.strokeStyle = DRESS_EDGE;
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+        flowers(ctx, [
+          [3.2, 4],
+          [7, 5.5],
+          [4.8, 7.2],
+        ]);
+        // Col claudine blanc.
+        ctx.fillStyle = COLLAR;
+        ctx.beginPath();
+        ctx.ellipse(7.2, 1, 2.6, 1.3, 0.15, 0, Math.PI);
+        ctx.fill();
+      }
+      break;
+    case 'arm':
+      // Manche ballon courte, puis le bras nu.
+      ctx.fillStyle = dark ? SILHOUETTE : SKIN;
+      ctx.beginPath();
+      ctx.roundRect(0.9, 1.5, 2.2, 5, 1.1);
+      ctx.fill();
+      circle(ctx, 2, 6.6, 1.3);
+      ctx.fillStyle = dark ? SILHOUETTE : DRESS;
+      ctx.beginPath();
+      ctx.ellipse(2, 1.6, 1.9, 1.8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      if (!dark) {
+        ctx.strokeStyle = DRESS_EDGE;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+      break;
+    case 'leg':
+      ctx.fillStyle = dark ? SILHOUETTE : SKIN;
+      ctx.beginPath();
+      ctx.roundRect(1.3, 0, 2.4, 7.4, 1.1);
+      ctx.fill();
+      if (!dark) {
+        ctx.strokeStyle = SKIN_EDGE;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+      // Sabot rose, bout arrondi, deux trous et la bride.
+      ctx.fillStyle = dark ? SILHOUETTE : CLOG;
+      ctx.beginPath();
+      ctx.roundRect(0.6, 6.6, 5.2, 2.4, [1, 1.3, 1.1, 1.1]);
+      ctx.fill();
+      if (!dark) {
+        ctx.fillStyle = CLOG_HOLE;
+        circle(ctx, 3.6, 7.3, 0.35);
+        circle(ctx, 4.8, 7.5, 0.35);
+        circle(ctx, 1.4, 7.6, 0.45);
+      }
+      break;
+    case 'skirt':
+      // Jupe évasée, un peu plus longue derrière ; ourlet ondulé.
+      ctx.fillStyle = dark ? SILHOUETTE : DRESS;
+      ctx.beginPath();
+      ctx.moveTo(3, 0);
+      ctx.lineTo(11, 0);
+      ctx.quadraticCurveTo(13.2, 3.5, 13.6, 6.4);
+      ctx.quadraticCurveTo(7, 7.4, 0.4, 6.6);
+      ctx.quadraticCurveTo(1, 3.5, 3, 0);
+      ctx.closePath();
+      ctx.fill();
+      if (!dark) {
+        ctx.strokeStyle = DRESS_EDGE;
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+        flowers(ctx, [
+          [4, 2.6],
+          [8.5, 2],
+          [6.2, 4.6],
+          [10.8, 4.8],
+          [2.6, 5.4],
+        ]);
+      }
+      break;
+    default:
       break;
   }
 }

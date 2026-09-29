@@ -17,6 +17,8 @@ export const MEMORIES = [
   'headband',
   /** En haut de la bibliothèque du salon, après le monde étrange : Céleste bébé avec Maria. */
   'bookcase',
+  /** Quelques mois plus tard (D-43) : la toise de la chambre, avec un nouveau trait. */
+  'height',
 ] as const;
 export type MemoryId = (typeof MEMORIES)[number];
 

@@ -38,6 +38,8 @@ export const THOUGHT_ICONS = [
   'flower',
   /** La photo de Céleste bébé avec Maria (D-39). */
   'baby',
+  /** La toise, un nouveau trait plus haut (D-43). */
+  'height',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
@@ -136,11 +138,20 @@ export const PROP_KINDS = [
   'plant',
   /** Photo encadrée de Céleste bébé avec Maria, en haut de la bibliothèque (D-39). */
   'baby-photo',
+  /** Toise au mur de la chambre (D-43) ; un trait de plus quand Céleste a grandi. */
+  'height-chart',
+  'height-chart-grown',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 
 /** Objets animés en boucle (deux images), sans être des personnages. */
 export const LOOP_OBJECT_KINDS: ReadonlySet<PropKind> = new Set<PropKind>(['music-box', 'plant']);
+
+/** Fixés au mur (la toise, D-43) : aussi hauts que Céleste, sans rien cacher. */
+export const WALL_PROP_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
+  'height-chart',
+  'height-chart-grown',
+]);
 
 /** Personnages : grands (les adultes), animés en boucle, ils peuvent avoir une bulle. */
 export const CHARACTER_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([

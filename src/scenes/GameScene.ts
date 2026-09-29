@@ -13,7 +13,6 @@ import {
   DEFAULT_MOVEMENT,
   MAX_STEPS_PER_FRAME,
   PHYSICS_STEP_HZ,
-  PLAYER_HITBOX,
   msToSteps,
   type MovementParams,
 } from '../config/movement';
@@ -27,6 +26,7 @@ import { EntityType, Material, Tile, tileAt, type LevelData } from '../core/leve
 import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../core/player/PlayerPhysics';
 import { PlayerFeel } from '../core/player/playerFeel';
+import { growthPhase, phaseMovement, type GrowthPhase } from '../config/growth';
 import { LEVELS, levelName, startRoom, zoneRoom, type LevelSource, type ZoneRoom } from '../levels';
 import { DEFAULT_WORLD, type WorldParams } from '../config/world';
 import { checkpointId } from '../core/save/saveData';
@@ -135,6 +135,10 @@ export class GameScene extends Phaser.Scene {
   readonly controls = new InputController();
   /** Paramètres courants (modifiables en direct par l'overlay de debug). */
   readonly movement: MovementParams = { ...DEFAULT_MOVEMENT };
+  /** Paramètres appliqués au joueur : `movement` (réglable en direct) à la phase de croissance. */
+  private readonly grownMovement: MovementParams = { ...DEFAULT_MOVEMENT };
+  /** Phase de croissance courante (D-43), déduite des drapeaux de l'histoire. */
+  private growth!: GrowthPhase;
   /** Paramètres de caméra courants (modifiables en direct par l'overlay de debug). */
   readonly cameraParams: CameraParams = { ...DEFAULT_CAMERA };
   readonly camera = new CameraController(this.cameraParams);
@@ -230,6 +234,8 @@ export class GameScene extends Phaser.Scene {
     this.story = new StoryDirector(HOUSE_STORY, {
       flagSet: (id) => {
         void this.session.addStoryFlag(id);
+        // Croissance : posée dans le noir d'un fondu, avant que le script ne replace Céleste.
+        this.applyGrowth();
       },
       place: (col, row, facing) => {
         this.placeCeleste(col, row, facing);
@@ -254,6 +260,7 @@ export class GameScene extends Phaser.Scene {
       },
     });
     this.story.setFlags(this.session.data.story.flags);
+    this.growth = growthPhase(this.story.flags);
     this.drawnTime = this.story.timeOfDay();
     this.roomArt = new RoomArtView(this);
     this.artScale = this.computeArtScale();
@@ -269,10 +276,10 @@ export class GameScene extends Phaser.Scene {
     this.pickups.load(this.level, save.progression.abilities, save.progression.collectibles);
     void this.session.revealRoom(this.level.id);
     const { x, y } = this.respawnPosition();
-    this.player = new PlayerPhysics(this.level, this.movement, x, y);
+    this.player = new PlayerPhysics(this.level, this.movement, x, y, this.growth.hitbox);
     // Origine aux pieds : l'écrasement et l'inclinaison se font autour du point d'appui.
     this.puppet = new CelestePuppet(this);
-    this.puppet.redraw(this.artScale, this.celestePalette(), this.artImages());
+    this.puppet.redraw(this.artScale, this.celestePalette(), this.artImages(), this.growth);
     this.dust = new DustPool(this, this.feelParams);
     this.combat = new CombatWorld(this.level, this.combatParams);
     this.combatView = new CombatView(this, this.combat, this.combatParams, this.dust);
@@ -593,10 +600,31 @@ export class GameScene extends Phaser.Scene {
 
   /** Applique les paramètres courants au joueur (après un réglage en direct). */
   applyMovement(): void {
-    this.player.setParams(this.movement);
-    this.feel.maxRunSpeed = this.movement.maxRunSpeed;
-    this.feel.maxFallSpeed = this.movement.maxFallSpeed;
-    this.poser.setParams(this.puppetParams, this.movement.maxRunSpeed);
+    const movement = phaseMovement(this.movement, this.growth, this.grownMovement);
+    this.player.setParams(movement);
+    this.feel.maxRunSpeed = movement.maxRunSpeed;
+    this.feel.maxFallSpeed = movement.maxFallSpeed;
+    this.poser.setParams(this.puppetParams, movement.maxRunSpeed);
+  }
+
+  /**
+   * Phase de croissance d'après les drapeaux (D-43) : hitbox, mouvement et marionnette. Appelée
+   * quand un drapeau change (dans le noir d'un fondu, ou par l'outil de debug).
+   */
+  private applyGrowth(): void {
+    const growth = growthPhase(this.story.flags);
+    if (growth === this.growth) {
+      return;
+    }
+    this.growth = growth;
+    this.player.setHitbox(growth.hitbox);
+    this.applyMovement();
+    this.puppet.redraw(this.artScale, this.celestePalette(), this.artImages(), growth);
+  }
+
+  /** Hitbox courante de Céleste (croissance). */
+  get hitbox(): Readonly<{ width: number; height: number }> {
+    return this.growth.hitbox;
   }
 
   /** Applique les réglages de combat (overlay). */
@@ -655,8 +683,8 @@ export class GameScene extends Phaser.Scene {
   private respawnPosition(): { x: number; y: number } {
     const tile = this.run.respawnTile();
     return {
-      x: (tile.col + 0.5) * TILE_SIZE - PLAYER_HITBOX.width / 2,
-      y: (tile.row + 1) * TILE_SIZE - PLAYER_HITBOX.height,
+      x: (tile.col + 0.5) * TILE_SIZE - this.growth.hitbox.width / 2,
+      y: (tile.row + 1) * TILE_SIZE - this.growth.hitbox.height,
     };
   }
 
@@ -736,8 +764,8 @@ export class GameScene extends Phaser.Scene {
     this.setRoom(room.level, room.zone, levelId === id ? checkpointId : null);
     const { spawn } = room.level;
     this.player.reset(
-      (spawn.col + 0.5) * TILE_SIZE - PLAYER_HITBOX.width / 2,
-      (spawn.row + 1) * TILE_SIZE - PLAYER_HITBOX.height,
+      (spawn.col + 0.5) * TILE_SIZE - this.growth.hitbox.width / 2,
+      (spawn.row + 1) * TILE_SIZE - this.growth.hitbox.height,
       room.level,
     );
     this.feel.reset(this.player);
@@ -764,8 +792,8 @@ export class GameScene extends Phaser.Scene {
     const { x, y } = arrivalPosition(
       room.level,
       target.exit,
-      PLAYER_HITBOX.width,
-      PLAYER_HITBOX.height,
+      this.growth.hitbox.width,
+      this.growth.hitbox.height,
     );
     this.player.reset(x, y, room.level);
     this.player.vx = vx;
@@ -873,7 +901,7 @@ export class GameScene extends Phaser.Scene {
     this.storyView.setArt(this.artScale, this.artImages());
     this.combatView.setArt(this.artScale, this.palette());
     this.drawLevel();
-    this.puppet.redraw(this.artScale, this.celestePalette(), this.artImages());
+    this.puppet.redraw(this.artScale, this.celestePalette(), this.artImages(), this.growth);
   }
 
   /** Images fournies chargées (nom d'élément → image). */
@@ -1031,7 +1059,7 @@ export class GameScene extends Phaser.Scene {
 
   /** Applique les réglages de la marionnette (overlay). */
   applyPuppet(): void {
-    this.poser.setParams(this.puppetParams, this.movement.maxRunSpeed);
+    this.poser.setParams(this.puppetParams, this.grownMovement.maxRunSpeed);
   }
 
   /** Palette courante : monde étrange (D-28), ou maison le soir ou le matin (D-31). */
@@ -1078,7 +1106,7 @@ export class GameScene extends Phaser.Scene {
     const main = this.cameras.main;
     const bounds = this.game.canvas.getBoundingClientRect();
     const k = bounds.width / this.scale.width;
-    const y = this.puppet.y - PLAYER_HITBOX.height / 2;
+    const y = this.puppet.y - this.growth.hitbox.height / 2;
     this.irisPoint.x = bounds.left + (this.puppet.x - main.worldView.x) * main.zoom * k;
     this.irisPoint.y = bounds.top + (y - main.worldView.y) * main.zoom * k;
     return this.irisPoint;
@@ -1087,8 +1115,8 @@ export class GameScene extends Phaser.Scene {
   /** Céleste placée debout sur une tuile par l'histoire (dans le noir d'un fondu). */
   private placeCeleste(col: number, row: number, facing: 1 | -1): void {
     this.player.reset(
-      (col + 0.5) * TILE_SIZE - PLAYER_HITBOX.width / 2,
-      (row + 1) * TILE_SIZE - PLAYER_HITBOX.height,
+      (col + 0.5) * TILE_SIZE - this.growth.hitbox.width / 2,
+      (row + 1) * TILE_SIZE - this.growth.hitbox.height,
       this.level,
     );
     this.player.facing = facing;
@@ -1125,6 +1153,7 @@ export class GameScene extends Phaser.Scene {
   /** Outil de debug : étapes de l'histoire remplacées (sans sauvegarde), salle redessinée. */
   setStoryFlags(flags: readonly string[]): void {
     this.story.setFlags(flags);
+    this.applyGrowth();
     this.props.load(this.story.data.props, this.level.id, this.story.flags);
     this.poser.sitting = false;
     this.redrawArt();

@@ -77,9 +77,10 @@ class MoveExplorer {
     private readonly params: Readonly<MovementParams>,
     private readonly map: SurfaceMap,
     canClimb: boolean,
+    private readonly hitbox: Readonly<{ width: number; height: number }>,
   ) {
-    this.main = new PlayerPhysics(level, params, 0, 0);
-    this.probe = new PlayerPhysics(level, params, 0, 0);
+    this.main = new PlayerPhysics(level, params, 0, 0, hitbox);
+    this.probe = new PlayerPhysics(level, params, 0, 0, hitbox);
     this.main.canClimb = canClimb;
     this.probe.canClimb = canClimb;
     const derived = deriveMovement(params);
@@ -90,8 +91,8 @@ class MoveExplorer {
       derived.jumpVelocity / derived.riseGravity + Math.sqrt((2 * apexPx) / derived.fallGravity);
     this.reachPx = 1.5 * params.maxRunSpeed * airtime + 3 * T;
     // En grimpant, les mains atteignent un bord au-dessus de la tête (D-26).
-    const grabPx = canClimb ? PLAYER_HITBOX.height + params.ledgeGrabAbovePx : 0;
-    this.reachUpTiles = Math.ceil((apexPx + PLAYER_HITBOX.height + grabPx) / T) + 2;
+    const grabPx = canClimb ? hitbox.height + params.ledgeGrabAbovePx : 0;
+    this.reachUpTiles = Math.ceil((apexPx + hitbox.height + grabPx) / T) + 2;
   }
 
   explore(surface: Surface): Move[] {
@@ -173,7 +174,7 @@ class MoveExplorer {
     }
     // Obstacle ou plateforme au-dessus, à portée de saut.
     const colFrom = Math.floor((x - this.reachPx) / T);
-    const colTo = Math.floor((x + PLAYER_HITBOX.width + this.reachPx) / T);
+    const colTo = Math.floor((x + this.hitbox.width + this.reachPx) / T);
     for (let row = surface.row - 1; row >= surface.row - this.reachUpTiles; row--) {
       for (let col = colFrom; col <= colTo; col++) {
         if (row >= 0 && tileAt(this.level, col, row) !== Tile.Empty) {
@@ -185,7 +186,7 @@ class MoveExplorer {
   }
 
   private runningJumps(surface: Surface, dir: number, offer: (move: Move) => void): void {
-    const hitbox = PLAYER_HITBOX;
+    const hitbox = this.hitbox;
     const x0 = dir > 0 ? surface.colStart * T : (surface.colEnd + 1) * T - hitbox.width;
     const main = this.main;
     main.reset(x0, surface.row * T - hitbox.height, this.level);
@@ -240,7 +241,7 @@ class MoveExplorer {
   }
 
   private standingJumps(surface: Surface, offer: (move: Move) => void): void {
-    const hitbox = PLAYER_HITBOX;
+    const hitbox = this.hitbox;
     const step = MOVE_SEARCH.standingSampleStepPx;
     const airDirs = [-1, 0, 1];
     const families = this.families(MoveKind.StandingJump, airDirs, false);
@@ -262,7 +263,7 @@ class MoveExplorer {
   }
 
   private drops(surface: Surface, offer: (move: Move) => void): void {
-    const hitbox = PLAYER_HITBOX;
+    const hitbox = this.hitbox;
     const input = this.input;
     for (let col = surface.colStart; col <= surface.colEnd; col++) {
       if (tileAt(this.level, col, surface.row) !== Tile.OneWay) {
@@ -421,6 +422,8 @@ function widestPath(
 export interface AnalysisAbilities {
   /** Grimper aux rebords (D-26) : les sauts qui poussent vers un mur s'y accrochent et s'y hissent. */
   readonly climb?: boolean;
+  /** Hitbox de Céleste (croissance, D-43) ; par défaut, celle de la première phase. */
+  readonly hitbox?: Readonly<{ width: number; height: number }>;
 }
 
 /**
@@ -432,8 +435,9 @@ export function analyzeLevel(
   params: Readonly<MovementParams>,
   abilities: AnalysisAbilities = {},
 ): LevelAnalysis {
-  const map = findSurfaces(level, PLAYER_HITBOX.height);
-  const explorer = new MoveExplorer(level, params, map, abilities.climb ?? false);
+  const hitbox = abilities.hitbox ?? PLAYER_HITBOX;
+  const map = findSurfaces(level, hitbox.height);
+  const explorer = new MoveExplorer(level, params, map, abilities.climb ?? false, hitbox);
   const moves: Move[] = [];
   for (const surface of map.surfaces) {
     moves.push(...explorer.explore(surface));
@@ -460,7 +464,13 @@ export function movesFrom(
 ): Move[] {
   const surface = map.surfaces[surfaceId];
   return surface
-    ? new MoveExplorer(level, params, map, abilities.climb ?? false).explore(surface)
+    ? new MoveExplorer(
+        level,
+        params,
+        map,
+        abilities.climb ?? false,
+        abilities.hitbox ?? PLAYER_HITBOX,
+      ).explore(surface)
     : [];
 }
 

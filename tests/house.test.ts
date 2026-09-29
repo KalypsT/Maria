@@ -164,3 +164,37 @@ describe('rez-de-chaussée retravaillé (D-39)', () => {
     expect(reachable(zoneGraph(true, medium), home()).has(secret), 'trop difficile').toBe(true);
   });
 });
+
+describe('Céleste a grandi (D-43)', () => {
+  const medium = byDifficulty('medium');
+
+  it(
+    'la maison reste aussi praticable : rien d’atteignable en phase 1 ne se ferme en phase 2',
+    { timeout: TIMEOUT },
+    () => {
+      const before = reachable(zoneGraph(true, roomDifficulty, 1), home());
+      const after = reachable(zoneGraph(true, roomDifficulty, 2), home());
+      const real = (n: Node) => {
+        const room = n.split('#')[0] ?? '';
+        const data = zone.rooms.get(room);
+        return data !== undefined && !isStrangeRoom(data);
+      };
+      const closed = [...before].filter((n) => real(n) && !after.has(n));
+      expect(where(closed, true)).toEqual([]);
+    },
+  );
+
+  it(
+    'la trouvaille du couloir attend qu’elle grandisse : hors d’atteinte avant, moyenne après',
+    { timeout: TIMEOUT },
+    () => {
+      const secret = entityNode(EntityType.Secret, 'hall');
+      const hard = byDifficulty('hard');
+      expect(reachable(zoneGraph(true, null, 1), home()).has(secret), 'phase 1').toBe(false);
+      expect(reachable(zoneGraph(true, hard, 2), home()).has(secret), 'phase 2').toBe(true);
+      expect(reachable(zoneGraph(true, medium, 2), home()).has(secret), 'trop difficile').toBe(
+        true,
+      );
+    },
+  );
+});

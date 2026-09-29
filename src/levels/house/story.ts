@@ -283,6 +283,48 @@ export const HOUSE_STORY: StoryData = {
         { do: 'fadeIn', ms: S.fadeMs },
       ],
     },
+    {
+      // Quelques mois plus tard (D-43) : après la visite de papa, Céleste se recouche. Le noir le
+      // plus long ; au retour, elle a grandi (hitbox, saut, tenue) et la toise a un trait de plus.
+      // Aucun texte (pilier 6) ; Maria reste introuvable.
+      id: 'months-later',
+      room: 'bedroom',
+      on: 'interact',
+      area: { col: 7, row: 13, w: 11, h: 3 },
+      mark: { col: 9, row: 14 },
+      when: { all: [F.DadVisit], none: [F.Grown] },
+      lock: true,
+      steps: [
+        { do: 'pose', pose: 'sit' },
+        { do: 'thought', icon: 'maria', ms: S.holdMs },
+        { do: 'wait', ms: S.holdMs },
+        { do: 'fadeOut', ms: S.nightFadeOutMs },
+        { do: 'flag', id: F.Grown },
+        { do: 'place', col: 12, row: 15, facing: 1 },
+        { do: 'pose', pose: 'sit' },
+        { do: 'wait', ms: S.monthsBlackMs },
+        { do: 'fadeIn', ms: S.monthsFadeInMs },
+        { do: 'wait', ms: 1400 },
+        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs + 800 },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // La toise (D-43) : un nouveau trait, plus haut. Souvenir du cahier.
+      id: 'look-height',
+      room: 'bedroom',
+      on: 'interact',
+      area: { col: 40, row: 17, w: 5, h: 3 },
+      mark: { col: 42, row: 15 },
+      when: { all: [F.Grown] },
+      lock: true,
+      repeat: true,
+      steps: [
+        { do: 'memory', id: 'height' },
+        { do: 'thought', icon: 'height', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
     // Objets à regarder (D-38) : la première fois, ils deviennent des souvenirs du cahier ; on
     // peut les regarder autant qu'on veut.
     {
@@ -363,6 +405,23 @@ export const HOUSE_STORY: StoryData = {
     },
   ],
   props: [
+    // La toise de la chambre (D-43), au mur près de la porte.
+    {
+      id: 'height-chart',
+      room: 'bedroom',
+      kind: 'height-chart',
+      col: 42,
+      row: 19,
+      when: { none: [F.Grown] },
+    },
+    {
+      id: 'height-chart-grown',
+      room: 'bedroom',
+      kind: 'height-chart-grown',
+      col: 42,
+      row: 19,
+      when: { all: [F.Grown] },
+    },
     {
       id: 'maria-rug',
       room: 'bedroom',
