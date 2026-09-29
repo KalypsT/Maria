@@ -45,6 +45,11 @@ export class KeyboardSource implements InputSource {
   private readonly down = new Set<string>();
   private directions = 0;
   private buttons = 0;
+  /**
+   * Boutons pressés depuis la dernière lecture : une touche enfoncée puis relâchée entre deux
+   * images compte quand même comme tenue une lecture (aucune pression perdue, spec §43.0.2).
+   */
+  private latched = 0;
 
   /** Retourne vrai si la touche est liée à une action. */
   handleKey(code: string, isDown: boolean): boolean {
@@ -57,11 +62,15 @@ export class KeyboardSource implements InputSource {
       this.down.delete(code);
     }
     this.recompute();
+    if (isDown) {
+      this.latched |= this.buttons;
+    }
     return true;
   }
 
   releaseAll(): void {
     this.down.clear();
+    this.latched = 0;
     this.recompute();
   }
 
@@ -69,7 +78,8 @@ export class KeyboardSource implements InputSource {
     const d = this.directions;
     into.moveX += ((d & DIRECTION.right) !== 0 ? 1 : 0) - ((d & DIRECTION.left) !== 0 ? 1 : 0);
     into.moveY += ((d & DIRECTION.down) !== 0 ? 1 : 0) - ((d & DIRECTION.up) !== 0 ? 1 : 0);
-    into.held |= this.buttons;
+    into.held |= this.buttons | this.latched;
+    this.latched = 0;
   }
 
   attach(target: Window): () => void {
