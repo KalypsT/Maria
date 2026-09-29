@@ -94,6 +94,12 @@ export const CHARACTER_LOOP_MS = { parent: 1600, cat: 2400 } as const;
 export const THOUGHT_SCALE = 1.6;
 
 /**
+ * Agrandissement des parents (D-37) par rapport à leur dessin de référence (62 px debout, environ
+ * 2,4 fois Céleste). PROVISOIRE : à choisir sur maquettes avec l'utilisateur.
+ */
+export const PARENT_SCALE = 1;
+
+/**
  * Taille des objets de mise en scène (px logiques). Maria est un peu plus grande qu'un vrai poupon à
  * côté d'une enfant, pour rester lisible à la taille du jeu.
  */
@@ -106,11 +112,12 @@ export const PROP_SIZE = {
   bottle: { w: 9, h: 5 },
   headband: { w: 10, h: 5 },
   blanket: { w: 10, h: 5 },
-  // Parents (D-37) : à hauteur d'enfant, bien plus grands que Céleste (environ 26 px).
-  'dad-door': { w: 26, h: 62 },
-  'dad-kitchen': { w: 28, h: 62 },
-  'mom-bed': { w: 28, h: 44 },
-  'mom-sofa': { w: 30, h: 44 },
+  // Parents (D-37) : à hauteur d'enfant, bien plus grands que Céleste (environ 26 px) ; taille
+  // réglée par PARENT_SCALE (le dessin s'agrandit).
+  'dad-door': { w: 26 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  'dad-kitchen': { w: 28 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  'mom-bed': { w: 28 * PARENT_SCALE, h: 44 * PARENT_SCALE },
+  'mom-sofa': { w: 30 * PARENT_SCALE, h: 44 * PARENT_SCALE },
   // Le chat gris.
   'cat-sleep': { w: 16, h: 8 },
   'cat-sit': { w: 12, h: 14 },
