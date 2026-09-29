@@ -44,6 +44,7 @@ npm run dev           # serveur de dev Vite sur http://<ip-locale>:5173/Maria/ (
 npm run build         # build de production dans dist/ (sans outils de debug)
 npm run build:debug   # build de debug dans dist/debug/ (à lancer après build, publié sur /Maria/debug/, D-12)
 npm run check:no-debug # vérifie l'absence d'outils de debug dans le build principal
+npm run check:pwa     # vérifie la PWA (service worker du build principal, aucun en debug, D-23)
 npm run preview       # sert dist/ localement (http://<ip-locale>:4173/Maria/)
 npm run typecheck     # tsc --noEmit
 npm run lint          # ESLint (typescript-eslint strictTypeChecked)

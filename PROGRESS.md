@@ -2,11 +2,11 @@
 
 ## Phase en cours
 
-**Phase 5 — Checkpoint / sauvegarde** (spec §20, §21, §42.5, §43.0.7) : implémentée sur la branche `claude/phase-5-save`, **en attente de validation puis d'essai sur téléphone**.
+**PWA / hors ligne** (D-09, D-23) : implémentée sur la branche `claude/pwa`, **en attente de validation puis d'essai sur téléphone**.
 
-**Essai sur téléphone (utilisateur, après la Phase 4)** : contrôles, déplacement et attaque jugés bons ; **validation provisoire** du mouvement (§43.0.1), des commandes (§43.0.2) et du combat (§43.0.4), à confirmer en jeu réel (première zone).
+Phase 5 (checkpoints, sauvegarde) : mergée, en attente d'essai sur téléphone. Mouvement, commandes et combat : validation provisoire par l'utilisateur, à confirmer en jeu réel.
 
-Prochaine : Phase 6 — première zone réelle (vertical slice), ou PWA / hors ligne (D-09) en petite session à part (utile pour la sauvegarde sur iOS).
+Prochaine : Phase 6 — première zone réelle (vertical slice, spec §53).
 
 ## Fait
 
@@ -40,6 +40,27 @@ Prochaine : Phase 6 — première zone réelle (vertical slice), ou PWA / hors l
 - **Traversée de plateforme** (**D-14**, validée) : Bas + Saut sur une plateforme traversable. Paramètres `dropInputThreshold` et `dropThroughMs`, réglables dans l'overlay.
 - Debug : doigts actifs, valeurs du joystick, masque des boutons ; `?touch` force les commandes tactiles sur ordinateur (dev / build de debug seulement).
 - Tests : 134 (dont joystick, disposition sur 4 écrans × 3 échelles × avec/sans encoche, combinaisons multi-touch, annulations, réglages, traversée). Vérifié en émulation Chromium avec de vrais événements tactiles : joystick + saut simultanés, pause, réglage, persistance après rechargement, build principal sans debug.
+
+### PWA / hors ligne
+
+- **D-23** (mise en œuvre de D-09) : `vite-plugin-pwa` dans le **build principal seulement** ; le build de debug et le serveur de dev n'ont **pas de service worker** (option `disable`). Précache complet (10 fichiers, 1,5 Mo), `/Maria/debug/` exclu du précache et des navigations.
+- **Mises à jour** : mode « prompt », jamais de rechargement en pleine partie ; la nouvelle version s'applique au lancement suivant, ou par **« Mettre à jour »** sur l'écran de départ (« Nouvelle version disponible »).
+- **Manifeste** : MARIA, `/Maria/`, **paysage**, plein écran, couleurs du jeu ; **icônes placeholders** (lunettes rondes roses de Céleste, SVG source `public/icons/icon.svg`, PNG 192 / 512 / maskable / apple-touch-icon 180 générés avec Chromium).
+- **Installation** : bouton « Installer le jeu » (Android), **aide iOS** « Partager, puis Sur l'écran d'accueil » hors installation, qui rappelle le transfert par code de sauvegarde (fonction pure testée) ; rien une fois installé.
+- **CI** : `check:pwa` (service worker et manifeste présents, précache sans doublon ni debug, exclusion de `/Maria/debug/`, aucun service worker ni manifeste en debug) ; vérifié qu'il échoue sur un service worker en debug.
+- **Vérifié dans Chromium** (build principal servi localement) : service worker actif ; **hors ligne**, le jeu démarre et une partie se lance ; `/debug/` jamais servi depuis le cache (échec hors ligne, réseau en ligne) ; nouvelle version déployée → « Nouvelle version disponible » → Mettre à jour → nouvelle version chargée ; aide iOS affichée avec un agent Safari iPhone.
+- Tests : 244.
+
+### À vérifier sur téléphone (PWA)
+
+Sur https://kalypst.github.io/Maria/ (build **principal**, après merge et déploiement) :
+
+- [ ] **iPhone** : l'aide s'affiche dans Safari ; Partager → Sur l'écran d'accueil ; l'icône apparaît ; l'application s'ouvre **en plein écran, en paysage**, sans barre Safari.
+- [ ] **Android** : bouton « Installer le jeu » (ou menu du navigateur) ; l'application s'ouvre en plein écran.
+- [ ] **Hors ligne** : mode avion, ouvrir l'application installée : le jeu démarre, Continuer fonctionne.
+- [ ] **Transfert iOS** : dans Safari, copier le code de sauvegarde ; dans l'application installée, Importer un code.
+- [ ] **Mise à jour** : après un prochain déploiement, « Nouvelle version disponible » apparaît sur l'écran de départ (parfois après deux ouvertures) ; Mettre à jour charge la nouvelle version.
+- [ ] Le build de debug (https://kalypst.github.io/Maria/debug/) reste toujours à jour (pas d'ancienne version en cache).
 
 ### Phase 5 — Checkpoint / sauvegarde
 
@@ -205,6 +226,5 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. Validation de la Phase 5, PR et merge, puis essai sur téléphone (liste « Phase 5 »).
-2. PWA / hors ligne (D-09), petite session : installation sur l'écran d'accueil (seul vrai plein écran sur iOS, protège la sauvegarde).
-3. Phase 6 — première zone réelle (vertical slice, spec §53) : boucle, secret, capacité permettant une revisite (§43.0.5).
+1. Validation de la PWA, PR et merge, puis essai sur téléphone (listes « PWA » et « Phase 5 »).
+2. Phase 6 — première zone réelle (vertical slice, spec §53) : boucle, secret, capacité permettant une revisite (§43.0.5).
