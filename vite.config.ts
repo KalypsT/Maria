@@ -46,7 +46,7 @@ export default defineConfig(({ mode }) => {
           ],
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,png,svg,webmanifest}'],
+          globPatterns: ['**/*.{js,css,html,png,svg}'],
           // Le build de debug est publié sous /Maria/debug/ : jamais précaché ni servi par ce SW.
           globIgnores: ['debug/**'],
           navigateFallbackDenylist: [/^\/Maria\/debug(\/|$)/],
