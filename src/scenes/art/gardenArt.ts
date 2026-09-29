@@ -291,7 +291,7 @@ export function gardenDrawers({ tileShape, rounded }: ShapeTools): Record<string
       ctx.strokeStyle = p.woodDark;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      for (let x = r.x + 6; x < r.x + r.w; x += 14) {
+      for (let x = r.x + 6; x < r.x + r.w; x += 24) {
         ctx.moveTo(x, r.y + r.h + 4 * T);
         ctx.lineTo(x + 3, r.y);
       }
@@ -312,7 +312,7 @@ export function gardenDrawers({ tileShape, rounded }: ShapeTools): Record<string
       const { ctx, palette: p } = a;
       // Mur de la maison (crépi clair) et une fenêtre (la buanderie) au-dessus de la porte.
       ctx.fillStyle = '#e8dcc6';
-      ctx.fillRect(r.x, r.y, r.w * T + 2 * T, r.h);
+      ctx.fillRect(r.x, r.y, r.w, r.h);
       ctx.fillStyle = '#9b5b4a';
       ctx.fillRect(r.x, r.y, 3 * T, 4);
       if (!p.silhouettes) {

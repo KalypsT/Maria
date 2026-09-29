@@ -1083,7 +1083,10 @@ export class GameScene extends Phaser.Scene {
     if (isGardenRoom(this.level)) {
       return GARDEN_PALETTE;
     }
-    return this.story.timeOfDay() === 'morning' ? DAY_PALETTE : REAL_PALETTE;
+    const base = this.story.timeOfDay() === 'morning' ? DAY_PALETTE : REAL_PALETTE;
+    // Couleur de mur propre à une salle (`; @walls: haut bas`), la cabane en bois par exemple.
+    const walls = this.level.meta.walls?.split(/\s+/);
+    return walls?.[0] && walls[1] ? { ...base, wallTop: walls[0], wallBottom: walls[1] } : base;
   }
 
   /**
