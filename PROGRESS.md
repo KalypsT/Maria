@@ -13,6 +13,7 @@ Prochaines PR de la phase : (2) maison vivante (animations, objets à regarder, 
 - Le soir : papa à la porte (il rappelle l'heure du lit), maman au bord du lit pour la bonne nuit, le chat qui dort sur le tabouret.
 - Le matin : papa à la cuisine avec son café, maman qui lit au salon sous Maria sans la voir, le chat qui regarde le haut de la bibliothèque. Agir près d'un parent : « ? » puis un cœur.
 - Après le monde étrange : papa passe la tête par la porte, inquiet.
+- Parents à l'échelle de la maison (×2, environ 4,5 fois Céleste), bulles centrées sur leur tête.
 - Bulles au-dessus des personnages, petit mouvement en boucle (deux images), nouvelle bulle « ? ».
 - Tests : 340 (papa à la porte, bonne nuit, ancienne partie, bulles des parents, personnage absent détecté).
 - **Vérifié dans Chromium** : les quatre scènes et leurs bulles.

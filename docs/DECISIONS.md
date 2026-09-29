@@ -386,7 +386,7 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
   - au coucher, maman vient au bord du lit (cœur), puis la nuit ;
   - au matin, papa boit son café à la cuisine, maman lit au salon, le chat regarde le haut de la bibliothèque. Agir près d'un parent : Céleste pense à Maria, le parent répond « ? » puis un cœur (une fois) ;
   - après le monde étrange, papa passe la tête par la porte (« ? »), puis repart dans un court fondu.
-- **Dessin** : dessinés par le code dans le style « papier découpé », adultes environ 2,4 fois plus grands que Céleste, visages simples vus de loin. Placeholders : l'apparence (cheveux, vêtements, peau) reste à préciser par l'utilisateur, ou à remplacer par des images fournies.
+- **Dessin** : dessinés par le code dans le style « papier découpé », visages simples vus de loin. **Taille (choisie sur maquettes)** : ×2 (`PARENT_SCALE`), soit environ 4,5 fois Céleste, à l'échelle des meubles de la maison géante (spec §7.1, §10.3). Une première version à environ 2,4 fois Céleste paraissait trop petite à côté des meubles. Placeholders : l'apparence (cheveux, vêtements, peau) reste à préciser par l'utilisateur, ou à remplacer par des images fournies.
 - **Données** : nouvelles étapes `evening.goodnight`, `morning.dad`, `morning.mom`, `cat.petted`, `end.dad`. `evening.goodnight` est ajoutée aux étapes données à une ancienne partie migrée. Pas de migration.
 - **Limite connue** : les jouets mécaniques (ennemis de la maison) patrouillent près des parents sans réaction ; à revoir (par exemple, ils ne s'animent que la nuit ou hors de la présence d'un adulte).
 

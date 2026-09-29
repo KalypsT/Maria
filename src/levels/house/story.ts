@@ -144,8 +144,8 @@ export const HOUSE_STORY: StoryData = {
       id: 'morning-dad',
       room: 'kitchen',
       on: 'interact',
-      area: { col: 23, row: 17, w: 7, h: 5 },
-      mark: { col: 27, row: 17 },
+      area: { col: 22, row: 14, w: 8, h: 8 },
+      mark: { col: 27, row: 13 },
       when: { all: [F.Slept], none: [F.MorningDad] },
       lock: true,
       steps: [
@@ -163,8 +163,8 @@ export const HOUSE_STORY: StoryData = {
       id: 'morning-mom',
       room: 'living',
       on: 'interact',
-      area: { col: 7, row: 15, w: 11, h: 7 },
-      mark: { col: 12, row: 15 },
+      area: { col: 7, row: 13, w: 11, h: 9 },
+      mark: { col: 14, row: 12 },
       when: { all: [F.Slept], none: [F.MorningMom] },
       lock: true,
       steps: [
