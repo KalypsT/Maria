@@ -2,13 +2,33 @@
 
 ## Phase en cours
 
-**Céleste en « papier découpé »** (D-29) : implémentée sur la branche `claude/celeste-puppet`, **en attente de validation puis d'essai sur téléphone**.
+**Habillage de toute la maison** (D-28) : implémenté sur la branche `claude/art-rooms`, **en attente de validation puis d'essai sur téléphone**.
 
-Chambre habillée (D-28), level design, escalade, Phase 6, PWA et Phase 5 : mergés, **en attente d'essai sur téléphone**. Mouvement, commandes et combat : validation provisoire par l'utilisateur, à confirmer en jeu réel.
+Céleste en papier découpé, chambre habillée, level design, escalade, Phase 6, PWA et Phase 5 : mergés, **en attente d'essai sur téléphone**.
 
-Prochaine : habillage des autres salles, en commençant par l'étage (couloir, escalier, grenier).
+Prochaine : **essai sur téléphone** (toutes les listes), puis selon les retours : réglages, mode de rendu par défaut (D-18), temps de dessin des salles.
 
 ## Fait
+
+### Habillage de toute la maison (D-28)
+
+- **Couloir** : console avec plante, panier à linge, banc, étagère murale, rebord de la trappe, patère, deux lampes murales, cadre, horloge, tapis de couloir. Murs à rayures.
+- **Escalier** : marches et palier du haut en bois, palier intermédiaire, buffet, étagère, corniche, planches de la rampe, fenêtre, lampe, cadre. Murs en planches.
+- **Grenier** : malle, cartons, tapis roulé, poutres, recoin sous le toit, lucarne, ampoule. Murs en planches, sans lambris.
+- **Salon** : canapé et coussin, poufs, table basse, bibliothèque garnie de livres, étagère haute, briques de jeu sur le sol, grande fenêtre, lampes, cadre, horloge.
+- **Cuisine** : chaises, table, marchepied, plan de travail et placards, placards hauts, hotte, fenêtre, suspension, horloge. Murs carrelés.
+- **Buanderie** : rebord de la trappe, placard mural, machine à laver, bassine et tas de linge, étendoir, fenêtre, lampe. Murs carrelés.
+- **Jouets mécaniques** : souris à remonter (clé dans le dos), silhouette à l'œil lumineux dans le monde étrange.
+- **Méthode** : meubles dessinés d'après leurs tuiles. Le test vérifie que chaque tuile de meuble de chaque salle est habillée.
+- **Vérifié dans Chromium** : les six salles en entier (réel et étrange), passages de salle, escalade et trappe, reprise.
+- **Mesure** : 160 à 300 ms pour dessiner une salle à l'échelle 3 sur ordinateur, pendant le fondu (à mesurer sur téléphone).
+
+### À vérifier sur téléphone (maison habillée)
+
+- [ ] Chaque salle se reconnaît au premier coup d'œil (couloir, escalier, grenier, salon, cuisine, buanderie).
+- [ ] Les surfaces praticables restent lisibles partout, même dans les coins sombres.
+- [ ] Changement de salle : le noir entre deux salles ne dure pas trop (dessin de la salle). Sinon, dessiner à l'échelle 2 ou garder les salles voisines en cache.
+- [ ] Jouets mécaniques bien visibles (danger lisible).
 
 ### Céleste en « papier découpé » (D-29)
 
@@ -411,7 +431,6 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. Validation de Céleste en papier découpé, PR et merge, puis **essai sur téléphone** (toutes les listes « À vérifier »).
-2. **Habillage des autres salles** : étage d'abord (couloir, escalier, grenier), puis rez-de-chaussée, et les jouets mécaniques.
-3. Décider du mode de rendu par défaut (D-18) d'après l'essai sur téléphone.
-4. Plus tard : retravailler le rez-de-chaussée (level design), puis croissance, carte et secrets, narration.
+1. PR de l'habillage et merge, puis **essai sur téléphone** : toutes les listes « À vérifier sur téléphone ». C'est désormais le point le plus important.
+2. Selon les retours : réglages du mouvement et des commandes, mode de rendu par défaut (D-18), temps de dessin des salles, ambiance.
+3. Plus tard : retravailler le rez-de-chaussée (level design), puis croissance, carte et secrets, narration.
