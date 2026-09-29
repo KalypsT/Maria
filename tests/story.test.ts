@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DIFFICULTY_MIN_WINDOW_MS } from '../src/config/levelDesign';
 import { DEFAULT_MOVEMENT, PLAYER_HITBOX } from '../src/config/movement';
 import { TILE_SIZE as T } from '../src/config/display';
+import { MEMORIES, MEMORIES_LATER } from '../src/config/memories';
 import { LEGACY_STORY_FLAGS, PROP_SIZE, StoryFlag as F } from '../src/config/story';
 import { analyzeLevel } from '../src/core/analysis/analyzeLevel';
 import { surfaceUnder } from '../src/core/analysis/surfaces';
@@ -30,6 +31,7 @@ function recorder() {
     think: (icon, _ms, by) => log.push(by ? `think ${icon} ${by}` : `think ${icon}`),
     sparkle: (area) => log.push(`sparkle ${String(area.col)},${String(area.row)}`),
     shake: (ms) => log.push(`shake ${String(ms)}`),
+    memory: (id) => log.push(`memory ${id}`),
   };
   return { log, host };
 }
@@ -569,5 +571,62 @@ describe('la famille (D-37)', () => {
     const problems = storyProblems(bad, buildZone(HOUSE));
     expect(problems).toContain("déclencheur z : bulle d'un personnage absent de hall (mom-sofa)");
     expect(problems).toContain('porte fermée hall : personnage dad-kitchen absent');
+  });
+});
+
+describe('souvenirs (D-38)', () => {
+  it('chaque souvenir (sauf ceux à venir) s’obtient dans l’histoire', () => {
+    const given = new Set<string>();
+    for (const t of HOUSE_STORY.triggers) {
+      for (const step of t.steps) {
+        if (step.do === 'memory') {
+          given.add(step.id);
+        }
+      }
+    }
+    for (const id of MEMORIES) {
+      expect(given.has(id), id).toBe(!MEMORIES_LATER.includes(id));
+    }
+  });
+
+  it('un objet se regarde autant qu’on veut ; le souvenir est donné à chaque fois (sans effet)', () => {
+    const { log, host } = recorder();
+    const d = new StoryDirector(HOUSE_STORY, host, HZ);
+    d.setFlags([F.EveningPlayed]);
+    const onShelf = standing(12, 12);
+    for (let round = 0; round < 2; round++) {
+      d.step('bedroom', onShelf, true);
+      for (let i = 0; i < 2000 && d.busy; i++) {
+        d.step('bedroom', onShelf, false);
+      }
+    }
+    expect(log).toEqual(['memory music-box', 'think music', 'memory music-box', 'think music']);
+  });
+
+  it('détecte un déclencheur rejouable qui change l’histoire', () => {
+    const bad: StoryData = {
+      ...HOUSE_STORY,
+      triggers: [
+        {
+          id: 'r',
+          room: 'hall',
+          on: 'interact',
+          area: { col: 1, row: 1, w: 1, h: 1 },
+          mark: { col: 1, row: 1 },
+          when: {},
+          lock: false,
+          repeat: true,
+          steps: [
+            { do: 'flag', id: 'x' },
+            { do: 'memory', id: 'nope' },
+          ],
+        },
+      ],
+    };
+    const problems = storyProblems(bad, buildZone(HOUSE));
+    expect(problems).toContain(
+      "déclencheur r : rejouable seulement avec Agir, sans effet sur l'histoire",
+    );
+    expect(problems).toContain('déclencheur r : souvenir inconnu nope');
   });
 });

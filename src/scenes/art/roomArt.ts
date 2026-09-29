@@ -15,6 +15,7 @@ import {
   type LevelDecor,
 } from '../../core/level/LevelData';
 import { floatingDecor } from '../../core/level/decor';
+import { drawMemory } from './memoryArt';
 
 /**
  * Dessin d'une salle habillée (D-28) avec l'API Canvas : fond et meubles sous les personnages,
@@ -662,6 +663,11 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     if (p.silhouettes) {
       ctx.restore();
     }
+  },
+  photo(a, r) {
+    // La photo de famille (souvenir, D-38) : papa, maman, Céleste et le chat.
+    const size = Math.min(r.w / 0.92, r.h / 0.72);
+    drawMemory(a.ctx, 'photo', r.x + r.w / 2, r.y + r.h / 2, size);
   },
   drawing(a, r) {
     const { ctx, palette: p } = a;

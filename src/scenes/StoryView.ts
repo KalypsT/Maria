@@ -3,9 +3,22 @@ import { TILE_SIZE as T } from '../config/display';
 import { CHARACTER_LOOP_MS, PROP_SIZE, STORY_TIMING, THOUGHT_SCALE } from '../config/story';
 import type { PropStage } from '../core/story/PropStage';
 import type { StoryDirector } from '../core/story/StoryDirector';
-import { CHARACTER_KINDS, PROP_KINDS, THOUGHT_ICONS, type ThoughtIcon } from '../core/story/story';
+import {
+  CHARACTER_KINDS,
+  LOOP_OBJECT_KINDS,
+  PROP_KINDS,
+  THOUGHT_ICONS,
+  type PropKind,
+  type ThoughtIcon,
+} from '../core/story/story';
+import { drawLoopObject } from './art/memoryArt';
 import { drawCharacter } from './art/familyArt';
 import { SPARKLE_SIZE, THOUGHT_SIZE, drawProp, drawSparkle, drawThought } from './art/storyArt';
+
+/** Objets et personnages animés en boucle (deux images). */
+function isLooping(kind: PropKind): boolean {
+  return CHARACTER_KINDS.has(kind) || LOOP_OBJECT_KINDS.has(kind);
+}
 
 /** Au-dessus de la lumière (4), sous Céleste (10) : objets et étincelle ; la bulle au-dessus. */
 const PROP_DEPTH = 5;
@@ -58,11 +71,15 @@ export class StoryView {
     this.artScale = scale;
     for (const kind of PROP_KINDS) {
       const { w, h } = PROP_SIZE[kind];
-      if (CHARACTER_KINDS.has(kind)) {
-        // Deux images pour le petit mouvement en boucle (D-37).
+      if (isLooping(kind)) {
+        // Deux images pour le petit mouvement en boucle (D-37, D-38).
         for (const frame of [0, 1]) {
           this.texture(`prop-${kind}-${String(frame)}`, w, h, (ctx) => {
-            drawCharacter(ctx, kind, frame);
+            if (kind === 'music-box' || kind === 'plant') {
+              drawLoopObject(ctx, kind, w, h, frame);
+            } else {
+              drawCharacter(ctx, kind, frame);
+            }
           });
         }
         continue;
@@ -96,7 +113,7 @@ export class StoryView {
     this.speechEnd = -1;
     this.speech.setVisible(false);
     this.loopKeys = this.stage.props.map((prop) =>
-      CHARACTER_KINDS.has(prop.kind)
+      isLooping(prop.kind)
         ? ([
             `prop-${prop.kind}-0`,
             `prop-${prop.kind}-1`,
@@ -106,7 +123,7 @@ export class StoryView {
     );
     this.propImages = this.stage.props.map((prop, i) => {
       const box = this.stage.boxes[i];
-      const key = CHARACTER_KINDS.has(prop.kind) ? `prop-${prop.kind}-0` : `prop-${prop.kind}`;
+      const key = isLooping(prop.kind) ? `prop-${prop.kind}-0` : `prop-${prop.kind}`;
       return this.scene.add
         .image(box ? box.x : 0, box ? box.y : 0, key)
         .setOrigin(0, 0)

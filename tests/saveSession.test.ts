@@ -69,4 +69,19 @@ describe('SaveSession', () => {
     const reloaded = (await new SaveManager(storage).load()).data;
     expect(reloaded?.story.flags).toEqual(['evening.played']);
   });
+
+  it('garde un souvenir une seule fois, relu après « fermeture » (D-38)', async () => {
+    const storage = new MemorySaveStorage();
+    let clock = 0;
+    const session = new SaveSession(
+      new SaveManager(storage),
+      createNewSave('bedroom', 0),
+      () => ++clock,
+    );
+    await session.addMemory('photo');
+    await session.addMemory('photo');
+    expect(clock).toBe(1);
+    const reloaded = (await new SaveManager(storage).load()).data;
+    expect(reloaded?.progression.memories).toEqual(['photo']);
+  });
 });

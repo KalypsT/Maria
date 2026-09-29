@@ -69,3 +69,21 @@ export const STRANGE_FX = {
   bearGlideTiles: 10,
   bearHiddenMs: 12000,
 } as const;
+
+/**
+ * Vie de la maison réelle (D-38), douce : poussière dans la lumière des fenêtres, trotteuse,
+ * rideaux, veilleuses qui respirent, machine à laver le matin. PROVISOIRE : à régler sur téléphone.
+ */
+export const HOUSE_LIFE = {
+  motesPerWindow: 10,
+  moteLifeMs: 7000,
+  moteAlpha: 0.45,
+  curtainMs: 5200,
+  /** Balancement des rideaux (angle maximal, radians). */
+  curtainSway: 0.012,
+  breathMs: 3600,
+  breathMin: 0.08,
+  breathMax: 0.28,
+  /** Un tour du tambour de la machine à laver (ms). */
+  drumTurnMs: 1400,
+} as const;

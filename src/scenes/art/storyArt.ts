@@ -1,5 +1,6 @@
 import { PROP_SIZE } from '../../config/story';
 import type { PropKind, ThoughtIcon } from '../../core/story/story';
+import { drawMemory, drawNotes } from './memoryArt';
 
 /**
  * Dessins de l'histoire (D-31), PLACEHOLDERS du style D-28 : objets de mise en scène (berceau,
@@ -372,6 +373,18 @@ export function drawThought(
       ctx.beginPath();
       ctx.arc(cx + 6, cy + 3.6, 0.8, 0, Math.PI * 2);
       ctx.fill();
+      break;
+    case 'family':
+      drawMemory(ctx, 'photo', cx, cy, 18);
+      break;
+    case 'drawing':
+      drawMemory(ctx, 'drawing', cx, cy, 18);
+      break;
+    case 'music':
+      drawNotes(ctx, cx, cy, 11);
+      break;
+    case 'flower':
+      drawMemory(ctx, 'plant', cx, cy + 1, 17);
       break;
     case 'question':
       // « ? » seul, au crayon : un parent qui ne sait pas (D-37).

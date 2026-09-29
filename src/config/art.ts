@@ -45,6 +45,8 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   // Fond (sans collision).
   window: { furniture: false },
   frame: { furniture: false },
+  /** Photo de famille (souvenir, D-38). */
+  photo: { furniture: false },
   drawing: { furniture: false },
   rug: { furniture: false },
   lamp: { furniture: false },

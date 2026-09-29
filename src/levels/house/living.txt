@@ -5,7 +5,7 @@
 ; @note: dessus de la bibliothèque (colonnes 47-56) : en grimpant depuis l'étagère haute (D-26).
 ; @wall: dots
 ; @decor: window 24 5 8 7
-; @decor: frame 13 8 3 2
+; @decor: photo 13 8 3 2
 ; @decor: lamp 11 12 1 2
 ; @decor: clock 38 8 2 2
 ; @decor: lamp 43 11 1 2

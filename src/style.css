@@ -510,10 +510,27 @@ body {
   box-shadow: 3px 4px 0 var(--drop-shadow);
 }
 
-.map-title {
+/* Onglets du cahier (D-38) : la carte et les souvenirs, écrits à la main. */
+.map-tabs {
+  display: flex;
+  gap: 18px;
   margin: 0 0 4px 34px;
+}
+
+.map-title {
+  padding: 2px 4px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
   color: var(--ink-soft);
   font: italic 600 16px/1.2 var(--ui-font);
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.map-title.active {
+  border-bottom-color: var(--crayon-rose);
+  opacity: 1;
 }
 
 .map-canvas {

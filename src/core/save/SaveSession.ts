@@ -63,6 +63,16 @@ export class SaveSession {
     return this.persist();
   }
 
+  /** Souvenir trouvé (§22.1, D-38), enregistré aussitôt ; sans effet s'il l'est déjà. */
+  addMemory(id: string): Promise<void> {
+    const memories = this.current.progression.memories;
+    if (memories.includes(id)) {
+      return Promise.resolve();
+    }
+    memories.push(id);
+    return this.persist();
+  }
+
   /** Étape de l'histoire vécue (§33, D-31), enregistrée aussitôt ; sans effet si déjà notée. */
   addStoryFlag(flag: string): Promise<void> {
     const flags = this.current.story.flags;

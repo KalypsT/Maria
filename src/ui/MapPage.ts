@@ -1,6 +1,8 @@
 import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 import type { MapModel, MapPoint, MapRoom } from '../core/world/mapModel';
 import type { MapBox } from '../core/world/zone';
+import { MEMORIES, type MemoryId } from '../config/memories';
+import { drawMemory } from '../scenes/art/memoryArt';
 
 /** Durée du tracé d'une salle découverte depuis la dernière ouverture (ms). */
 const DRAW_IN_MS = 900;
@@ -32,7 +34,15 @@ function seeded(text: string): () => number {
 export class MapPage {
   private readonly root: HTMLElement;
   private readonly canvas: HTMLCanvasElement;
-  private readonly title: HTMLElement;
+  private readonly title: HTMLButtonElement;
+  private readonly memoriesTab: HTMLButtonElement;
+  /** Page affichée : la carte, ou les souvenirs (D-38). */
+  private page: 'map' | 'memories' = 'map';
+  private found: ReadonlySet<string> = new Set();
+  /** Souvenir affiché en grand (null : la grille). */
+  private selected: MemoryId | null = null;
+  /** Cases de la grille des souvenirs (px CSS du canvas), pour les touchers. */
+  private cells: { id: MemoryId; x: number; y: number; size: number }[] = [];
   private frame = 0;
   private openedAt = 0;
   private model: MapModel | null = null;
@@ -45,11 +55,33 @@ export class MapPage {
     this.root.hidden = true;
     const panel = document.createElement('div');
     panel.className = 'map-panel';
-    this.title = document.createElement('p');
+    // Deux onglets manuscrits : la carte et les souvenirs (D-38).
+    const tabs = document.createElement('div');
+    tabs.className = 'map-tabs';
+    this.title = document.createElement('button');
     this.title.className = 'map-title';
+    this.memoriesTab = document.createElement('button');
+    this.memoriesTab.className = 'map-title';
+    this.memoriesTab.textContent = 'Mes souvenirs';
+    tabs.append(this.title, this.memoriesTab);
+    for (const [tab, page] of [
+      [this.title, 'map'],
+      [this.memoriesTab, 'memories'],
+    ] as const) {
+      tab.type = 'button';
+      tab.addEventListener('pointerup', (event) => {
+        event.stopPropagation();
+        this.show(page);
+      });
+    }
     this.canvas = document.createElement('canvas');
     this.canvas.className = 'map-canvas';
-    panel.append(this.title, this.canvas);
+    this.canvas.addEventListener('pointerup', (event) => {
+      if (this.page === 'memories' && this.touchMemories(event)) {
+        event.stopPropagation();
+      }
+    });
+    panel.append(tabs, this.canvas);
     this.root.append(panel);
     this.root.addEventListener('pointerup', () => {
       this.onClose();
@@ -61,11 +93,16 @@ export class MapPage {
     return !this.root.hidden;
   }
 
-  /** Ouvre la carte. `bounds` : boîte englobant toute la zone (disposition stable). */
-  open(model: MapModel, title: string, bounds: MapBox): void {
+  /**
+   * Ouvre le cahier sur la carte. `bounds` : boîte englobant toute la zone (disposition stable) ;
+   * `memories` : souvenirs trouvés.
+   */
+  open(model: MapModel, title: string, bounds: MapBox, memories: readonly string[] = []): void {
     this.model = model;
     this.bounds = bounds;
     this.title.textContent = title;
+    this.found = new Set(memories);
+    this.show('map');
     this.root.hidden = false;
     this.openedAt = performance.now();
     const tick = () => {
@@ -85,6 +122,78 @@ export class MapPage {
   destroy(): void {
     this.close();
     this.root.remove();
+  }
+
+  private show(page: 'map' | 'memories'): void {
+    this.page = page;
+    this.selected = null;
+    this.title.classList.toggle('active', page === 'map');
+    this.memoriesTab.classList.toggle('active', page === 'memories');
+  }
+
+  /** Toucher sur la page des souvenirs : ouvre ou referme un souvenir ; vrai s'il est traité. */
+  private touchMemories(event: PointerEvent): boolean {
+    if (this.selected !== null) {
+      this.selected = null;
+      return true;
+    }
+    const bounds = this.canvas.getBoundingClientRect();
+    const x = event.clientX - bounds.left;
+    const y = event.clientY - bounds.top;
+    for (const cell of this.cells) {
+      const half = cell.size / 2;
+      if (Math.abs(x - cell.x) <= half && Math.abs(y - cell.y) <= half) {
+        if (this.found.has(cell.id)) {
+          this.selected = cell.id;
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Page des souvenirs (D-38) : une case par souvenir, dessiné s'il est trouvé, en pointillés
+   * sinon (complétion explicite, §23) ; un souvenir touché s'affiche en grand.
+   */
+  private drawMemories(ctx: CanvasRenderingContext2D, width: number, height: number): void {
+    const pencil = themeColor('--pencil');
+    const ink = themeColor('--ink');
+    ctx.lineCap = 'round';
+    if (this.selected !== null) {
+      const size = Math.min(width, height) * 0.82;
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(width / 2 - size / 2, height / 2 - size / 2, size, size, 12);
+      ctx.stroke();
+      drawMemory(ctx, this.selected, width / 2, height / 2, size * 0.85);
+      return;
+    }
+    const cols = 3;
+    const rows = Math.ceil(MEMORIES.length / cols);
+    const size = Math.min((width - 24) / cols, (height - 12) / rows) * 0.84;
+    const gapX = (width - cols * size) / (cols + 1);
+    const gapY = (height - rows * size) / (rows + 1);
+    this.cells = MEMORIES.map((id, i) => ({
+      id,
+      x: gapX + (i % cols) * (size + gapX) + size / 2,
+      y: gapY + Math.floor(i / cols) * (size + gapY) + size / 2,
+      size,
+    }));
+    for (const cell of this.cells) {
+      const found = this.found.has(cell.id);
+      ctx.strokeStyle = found ? ink : pencil;
+      ctx.lineWidth = found ? 2 : 1.6;
+      ctx.setLineDash(found ? [] : [6, 5]);
+      ctx.beginPath();
+      ctx.roundRect(cell.x - size / 2, cell.y - size / 2, size, size, 10);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      if (found) {
+        drawMemory(ctx, cell.id, cell.x, cell.y, size * 0.82);
+      }
+    }
   }
 
   private draw(elapsedMs: number): void {
@@ -109,6 +218,10 @@ export class MapPage {
     }
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.clearRect(0, 0, width, height);
+    if (this.page === 'memories') {
+      this.drawMemories(ctx, width, height);
+      return;
+    }
     const margin = 18;
     const b = this.bounds;
     const unit = Math.min((width - 2 * margin) / b.w, (height - 2 * margin) / b.h);

@@ -2,11 +2,25 @@
 
 ## Phase en cours
 
-**Maison vivante, PR 1 : la famille** (D-37) : maman, papa et le chat gris ; sur la branche `ccr-5c5df983-6feqj3`, **en attente d'essai sur téléphone**. La palette crépuscule (D-36) est fusionnée dans `main`.
+**Maison vivante, PR 1 (la famille, D-37) et PR 2 (mouvements, objets à regarder, souvenirs, D-38)** : sur la branche `ccr-5c5df983-6feqj3`, **en attente de PR et d'essai sur téléphone**.
 
-Prochaines PR de la phase : (2) maison vivante (animations, objets à regarder, souvenirs dans le cahier), (3) rez-de-chaussée retravaillé. Ensuite, la croissance.
+Prochaine : PR 3, le rez-de-chaussée retravaillé (canapé, verticalité, souvenir en haut de la bibliothèque). Ensuite, la croissance.
 
 ## Fait
+
+### Maison vivante : mouvements, objets à regarder, souvenirs (§22.1, D-38)
+
+- Mouvements doux : poussière dans la lumière, trotteuse, rideaux, veilleuses qui respirent, machine à laver le matin, plante, boîte à musique.
+- Objets à regarder avec Agir : photo de famille (salon), dessin (chambre), boîte à musique (étagère du lit), plante (cuisine). Rejouables.
+- Souvenirs dans le cahier : onglets « Ma maison » et « Mes souvenirs », cases en pointillés, souvenir en grand au toucher ; le bandeau de Maria à la fin du monde étrange.
+- Tests : 344 (souvenirs obtenables, objets rejouables, validation, sauvegarde des souvenirs).
+- **Vérifié dans Chromium** : les objets et leurs bulles, la machine, la photo de famille, les deux pages du cahier.
+
+### À vérifier sur téléphone (maison vivante)
+
+- [ ] Les étincelles des objets se voient ; les objets se trouvent sans aide.
+- [ ] Les onglets du cahier se touchent facilement ; toucher hors d'une case referme le cahier.
+- [ ] Les mouvements rendent la maison vivante sans distraire.
 
 ### La famille : maman, papa et le chat gris (§8, D-37)
 
@@ -586,7 +600,7 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. PR de la famille (D-37) et merge.
-2. Maison vivante (animations, objets à regarder, souvenirs dans le cahier), puis rez-de-chaussée retravaillé.
+1. PR de la famille et de la maison vivante (D-37, D-38) et merge.
+2. Rez-de-chaussée retravaillé (PR 3 de la maison vivante).
 3. La croissance (§42 phase 7).
 4. Avant d'offrir le jeu : installation facile (PWA), sauvegarde sûre sur iPhone, option « réduire les effets ».

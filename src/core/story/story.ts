@@ -31,6 +31,11 @@ export const THOUGHT_ICONS = [
   'maria-missing',
   /** « ? » seul : un parent qui ne sait pas (D-37). */
   'question',
+  // Objets à regarder (D-38).
+  'family',
+  'drawing',
+  'music',
+  'flower',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
@@ -78,6 +83,8 @@ export type StoryStep =
   | { readonly do: 'pose'; readonly pose: ScriptPose }
   /** Scintillements étranges dans une zone de la salle (non bloquant, D-35). */
   | { readonly do: 'sparkle'; readonly area: TileArea; readonly ms: number }
+  /** Souvenir trouvé (D-38), sauvegardé aussitôt ; sans effet s'il l'est déjà. */
+  | { readonly do: 'memory'; readonly id: string }
   /** Tremblement de l'image (non bloquant, D-35) ; amplitude dans `src/config/strangeFx.ts`. */
   | { readonly do: 'shake'; readonly ms: number; readonly strength: number };
 
@@ -96,6 +103,11 @@ export interface StoryTrigger {
   readonly when: FlagCondition;
   /** Commandes de Céleste suspendues pendant le script. */
   readonly lock: boolean;
+  /**
+   * Rejouable (D-38) : un objet qu'on regarde autant qu'on veut. Seulement pour Agir, et avec des
+   * étapes sans effet sur l'histoire (bulles, attentes, souvenir).
+   */
+  readonly repeat?: boolean;
   readonly steps: readonly StoryStep[];
 }
 
@@ -117,8 +129,14 @@ export const PROP_KINDS = [
   'mom-sofa',
   'cat-sleep',
   'cat-sit',
+  // Objets à regarder (D-38), avec un petit mouvement en boucle.
+  'music-box',
+  'plant',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
+
+/** Objets animés en boucle (deux images), sans être des personnages. */
+export const LOOP_OBJECT_KINDS: ReadonlySet<PropKind> = new Set<PropKind>(['music-box', 'plant']);
 
 /** Personnages : grands (les adultes), animés en boucle, ils peuvent avoir une bulle. */
 export const CHARACTER_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
