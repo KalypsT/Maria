@@ -2,13 +2,38 @@
 
 ## Phase en cours
 
-**Direction artistique** (D-28) : style D validé ; **la chambre est habillée** sur la branche `claude/art-bedroom`, **en attente de validation puis d'essai sur téléphone**.
+**Céleste en « papier découpé »** (D-29) : implémentée sur la branche `claude/celeste-puppet`, **en attente de validation puis d'essai sur téléphone**.
 
-Level design, escalade, Phase 6 (maison), PWA et Phase 5 : mergés, en attente d'essai sur téléphone. Mouvement, commandes et combat : validation provisoire par l'utilisateur, à confirmer en jeu réel.
+Chambre habillée (D-28), level design, escalade, Phase 6, PWA et Phase 5 : mergés, **en attente d'essai sur téléphone**. Mouvement, commandes et combat : validation provisoire par l'utilisateur, à confirmer en jeu réel.
 
-Prochaine : après validation de la chambre, Céleste en « papier découpé » (animation), puis l'habillage des autres salles.
+Prochaine : habillage des autres salles, en commençant par l'étage (couloir, escalier, grenier).
 
 ## Fait
+
+### Céleste en « papier découpé » (D-29)
+
+- **Pièces** dessinées par le code : tête (lunettes rondes roses, frange), deux couettes à rubans, torse (pyjama à pois), bras, jambes à chaussons. Le côté caché est assombri. Chaque pièce est remplaçable par une image.
+- **Poses** (fonctions pures testées) :
+  - attente : respiration ;
+  - course : jambes et bras en opposition, léger rebond ; le pas suit la distance parcourue ;
+  - saut : jambes repliées ; chute : bras écartés ;
+  - suspension : bras tendus vers le rebord, jambes qui se balancent ;
+  - hissage : traction, jambe qui monte ;
+  - coup reçu : recul ;
+  - attaque : le bras suit le bâton.
+
+  Les couettes sont sur un ressort amorti, et les passages d'une pose à l'autre sont adoucis.
+
+- **Réglages** dans `src/config/puppet.ts` et dans l'overlay (« Céleste (papier découpé) »).
+- Tests : 292 (pas lié à la distance, opposition bras et jambes, retour au repos, bras levés suspendue, continuité des mouvements, couettes, attaque).
+- **Vérifié dans Chromium** : attente, course, saut, chute, suspension, monde étrange ; passages de salle et reprise inchangés.
+
+### À vérifier sur téléphone (Céleste)
+
+- [ ] Céleste se lit bien à la taille du jeu : lunettes, couettes, sens de la course.
+- [ ] La course semble « posée » au sol (pas de glissement des pieds) ; sinon régler `strideLengthPx`.
+- [ ] L'allure est sobre et vivante, ni raide ni agitée.
+- [ ] La suspension et le hissage se comprennent.
 
 ### Direction artistique : la chambre (D-28)
 
@@ -386,8 +411,7 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. Validation de la chambre habillée, PR et merge, puis essai sur téléphone (liste « chambre habillée » et précédentes).
-2. **Céleste en « papier découpé »** : pièces dessinées par le code (puis images éventuelles), animées selon l'état (course, saut, suspension, hissage).
-3. **Habillage des autres salles** (couloir, escalier, salon, cuisine, buanderie, grenier) et des jouets mécaniques.
-4. Décider du mode de rendu par défaut (D-18) d'après l'essai sur téléphone.
-5. Plus tard : retravailler le rez-de-chaussée (level design), puis croissance, carte et secrets, narration.
+1. Validation de Céleste en papier découpé, PR et merge, puis **essai sur téléphone** (toutes les listes « À vérifier »).
+2. **Habillage des autres salles** : étage d'abord (couloir, escalier, grenier), puis rez-de-chaussée, et les jouets mécaniques.
+3. Décider du mode de rendu par défaut (D-18) d'après l'essai sur téléphone.
+4. Plus tard : retravailler le rez-de-chaussée (level design), puis croissance, carte et secrets, narration.
