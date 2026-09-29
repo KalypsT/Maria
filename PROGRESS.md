@@ -2,11 +2,25 @@
 
 ## Phase en cours
 
-**Maison vivante, PR 1 (la famille, D-37) et PR 2 (mouvements, objets à regarder, souvenirs, D-38)** : sur la branche `ccr-5c5df983-6feqj3`, **en attente de PR et d'essai sur téléphone**.
+**Maison vivante, PR 1 à 3** (la famille D-37, mouvements et souvenirs D-38, rez-de-chaussée D-39) : sur la branche `ccr-5c5df983-6feqj3`, **en attente de PR et d'essai sur téléphone**.
 
-Prochaine : PR 3, le rez-de-chaussée retravaillé (canapé, verticalité, souvenir en haut de la bibliothèque). Ensuite, la croissance.
+Prochaine : essai sur téléphone de la maison vivante, puis la croissance (§42 phase 7).
 
 ## Fait
+
+### Rez-de-chaussée retravaillé (D-39)
+
+- Salon : vrai canapé (maman assise dedans), route haute par la gauche jusqu'à la bibliothèque (meuble mural en grimpant, étagères, tringle du rideau), trouvaille à droite du haut de la bibliothèque, photo de Céleste bébé avec Maria en haut de la bibliothèque après le monde étrange (souvenir).
+- Cuisine : étagères à bocaux de la table vers les placards hauts (la dernière marche en grimpant), trouvaille sur les placards, jouet mécanique sur la table, loin de papa. Le frigo prévu est écarté (il coupait le chemin vers la buanderie).
+- Buanderie : fil à linge.
+- Tests : 348 (route haute, trouvailles au plus moyennes, photo après le monde étrange ; la maison reste facile).
+- **Vérifié dans Chromium** : salon, cuisine et buanderie en entier.
+
+### À vérifier sur téléphone (rez-de-chaussée)
+
+- [ ] La route haute du salon donne envie d'être explorée ; le meuble mural s'escalade sans peine.
+- [ ] La trouvaille du salon (à droite de la bibliothèque) et celle de la cuisine se remarquent.
+- [ ] Revenir au salon après le monde étrange pour la photo de Céleste bébé a du sens (on y pense ?).
 
 ### Maison vivante : mouvements, objets à regarder, souvenirs (§22.1, D-38)
 
@@ -600,7 +614,7 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. PR de la famille et de la maison vivante (D-37, D-38) et merge.
-2. Rez-de-chaussée retravaillé (PR 3 de la maison vivante).
+1. PR de la maison vivante (D-37 à D-39) et merge, puis essai sur téléphone.
+2. La croissance (§42 phase 7).
 3. La croissance (§42 phase 7).
 4. Avant d'offrir le jeu : installation facile (PWA), sauvegarde sûre sur iPhone, option « réduire les effets ».

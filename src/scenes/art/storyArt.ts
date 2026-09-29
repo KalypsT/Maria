@@ -253,6 +253,12 @@ export function drawProp(
     case 'blanket':
       drawBlanket(ctx, w, h);
       break;
+    case 'baby-photo':
+      // Photo encadrée posée debout, en haut de la bibliothèque.
+      drawMemory(ctx, 'bookcase', w / 2, h / 2, Math.min(w / 0.8, h / 0.88));
+      break;
+    default:
+      break;
   }
 }
 
@@ -385,6 +391,9 @@ export function drawThought(
       break;
     case 'flower':
       drawMemory(ctx, 'plant', cx, cy + 1, 17);
+      break;
+    case 'baby':
+      drawMemory(ctx, 'bookcase', cx, cy, 17);
       break;
     case 'question':
       // « ? » seul, au crayon : un parent qui ne sait pas (D-37).

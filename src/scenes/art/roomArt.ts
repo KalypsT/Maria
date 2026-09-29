@@ -297,6 +297,120 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     rounded(ctx, { x: r.x + 6, y: r.y - 6, w: 10, h: 8 }, 3);
     ctx.fill();
   },
+  fridge(a, r) {
+    // Frigo : grand bloc clair, poignées, magnets (et le dessin de Céleste).
+    const p = a.palette;
+    tileShape(a, r, p.silhouettes ? p.wood : '#e8ecef', p.silhouettes ? p.wood : '#f7f9fa');
+    if (p.silhouettes) {
+      return;
+    }
+    const { ctx } = a;
+    ctx.fillStyle = 'rgba(0,0,0,0.12)';
+    ctx.fillRect(r.x + 2, r.y + r.h * 0.34, r.w - 4, 1.5);
+    ctx.fillStyle = '#9aa3ad';
+    ctx.fillRect(r.x + r.w - 7, r.y + 8, 2, 12);
+    ctx.fillRect(r.x + r.w - 7, r.y + r.h * 0.34 + 8, 2, 20);
+    for (const [dx, dy, color] of [
+      [8, 28, '#d9788f'],
+      [20, 34, '#e6c27a'],
+      [12, 44, '#4f6f8f'],
+    ] as const) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(r.x + dx, r.y + r.h * 0.34 + dy, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = '#fdf8ee';
+    ctx.fillRect(r.x + 7, r.y + r.h * 0.34 + 50, 16, 12);
+    ctx.strokeStyle = '#d9788f';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(r.x + 11, r.y + r.h * 0.34 + 55, 7, 5);
+  },
+  jarshelf(a, r) {
+    // Étagère murale et ses bocaux (pâtes, confiture, biscuits).
+    DRAWERS.wallshelf?.(a, r);
+    if (a.palette.silhouettes) {
+      return;
+    }
+    const { ctx } = a;
+    const colors = ['#e6c27a', '#d9788f', '#c79d6f', '#9bc49a'];
+    for (let x = r.x + 3, i = 0; x < r.x + r.w - 6; x += 9, i++) {
+      const h = 7 + (i % 2) * 2;
+      ctx.fillStyle = 'rgba(240,248,255,0.75)';
+      rounded(ctx, { x, y: r.y - h, w: 6, h }, 1.5);
+      ctx.fill();
+      ctx.fillStyle = colors[i % colors.length] ?? '#e6c27a';
+      ctx.fillRect(x + 1, r.y - h + 3, 4, h - 4);
+      ctx.fillStyle = '#b85f75';
+      ctx.fillRect(x, r.y - h - 1, 6, 1.5);
+    }
+  },
+  clothesline(a, r) {
+    // Un fil qui pend un peu, des pinces, des chaussettes et un petit pyjama rose.
+    const { ctx, palette: p } = a;
+    ctx.strokeStyle = p.silhouettes ? p.structure : '#8a7b6c';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(r.x, r.y + 2);
+    ctx.quadraticCurveTo(r.x + r.w / 2, r.y + 7, r.x + r.w, r.y + 2);
+    ctx.stroke();
+    const colors = ['#f19bb5', '#9fc0e8', '#e6c27a', '#f1a9bd', '#7fa37a'];
+    const count = Math.max(3, Math.floor(r.w / 24));
+    for (let i = 0; i < count; i++) {
+      const t = (i + 0.5) / count;
+      const x = r.x + t * r.w;
+      const y = r.y + 2 + 5 * 4 * t * (1 - t);
+      ctx.fillStyle = p.silhouettes ? p.wood : (colors[i % colors.length] ?? '#f19bb5');
+      if (i % 3 === 1) {
+        rounded(ctx, { x: x - 6, y, w: 12, h: 14 }, 3);
+      } else {
+        rounded(ctx, { x: x - 2.5, y, w: 5, h: 11 }, [1, 1, 3, 3]);
+        ctx.fill();
+        rounded(ctx, { x: x - 2.5, y: y + 8, w: 8, h: 4 }, 2);
+      }
+      ctx.fill();
+      ctx.fillStyle = '#c79d6f';
+      ctx.fillRect(x - 1, y - 2, 2, 3);
+    }
+  },
+  sofaback(a, r) {
+    // Dossier du canapé, derrière l'assise où l'on s'assoit (D-39).
+    const p = a.palette;
+    const { ctx } = a;
+    ctx.fillStyle = p.silhouettes ? p.fabric : p.fabric;
+    rounded(ctx, { x: r.x + 4, y: r.y + 2, w: r.w - 8, h: r.h + 6 }, [8, 8, 2, 2]);
+    ctx.fill();
+    if (p.silhouettes) {
+      return;
+    }
+    ctx.fillStyle = p.fabricLight;
+    for (let i = 0; i < 3; i++) {
+      const w = (r.w - 16) / 3;
+      rounded(ctx, { x: r.x + 8 + i * w, y: r.y + 6, w: w - 3, h: r.h - 2 }, 5);
+      ctx.fill();
+    }
+  },
+  rod(a, r) {
+    // Tringle du rideau : une barre dorée et ses anneaux.
+    const { ctx, palette: p } = a;
+    ctx.fillStyle = p.silhouettes ? p.wood : '#c9a45c';
+    rounded(ctx, { x: r.x, y: r.y + 1, w: r.w, h: 3 }, 1.5);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(r.x + 2, r.y + 2.5, 3, 0, Math.PI * 2);
+    ctx.arc(r.x + r.w - 2, r.y + 2.5, 3, 0, Math.PI * 2);
+    ctx.fill();
+    if (p.silhouettes) {
+      return;
+    }
+    ctx.strokeStyle = '#a8843f';
+    ctx.lineWidth = 1;
+    for (let x = r.x + 8; x < r.x + r.w - 6; x += 9) {
+      ctx.beginPath();
+      ctx.arc(x, r.y + 4, 2, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  },
   pouf(a, r) {
     tileShape(
       a,

@@ -630,3 +630,20 @@ describe('souvenirs (D-38)', () => {
     expect(problems).toContain('déclencheur r : souvenir inconnu nope');
   });
 });
+
+describe('rez-de-chaussée (D-39)', () => {
+  it('la photo de Céleste bébé avec Maria n’apparaît qu’après le monde étrange', () => {
+    const { host } = recorder();
+    const d = new StoryDirector(HOUSE_STORY, host, HZ);
+    const shown = () => {
+      const stage = new PropStage();
+      stage.load(HOUSE_STORY.props, 'living', d.flags);
+      return stage.props.filter((_, i) => stage.shown[i]).map((p) => p.id);
+    };
+    d.setFlags([...LEGACY_STORY_FLAGS, F.MariaVanished]);
+    expect(shown()).not.toContain('baby-photo');
+    d.setFlags([...LEGACY_STORY_FLAGS, F.MariaVanished, F.StrangeDone]);
+    expect(shown()).toContain('baby-photo');
+    expect(shown()).not.toContain('maria-bookcase');
+  });
+});

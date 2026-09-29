@@ -36,6 +36,8 @@ export const THOUGHT_ICONS = [
   'drawing',
   'music',
   'flower',
+  /** La photo de Céleste bébé avec Maria (D-39). */
+  'baby',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
@@ -132,6 +134,8 @@ export const PROP_KINDS = [
   // Objets à regarder (D-38), avec un petit mouvement en boucle.
   'music-box',
   'plant',
+  /** Photo encadrée de Céleste bébé avec Maria, en haut de la bibliothèque (D-39). */
+  'baby-photo',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 

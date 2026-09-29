@@ -7,6 +7,7 @@
 ; @wall: tiles
 ; @decor: window 28 4 6 5
 ; @decor: lamp 32 11 1 2
+; @decor: clothesline 12 11 14 2
 ; @decor: ledge 1 10 6 1
 ; @decor: wallshelf 4 14 7 1
 ; @decor: laundry 10 21 3 3

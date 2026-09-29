@@ -124,4 +124,5 @@ export const PROP_SIZE = {
   // Objets à regarder (D-38).
   'music-box': { w: 10, h: 11 },
   plant: { w: 10, h: 16 },
+  'baby-photo': { w: 11, h: 10 },
 } as const satisfies Readonly<Record<PropKind, { w: number; h: number }>>;
