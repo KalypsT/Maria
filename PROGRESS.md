@@ -2,11 +2,38 @@
 
 ## Phase en cours
 
-**Saut mural** (§15, D-44, D-45), PR 1 du jardin : sur la branche `ccr-53d22df4-9euiqo`, **en attente de PR et d'essai sur téléphone** (parcours d'essai 7). La croissance (D-43) et le chat agrandi (D-42) sont fusionnés.
+**Le jardin, PR 2a** (§7.2, D-46 à D-48) : sur la branche `ccr-53d22df4-9euiqo`, **en attente de PR et d'essai sur téléphone**. Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
 
-Prochaine : PR 2, **le jardin** (§7.2), construit sur les valeurs du saut mural réglées au téléphone, avec une difficulté qui monte (D-36) et la revisite de la maison par le saut mural.
+Prochaine : PR 2b, **derrière la haie** (monde étrange du jardin : premiers passages difficiles, escargot sur les murs, Maria aperçue, trace dans le monde réel).
 
 ## Fait
+
+### Le jardin (D-46 à D-48)
+
+- **Accès** : porte de derrière de la buanderie. En phase 1, la poignée est trop haute (bulle « poignée ») ; ouverte une fois Céleste grandie. Nouveau : une sortie peut être fermée seule (`lockedRooms` avec `exit` et `icon`).
+- **Cinq salles** (dans la zone de la maison, sur la carte à droite de la buanderie) :
+  - **terrasse** (facile) : lanterne (point de retour), maman étend le linge, pergola ;
+  - **potager** (moyen) : bacs surélevés au-dessus des orties, papa arrose ; trouvaille en haut des tuteurs (moyenne, planches d'une tuile) ;
+  - **grand arbre** (moyen) : branches et buissons de la haie, en grimpant ; deux araignées ; trou sombre dans la haie, au fond (pour la PR 2b) ;
+  - **cabane dans l'arbre** : le saut mural ; une petite cheminée pour l'essayer, trouvaille au-dessus du coffre suspendu ;
+  - **allée des toits** (moyen, saut mural) : du haut du vieux mur à la pergola de la terrasse, par une cheminée au-dessus des orties : **boucle** du jardin.
+- **Histoire** : au réveil, « quelques mois plus tard », une bulle soleil (il fait beau) ; en sortant, soleil puis Maria (la chercher dehors). Parents au jardin (bulles « ? » puis cœur) ; ils ne sont plus dans la maison après la croissance. Le trou de la haie scintille une fois.
+- **Palette du jardin** : ciel, nuages, collines, herbe, pierres, feuillage (`v`, nouveau matériau plein), orties (danger). Tout dessiné par le code (PLACEHOLDER).
+- **Araignée** (`a`) : monte et descend au bout de son fil ; un coup l'effraie (elle remonte, inoffensive), deux la dispersent.
+- **Revisite de la maison** : armoire à linge sur pieds dans la buanderie ; la cheminée entre elle et le mur mène à une trouvaille, seulement avec le saut mural.
+- Tests : 391. Jardin fermé en phase 1 ; chemin jusqu'au saut mural moyen exactement ; vieux mur et allée seulement avec le saut mural ; boucle ; jamais coincée (avec et sans saut mural) ; trouvailles ; pas d'ennemi près des parents ; araignée ; le saut mural n'ouvre que l'armoire dans la maison.
+- Vérifié dans Chromium : bulle « poignée » en phase 1, sortie en phase 2, bulles d'arrivée, maman, papa, araignées, saut mural ramassé (sauvegardé, indice affiché).
+
+### À vérifier sur téléphone (jardin)
+
+Après merge, sur https://kalypst.github.io/Maria/debug/ (debug : étape « quelques mois plus tard », ou case « Céleste a grandi », puis téléportation) :
+
+- [ ] Lisibilité du dehors : herbe, orties, feuillage où l'on grimpe, bords praticables.
+- [ ] Difficulté : le potager et l'arbre sont-ils bien un cran au-dessus de la maison, sans être pénibles ?
+- [ ] Les araignées : lisibles, pas effrayantes, gênantes juste ce qu'il faut.
+- [ ] La cheminée de l'allée au-dessus des orties : moyenne ou trop punitive ?
+- [ ] Les bulles (soleil, Maria), les parents au jardin.
+- [ ] L'armoire à linge : donne-t-elle envie de revenir une fois le saut mural trouvé ?
 
 ### Saut mural (D-44, D-45)
 
@@ -674,6 +701,6 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. PR du saut mural, merge, essai sur téléphone et réglage des valeurs.
-2. Le jardin (PR 2) : zone, obtention du saut mural, revisite de la maison.
+1. PR du jardin (2a), merge, essai sur téléphone ; réglage des valeurs du saut mural.
+2. Derrière la haie (PR 2b) : monde étrange du jardin.
 3. Avant d'offrir le jeu : installation facile (PWA), sauvegarde sûre sur iPhone, option « réduire les effets ».
