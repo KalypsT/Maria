@@ -2,13 +2,41 @@
 
 ## Phase en cours
 
-**Habillage de toute la maison** (D-28) : implémenté sur la branche `claude/art-rooms`, **en attente de validation puis d'essai sur téléphone**.
+**Vertical slice** (D-30) : **carte dessinée par Céleste** implémentée sur la branche `claude/map`, **en attente de validation puis d'essai sur téléphone**.
 
-Céleste en papier découpé, chambre habillée, level design, escalade, Phase 6, PWA et Phase 5 : mergés, **en attente d'essai sur téléphone**.
+Essai sur téléphone (retour de l'utilisateur) : saut, commandes tactiles, escalade et durée des changements de salle **validés** ; habillages cohérents.
 
-Prochaine : **essai sur téléphone** (toutes les listes), puis selon les retours : réglages, mode de rendu par défaut (D-18), temps de dessin des salles.
+Prochaine : manifestation de Maria, courte séquence narrative et premier passage vers le monde étrange (plan à valider).
 
 ## Fait
+
+### Carte dessinée par Céleste (§24, D-30)
+
+- **Page du cahier** en plein écran, jeu en pause : bouton tactile **Carte** (à côté de la pause), touche M ou Tab, entrée « Carte » du menu pause. Se referme au toucher, par Carte ou par Pause.
+- **Contenu** :
+  - salles visitées au crayon tremblé, avec hachures, nom et petit dessin (lit, porte, marches, toit, canapé, casserole, machine) ;
+  - salles devinées en pointillés avec « ? » ;
+  - passages entre salles voisines, avec un coude si les portes sont décalées ; passages lointains (trappe à linge, grenier ↔ chambre) en amorces de même couleur ;
+  - veilleuses allumées, avec le point de retour entouré ;
+  - trouvailles ramassées en étoiles roses ;
+  - Céleste à sa place dans la salle.
+- **Tracé animé** des salles découvertes depuis la dernière ouverture.
+- **Données** : disposition dessinée à la main dans `src/levels/house/zone.ts` (`map`) et `@icon` par salle. Aucune migration de sauvegarde.
+- Tests : 299 (modèle : visitées, devinées, cachées, passages, Céleste, veilleuses, trouvailles, salles nouvelles ; disposition cohérente avec les portes).
+- **Vérifié dans Chromium** : ouverture (M), fermeture (M, toucher), carte en début de partie (chambre et deux « ? »), carte complète avec veilleuses, trouvaille et Céleste.
+- **Corrigé en cours de route** : la première disposition du rez-de-chaussée était inversée par rapport aux portes. Un test l'empêche désormais.
+
+### Retours de l'utilisateur à reprendre
+
+- **Maison plus vivante** : plus de petits objets, éléments animés (rideaux, poussière dans la lumière, horloge, lampe qui vacille).
+- **Affichage de jour** selon les besoins de l'histoire : une palette « jour », comme le monde étrange.
+- **Difficulté croissante** dans les zones suivantes : cible de difficulté par zone (moyen, puis difficile), secrets plus exigeants ; la maison reste la zone d'apprentissage.
+
+### À vérifier sur téléphone (carte)
+
+- [ ] Le bouton Carte se trouve facilement et ne gêne pas.
+- [ ] La carte aide à savoir où l'on est et où aller ; les « ? » donnent envie d'explorer.
+- [ ] Les amorces de couleur (trappe, grenier) se comprennent.
 
 ### Habillage de toute la maison (D-28)
 
@@ -431,6 +459,6 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. PR de l'habillage et merge, puis **essai sur téléphone** : toutes les listes « À vérifier sur téléphone ». C'est désormais le point le plus important.
-2. Selon les retours : réglages du mouvement et des commandes, mode de rendu par défaut (D-18), temps de dessin des salles, ambiance.
-3. Plus tard : retravailler le rez-de-chaussée (level design), puis croissance, carte et secrets, narration.
+1. PR de la carte et merge, puis essai sur téléphone (liste « carte »).
+2. **Vertical slice** : manifestation de Maria (jamais en mouvement, jamais parlante), courte séquence narrative, premier passage vers le monde étrange en jeu. Plan à valider.
+3. Ensuite : croissance (§42 phase 7), maison plus vivante, affichage de jour, zones suivantes plus difficiles.

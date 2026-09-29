@@ -243,6 +243,21 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
 - **Images** : chaque pièce peut être remplacée par une image `celeste-head`, `celeste-pigtail`, `celeste-torso`, `celeste-arm`, `celeste-leg` (D-28). Le bras et la jambe servent des deux côtés ; le côté caché est assombri.
 - **Conséquences** : purement visuel, la hitbox et la physique ne changent pas. Le dessin dépasse la hitbox de quelques pixels vers le haut (la tête).
 
+## D-30 — Carte dessinée par Céleste, et ordre du vertical slice
+
+- **Ordre (validé)** : le vertical slice (§53) passe avant la croissance (§42 plaçait la croissance en phase 7) : carte rudimentaire, puis manifestation de Maria, courte séquence narrative et premier passage vers le monde étrange ; la croissance ensuite. Raison : la croissance ne fait pas partie du slice, qui doit dire au plus tôt si le jeu donne envie de continuer.
+- **Carte (validée)** :
+  - **une page du cahier** à consulter, pas de mini-carte (§38 : écran mobile épuré) ;
+  - ouverture par le bouton tactile Carte, M ou Tab, ou le menu pause ; jeu en pause pendant la consultation ;
+  - salles visitées dessinées au crayon (nom, petit dessin), **salles devinées** (voisines d'une salle visitée) en pointillés avec « ? » ;
+  - veilleuses allumées et point de retour, **trouvailles ramassées** en étoiles (les autres ne sont jamais révélées) ;
+  - Céleste à sa place ; tracé animé des salles nouvelles.
+- **Données** :
+  - la disposition est **dessinée à la main** dans les données de la zone (`map` : une boîte par salle), avec une icône par salle (`@icon`) ;
+  - carte « imparfaite » (§24.1) : les passages lointains (trappe à linge, grenier) sont dessinés en amorces de même couleur ;
+  - lecture de la sauvegarde existante (`mapRevealed`, checkpoints, trouvailles), sans migration.
+- **Vérifié** : modèle pur testé ; test de disposition (un mur droit mène à la salle de droite).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
