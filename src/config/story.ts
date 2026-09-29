@@ -98,6 +98,11 @@ export const THOUGHT_SCALE = 1.6;
  * 2,4 fois Céleste). PROVISOIRE : à choisir sur maquettes avec l'utilisateur.
  */
 export const PARENT_SCALE = 2;
+/**
+ * Agrandissement du chat (D-42) : vu à hauteur d'enfant, comme les parents. Assis, sa tête arrive
+ * à celle de Céleste. PROVISOIRE, à régler sur téléphone.
+ */
+export const CAT_SCALE = 2;
 
 /**
  * Taille des objets de mise en scène (px logiques). Maria est un peu plus grande qu'un vrai poupon à
@@ -118,9 +123,9 @@ export const PROP_SIZE = {
   'dad-kitchen': { w: 40 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   'mom-bed': { w: 36 * PARENT_SCALE, h: 44 * PARENT_SCALE },
   'mom-sofa': { w: 38 * PARENT_SCALE, h: 44 * PARENT_SCALE },
-  // Le chat gris.
-  'cat-sleep': { w: 16, h: 8 },
-  'cat-sit': { w: 12, h: 14 },
+  // Le chat gris, agrandi par CAT_SCALE (D-42).
+  'cat-sleep': { w: 16 * CAT_SCALE, h: 8 * CAT_SCALE },
+  'cat-sit': { w: 12 * CAT_SCALE, h: 14 * CAT_SCALE },
   // Objets à regarder (D-38).
   'music-box': { w: 10, h: 11 },
   plant: { w: 10, h: 16 },

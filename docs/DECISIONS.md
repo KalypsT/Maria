@@ -431,6 +431,10 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
 - **Marionnette redessinée** d'après elle (D-29 conservé) : pyjama bleu clair, myrtilles, col et patte boutonnée à liseré rose, poignets et chevilles roses, nœuds roses, taches de rousseur, chaussons lapin roses (une oreille, le museau clair). Un **liseré sombre** détache le pyjama des murs bleus de la maison (lisibilité, pilier 1). À vérifier sur téléphone, surtout sur le mur clair du salon le matin.
 - **Le pyjama est la tenue de la maison seulement** (décision de l'utilisateur) : les tenues des autres zones restent ouvertes (§45) ; elles viendront avec ces zones.
 
+## D-42 — Chat agrandi
+
+- Retour du téléphone : le chat était trop petit à côté des parents agrandis (D-37). Il est agrandi par `CAT_SCALE = 2` (même principe que `PARENT_SCALE`) : endormi, il occupe les deux tiers du tabouret de la chambre ; assis, sa tête arrive à celle de Céleste. PROVISOIRE, à régler sur téléphone.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

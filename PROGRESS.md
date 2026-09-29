@@ -8,6 +8,10 @@ Prochaine : la croissance (§42 phase 7).
 
 ## Fait
 
+### Chat agrandi (D-42)
+
+- Le chat gris est deux fois plus grand (`CAT_SCALE`), endormi sur le tabouret comme assis dans le salon. À vérifier sur téléphone.
+
 ### Retours du téléphone (D-40)
 
 - Le présage du salon dépend de la distance à Maria (rayon 13 tuiles), plus de la hauteur : rien sur la tringle ni sur le canapé.

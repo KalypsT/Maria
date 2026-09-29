@@ -260,6 +260,8 @@ const DRAWN_SIZE: Readonly<Partial<Record<PropKind, { w: number; h: number; pad:
   'dad-kitchen': { w: 40, h: 62, pad: 6 },
   'mom-bed': { w: 36, h: 44, pad: 4 },
   'mom-sofa': { w: 38, h: 44, pad: 4 },
+  'cat-sleep': { w: 16, h: 8, pad: 0 },
+  'cat-sit': { w: 12, h: 14, pad: 0 },
 };
 
 export function drawCharacter(ctx: CanvasRenderingContext2D, kind: PropKind, frame: number): void {
