@@ -1,0 +1,278 @@
+import { DEFAULT_CONTROL_SETTINGS, type ControlSettings } from '../../config/controls';
+import { DEFAULT_DISPLAY_SETTINGS, type DisplaySettings } from '../../config/display';
+import { parseControlSettings, sanitizeControlSettings } from '../settings/controlSettings';
+import { parseDisplaySettings, sanitizeDisplaySettings } from '../settings/displaySettings';
+
+/**
+ * Sauvegarde (décision D-22) : format versionné, validé strictement, protégé par une somme de
+ * contrôle. Pur et indépendant du stockage (IndexedDB, localStorage ou mémoire).
+ */
+export const SAVE_VERSION = 1;
+const RECORD_FORMAT = 'maria-save';
+const CODE_PREFIX = 'MARIA1';
+const MAX_ID_LENGTH = 64;
+const MAX_LIST_LENGTH = 2000;
+
+export interface SaveData {
+  version: typeof SAVE_VERSION;
+  /** Date de l'écriture (ms depuis l'époque Unix). */
+  savedAt: number;
+  /** Point de retour : salle et checkpoint (null = départ de la salle). */
+  checkpoint: { levelId: string; checkpointId: string | null };
+  /** Checkpoints déjà activés, sous la forme `salle:identifiant`. */
+  activatedCheckpoints: string[];
+  settings: { controls: ControlSettings; display: DisplaySettings };
+  /** Progression permanente : prévue, vide tant que ces systèmes n'existent pas. */
+  progression: {
+    abilities: string[];
+    collectibles: string[];
+    memories: string[];
+    mapRevealed: string[];
+  };
+}
+
+/** Enregistrement stocké : le contenu sérialisé et sa somme de contrôle. */
+export interface SaveRecord {
+  format: typeof RECORD_FORMAT;
+  version: number;
+  checksum: string;
+  payload: string;
+}
+
+export type SaveProblem =
+  /** Texte illisible (JSON invalide ou tronqué). */
+  | 'unreadable'
+  /** Pas un enregistrement de sauvegarde de MARIA. */
+  | 'format'
+  /** Contenu modifié ou abîmé (somme de contrôle fausse). */
+  | 'checksum'
+  /** Version plus récente que ce jeu. */
+  | 'future-version'
+  /** Contenu ne respectant pas le schéma. */
+  | 'schema';
+
+export type DecodeResult = { ok: true; data: SaveData } | { ok: false; problem: SaveProblem };
+
+/** Identifiant stable d'un checkpoint dans sa salle (d'après sa tuile). */
+export function checkpointId(col: number, row: number): string {
+  return `c${col}-${row}`;
+}
+
+/** FNV-1a 32 bits, en hexadécimal : détecte les altérations accidentelles (pas une signature). */
+export function checksum(text: string): string {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16).padStart(8, '0');
+}
+
+export function createNewSave(
+  levelId: string,
+  now: number,
+  settings: { controls: ControlSettings; display: DisplaySettings } = {
+    controls: { ...DEFAULT_CONTROL_SETTINGS },
+    display: { ...DEFAULT_DISPLAY_SETTINGS },
+  },
+): SaveData {
+  return {
+    version: SAVE_VERSION,
+    savedAt: now,
+    checkpoint: { levelId, checkpointId: null },
+    activatedCheckpoints: [],
+    settings: { controls: { ...settings.controls }, display: { ...settings.display } },
+    progression: { abilities: [], collectibles: [], memories: [], mapRevealed: [] },
+  };
+}
+
+/**
+ * Migration depuis les réglages stockés avant la sauvegarde (D-13, D-18 : `localStorage`). Des textes
+ * absents ou invalides donnent les valeurs par défaut.
+ */
+export function migrateLegacySettings(
+  controlsText: string | null,
+  displayText: string | null,
+): { controls: ControlSettings; display: DisplaySettings } {
+  return {
+    controls: parseControlSettings(controlsText),
+    display: parseDisplaySettings(displayText),
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isId(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0 && value.length <= MAX_ID_LENGTH;
+}
+
+function stringList(value: unknown): string[] | null {
+  if (!Array.isArray(value) || value.length > MAX_LIST_LENGTH) {
+    return null;
+  }
+  const list: string[] = [];
+  for (const item of value) {
+    if (typeof item !== 'string' || item.length === 0 || item.length > 2 * MAX_ID_LENGTH) {
+      return null;
+    }
+    list.push(item);
+  }
+  return list;
+}
+
+/**
+ * Validation stricte de la structure (un seul défaut rejette tout) ; les réglages, eux, sont
+ * seulement bornés (un réglage hors bornes ne doit pas faire perdre la progression).
+ */
+export function validateSaveData(raw: unknown): SaveData | null {
+  if (!isRecord(raw) || raw['version'] !== SAVE_VERSION) {
+    return null;
+  }
+  const savedAt = raw['savedAt'];
+  const checkpoint = raw['checkpoint'];
+  const settings = raw['settings'];
+  const progression = raw['progression'];
+  if (typeof savedAt !== 'number' || !Number.isFinite(savedAt) || savedAt < 0) {
+    return null;
+  }
+  if (!isRecord(checkpoint) || !isId(checkpoint['levelId'])) {
+    return null;
+  }
+  const cp = checkpoint['checkpointId'];
+  if (cp !== null && !isId(cp)) {
+    return null;
+  }
+  const activated = stringList(raw['activatedCheckpoints']);
+  if (!activated || !isRecord(settings) || !isRecord(progression)) {
+    return null;
+  }
+  const abilities = stringList(progression['abilities']);
+  const collectibles = stringList(progression['collectibles']);
+  const memories = stringList(progression['memories']);
+  const mapRevealed = stringList(progression['mapRevealed']);
+  if (!abilities || !collectibles || !memories || !mapRevealed) {
+    return null;
+  }
+  return {
+    version: SAVE_VERSION,
+    savedAt,
+    checkpoint: { levelId: checkpoint['levelId'], checkpointId: cp },
+    activatedCheckpoints: activated,
+    settings: {
+      controls: sanitizeControlSettings(settings['controls']),
+      display: sanitizeDisplaySettings(settings['display']),
+    },
+    progression: { abilities, collectibles, memories, mapRevealed },
+  };
+}
+
+export function encodeRecord(data: Readonly<SaveData>): SaveRecord {
+  const payload = JSON.stringify(data);
+  return { format: RECORD_FORMAT, version: SAVE_VERSION, checksum: checksum(payload), payload };
+}
+
+/** Enregistrement → texte stocké. */
+export function serializeSave(data: Readonly<SaveData>): string {
+  return JSON.stringify(encodeRecord(data));
+}
+
+/**
+ * Contenu (après vérification de la somme de contrôle) → données valides. Point d'entrée des
+ * migrations futures : une version antérieure serait convertie ici avant validation.
+ */
+function decodePayload(version: number, payload: string): DecodeResult {
+  if (version > SAVE_VERSION) {
+    return { ok: false, problem: 'future-version' };
+  }
+  let raw: unknown;
+  try {
+    raw = JSON.parse(payload);
+  } catch {
+    return { ok: false, problem: 'unreadable' };
+  }
+  const data = validateSaveData(raw);
+  return data ? { ok: true, data } : { ok: false, problem: 'schema' };
+}
+
+/** Texte stocké → données valides, ou la raison du refus. Ne lève jamais d'exception. */
+export function deserializeSave(text: string | null): DecodeResult {
+  if (text === null) {
+    return { ok: false, problem: 'unreadable' };
+  }
+  let raw: unknown;
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    return { ok: false, problem: 'unreadable' };
+  }
+  if (
+    !isRecord(raw) ||
+    raw['format'] !== RECORD_FORMAT ||
+    typeof raw['version'] !== 'number' ||
+    typeof raw['checksum'] !== 'string' ||
+    typeof raw['payload'] !== 'string'
+  ) {
+    return { ok: false, problem: 'format' };
+  }
+  if (checksum(raw['payload']) !== raw['checksum']) {
+    return { ok: false, problem: 'checksum' };
+  }
+  return decodePayload(raw['version'], raw['payload']);
+}
+
+function toBase64Url(text: string): string {
+  let binary = '';
+  for (const byte of new TextEncoder().encode(text)) {
+    binary += String.fromCharCode(byte);
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function fromBase64Url(code: string): string | null {
+  if (!/^[A-Za-z0-9_-]*$/.test(code)) {
+    return null;
+  }
+  try {
+    const binary = atob(code.replace(/-/g, '+').replace(/_/g, '/'));
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Code de sauvegarde à copier (export, D-22) : `MARIA1.<contenu base64url>.<somme de contrôle>`.
+ * Recopiable à la main, sans caractère ambigu pour une URL ou un message.
+ */
+export function encodeSaveCode(data: Readonly<SaveData>): string {
+  const record = encodeRecord(data);
+  return `${CODE_PREFIX}.${toBase64Url(record.payload)}.${record.checksum}`;
+}
+
+/** Code collé → données valides, ou la raison du refus (espaces et retours à la ligne ignorés). */
+export function decodeSaveCode(code: string): DecodeResult {
+  const parts = code.replace(/\s+/g, '').split('.');
+  if (parts.length !== 3 || parts[0] !== CODE_PREFIX) {
+    return { ok: false, problem: 'format' };
+  }
+  const payload = fromBase64Url(parts[1] ?? '');
+  if (payload === null) {
+    return { ok: false, problem: 'unreadable' };
+  }
+  if (checksum(payload) !== parts[2]) {
+    return { ok: false, problem: 'checksum' };
+  }
+  return decodePayload(SAVE_VERSION, payload);
+}
+
+/** Message lisible pour un refus (interface en français). */
+export const SAVE_PROBLEM_LABEL: Readonly<Record<SaveProblem, string>> = {
+  unreadable: 'illisible ou incomplète',
+  format: "n'est pas une sauvegarde de MARIA",
+  checksum: 'abîmée ou modifiée',
+  'future-version': "d'une version plus récente du jeu",
+  schema: 'au contenu invalide',
+};
