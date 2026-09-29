@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { TILE_SIZE as T } from '../config/display';
-import { PROP_SIZE, STORY_TIMING } from '../config/story';
+import { PROP_SIZE, STORY_TIMING, THOUGHT_SCALE } from '../config/story';
 import type { PropStage } from '../core/story/PropStage';
 import type { StoryDirector } from '../core/story/StoryDirector';
 import { PROP_KINDS, THOUGHT_ICONS, type ThoughtIcon } from '../core/story/story';
@@ -50,7 +50,9 @@ export class StoryView {
       });
     }
     for (const icon of THOUGHT_ICONS) {
-      this.texture(`thought-${icon}`, THOUGHT_SIZE.w, THOUGHT_SIZE.h, (ctx) => {
+      const k = THOUGHT_SCALE;
+      this.texture(`thought-${icon}`, THOUGHT_SIZE.w * k, THOUGHT_SIZE.h * k, (ctx) => {
+        ctx.scale(k, k);
         drawThought(ctx, icon, images);
       });
     }

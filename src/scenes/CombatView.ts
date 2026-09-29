@@ -183,19 +183,33 @@ export class CombatView {
     }
     ctx.scale(scale, scale);
     const dark = palette.silhouettes;
+    // Monde étrange : ombre sombre mais lisible sur les fonds sombres (retour de l'utilisateur).
+    const SHADOW = '#2a3140';
     // Corps (tourné vers la droite), oreille, museau, roues, queue, clé.
-    ctx.fillStyle = dark ? '#07080d' : '#c9823f';
+    ctx.fillStyle = dark ? SHADOW : '#c9823f';
     ctx.beginPath();
     ctx.ellipse(w / 2, h * 0.58, w * 0.45, h * 0.4, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
     ctx.arc(w * 0.72, h * 0.25, h * 0.2, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = dark ? '#07080d' : '#e0a56a';
+    if (dark) {
+      // Contour lumineux discret : la silhouette se détache du fond.
+      ctx.strokeStyle = palette.rim;
+      ctx.globalAlpha = 0.55;
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.ellipse(w / 2, h * 0.58, w * 0.45, h * 0.4, 0, 0, Math.PI * 2);
+      ctx.moveTo(w * 0.72 + h * 0.2, h * 0.25);
+      ctx.arc(w * 0.72, h * 0.25, h * 0.2, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+    ctx.fillStyle = dark ? SHADOW : '#e0a56a';
     ctx.beginPath();
     ctx.ellipse(w * 0.95, h * 0.62, 1.6, 1.3, 0, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = dark ? '#07080d' : '#6e625a';
+    ctx.fillStyle = dark ? SHADOW : '#6e625a';
     ctx.beginPath();
     ctx.arc(w * 0.3, h - 1.2, 1.2, 0, Math.PI * 2);
     ctx.arc(w * 0.7, h - 1.2, 1.2, 0, Math.PI * 2);

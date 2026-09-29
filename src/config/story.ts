@@ -7,6 +7,8 @@ import type { PropKind } from '../core/story/story';
 export const StoryFlag = {
   /** Le soir : Céleste a joué avec Maria. */
   EveningPlayed: 'evening.played',
+  /** Le soir : Céleste a pris la couverture de Maria sur l'étagère. */
+  EveningBlanket: 'evening.blanket',
   /** Le soir : Maria est couchée dans son berceau. */
   EveningTucked: 'evening.tucked',
   /** Céleste s'est couchée : la nuit a passé, c'est le matin et Maria n'est plus là. */
@@ -31,31 +33,40 @@ export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
  */
 export const LEGACY_STORY_FLAGS: readonly string[] = [
   StoryFlag.EveningPlayed,
+  StoryFlag.EveningBlanket,
   StoryFlag.EveningTucked,
   StoryFlag.Slept,
 ];
 
-/** Mise en scène (ms). PROVISOIRE : à régler sur téléphone. */
+/**
+ * Mise en scène (ms). PROVISOIRE : à régler sur téléphone. Retour de l'utilisateur : ralentir
+ * l'histoire pour que le joueur s'en imprègne (bulles plus longues, nuit et bascule plus lentes).
+ */
 export const STORY_TIMING = {
   /** Fondu court (jouer, coucher Maria). */
-  fadeMs: 350,
+  fadeMs: 600,
   /** Fondu de la nuit (Céleste s'endort, puis se réveille). */
-  nightFadeOutMs: 1100,
-  nightBlackMs: 700,
-  nightFadeInMs: 1500,
+  nightFadeOutMs: 1900,
+  nightBlackMs: 2000,
+  nightFadeInMs: 2600,
   /** Durée d'affichage d'une bulle de pensée. */
-  thoughtMs: 1800,
+  thoughtMs: 3000,
   /** Apparition et disparition d'une bulle. */
-  thoughtFadeMs: 180,
-  /** Pause d'un plan fixe (Céleste joue avec Maria). */
-  holdMs: 1100,
+  thoughtFadeMs: 250,
+  /** Plan fixe (Céleste joue avec Maria, la regarde dormir). */
+  holdMs: 2600,
+  /** Céleste s'arrête pour regarder (trace, Maria aperçue, bandeau). */
+  lookMs: 1400,
   /** Délai minimal entre deux bulles « c'est l'heure de dormir » à une porte fermée. */
-  lockedExitThoughtMs: 2500,
-  /** Bascule vers le monde étrange : un clignement (fondu très court), puis le retour lent. */
-  blinkOutMs: 160,
-  blinkBlackMs: 240,
-  blinkInMs: 700,
+  lockedExitThoughtMs: 3500,
+  /** Bascule vers le monde étrange : un clignement, un noir, puis le retour lent. */
+  blinkOutMs: 300,
+  blinkBlackMs: 700,
+  blinkInMs: 1500,
 } as const;
+
+/** Agrandissement des bulles de pensée (retour de l'utilisateur : mieux lisibles sur téléphone). */
+export const THOUGHT_SCALE = 1.6;
 
 /**
  * Taille des objets de mise en scène (px logiques). Maria est un peu plus grande qu'un vrai poupon à
@@ -69,4 +80,5 @@ export const PROP_SIZE = {
   slipper: { w: 7, h: 4 },
   bottle: { w: 9, h: 5 },
   headband: { w: 10, h: 5 },
+  blanket: { w: 10, h: 5 },
 } as const satisfies Readonly<Record<PropKind, { w: number; h: number }>>;

@@ -182,6 +182,34 @@ describe('objets de mise en scène (pilier 5)', () => {
     expect(stage.shown).toEqual([false]);
   });
 
+  it('un objet ramassé disparaît aussitôt ; jamais Maria', () => {
+    const stage = new PropStage();
+    const props = [
+      {
+        id: 'b',
+        room: 'r',
+        kind: 'blanket' as const,
+        col: 3,
+        row: 3,
+        instant: true,
+        when: { none: ['taken'] },
+      },
+    ];
+    const flags = new Set<string>();
+    stage.load(props, 'r', flags);
+    flags.add('taken');
+    expect(stage.update(flags, view, 0)).toBe(true);
+    expect(stage.shown).toEqual([false]);
+    const zone = buildZone(HOUSE);
+    const bad: StoryData = {
+      ...HOUSE_STORY,
+      props: [
+        { id: 'm', room: 'bedroom', kind: 'maria-sit', col: 19, row: 19, instant: true, when: {} },
+      ],
+    };
+    expect(storyProblems(bad, zone)).toContain("objet m : Maria ne disparaît jamais à l'écran");
+  });
+
   it('posés au centre du bas de leur tuile', () => {
     const box = propBox({ id: 'b', room: 'r', kind: 'bottle', col: 2, row: 4, when: {} });
     expect(box.x + box.width / 2).toBe(2.5 * T);
@@ -237,6 +265,13 @@ describe('histoire de la maison (D-31)', () => {
     expect(d.exitsLocked('bedroom')).toBe(true);
     run(true);
     expect(d.flags.has(F.EveningPlayed)).toBe(true);
+    // Sans la couverture, on ne peut pas encore la coucher.
+    box = standing(20, 19);
+    run(true);
+    expect(d.flags.has(F.EveningTucked)).toBe(false);
+    box = standing(33, 11);
+    run(false);
+    expect(d.flags.has(F.EveningBlanket)).toBe(true);
     box = standing(20, 19);
     run(true);
     expect(d.flags.has(F.EveningTucked)).toBe(true);
@@ -248,13 +283,17 @@ describe('histoire de la maison (D-31)', () => {
     expect(d.veil).toBe(0);
     expect(log.filter((l) => l.startsWith('think'))).toEqual([
       'think heart',
+      'think book',
+      'think blanket',
       'think cradle',
+      'think heart',
       'think bed',
+      'think heart',
       'think maria-missing',
     ]);
   });
 
-  it('le soir se joue dans la chambre sans grimper, par des passages faciles', () => {
+  it('le soir (couverture comprise) se joue dans la chambre sans grimper, par des passages faciles', () => {
     const level = zone.rooms.get('bedroom');
     if (!level) {
       throw new Error('chambre absente');
@@ -280,8 +319,11 @@ describe('histoire de la maison (D-31)', () => {
       }
       return seen;
     };
-    // Du lit à Maria (sur le tapis), puis du berceau (où Céleste se retrouve) au lit.
+    // Du lit à Maria (sur le tapis), de Maria à la couverture (étagère du bureau) et retour,
+    // puis du berceau (où Céleste se retrouve) au lit.
     expect(reach(at(12, 15)).has(at(19, 19))).toBe(true);
+    expect(reach(at(21, 19)).has(at(33, 11))).toBe(true);
+    expect(reach(at(33, 11)).has(at(19, 19))).toBe(true);
     expect(reach(at(25, 17)).has(at(12, 15))).toBe(true);
   });
 
@@ -297,11 +339,16 @@ describe('histoire de la maison (D-31)', () => {
     const view: Box = { x: 30 * T, y: 0, width: 30 * T, height: 24 * T };
     d.step('living', standing(44, 21), false);
     expect(d.flags.has(F.MariaSeen)).toBe(true);
+    // Céleste s'arrête un instant pour la regarder.
+    expect(d.locked).toBe(true);
+    for (let i = 0; i < 1000 && d.busy; i++) {
+      d.step('living', standing(44, 21), false);
+    }
     const top = standing(50, 8);
     let veilAtChange = -1;
     d.step('living', top, false);
     expect(d.locked).toBe(true);
-    for (let i = 0; i < 300 && d.busy; i++) {
+    for (let i = 0; i < 2000 && d.busy; i++) {
       const before = stage.shown[maria];
       stage.update(d.flags, view, d.veil);
       if (before !== stage.shown[maria]) {

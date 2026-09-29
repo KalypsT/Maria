@@ -8,6 +8,16 @@ Prochaine : essai du slice complet sur téléphone, puis retours (maison plus vi
 
 ## Fait
 
+### Histoire ralentie (D-33, retours de l'utilisateur)
+
+- Bulles plus grandes (×1,6) et plus longues (3 s).
+- Soirée rallongée : câlin, puis histoire du soir (livre). La **couverture de Maria** est à aller chercher sur l'étagère du bureau avant de la coucher. Céleste regarde Maria dormir, puis s'assoit sur son lit pour un dernier regard.
+- Nuit plus lente (environ 6,5 s en tout), bascule vers le monde étrange plus lente (2,5 s).
+- Céleste s'arrête un instant devant les traces, Maria sur la bibliothèque et le bandeau.
+- Ennemis du monde étrange un peu plus visibles (ombre gris-bleu, liseré turquoise).
+- Tests : 319 (couverture atteignable sans grimper, coucher impossible sans elle, objet ramassé, jamais Maria).
+- **Vérifié dans Chromium** : bulles cœur, livre et couverture, couverture sur l'étagère puis ramassée, ennemi du salon étrange.
+
 ### Maria dans la bibliothèque, monde étrange, bandeau (§6, D-32)
 
 - **Salon, au matin** : Maria assise en haut de la bibliothèque, visible du sol ; en l'apercevant, bulle avec son visage.
