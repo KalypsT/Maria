@@ -20,6 +20,7 @@ const LEGEND: Readonly<Record<string, number>> = {
   e: Tile.Empty,
   C: Tile.Empty,
   A: Tile.Empty,
+  S: Tile.Empty,
   '^': Tile.Hazard,
 };
 /** Marqueurs d'entités (la tuile elle-même est vide). */
@@ -27,6 +28,7 @@ const ENTITIES: Readonly<Record<string, EntityType>> = {
   e: EntityType.Patroller,
   C: EntityType.Checkpoint,
   A: EntityType.Ability,
+  S: EntityType.Secret,
 };
 /** Matériaux d'affichage (D-25). */
 const MATERIALS: Readonly<Record<string, Material>> = {
@@ -48,7 +50,7 @@ const META = /^;\s*@([\w-]+)\s*:\s*(.*)$/;
  * Légende : `#` plein, `=` traversable par le dessous, `.` vide, `P` départ (une seule fois),
  * `G` arrivée d'un parcours (au plus une fois), `e` patrouilleur, `C` checkpoint, `^` danger,
  * `b` bois et `t` tissu (pleins), `-` étagère (traversable), `1`-`9` sortie dans un mur latéral,
- * `A` objet de capacité (au plus un, capacité nommée par `; @ability:`).
+ * `A` objet de capacité (au plus un, capacité nommée par `; @ability:`), `S` trouvaille (secret).
  * Les commentaires `; @clé: valeur` sont des métadonnées.
  */
 export function parseAsciiLevel(id: string, text: string): LevelData {

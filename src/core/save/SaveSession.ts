@@ -53,6 +53,16 @@ export class SaveSession {
     return this.persist();
   }
 
+  /** Trouvaille découverte (secret, D-27), enregistrée aussitôt ; sans effet si déjà trouvée. */
+  addCollectible(id: string): Promise<void> {
+    const collectibles = this.current.progression.collectibles;
+    if (collectibles.includes(id)) {
+      return Promise.resolve();
+    }
+    collectibles.push(id);
+    return this.persist();
+  }
+
   setControls(controls: Readonly<ControlSettings>): Promise<void> {
     this.current.settings.controls = { ...controls };
     return this.persist();

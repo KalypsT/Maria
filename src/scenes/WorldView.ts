@@ -1,11 +1,12 @@
 import type Phaser from 'phaser';
 import { PLACEHOLDER_COLORS, TILE_SIZE as T } from '../config/display';
-import type { Pickups } from '../core/world/Pickups';
+import { PickupKind, type Pickups } from '../core/world/Pickups';
 import type { RunState } from '../core/world/RunState';
 
 const CHECKPOINT_OFF = 'checkpoint-off-placeholder';
 const CHECKPOINT_ON = 'checkpoint-on-placeholder';
 const PICKUP = 'ability-pickup-placeholder';
+const SECRET = 'secret-pickup-placeholder';
 const WIDTH = 8;
 const HEIGHT = 20;
 const PICKUP_SIZE = 10;
@@ -16,7 +17,7 @@ const PICKUP_BOB_MS = 1600;
 /**
  * Affichage des checkpoints (placeholder neutre, design ouvert §45) : un petit repère qui s'allume
  * quand il est activé, plus vif s'il est le point de retour courant. Objets de capacité (D-26) :
- * une petite lueur qui flotte (placeholder, nature de l'objet ouverte).
+ * une petite lueur qui flotte ; trouvailles (D-27) : la même, rose (placeholders, nature ouverte).
  */
 export class WorldView {
   private sprites: Phaser.GameObjects.Image[] = [];
@@ -47,7 +48,11 @@ export class WorldView {
     }
     this.pickupSprites = this.pickups.items.map((item) =>
       this.scene.add
-        .image((item.col + 0.5) * T, (item.row + 0.5) * T, PICKUP)
+        .image(
+          (item.col + 0.5) * T,
+          (item.row + 0.5) * T,
+          item.kind === PickupKind.Secret ? SECRET : PICKUP,
+        )
         .setDepth(6)
         .setVisible(!item.taken),
     );
@@ -83,15 +88,20 @@ export class WorldView {
     if (textures.exists(CHECKPOINT_ON)) {
       return;
     }
-    const glow = this.scene.make.graphics({}, false);
-    const c = PICKUP_SIZE / 2;
-    glow.fillStyle(PLACEHOLDER_COLORS.checkpointLit, 0.3);
-    glow.fillCircle(c, c, c);
-    glow.fillStyle(PLACEHOLDER_COLORS.checkpointLit);
-    glow.fillTriangle(c, 1, c + 3, c, c - 3, c);
-    glow.fillTriangle(c, PICKUP_SIZE - 1, c + 3, c, c - 3, c);
-    glow.generateTexture(PICKUP, PICKUP_SIZE, PICKUP_SIZE);
-    glow.destroy();
+    for (const [key, color] of [
+      [PICKUP, PLACEHOLDER_COLORS.checkpointLit],
+      [SECRET, PLACEHOLDER_COLORS.secret],
+    ] as const) {
+      const glow = this.scene.make.graphics({}, false);
+      const c = PICKUP_SIZE / 2;
+      glow.fillStyle(color, 0.3);
+      glow.fillCircle(c, c, c);
+      glow.fillStyle(color);
+      glow.fillTriangle(c, 1, c + 3, c, c - 3, c);
+      glow.fillTriangle(c, PICKUP_SIZE - 1, c + 3, c, c - 3, c);
+      glow.generateTexture(key, PICKUP_SIZE, PICKUP_SIZE);
+      glow.destroy();
+    }
     for (const [key, lit] of [
       [CHECKPOINT_OFF, false],
       [CHECKPOINT_ON, true],
