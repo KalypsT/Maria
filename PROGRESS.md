@@ -2,11 +2,11 @@
 
 ## Phase en cours
 
-**Phase 4 — Combat minimal** (spec §17, §18, §42.4, §43.0.4) : implémentée sur la branche `claude/phase-4-combat`, **en attente de validation puis d'essai sur téléphone**.
+**Phase 5 — Checkpoint / sauvegarde** (spec §20, §21, §42.5, §43.0.7) : implémentée sur la branche `claude/phase-5-save`, **en attente de validation puis d'essai sur téléphone**.
 
-Passe de fluidité et Phase 2 : mergées, en attente d'essai sur téléphone. Phase 1 (mouvement) : pas encore formellement validée (§43.0.1).
+**Essai sur téléphone (utilisateur, après la Phase 4)** : contrôles, déplacement et attaque jugés bons ; **validation provisoire** du mouvement (§43.0.1), des commandes (§43.0.2) et du combat (§43.0.4), à confirmer en jeu réel (première zone).
 
-Prochaine : Phase 5 — checkpoint / sauvegarde (mort douce et retour au checkpoint, D-20), ou PWA / hors ligne (D-09) en petite session à part.
+Prochaine : Phase 6 — première zone réelle (vertical slice), ou PWA / hors ligne (D-09) en petite session à part (utile pour la sauvegarde sur iOS).
 
 ## Fait
 
@@ -40,6 +40,33 @@ Prochaine : Phase 5 — checkpoint / sauvegarde (mort douce et retour au checkpo
 - **Traversée de plateforme** (**D-14**, validée) : Bas + Saut sur une plateforme traversable. Paramètres `dropInputThreshold` et `dropThroughMs`, réglables dans l'overlay.
 - Debug : doigts actifs, valeurs du joystick, masque des boutons ; `?touch` force les commandes tactiles sur ordinateur (dev / build de debug seulement).
 - Tests : 134 (dont joystick, disposition sur 4 écrans × 3 échelles × avec/sans encoche, combinaisons multi-touch, annulations, réglages, traversée). Vérifié en émulation Chromium avec de vrais événements tactiles : joystick + saut simultanés, pause, réglage, persistance après rechargement, build principal sans debug.
+
+### Phase 5 — Checkpoint / sauvegarde
+
+- **D-21** (validée) : **jauge de peur** (3 crans, réglable) remplie par les contacts ennemis ; pleine, ou au contact d'un **danger** `^`, Céleste **s'évanouit** (elle s'estompe, voile noir de 450 ms, aucune représentation de la mort) puis revient au **dernier checkpoint** (départ de la salle à défaut) ; ennemis remis à leur départ, jauge vidée, progression conservée. Checkpoints `C` : activés au contact, vident la jauge, déclenchent une sauvegarde. Diminution naturelle de la jauge : paramètre, désactivée. Contact de danger tolérant (2 px).
+- **D-22** : sauvegarde robuste. Cœur pur (`src/core/save`) : schéma v1 (checkpoint, checkpoints activés, réglages, progression prévue et vide), validation stricte, somme de contrôle FNV-1a, refus motivé (illisible, format, somme, version future, schéma), migration des réglages `localStorage` (D-13, D-18 : anciens modules supprimés). **Deux emplacements** (principal / précédent) écrits dans **une transaction IndexedDB** ; le dernier principal valide devient le précédent ; au chargement : principal, sinon précédent, sinon partie neuve, sans jamais échouer ; écritures en file. Repli `localStorage` puis mémoire. Stockage persistant demandé (après un geste).
+- **Code de sauvegarde** (`MARIA1.…`) : copier depuis le menu pause, importer depuis le menu pause ou l'écran de départ ; un code abîmé est refusé avec la raison.
+- **Écran de départ** minimal (placeholder) : Continuer (avec la salle ; avis si la sauvegarde précédente a été récupérée), Nouvelle partie (confirmée si elle remplace une partie ; l'ancienne reste l'état précédent), Importer un code.
+- **Sauvegarde automatique** : checkpoint, changement de réglage, changement de salle (pas seulement à la fermeture).
+- **Analyse de faisabilité** : un passage qui touche un danger est raté, une surface sous un danger n'est pas praticable.
+- **Parcours 6. Checkpoints** (facile, 317 ms) : bassins de dangers, plateformes au-dessus d'un sol de dangers, patrouilleur entre deux dangers, plafond de dangers, trois checkpoints.
+- **Overlay** : sections « Échec et peur » et « Sauvegarde » (emplacements, stockage, erreur, checkpoints, contenu ; Sauvegarder maintenant, Corrompre le principal, Effacer), bouton Évanouissement ; peur et point de retour dans les stats.
+- **Correctifs trouvés en essai** : une touche pressée et relâchée entre deux images était perdue (Échap n'ouvrait pas toujours la pause) ; les touches tapées dans un champ de saisie pilotaient le jeu et étaient bloquées (`preventDefault`).
+- Tests : 241 (format, corruption, validation, migration, code ; deux emplacements, écriture interrompue, principal abîmé, stockage illisible, file ; SaveSession ; RunState : danger, durée de l'évanouissement, checkpoint, jauge, diminution, reprise ; dangers et analyse ; touche brève).
+- **Vérifié de bout en bout dans Chromium** (IndexedDB réel) : écran de départ neuf → nouvelle partie → danger → retour au départ → checkpoint (sauvegarde écrite) → évanouissement → retour au checkpoint → **rechargement** → Continuer au checkpoint → **principal corrompu** → rechargement → avis et reprise sur le précédent → jauge 1 → 2 → évanouie → export du code → **navigateur vierge** → code abîmé refusé → code importé.
+- Mesure (profileur de tas, boucle chaude, parcours 6) : 0,09 octet/pas pour combat + physique + `RunState` (bruit).
+
+### À vérifier sur téléphone (Phase 5)
+
+Sur https://kalypst.github.io/Maria/debug/ (après merge), parcours « 6. Checkpoints » :
+
+- [ ] Écran de départ lisible ; Continuer reprend bien après **fermeture complète** du navigateur (et après une nuit).
+- [ ] Évanouissement doux, compréhensible, pas frustrant (durée `faintMs`) ; retour au bon checkpoint.
+- [ ] Checkpoints visibles, activation perceptible.
+- [ ] Jauge de peur : lisible sans gêner (en haut au centre) ; 3 crans, trop ou pas assez ?
+- [ ] Contact des dangers juste (ni injuste, ni trop tolérant).
+- [ ] Code de sauvegarde : copier, le coller dans une note, puis l'importer (idéalement sur un autre navigateur ou appareil).
+- [ ] iOS : après installation sur l'écran d'accueil (quand la PWA existera) ; en attendant, garder un code.
 
 ### Phase 4 — Combat minimal
 
@@ -178,6 +205,6 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. Validation de la Phase 4, PR et merge.
-2. Essai sur téléphone : listes « Phase 4 », « fluidité », « Phase 2 » et « Phase 3 » ; reporter les réglages exportés dans `src/config/` et décider des options à adopter (D-18, D-19, sensations). Si le flottement au sommet est adopté : recalibrer les parcours et les seuils de difficulté.
-3. Phase 5 (checkpoint, mort douce et retour, sauvegarde), ou PWA / hors ligne (D-09) en petite session à part.
+1. Validation de la Phase 5, PR et merge, puis essai sur téléphone (liste « Phase 5 »).
+2. PWA / hors ligne (D-09), petite session : installation sur l'écran d'accueil (seul vrai plein écran sur iOS, protège la sauvegarde).
+3. Phase 6 — première zone réelle (vertical slice, spec §53) : boucle, secret, capacité permettant une revisite (§43.0.5).
