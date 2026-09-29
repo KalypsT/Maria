@@ -2,6 +2,18 @@
 ; @name: Salon
 ; @ambient: #2e2b33
 ; @note: dessus de la bibliothèque (colonnes 47-56) : en grimpant depuis l'étagère haute (D-26).
+; @wall: dots
+; @decor: window 24 5 8 7
+; @decor: frame 13 8 3 2
+; @decor: lamp 11 12 1 2
+; @decor: clock 38 8 2 2
+; @decor: lamp 43 11 1 2
+; @decor: pouf 4 20 2 2
+; @decor: sofa 8 19 13 3
+; @decor: pouf 21 20 2 2
+; @decor: table 33 19 9 3
+; @decor: bookcase 46 9 10 11
+; @decor: shelf 56 13 5 1
 ; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), ^ briques de jeu (danger), e jouet mécanique, C veilleuse (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 ##################################################################
 #................................................................#

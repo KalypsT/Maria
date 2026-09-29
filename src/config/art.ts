@@ -9,6 +9,7 @@
  * (vérifié) ; sinon élément de fond (fenêtre, cadre…), sans contrainte.
  */
 export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean }>> = {
+  // Chambre.
   wardrobe: { furniture: true },
   headboard: { furniture: true },
   bed: { furniture: true },
@@ -17,11 +18,43 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   desk: { furniture: true },
   books: { furniture: true },
   shelf: { furniture: true },
+  // Meubles dessinés d'après leurs tuiles (forme exacte de la collision) + détails.
+  console: { furniture: true },
+  basket: { furniture: true },
+  bench: { furniture: true },
+  wallshelf: { furniture: true },
+  ledge: { furniture: true },
+  stairs: { furniture: true },
+  landing: { furniture: true },
+  buffet: { furniture: true },
+  trunk: { furniture: true },
+  boxes: { furniture: true },
+  rolledrug: { furniture: true },
+  beam: { furniture: true },
+  skylight: { furniture: true },
+  sofa: { furniture: true },
+  pouf: { furniture: true },
+  table: { furniture: true },
+  chair: { furniture: true },
+  bookcase: { furniture: true },
+  counter: { furniture: true },
+  cupboard: { furniture: true },
+  hood: { furniture: true },
+  machine: { furniture: true },
+  laundry: { furniture: true },
+  // Fond (sans collision).
   window: { furniture: false },
   frame: { furniture: false },
   drawing: { furniture: false },
   rug: { furniture: false },
+  lamp: { furniture: false },
+  coatrack: { furniture: false },
+  clock: { furniture: false },
 };
+
+/** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */
+export const WALL_STYLES = ['dots', 'stripes', 'planks', 'tiles'] as const;
+export type WallStyle = (typeof WALL_STYLES)[number];
 
 /**
  * Images fournies (voir le document « Créer des images pour le jeu ») : nom d'élément → fichier

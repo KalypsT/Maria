@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type { CombatParams } from '../config/combat';
+import type { ArtPalette } from '../config/art';
 import { PATROLLER_HITBOX } from '../config/combat';
 import { PLACEHOLDER_COLORS } from '../config/display';
 import { msToSteps } from '../config/movement';
@@ -31,6 +32,8 @@ export class CombatView {
   /** Arc de frappe : rend le coup lisible (le bâton seul est fin et bref). */
   private readonly slash: Phaser.GameObjects.Image;
 
+  private artScale = 1;
+
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly world: CombatWorld,
@@ -57,7 +60,11 @@ export class CombatView {
       sprite.destroy();
     }
     this.enemySprites = this.world.enemies.map(() =>
-      this.scene.add.image(0, 0, PATROLLER_TEXTURE).setOrigin(0.5, 1).setDepth(8),
+      this.scene.add
+        .image(0, 0, PATROLLER_TEXTURE)
+        .setOrigin(0.5, 1)
+        .setScale(1 / this.artScale)
+        .setDepth(8),
     );
   }
 
@@ -158,6 +165,60 @@ export class CombatView {
     } else {
       this.slash.setVisible(false);
     }
+  }
+
+  /**
+   * Jouet mécanique (D-28, placeholder du style) : souris à remonter, clé dans le dos, dessinée
+   * à l'échelle de l'écran ; silhouette à l'œil lumineux dans le monde étrange.
+   */
+  setArt(scale: number, palette: Readonly<ArtPalette>): void {
+    this.artScale = scale;
+    const { width: w, height: h } = PATROLLER_HITBOX;
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.ceil(w * scale);
+    canvas.height = Math.ceil(h * scale);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
+    ctx.scale(scale, scale);
+    const dark = palette.silhouettes;
+    // Corps (tourné vers la droite), oreille, museau, roues, queue, clé.
+    ctx.fillStyle = dark ? '#07080d' : '#c9823f';
+    ctx.beginPath();
+    ctx.ellipse(w / 2, h * 0.58, w * 0.45, h * 0.4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(w * 0.72, h * 0.25, h * 0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = dark ? '#07080d' : '#e0a56a';
+    ctx.beginPath();
+    ctx.ellipse(w * 0.95, h * 0.62, 1.6, 1.3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = dark ? '#07080d' : '#6e625a';
+    ctx.beginPath();
+    ctx.arc(w * 0.3, h - 1.2, 1.2, 0, Math.PI * 2);
+    ctx.arc(w * 0.7, h - 1.2, 1.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = dark ? palette.rim : '#8a5a2a';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.08, h * 0.6);
+    ctx.quadraticCurveTo(-1, h * 0.3, w * 0.05, h * 0.15);
+    ctx.stroke();
+    ctx.fillStyle = dark ? palette.rim : '#c9a46b';
+    ctx.fillRect(w * 0.42, 0.5, 1.2, h * 0.28);
+    ctx.fillRect(w * 0.32, 0.5, w * 0.24, 1.2);
+    ctx.fillStyle = dark ? '#ffb36a' : '#2b2530';
+    ctx.beginPath();
+    ctx.arc(w * 0.84, h * 0.46, 0.9, 0, Math.PI * 2);
+    ctx.fill();
+    const textures = this.scene.textures;
+    if (textures.exists(PATROLLER_TEXTURE)) {
+      textures.remove(PATROLLER_TEXTURE);
+    }
+    textures.addCanvas(PATROLLER_TEXTURE, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
+    this.rebuild();
   }
 
   private createTextures(): void {
