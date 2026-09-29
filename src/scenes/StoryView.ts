@@ -173,7 +173,8 @@ export class StoryView {
       this.speech
         .setVisible(true)
         .setAlpha(Math.max(0, alpha))
-        .setPosition(speechBox.x + speechBox.width * 0.55, speechBox.y + 4);
+        // La traîne de la bulle (en bas à gauche) part du milieu du personnage : sa tête.
+        .setPosition(speechBox.x + speechBox.width * 0.5 - 4, speechBox.y + 4);
     } else if (this.speech.visible) {
       this.speech.setVisible(false);
     }

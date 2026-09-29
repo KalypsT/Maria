@@ -97,7 +97,7 @@ export const THOUGHT_SCALE = 1.6;
  * Agrandissement des parents (D-37) par rapport à leur dessin de référence (62 px debout, environ
  * 2,4 fois Céleste). PROVISOIRE : à choisir sur maquettes avec l'utilisateur.
  */
-export const PARENT_SCALE = 1;
+export const PARENT_SCALE = 2;
 
 /**
  * Taille des objets de mise en scène (px logiques). Maria est un peu plus grande qu'un vrai poupon à
