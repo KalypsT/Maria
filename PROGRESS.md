@@ -2,13 +2,59 @@
 
 ## Phase en cours
 
-**Phase 6 — la maison, première zone** (D-24, D-25, D-26) : implémentée sur la branche `claude/phase-6-house`, **en attente de validation puis d'essai sur téléphone**.
+**Grimper aux rebords** (D-26) : implémentée sur la branche `claude/climb-ledges`, **en attente de validation puis d'essai sur téléphone**.
 
-PWA (D-23) et Phase 5 : mergées, en attente d'essai sur téléphone. Mouvement, commandes et combat : validation provisoire par l'utilisateur, à confirmer en jeu réel.
+Phase 6 (maison), PWA et Phase 5 : mergées, en attente d'essai sur téléphone. Mouvement, commandes et combat : validation provisoire par l'utilisateur, à confirmer en jeu réel.
 
-Prochaine : petite phase « grimper aux rebords » (D-26), plan à valider d'abord.
+Prochaine : passe de level design sur la maison (D-27), puis direction artistique.
 
 ## Fait
+
+### Grimper aux rebords (D-26)
+
+- **Geste** (option B validée) :
+  - **Accroche** : en descente, en poussant vers un mur, Céleste attrape le bord d'une tuile pleine à hauteur des mains.
+  - **Suspension** : Saut hisse aussitôt ; pousser vers le bord ou vers le haut hisse après 120 ms ; pousser vers le bas ou à l'opposé lâche, avec 250 ms avant de pouvoir se raccrocher.
+  - **Hissage** : 240 ms, montée puis avance sur le rebord.
+  - Pas de nouveau bouton. Pas d'attaque suspendue ; touchée, elle lâche.
+- **Garde-fous** :
+  - on n'attrape qu'en descente et en poussant vers le bord ;
+  - les pieds doivent être nettement sous le bord : un saut qui suffisait pour s'y poser n'est jamais interrompu ;
+  - le trajet du hissage est vérifié à l'accroche ;
+  - pas d'accroche sans place pour se tenir debout au-dessus.
+- **Portée** : rebords jusqu'à environ 4 tuiles et demie au-dessus des pieds (au lieu de 3 en sautant). Tous les réglages `ledge*` sont dans `src/config/movement.ts` et l'overlay.
+- **Sans la capacité, le mouvement est inchangé** : parcours d'essai et difficultés identiques.
+- **Obtention** : objet placeholder (lueur qui flotte) sur la machine à laver de la buanderie. Il est sauvegardé aussitôt, et un indice de prototype s'affiche 5 s en bas de l'écran. Overlay : « Capacité : grimper aux rebords » (sans sauvegarde).
+- **Maison retouchée au minimum** pour que les endroits prévus s'atteignent en grimpant :
+  - tête de lit puis armoire (chambre) ;
+  - étagère murale puis rebord de la trappe à linge (couloir) ;
+  - étagère haute débordante puis dessus de la bibliothèque (salon) ;
+  - hotte puis placards hauts (cuisine) ;
+  - machine, placard mural puis rebord de la trappe (buanderie).
+
+  La buanderie n'est plus un cul-de-sac : on en ressort par la trappe, ce qui ferme la **boucle** couloir → escalier → salon → cuisine → buanderie → couloir.
+
+- **Analyse de faisabilité** (D-16) avec l'escalade en option. Tests de la maison sans et avec escalade :
+  - aucun endroit sans retour facile, dans les deux cas ;
+  - objet atteignable sans grimper ;
+  - endroits prévus inatteignables sans grimper, faciles en grimpant ;
+  - montée de la buanderie à la trappe.
+- Tests : 280.
+  - Physique : accroche, suspension, hissage, Saut, lâcher, sans pousser, saut suffisant non interrompu, sans place, touchée, `copyFrom`.
+  - Analyse, objet, `unlockAbility`, format `A`/`@ability`, maison.
+- **Vérifié dans Chromium** : sans capacité, pas d'accroche. Objet ramassé : capacité sauvegardée, indice affiché. Élan sur l'étagère murale, saut : accroche, suspension tenue sans entrée, hissage en poussant, puis trappe et arrivée sur le rebord de la buanderie.
+- **Mesure** (tas, 1,4 million de pas, plus de 2 300 hissages) : 0,1 octet par pas, soit le bruit de mesure habituel.
+
+### À vérifier sur téléphone (escalade)
+
+Sur https://kalypst.github.io/Maria/debug/ (après merge) :
+
+- [ ] L'accroche arrive quand on la veut, et **jamais sans la vouloir** : près d'une table, d'un banc, d'un bord qu'on voulait sauter.
+- [ ] Pousser en diagonale sur le joystick accroche et hisse (seuil `ledgeInputThreshold`).
+- [ ] Hissage ni trop lent ni trop sec (`ledgeClimbMs`). Suspension compréhensible sans animation.
+- [ ] Lâcher (bas ou l'opposé) facile. Se raccrocher tout de suite n'est pas frustrant (`ledgeRegrabMs`).
+- [ ] L'objet de la buanderie se voit, et l'indice se lit sans gêner.
+- [ ] La boucle par la trappe à linge donne une impression de raccourci.
 
 ### Phase 6 — La maison (première zone)
 
@@ -286,6 +332,7 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. Validation de la Phase 6, PR et merge, puis essai sur téléphone (listes « Phase 6 », « PWA » et « Phase 5 »).
-2. **Grimper aux rebords** (D-26), petite phase dédiée : s'accrocher au bord d'un meuble et se hisser. Elle ouvre l'armoire, la bibliothèque, les placards et la trappe à linge (boucle de la maison). Plan à valider d'abord, car elle modifie le mouvement.
-3. Ensuite (§42) : croissance, carte et secrets (un premier secret dans la maison), narration.
+1. Validation de l'escalade, PR et merge, puis essai sur téléphone (listes « escalade », « Phase 6 », « PWA » et « Phase 5 »).
+2. **Passe de level design** sur la maison (D-27) : boucle, embranchements, verticalité, un premier secret ; éditeur visuel à envisager.
+3. **Direction artistique** (D-27) : écrans de test dans 2 ou 3 styles ; qui produit les images.
+4. Ensuite (§42) : croissance, carte et secrets, narration.
