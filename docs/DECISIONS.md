@@ -488,6 +488,34 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
   - un rebond pendant la montée (possible en jeu) n'est pas essayé : l'analyse est prudente ;
   - coût : 1 à 2 s par salle de la maison avec le saut mural (au lieu de moins d'une seconde).
 
+## D-46 — Le jardin (§7.2), PR 2a
+
+- **Plan validé** : le jardin réel d'abord, le monde étrange du jardin (« derrière la haie ») dans une PR suivante. Réponses de l'utilisateur : Céleste veut jouer dehors parce qu'il fait beau, et y chercher Maria ; les parents sont au jardin ; pas d'image clé pour l'instant.
+- **Accès par la croissance** (§16) : la porte de derrière de la buanderie (sortie 3) a une poignée trop haute en phase 1 ; elle s'ouvre en phase 2. Mise en œuvre : `lockedRooms` accepte une sortie précise (`exit`) et une bulle (`icon`, ici « poignée »). Aucune migration.
+- **Dans la zone de la maison** : les liaisons ne relient que des salles d'une même zone. Les liaisons entre zones viendront avec le quartier. La carte « Ma maison » s'étend à droite.
+- **Salles** (PLACEHOLDER, formes simples) :
+  - **terrasse** (facile), **potager** (moyen), **grand arbre** (moyen), **cabane** (saut mural), **allée des toits** (moyen, saut mural) ;
+  - boucle : terrasse → potager → arbre → (saut mural) vieux mur → allée → toit de la pergola → terrasse ;
+  - difficulté (D-36) : le chemin jusqu'au saut mural est moyen exactement (testé : impossible par des passages faciles seulement).
+- **Dehors** : directive `; @world: garden` et palette du jardin (ciel, nuages, collines, herbe, pierres, feuillage, orties). Nouveau matériau plein `v` (feuillage : haies, frondaisons, buissons), dessiné comme les meubles, exactement sur ses tuiles. Directive `; @walls:` pour la couleur de mur d'une salle (la cabane).
+- **Histoire** : bulle soleil au réveil « quelques mois plus tard » ; à la première sortie, soleil puis Maria. Parents au jardin (maman étend le linge, papa arrose) avec leurs bulles « ? » puis cœur ; ils quittent la cuisine et le salon après la croissance. Nouvelles étapes : `garden.arrived`, `garden.mom`, `garden.dad`, `garden.hedge`. Aucune migration.
+- **Signposting** (§25.3) : un trou sombre dans la haie du fond, qui scintille une fois : la PR 2b.
+- **Tests** : le graphe de zone ferme les sorties verrouillées selon la phase, et ignore les passages de l'histoire (monde étrange) après la croissance.
+
+## D-47 — L'araignée au bout de son fil (§18)
+
+- Deuxième ennemi, conçu autour du mouvement : elle monte et descend sous son point d'attache (`a` dans l'ASCII), sur le trajet des sauts de l'arbre et dans la cheminée de l'allée. Elle impose un timing.
+- Un coup l'effraie : elle remonte, inoffensive, puis reprend ; deux coups la dispersent. Pas de gore (pilier 8) : petit corps rond, deux yeux clairs.
+- Réglages `spiderDropTiles` (4) et `spiderPeriodMs` (3,2 s) dans `src/config/combat.ts` et l'overlay. PROVISOIRES.
+- Même classe que le jouet mécanique (`Patroller`, sorte `Spider`) : aucune allocation par pas. Le fil est une image étirée jusqu'à la première surface au-dessus.
+- **Limite** : l'analyse de faisabilité ignore les ennemis. Aucune araignée dans les salles des parents (testé).
+
+## D-48 — Revisite de la maison par le saut mural
+
+- Remplace la lucarne du grenier (D-44 : déjà atteignable en phase 2). Une **armoire à linge sur pieds** dans la buanderie, près de la porte de derrière. La cheminée entre elle et le mur mène à une trouvaille sur son dessus. On la voit dès qu'on passe vers le jardin.
+- Testé : dans la maison, le saut mural n'ouvre **que** cet endroit, facilement. Hors d'atteinte sans lui.
+- L'étagère basse de la buanderie est déplacée un peu à gauche.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
