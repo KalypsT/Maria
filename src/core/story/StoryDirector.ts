@@ -95,19 +95,31 @@ export class StoryDirector {
     return 'evening';
   }
 
-  /** Sorties de la salle fermées (ce n'est pas le moment de sortir). */
-  exitsLocked(room: string): boolean {
-    return this.lockOf(room) !== null;
+  /**
+   * Sortie fermée (ce n'est pas le moment de sortir, ou la porte ne s'ouvre pas encore). Sans
+   * `exit`, vrai si toutes les sorties de la salle sont fermées.
+   */
+  exitsLocked(room: string, exit?: number): boolean {
+    return this.lockOf(room, exit) !== null;
   }
 
-  /** Personnage qui rappelle que les sorties sont fermées (null : Céleste elle-même). */
-  lockSpeaker(room: string): string | null {
-    return this.lockOf(room)?.speaker ?? null;
+  /** Personnage qui rappelle que la sortie est fermée (null : Céleste elle-même). */
+  lockSpeaker(room: string, exit?: number): string | null {
+    return this.lockOf(room, exit)?.speaker ?? null;
   }
 
-  private lockOf(room: string): StoryData['lockedRooms'][number] | null {
+  /** Bulle d'une sortie fermée. */
+  lockIcon(room: string, exit?: number): ThoughtIcon {
+    return this.lockOf(room, exit)?.icon ?? 'bed';
+  }
+
+  private lockOf(room: string, exit?: number): StoryData['lockedRooms'][number] | null {
     for (const lock of this.data.lockedRooms) {
-      if (lock.room === room && this.check(lock.when)) {
+      if (
+        lock.room === room &&
+        (lock.exit === undefined || lock.exit === exit) &&
+        this.check(lock.when)
+      ) {
         return lock;
       }
     }

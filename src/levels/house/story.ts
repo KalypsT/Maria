@@ -146,7 +146,7 @@ export const HOUSE_STORY: StoryData = {
       on: 'interact',
       area: { col: 22, row: 14, w: 8, h: 8 },
       mark: { col: 27, row: 13 },
-      when: { all: [F.Slept], none: [F.MorningDad] },
+      when: { all: [F.Slept], none: [F.MorningDad, F.Grown] },
       lock: true,
       steps: [
         { do: 'flag', id: F.MorningDad },
@@ -165,7 +165,7 @@ export const HOUSE_STORY: StoryData = {
       on: 'interact',
       area: { col: 8, row: 14, w: 13, h: 8 },
       mark: { col: 14, row: 13 },
-      when: { all: [F.Slept], none: [F.MorningMom] },
+      when: { all: [F.Slept], none: [F.MorningMom, F.Grown] },
       lock: true,
       steps: [
         { do: 'flag', id: F.MorningMom },
@@ -307,6 +307,9 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: 1400 },
         { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs + 800 },
         { do: 'wait', ms: S.lookMs },
+        // Il fait beau : envie de jouer dehors, et d'y chercher Maria (D-46).
+        { do: 'thought', icon: 'sun', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
       ],
     },
     {
@@ -322,6 +325,78 @@ export const HOUSE_STORY: StoryData = {
       steps: [
         { do: 'memory', id: 'height' },
         { do: 'thought', icon: 'height', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // Le jardin (D-46) : la première sortie. Il fait beau… et Maria est peut-être dehors.
+      id: 'garden-arrive',
+      room: 'garden-terrace',
+      on: 'touch',
+      area: { col: 1, row: 17, w: 5, h: 5 },
+      when: { all: [F.Grown], none: [F.GardenArrived] },
+      lock: true,
+      steps: [
+        { do: 'flag', id: F.GardenArrived },
+        { do: 'wait', ms: 600 },
+        { do: 'thought', icon: 'sun', ms: S.thoughtMs },
+        { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // Maman étend le linge : elle ne sait pas non plus où est Maria, elle console.
+      id: 'garden-mom',
+      room: 'garden-terrace',
+      on: 'interact',
+      area: { col: 10, row: 16, w: 10, h: 6 },
+      mark: { col: 17, row: 15 },
+      when: { all: [F.Grown], none: [F.GardenMom] },
+      lock: true,
+      steps: [
+        { do: 'flag', id: F.GardenMom },
+        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
+        { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'question', ms: S.thoughtMs, by: 'mom-garden' },
+        { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'mom-garden' },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // Papa arrose le potager, au pied des bacs.
+      id: 'garden-dad',
+      room: 'garden-vegetables',
+      on: 'interact',
+      area: { col: 1, row: 16, w: 8, h: 6 },
+      mark: { col: 7, row: 15 },
+      when: { all: [F.Grown], none: [F.GardenDad] },
+      lock: true,
+      steps: [
+        { do: 'flag', id: F.GardenDad },
+        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
+        { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'question', ms: S.thoughtMs, by: 'dad-garden' },
+        { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'dad-garden' },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // Au fond du jardin, un creux sombre dans la haie, trop serré pour passer ; quelque chose
+      // y scintille, une fois (pour plus tard, §25.3). Aucune explication.
+      id: 'garden-hedge',
+      room: 'garden-tree',
+      on: 'touch',
+      area: { col: 36, row: 36, w: 8, h: 4 },
+      when: { none: [F.GardenHedge] },
+      lock: true,
+      steps: [
+        { do: 'flag', id: F.GardenHedge },
+        { do: 'sparkle', area: { col: 40, row: 37, w: 4, h: 3 }, ms: 2000 },
+        { do: 'wait', ms: S.lookMs },
+        { do: 'thought', icon: 'question', ms: S.thoughtMs },
         { do: 'wait', ms: S.lookMs },
       ],
     },
@@ -535,7 +610,8 @@ export const HOUSE_STORY: StoryData = {
       kind: 'dad-kitchen',
       col: 26,
       row: 21,
-      when: { all: [F.Slept] },
+      // Quelques mois plus tard, les parents sont au jardin (D-46).
+      when: { all: [F.Slept], none: [F.Grown] },
     },
     // Maman est assise dans le canapé, entre les accoudoirs (D-39).
     {
@@ -544,7 +620,7 @@ export const HOUSE_STORY: StoryData = {
       kind: 'mom-sofa',
       col: 14,
       row: 19,
-      when: { all: [F.Slept] },
+      when: { all: [F.Slept], none: [F.Grown] },
     },
     // Après le monde étrange, là où Maria était assise : une photo de Céleste bébé avec Maria.
     {
@@ -558,6 +634,24 @@ export const HOUSE_STORY: StoryData = {
     { id: 'cat-sit', room: 'living', kind: 'cat-sit', col: 44, row: 21, when: { all: [F.Slept] } },
     { id: 'music-box', room: 'bedroom', kind: 'music-box', col: 12, row: 12, when: {} },
     { id: 'plant', room: 'kitchen', kind: 'plant', col: 52, row: 16, when: {} },
+    // Au jardin (D-46) : maman étend le linge sur la terrasse, papa arrose le potager, loin des
+    // araignées (pas d'ennemi près d'un adulte, D-39).
+    {
+      id: 'mom-garden',
+      room: 'garden-terrace',
+      kind: 'mom-garden',
+      col: 15,
+      row: 21,
+      when: { all: [F.Grown] },
+    },
+    {
+      id: 'dad-garden',
+      room: 'garden-vegetables',
+      kind: 'dad-garden',
+      col: 5,
+      row: 21,
+      when: { all: [F.Grown] },
+    },
     {
       id: 'headband',
       room: 'bedroom',
@@ -568,7 +662,11 @@ export const HOUSE_STORY: StoryData = {
     },
   ],
   times: [{ when: { all: [F.Slept] }, time: 'morning' }],
-  lockedRooms: [{ room: 'bedroom', when: { none: [F.Slept] }, speaker: 'dad-door' }],
+  lockedRooms: [
+    { room: 'bedroom', when: { none: [F.Slept] }, speaker: 'dad-door' },
+    // La porte de derrière (D-46) : la poignée est trop haute tant que Céleste n'a pas grandi.
+    { room: 'laundry', exit: 3, when: { none: [F.Grown] }, icon: 'handle' },
+  ],
   omens: [
     // En approchant de Maria (en grimpant la bibliothèque), la lumière vacille, les couleurs se
     // refroidissent, puis tout tremble ; rien à l'autre bout de la pièce (D-40).

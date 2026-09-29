@@ -405,6 +405,56 @@ export function drawThought(
     case 'height':
       drawMemory(ctx, 'height', cx, cy, 18);
       break;
+    case 'handle': {
+      // Une porte, la poignée tout en haut, et une petite main qui n'y arrive pas (D-46).
+      ctx.fillStyle = WOOD_DARK;
+      ctx.fillRect(cx - 4, cy - 6, 8, 12);
+      ctx.fillStyle = '#bfe3b0';
+      ctx.fillRect(cx - 2.5, cy - 4.5, 5, 4);
+      ctx.fillStyle = '#e6c27a';
+      ctx.beginPath();
+      ctx.arc(cx + 2.4, cy - 5, 1.1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 0.9;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx + 8, cy + 5);
+      ctx.lineTo(cx + 6, cy + 0.5);
+      ctx.moveTo(cx + 6, cy + 0.5);
+      ctx.lineTo(cx + 5, cy - 1);
+      ctx.moveTo(cx + 6, cy + 0.5);
+      ctx.lineTo(cx + 7, cy - 1.2);
+      ctx.stroke();
+      break;
+    }
+    case 'sun': {
+      // Il fait beau : un soleil et une fleur (envie de jouer dehors, D-46).
+      ctx.fillStyle = '#f2c14e';
+      ctx.beginPath();
+      ctx.arc(cx - 2, cy - 1.5, 3.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#f2c14e';
+      ctx.lineWidth = 1;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (let i = 0; i < 8; i++) {
+        const a = (i * Math.PI) / 4;
+        ctx.moveTo(cx - 2 + Math.cos(a) * 4.8, cy - 1.5 + Math.sin(a) * 4.8);
+        ctx.lineTo(cx - 2 + Math.cos(a) * 6.3, cy - 1.5 + Math.sin(a) * 6.3);
+      }
+      ctx.stroke();
+      ctx.strokeStyle = '#6f9a62';
+      ctx.beginPath();
+      ctx.moveTo(cx + 6, cy + 6);
+      ctx.lineTo(cx + 6, cy + 1);
+      ctx.stroke();
+      ctx.fillStyle = PINK;
+      ctx.beginPath();
+      ctx.arc(cx + 6, cy, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
     case 'question':
       // « ? » seul, au crayon : un parent qui ne sait pas (D-37).
       ctx.strokeStyle = INK;
