@@ -1,0 +1,27 @@
+; Chambre de Céleste : départ d'une nouvelle partie (dans le lit).
+; @name: Chambre
+; @ambient: #2b2f3d
+; @note: dessus de l'armoire (colonnes 2-6) trop haut : à atteindre en grimpant (D-26).
+; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), ^ briques de jeu (danger), e jouet mécanique, C veilleuse (checkpoint), P repère de départ, 1-9 sorties (liaisons dans zone.ts).
+##############################################
+#............................................#
+#............................................#
+#............................................#
+#bbbbb.......................................#
+#bbbbb.......................................#
+#bbbbb.......................................#
+#bbbbb.......................................#
+#bbbbb.......................................#
+#bbbbb.......................................#
+#bbbbb.......................................#
+#bbbbb.......................................#
+#bbbbbb........................------........#
+#bbbbbb..------..............................#
+#bbbbbb......................................#
+#bbbbbb.....P................bbbbbbbbb.......#
+#bbbbbbttttttttttt...........bb......b.......#
+#bbbbbbttttttttttt........bbbbb......bbbb....1
+#bbbbbbbbbbbbbbbbb....bbbbb.bbb......bbbb....1
+#bbbbbbbbbbbbbbbbb..C.bbbbb.bbb......bbbb....1
+##############################################
+##############################################
