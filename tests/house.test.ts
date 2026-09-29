@@ -198,3 +198,25 @@ describe('Céleste a grandi (D-43)', () => {
     },
   );
 });
+
+describe('saut mural dans la maison (D-44)', () => {
+  it(
+    'ne rend rien de la maison réelle plus facile : mêmes endroits, en facile comme en moyen',
+    { timeout: TIMEOUT },
+    () => {
+      const real = (n: Node) => {
+        const data = zone.rooms.get(n.split('#')[0] ?? '');
+        return data !== undefined && !isStrangeRoom(data);
+      };
+      for (const difficulty of ['easy', 'medium'] as const) {
+        const rule = byDifficulty(difficulty);
+        const before = reachable(zoneGraph(true, rule, 2), home());
+        const after = reachable(zoneGraph(true, rule, 2, true), home());
+        const opened = [...after].filter((n) => real(n) && !before.has(n));
+        const closed = [...before].filter((n) => real(n) && !after.has(n));
+        expect(where(opened, true), `${difficulty} : ouverts`).toEqual([]);
+        expect(where(closed, true), `${difficulty} : fermés`).toEqual([]);
+      }
+    },
+  );
+});

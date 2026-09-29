@@ -247,6 +247,19 @@ export class PlayerPhysics {
     return this.state === PlayerState.WallSlide;
   }
 
+  /** Colonne de la tuile du dernier mur touché (analyse de faisabilité). */
+  get wallCol(): number {
+    return this.lastWallCol;
+  }
+
+  /**
+   * Mur quitté par le dernier saut mural, qui ne retient plus Céleste, résumé en un entier (0 :
+   * aucun). Sert à distinguer deux appuis en apparence identiques dans l'analyse de faisabilité.
+   */
+  get releasedWall(): number {
+    return this.noCatchDir === 0 ? 0 : this.noCatchDir * (this.noCatchCol + 1);
+  }
+
   /**
    * Touchée (D-20) : le recul est déjà écrit dans `vx` / `vy` par l'appelant (aucun flottant en
    * argument) ; pendant `steps` pas, direction et saut sont ignorés.

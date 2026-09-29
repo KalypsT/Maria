@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { TILE_SIZE as T } from '../src/config/display';
 import { DEFAULT_MOVEMENT, PLAYER_HITBOX, deriveMovement } from '../src/config/movement';
+import { MoveKind, analyzeLevel } from '../src/core/analysis/analyzeLevel';
+import { LEVELS } from '../src/levels';
 import { spawnPosition } from '../src/core/level/LevelData';
 import { parseAsciiLevel } from '../src/core/level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../src/core/player/PlayerPhysics';
@@ -226,5 +228,72 @@ describe('saut mural (D-44)', () => {
     expect(b.box.x).toBe(a.box.x);
     expect(b.box.y).toBe(a.box.y);
     expect(b.state).toBe(a.state);
+  });
+});
+
+describe('analyse de faisabilité avec le saut mural (D-44)', () => {
+  const level = (map: string[]) => parseAsciiLevel('wall', map.join('\n'));
+  /** Cheminée qui débouche sur une arrivée, en haut à droite. */
+  function chimneyCourse(width: number): string[] {
+    const rows = ['##############'];
+    for (let row = 1; row < 24; row++) {
+      const gap = '.'.repeat(width);
+      const rest = '#'.repeat(12 - width);
+      if (row < 7) {
+        rows.push(row === 6 ? `#${'.'.repeat(10)}G.#` : `#${'.'.repeat(12)}#`);
+      } else {
+        rows.push(row === 23 ? `#P${gap.slice(1)}${rest}#` : `#${gap}${rest}#`);
+      }
+    }
+    rows.push('##############');
+    return rows;
+  }
+
+  it('sans la capacité, l’analyse est inchangée (mêmes passages)', { timeout: 60_000 }, () => {
+    const source = LEVELS.find((l) => l.id === 'tour');
+    if (!source) {
+      throw new Error('parcours tour absent');
+    }
+    const tour = parseAsciiLevel('tour', source.text);
+    const plain = analyzeLevel(tour, DEFAULT_MOVEMENT);
+    const flagged = analyzeLevel(tour, DEFAULT_MOVEMENT, { wallJump: false });
+    expect(flagged.moves).toEqual(plain.moves);
+    expect(flagged.wallNodeCount).toBe(0);
+  });
+
+  it('une cheminée de 4 tuiles se remonte, facilement ; sans la capacité, non', () => {
+    const map = level(chimneyCourse(4));
+    expect(analyzeLevel(map, DEFAULT_MOVEMENT).path).toBeNull();
+    const result = analyzeLevel(map, DEFAULT_MOVEMENT, { wallJump: true });
+    expect(result.path).not.toBeNull();
+    expect(result.critical?.kind).toBe(MoveKind.WallJump);
+    expect(result.critical?.windowMs).toBeGreaterThanOrEqual(200);
+  });
+
+  it('un seul mur ne se remonte pas', () => {
+    // Grand meuble à droite (20 tuiles), l'arrivée dessus ; le mur de gauche est trop loin.
+    const rows = ['##########################'];
+    for (let row = 1; row < 24; row++) {
+      if (row === 2) {
+        rows.push('#...................G....#');
+      } else if (row < 3) {
+        rows.push('#........................#');
+      } else {
+        rows.push(row === 23 ? '#............P....########' : '#.................########');
+      }
+    }
+    rows.push('##########################');
+    const result = analyzeLevel(level(rows), DEFAULT_MOVEMENT, { wallJump: true });
+    expect(result.path).toBeNull();
+    expect(result.wallNodeCount).toBeGreaterThan(0);
+  });
+
+  it('le parcours 7 demande le saut mural', { timeout: 60_000 }, () => {
+    const source = LEVELS.find((l) => l.id === 'saut-mural');
+    if (!source) {
+      throw new Error('parcours saut-mural absent');
+    }
+    const course = parseAsciiLevel('saut-mural', source.text);
+    expect(analyzeLevel(course, DEFAULT_MOVEMENT, { climb: true }).path).toBeNull();
   });
 });
