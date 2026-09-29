@@ -29,6 +29,8 @@ export const THOUGHT_ICONS = [
   'bed',
   'maria',
   'maria-missing',
+  /** « ? » seul : un parent qui ne sait pas (D-37). */
+  'question',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
@@ -49,8 +51,16 @@ export type StoryStep =
   | { readonly do: 'wait'; readonly ms: number }
   /** Étape vécue, sauvegardée aussitôt. */
   | { readonly do: 'flag'; readonly id: string }
-  /** Bulle de pensée au-dessus de Céleste (non bloquante). */
-  | { readonly do: 'thought'; readonly icon: ThoughtIcon; readonly ms: number }
+  /**
+   * Bulle de pensée (non bloquante), au-dessus de Céleste, ou d'un personnage de la salle (`by` :
+   * identifiant de l'objet de mise en scène, un parent par exemple, D-37).
+   */
+  | {
+      readonly do: 'thought';
+      readonly icon: ThoughtIcon;
+      readonly ms: number;
+      readonly by?: string;
+    }
   /** Céleste placée debout sur la tuile (col, row), tournée vers `facing` (seulement dans le noir). */
   | { readonly do: 'place'; readonly col: number; readonly row: number; readonly facing: 1 | -1 }
   /**
@@ -99,8 +109,26 @@ export const PROP_KINDS = [
   'bottle',
   'headband',
   'blanket',
+  // Personnages (D-37), à hauteur d'enfant : ils ne marchent jamais à l'écran, une pose par
+  // activité, un petit mouvement en boucle.
+  'dad-door',
+  'dad-kitchen',
+  'mom-bed',
+  'mom-sofa',
+  'cat-sleep',
+  'cat-sit',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
+
+/** Personnages : grands (les adultes), animés en boucle, ils peuvent avoir une bulle. */
+export const CHARACTER_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
+  'dad-door',
+  'dad-kitchen',
+  'mom-bed',
+  'mom-sofa',
+  'cat-sleep',
+  'cat-sit',
+]);
 
 export interface StoryProp {
   readonly id: string;
@@ -137,8 +165,15 @@ export interface StoryData {
   readonly props: readonly StoryProp[];
   /** Moment de la journée : la première règle vraie l'emporte, sinon `evening`. */
   readonly times: readonly { readonly when: FlagCondition; readonly time: TimeOfDay }[];
-  /** Salles dont les sorties sont fermées tant que la condition est vraie. */
-  readonly lockedRooms: readonly { readonly room: string; readonly when: FlagCondition }[];
+  /**
+   * Salles dont les sorties sont fermées tant que la condition est vraie ; `speaker` : le
+   * personnage qui le rappelle (bulle « au lit » d'un parent), sinon Céleste elle-même.
+   */
+  readonly lockedRooms: readonly {
+    readonly room: string;
+    readonly when: FlagCondition;
+    readonly speaker?: string;
+  }[];
   readonly omens: readonly StoryOmen[];
 }
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DIFFICULTY_MIN_WINDOW_MS } from '../src/config/levelDesign';
 import { DEFAULT_MOVEMENT, PLAYER_HITBOX } from '../src/config/movement';
 import { TILE_SIZE as T } from '../src/config/display';
-import { PROP_SIZE, StoryFlag as F } from '../src/config/story';
+import { LEGACY_STORY_FLAGS, PROP_SIZE, StoryFlag as F } from '../src/config/story';
 import { analyzeLevel } from '../src/core/analysis/analyzeLevel';
 import { surfaceUnder } from '../src/core/analysis/surfaces';
 import type { Box } from '../src/core/physics/gridCollision';
@@ -27,7 +27,7 @@ function recorder() {
         `room ${room} ${String(col)},${String(row)},${String(facing)}${returnPoint ? ' retour' : ''}`,
       ),
     pose: (pose) => log.push(`pose ${pose}`),
-    think: (icon) => log.push(`think ${icon}`),
+    think: (icon, _ms, by) => log.push(by ? `think ${icon} ${by}` : `think ${icon}`),
     sparkle: (area) => log.push(`sparkle ${String(area.col)},${String(area.row)}`),
     shake: (ms) => log.push(`shake ${String(ms)}`),
   };
@@ -360,6 +360,8 @@ describe('histoire de la maison (D-31)', () => {
       'think heart',
       'think bed',
       'think heart',
+      'think heart mom-bed',
+      'think heart',
       'think maria-missing',
     ]);
   });
@@ -499,5 +501,73 @@ describe('histoire de la maison (D-31)', () => {
     expect(log).toEqual([]);
     d.step('s', standing(0, 0), false);
     expect(log).toEqual(['flag left']);
+  });
+});
+
+describe('la famille (D-37)', () => {
+  it('le soir, papa rappelle l’heure du lit à la porte ; au matin, il n’y est plus', () => {
+    const { host } = recorder();
+    const d = new StoryDirector(HOUSE_STORY, host, HZ);
+    d.setFlags([F.EveningPlayed]);
+    expect(d.lockSpeaker('bedroom')).toBe('dad-door');
+    const stage = new PropStage();
+    stage.load(HOUSE_STORY.props, 'bedroom', d.flags);
+    const shown = () => stage.props.filter((_, i) => stage.shown[i]).map((p) => p.id);
+    expect(shown()).toContain('dad-door');
+    expect(shown()).not.toContain('mom-bed');
+    d.setFlags([F.EveningPlayed, F.EveningBlanket, F.EveningTucked, F.EveningGoodnight]);
+    stage.load(HOUSE_STORY.props, 'bedroom', d.flags);
+    expect(shown()).toEqual(expect.arrayContaining(['mom-bed']));
+    expect(shown()).not.toContain('dad-door');
+    d.setFlags([...LEGACY_STORY_FLAGS]);
+    stage.load(HOUSE_STORY.props, 'bedroom', d.flags);
+    expect(shown()).not.toContain('dad-door');
+    expect(shown()).not.toContain('mom-bed');
+    expect(d.exitsLocked('bedroom')).toBe(false);
+  });
+
+  it('au matin, papa ne sait pas où est Maria : « ? » puis un câlin, une seule fois', () => {
+    const { log, host } = recorder();
+    const d = new StoryDirector(HOUSE_STORY, host, HZ);
+    d.setFlags([...LEGACY_STORY_FLAGS]);
+    const near = standing(25, 21);
+    d.step('kitchen', near, false);
+    expect(d.interactable).toBeGreaterThanOrEqual(0);
+    d.step('kitchen', near, true);
+    for (let i = 0; i < 3000 && d.busy; i++) {
+      d.step('kitchen', near, false);
+    }
+    expect(log).toEqual([
+      'flag morning.dad',
+      'think maria-missing',
+      'think question dad-kitchen',
+      'think heart dad-kitchen',
+    ]);
+    d.step('kitchen', near, false);
+    expect(d.interactable).toBe(-1);
+  });
+
+  it('détecte une bulle d’un personnage absent de la salle', () => {
+    const bad: StoryData = {
+      ...HOUSE_STORY,
+      triggers: [
+        {
+          id: 'z',
+          room: 'hall',
+          on: 'touch',
+          area: { col: 1, row: 1, w: 1, h: 1 },
+          when: { none: ['z'] },
+          lock: false,
+          steps: [
+            { do: 'flag', id: 'z' },
+            { do: 'thought', icon: 'heart', ms: 100, by: 'mom-sofa' },
+          ],
+        },
+      ],
+      lockedRooms: [{ room: 'hall', when: {}, speaker: 'dad-kitchen' }],
+    };
+    const problems = storyProblems(bad, buildZone(HOUSE));
+    expect(problems).toContain("déclencheur z : bulle d'un personnage absent de hall (mom-sofa)");
+    expect(problems).toContain('porte fermée hall : personnage dad-kitchen absent');
   });
 });

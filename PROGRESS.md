@@ -2,11 +2,27 @@
 
 ## Phase en cours
 
-**Vertical slice, monde étrange** (D-36) : palette « crépuscule », frissons, scintillements qui tombent, fenêtre sur la chambre, ombre de l'ours ; sur la branche `ccr-5c5df983-6feqj3`, **en attente d'essai sur téléphone**. D-35 est fusionné dans `main`, et le slice a été validé par l'utilisateur (durée, difficulté, amusement).
+**Maison vivante, PR 1 : la famille** (D-37) : maman, papa et le chat gris ; sur la branche `ccr-5c5df983-6feqj3`, **en attente d'essai sur téléphone**. La palette crépuscule (D-36) est fusionnée dans `main`.
 
-Prochaine : **maison vivante et rez-de-chaussée retravaillé, avec les parents** (spec §8), sur plan à valider. Ensuite, la croissance.
+Prochaines PR de la phase : (2) maison vivante (animations, objets à regarder, souvenirs dans le cahier), (3) rez-de-chaussée retravaillé. Ensuite, la croissance.
 
 ## Fait
+
+### La famille : maman, papa et le chat gris (§8, D-37)
+
+- Le soir : papa à la porte (il rappelle l'heure du lit), maman au bord du lit pour la bonne nuit, le chat qui dort sur le tabouret.
+- Le matin : papa à la cuisine avec son café, maman qui lit au salon sous Maria sans la voir, le chat qui regarde le haut de la bibliothèque. Agir près d'un parent : « ? » puis un cœur.
+- Après le monde étrange : papa passe la tête par la porte, inquiet.
+- Bulles au-dessus des personnages, petit mouvement en boucle (deux images), nouvelle bulle « ? ».
+- Tests : 340 (papa à la porte, bonne nuit, ancienne partie, bulles des parents, personnage absent détecté).
+- **Vérifié dans Chromium** : les quatre scènes et leurs bulles.
+
+### À vérifier sur téléphone (la famille)
+
+- [ ] Les parents « à hauteur d'enfant » fonctionnent : présents, rassurants, pas raides.
+- [ ] Le moment de maman sous Maria (elle ne la voit pas) se remarque.
+- [ ] Le soir ne devient pas trop long avec la bonne nuit.
+- [ ] Les jouets mécaniques près de papa ne choquent pas trop (limite connue).
 
 ### Monde étrange : palette crépuscule et nouvelles animations (D-36)
 
@@ -569,7 +585,7 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. PR de la palette et des animations (D-36) et merge.
-2. Maison plus vivante et rez-de-chaussée retravaillé, **avec les parents** (spec §8) : plan à valider.
+1. PR de la famille (D-37) et merge.
+2. Maison vivante (animations, objets à regarder, souvenirs dans le cahier), puis rez-de-chaussée retravaillé.
 3. La croissance (§42 phase 7).
 4. Avant d'offrir le jeu : installation facile (PWA), sauvegarde sûre sur iPhone, option « réduire les effets ».

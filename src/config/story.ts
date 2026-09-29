@@ -28,6 +28,15 @@ export const StoryFlag = {
    * retrouve sur son lit, à côté du bandeau de Maria.
    */
   StrangeDone: 'strange.done',
+  /** Le soir : maman est venue dire bonne nuit (papa n'est plus à la porte). */
+  EveningGoodnight: 'evening.goodnight',
+  /** Au matin, Céleste a parlé de Maria à papa (cuisine) et à maman (salon). */
+  MorningDad: 'morning.dad',
+  MorningMom: 'morning.mom',
+  /** Céleste a caressé le chat. */
+  CatPetted: 'cat.petted',
+  /** Après le monde étrange, papa est passé voir Céleste. */
+  DadVisit: 'end.dad',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -39,6 +48,7 @@ export const LEGACY_STORY_FLAGS: readonly string[] = [
   StoryFlag.EveningPlayed,
   StoryFlag.EveningBlanket,
   StoryFlag.EveningTucked,
+  StoryFlag.EveningGoodnight,
   StoryFlag.Slept,
 ];
 
@@ -77,6 +87,9 @@ export const STORY_TIMING = {
   cradleSparkleMs: 1400,
 } as const;
 
+/** Période du petit mouvement en boucle des personnages (ms), D-37. */
+export const CHARACTER_LOOP_MS = { parent: 1600, cat: 2400 } as const;
+
 /** Agrandissement des bulles de pensée (retour de l'utilisateur : mieux lisibles sur téléphone). */
 export const THOUGHT_SCALE = 1.6;
 
@@ -93,4 +106,12 @@ export const PROP_SIZE = {
   bottle: { w: 9, h: 5 },
   headband: { w: 10, h: 5 },
   blanket: { w: 10, h: 5 },
+  // Parents (D-37) : à hauteur d'enfant, bien plus grands que Céleste (environ 26 px).
+  'dad-door': { w: 26, h: 62 },
+  'dad-kitchen': { w: 28, h: 62 },
+  'mom-bed': { w: 28, h: 44 },
+  'mom-sofa': { w: 30, h: 44 },
+  // Le chat gris.
+  'cat-sleep': { w: 16, h: 8 },
+  'cat-sit': { w: 12, h: 14 },
 } as const satisfies Readonly<Record<PropKind, { w: number; h: number }>>;
