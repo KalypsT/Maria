@@ -169,6 +169,11 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
 - **Salles** : matériaux (`b` bois, `t` tissu, `-` étagère traversable) pour des meubles reconnaissables à l'échelle d'une enfant (§10) ; ambiance de couleur par salle (`; @ambient:`).
 - **Vérification** (D-16 étendue) : graphe de zone (sorties reliées + passages simulés dans chaque salle) : toutes les salles atteignables depuis le départ, retour possible de partout vers le départ, aucune surface sans issue.
 - **Conséquences** : « Nouvelle partie » commence dans la chambre ; les parcours d'essai restent accessibles (menu pause, prototype) comme des salles isolées.
+- **Précisions de mise en œuvre** :
+  - Les parcours d'essai sont **hors partie** : y jouer ne modifie pas la sauvegarde (ni point de retour ni checkpoints). « La maison (partie) » dans le menu pause ramène au point de retour. Une sauvegarde plus ancienne qui pointe vers un parcours reprend au départ de la maison.
+  - La **jauge de peur suit Céleste** d'une salle à l'autre : changer de salle ne la vide pas.
+  - L'ambiance de salle modifie la **couleur d'effacement du rendu**. Un fond de caméra coûtait ~350 octets par pas (rectangle redessiné à chaque image).
+  - Les identifiants de salle sont uniques entre zones et parcours ; ce sont les clés de sauvegarde (testé).
 
 ## D-26 — Première capacité : grimper aux rebords (prévue)
 
