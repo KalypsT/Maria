@@ -53,6 +53,8 @@ export const EntityType = {
   Checkpoint: 'checkpoint',
   /** Objet qui donne une capacité, nommée par `; @ability:` (D-26). */
   Ability: 'ability',
+  /** Trouvaille : secret à découvrir (D-27), enregistrée dans la sauvegarde. */
+  Secret: 'secret',
 } as const;
 export type EntityType = (typeof EntityType)[keyof typeof EntityType];
 

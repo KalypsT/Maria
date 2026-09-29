@@ -6,26 +6,26 @@ import { SaveManager } from '../src/core/save/SaveManager';
 import { SaveSession } from '../src/core/save/SaveSession';
 import { MemorySaveStorage } from '../src/core/save/SaveStorage';
 import { createNewSave } from '../src/core/save/saveData';
-import { Pickups } from '../src/core/world/Pickups';
+import { PickupKind, Pickups, secretId } from '../src/core/world/Pickups';
 
 const ROOM = ['; @ability: climb', '########', '#P...A.#', '########'].join('\n');
 
 describe('objets de capacité (D-26)', () => {
   it('ramassé au contact, une seule fois', () => {
     const pickups = new Pickups();
-    pickups.load(parseAsciiLevel('r', ROOM), []);
+    pickups.load(parseAsciiLevel('r', ROOM), [], []);
     expect(pickups.items).toHaveLength(1);
     const box = { x: T, y: T + 4, width: 12, height: 22 };
     expect(pickups.step(box)).toBe(-1);
     box.x = 5 * T;
     expect(pickups.step(box)).toBe(0);
-    expect(pickups.items[0]?.ability).toBe('climb');
+    expect(pickups.items[0]?.id).toBe('climb');
     expect(pickups.step(box)).toBe(-1);
   });
 
   it('absent si la capacité est déjà acquise', () => {
     const pickups = new Pickups();
-    pickups.load(parseAsciiLevel('r', ROOM), ['climb']);
+    pickups.load(parseAsciiLevel('r', ROOM), ['climb'], []);
     expect(pickups.items[0]?.taken).toBe(true);
     expect(pickups.step({ x: 5 * T, y: T, width: 12, height: 22 })).toBe(-1);
   });
@@ -50,5 +50,33 @@ describe('objets de capacité (D-26)', () => {
     }
     expect(isAbility('climb')).toBe(true);
     expect(isAbility('fly')).toBe(false);
+  });
+
+  it('trouvailles (D-27) : identifiées par salle et tuile, sauvegardées une fois', async () => {
+    const level = parseAsciiLevel('attic', ['######', '#P.S.#', '######'].join('\n'));
+    const pickups = new Pickups();
+    pickups.load(level, [], []);
+    expect(pickups.items).toEqual([
+      expect.objectContaining({
+        kind: PickupKind.Secret,
+        id: secretId('attic', 3, 1),
+        taken: false,
+      }),
+    ]);
+    expect(secretId('attic', 3, 1)).toBe('attic:s3-1');
+    expect(pickups.step({ x: 3 * T, y: T, width: 12, height: 22 })).toBe(0);
+    pickups.load(level, [], ['attic:s3-1']);
+    expect(pickups.items[0]?.taken).toBe(true);
+
+    let clock = 0;
+    const session = new SaveSession(
+      new SaveManager(new MemorySaveStorage()),
+      createNewSave('bedroom', 0),
+      () => ++clock,
+    );
+    await session.addCollectible('attic:s3-1');
+    await session.addCollectible('attic:s3-1');
+    expect(clock).toBe(1);
+    expect(session.data.progression.collectibles).toEqual(['attic:s3-1']);
   });
 });

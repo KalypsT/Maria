@@ -30,7 +30,7 @@ import { LEVELS, levelName, startRoom, zoneRoom, type LevelSource, type ZoneRoom
 import { DEFAULT_WORLD, type WorldParams } from '../config/world';
 import type { SaveSession } from '../core/save/SaveSession';
 import { ABILITY_HINTS, ABILITY_HINT_MS, Ability, isAbility } from '../config/abilities';
-import { Pickups } from '../core/world/Pickups';
+import { PickupKind, Pickups } from '../core/world/Pickups';
 import { RoomTransition } from '../core/world/RoomTransition';
 import { RunEvent, RunState } from '../core/world/RunState';
 import { arrivalPosition, touchedExit, type ExitRef, type Zone } from '../core/world/zone';
@@ -152,7 +152,7 @@ export class GameScene extends Phaser.Scene {
     this.createPlayerTexture();
     this.run = new RunState(this.level, this.worldParams);
     this.run.load(this.level, save.activatedCheckpoints, checkpointId);
-    this.pickups.load(this.level, save.progression.abilities);
+    this.pickups.load(this.level, save.progression.abilities, save.progression.collectibles);
     void this.session.revealRoom(this.level.id);
     const { x, y } = this.respawnPosition();
     this.player = new PlayerPhysics(this.level, this.movement, x, y);
@@ -302,7 +302,7 @@ export class GameScene extends Phaser.Scene {
       run.step(this.player.box, combat.events);
       const picked = this.pickups.step(this.player.box);
       if (picked >= 0) {
-        this.onAbilityPicked(picked);
+        this.onPicked(picked);
       }
       if ((run.events & RunEvent.CheckpointActivated) !== 0 && this.zone) {
         // Sauvegarde automatique au checkpoint (D-22), sans attendre l'écriture. Les parcours
@@ -560,7 +560,8 @@ export class GameScene extends Phaser.Scene {
     this.combat.load(level);
     this.combatView.rebuild();
     this.run.load(level, this.session.data.activatedCheckpoints, checkpointId);
-    this.pickups.load(level, this.session.data.progression.abilities);
+    const { abilities, collectibles } = this.session.data.progression;
+    this.pickups.load(level, abilities, collectibles);
     this.worldView.rebuild();
   }
 
@@ -570,15 +571,25 @@ export class GameScene extends Phaser.Scene {
       this.debugClimb || this.session.data.progression.abilities.includes(Ability.Climb);
   }
 
-  /** Objet de capacité ramassé (D-26) : sauvegardé aussitôt, indice de prototype affiché. */
-  private onAbilityPicked(index: number): void {
-    const ability = this.pickups.items[index]?.ability;
-    if (ability === undefined || !isAbility(ability)) {
+  /**
+   * Objet ramassé, sauvegardé aussitôt. Capacité (D-26) : appliquée, indice de prototype affiché.
+   * Trouvaille (D-27) : rien d'affiché pour l'instant (pas de compteur avant la carte, §23).
+   */
+  private onPicked(index: number): void {
+    const item = this.pickups.items[index];
+    if (!item) {
       return;
     }
-    void this.session.unlockAbility(ability);
+    if (item.kind === PickupKind.Secret) {
+      void this.session.addCollectible(item.id);
+      return;
+    }
+    if (!isAbility(item.id)) {
+      return;
+    }
+    void this.session.unlockAbility(item.id);
     this.applyAbilities();
-    this.hud.showHint(ABILITY_HINTS[ability], ABILITY_HINT_MS);
+    this.hud.showHint(ABILITY_HINTS[item.id], ABILITY_HINT_MS);
   }
 
   private resetCamera(): void {
