@@ -37,11 +37,14 @@ import { arrivalPosition, touchedExit, type ExitRef, type Zone } from '../core/w
 import { Hud } from '../ui/Hud';
 import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
 import { PauseMenu } from '../ui/PauseMenu';
+import { ART_IMAGES, MAX_ART_SCALE, REAL_PALETTE, STRANGE_PALETTE } from '../config/art';
+import { CELESTE_ART, drawCeleste } from './art/celesteArt';
 import { CombatView } from './CombatView';
+import { RoomArtView } from './RoomArtView';
 import { DustPool } from './DustPool';
 import { WorldView } from './WorldView';
 
-const PLAYER_TEXTURE = 'celeste-placeholder';
+const PLAYER_TEXTURE = 'celeste';
 /** Durée d'image maximale prise en compte (onglet en arrière-plan, pause du navigateur). */
 const MAX_FRAME_SECONDS = 0.25;
 /** Clé du registre Phaser où main.ts dépose la partie en cours (D-22). */
@@ -110,6 +113,11 @@ export class GameScene extends Phaser.Scene {
   readonly pickups = new Pickups();
   /** Outil de debug : escalade débloquée sans objet ni sauvegarde. */
   debugClimb = false;
+  /** Aperçu du monde étrange (D-28, overlay) : mêmes formes, autre palette. */
+  strangeWorld = false;
+  private roomArt!: RoomArtView;
+  /** Échelle des textures dessinées (habillage, Céleste) : celle de l'écran, plafonnée. */
+  private artScale = 1;
   /** Changement de salle en cours (D-25). */
   readonly transition = new RoomTransition(this.worldParams);
   session!: SaveSession;
@@ -142,8 +150,17 @@ export class GameScene extends Phaser.Scene {
     super('Game');
   }
 
+  preload(): void {
+    // Images fournies (D-28) : elles remplacent le dessin par code de l'élément du même nom.
+    for (const [key, file] of Object.entries(ART_IMAGES)) {
+      this.load.image(`art:${key}`, `art/${file}`);
+    }
+  }
+
   create(): void {
     this.session = this.registry.get(SESSION_KEY) as SaveSession;
+    this.roomArt = new RoomArtView(this);
+    this.artScale = this.computeArtScale();
     const save = this.session.data;
     const { room, checkpointId } = savedReturn(this.session);
     this.level = room.level;
@@ -158,10 +175,12 @@ export class GameScene extends Phaser.Scene {
     this.player = new PlayerPhysics(this.level, this.movement, x, y);
     // Origine aux pieds : l'écrasement et l'inclinaison se font autour du point d'appui.
     this.playerSprite = this.add.image(x, y, PLAYER_TEXTURE).setOrigin(0.5, 1).setDepth(10);
+    this.playerSprite.texture.setFilter(Phaser.Textures.FilterMode.LINEAR);
     this.dust = new DustPool(this, this.feelParams);
     this.combat = new CombatWorld(this.level, this.combatParams);
     this.combatView = new CombatView(this, this.combat, this.combatParams, this.dust);
     this.worldView = new WorldView(this, this.run, this.pickups);
+    this.worldView.setArtScale(this.artScale);
     this.hud = new Hud();
     this.applyMovement();
     this.applyAbilities();
@@ -339,7 +358,7 @@ export class GameScene extends Phaser.Scene {
         player.prevX + (box.x - player.prevX) * alpha + box.width / 2,
         player.prevY + (box.y - player.prevY) * alpha + box.height,
       )
-      .setScale(feel.scaleX, feel.scaleY)
+      .setScale(feel.scaleX / this.artScale, feel.scaleY / this.artScale)
       .setRotation(feel.lean)
       .setFlipX(player.facing < 0);
     this.combatView.render(alpha, player, this.playerSprite);
@@ -608,7 +627,42 @@ export class GameScene extends Phaser.Scene {
     this.camera.setView(this.scale.width / scale, this.scale.height / scale);
     this.cameras.main.setZoom(this.cameraParams.zoom * scale);
     this.cameras.main.centerOn(this.camera.x, this.camera.y);
+    const artScale = this.computeArtScale();
+    if (artScale !== this.artScale) {
+      this.artScale = artScale;
+      this.redrawArt();
+    }
   };
+
+  /** Échelle des dessins : pixels de l'écran par pixel logique (arrondie au demi, plafonnée). */
+  private computeArtScale(): number {
+    const screen = this.renderScale * this.cameraParams.zoom;
+    return Math.min(MAX_ART_SCALE, Math.max(1, Math.ceil(screen * 2) / 2));
+  }
+
+  /** Aperçu du monde étrange (overlay). */
+  setStrangeWorld(strange: boolean): void {
+    this.strangeWorld = strange;
+    this.redrawArt();
+  }
+
+  /** Redessine la salle et Céleste (échelle ou palette changée). */
+  private redrawArt(): void {
+    this.worldView.setArtScale(this.artScale);
+    this.drawLevel();
+    this.createPlayerTexture();
+  }
+
+  /** Images fournies chargées (nom d'élément → image). */
+  private artImages(): Map<string, CanvasImageSource> {
+    const images = new Map<string, CanvasImageSource>();
+    for (const key of Object.keys(ART_IMAGES)) {
+      if (this.textures.exists(`art:${key}`)) {
+        images.set(key, this.textures.get(`art:${key}`).getSourceImage() as CanvasImageSource);
+      }
+    }
+    return images;
+  }
 
   /**
    * Dessine la salle une seule fois, par blocs (D-17) : une image par bloc, et les blocs hors
@@ -631,6 +685,11 @@ export class GameScene extends Phaser.Scene {
     }
     this.levelImages.length = 0;
     const level = this.level;
+    // Salle habillée (D-28) : dessinée par l'habillage, pas tuile par tuile.
+    const palette = this.strangeWorld ? STRANGE_PALETTE : REAL_PALETTE;
+    if (this.roomArt.build(level, palette, this.artScale, this.artImages())) {
+      return;
+    }
     const chunkPx = LEVEL_CHUNK_TILES * TILE_SIZE;
     const g = this.make.graphics({}, false);
     for (let chunkRow = 0; chunkRow * LEVEL_CHUNK_TILES < level.height; chunkRow++) {
@@ -732,21 +791,31 @@ export class GameScene extends Phaser.Scene {
     return false;
   }
 
-  /** Placeholder de Céleste (D-07) : corps rose et lunettes rondes roses, tourné vers la droite. */
+  /**
+   * Céleste dessinée par le code (D-28), à l'échelle de l'écran ; une image fournie sous le nom
+   * « celeste » la remplace. Redessinée si l'échelle ou la palette change.
+   */
   private createPlayerTexture(): void {
-    if (this.textures.exists(PLAYER_TEXTURE)) {
+    const scale = this.artScale;
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.ceil(CELESTE_ART.width * scale);
+    canvas.height = Math.ceil(CELESTE_ART.height * scale);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
       return;
     }
-    const { width, height } = PLAYER_HITBOX;
-    const g = this.make.graphics({}, false);
-    g.fillStyle(PLACEHOLDER_COLORS.celeste);
-    g.fillRect(0, 0, width, height);
-    g.fillStyle(PLACEHOLDER_COLORS.face);
-    g.fillRect(2, 2, width - 3, 8);
-    g.lineStyle(1, PLACEHOLDER_COLORS.glasses);
-    g.strokeCircle(6, 6, 2);
-    g.strokeCircle(10, 6, 2);
-    g.generateTexture(PLAYER_TEXTURE, width, height);
-    g.destroy();
+    const image = this.artImages().get('celeste');
+    if (image) {
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    } else {
+      ctx.scale(scale, scale);
+      drawCeleste(ctx, this.strangeWorld ? STRANGE_PALETTE : REAL_PALETTE);
+    }
+    const sprite = this.playerSprite as Phaser.GameObjects.Image | undefined;
+    if (this.textures.exists(PLAYER_TEXTURE)) {
+      this.textures.remove(PLAYER_TEXTURE);
+    }
+    this.textures.addCanvas(PLAYER_TEXTURE, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
+    sprite?.setTexture(PLAYER_TEXTURE);
   }
 }

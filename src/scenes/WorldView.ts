@@ -1,4 +1,4 @@
-import type Phaser from 'phaser';
+import Phaser from 'phaser';
 import { PLACEHOLDER_COLORS, TILE_SIZE as T } from '../config/display';
 import { PickupKind, type Pickups } from '../core/world/Pickups';
 import type { RunState } from '../core/world/RunState';
@@ -7,8 +7,8 @@ const CHECKPOINT_OFF = 'checkpoint-off-placeholder';
 const CHECKPOINT_ON = 'checkpoint-on-placeholder';
 const PICKUP = 'ability-pickup-placeholder';
 const SECRET = 'secret-pickup-placeholder';
-const WIDTH = 8;
-const HEIGHT = 20;
+const WIDTH = 10;
+const HEIGHT = 14;
 const PICKUP_SIZE = 10;
 /** Flottement de l'objet de capacité : amplitude (px) et période (ms). */
 const PICKUP_BOB_PX = 2;
@@ -22,6 +22,7 @@ const PICKUP_BOB_MS = 1600;
 export class WorldView {
   private sprites: Phaser.GameObjects.Image[] = [];
   private pickupSprites: Phaser.GameObjects.Image[] = [];
+  private artScale = 1;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -41,6 +42,7 @@ export class WorldView {
       this.scene.add
         .image((checkpoint.col + 0.5) * T, (checkpoint.row + 1) * T, CHECKPOINT_OFF)
         .setOrigin(0.5, 1)
+        .setScale(1 / this.artScale)
         .setDepth(5),
     );
     for (const sprite of this.pickupSprites) {
@@ -53,6 +55,7 @@ export class WorldView {
           (item.row + 0.5) * T,
           item.kind === PickupKind.Secret ? SECRET : PICKUP,
         )
+        .setScale(1 / this.artScale)
         .setDepth(6)
         .setVisible(!item.taken),
     );
@@ -83,37 +86,87 @@ export class WorldView {
     }
   }
 
-  private createTextures(): void {
-    const textures = this.scene.textures;
-    if (textures.exists(CHECKPOINT_ON)) {
+  /** Échelle de l'écran (D-28) : textures redessinées nettes, repères recréés. */
+  setArtScale(scale: number): void {
+    if (scale === this.artScale) {
       return;
     }
+    this.artScale = scale;
+    this.createTextures();
+    this.rebuild();
+  }
+
+  /**
+   * Veilleuse (checkpoint, placeholder du style D-28 : petite lampe champignon, allumée ou non),
+   * objets de capacité et trouvailles (lueur étoilée), dessinés à l'échelle de l'écran.
+   */
+  private createTextures(): void {
+    const textures = this.scene.textures;
+    const scale = this.artScale;
+    const make = (
+      key: string,
+      w: number,
+      h: number,
+      draw: (ctx: CanvasRenderingContext2D) => void,
+    ) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.ceil(w * scale);
+      canvas.height = Math.ceil(h * scale);
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        return;
+      }
+      ctx.scale(scale, scale);
+      draw(ctx);
+      if (textures.exists(key)) {
+        textures.remove(key);
+      }
+      textures.addCanvas(key, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
+    };
     for (const [key, color] of [
       [PICKUP, PLACEHOLDER_COLORS.checkpointLit],
       [SECRET, PLACEHOLDER_COLORS.secret],
     ] as const) {
-      const glow = this.scene.make.graphics({}, false);
-      const c = PICKUP_SIZE / 2;
-      glow.fillStyle(color, 0.3);
-      glow.fillCircle(c, c, c);
-      glow.fillStyle(color);
-      glow.fillTriangle(c, 1, c + 3, c, c - 3, c);
-      glow.fillTriangle(c, PICKUP_SIZE - 1, c + 3, c, c - 3, c);
-      glow.generateTexture(key, PICKUP_SIZE, PICKUP_SIZE);
-      glow.destroy();
+      const css = `#${color.toString(16).padStart(6, '0')}`;
+      make(key, PICKUP_SIZE, PICKUP_SIZE, (ctx) => {
+        const c = PICKUP_SIZE / 2;
+        const halo = ctx.createRadialGradient(c, c, 0, c, c, c);
+        halo.addColorStop(0, `${css}99`);
+        halo.addColorStop(1, `${css}00`);
+        ctx.fillStyle = halo;
+        ctx.fillRect(0, 0, PICKUP_SIZE, PICKUP_SIZE);
+        ctx.fillStyle = css;
+        ctx.beginPath();
+        for (let i = 0; i < 8; i++) {
+          const angle = (i * Math.PI) / 4;
+          const r = i % 2 === 0 ? c - 0.5 : 1.4;
+          ctx.lineTo(c + Math.cos(angle) * r, c + Math.sin(angle) * r);
+        }
+        ctx.fill();
+      });
     }
     for (const [key, lit] of [
       [CHECKPOINT_OFF, false],
       [CHECKPOINT_ON, true],
     ] as const) {
-      const g = this.scene.make.graphics({}, false);
-      g.fillStyle(PLACEHOLDER_COLORS.checkpoint);
-      g.fillRect(WIDTH / 2 - 1, 6, 2, HEIGHT - 6);
-      g.fillRect(1, HEIGHT - 2, WIDTH - 2, 2);
-      g.fillStyle(lit ? PLACEHOLDER_COLORS.checkpointLit : PLACEHOLDER_COLORS.checkpoint);
-      g.fillCircle(WIDTH / 2, 4, lit ? 4 : 3);
-      g.generateTexture(key, WIDTH, HEIGHT);
-      g.destroy();
+      make(key, WIDTH, HEIGHT, (ctx) => {
+        // Pied en bois, chapeau de champignon, petite fenêtre ronde.
+        ctx.fillStyle = '#9a7352';
+        ctx.beginPath();
+        ctx.roundRect(1, HEIGHT - 3, WIDTH - 2, 3, 1);
+        ctx.fill();
+        ctx.fillStyle = lit ? '#f7e3b0' : '#9aa0b3';
+        ctx.fillRect(WIDTH / 2 - 1.5, HEIGHT - 10, 3, 7);
+        ctx.fillStyle = lit ? '#ffcf7a' : '#6e7590';
+        ctx.beginPath();
+        ctx.ellipse(WIDTH / 2, HEIGHT - 10, WIDTH / 2, 5, 0, Math.PI, 0);
+        ctx.fill();
+        ctx.fillStyle = lit ? '#fff4d0' : '#b9bfd0';
+        ctx.beginPath();
+        ctx.arc(WIDTH / 2 - 1.5, HEIGHT - 12, 1, 0, Math.PI * 2);
+        ctx.arc(WIDTH / 2 + 2, HEIGHT - 13, 0.8, 0, Math.PI * 2);
+        ctx.fill();
+      });
     }
   }
 }

@@ -32,6 +32,20 @@ export interface LevelData {
   readonly materials: Uint8Array;
   /** Sorties vers d'autres salles (D-25), dans les murs latéraux. */
   readonly exits: readonly LevelExit[];
+  /** Habillage (D-28) : meubles et éléments dessinés, déclarés par `; @decor:` (vide : tuiles). */
+  readonly decor: readonly LevelDecor[];
+}
+
+/**
+ * Élément d'habillage d'une salle (D-28), en tuiles : son nom d'élément visuel (`kind`) et le
+ * rectangle qu'il occupe. Sans effet sur la collision.
+ */
+export interface LevelDecor {
+  readonly kind: string;
+  readonly col: number;
+  readonly row: number;
+  readonly width: number;
+  readonly height: number;
 }
 
 /** Matériaux d'affichage (D-25) : des meubles reconnaissables à l'échelle d'une enfant (§10). */
