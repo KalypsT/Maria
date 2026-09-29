@@ -1,0 +1,53 @@
+import type { ControlSettings } from '../../config/controls';
+import type { DisplaySettings } from '../../config/display';
+import type { SaveData } from './saveData';
+import type { SaveManager } from './SaveManager';
+
+/**
+ * Partie en cours (D-22) : la sauvegarde courante et les modifications du jeu (checkpoint, salle,
+ * réglages), écrites par `SaveManager`. Pure : l'horloge est injectée.
+ */
+export class SaveSession {
+  constructor(
+    readonly manager: SaveManager,
+    private current: SaveData,
+    private readonly now: () => number = Date.now,
+  ) {}
+
+  get data(): Readonly<SaveData> {
+    return this.current;
+  }
+
+  /** Nouveau point de retour (`checkpointKey` = `salle:checkpoint`), marqué activé. */
+  setCheckpoint(levelId: string, checkpointId: string | null): Promise<void> {
+    this.current.checkpoint = { levelId, checkpointId };
+    if (checkpointId !== null) {
+      const key = `${levelId}:${checkpointId}`;
+      if (!this.current.activatedCheckpoints.includes(key)) {
+        this.current.activatedCheckpoints.push(key);
+      }
+    }
+    return this.persist();
+  }
+
+  setControls(controls: Readonly<ControlSettings>): Promise<void> {
+    this.current.settings.controls = { ...controls };
+    return this.persist();
+  }
+
+  setDisplay(display: Readonly<DisplaySettings>): Promise<void> {
+    this.current.settings.display = { ...display };
+    return this.persist();
+  }
+
+  /** Remplace toute la partie (import d'un code de sauvegarde). */
+  replace(data: SaveData): Promise<void> {
+    this.current = data;
+    return this.persist();
+  }
+
+  persist(): Promise<void> {
+    this.current.savedAt = this.now();
+    return this.manager.save(this.current);
+  }
+}

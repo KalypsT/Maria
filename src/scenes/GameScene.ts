@@ -22,30 +22,27 @@ import { FixedStepClock } from '../core/FixedStepClock';
 import { InputController } from '../core/input/InputController';
 import { KeyboardSource } from '../core/input/KeyboardSource';
 import { TouchSource } from '../core/input/TouchSource';
-import { Tile, spawnPosition, tileAt, type LevelData } from '../core/level/LevelData';
+import { Tile, tileAt, type LevelData } from '../core/level/LevelData';
 import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../core/player/PlayerPhysics';
 import { PlayerFeel } from '../core/player/playerFeel';
 import { LEVELS, levelName, type LevelSource } from '../levels';
-import { loadControlSettings, saveControlSettings } from '../ui/controlSettingsStorage';
-import { loadDisplaySettings, saveDisplaySettings } from '../ui/displaySettingsStorage';
+import { DEFAULT_WORLD, type WorldParams } from '../config/world';
+import type { SaveSession } from '../core/save/SaveSession';
+import { RunEvent, RunState } from '../core/world/RunState';
+import { Hud } from '../ui/Hud';
 import { PauseMenu } from '../ui/PauseMenu';
 import { CombatView } from './CombatView';
 import { DustPool } from './DustPool';
+import { WorldView } from './WorldView';
 
 const PLAYER_TEXTURE = 'celeste-placeholder';
 /** Durée d'image maximale prise en compte (onglet en arrière-plan, pause du navigateur). */
 const MAX_FRAME_SECONDS = 0.25;
-/** Dernière salle choisie (prototype : choix des parcours d'essai), conservée au rechargement. */
-const LEVEL_STORAGE_KEY = 'maria.prototype.level';
+/** Clé du registre Phaser où main.ts dépose la partie en cours (D-22). */
+export const SESSION_KEY = 'maria-session';
 
-function loadLevelChoice(): LevelSource {
-  let id: string | null = null;
-  try {
-    id = localStorage.getItem(LEVEL_STORAGE_KEY);
-  } catch {
-    // Stockage indisponible : première salle.
-  }
+function levelSource(id: string): LevelSource {
   const first = LEVELS[0];
   if (!first) {
     throw new Error('Aucune salle déclarée dans src/levels/index.ts');
@@ -81,6 +78,14 @@ export class GameScene extends Phaser.Scene {
   readonly combatParams: CombatParams = { ...DEFAULT_COMBAT };
   combat!: CombatWorld;
   private combatView!: CombatView;
+  /** Échec, jauge de peur et checkpoints (D-21), modifiables par l'overlay. */
+  readonly worldParams: WorldParams = { ...DEFAULT_WORLD };
+  run!: RunState;
+  session!: SaveSession;
+  private worldView!: WorldView;
+  private hud!: Hud;
+  /** Heure de la dernière réapparition (fondu de retour), -1 sinon. */
+  private reappearAtMs = -1;
   readonly clock = new FixedStepClock(1 / PHYSICS_STEP_HZ, MAX_STEPS_PER_FRAME);
   readonly frameStats: FrameStats = { steps: 0, simulationMs: 0 };
   level!: LevelData;
@@ -105,17 +110,27 @@ export class GameScene extends Phaser.Scene {
   }
 
   create(): void {
-    const source = loadLevelChoice();
+    this.session = this.registry.get(SESSION_KEY) as SaveSession;
+    const save = this.session.data;
+    const source = levelSource(save.checkpoint.levelId);
     this.level = parseAsciiLevel(source.id, source.text);
     this.drawLevel();
     this.createPlayerTexture();
-    const { x, y } = spawnPosition(this.level, PLAYER_HITBOX.width, PLAYER_HITBOX.height);
+    this.run = new RunState(this.level, this.worldParams);
+    this.run.load(
+      this.level,
+      save.activatedCheckpoints,
+      source.id === save.checkpoint.levelId ? save.checkpoint.checkpointId : null,
+    );
+    const { x, y } = this.respawnPosition();
     this.player = new PlayerPhysics(this.level, this.movement, x, y);
     // Origine aux pieds : l'écrasement et l'inclinaison se font autour du point d'appui.
     this.playerSprite = this.add.image(x, y, PLAYER_TEXTURE).setOrigin(0.5, 1).setDepth(10);
     this.dust = new DustPool(this, this.feelParams);
     this.combat = new CombatWorld(this.level, this.combatParams);
     this.combatView = new CombatView(this, this.combat, this.combatParams, this.dust);
+    this.worldView = new WorldView(this, this.run);
+    this.hud = new Hud();
     this.applyMovement();
     this.feel.reset(this.player);
 
@@ -123,7 +138,7 @@ export class GameScene extends Phaser.Scene {
     this.controls.sources.push(keyboard);
     const detachKeyboard = keyboard.attach(window);
     let detachTouch: (() => void) | undefined;
-    const controlSettings = loadControlSettings();
+    const controlSettings = { ...save.settings.controls };
     // En dev et dans le build de debug, `?touch` force l'affichage sur ordinateur (essai à la souris).
     const forceTouch = __DEBUG_TOOLS__ && new URLSearchParams(location.search).has('touch');
     if (forceTouch || TouchSource.isTouchDevice()) {
@@ -131,7 +146,7 @@ export class GameScene extends Phaser.Scene {
       this.controls.sources.push(this.touch);
       detachTouch = this.touch.attach(window);
     }
-    this.displaySettings = loadDisplaySettings();
+    this.displaySettings = { ...save.settings.display };
     this.pauseMenu = new PauseMenu({
       settings: controlSettings,
       display: this.displaySettings,
@@ -143,7 +158,7 @@ export class GameScene extends Phaser.Scene {
         this.setPaused(false);
       },
       onSettingsChange: (settings) => {
-        saveControlSettings(settings);
+        void this.session.setControls(settings);
         this.touch?.setSettings(settings);
       },
       levels: LEVELS.map((level) => ({ id: level.id, name: levelName(level) })),
@@ -170,6 +185,7 @@ export class GameScene extends Phaser.Scene {
       detachTouch?.();
       document.removeEventListener('visibilitychange', onVisibility);
       this.pauseMenu?.destroy();
+      this.hud.destroy();
       this.scale.off(Phaser.Scale.Events.RESIZE, this.onResize);
     });
 
@@ -195,11 +211,21 @@ export class GameScene extends Phaser.Scene {
     const camera = this.camera;
     const feel = this.feel;
     const combat = this.combat;
+    const run = this.run;
     for (let i = 0; i < steps; i++) {
       if (combat.hitstopSteps > 0) {
         // Arrêt sur image : toute la simulation est suspendue, les pressions restent mémorisées.
         combat.hitstopSteps--;
         this.freezeInterpolation();
+        continue;
+      }
+      if (run.fainting) {
+        // Évanouissement (D-21) : rien ne bouge ; à la fin, retour au point de retour.
+        run.stepFainting();
+        this.freezeInterpolation();
+        if ((run.events & RunEvent.Respawn) !== 0) {
+          this.respawnAtCheckpoint();
+        }
         continue;
       }
       input.moveX = this.controls.moveX;
@@ -210,6 +236,12 @@ export class GameScene extends Phaser.Scene {
       combat.step(this.player, this.controls.consumePressed('Attack'));
       if (combat.events !== 0) {
         this.combatView.onEvents(combat.events);
+      }
+      run.step(this.player.box, combat.events);
+      if ((run.events & RunEvent.CheckpointActivated) !== 0) {
+        // Sauvegarde automatique au checkpoint (D-22), sans attendre l'écriture.
+        const checkpoint = run.checkpoints[run.current];
+        void this.session.setCheckpoint(this.level.id, checkpoint ? checkpoint.id : null);
       }
       camera.lookInput = input.moveY;
       camera.step(this.player);
@@ -235,6 +267,8 @@ export class GameScene extends Phaser.Scene {
       .setRotation(feel.lean)
       .setFlipX(player.facing < 0);
     this.combatView.render(alpha, player, this.playerSprite);
+    this.worldView.render();
+    this.renderRunState();
     this.dust.update();
     this.cameras.main.centerOn(
       camera.prevX + (camera.x - camera.prevX) * alpha,
@@ -300,10 +334,10 @@ export class GameScene extends Phaser.Scene {
     this.onResize();
   }
 
-  /** Change la résolution de rendu (D-18) : conservée, puis appliquée par main.ts. */
+  /** Change la résolution de rendu (D-18) : sauvegardée, puis appliquée par main.ts. */
   setDisplaySettings(settings: Readonly<DisplaySettings>): void {
     this.displaySettings = { ...settings };
-    saveDisplaySettings(this.displaySettings);
+    void this.session.setDisplay(this.displaySettings);
     this.game.events.emit(DISPLAY_SETTINGS_EVENT, this.displaySettings);
   }
 
@@ -312,8 +346,50 @@ export class GameScene extends Phaser.Scene {
     return this.scale.height / GAME_HEIGHT;
   }
 
+  /** Applique les réglages d'échec et de jauge (overlay). */
+  applyWorld(): void {
+    this.run.setParams(this.worldParams);
+  }
+
+  /** Position (px) de réapparition : pieds au bas de la tuile du checkpoint courant ou du départ. */
+  private respawnPosition(): { x: number; y: number } {
+    const tile = this.run.respawnTile();
+    return {
+      x: (tile.col + 0.5) * TILE_SIZE - PLAYER_HITBOX.width / 2,
+      y: (tile.row + 1) * TILE_SIZE - PLAYER_HITBOX.height,
+    };
+  }
+
+  /** Fin de l'évanouissement : retour au point de retour, monde local restauré (§20.2). */
+  private respawnAtCheckpoint(): void {
+    this.respawn();
+    this.reappearAtMs = this.time.now;
+  }
+
+  /** Voile de l'évanouissement, jauge de peur, transparence de Céleste. */
+  private renderRunState(): void {
+    const run = this.run;
+    this.hud.setFear(run.fear, this.worldParams.fearMax);
+    if (run.fainting) {
+      const progress = run.faintProgress;
+      this.hud.setVeil(progress);
+      this.playerSprite.setAlpha(1 - progress);
+      return;
+    }
+    if (this.reappearAtMs >= 0) {
+      const duration = this.worldParams.reappearMs;
+      const k = duration > 0 ? (this.time.now - this.reappearAtMs) / duration : 1;
+      this.hud.setVeil(1 - k);
+      if (k >= 1) {
+        this.reappearAtMs = -1;
+      }
+    } else {
+      this.hud.setVeil(0);
+    }
+  }
+
   respawn(): void {
-    const { x, y } = spawnPosition(this.level, PLAYER_HITBOX.width, PLAYER_HITBOX.height);
+    const { x, y } = this.respawnPosition();
     this.player.reset(x, y, this.level);
     this.feel.reset(this.player);
     this.combat.reset();
@@ -321,18 +397,16 @@ export class GameScene extends Phaser.Scene {
     this.resetCamera();
   }
 
-  /** Charge une autre salle et y replace Céleste ; le choix est conservé au rechargement. */
+  /** Charge une autre salle et y replace Céleste au départ ; le choix est sauvegardé. */
   loadLevel(source: LevelSource): void {
     this.level = parseAsciiLevel(source.id, source.text);
     this.drawLevel();
     this.combat.load(this.level);
     this.combatView.rebuild();
+    this.run.load(this.level, this.session.data.activatedCheckpoints, null);
+    this.worldView.rebuild();
     this.respawn();
-    try {
-      localStorage.setItem(LEVEL_STORAGE_KEY, source.id);
-    } catch {
-      // Stockage indisponible : le choix vaut pour la session.
-    }
+    void this.session.setCheckpoint(this.level.id, null);
   }
 
   private resetCamera(): void {
