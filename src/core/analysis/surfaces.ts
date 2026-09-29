@@ -26,7 +26,8 @@ function isStandable(level: LevelData, col: number, row: number, headroomTiles: 
     return false;
   }
   for (let above = 1; above <= headroomTiles; above++) {
-    if (row - above < 0 || tileAt(level, col, row - above) === Tile.Solid) {
+    const tileAbove = row - above < 0 ? Tile.Solid : tileAt(level, col, row - above);
+    if (tileAbove === Tile.Solid || tileAbove === Tile.Hazard) {
       return false;
     }
   }

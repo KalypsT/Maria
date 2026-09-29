@@ -1,6 +1,6 @@
 import type { CombatParams } from '../../config/combat';
 import { PHYSICS_STEP_HZ, msToSteps } from '../../config/movement';
-import type { LevelData } from '../level/LevelData';
+import { EntityType, type LevelData } from '../level/LevelData';
 import type { Box } from '../physics/gridCollision';
 import type { PlayerPhysics } from '../player/PlayerPhysics';
 import { PlayerAttack } from './PlayerAttack';
@@ -84,8 +84,9 @@ export class CombatWorld {
   /** Nouvelle salle : ennemis créés depuis ses marqueurs (allocation au chargement seulement). */
   load(level: LevelData): void {
     this.level = level;
-    // Un seul type d'entité pour l'instant (EntityType.Patroller).
-    this.enemies = level.entities.map((entity) => new Patroller(entity.col, entity.row));
+    this.enemies = level.entities
+      .filter((entity) => entity.type === EntityType.Patroller)
+      .map((entity) => new Patroller(entity.col, entity.row));
     this.reset();
   }
 

@@ -1,4 +1,5 @@
 import { TILE_SIZE } from '../../config/display';
+import { HAZARD_INSET_PX } from '../../config/world';
 import { Tile, tileAt, type LevelData } from '../level/LevelData';
 
 /** Rectangle aligné sur les axes (coin haut gauche, px). Occupe [x, x + width) × [y, y + height). */
@@ -148,6 +149,25 @@ export function isGrounded(level: LevelData, box: Box, includeOneWay = true): bo
 }
 
 /** Vrai si le rectangle ne chevauche aucune tuile pleine (les traversables sont ignorées). */
+/**
+ * Vrai si la hitbox, réduite de `HAZARD_INSET_PX` de chaque côté, touche une tuile de danger (D-21).
+ */
+export function touchesHazard(level: LevelData, box: Box): boolean {
+  const inset = HAZARD_INSET_PX;
+  const colFrom = Math.floor((box.x + inset) / TILE_SIZE);
+  const colTo = Math.floor((box.x + box.width - inset - EDGE_EPSILON) / TILE_SIZE);
+  const rowFrom = Math.floor((box.y + inset) / TILE_SIZE);
+  const rowTo = Math.floor((box.y + box.height - inset - EDGE_EPSILON) / TILE_SIZE);
+  for (let row = rowFrom; row <= rowTo; row++) {
+    for (let col = colFrom; col <= colTo; col++) {
+      if (tileAt(level, col, row) === Tile.Hazard) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 export function isBoxFree(level: LevelData, box: Box): boolean {
   const colFrom = firstCol(box);
   const colTo = lastCol(box);

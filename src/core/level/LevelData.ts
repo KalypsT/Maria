@@ -6,6 +6,8 @@ export const Tile = {
   Solid: 1,
   /** Plateforme traversable par le dessous, solide seulement par le dessus. */
   OneWay: 2,
+  /** Danger (D-21) : non solide, son contact fait s'évanouir Céleste. */
+  Hazard: 3,
 } as const;
 export type Tile = (typeof Tile)[keyof typeof Tile];
 
@@ -28,7 +30,7 @@ export interface LevelData {
   readonly entities: readonly LevelEntity[];
 }
 
-export const EntityType = { Patroller: 'patroller' } as const;
+export const EntityType = { Patroller: 'patroller', Checkpoint: 'checkpoint' } as const;
 export type EntityType = (typeof EntityType)[keyof typeof EntityType];
 
 export interface LevelEntity {
