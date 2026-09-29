@@ -22,17 +22,17 @@ Prochaine : habillage des autres salles, en commençant par l'étage (couloir, e
   - coup reçu : recul ;
   - attaque : le bras suit le bâton.
 
-  Les couettes sont sur un ressort amorti, et les passages d'une pose à l'autre sont adoucis.
+  Les couettes **sautent** : ressort peu amorti, élan à chaque foulée, envolée au saut, retombée qui oscille à la réception (`pigtail*` dans l'overlay). Les passages d'une pose à l'autre sont adoucis.
 
 - **Réglages** dans `src/config/puppet.ts` et dans l'overlay (« Céleste (papier découpé) »).
-- Tests : 292 (pas lié à la distance, opposition bras et jambes, retour au repos, bras levés suspendue, continuité des mouvements, couettes, attaque).
+- Tests : 294 (pas lié à la distance, opposition bras et jambes, retour au repos, bras levés suspendue, continuité des mouvements, couettes qui sautent et se reposent, attaque).
 - **Vérifié dans Chromium** : attente, course, saut, chute, suspension, monde étrange ; passages de salle et reprise inchangés.
 
 ### À vérifier sur téléphone (Céleste)
 
 - [ ] Céleste se lit bien à la taille du jeu : lunettes, couettes, sens de la course.
 - [ ] La course semble « posée » au sol (pas de glissement des pieds) ; sinon régler `strideLengthPx`.
-- [ ] L'allure est sobre et vivante, ni raide ni agitée.
+- [ ] L'allure est sobre et vivante, ni raide ni agitée ; les couettes sautent juste assez (`pigtailBounceDegPerS`, `pigtailDamping`).
 - [ ] La suspension et le hissage se comprennent.
 
 ### Direction artistique : la chambre (D-28)

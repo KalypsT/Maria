@@ -227,7 +227,7 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
 
 ## D-29 — Céleste en « papier découpé »
 
-- **Décision** (validée) : Céleste est une marionnette de pièces fixes : tête avec lunettes rondes roses, deux couettes, torse, bras, jambes à chaussons. Enfant de **5-6 ans** (tête ronde assez grosse), pyjama rose à pois. Allure **sobre avec un peu de vie** : gestes nets, souplesse portée par les couettes.
+- **Décision** (validée) : Céleste est une marionnette de pièces fixes : tête avec lunettes rondes roses, deux couettes, torse, bras, jambes à chaussons. Enfant de **5-6 ans** (tête ronde assez grosse), pyjama rose à pois. Allure **sobre avec un peu de vie** : gestes nets, souplesse portée par les couettes, qui **sautent** (demande de l'utilisateur) : élan à chaque foulée, envolée au saut, retombée qui oscille à la réception, butée souple. Même principe plus tard pour la queue de cheval (phases de croissance).
 - **Mise en œuvre** :
   - poses calculées par une fonction pure testée (`CelestePoser`) : respiration, course, saut, chute, suspension (bras tendus vers le rebord), hissage, coup reçu, bras qui accompagne le bâton ;
   - le pas suit la distance parcourue, et les couettes sont un ressort amorti ;

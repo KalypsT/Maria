@@ -102,13 +102,27 @@ export class CelestePoser {
       this.stateSteps++;
     }
     const speed = Math.abs(subject.vx);
+    // Couettes qui sautent (D-29) : élan au décollage, retombée à la réception, rebond à chaque pas.
+    const bounce = p.pigtailBounceDegPerS * DEG;
+    if (this.stateSteps === 0) {
+      if (subject.state === PlayerState.Jump) {
+        this.pigtailVel += 2 * bounce;
+      } else if (subject.state === PlayerState.Land) {
+        this.pigtailVel -= 1.5 * bounce;
+      }
+    }
     t.bodyY = 0;
     t.bodyTilt = 0;
     t.headTilt = 0;
     t.armReach = 1;
     switch (subject.state) {
       case PlayerState.Run: {
+        const strides = Math.floor(this.runPhase / (2 * Math.PI));
         this.runPhase += ((speed * dt) / Math.max(1, p.strideLengthPx)) * Math.PI * 2;
+        if (Math.floor(this.runPhase / (2 * Math.PI)) !== strides) {
+          // Une foulée complète : le rythme proche du ressort fait sautiller les couettes.
+          this.pigtailVel += bounce * Math.min(1, speed / Math.max(1, this.maxRunSpeed));
+        }
         const swing = Math.sin(this.runPhase);
         const amount = Math.min(1, speed / Math.max(1, this.maxRunSpeed));
         t.legFront = swing * p.legSwingDeg * DEG * amount;
@@ -200,6 +214,11 @@ export class CelestePoser {
     const w = 2 * Math.PI * p.pigtailHz;
     const accel = w * w * (target - pose.pigtails) - 2 * p.pigtailDamping * w * this.pigtailVel;
     this.pigtailVel += accel * dt;
-    pose.pigtails = Math.max(-max, Math.min(max, pose.pigtails + this.pigtailVel * dt));
+    pose.pigtails += this.pigtailVel * dt;
+    if (pose.pigtails > max || pose.pigtails < -max) {
+      // Butée souple : elles rebondissent au lieu de s'arrêter net.
+      pose.pigtails = Math.max(-max, Math.min(max, pose.pigtails));
+      this.pigtailVel *= -0.4;
+    }
   }
 }
