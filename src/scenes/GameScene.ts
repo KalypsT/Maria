@@ -22,14 +22,16 @@ import { FixedStepClock } from '../core/FixedStepClock';
 import { InputController } from '../core/input/InputController';
 import { KeyboardSource } from '../core/input/KeyboardSource';
 import { TouchSource } from '../core/input/TouchSource';
-import { Tile, tileAt, type LevelData } from '../core/level/LevelData';
+import { Material, Tile, tileAt, type LevelData } from '../core/level/LevelData';
 import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../core/player/PlayerPhysics';
 import { PlayerFeel } from '../core/player/playerFeel';
-import { LEVELS, levelName, type LevelSource } from '../levels';
+import { LEVELS, levelName, startRoom, zoneRoom, type LevelSource, type ZoneRoom } from '../levels';
 import { DEFAULT_WORLD, type WorldParams } from '../config/world';
 import type { SaveSession } from '../core/save/SaveSession';
+import { RoomTransition } from '../core/world/RoomTransition';
 import { RunEvent, RunState } from '../core/world/RunState';
+import { arrivalPosition, touchedExit, type ExitRef, type Zone } from '../core/world/zone';
 import { Hud } from '../ui/Hud';
 import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
 import { PauseMenu } from '../ui/PauseMenu';
@@ -43,12 +45,32 @@ const MAX_FRAME_SECONDS = 0.25;
 /** Clé du registre Phaser où main.ts dépose la partie en cours (D-22). */
 export const SESSION_KEY = 'maria-session';
 
-function levelSource(id: string): LevelSource {
-  const first = LEVELS[0];
-  if (!first) {
-    throw new Error('Aucune salle déclarée dans src/levels/index.ts');
-  }
-  return LEVELS.find((level) => level.id === id) ?? first;
+/** Couleurs des tuiles pleines selon le matériau (placeholders, D-24). */
+interface SolidColors {
+  readonly fill: number;
+  readonly edge: number;
+}
+const DEFAULT_SOLID: SolidColors = {
+  fill: PLACEHOLDER_COLORS.solid,
+  edge: PLACEHOLDER_COLORS.solidEdge,
+};
+const SOLID_COLORS: Readonly<Partial<Record<number, SolidColors>>> = {
+  [Material.Default]: DEFAULT_SOLID,
+  [Material.Wood]: { fill: PLACEHOLDER_COLORS.wood, edge: PLACEHOLDER_COLORS.woodEdge },
+  [Material.Fabric]: { fill: PLACEHOLDER_COLORS.fabric, edge: PLACEHOLDER_COLORS.fabricEdge },
+};
+
+/** Identifiant de la maison dans la liste du menu pause (retour à la partie). */
+export const HOME_CHOICE = 'home';
+/** Couleur d'ambiance d'une salle (`; @ambient: #rrggbb`). */
+const AMBIENT = /^#[0-9a-f]{6}$/i;
+
+/** Point de retour de la partie : salle et checkpoint ; départ de la zone de départ sinon. */
+function savedReturn(session: SaveSession): { room: ZoneRoom; checkpointId: string | null } {
+  const { levelId, checkpointId } = session.data.checkpoint;
+  const room = zoneRoom(levelId);
+  // Une sauvegarde des phases précédentes peut pointer vers un parcours d'essai : départ.
+  return room ? { room, checkpointId } : { room: startRoom(), checkpointId: null };
 }
 
 /** Événement du jeu émis quand les réglages d'affichage changent (main.ts redimensionne le canvas). */
@@ -82,6 +104,8 @@ export class GameScene extends Phaser.Scene {
   /** Échec, jauge de peur et checkpoints (D-21), modifiables par l'overlay. */
   readonly worldParams: WorldParams = { ...DEFAULT_WORLD };
   run!: RunState;
+  /** Changement de salle en cours (D-25). */
+  readonly transition = new RoomTransition(this.worldParams);
   session!: SaveSession;
   private worldView!: WorldView;
   private hud!: Hud;
@@ -90,6 +114,8 @@ export class GameScene extends Phaser.Scene {
   readonly clock = new FixedStepClock(1 / PHYSICS_STEP_HZ, MAX_STEPS_PER_FRAME);
   readonly frameStats: FrameStats = { steps: 0, simulationMs: 0 };
   level!: LevelData;
+  /** Zone de la salle courante ; null dans un parcours d'essai (hors partie). */
+  zone: Zone | null = null;
   player!: PlayerPhysics;
   /** Commandes tactiles, absentes sur ordinateur. */
   touch?: TouchSource;
@@ -113,16 +139,14 @@ export class GameScene extends Phaser.Scene {
   create(): void {
     this.session = this.registry.get(SESSION_KEY) as SaveSession;
     const save = this.session.data;
-    const source = levelSource(save.checkpoint.levelId);
-    this.level = parseAsciiLevel(source.id, source.text);
+    const { room, checkpointId } = savedReturn(this.session);
+    this.level = room.level;
+    this.zone = room.zone;
     this.drawLevel();
     this.createPlayerTexture();
     this.run = new RunState(this.level, this.worldParams);
-    this.run.load(
-      this.level,
-      save.activatedCheckpoints,
-      source.id === save.checkpoint.levelId ? save.checkpoint.checkpointId : null,
-    );
+    this.run.load(this.level, save.activatedCheckpoints, checkpointId);
+    void this.session.revealRoom(this.level.id);
     const { x, y } = this.respawnPosition();
     this.player = new PlayerPhysics(this.level, this.movement, x, y);
     // Origine aux pieds : l'écrasement et l'inclinaison se font autour du point d'appui.
@@ -174,9 +198,16 @@ export class GameScene extends Phaser.Scene {
           }
         });
       },
-      levels: LEVELS.map((level) => ({ id: level.id, name: levelName(level) })),
-      currentLevelId: () => this.level.id,
+      levels: [
+        { id: HOME_CHOICE, name: 'La maison (partie)' },
+        ...LEVELS.map((level) => ({ id: level.id, name: levelName(level) })),
+      ],
+      currentLevelId: () => (this.zone ? HOME_CHOICE : this.level.id),
       onLevelChange: (id) => {
+        if (id === HOME_CHOICE) {
+          this.returnToSaved();
+          return;
+        }
         const level = LEVELS.find((candidate) => candidate.id === id);
         if (level) {
           this.loadLevel(level);
@@ -225,7 +256,17 @@ export class GameScene extends Phaser.Scene {
     const feel = this.feel;
     const combat = this.combat;
     const run = this.run;
+    const transition = this.transition;
     for (let i = 0; i < steps; i++) {
+      if (transition.leaving) {
+        // Fondu au noir d'un changement de salle (D-25) : rien ne bouge, puis nouvelle salle.
+        if (transition.stepOut()) {
+          this.enterRoom(transition.target, transition.vx);
+          transition.arrive();
+        }
+        this.freezeInterpolation();
+        continue;
+      }
       if (combat.hitstopSteps > 0) {
         // Arrêt sur image : toute la simulation est suspendue, les pressions restent mémorisées.
         combat.hitstopSteps--;
@@ -251,10 +292,20 @@ export class GameScene extends Phaser.Scene {
         this.combatView.onEvents(combat.events);
       }
       run.step(this.player.box, combat.events);
-      if ((run.events & RunEvent.CheckpointActivated) !== 0) {
-        // Sauvegarde automatique au checkpoint (D-22), sans attendre l'écriture.
+      if ((run.events & RunEvent.CheckpointActivated) !== 0 && this.zone) {
+        // Sauvegarde automatique au checkpoint (D-22), sans attendre l'écriture. Les parcours
+        // d'essai sont hors partie : leurs checkpoints ne sont pas sauvegardés.
         const checkpoint = run.checkpoints[run.current];
         void this.session.setCheckpoint(this.level.id, checkpoint ? checkpoint.id : null);
+      }
+      transition.stepIn();
+      const zone = this.zone;
+      if (zone && (run.events & RunEvent.Fainted) === 0) {
+        const exit = touchedExit(this.level, this.player.box);
+        const target = exit !== 0 ? zone.destination(this.level.id, exit) : null;
+        if (target) {
+          transition.start(target, this.player.vx);
+        }
       }
       camera.lookInput = input.moveY;
       camera.step(this.player);
@@ -362,6 +413,7 @@ export class GameScene extends Phaser.Scene {
   /** Applique les réglages d'échec et de jauge (overlay). */
   applyWorld(): void {
     this.run.setParams(this.worldParams);
+    this.transition.setParams(this.worldParams);
   }
 
   /** Position (px) de réapparition : pieds au bas de la tuile du checkpoint courant ou du départ. */
@@ -373,9 +425,16 @@ export class GameScene extends Phaser.Scene {
     };
   }
 
-  /** Fin de l'évanouissement : retour au point de retour, monde local restauré (§20.2). */
+  /**
+   * Fin de l'évanouissement : retour au point de retour, monde local restauré (§20.2). Dans une
+   * zone, le point de retour peut être dans une autre salle (D-25).
+   */
   private respawnAtCheckpoint(): void {
-    this.respawn();
+    if (this.zone) {
+      this.returnToSaved();
+    } else {
+      this.respawn();
+    }
     this.reappearAtMs = this.time.now;
   }
 
@@ -385,20 +444,20 @@ export class GameScene extends Phaser.Scene {
     this.hud.setFear(run.fear, this.worldParams.fearMax);
     if (run.fainting) {
       const progress = run.faintProgress;
-      this.hud.setVeil(progress);
+      this.hud.setVeil(Math.max(progress, this.transition.veil));
       this.playerSprite.setAlpha(1 - progress);
       return;
     }
+    let veil = this.transition.veil;
     if (this.reappearAtMs >= 0) {
       const duration = this.worldParams.reappearMs;
       const k = duration > 0 ? (this.time.now - this.reappearAtMs) / duration : 1;
-      this.hud.setVeil(1 - k);
+      veil = Math.max(veil, 1 - k);
       if (k >= 1) {
         this.reappearAtMs = -1;
       }
-    } else {
-      this.hud.setVeil(0);
     }
+    this.hud.setVeil(veil);
   }
 
   respawn(): void {
@@ -407,19 +466,89 @@ export class GameScene extends Phaser.Scene {
     this.feel.reset(this.player);
     this.combat.reset();
     this.clock.reset();
+    this.transition.cancel();
     this.resetCamera();
   }
 
-  /** Charge une autre salle et y replace Céleste au départ ; le choix est sauvegardé. */
+  /**
+   * Parcours d'essai (hors partie) : Céleste y est placée au départ ; la sauvegarde n'est pas
+   * modifiée, « La maison » ramène au point de retour de la partie.
+   */
   loadLevel(source: LevelSource): void {
-    this.level = parseAsciiLevel(source.id, source.text);
-    this.drawLevel();
-    this.combat.load(this.level);
-    this.combatView.rebuild();
-    this.run.load(this.level, this.session.data.activatedCheckpoints, null);
-    this.worldView.rebuild();
+    this.setRoom(parseAsciiLevel(source.id, source.text), null, null);
     this.respawn();
-    void this.session.setCheckpoint(this.level.id, null);
+  }
+
+  /** Retour au point de retour de la partie, dans sa salle (réapparition, menu pause). */
+  returnToSaved(): void {
+    const { room, checkpointId } = savedReturn(this.session);
+    if (room.level !== this.level) {
+      this.setRoom(room.level, room.zone, checkpointId);
+    }
+    this.respawn();
+  }
+
+  /** Outil de debug : Céleste placée au départ `P` d'une salle de zone, sauvegarde inchangée. */
+  teleportToRoom(id: string): void {
+    const room = zoneRoom(id);
+    if (!room) {
+      return;
+    }
+    const { checkpointId, levelId } = this.session.data.checkpoint;
+    this.setRoom(room.level, room.zone, levelId === id ? checkpointId : null);
+    const { spawn } = room.level;
+    this.player.reset(
+      (spawn.col + 0.5) * TILE_SIZE - PLAYER_HITBOX.width / 2,
+      (spawn.row + 1) * TILE_SIZE - PLAYER_HITBOX.height,
+      room.level,
+    );
+    this.feel.reset(this.player);
+    this.clock.reset();
+    this.transition.cancel();
+    this.resetCamera();
+  }
+
+  /**
+   * Arrivée par une sortie (D-25) : nouvelle salle, Céleste juste à l'intérieur avec son élan
+   * horizontal. Le point de retour ne change pas.
+   */
+  private enterRoom(target: ExitRef | null, vx: number): void {
+    const room = target ? zoneRoom(target.room) : null;
+    if (!target || !room) {
+      return;
+    }
+    const fear = this.run.fear;
+    const { checkpointId, levelId } = this.session.data.checkpoint;
+    this.setRoom(room.level, room.zone, levelId === target.room ? checkpointId : null);
+    // La peur suit Céleste d'une salle à l'autre : changer de salle ne la calme pas.
+    this.run.fear = fear;
+    const { x, y } = arrivalPosition(
+      room.level,
+      target.exit,
+      PLAYER_HITBOX.width,
+      PLAYER_HITBOX.height,
+    );
+    this.player.reset(x, y, room.level);
+    this.player.vx = vx;
+    this.feel.reset(this.player);
+    this.resetCamera();
+  }
+
+  /**
+   * Remplace la salle : dessin, ennemis, checkpoints, ambiance ; une salle de zone est ajoutée à la
+   * carte révélée. Céleste est replacée ensuite.
+   */
+  private setRoom(level: LevelData, zone: Zone | null, checkpointId: string | null): void {
+    this.level = level;
+    this.zone = zone;
+    if (zone) {
+      void this.session.revealRoom(level.id);
+    }
+    this.drawLevel();
+    this.combat.load(level);
+    this.combatView.rebuild();
+    this.run.load(level, this.session.data.activatedCheckpoints, checkpointId);
+    this.worldView.rebuild();
   }
 
   private resetCamera(): void {
@@ -445,6 +574,15 @@ export class GameScene extends Phaser.Scene {
    * écran ne sont pas dessinés par Phaser. Remplace le dessin de la salle précédente.
    */
   private drawLevel(): void {
+    const ambient = this.level.meta.ambient;
+    // Ambiance de la salle : couleur d'effacement du rendu (partagée par la configuration du jeu),
+    // gratuite, contrairement au fond de caméra redessiné à chaque image.
+    const clear = this.game.config.backgroundColor;
+    if (ambient && AMBIENT.test(ambient)) {
+      Phaser.Display.Color.HexStringToColor(ambient, clear);
+    } else {
+      Phaser.Display.Color.IntegerToColor(PLACEHOLDER_COLORS.background, clear);
+    }
     for (const image of this.levelImages) {
       const key = image.texture.key;
       image.destroy();
@@ -495,11 +633,25 @@ export class GameScene extends Phaser.Scene {
   ): boolean {
     const level = this.level;
     const tile = tileAt(level, col, row);
+    const material = level.materials[row * level.width + col];
     if (tile === Tile.Solid) {
-      g.fillStyle(PLACEHOLDER_COLORS.solid);
+      // Placeholders de matériaux (D-25) : murs, meubles en bois, tissu (lit, canapé, linge).
+      const colors = SOLID_COLORS[material ?? Material.Default] ?? DEFAULT_SOLID;
+      g.fillStyle(colors.fill);
       g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-      if (tileAt(level, col, row - 1) !== Tile.Solid) {
-        g.fillStyle(PLACEHOLDER_COLORS.solidEdge);
+      const above = row * level.width - level.width + col;
+      if (tileAt(level, col, row - 1) !== Tile.Solid || level.materials[above] !== material) {
+        g.fillStyle(colors.edge);
+        g.fillRect(x, y, TILE_SIZE, 2);
+      }
+      return true;
+    }
+    if (tile === Tile.Empty && (col === 0 || col === level.width - 1)) {
+      // Sortie (D-25) : ouverture dans le mur, à peine éclairée, linteau en haut.
+      g.fillStyle(PLACEHOLDER_COLORS.exit, 0.08);
+      g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+      if (tileAt(level, col, row - 1) === Tile.Solid) {
+        g.fillStyle(PLACEHOLDER_COLORS.exit, 0.35);
         g.fillRect(x, y, TILE_SIZE, 2);
       }
       return true;
@@ -520,9 +672,11 @@ export class GameScene extends Phaser.Scene {
       return true;
     }
     if (tile === Tile.OneWay) {
-      g.fillStyle(PLACEHOLDER_COLORS.oneWay);
+      const color =
+        material === Material.Wood ? PLACEHOLDER_COLORS.woodEdge : PLACEHOLDER_COLORS.oneWay;
+      g.fillStyle(color);
       g.fillRect(x, y, TILE_SIZE, 3);
-      g.fillStyle(PLACEHOLDER_COLORS.oneWay, 0.25);
+      g.fillStyle(color, 0.25);
       g.fillRect(x, y + 3, TILE_SIZE, 5);
       return true;
     }

@@ -143,7 +143,12 @@ export function touchedExit(level: LevelData, box: Box): number {
     const left = exit.col * T;
     const top = exit.rowMin * T;
     const bottom = (exit.rowMax + 1) * T;
-    if (box.x < left + T && box.x + box.width > left && box.y < bottom && box.y + box.height > top) {
+    if (
+      box.x < left + T &&
+      box.x + box.width > left &&
+      box.y < bottom &&
+      box.y + box.height > top
+    ) {
       return exit.id;
     }
   }

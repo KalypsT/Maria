@@ -37,4 +37,21 @@ describe('SaveSession', () => {
     expect(session.data.checkpoint).toEqual({ levelId: 'b', checkpointId: null });
     expect(session.data.activatedCheckpoints).toEqual(['a:c1-1']);
   });
+
+  it('révèle une salle visitée une seule fois, sans toucher au point de retour', async () => {
+    const storage = new MemorySaveStorage();
+    let clock = 0;
+    const session = new SaveSession(
+      new SaveManager(storage),
+      createNewSave('bedroom', 0),
+      () => ++clock,
+    );
+    await session.setCheckpoint('bedroom', 'c20-19');
+    await session.revealRoom('hall');
+    await session.revealRoom('hall');
+    expect(clock).toBe(2);
+    const reloaded = (await new SaveManager(storage).load()).data;
+    expect(reloaded?.progression.mapRevealed).toEqual(['hall']);
+    expect(reloaded?.checkpoint).toEqual({ levelId: 'bedroom', checkpointId: 'c20-19' });
+  });
 });

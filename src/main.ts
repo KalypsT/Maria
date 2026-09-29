@@ -4,7 +4,7 @@ import { computeGameWidth, computeRenderScale, renderSize } from './core/gameSiz
 import { SaveManager } from './core/save/SaveManager';
 import { SaveSession } from './core/save/SaveSession';
 import { createNewSave, migrateLegacySettings, type SaveData } from './core/save/saveData';
-import { LEVELS, levelName } from './levels';
+import { roomName, startRoom } from './levels';
 import { openBrowserSaveStorage, requestPersistentStorage } from './platform/browserSaveStorage';
 import { DISPLAY_SETTINGS_EVENT, GameScene, SESSION_KEY } from './scenes/GameScene';
 import { installHint } from './core/platform/install';
@@ -32,7 +32,7 @@ function legacySettings(): SaveData['settings'] {
 }
 
 function newGame(): SaveData {
-  return createNewSave(LEVELS[0]?.id ?? 'test-room', Date.now(), legacySettings());
+  return createNewSave(startRoom().level.id, Date.now(), legacySettings());
 }
 
 function startGame(parent: HTMLElement, session: SaveSession): Phaser.Game {
@@ -83,10 +83,9 @@ async function boot(): Promise<void> {
   const manager = new SaveManager(await openBrowserSaveStorage());
   const report = await manager.load();
   const saved = report.data;
-  const source = saved ? LEVELS.find((level) => level.id === saved.checkpoint.levelId) : undefined;
   const choice = await showTitleScreen(
     report,
-    source ? levelName(source) : null,
+    saved ? roomName(saved.checkpoint.levelId) : null,
     pwa,
     installHint(installEnvironment()),
   );
