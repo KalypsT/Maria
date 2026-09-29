@@ -2,13 +2,43 @@
 
 ## Phase en cours
 
-**Grimper aux rebords** (D-26) : implémentée sur la branche `claude/climb-ledges`, **en attente de validation puis d'essai sur téléphone**.
+**Passe de level design sur la maison** (D-27) : implémentée sur la branche `claude/house-level-design`, plan validé par l'utilisateur, **en attente de PR puis d'essai sur téléphone**.
 
-Phase 6 (maison), PWA et Phase 5 : mergées, en attente d'essai sur téléphone. Mouvement, commandes et combat : validation provisoire par l'utilisateur, à confirmer en jeu réel.
+Escalade, Phase 6 (maison), PWA et Phase 5 : mergées, en attente d'essai sur téléphone. Mouvement, commandes et combat : validation provisoire par l'utilisateur, à confirmer en jeu réel.
 
-Prochaine : passe de level design sur la maison (D-27), puis direction artistique.
+Prochaine : direction artistique (D-27).
 
 ## Fait
+
+### Passe de level design sur la maison (D-27)
+
+- **Méthode** : plan de la zone et image de chaque salle en entier, **validés par l'utilisateur** avant de finaliser. Salles en texte ASCII (pas d'éditeur visuel pour l'instant).
+- **Grenier** (nouvelle salle), accessible seulement en grimpant :
+  - charpente en pente, malle, cartons, tapis roulé, veilleuse à l'entrée, jouet mécanique ;
+  - **premier secret** : quatre poutres jusqu'au recoin sous le toit, où se trouve une **trouvaille** (lueur rose, placeholder) ; difficulté moyenne, saut le plus serré à 150 ms ;
+  - **lucarne** hors de portée même en grimpant (capacité future).
+- **Escalier** : embranchement vers le grenier (buffet sur le palier, étagère, corniche, en grimpant) ; jouet mécanique en bas.
+- **Chambre** : sortie derrière l'armoire vers le grenier. Du grenier, on redescend près du lit : raccourci vers le départ.
+- **Deux boucles** : trappe à linge (buanderie → couloir), et chambre → couloir → escalier → grenier → chambre.
+- **Trouvailles** (`S`) : enregistrées dans `progression.collectibles`, sans compteur affiché (§23). Pas de texte à la découverte.
+- **Tests** (vraie physique, sans et avec escalade) :
+  - le grenier ne s'ouvre qu'en grimpant ;
+  - le secret est de difficulté moyenne (ni facile, ni au-delà) ;
+  - on revient du grenier à la chambre par l'armoire ;
+  - aucun endroit sans retour facile.
+
+  283 tests au total.
+
+- **Vérifié dans Chromium** : trouvaille ramassée et sauvegardée ; sortie du grenier sur le dessus de l'armoire, puis descente dans la chambre.
+- **Gardé pour plus tard (décision de l'utilisateur)** : le rez-de-chaussée (salon, cuisine, couloir, buanderie) reste presque identique ; les dessus de la bibliothèque et des placards n'ont pas encore de récompense.
+
+### À vérifier sur téléphone (level design)
+
+- [ ] L'embranchement de l'escalier vers le grenier se remarque (on a envie d'y monter).
+- [ ] Les poutres du grenier : défi agréable, pas frustrant. La chute ramène au sol du grenier, sans pénalité.
+- [ ] La trouvaille se voit et donne envie d'y aller.
+- [ ] Le retour par l'armoire donne l'impression d'un vrai raccourci.
+- [ ] La lucarne donne l'idée de revenir plus tard.
 
 ### Grimper aux rebords (D-26)
 
@@ -332,7 +362,7 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. Validation de l'escalade, PR et merge, puis essai sur téléphone (listes « escalade », « Phase 6 », « PWA » et « Phase 5 »).
-2. **Passe de level design** sur la maison (D-27) : boucle, embranchements, verticalité, un premier secret ; éditeur visuel à envisager.
-3. **Direction artistique** (D-27) : écrans de test dans 2 ou 3 styles ; qui produit les images.
-4. Ensuite (§42) : croissance, carte et secrets, narration.
+1. PR de la passe de level design et merge, puis essai sur téléphone (listes « level design », « escalade », « Phase 6 », « PWA » et « Phase 5 »).
+2. **Direction artistique** (D-27) : écrans de test dans 2 ou 3 styles sur la même salle ; qui produit les images.
+3. Plus tard : retravailler le rez-de-chaussée (verticalité, jouets placés autour du mouvement, récompenses en haut de la bibliothèque et des placards).
+4. Ensuite (§42) : croissance, carte et secrets (compteurs, carte dessinée), narration.
