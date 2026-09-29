@@ -1,0 +1,42 @@
+; Jardin : la terrasse, derrière la buanderie (D-46). Maman étend le linge ; lanterne (point de retour).
+; @name: Terrasse
+; @icon: sun
+; @world: garden
+; @difficulty: easy
+; @note: toit de la pergola (sortie 3) : arrivée du raccourci par l'allée, hors de portée depuis la terrasse.
+; @decor: canopy 1 0 49 1
+; @decor: hedge 49 1 1 5
+; @decor: hedge 49 9 1 10
+; @decor: pergola 28 9 21 13
+; @decor: gardentable 35 19 6 3
+; @decor: flowerpot 22 20 2 2
+; @decor: flowerpot 25 21 2 1
+; @decor: facade 0 1 3 21
+; @decor: backdoor 0 16 1 6
+; @decor: clothesline 6 11 16 2
+; @decor: sun 12 2 3 3
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (danger), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+#................................................v
+#................................................v
+#................................................v
+#................................................v
+#................................................v
+#................................................3
+#................................................3
+#................................................3
+#...........................---------------------v
+#................................................v
+#................................................v
+#................................................v
+#................................................v
+#................................................v
+#................................................v
+#................................................v
+#................................................v
+#................................................v
+1..................................bbbbbb........2
+1.....................bb...........bbbbbb........2
+1...C...P.............bb.bb........bbbbbb........2
+##################################################
+##################################################

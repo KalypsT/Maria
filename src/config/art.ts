@@ -77,6 +77,44 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   'narrow-right': { furniture: false },
   /** Yeux dans l'ombre : rien de dessiné dans le décor, animés par les effets (D-35). */
   eyes: { furniture: false },
+  // Le jardin (D-46), dessiné par le code (PLACEHOLDER, pas d'image clé pour l'instant).
+  /** Frondaison des arbres en haut des salles (feuillage plein). */
+  canopy: { furniture: true },
+  /** Haie (feuillage plein). */
+  hedge: { furniture: true },
+  /** Buisson accroché à la haie (feuillage plein, on y grimpe). */
+  bush: { furniture: true },
+  /** Tronc du grand arbre. */
+  treetrunk: { furniture: true },
+  /** Branche (traversable). */
+  branch: { furniture: true },
+  /** Bac de potager surélevé, planté. */
+  planter: { furniture: true },
+  /** Toit de lattes de la pergola (traversable), poteaux dessinés derrière. */
+  pergola: { furniture: true },
+  gardentable: { furniture: true },
+  flowerpot: { furniture: true },
+  /** Remise de jardin. */
+  shed: { furniture: true },
+  /** Clôture en planches. */
+  fence: { furniture: true },
+  /** Vieux mur de pierres du jardin. */
+  oldwall: { furniture: true },
+  /** Plancher de la cabane, sur les branches. */
+  deck: { furniture: true },
+  crate: { furniture: true },
+  /** Coffre suspendu au toit de la cabane. */
+  hangingchest: { furniture: true },
+  /** Tuteurs de haricots (fond ; les planches sont des tuiles traversables). */
+  beanpoles: { furniture: false },
+  /** Façade de la maison, vue du jardin. */
+  facade: { furniture: false },
+  /** Porte de derrière (buanderie, terrasse), autour de la sortie. */
+  backdoor: { furniture: false },
+  sun: { furniture: false },
+  /** Trou sombre dans la haie, au fond du jardin (pour plus tard, §25.3). */
+  hedgehole: { furniture: false },
+  cushions: { furniture: false },
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */
@@ -135,6 +173,12 @@ export interface ArtPalette {
   stars: boolean;
   /** Intensité des halos des lampes (1 : la nuit). */
   glow: number;
+  /** Dehors (jardin, D-46) : ciel au lieu du mur, herbe, pierres, orties. */
+  outdoor: boolean;
+  /** Feuillage (haies, frondaisons, buissons). */
+  leaf: string;
+  leafLight: string;
+  leafDark: string;
 }
 
 export const REAL_PALETTE: Readonly<ArtPalette> = {
@@ -163,6 +207,10 @@ export const REAL_PALETTE: Readonly<ArtPalette> = {
   silhouettes: false,
   stars: true,
   glow: 1,
+  outdoor: false,
+  leaf: '#4f7a4a',
+  leafLight: '#78a567',
+  leafDark: '#3a5c3a',
 };
 
 /**
@@ -216,6 +264,35 @@ export const STRANGE_PALETTE: Readonly<ArtPalette> = {
   lamp: '255,160,210',
   darkness: 0.42,
   silhouettes: true,
+};
+
+/**
+ * Le jardin (D-46), dehors par beau temps : ciel clair, herbe, vieux murs de pierre, feuillage.
+ * PROVISOIRE, à juger sur téléphone. Pas d'obscurité ; les bords praticables gardent un liseré.
+ */
+export const GARDEN_PALETTE: Readonly<ArtPalette> = {
+  ...DAY_PALETTE,
+  wallTop: '#8ec6ec',
+  wallBottom: '#e6f0d6',
+  wallpaper: 'rgba(255,255,255,0.55)',
+  wainscot: '#9cc48a',
+  floor: '#7a5a3c',
+  floorEdge: '#7fb85e',
+  structure: '#a8957a',
+  wood: '#a57b52',
+  woodLight: '#d1a676',
+  woodDark: '#7d5a3b',
+  night: '#8ec6ec',
+  nightLow: '#e6f0d6',
+  moon: '#fff1b8',
+  rim: 'rgba(255,250,225,0.75)',
+  lamp: '255,214,150',
+  darkness: 0,
+  glow: 0.25,
+  outdoor: true,
+  leaf: '#5d9152',
+  leafLight: '#8cc26f',
+  leafDark: '#3f6b3d',
 };
 
 /** Rayon du halo d'une veilleuse (px logiques). */

@@ -499,6 +499,53 @@ function drawIcon(
       ctx.moveTo(x + s * 0.3, y);
       ctx.arc(x, y, s * 0.3, 0, Math.PI * 2);
       break;
+    // Le jardin (D-46).
+    case 'sun':
+      ctx.arc(x, y, s * 0.35, 0, Math.PI * 2);
+      for (let i = 0; i < 8; i++) {
+        const a = (i * Math.PI) / 4;
+        ctx.moveTo(x + Math.cos(a) * s * 0.55, y + Math.sin(a) * s * 0.55);
+        ctx.lineTo(x + Math.cos(a) * s * 0.85, y + Math.sin(a) * s * 0.85);
+      }
+      break;
+    case 'flower':
+      ctx.moveTo(x, y + s * 0.8);
+      ctx.lineTo(x, y);
+      for (let i = 0; i < 5; i++) {
+        const a = (i * 2 * Math.PI) / 5;
+        ctx.moveTo(x + Math.cos(a) * s * 0.55, y - s * 0.3 + Math.sin(a) * s * 0.55);
+        ctx.arc(
+          x + Math.cos(a) * s * 0.35,
+          y - s * 0.3 + Math.sin(a) * s * 0.35,
+          s * 0.2,
+          0,
+          Math.PI * 2,
+        );
+      }
+      break;
+    case 'tree':
+      ctx.moveTo(x - s * 0.15, y + s * 0.8);
+      ctx.lineTo(x - s * 0.15, y);
+      ctx.moveTo(x + s * 0.15, y + s * 0.8);
+      ctx.lineTo(x + s * 0.15, y);
+      ctx.moveTo(x + s * 0.7, y - s * 0.4);
+      ctx.arc(x, y - s * 0.4, s * 0.7, 0, Math.PI * 2);
+      break;
+    case 'house':
+      ctx.rect(x - s * 0.6, y - s * 0.2, s * 1.2, s * 0.8);
+      ctx.moveTo(x - s * 0.8, y - s * 0.2);
+      ctx.lineTo(x, y - s * 0.8);
+      ctx.lineTo(x + s * 0.8, y - s * 0.2);
+      break;
+    case 'fence':
+      for (let i = -1; i <= 1; i++) {
+        ctx.moveTo(x + i * s * 0.6, y + s * 0.6);
+        ctx.lineTo(x + i * s * 0.6, y - s * 0.4);
+        ctx.lineTo(x + i * s * 0.6 + s * 0.15, y - s * 0.6);
+      }
+      ctx.moveTo(x - s, y - s * 0.1);
+      ctx.lineTo(x + s, y - s * 0.1);
+      break;
     default:
       ctx.arc(x, y, s * 0.3, 0, Math.PI * 2);
   }

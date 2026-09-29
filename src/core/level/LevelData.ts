@@ -49,7 +49,7 @@ export interface LevelDecor {
 }
 
 /** Matériaux d'affichage (D-25) : des meubles reconnaissables à l'échelle d'une enfant (§10). */
-export const Material = { Default: 0, Wood: 1, Fabric: 2 } as const;
+export const Material = { Default: 0, Wood: 1, Fabric: 2, Leaf: 3 } as const;
 export type Material = (typeof Material)[keyof typeof Material];
 
 /** Sortie latérale d'une salle (D-25) : ouverture de tuiles vides dans le mur gauche ou droit. */
