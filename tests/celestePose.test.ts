@@ -101,4 +101,43 @@ describe('Céleste en papier découpé (D-29)', () => {
     poser.step(subject(PlayerState.Idle), PoseAttack.Active, 0.5);
     expect(poser.pose.armFront).toBeCloseTo((70 * Math.PI) / 180, 6);
   });
+
+  it('les couettes sautent : envolée au saut, retombée qui oscille à la réception', () => {
+    const poser = new CelestePoser(DEFAULT_PUPPET, DT, MAX_RUN);
+    run(poser, subject(PlayerState.Idle), 240);
+    const rest = poser.pose.pigtails;
+    let highest = -Infinity;
+    for (let i = 0; i < 30; i++) {
+      poser.step(subject(PlayerState.Jump, 0, -300), PoseAttack.None, 0);
+      highest = Math.max(highest, poser.pose.pigtails);
+    }
+    expect(highest, 'envolée au saut').toBeGreaterThan(rest + 0.4);
+    run(poser, subject(PlayerState.Land), 1);
+    let crossings = 0;
+    let previous = Math.sign(poser.pose.pigtails - rest);
+    for (let i = 0; i < 180; i++) {
+      poser.step(subject(PlayerState.Idle), PoseAttack.None, 0);
+      const side = Math.sign(poser.pose.pigtails - rest);
+      if (side !== 0 && side !== previous) {
+        crossings++;
+        previous = side;
+      }
+    }
+    expect(crossings, 'rebond visible').toBeGreaterThanOrEqual(2);
+    run(poser, subject(PlayerState.Idle), 600);
+    expect(Math.abs(poser.pose.pigtails)).toBeLessThan(0.02);
+  });
+
+  it('en course, les couettes rebondissent à chaque pas', () => {
+    const poser = new CelestePoser(DEFAULT_PUPPET, DT, MAX_RUN);
+    let min = Infinity;
+    let max = -Infinity;
+    run(poser, subject(PlayerState.Run, MAX_RUN), 120);
+    for (let i = 0; i < 120; i++) {
+      poser.step(subject(PlayerState.Run, MAX_RUN), PoseAttack.None, 0);
+      min = Math.min(min, poser.pose.pigtails);
+      max = Math.max(max, poser.pose.pigtails);
+    }
+    expect(max - min).toBeGreaterThan(0.2);
+  });
 });

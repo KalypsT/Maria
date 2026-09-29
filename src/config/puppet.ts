@@ -20,6 +20,11 @@ export interface PuppetParams {
   pigtailHz: number;
   pigtailDamping: number;
   pigtailMaxDeg: number;
+  /**
+   * Couettes qui sautent : élan donné à chaque pas de course (degrés/s) ; le saut en donne le
+   * double, la réception les fait retomber vers l'avant.
+   */
+  pigtailBounceDegPerS: number;
   /** Suspendue : balancement des jambes (degrés) et sa période (ms). */
   hangSwingDeg: number;
   hangSwingMs: number;
@@ -34,8 +39,9 @@ export const DEFAULT_PUPPET: Readonly<PuppetParams> = {
   breathPx: 0.4,
   blendMs: 60,
   pigtailHz: 3.5,
-  pigtailDamping: 0.35,
-  pigtailMaxDeg: 40,
+  pigtailDamping: 0.18,
+  pigtailMaxDeg: 55,
+  pigtailBounceDegPerS: 420,
   hangSwingDeg: 6,
   hangSwingMs: 1800,
 };
@@ -53,6 +59,7 @@ export const PUPPET_PARAM_RANGES: Readonly<
   pigtailHz: { min: 0.5, max: 10, step: 0.5 },
   pigtailDamping: { min: 0.05, max: 1.5, step: 0.05 },
   pigtailMaxDeg: { min: 0, max: 90, step: 1 },
+  pigtailBounceDegPerS: { min: 0, max: 800, step: 10 },
   hangSwingDeg: { min: 0, max: 20, step: 1 },
   hangSwingMs: { min: 400, max: 5000, step: 100 },
 };
