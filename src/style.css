@@ -240,3 +240,48 @@ body {
   flex-wrap: wrap;
   gap: 6px;
 }
+
+/* HUD minimal (D-21) : jauge de peur discrète, visible seulement quand elle n'est pas vide. */
+#fear-gauge {
+  position: fixed;
+  z-index: 15;
+  top: calc(var(--safe-top) + 14px);
+  left: 50%;
+  display: flex;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 12px;
+  background: rgb(10 9 16 / 45%);
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+#fear-gauge.visible {
+  opacity: 1;
+}
+
+#fear-gauge span {
+  width: 10px;
+  height: 10px;
+  border: 1px solid #b9b3d6;
+  border-radius: 50%;
+}
+
+#fear-gauge span.filled {
+  border-color: #cdb6ff;
+  background: #7a64b8;
+  box-shadow: 0 0 6px #7a64b8;
+}
+
+/* Voile de l'évanouissement : au-dessus du jeu, sous les menus et les commandes. */
+#faint-veil {
+  position: fixed;
+  z-index: 14;
+  inset: 0;
+  background: #0a0910;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
