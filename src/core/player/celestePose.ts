@@ -32,6 +32,10 @@ export interface PoseSubject {
 export const PoseAttack = { None: 0, Startup: 1, Active: 2, Recovery: 3 } as const;
 
 const DEG = Math.PI / 180;
+/** Pseudo-état de la pose assise (hors des états du joueur). */
+const SITTING = 'Sitting';
+/** Descente de la hanche assise (px) : presque la longueur des jambes. */
+const SIT_DROP_PX = 6.5;
 
 export class CelestePoser {
   readonly pose: CelestePose = {
@@ -47,6 +51,8 @@ export class CelestePoser {
   };
   /** Phase du cycle de pas (radians). */
   runPhase = 0;
+  /** Assise (imposée par l'histoire : jouer avec Maria, réveil dans le lit), jambes devant. */
+  sitting = false;
   private time = 0;
   private stateSteps = 0;
   private lastState: PlayerState = PlayerState.Idle;
@@ -87,6 +93,7 @@ export class CelestePoser {
     this.pigtailVel = 0;
     this.runPhase = 0;
     this.stateSteps = 0;
+    this.sitting = false;
   }
 
   /** Un pas de simulation. `attack` : phase d'attaque (`PoseAttack`), `attackProgress` 0 → 1. */
@@ -115,7 +122,20 @@ export class CelestePoser {
     t.bodyTilt = 0;
     t.headTilt = 0;
     t.armReach = 1;
-    switch (subject.state) {
+    const state = this.sitting ? SITTING : subject.state;
+    switch (state) {
+      case SITTING: {
+        const breath = Math.sin((this.time * 1000 * Math.PI * 2) / p.breathMs);
+        t.bodyY = SIT_DROP_PX - breath * p.breathPx * 0.5;
+        t.bodyTilt = -6 * DEG;
+        t.headTilt = 4 * DEG;
+        t.legFront = 88 * DEG;
+        t.legBack = 80 * DEG;
+        t.armFront = 38 * DEG + breath * 2 * DEG;
+        t.armBack = 24 * DEG;
+        this.runPhase = 0;
+        break;
+      }
       case PlayerState.Run: {
         const strides = Math.floor(this.runPhase / (2 * Math.PI));
         this.runPhase += ((speed * dt) / Math.max(1, p.strideLengthPx)) * Math.PI * 2;

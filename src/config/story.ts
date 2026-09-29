@@ -50,10 +50,10 @@ export const STORY_TIMING = {
  * côté d'une enfant, pour rester lisible à la taille du jeu.
  */
 export const PROP_SIZE = {
-  'maria-sit': { w: 10, h: 13 },
+  'maria-sit': { w: 8, h: 13 },
   cradle: { w: 30, h: 16 },
   'cradle-maria': { w: 30, h: 16 },
   'cradle-undone': { w: 30, h: 16 },
   slipper: { w: 7, h: 4 },
-  bottle: { w: 5, h: 9 },
+  bottle: { w: 9, h: 5 },
 } as const satisfies Readonly<Record<PropKind, { w: number; h: number }>>;

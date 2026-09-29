@@ -2,13 +2,36 @@
 
 ## Phase en cours
 
-**Vertical slice** (D-30) : **carte dessinée par Céleste** implémentée sur la branche `claude/map`, **en attente de validation puis d'essai sur téléphone**.
+**Vertical slice** (D-30, D-31) : **prologue du soir, réveil et traces** (PR 1 de « Maria et le monde étrange ») implémentés sur la branche `ccr-f0e3d7f5-a38dwj`, **en attente d'essai sur téléphone**.
 
-Essai sur téléphone (retour de l'utilisateur) : saut, commandes tactiles, escalade et durée des changements de salle **validés** ; habillages cohérents.
-
-Prochaine : manifestation de Maria, courte séquence narrative et premier passage vers le monde étrange (plan à valider).
+Prochaine (PR 2) : Maria en haut de la bibliothèque du salon, bascule du salon vers le monde étrange, bandeau de Maria sur le lit de Céleste.
 
 ## Fait
+
+### Prologue : le soir, le réveil, les traces (§5.2, §33, D-31)
+
+- **Le soir** (nouvelle partie, palette de nuit, portes de la chambre fermées) :
+  1. Maria est assise sur le tapis ; Agir : fondu, Céleste assise joue avec elle (bulle cœur), puis bulle « berceau » ;
+  2. Agir de nouveau : fondu, Maria est couchée dans son berceau (sur le coffre à jouets), bulle « lit » ;
+  3. Agir sur le lit : la nuit passe (long fondu).
+- **Le matin** (palette jour) : Céleste assise dans son lit, berceau vide et défait, bulle « Maria ? ». Elle se relève dès qu'on la fait bouger.
+- **Traces** : un chausson de poupée dans le couloir, un biberon sur le palier de l'escalier ; en passant, bulle avec le visage de Maria.
+- **Maria ne bouge jamais à l'écran** : ses changements de place ont lieu dans le noir ; règle garantie par une fonction testée.
+- **Commandes** : étincelle au-dessus de ce qu'on peut faire, et le bouton Action devient « Agir » (clavier : E ou J).
+- **Image de Maria** fournie par l'utilisateur, détourée ; aussi dans le berceau et les bulles.
+- **Sauvegarde v2** : étapes de l'histoire enregistrées aussitôt ; une ancienne partie est migrée avec le prologue considéré comme vécu.
+- **Debug** : liste « Histoire » (soir, a joué, Maria couchée, matin, traces vues), sans sauvegarde.
+- Tests : 316 (conditions, scripts et fondus, objets hors de la vue, cohérence des données, prologue complet, faisabilité du soir sans grimper, migration v1 → v2, pose assise).
+- **Vérifié dans Chromium** : tout le prologue (jouer, coucher, porte fermée, nuit, réveil), les deux traces, sauvegarde des étapes.
+- **Corrigé en cours de route** : le berceau était d'abord au sol près de la porte, **caché sous le bouton Action** ; il est maintenant sur le coffre à jouets.
+
+### À vérifier sur téléphone (prologue)
+
+- [ ] On comprend sans texte qu'il faut jouer, coucher Maria, puis se coucher (étincelle, bulles, bouton « Agir »).
+- [ ] Les fondus ne sont ni trop longs ni trop secs ; la nuit se sent.
+- [ ] **L'image de Maria** : se reconnaît-elle à cette taille ? Le décalage avec le style « papier découpé » gêne-t-il ?
+- [ ] Le matin : la palette jour plaît-elle ? Le réveil (berceau vide, bulle) serre-t-il un peu le cœur, sans inquiéter trop ?
+- [ ] Les traces se remarquent et donnent envie de descendre.
 
 ### Carte dessinée par Céleste (§24, D-30)
 

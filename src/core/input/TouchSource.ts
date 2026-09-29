@@ -67,6 +67,16 @@ export class TouchSource implements InputSource {
     this.relayout();
   }
 
+  /** Libellé d'un bouton (Action devient « Agir » près de ce qu'on peut faire, D-31). */
+  setLabel(action: ButtonAction, label: string | null): void {
+    const element = this.buttonElements.get(action);
+    const text = label ?? LABELS[action];
+    if (element && element.textContent !== text) {
+      element.textContent = text;
+      element.classList.toggle('contextual', label !== null);
+    }
+  }
+
   /** Relâche toutes les commandes (pause, perte de focus, rotation…). */
   releaseAll(): void {
     this.controller.releaseAll();

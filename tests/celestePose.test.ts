@@ -140,4 +140,15 @@ describe('Céleste en papier découpé (D-29)', () => {
     }
     expect(max - min).toBeGreaterThan(0.2);
   });
+
+  it('assise (histoire, D-31) : jambes devant, hanche basse ; reset la relève', () => {
+    const poser = new CelestePoser(DEFAULT_PUPPET, DT, MAX_RUN);
+    poser.sitting = true;
+    run(poser, subject(PlayerState.Idle), 240);
+    expect(poser.pose.legFront).toBeGreaterThan(1.3);
+    expect(poser.pose.legBack).toBeGreaterThan(1.2);
+    expect(poser.pose.bodyY).toBeGreaterThan(5);
+    poser.reset();
+    expect(poser.sitting).toBe(false);
+  });
 });

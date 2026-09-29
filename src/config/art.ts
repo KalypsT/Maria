@@ -60,7 +60,10 @@ export type WallStyle = (typeof WALL_STYLES)[number];
  * Images fournies (voir le document « Créer des images pour le jeu ») : nom d'élément → fichier
  * sous `public/art/`. Un élément absent de cette liste est dessiné par le code.
  */
-export const ART_IMAGES: Readonly<Record<string, string>> = {};
+export const ART_IMAGES: Readonly<Record<string, string>> = {
+  /** Maria (D-31) : image fournie par l'utilisateur, détourée. */
+  maria: 'maria.png',
+};
 
 /** Palette d'une salle habillée ; le monde étrange en est une variante (§6.2). */
 export interface ArtPalette {
@@ -91,6 +94,10 @@ export interface ArtPalette {
   darkness: number;
   /** Meubles réduits à des silhouettes (monde étrange). */
   silhouettes: boolean;
+  /** Étoiles dans les fenêtres (la nuit). */
+  stars: boolean;
+  /** Intensité des halos des lampes (1 : la nuit). */
+  glow: number;
 }
 
 export const REAL_PALETTE: Readonly<ArtPalette> = {
@@ -117,6 +124,30 @@ export const REAL_PALETTE: Readonly<ArtPalette> = {
   lamp: '255,196,120',
   darkness: 0.42,
   silhouettes: false,
+  stars: true,
+  glow: 1,
+};
+
+/**
+ * Le matin (D-31), première version de la palette « jour » : même maison, murs plus clairs, ciel
+ * d'aube dans les fenêtres, obscurité presque levée. PROVISOIRE.
+ */
+export const DAY_PALETTE: Readonly<ArtPalette> = {
+  ...REAL_PALETTE,
+  wallTop: '#9fa9cf',
+  wallBottom: '#8690ba',
+  wallpaper: 'rgba(255,244,220,0.16)',
+  wainscot: '#7f86ad',
+  floor: '#8a6a50',
+  floorEdge: '#a07e62',
+  structure: '#4a4258',
+  night: '#8fc3ea',
+  nightLow: '#f6dcb6',
+  moon: '#fff4cf',
+  rim: 'rgba(255,240,205,0.55)',
+  darkness: 0.1,
+  stars: false,
+  glow: 0.35,
 };
 
 export const STRANGE_PALETTE: Readonly<ArtPalette> = {
