@@ -29,6 +29,8 @@ import { PlayerFeel } from '../core/player/playerFeel';
 import { LEVELS, levelName, startRoom, zoneRoom, type LevelSource, type ZoneRoom } from '../levels';
 import { DEFAULT_WORLD, type WorldParams } from '../config/world';
 import type { SaveSession } from '../core/save/SaveSession';
+import { ABILITY_HINTS, ABILITY_HINT_MS, Ability, isAbility } from '../config/abilities';
+import { Pickups } from '../core/world/Pickups';
 import { RoomTransition } from '../core/world/RoomTransition';
 import { RunEvent, RunState } from '../core/world/RunState';
 import { arrivalPosition, touchedExit, type ExitRef, type Zone } from '../core/world/zone';
@@ -104,6 +106,10 @@ export class GameScene extends Phaser.Scene {
   /** Échec, jauge de peur et checkpoints (D-21), modifiables par l'overlay. */
   readonly worldParams: WorldParams = { ...DEFAULT_WORLD };
   run!: RunState;
+  /** Objets de capacité de la salle (D-26). */
+  readonly pickups = new Pickups();
+  /** Outil de debug : escalade débloquée sans objet ni sauvegarde. */
+  debugClimb = false;
   /** Changement de salle en cours (D-25). */
   readonly transition = new RoomTransition(this.worldParams);
   session!: SaveSession;
@@ -146,6 +152,7 @@ export class GameScene extends Phaser.Scene {
     this.createPlayerTexture();
     this.run = new RunState(this.level, this.worldParams);
     this.run.load(this.level, save.activatedCheckpoints, checkpointId);
+    this.pickups.load(this.level, save.progression.abilities);
     void this.session.revealRoom(this.level.id);
     const { x, y } = this.respawnPosition();
     this.player = new PlayerPhysics(this.level, this.movement, x, y);
@@ -154,9 +161,10 @@ export class GameScene extends Phaser.Scene {
     this.dust = new DustPool(this, this.feelParams);
     this.combat = new CombatWorld(this.level, this.combatParams);
     this.combatView = new CombatView(this, this.combat, this.combatParams, this.dust);
-    this.worldView = new WorldView(this, this.run);
+    this.worldView = new WorldView(this, this.run, this.pickups);
     this.hud = new Hud();
     this.applyMovement();
+    this.applyAbilities();
     this.feel.reset(this.player);
 
     const keyboard = new KeyboardSource();
@@ -292,6 +300,10 @@ export class GameScene extends Phaser.Scene {
         this.combatView.onEvents(combat.events);
       }
       run.step(this.player.box, combat.events);
+      const picked = this.pickups.step(this.player.box);
+      if (picked >= 0) {
+        this.onAbilityPicked(picked);
+      }
       if ((run.events & RunEvent.CheckpointActivated) !== 0 && this.zone) {
         // Sauvegarde automatique au checkpoint (D-22), sans attendre l'écriture. Les parcours
         // d'essai sont hors partie : leurs checkpoints ne sont pas sauvegardés.
@@ -548,7 +560,25 @@ export class GameScene extends Phaser.Scene {
     this.combat.load(level);
     this.combatView.rebuild();
     this.run.load(level, this.session.data.activatedCheckpoints, checkpointId);
+    this.pickups.load(level, this.session.data.progression.abilities);
     this.worldView.rebuild();
+  }
+
+  /** Capacités acquises (sauvegarde) ou débloquées par l'overlay, appliquées à Céleste. */
+  applyAbilities(): void {
+    this.player.canClimb =
+      this.debugClimb || this.session.data.progression.abilities.includes(Ability.Climb);
+  }
+
+  /** Objet de capacité ramassé (D-26) : sauvegardé aussitôt, indice de prototype affiché. */
+  private onAbilityPicked(index: number): void {
+    const ability = this.pickups.items[index]?.ability;
+    if (ability === undefined || !isAbility(ability)) {
+      return;
+    }
+    void this.session.unlockAbility(ability);
+    this.applyAbilities();
+    this.hud.showHint(ABILITY_HINTS[ability], ABILITY_HINT_MS);
   }
 
   private resetCamera(): void {

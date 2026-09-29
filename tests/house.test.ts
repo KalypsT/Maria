@@ -166,8 +166,15 @@ describe('grimper aux rebords dans la maison (D-26)', () => {
   it('la trappe à linge ferme la boucle : de la buanderie au couloir', { timeout: TIMEOUT }, () => {
     const seen = reachable(zoneGraph(true, true), pickup());
     expect(seen.has(node('hall', exitSurface('hall', 3)))).toBe(true);
-    // Par la trappe depuis la buanderie, sans repasser par la cuisine.
-    const laundryUp = reachable(zoneGraph(true, true), node('laundry', exitSurface('laundry', 2)));
-    expect(laundryUp.has(node('laundry', exitSurface('laundry', 1)))).toBe(true);
+    // Dans la buanderie même : du sol (porte de la cuisine) jusqu'à la trappe, en grimpant.
+    const laundry = new Map<Node, Set<Node>>();
+    for (const move of analysis('laundry', true).moves) {
+      if (move.windowMs >= MIN_WINDOW_MS) {
+        const from = node('laundry', move.from);
+        laundry.set(from, (laundry.get(from) ?? new Set()).add(node('laundry', move.to)));
+      }
+    }
+    const up = reachable(laundry, node('laundry', exitSurface('laundry', 2)));
+    expect(up.has(node('laundry', exitSurface('laundry', 1)))).toBe(true);
   });
 });
