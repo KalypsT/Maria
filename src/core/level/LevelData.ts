@@ -28,6 +28,24 @@ export interface LevelData {
   readonly meta: Readonly<Record<string, string>>;
   /** Ennemis et autres entités, posés au bas de leur tuile. */
   readonly entities: readonly LevelEntity[];
+  /** Matériau d'affichage par tuile (même index que `tiles`), sans effet sur la collision. */
+  readonly materials: Uint8Array;
+  /** Sorties vers d'autres salles (D-25), dans les murs latéraux. */
+  readonly exits: readonly LevelExit[];
+}
+
+/** Matériaux d'affichage (D-25) : des meubles reconnaissables à l'échelle d'une enfant (§10). */
+export const Material = { Default: 0, Wood: 1, Fabric: 2 } as const;
+export type Material = (typeof Material)[keyof typeof Material];
+
+/** Sortie latérale d'une salle (D-25) : ouverture de tuiles vides dans le mur gauche ou droit. */
+export interface LevelExit {
+  /** Numéro de la sortie dans la salle (chiffre de la carte, 1 à 9). */
+  readonly id: number;
+  readonly side: 'left' | 'right';
+  readonly col: number;
+  readonly rowMin: number;
+  readonly rowMax: number;
 }
 
 export const EntityType = { Patroller: 'patroller', Checkpoint: 'checkpoint' } as const;

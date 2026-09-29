@@ -1,9 +1,20 @@
-import { EntityType, Tile, type LevelData, type LevelEntity, type TilePos } from './LevelData';
+import {
+  EntityType,
+  Material,
+  Tile,
+  type LevelData,
+  type LevelEntity,
+  type LevelExit,
+  type TilePos,
+} from './LevelData';
 
 const LEGEND: Readonly<Record<string, number>> = {
   '.': Tile.Empty,
   '#': Tile.Solid,
+  b: Tile.Solid,
+  t: Tile.Solid,
   '=': Tile.OneWay,
+  '-': Tile.OneWay,
   P: Tile.Empty,
   G: Tile.Empty,
   e: Tile.Empty,
@@ -15,6 +26,14 @@ const ENTITIES: Readonly<Record<string, EntityType>> = {
   e: EntityType.Patroller,
   C: EntityType.Checkpoint,
 };
+/** Matériaux d'affichage (D-25). */
+const MATERIALS: Readonly<Record<string, Material>> = {
+  b: Material.Wood,
+  t: Material.Fabric,
+  '-': Material.Wood,
+};
+/** Chiffres de sortie (D-25). */
+const EXIT = /^[1-9]$/;
 const SPAWN = 'P';
 const GOAL = 'G';
 const COMMENT = ';';
@@ -25,7 +44,8 @@ const META = /^;\s*@([\w-]+)\s*:\s*(.*)$/;
  * Convertit une carte ASCII (décision D-06) en `LevelData`.
  * Lignes vides en début et fin ignorées, lignes commençant par `;` ignorées (commentaires).
  * Légende : `#` plein, `=` traversable par le dessous, `.` vide, `P` départ (une seule fois),
- * `G` arrivée d'un parcours (au plus une fois), `e` patrouilleur, `C` checkpoint, `^` danger.
+ * `G` arrivée d'un parcours (au plus une fois), `e` patrouilleur, `C` checkpoint, `^` danger,
+ * `b` bois et `t` tissu (pleins), `-` étagère (traversable), `1`-`9` sortie dans un mur latéral.
  * Les commentaires `; @clé: valeur` sont des métadonnées.
  */
 export function parseAsciiLevel(id: string, text: string): LevelData {
@@ -55,9 +75,11 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   const width = first.text.length;
   const height = rows.length;
   const tiles = new Uint8Array(width * height);
+  const materials = new Uint8Array(width * height);
   let spawn: TilePos | undefined;
   let goal: TilePos | null = null;
   const entities: LevelEntity[] = [];
+  const exitTiles = new Map<number, TilePos[]>();
 
   rows.forEach(({ text: rowText, line }, row) => {
     if (rowText.length !== width) {
@@ -67,6 +89,12 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
     }
     for (let col = 0; col < width; col++) {
       const char = rowText.charAt(col);
+      if (EXIT.test(char)) {
+        const id = Number(char);
+        exitTiles.set(id, [...(exitTiles.get(id) ?? []), { col, row }]);
+        tiles[row * width + col] = Tile.Empty;
+        continue;
+      }
       const tile = LEGEND[char];
       if (tile === undefined) {
         throw new Error(
@@ -89,11 +117,40 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         entities.push({ type: entity, col, row });
       }
       tiles[row * width + col] = tile;
+      materials[row * width + col] = MATERIALS[char] ?? Material.Default;
     }
   });
 
   if (!spawn) {
     throw new Error(`Niveau ${id} : point de départ « ${SPAWN} » manquant`);
   }
-  return { id, width, height, tiles, spawn, goal, meta, entities };
+  const exits = [...exitTiles.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([exitId, cells]) => exitFromTiles(id, exitId, cells, width));
+  return { id, width, height, tiles, spawn, goal, meta, entities, materials, exits };
+}
+
+/** Une sortie : tuiles d'une même colonne de mur latéral, contiguës, au moins 2 de haut. */
+function exitFromTiles(
+  levelId: string,
+  exitId: number,
+  cells: TilePos[],
+  width: number,
+): LevelExit {
+  const cols = new Set(cells.map((c) => c.col));
+  const rows = cells.map((c) => c.row);
+  const col = cells[0]?.col ?? -1;
+  const rowMin = Math.min(...rows);
+  const rowMax = Math.max(...rows);
+  if (cols.size !== 1 || (col !== 0 && col !== width - 1)) {
+    throw new Error(
+      `Niveau ${levelId} : la sortie ${exitId} doit être dans le mur gauche ou droit`,
+    );
+  }
+  if (rowMax - rowMin + 1 !== cells.length || cells.length < 2) {
+    throw new Error(
+      `Niveau ${levelId} : la sortie ${exitId} doit être une ouverture continue d'au moins 2 tuiles`,
+    );
+  }
+  return { id: exitId, side: col === 0 ? 'left' : 'right', col, rowMin, rowMax };
 }
