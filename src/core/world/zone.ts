@@ -139,6 +139,11 @@ export function isStrangeRoom(level: LevelData): boolean {
   return level.meta.world === 'strange';
 }
 
+/** Salle du jardin (D-46) : dehors, de jour (`; @world: garden`), sur la carte. */
+export function isGardenRoom(level: LevelData): boolean {
+  return level.meta.world === 'garden';
+}
+
 /**
  * Position (coin haut gauche, px) d'une hitbox arrivant par une sortie : juste à l'intérieur, hors de
  * l'ouverture (pour ne pas repartir aussitôt), pieds au bas de l'ouverture.

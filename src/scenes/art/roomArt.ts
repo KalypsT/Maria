@@ -15,6 +15,7 @@ import {
   type LevelDecor,
 } from '../../core/level/LevelData';
 import { floatingDecor } from '../../core/level/decor';
+import { gardenDrawers } from './gardenArt';
 import { drawMemory } from './memoryArt';
 
 /**
@@ -146,6 +147,7 @@ const fabric = (a: ArtContext, r: Rect) => {
 };
 
 const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
+  ...gardenDrawers({ tileShape, rounded }),
   console(a, r) {
     wood(a, r);
     if (!a.palette.silhouettes) {
@@ -1103,7 +1105,75 @@ export function drawRoomBackground(a: ArtContext): void {
   const height = level.height * T;
   const floorY = floorRow(level) * T;
   const wainscotY = floorY - 5 * T;
-  // Mur : dégradé, papier peint, lambris.
+  if (p.outdoor) {
+    drawSky(a, width, height, floorY);
+  } else {
+    drawWall(a, width, height, floorY, wainscotY);
+  }
+  // Éléments de fond, puis structure (murs, plafond, sol), puis meubles.
+  const images = a.images;
+  const drawDecor = (furniture: boolean) => {
+    for (const d of level.decor) {
+      const isFurniture = DECOR_KINDS[d.kind]?.furniture ?? false;
+      if (isFurniture !== furniture) {
+        continue;
+      }
+      const r = rect(d);
+      const image = images.get(d.kind);
+      if (image) {
+        ctx.drawImage(image, r.x, r.y, r.w, r.h);
+      } else {
+        DRAWERS[d.kind]?.(a, r);
+      }
+    }
+  };
+  drawDecor(false);
+  drawStructure(a, floorY);
+  if (p.silhouettes) {
+    drawFloatingGlow(a);
+  }
+  drawDecor(true);
+}
+
+/** Dehors (jardin, D-46) : ciel, nuages, collines lointaines. */
+function drawSky(a: ArtContext, width: number, height: number, floorY: number): void {
+  const { ctx, palette: p } = a;
+  const sky = ctx.createLinearGradient(0, 0, 0, floorY);
+  sky.addColorStop(0, p.wallTop);
+  sky.addColorStop(1, p.wallBottom);
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = p.wallpaper;
+  for (let x = 20; x < width; x += 90) {
+    const y = 30 + ((x * 7) % 50);
+    ctx.beginPath();
+    ctx.ellipse(x, y, 16, 6, 0, 0, Math.PI * 2);
+    ctx.ellipse(x + 12, y - 4, 12, 7, 0, 0, Math.PI * 2);
+    ctx.ellipse(x + 24, y, 14, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Haies et arbres lointains, plus pâles : de la profondeur, jamais pris pour une surface.
+  ctx.fillStyle = p.wainscot;
+  ctx.globalAlpha = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(0, floorY);
+  for (let x = 0; x <= width; x += 12) {
+    ctx.lineTo(x, floorY - 3 * T - Math.sin(x / 37) * 10 - Math.sin(x / 11) * 4);
+  }
+  ctx.lineTo(width, floorY);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+}
+
+/** Dedans : mur en dégradé, papier peint, lambris. */
+function drawWall(
+  a: ArtContext,
+  width: number,
+  height: number,
+  floorY: number,
+  wainscotY: number,
+): void {
+  const { ctx, level, palette: p } = a;
   const wall = ctx.createLinearGradient(0, 0, 0, floorY);
   wall.addColorStop(0, p.wallTop);
   wall.addColorStop(1, p.wallBottom);
@@ -1131,29 +1201,6 @@ export function drawRoomBackground(a: ArtContext): void {
       ctx.strokeRect(x, wainscotY + 7, 22, floorY - wainscotY - 12);
     }
   }
-  // Éléments de fond, puis structure (murs, plafond, sol), puis meubles.
-  const images = a.images;
-  const drawDecor = (furniture: boolean) => {
-    for (const d of level.decor) {
-      const isFurniture = DECOR_KINDS[d.kind]?.furniture ?? false;
-      if (isFurniture !== furniture) {
-        continue;
-      }
-      const r = rect(d);
-      const image = images.get(d.kind);
-      if (image) {
-        ctx.drawImage(image, r.x, r.y, r.w, r.h);
-      } else {
-        DRAWERS[d.kind]?.(a, r);
-      }
-    }
-  };
-  drawDecor(false);
-  drawStructure(a, floorY);
-  if (p.silhouettes) {
-    drawFloatingGlow(a);
-  }
-  drawDecor(true);
 }
 
 /**
@@ -1194,7 +1241,17 @@ function drawStructure(a: ArtContext, floorY: number): void {
       }
       const x = col * T;
       const y = row * T;
-      if (y >= floorY) {
+      if (y >= floorY && p.outdoor) {
+        // Terre sous une bande d'herbe.
+        ctx.fillStyle = p.floor;
+        ctx.fillRect(x, y, T, T);
+        if (y === floorY) {
+          ctx.fillStyle = p.floorEdge;
+          ctx.fillRect(x, y, T, 5);
+          ctx.fillRect(x + ((col * 5) % 13), y - 2, 1.5, 3);
+          ctx.fillRect(x + ((col * 11) % 13) + 1, y - 3, 1.5, 4);
+        }
+      } else if (y >= floorY) {
         ctx.fillStyle = p.floor;
         ctx.fillRect(x, y, T, T);
         if (!p.silhouettes && (col * 7 + row * 3) % 5 === 0) {
@@ -1230,6 +1287,10 @@ function drawStructure(a: ArtContext, floorY: number): void {
           ctx.fillStyle = p.floor;
           ctx.fillRect(x, y, T, T);
         }
+        if (p.outdoor) {
+          drawNettles(ctx, p, x, y, col, y >= floorY);
+          continue;
+        }
         // Briques de jeu éparpillées (danger, sans violence).
         const colors = p.silhouettes ? [p.rim] : ['#d9788f', '#4f6f8f', '#e6c27a', '#7fa37a'];
         for (let i = 0; i < 3; i++) {
@@ -1245,6 +1306,21 @@ function drawStructure(a: ArtContext, floorY: number): void {
       }
     }
   }
+  // Dehors : une trouée dans la haie, claire (on voit qu'on peut passer).
+  if (p.outdoor) {
+    for (const exit of level.exits) {
+      const x = exit.col * T;
+      const y = exit.rowMin * T;
+      const h = (exit.rowMax - exit.rowMin + 1) * T;
+      ctx.fillStyle = p.wallBottom;
+      ctx.fillRect(x, y, T, h);
+      ctx.fillStyle = p.leafDark;
+      ctx.beginPath();
+      ctx.ellipse(x + T / 2, y, T * 0.9, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    return;
+  }
   // Sorties : ouverture sombre, encadrement en bois.
   for (const exit of level.exits) {
     const x = exit.col * T;
@@ -1259,6 +1335,38 @@ function drawStructure(a: ArtContext, floorY: number): void {
     ctx.fillRect(exit.side === 'left' ? x + T - 3 : x, y - 3, 3, h + 3);
     ctx.fillRect(x, y - 3, T, 3);
   }
+}
+
+/** Orties (danger du jardin, D-46) : touffes dentelées d'un vert vif, sans violence. */
+function drawNettles(
+  ctx: CanvasRenderingContext2D,
+  p: Readonly<ArtPalette>,
+  x: number,
+  y: number,
+  col: number,
+  inFloor: boolean,
+): void {
+  if (inFloor) {
+    ctx.fillStyle = p.floor;
+    ctx.fillRect(x, y, T, T);
+  }
+  const base = inFloor ? y + 3 : y + T;
+  ctx.fillStyle = '#3f8f4a';
+  for (let i = 0; i < 3; i++) {
+    const cx = x + 3 + i * 5;
+    const h = 7 + ((col * 3 + i * 5) % 4);
+    ctx.beginPath();
+    ctx.moveTo(cx - 2.5, base);
+    ctx.lineTo(cx - 1.5, base - h * 0.5);
+    ctx.lineTo(cx - 2.8, base - h * 0.55);
+    ctx.lineTo(cx, base - h);
+    ctx.lineTo(cx + 2.8, base - h * 0.55);
+    ctx.lineTo(cx + 1.5, base - h * 0.5);
+    ctx.lineTo(cx + 2.5, base);
+    ctx.fill();
+  }
+  ctx.fillStyle = '#b7e36b';
+  ctx.fillRect(x + 7.5, base - 8, 1, 1);
 }
 
 /**
@@ -1357,7 +1465,8 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
       if (
         (tile === Tile.Solid || tile === Tile.OneWay) &&
         above !== Tile.Solid &&
-        above !== Tile.OneWay
+        above !== Tile.OneWay &&
+        above !== Tile.Hazard
       ) {
         ctx.fillRect(col * T, row * T, T, 1);
       }

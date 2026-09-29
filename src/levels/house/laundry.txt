@@ -4,8 +4,10 @@
 ; @ambient: #29303a
 ; @ability: climb
 ; @note: machine, placard mural, rebord de la trappe (sortie 1) : chaîne d'escalade (D-26).
+; @note-2: porte de derrière (sortie 3) vers le jardin : poignée trop haute avant que Céleste grandisse (D-46).
 ; @wall: tiles
 ; @decor: window 28 4 6 5
+; @decor: backdoor 45 18 1 6
 ; @decor: lamp 32 11 1 2
 ; @decor: clothesline 12 11 14 2
 ; @decor: ledge 1 10 6 1
@@ -35,8 +37,8 @@
 #............bbbbbbbbb.......................#
 #............bbbbbbbbb.......................#
 #............bbbbbbbbb.......................#
-2.........tttbbbbbbbbbttttt.........=========#
-2.........tttbbbbbbbbbttttt..................#
-2.........tttbbbbbbbbbttttt.....e.......P....#
+2.........tttbbbbbbbbbttttt......=========...3
+2.........tttbbbbbbbbbttttt..................3
+2.........tttbbbbbbbbbttttt.....e.......P....3
 ##############################################
 ##############################################

@@ -14,6 +14,7 @@ const LEGEND: Readonly<Record<string, number>> = {
   '#': Tile.Solid,
   b: Tile.Solid,
   t: Tile.Solid,
+  v: Tile.Solid,
   '=': Tile.OneWay,
   '-': Tile.OneWay,
   P: Tile.Empty,
@@ -35,6 +36,7 @@ const ENTITIES: Readonly<Record<string, EntityType>> = {
 const MATERIALS: Readonly<Record<string, Material>> = {
   b: Material.Wood,
   t: Material.Fabric,
+  v: Material.Leaf,
   '-': Material.Wood,
 };
 /** Chiffres de sortie (D-25). */
@@ -52,7 +54,7 @@ const DECOR = /^([a-z][\w-]*)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
  * Lignes vides en début et fin ignorées, lignes commençant par `;` ignorées (commentaires).
  * Légende : `#` plein, `=` traversable par le dessous, `.` vide, `P` départ (une seule fois),
  * `G` arrivée d'un parcours (au plus une fois), `e` patrouilleur, `C` checkpoint, `^` danger,
- * `b` bois et `t` tissu (pleins), `-` étagère (traversable), `1`-`9` sortie dans un mur latéral,
+ * `b` bois, `t` tissu et `v` feuillage (pleins, D-46), `-` étagère (traversable), `1`-`9` sortie dans un mur latéral,
  * `A` objet de capacité (au plus un, capacité nommée par `; @ability:`), `S` trouvaille (secret).
  * Les commentaires `; @clé: valeur` sont des métadonnées ; `; @decor:` (répétable) déclare
  * l'habillage (D-28).

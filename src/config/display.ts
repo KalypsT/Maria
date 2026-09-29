@@ -50,6 +50,9 @@ export const PLACEHOLDER_COLORS = {
   /** Tissus (lit, canapé, coussins). */
   fabric: 0x5f6f8e,
   fabricEdge: 0x7e8eab,
+  /** Feuillage (haies, frondaisons du jardin, D-46). */
+  leaf: 0x4f7a4a,
+  leafEdge: 0x6f9a62,
   /** Arrivée d'un parcours (placeholder). */
   goal: 0xe6c27a,
   /** Patrouilleur (placeholder neutre, design ouvert) : ocre, distinct de Céleste et du décor. */

@@ -1,0 +1,43 @@
+; Jardin : l'allée des toits (D-46), du haut du vieux mur jusqu'au toit de la pergola de la terrasse.
+; Raccourci qui boucle le jardin ; la cheminée entre la remise et le mur demande le saut mural.
+; @name: Allée
+; @icon: fence
+; @world: garden
+; @difficulty: medium
+; @decor: canopy 0 0 56 1
+; @decor: hedge 0 1 1 5
+; @decor: hedge 0 9 1 15
+; @decor: hedge 55 1 1 9
+; @decor: hedge 55 13 1 11
+; @decor: oldwall 34 13 21 11
+; @decor: hedge 34 1 2 10
+; @decor: shed 18 5 12 19
+; @decor: fence 1 9 12 15
+; @decor: sun 6 2 3 3
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (danger), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+v.................................vv...................v
+v.................................vv...................v
+v.................................vv...................v
+v.................................vv...................v
+v.................bbbbbbbbbbbb....vv...................v
+1.................bbbbbbbbbbbb....vv...................v
+1.................bbbbbbbbbbbb....vv...................v
+1.................bbbbbbbbbbbb....vv...................v
+vbbbbbbbbbbbb.....bbbbbbbbbbbb....vv...................v
+vbbbbbbbbbbbb.....bbbbbbbbbbbb....vv...................2
+vbbbbbbbbbbbb.....bbbbbbbbbbbb.........................2
+vbbbbbbbbbbbb.....bbbbbbbbbbbb..........P..............2
+vbbbbbbbbbbbb.....bbbbbbbbbbbb....#####################v
+vbbbbbbbbbbbb.....bbbbbbbbbbbb....#####################v
+vbbbbbbbbbbbb.....bbbbbbbbbbbb....#####################v
+vbbbbbbbbbbbb.....bbbbbbbbbbbb....#####################v
+vbbbbbbbbbbbb.....bbbbbbbbbbbb....#####################v
+vbbbbbbbbbbbb.....bbbbbbbbbbbb....#####################v
+vbbbbbbbbbbbb.....bbbbbbbbbbbb....#####################v
+vbbbbbbbbbbbb.....bbbbbbbbbbbb....#####################v
+vbbbbbbbbbbbb.....bbbbbbbbbbbb....#####################v
+vbbbbbbbbbbbb.....bbbbbbbbbbbb....#####################v
+vbbbbbbbbbbbb.....bbbbbbbbbbbb....#####################v
+#############^^^^^############^^^^######################
+########################################################

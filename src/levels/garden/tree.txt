@@ -1,0 +1,66 @@
+; Jardin : le grand arbre (D-46). On y monte par les branches et les buissons de la haie (en grimpant),
+; jusqu'à la cabane (sortie 2). Le vieux mur (sortie 3, en haut à gauche) ne s'atteint qu'avec le saut mural,
+; par la cheminée entre le mur et le tronc.
+; @name: Grand arbre
+; @icon: tree
+; @world: garden
+; @difficulty: medium
+; @note: trou dans la haie (en bas à droite) : le fond du jardin, pour plus tard.
+; @decor: canopy 0 0 46 1
+; @decor: hedge 0 1 1 5
+; @decor: hedge 45 1 1 8
+; @decor: hedge 45 12 1 28
+; @decor: oldwall 0 9 16 26
+; @decor: treetrunk 20 6 6 31
+; @decor: canopy 1 1 44 5
+; @decor: bush 37 36 8 2
+; @decor: branch 26 32 7 1
+; @decor: bush 37 28 8 2
+; @decor: branch 26 24 7 1
+; @decor: bush 37 20 8 2
+; @decor: branch 26 16 7 1
+; @decor: deck 36 12 9 1
+; @decor: hedgehole 39 37 6 3
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (danger), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+3...................bbbbbb...................v
+3...................bbbbbb...................v
+3...................bbbbbb...................v
+################....bbbbbb...................2
+################....bbbbbb...................2
+################....bbbbbb...................2
+################....bbbbbb..........bbbbbbbbbv
+################....bbbbbb...................v
+################....bbbbbb...................v
+################....bbbbbb...................v
+################....bbbbbb-------............v
+################....bbbbbb...................v
+################....bbbbbb...................v
+################....bbbbbb...................v
+################....bbbbbb...........vvvvvvvvv
+################....bbbbbb...........vvvvvvvvv
+################....bbbbbb...................v
+################....bbbbbb...................v
+################....bbbbbb-------............v
+################....bbbbbb...................v
+################....bbbbbb...................v
+################....bbbbbb...................v
+################....bbbbbb...........vvvvvvvvv
+################....bbbbbb...........vvvvvvvvv
+################....bbbbbb...................v
+################....bbbbbb...................v
+################....bbbbbb-------............v
+################....bbbbbb...................v
+################....bbbbbb...................v
+#...................bbbbbb...................v
+#...................bbbbbb...........vvvvvvvvv
+1....................................vvvvvvvvv
+1............................................v
+1...P........................................v
+##############################################
+##############################################

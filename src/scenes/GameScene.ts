@@ -37,6 +37,7 @@ import { RoomTransition } from '../core/world/RoomTransition';
 import { RunEvent, RunState } from '../core/world/RunState';
 import {
   arrivalPosition,
+  isGardenRoom,
   isStrangeRoom,
   touchedExit,
   type ExitRef,
@@ -49,6 +50,7 @@ import { PauseMenu } from '../ui/PauseMenu';
 import {
   ART_IMAGES,
   DAY_PALETTE,
+  GARDEN_PALETTE,
   MAX_ART_SCALE,
   REAL_PALETTE,
   STRANGE_PALETTE,
@@ -90,6 +92,7 @@ const SOLID_COLORS: Readonly<Partial<Record<number, SolidColors>>> = {
   [Material.Default]: DEFAULT_SOLID,
   [Material.Wood]: { fill: PLACEHOLDER_COLORS.wood, edge: PLACEHOLDER_COLORS.woodEdge },
   [Material.Fabric]: { fill: PLACEHOLDER_COLORS.fabric, edge: PLACEHOLDER_COLORS.fabricEdge },
+  [Material.Leaf]: { fill: PLACEHOLDER_COLORS.leaf, edge: PLACEHOLDER_COLORS.leafEdge },
 };
 
 /** Titre de la carte de chaque zone (écrit par Céleste). */
@@ -1075,6 +1078,9 @@ export class GameScene extends Phaser.Scene {
   private palette() {
     if (this.strangeWorld || isStrangeRoom(this.level)) {
       return STRANGE_PALETTE;
+    }
+    if (isGardenRoom(this.level)) {
+      return GARDEN_PALETTE;
     }
     return this.story.timeOfDay() === 'morning' ? DAY_PALETTE : REAL_PALETTE;
   }
