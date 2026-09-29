@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { CAMERA_PARAM_RANGES, DEFAULT_CAMERA, type CameraParams } from '../config/camera';
 import { COMBAT_PARAM_RANGES, DEFAULT_COMBAT, type CombatParams } from '../config/combat';
 import { DEFAULT_FEEL, FEEL_PARAM_RANGES, type FeelParams } from '../config/feel';
+import { DEFAULT_WORLD, WORLD_PARAM_RANGES, type WorldParams } from '../config/world';
+import { deserializeSave } from '../core/save/saveData';
 import {
   DEFAULT_MOVEMENT,
   MOVEMENT_PARAM_RANGES,
@@ -19,6 +21,8 @@ import {
   sanitizeCameraOverrides,
   sanitizeCombatOverrides,
   sanitizeFeelOverrides,
+  sanitizeWorldOverrides,
+  worldToJson,
   sanitizeMovementOverrides,
 } from './movementOverrides';
 
@@ -28,6 +32,7 @@ const STORAGE_KEY = 'maria.debug.movement';
 const CAMERA_STORAGE_KEY = 'maria.debug.camera';
 const FEEL_STORAGE_KEY = 'maria.debug.feel';
 const COMBAT_STORAGE_KEY = 'maria.debug.combat';
+const WORLD_STORAGE_KEY = 'maria.debug.world';
 const ATTACK_COLOR = 0xff5d5d;
 const ENEMY_BOX_COLOR = 0xffa24d;
 const ENEMY_STATE_LABEL = ['patrouille', 'étourdi', 'dispersé'] as const;
@@ -171,6 +176,8 @@ export function installDebugOverlay(scene: GameScene): void {
   scene.applyFeel();
   Object.assign(scene.combatParams, load(COMBAT_STORAGE_KEY, sanitizeCombatOverrides));
   scene.applyCombat();
+  Object.assign(scene.worldParams, load(WORLD_STORAGE_KEY, sanitizeWorldOverrides));
+  scene.applyWorld();
 
   const style = document.createElement('style');
   style.textContent = STYLE;
@@ -254,6 +261,75 @@ export function installDebugOverlay(scene: GameScene): void {
     },
   });
 
+  const refreshWorld = addSliders<WorldParams>(panel, {
+    title: 'Échec et peur',
+    values: scene.worldParams,
+    defaults: DEFAULT_WORLD,
+    ranges: WORLD_PARAM_RANGES,
+    onChange: () => {
+      scene.applyWorld();
+      save(WORLD_STORAGE_KEY, worldToJson(scene.worldParams));
+    },
+  });
+
+  // Sauvegarde (D-22) : inspection des emplacements, checkpoints, tests de récupération.
+  const saveSection = element('details', panel);
+  element('summary', saveSection, undefined, 'Sauvegarde');
+  const saveInfo = element('div', saveSection, 'dbg-stats');
+  const refreshSave = async () => {
+    const manager = scene.session.manager;
+    const slots = await manager.storage.read();
+    const describe = (text: string | null) => {
+      if (text === null) {
+        return 'vide';
+      }
+      const result = deserializeSave(text);
+      return result.ok
+        ? `valide (${new Date(result.data.savedAt).toLocaleTimeString()})`
+        : `refusé : ${result.problem}`;
+    };
+    const checkpoints = scene.run.checkpoints
+      .map((c, i) => `${c.id}${c.activated ? ' ✓' : ''}${i === scene.run.current ? ' ←' : ''}`)
+      .join('  ');
+    saveInfo.textContent =
+      `stockage ${manager.storage.kind}${manager.lastError ? `  erreur : ${manager.lastError}` : ''}\n` +
+      `principal ${describe(slots.main)}\nprécédent ${describe(slots.previous)}\n` +
+      `checkpoints ${checkpoints || '(aucun)'}\n\n${JSON.stringify(scene.session.data, null, 1)}`;
+  };
+  saveSection.addEventListener('toggle', () => {
+    if (saveSection.open) {
+      void refreshSave();
+    }
+  });
+  const saveActions = element('div', saveSection, 'dbg-actions');
+  element('button', saveActions, undefined, 'Actualiser').addEventListener('click', () => {
+    void refreshSave();
+  });
+  element('button', saveActions, undefined, 'Sauvegarder maintenant').addEventListener(
+    'click',
+    () => {
+      void scene.session.persist().then(refreshSave);
+    },
+  );
+  element('button', saveActions, undefined, 'Corrompre le principal').addEventListener(
+    'click',
+    () => {
+      const storage = scene.session.manager.storage;
+      void storage
+        .read()
+        .then((slots) => storage.write({ main: '{"abîmé": true', previous: slots.previous }))
+        .then(refreshSave);
+    },
+  );
+  element('button', saveActions, undefined, 'Effacer la sauvegarde').addEventListener(
+    'click',
+    () => {
+      void scene.session.manager.clear().then(() => {
+        location.reload();
+      });
+    },
+  );
+
   // Actions.
   const actions = element('div', panel, 'dbg-actions');
   const exportButton = element('button', actions, undefined, 'Exporter JSON');
@@ -264,6 +340,7 @@ export function installDebugOverlay(scene: GameScene): void {
         camera: orderedParams(scene.cameraParams, CAMERA_PARAM_RANGES),
         feel: orderedParams(scene.feelParams, FEEL_PARAM_RANGES),
         combat: orderedParams(scene.combatParams, COMBAT_PARAM_RANGES),
+        world: orderedParams(scene.worldParams, WORLD_PARAM_RANGES),
       },
       null,
       2,
@@ -301,10 +378,17 @@ export function installDebugOverlay(scene: GameScene): void {
     refreshMovement();
     refreshCamera();
     refreshFeel();
+    Object.assign(scene.worldParams, DEFAULT_WORLD);
+    scene.applyWorld();
+    save(WORLD_STORAGE_KEY, worldToJson(scene.worldParams));
     refreshCombat();
+    refreshWorld();
   });
   element('button', actions, undefined, 'Replacer Céleste').addEventListener('click', () => {
     scene.respawn();
+  });
+  element('button', actions, undefined, 'Évanouissement').addEventListener('click', () => {
+    scene.run.triggerFaint();
   });
   element('button', actions, undefined, 'Réinitialiser les ennemis').addEventListener(
     'click',
@@ -397,7 +481,9 @@ export function installDebugOverlay(scene: GameScene): void {
       const states = combat.enemies.map((enemy) => ENEMY_STATE_LABEL[enemy.state]).join(' ');
       stats.textContent +=
         `\ncombat coup ${combat.attack.phase} n°${combat.attack.swing}  invuln. ${combat.invulnerableSteps}` +
-        (states ? `  ennemis ${states}` : '');
+        (states ? `  ennemis ${states}` : '') +
+        `\npeur ${scene.run.fear}/${scene.worldParams.fearMax}  retour ${scene.run.currentKey ?? 'départ'}` +
+        (scene.run.fainting ? '  évanouie' : '');
       const touch = scene.touch;
       if (touch) {
         const stick = touch.controller.joystick;
