@@ -14,6 +14,26 @@ const PICKUP_SIZE = 10;
 const PICKUP_BOB_PX = 2;
 const PICKUP_BOB_MS = 1600;
 
+/** Couleurs de la veilleuse : maison réelle, et monde étrange (turquoise, D-34). */
+const REAL_LAMP = {
+  foot: '#9a7352',
+  stem: '#9aa0b3',
+  stemLit: '#f7e3b0',
+  cap: '#6e7590',
+  capLit: '#ffcf7a',
+  dots: '#b9bfd0',
+  dotsLit: '#fff4d0',
+};
+const STRANGE_LAMP: typeof REAL_LAMP = {
+  foot: '#1a2a33',
+  stem: '#2c3e48',
+  stemLit: '#c8fff4',
+  cap: '#23343e',
+  capLit: '#5ee6d2',
+  dots: '#3a525c',
+  dotsLit: '#effffb',
+};
+
 /**
  * Affichage des checkpoints (placeholder neutre, design ouvert §45) : un petit repère qui s'allume
  * quand il est activé, plus vif s'il est le point de retour courant. Objets de capacité (D-26) :
@@ -23,6 +43,8 @@ export class WorldView {
   private sprites: Phaser.GameObjects.Image[] = [];
   private pickupSprites: Phaser.GameObjects.Image[] = [];
   private artScale = 1;
+  /** Monde étrange (D-34) : veilleuse turquoise. */
+  private strange = false;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -86,12 +108,16 @@ export class WorldView {
     }
   }
 
-  /** Échelle de l'écran (D-28) : textures redessinées nettes, repères recréés. */
-  setArtScale(scale: number): void {
-    if (scale === this.artScale) {
+  /**
+   * Échelle de l'écran (D-28) et monde étrange (veilleuse turquoise, D-34) : textures redessinées
+   * nettes, repères recréés.
+   */
+  setArt(scale: number, strange: boolean): void {
+    if (scale === this.artScale && strange === this.strange) {
       return;
     }
     this.artScale = scale;
+    this.strange = strange;
     this.createTextures();
     this.rebuild();
   }
@@ -149,19 +175,20 @@ export class WorldView {
       [CHECKPOINT_OFF, false],
       [CHECKPOINT_ON, true],
     ] as const) {
+      const c = this.strange ? STRANGE_LAMP : REAL_LAMP;
       make(key, WIDTH, HEIGHT, (ctx) => {
         // Pied en bois, chapeau de champignon, petite fenêtre ronde.
-        ctx.fillStyle = '#9a7352';
+        ctx.fillStyle = c.foot;
         ctx.beginPath();
         ctx.roundRect(1, HEIGHT - 3, WIDTH - 2, 3, 1);
         ctx.fill();
-        ctx.fillStyle = lit ? '#f7e3b0' : '#9aa0b3';
+        ctx.fillStyle = lit ? c.stemLit : c.stem;
         ctx.fillRect(WIDTH / 2 - 1.5, HEIGHT - 10, 3, 7);
-        ctx.fillStyle = lit ? '#ffcf7a' : '#6e7590';
+        ctx.fillStyle = lit ? c.capLit : c.cap;
         ctx.beginPath();
         ctx.ellipse(WIDTH / 2, HEIGHT - 10, WIDTH / 2, 5, 0, Math.PI, 0);
         ctx.fill();
-        ctx.fillStyle = lit ? '#fff4d0' : '#b9bfd0';
+        ctx.fillStyle = lit ? c.dotsLit : c.dots;
         ctx.beginPath();
         ctx.arc(WIDTH / 2 - 1.5, HEIGHT - 12, 1, 0, Math.PI * 2);
         ctx.arc(WIDTH / 2 + 2, HEIGHT - 13, 0.8, 0, Math.PI * 2);

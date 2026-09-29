@@ -802,7 +802,48 @@ export function drawRoomBackground(a: ArtContext): void {
   };
   drawDecor(false);
   drawStructure(a, floorY);
+  if (p.silhouettes) {
+    drawFloatingGlow(a);
+  }
   drawDecor(true);
+}
+
+/**
+ * Monde étrange (D-34) : sous un meuble qui flotte (rien sous lui), une lueur turquoise. Purement
+ * visuel et immobile : le dessin reste exactement sur la collision (pilier 1).
+ */
+function drawFloatingGlow(a: ArtContext): void {
+  const { ctx, level, palette: p } = a;
+  for (const d of level.decor) {
+    if (!(DECOR_KINDS[d.kind]?.furniture ?? false)) {
+      continue;
+    }
+    const below = d.row + d.height;
+    let floating = below < level.height;
+    for (let col = d.col; floating && col < d.col + d.width; col++) {
+      floating = tileAt(level, col, below) === Tile.Empty;
+    }
+    if (!floating) {
+      continue;
+    }
+    const r = rect(d);
+    const cx = r.x + r.w / 2;
+    const cy = r.y + r.h;
+    const rx = r.w / 2 + 6;
+    const ry = 9;
+    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, rx);
+    glow.addColorStop(0, `rgba(${p.lamp},0.32)`);
+    glow.addColorStop(1, `rgba(${p.lamp},0)`);
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(1, ry / rx);
+    ctx.translate(-cx, -cy);
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cx, cy, rx, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
 }
 
 /** Murs, plafond, sol en parquet et encadrement des sorties. */

@@ -5,8 +5,32 @@
 ; @difficulty: medium
 ; @ambient: #1a1f2c
 ; @note: Maria (étagère de gauche, colonnes 3-6) : jamais atteignable, même en grimpant.
-; @note-2: trouvaille (colonnes 17-18) : saut difficile depuis l'étagère de droite ; un échec ramène sur le chemin.
+; @note-2: trouvaille (en haut à droite, colonnes 44-45) : saut difficile depuis l'étagère sous le berceau ; un échec ramène sur le chemin.
+; @note-3: deux sauts moyens (écart de 6 tuiles) : vers la gauche au milieu, puis vers le berceau ; une étagère rattrape chaque chute.
 ; @wall: planks
+; @decor: window 6 4 7 6
+; @decor: frame 36 26 3 2
+; @decor: clock 9 30 2 2
+; @decor: frame 30 12 3 2
+; @decor: lamp 14 22 1 2
+; @decor: drawing 40 38 3 3
+; @decor: coatrack 4 34 3 3
+; @decor: shelf 34 39 5 1
+; @decor: shelf 27 36 5 1
+; @decor: shelf 36 33 6 1
+; @decor: shelf 26 30 15 1
+; @decor: shelf 22 27 4 1
+; @decor: shelf 30 24 5 1
+; @decor: shelf 38 21 6 1
+; @decor: shelf 36 18 6 1
+; @decor: shelf 24 18 6 1
+; @decor: shelf 21 15 5 1
+; @decor: shelf 28 12 5 1
+; @decor: shelf 35 9 5 1
+; @decor: shelf 34 6 4 1
+; @decor: shelf 20 6 8 1
+; @decor: shelf 2 20 4 1
+; @decor: shelf 43 3 2 1
 ; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), ^ briques de jeu (danger), e jouet mécanique, C veilleuse (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 ##############################################
 #............................................#

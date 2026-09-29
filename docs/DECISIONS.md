@@ -312,6 +312,30 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
   - Un objet peut être **ramassé** : il disparaît aussitôt, même à l'écran (la couverture). **Jamais Maria** : la validation des données le refuse.
 - **Sauvegarde** : nouvelle étape `evening.blanket`, ajoutée aussi aux étapes données à une ancienne partie migrée. Une partie en cours de soirée reprend simplement à la couverture.
 
+## D-34 — Monde étrange jouable (salon étrange, passage d'ombres)
+
+- **Décision** (plan validé) : le clignement en haut de la bibliothèque ne fait plus basculer le salon réel ; il fait passer Céleste, **dans le noir**, dans des **salles distinctes** du monde étrange. Remplace les points 2 à 4 de D-32 (bascule du salon réel, retour en quittant le salon, bandeau posé à ce moment-là).
+- **Salles** (PLACEHOLDER) :
+  - **salon étrange** : mêmes silhouettes que le salon, réagencées ; portes murées ; meubles qui flottent ; une ouverture en haut du mur gauche. Difficulté facile (salle de découverte) ;
+  - **passage d'ombres** : montée d'étagères flottantes autour d'un vide, jouets-ombres, **veilleuse turquoise** (point de retour). Difficulté **moyenne** (D-16) : deux sauts moyens, chacun avec une étagère en dessous pour rattraper une chute. **Trouvaille optionnelle difficile**.
+- **Maria** (pilier 5) : assise sur une étagère flottante de l'autre côté du vide, **inaccessible** (testé, même en grimpant) ; elle est là dès l'entrée et ne bouge jamais.
+- **Fin** : un **berceau vide** qui flotte tout en haut. Agir, long fondu, Céleste assise sur son lit, le **bandeau** de Maria à côté d'elle, une bulle. Aucune explication (pilier 6).
+- **Règles de jeu (validées)** :
+  - **pas de sortie volontaire** du monde étrange : on en sort par la fin, ou par un évanouissement ;
+  - évanouissement avant la veilleuse turquoise : retour au point de retour réel ; le haut de la bibliothèque ramène alors au monde étrange (clignement bref, sans bulle), tant que la fin n'est pas vécue ;
+  - après la veilleuse : retour à la veilleuse ;
+  - **carte** : les salles étranges n'y figurent jamais ; ouverte dans le monde étrange, elle ne dessine pas Céleste (« elle n'est nulle part »).
+- **Mise en œuvre** :
+  - étape de script **`room`** : changement de salle, seulement dans le noir complet (validé par `storyProblems`), debout sur un sol ; `returnPoint` fait de la veilleuse de la salle le point de retour (fin : chambre) ;
+  - directive de salle **`; @world: strange`** : palette étrange permanente, salle absente de la carte et de `mapRevealed`. Le mécanisme `strangeRooms` (bascule par étapes) est retiré ;
+  - un déclencheur qui emmène Céleste dans une autre salle peut rester disponible (ré-entrée) : il ne peut pas se rejouer sur place ;
+  - rendu : **lueur turquoise immobile** sous les meubles qui flottent (aucun balancement : le dessin reste sur la collision, pilier 1) ; veilleuse turquoise ;
+  - le graphe de faisabilité des tests (`tests/zoneGraph.ts`) suit les passages de l'histoire et la difficulté déclarée de chaque salle. « Jamais coincée » : faciles dans la maison réelle, moyens au plus dans le monde étrange.
+- **Sauvegarde** : aucune migration (nouvelle étape `strange.done`). Les étapes retirées `living.left` et `headband.found` restent sans effet dans une ancienne sauvegarde. Une partie qui avait vécu l'ancienne fin retrouve le monde étrange ouvert, et le bandeau réapparaît à la nouvelle fin.
+- **Limites** :
+  - l'analyse de difficulté ignore les ennemis : aucun jouet-ombre n'est placé sur une réception d'un saut moyen, à confirmer sur téléphone ;
+  - la durée (3 à 5 min) est une estimation sur plan, à chronométrer.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

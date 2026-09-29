@@ -247,6 +247,8 @@ export class GameScene extends Phaser.Scene {
     const { room, checkpointId } = savedReturn(this.session);
     this.level = room.level;
     this.zone = room.zone;
+    // Partie reprise dans le monde étrange (veilleuse du passage d'ombres, D-34).
+    this.drawnStrange = isStrangeRoom(this.level);
     this.drawLevel();
     this.run = new RunState(this.level, this.worldParams);
     this.run.load(this.level, save.activatedCheckpoints, checkpointId);
@@ -262,7 +264,7 @@ export class GameScene extends Phaser.Scene {
     this.combatView = new CombatView(this, this.combat, this.combatParams, this.dust);
     this.combatView.setArt(this.artScale, this.palette());
     this.worldView = new WorldView(this, this.run, this.pickups);
-    this.worldView.setArtScale(this.artScale);
+    this.worldView.setArt(this.artScale, this.strangeWorld || isStrangeRoom(this.level));
     this.props.load(this.story.data.props, this.level.id, this.story.flags);
     this.storyView = new StoryView(this, this.props, this.story);
     this.storyView.setArt(this.artScale, this.artImages());
@@ -820,7 +822,7 @@ export class GameScene extends Phaser.Scene {
   private redrawArt(): void {
     this.drawnTime = this.story.timeOfDay();
     this.drawnStrange = isStrangeRoom(this.level);
-    this.worldView.setArtScale(this.artScale);
+    this.worldView.setArt(this.artScale, this.strangeWorld || isStrangeRoom(this.level));
     this.storyView.setArt(this.artScale, this.artImages());
     this.combatView.setArt(this.artScale, this.palette());
     this.drawLevel();
