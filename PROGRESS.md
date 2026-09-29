@@ -2,11 +2,35 @@
 
 ## Phase en cours
 
-**Vertical slice** (D-30 à D-32) : **Maria dans la bibliothèque et premier passage vers le monde étrange** (PR 2 de « Maria et le monde étrange ») implémentés sur la branche `ccr-f0e3d7f5-a38dwj`, **en attente d'essai sur téléphone**. Avec la PR 1, la séquence narrative du slice est complète.
+**Vertical slice, A : monde étrange jouable** (D-34) implémenté sur la branche `ccr-5c5df983-6feqj3`, **en attente d'essai sur téléphone**. Tout ce qui précède (D-30 à D-33) est fusionné dans `main`.
 
-Prochaine : essai du slice complet sur téléphone, puis retours (maison plus vivante, rez-de-chaussée), ou la croissance.
+Prochaine : essai complet du slice sur téléphone, **chronométré** (cible §53 : 15 à 30 min), avec la question « est-ce que ça donne envie de continuer ? ». Ensuite : maison plus vivante et rez-de-chaussée retravaillé, puis la croissance.
 
 ## Fait
+
+### Monde étrange jouable (§6.2, D-34)
+
+- **Entrée** : en haut de la bibliothèque, le clignement fait passer Céleste, dans le noir, dans le **salon étrange** (même place, bulle « Maria ? »). Après un évanouissement avant la veilleuse turquoise (retour au point de retour réel), le haut de la bibliothèque y ramène par un clignement bref, tant que la fin n'est pas vécue.
+- **Salon étrange** (66 × 24, facile) : même taille que le vrai salon, portes murées, bibliothèque à la même place ; canapé, table et poufs flottent ; on redescend, on traverse le sol (deux jouets-ombres, briques), on remonte les meubles flottants jusqu'à l'ouverture en haut du mur gauche.
+- **Passage d'ombres** (46 × 44, moyen) : montée d'étagères flottantes ; veilleuse turquoise au tiers ; **deux sauts moyens** (écart de 6 tuiles, fenêtre 133 ms), une étagère rattrape chaque chute ; **Maria** assise sur une étagère de l'autre côté du vide, hors d'atteinte ; **trouvaille difficile** (67 ms) en haut à droite ; un **berceau vide** tout en haut.
+- **Fin** : Agir au berceau, long fondu (comme la nuit), Céleste assise sur son lit, le **bandeau** à côté d'elle, bulle avec le visage de Maria. Le point de retour repasse à la veilleuse de la chambre.
+- **Carte** : les salles étranges n'y figurent pas ; ouverte dans le monde étrange, elle ne dessine pas Céleste.
+- **Rendu** : lueur turquoise immobile sous les meubles qui flottent ; veilleuse turquoise.
+- **Moteur** : étape de script `room` (changement de salle dans le noir, point de retour optionnel), directive de salle `; @world: strange`. Supprimés : le basculement du salon réel par étapes (`strangeRooms`), le déclencheur « en quittant le salon » et les étapes `living.left` et `headband.found`.
+- **Debug** : liste « Histoire » (monde étrange ouvert, fin du monde étrange) ; les deux salles sont dans la téléportation.
+- Tests : 329. Faisabilité du monde étrange : jamais coincée, chemin principal exactement moyen, Maria jamais atteignable (même en grimpant), trouvaille difficile, entrée seulement par l'histoire. Validation des scripts : changement de salle seulement dans le noir, sur un sol, point de retour avec une veilleuse.
+- **Vérifié dans Chromium** : clignement puis salon étrange, habillage des deux salles, veilleuse turquoise sauvegardée puis reprise après rechargement dans le passage, fin dans la chambre (bandeau, bulle, point de retour).
+
+### À vérifier sur téléphone (monde étrange jouable)
+
+- [ ] **Chronomètre** : temps passé dans le monde étrange (visé : 3 à 5 min), et temps du slice complet.
+- [ ] Les deux sauts moyens du passage sont exigeants sans être frustrants ; les chutes ne font perdre qu'un palier.
+- [ ] Les jouets-ombres ne gênent pas les réceptions (l'analyse de difficulté ne voit pas les ennemis).
+- [ ] Maria se remarque de l'autre côté du vide, et on comprend qu'on ne peut pas l'atteindre.
+- [ ] Le noir du clignement ne dure pas trop longtemps (dessin de la salle pendant le noir).
+- [ ] La fin (berceau vide, chambre, bandeau) serre un peu le cœur sans rien expliquer.
+- [ ] Un évanouissement avant la veilleuse ramène à la maison, et le haut de la bibliothèque ramène au monde étrange.
+- [ ] Partie existante : si l'ancienne fin avait déjà été vécue, le bandeau disparaît du lit jusqu'à la nouvelle fin (voulu).
 
 ### Histoire ralentie (D-33, retours de l'utilisateur)
 
@@ -509,6 +533,7 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. PR de la carte et merge, puis essai sur téléphone (liste « carte »).
-2. **Vertical slice** : manifestation de Maria (jamais en mouvement, jamais parlante), courte séquence narrative, premier passage vers le monde étrange en jeu. Plan à valider.
-3. Ensuite : croissance (§42 phase 7), maison plus vivante, affichage de jour, zones suivantes plus difficiles.
+1. PR du monde étrange jouable (D-34) et merge.
+2. **Essai complet du slice sur téléphone, chronométré** (§53 : 15 à 30 min) : « est-ce que ça donne envie de continuer ? ».
+3. Maison plus vivante et rez-de-chaussée retravaillé.
+4. La croissance (§42 phase 7).
