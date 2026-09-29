@@ -208,6 +208,23 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
   - **Signposting d'une capacité future** : lucarne du grenier, hors de portée même en grimpant.
   - **Rez-de-chaussée gardé tel quel pour l'instant** (salon, cuisine, couloir, buanderie). Il sera retravaillé plus tard : verticalité, placement des jouets, récompenses en haut de la bibliothèque et des placards (pilier 2).
 
+## D-28 — Direction artistique : style D, dessin par le code, images fournies en option
+
+- **Décision** (validée) : la maison réelle est dessinée en **livre illustré** (aplats doux, formes arrondies, objets du quotidien reconnaissables, nuit bleutée), avec la **lumière** du style « ombres et lumière » : pièce dans la pénombre, veilleuses, lune, halos, liseré clair sur les surfaces praticables. Le **monde étrange** reprend les mêmes formes en **silhouettes** avec une lumière turquoise (§6.2 : pas de décor produit deux fois). Maquettes A, B, C, D comparées ; A écarté, B jugé trop sombre pour la maison réelle mais retenu pour le monde étrange.
+- **Production** :
+  - tout est **dessiné par le code** (API Canvas, à l'échelle de l'écran) ;
+  - **n'importe quel élément** peut être remplacé par une image fournie sous son nom d'élément (`ART_IMAGES`, fichiers dans `public/art/`) ; candidats : Maria (jamais animée, une image fixe suffit), les pièces de Céleste (animation « papier découpé »), quelques éléments clés ;
+  - **images IA** acceptées pour des images fixes, déconseillées pour des animations image par image ;
+  - guide pour l'utilisateur : document « MARIA — Créer des images pour le jeu » (https://claude.ai/code/artifact/2123c112-080b-45e4-b564-cca8f480fd45).
+- **Mise en œuvre** :
+  - chaque salle déclare son habillage par `; @decor: nom colonne ligne largeur hauteur`, et un test vérifie que chaque tuile de meuble est couverte ; le level design reste en ASCII ;
+  - fond et lumière sont dessinés **une fois par salle**, en blocs de textures à l'échelle de l'écran (plafonnée à 3) ; la lumière passe **sous les personnages**, qui restent lisibles ;
+  - la palette est dans `src/config/art.ts` ; overlay : « Monde étrange (aperçu) ».
+- **Conséquences** :
+  - mémoire des textures : environ 19 Mo pour la chambre à l'échelle 3 (deux calques), à surveiller sur téléphone ;
+  - le style illustré gagne nettement en mode « résolution de l'écran » (D-18). Passer ce mode par défaut est à décider après l'essai sur téléphone (performance) ;
+  - les salles non habillées gardent le rendu par tuiles jusqu'à leur habillage.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
