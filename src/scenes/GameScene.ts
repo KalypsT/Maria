@@ -240,8 +240,8 @@ export class GameScene extends Phaser.Scene {
       pose: (pose) => {
         this.poser.sitting = pose === 'sit';
       },
-      think: (icon, ms) => {
-        this.storyView.think(icon, ms);
+      think: (icon, ms, by) => {
+        this.storyView.think(icon, ms, by);
       },
       sparkle: (area, ms) => {
         this.fx.sparkle(area, ms);
@@ -465,7 +465,12 @@ export class GameScene extends Phaser.Scene {
         if (target && story.exitsLocked(this.level.id)) {
           // Ce n'est pas le moment de sortir (le soir) : une bulle le rappelle, sans texte.
           if (this.time.now >= this.lockedThoughtUntil && !story.busy) {
-            this.storyView.think('bed', STORY_TIMING.thoughtMs);
+            // Un parent le rappelle (D-37), sinon Céleste y pense elle-même.
+            this.storyView.think(
+              'bed',
+              STORY_TIMING.thoughtMs,
+              story.lockSpeaker(this.level.id) ?? undefined,
+            );
             this.lockedThoughtUntil = this.time.now + STORY_TIMING.lockedExitThoughtMs;
           }
         } else if (target) {

@@ -373,6 +373,20 @@ export function drawThought(
       ctx.arc(cx + 6, cy + 3.6, 0.8, 0, Math.PI * 2);
       ctx.fill();
       break;
+    case 'question':
+      // « ? » seul, au crayon : un parent qui ne sait pas (D-37).
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 1.6;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.arc(cx, cy - 2.5, 3, Math.PI * 1.1, Math.PI * 2.4);
+      ctx.lineTo(cx, cy + 2);
+      ctx.stroke();
+      ctx.fillStyle = INK;
+      ctx.beginPath();
+      ctx.arc(cx, cy + 5, 1, 0, Math.PI * 2);
+      ctx.fill();
+      break;
   }
 }
 

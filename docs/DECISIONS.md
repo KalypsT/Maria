@@ -373,6 +373,23 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
 - Non retenu : les papillons de papier, la lueur qui parcourt les bords, et les cadres qui basculent pendant les frissons (ils demanderaient de sortir les cadres du décor fixe).
 - **Parents** (rappel de l'utilisateur, spec §8) : très présents au début de l'histoire, absents du slice actuel. **À intégrer dans l'étape « maison vivante »**, avec les choix réservés à l'utilisateur (§45 : composition de la famille, apparence, rôle le soir et le matin, bulles pictogrammes).
 
+## D-37 — La famille : maman, papa et le chat gris (maison vivante, PR 1)
+
+- **Décisions de l'utilisateur** : maman, papa et un chat gris ; parents **à hauteur d'enfant** (à essayer) ; scènes validées ; souvenirs à revoir dans le cahier de Céleste (PR suivante).
+- **Principes** :
+  - les parents rassurent, n'expliquent rien, ne sont jamais des antagonistes (spec §8, pilier 6) ;
+  - ils communiquent par des **bulles pictogrammes** au-dessus de leur tête (étape `thought` avec `by`), jamais de texte ;
+  - **ils ne marchent pas à l'écran** : une pose par activité, un petit mouvement en boucle (deux images), et ils changent d'activité hors de la vue ou dans le noir (règle des objets de mise en scène) ;
+  - **ils ne voient jamais l'étrange** : au matin, maman lit sous la bibliothèque où Maria est assise.
+- **Scènes** (PLACEHOLDER) :
+  - le soir, papa est à la porte de la chambre et rappelle l'heure du lit (bulle) si Céleste veut sortir (`lockedRooms.speaker`) ; le chat dort sur le tabouret ;
+  - au coucher, maman vient au bord du lit (cœur), puis la nuit ;
+  - au matin, papa boit son café à la cuisine, maman lit au salon, le chat regarde le haut de la bibliothèque. Agir près d'un parent : Céleste pense à Maria, le parent répond « ? » puis un cœur (une fois) ;
+  - après le monde étrange, papa passe la tête par la porte (« ? »), puis repart dans un court fondu.
+- **Dessin** : dessinés par le code dans le style « papier découpé », adultes environ 2,4 fois plus grands que Céleste, visages simples vus de loin. Placeholders : l'apparence (cheveux, vêtements, peau) reste à préciser par l'utilisateur, ou à remplacer par des images fournies.
+- **Données** : nouvelles étapes `evening.goodnight`, `morning.dad`, `morning.mom`, `cat.petted`, `end.dad`. `evening.goodnight` est ajoutée aux étapes données à une ancienne partie migrée. Pas de migration.
+- **Limite connue** : les jouets mécaniques (ennemis de la maison) patrouillent près des parents sans réaction ; à revoir (par exemple, ils ne s'animent que la nuit ou hors de la présence d'un adulte).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

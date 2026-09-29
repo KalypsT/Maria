@@ -23,7 +23,8 @@ export interface StoryHost {
   /** Céleste passe dans la salle `room` (dans le noir) ; le script continue. */
   room(room: string, col: number, row: number, facing: 1 | -1, returnPoint: boolean): void;
   pose(pose: ScriptPose): void;
-  think(icon: ThoughtIcon, ms: number): void;
+  /** Bulle au-dessus de Céleste, ou du personnage `by` (objet de mise en scène). */
+  think(icon: ThoughtIcon, ms: number, by?: string): void;
   /** Scintillements étranges dans une zone (tuiles) de la salle courante. */
   sparkle(area: TileArea, ms: number): void;
   shake(ms: number, strength: number): void;
@@ -94,12 +95,21 @@ export class StoryDirector {
 
   /** Sorties de la salle fermées (ce n'est pas le moment de sortir). */
   exitsLocked(room: string): boolean {
+    return this.lockOf(room) !== null;
+  }
+
+  /** Personnage qui rappelle que les sorties sont fermées (null : Céleste elle-même). */
+  lockSpeaker(room: string): string | null {
+    return this.lockOf(room)?.speaker ?? null;
+  }
+
+  private lockOf(room: string): StoryData['lockedRooms'][number] | null {
     for (const lock of this.data.lockedRooms) {
       if (lock.room === room && this.check(lock.when)) {
-        return true;
+        return lock;
       }
     }
-    return false;
+    return null;
   }
 
   /**
@@ -221,7 +231,7 @@ export class StoryDirector {
         }
         break;
       case 'thought':
-        this.host.think(step.icon, step.ms);
+        this.host.think(step.icon, step.ms, step.by);
         break;
       case 'place':
         this.host.place(step.col, step.row, step.facing);

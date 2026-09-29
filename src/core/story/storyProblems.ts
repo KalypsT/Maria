@@ -2,7 +2,7 @@ import { TILE_SIZE } from '../../config/display';
 import { EntityType, Tile, tileAt, type LevelData } from '../level/LevelData';
 import type { Zone } from '../world/zone';
 import { propBox } from './PropStage';
-import type { FlagCondition, StoryData, TileArea } from './story';
+import { CHARACTER_KINDS, type FlagCondition, type StoryData, type TileArea } from './story';
 
 /** Tuile libre (Céleste y tient debout, deux tuiles de haut) au-dessus d'un sol. */
 function standable(level: LevelData, col: number, row: number): boolean {
@@ -94,6 +94,11 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
     for (const step of t.steps) {
       if (step.do === 'sparkle') {
         inRoom(room, step.area, what);
+      } else if (step.do === 'thought' && step.by !== undefined) {
+        const by = step.by;
+        if (!story.props.some((p) => p.id === by && p.room === room)) {
+          problems.push(`${what} : bulle d'un personnage absent de ${room} (${by})`);
+        }
       } else if (step.do === 'fadeOut') {
         dark = true;
       } else if (step.do === 'fadeIn') {
@@ -143,7 +148,7 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
       } else if (below !== Tile.Solid && below !== Tile.OneWay) {
         problems.push(`${what} : ne repose sur rien`);
       }
-      if (box.height > 2 * TILE_SIZE) {
+      if (box.height > 2 * TILE_SIZE && !CHARACTER_KINDS.has(prop.kind)) {
         problems.push(`${what} : trop grand`);
       }
     }
@@ -161,6 +166,13 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
   }
   for (const lock of story.lockedRooms) {
     knownFlags(lock.when, `porte fermée ${lock.room}`);
+    const speaker = lock.speaker;
+    if (
+      speaker !== undefined &&
+      !story.props.some((p) => p.id === speaker && p.room === lock.room)
+    ) {
+      problems.push(`porte fermée ${lock.room} : personnage ${speaker} absent`);
+    }
     if (!zone.rooms.has(lock.room)) {
       problems.push(`porte fermée : salle ${lock.room} inconnue`);
     }
