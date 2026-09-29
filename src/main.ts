@@ -7,6 +7,8 @@ import { createNewSave, migrateLegacySettings, type SaveData } from './core/save
 import { LEVELS, levelName } from './levels';
 import { openBrowserSaveStorage, requestPersistentStorage } from './platform/browserSaveStorage';
 import { DISPLAY_SETTINGS_EVENT, GameScene, SESSION_KEY } from './scenes/GameScene';
+import { installHint } from './core/platform/install';
+import { installEnvironment, Pwa } from './platform/pwa';
 import { showTitleScreen } from './ui/TitleScreen';
 
 function getParent(): HTMLElement {
@@ -75,11 +77,19 @@ function startGame(parent: HTMLElement, session: SaveSession): Phaser.Game {
 
 async function boot(): Promise<void> {
   const parent = getParent();
+  // Service worker (build principal seulement, D-23) : enregistré au plus tôt.
+  const pwa = new Pwa();
+  pwa.start();
   const manager = new SaveManager(await openBrowserSaveStorage());
   const report = await manager.load();
   const saved = report.data;
   const source = saved ? LEVELS.find((level) => level.id === saved.checkpoint.levelId) : undefined;
-  const choice = await showTitleScreen(report, source ? levelName(source) : null);
+  const choice = await showTitleScreen(
+    report,
+    source ? levelName(source) : null,
+    pwa,
+    installHint(installEnvironment()),
+  );
   // Demandé après un geste de l'utilisateur : certains navigateurs l'exigent.
   void requestPersistentStorage();
   const data =
