@@ -7,6 +7,8 @@ import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 export class Hud {
   private readonly gauge: HTMLElement;
   private readonly veil: HTMLElement;
+  private readonly hint: HTMLElement;
+  private hintTimer = 0;
   private dots: HTMLElement[] = [];
   private shownFear = -1;
   private shownMax = -1;
@@ -19,7 +21,10 @@ export class Hud {
     this.gauge.setAttribute(UI_OVERLAY_ATTRIBUTE, '');
     this.veil = document.createElement('div');
     this.veil.id = 'faint-veil';
-    parent.append(this.gauge, this.veil);
+    this.hint = document.createElement('p');
+    this.hint.id = 'hud-hint';
+    this.hint.setAttribute('role', 'status');
+    parent.append(this.gauge, this.veil, this.hint);
   }
 
   /** Jauge de peur : `fear` crans remplis sur `max`. Masquée tant qu'elle est vide. */
@@ -54,8 +59,20 @@ export class Hud {
     this.shownVeil = value;
   }
 
+  /** Indice discret en bas de l'écran, effacé après `durationMs`. */
+  showHint(text: string, durationMs: number): void {
+    this.hint.textContent = text;
+    this.hint.classList.add('visible');
+    window.clearTimeout(this.hintTimer);
+    this.hintTimer = window.setTimeout(() => {
+      this.hint.classList.remove('visible');
+    }, durationMs);
+  }
+
   destroy(): void {
+    window.clearTimeout(this.hintTimer);
     this.gauge.remove();
     this.veil.remove();
+    this.hint.remove();
   }
 }

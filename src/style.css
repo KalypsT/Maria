@@ -312,6 +312,31 @@ body {
   background: var(--crayon-blue);
 }
 
+/* Indice d'obtention d'une capacité (placeholder, D-26) : note au crayon, en bas au centre. */
+#hud-hint {
+  position: fixed;
+  z-index: 15;
+  bottom: calc(var(--safe-bottom) + 18px);
+  left: 50%;
+  max-width: min(70vw, 460px);
+  margin: 0;
+  padding: 7px 12px;
+  border: 1px solid var(--pencil);
+  border-radius: var(--sketch-radius);
+  background: var(--paper-translucent);
+  color: var(--ink);
+  font: 14px/1.35 var(--ui-font);
+  text-align: center;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+
+#hud-hint.visible {
+  opacity: 1;
+}
+
 /* Voile de l'évanouissement : au-dessus du jeu, sous les menus et les commandes. */
 #faint-veil {
   position: fixed;

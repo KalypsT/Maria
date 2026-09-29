@@ -225,6 +225,11 @@ export function installDebugOverlay(scene: GameScene): void {
   addCheck(panel, 'Repères de caméra', showCamera, (checked) => {
     showCamera = checked;
   });
+  // Déblocage des capacités (D-26) : pour la partie en cours seulement, sans sauvegarde.
+  addCheck(panel, 'Capacité : grimper aux rebords', scene.debugClimb, (checked) => {
+    scene.debugClimb = checked;
+    scene.applyAbilities();
+  });
 
   const refreshMovement = addSliders<MovementParams>(panel, {
     title: 'Mouvement',

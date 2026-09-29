@@ -1,22 +1,31 @@
 import type Phaser from 'phaser';
 import { PLACEHOLDER_COLORS, TILE_SIZE as T } from '../config/display';
+import type { Pickups } from '../core/world/Pickups';
 import type { RunState } from '../core/world/RunState';
 
 const CHECKPOINT_OFF = 'checkpoint-off-placeholder';
 const CHECKPOINT_ON = 'checkpoint-on-placeholder';
+const PICKUP = 'ability-pickup-placeholder';
 const WIDTH = 8;
 const HEIGHT = 20;
+const PICKUP_SIZE = 10;
+/** Flottement de l'objet de capacité : amplitude (px) et période (ms). */
+const PICKUP_BOB_PX = 2;
+const PICKUP_BOB_MS = 1600;
 
 /**
  * Affichage des checkpoints (placeholder neutre, design ouvert §45) : un petit repère qui s'allume
- * quand il est activé, plus vif s'il est le point de retour courant.
+ * quand il est activé, plus vif s'il est le point de retour courant. Objets de capacité (D-26) :
+ * une petite lueur qui flotte (placeholder, nature de l'objet ouverte).
  */
 export class WorldView {
   private sprites: Phaser.GameObjects.Image[] = [];
+  private pickupSprites: Phaser.GameObjects.Image[] = [];
 
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly run: RunState,
+    private readonly pickups: Pickups,
   ) {
     this.createTextures();
     this.rebuild();
@@ -33,9 +42,27 @@ export class WorldView {
         .setOrigin(0.5, 1)
         .setDepth(5),
     );
+    for (const sprite of this.pickupSprites) {
+      sprite.destroy();
+    }
+    this.pickupSprites = this.pickups.items.map((item) =>
+      this.scene.add
+        .image((item.col + 0.5) * T, (item.row + 0.5) * T, PICKUP)
+        .setDepth(6)
+        .setVisible(!item.taken),
+    );
   }
 
   render(): void {
+    const items = this.pickups.items;
+    const bob = Math.sin((this.scene.time.now / PICKUP_BOB_MS) * Math.PI * 2) * PICKUP_BOB_PX;
+    for (let i = 0; i < items.length; i++) {
+      const sprite = this.pickupSprites[i];
+      const item = items[i];
+      if (sprite && item) {
+        sprite.setVisible(!item.taken).setY((item.row + 0.5) * T + bob);
+      }
+    }
     const checkpoints = this.run.checkpoints;
     for (let i = 0; i < checkpoints.length; i++) {
       const sprite = this.sprites[i];
@@ -56,6 +83,15 @@ export class WorldView {
     if (textures.exists(CHECKPOINT_ON)) {
       return;
     }
+    const glow = this.scene.make.graphics({}, false);
+    const c = PICKUP_SIZE / 2;
+    glow.fillStyle(PLACEHOLDER_COLORS.checkpointLit, 0.3);
+    glow.fillCircle(c, c, c);
+    glow.fillStyle(PLACEHOLDER_COLORS.checkpointLit);
+    glow.fillTriangle(c, 1, c + 3, c, c - 3, c);
+    glow.fillTriangle(c, PICKUP_SIZE - 1, c + 3, c, c - 3, c);
+    glow.generateTexture(PICKUP, PICKUP_SIZE, PICKUP_SIZE);
+    glow.destroy();
     for (const [key, lit] of [
       [CHECKPOINT_OFF, false],
       [CHECKPOINT_ON, true],
