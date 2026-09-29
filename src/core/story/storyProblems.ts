@@ -193,8 +193,11 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
     ) {
       problems.push(`porte fermée ${lock.room} : personnage ${speaker} absent`);
     }
-    if (!zone.rooms.has(lock.room)) {
+    const room = zone.rooms.get(lock.room);
+    if (!room) {
       problems.push(`porte fermée : salle ${lock.room} inconnue`);
+    } else if (lock.exit !== undefined && !room.exits.some((e) => e.id === lock.exit)) {
+      problems.push(`porte fermée ${lock.room} : sortie ${String(lock.exit)} absente`);
     }
   }
   return problems;

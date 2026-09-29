@@ -262,6 +262,8 @@ const DRAWN_SIZE: Readonly<Partial<Record<PropKind, { w: number; h: number; pad:
   'mom-sofa': { w: 38, h: 44, pad: 4 },
   'cat-sleep': { w: 16, h: 8, pad: 0 },
   'cat-sit': { w: 12, h: 14, pad: 0 },
+  'mom-garden': { w: 40, h: 62, pad: 6 },
+  'dad-garden': { w: 44, h: 62, pad: 8 },
 };
 
 export function drawCharacter(ctx: CanvasRenderingContext2D, kind: PropKind, frame: number): void {
@@ -318,6 +320,31 @@ function drawAt(
       ctx.lineTo(hand.handX + 5, hand.handY + 1.5);
       ctx.lineTo(hand.handX - 2.5, hand.handY + 3.5);
       ctx.fill();
+      break;
+    }
+    case 'mom-garden': {
+      // Au jardin (D-46), maman étend le linge : le bras levé vers le fil, une chaussette.
+      const hand = standing(ctx, MOM, w, h, frame === 0 ? 2.7 : 2.9, 0, true);
+      ctx.fillStyle = '#8fb8e5';
+      round(ctx, hand.handX - 1.5, hand.handY - 1, 3.5, 6, 1.2);
+      break;
+    }
+    case 'dad-garden': {
+      // Papa arrose le potager : l'arrosoir penché, quelques gouttes qui tombent.
+      const hand = standing(ctx, DAD, w, h, 0.9, 0, false);
+      ctx.fillStyle = '#7fa37a';
+      round(ctx, hand.handX - 3, hand.handY - 2, 8, 6, 1.5);
+      ctx.strokeStyle = '#7fa37a';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(hand.handX + 5, hand.handY + 1);
+      ctx.lineTo(hand.handX + 9, hand.handY + 3);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(143,184,229,0.9)';
+      for (let i = 0; i < 3; i++) {
+        const drop = (frame + i) % 2 === 0 ? 0 : 2;
+        ctx.fillRect(hand.handX + 9 + i * 0.8, hand.handY + 5 + i * 3 + drop, 0.9, 1.6);
+      }
       break;
     }
     case 'cat-sleep':

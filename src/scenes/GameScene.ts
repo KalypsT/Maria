@@ -482,14 +482,15 @@ export class GameScene extends Phaser.Scene {
       if (zone && (run.events & RunEvent.Fainted) === 0) {
         const exit = touchedExit(this.level, this.player.box);
         const target = exit !== 0 ? zone.destination(this.level.id, exit) : null;
-        if (target && story.exitsLocked(this.level.id)) {
-          // Ce n'est pas le moment de sortir (le soir) : une bulle le rappelle, sans texte.
+        if (target && story.exitsLocked(this.level.id, exit)) {
+          // Ce n'est pas le moment de sortir (le soir), ou la porte ne s'ouvre pas encore (la
+          // porte de derrière, D-46) : une bulle le rappelle, sans texte.
           if (this.time.now >= this.lockedThoughtUntil && !story.busy) {
             // Un parent le rappelle (D-37), sinon Céleste y pense elle-même.
             this.storyView.think(
-              'bed',
+              story.lockIcon(this.level.id, exit),
               STORY_TIMING.thoughtMs,
-              story.lockSpeaker(this.level.id) ?? undefined,
+              story.lockSpeaker(this.level.id, exit) ?? undefined,
             );
             this.lockedThoughtUntil = this.time.now + STORY_TIMING.lockedExitThoughtMs;
           }

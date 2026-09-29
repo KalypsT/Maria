@@ -40,6 +40,10 @@ export const THOUGHT_ICONS = [
   'baby',
   /** La toise, un nouveau trait plus haut (D-43). */
   'height',
+  /** Une porte dont la poignée est trop haute (porte de derrière, D-46). */
+  'handle',
+  /** Le soleil : il fait beau, envie de jouer dehors (D-46). */
+  'sun',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
@@ -133,6 +137,9 @@ export const PROP_KINDS = [
   'mom-sofa',
   'cat-sleep',
   'cat-sit',
+  // Au jardin (D-46).
+  'mom-garden',
+  'dad-garden',
   // Objets à regarder (D-38), avec un petit mouvement en boucle.
   'music-box',
   'plant',
@@ -161,6 +168,8 @@ export const CHARACTER_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'mom-sofa',
   'cat-sleep',
   'cat-sit',
+  'mom-garden',
+  'dad-garden',
 ]);
 
 export interface StoryProp {
@@ -204,12 +213,15 @@ export interface StoryData {
   readonly times: readonly { readonly when: FlagCondition; readonly time: TimeOfDay }[];
   /**
    * Salles dont les sorties sont fermées tant que la condition est vraie ; `speaker` : le
-   * personnage qui le rappelle (bulle « au lit » d'un parent), sinon Céleste elle-même.
+   * personnage qui le rappelle (bulle « au lit » d'un parent), sinon Céleste elle-même. `exit` :
+   * une seule sortie fermée (la porte de derrière, D-46) ; `icon` : la bulle (« au lit » sinon).
    */
   readonly lockedRooms: readonly {
     readonly room: string;
+    readonly exit?: number;
     readonly when: FlagCondition;
     readonly speaker?: string;
+    readonly icon?: ThoughtIcon;
   }[];
   readonly omens: readonly StoryOmen[];
 }

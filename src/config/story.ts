@@ -39,6 +39,13 @@ export const StoryFlag = {
   DadVisit: 'end.dad',
   /** Quelques mois plus tard (D-43) : Céleste a grandi (phase de croissance 2). */
   Grown: 'growth.2',
+  /** Le jardin (D-46) : Céleste est sortie pour la première fois (il fait beau, et Maria ?). */
+  GardenArrived: 'garden.arrived',
+  /** Au jardin, Céleste a parlé de Maria à maman (terrasse) et à papa (potager). */
+  GardenMom: 'garden.mom',
+  GardenDad: 'garden.dad',
+  /** Céleste a regardé dans le trou de la haie, au fond du jardin. */
+  GardenHedge: 'garden.hedge',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -128,6 +135,9 @@ export const PROP_SIZE = {
   'dad-kitchen': { w: 40 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   'mom-bed': { w: 36 * PARENT_SCALE, h: 44 * PARENT_SCALE },
   'mom-sofa': { w: 38 * PARENT_SCALE, h: 44 * PARENT_SCALE },
+  // Au jardin (D-46).
+  'mom-garden': { w: 40 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  'dad-garden': { w: 44 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // Le chat gris, agrandi par CAT_SCALE (D-42).
   'cat-sleep': { w: 16 * CAT_SCALE, h: 8 * CAT_SCALE },
   'cat-sit': { w: 12 * CAT_SCALE, h: 14 * CAT_SCALE },
