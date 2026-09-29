@@ -511,7 +511,14 @@ export const HOUSE_STORY: StoryData = {
   times: [{ when: { all: [F.Slept] }, time: 'morning' }],
   lockedRooms: [{ room: 'bedroom', when: { none: [F.Slept] }, speaker: 'dad-door' }],
   omens: [
-    // En grimpant vers Maria, la lumière vacille, les couleurs se refroidissent, puis tout tremble.
-    { room: 'living', when: { all: [F.Slept], none: [F.StrangeDone] }, fromRow: 21, toRow: 8 },
+    // En approchant de Maria (en grimpant la bibliothèque), la lumière vacille, les couleurs se
+    // refroidissent, puis tout tremble ; rien à l'autre bout de la pièce (D-40).
+    {
+      room: 'living',
+      when: { all: [F.Slept], none: [F.StrangeDone] },
+      col: 51,
+      row: 8,
+      radius: 13,
+    },
   ],
 };

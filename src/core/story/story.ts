@@ -172,14 +172,18 @@ export interface StoryProp {
 export type TimeOfDay = 'evening' | 'morning';
 
 /**
- * Présage (D-35) : dans une salle, tant que la condition est vraie, l'étrangeté monte avec la
- * hauteur de Céleste, de 0 (pieds sur la ligne `fromRow`) à 1 (sur la ligne `toRow`, plus haute).
+ * Présage (D-35, corrigé en D-40) : dans une salle, tant que la condition est vraie, l'étrangeté
+ * monte à mesure que Céleste approche d'un point (Maria), de 0 (à `radius` tuiles ou plus) à 1
+ * (sur place). Seulement près de Maria, jamais à l'autre bout de la pièce.
  */
 export interface StoryOmen {
   readonly room: string;
   readonly when: FlagCondition;
-  readonly fromRow: number;
-  readonly toRow: number;
+  /** Point visé (tuile) : là où est Maria. */
+  readonly col: number;
+  readonly row: number;
+  /** Distance (tuiles) à partir de laquelle le présage commence. */
+  readonly radius: number;
 }
 
 export interface StoryData {

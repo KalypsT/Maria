@@ -251,21 +251,24 @@ function catSit(ctx: CanvasRenderingContext2D, h: number, frame: number): void {
 
 /**
  * Taille de référence du dessin de chaque personnage (px logiques) : la taille à l'écran
- * (`PROP_SIZE`, réglable dans la configuration) en est un agrandissement.
+ * (`PROP_SIZE`, réglable dans la configuration) en est un agrandissement. `pad` : marge de
+ * chaque côté du corps pour que la main tendue (et ce qu'elle tient) ne soit pas coupée ; elle
+ * est symétrique, pour que le corps reste centré sur sa tuile, retourné ou non (D-40).
  */
-const DRAWN_SIZE: Readonly<Partial<Record<PropKind, { w: number; h: number }>>> = {
-  'dad-door': { w: 26, h: 62 },
-  'dad-kitchen': { w: 28, h: 62 },
-  'mom-bed': { w: 28, h: 44 },
-  'mom-sofa': { w: 30, h: 44 },
+const DRAWN_SIZE: Readonly<Partial<Record<PropKind, { w: number; h: number; pad: number }>>> = {
+  'dad-door': { w: 42, h: 62, pad: 8 },
+  'dad-kitchen': { w: 40, h: 62, pad: 6 },
+  'mom-bed': { w: 36, h: 44, pad: 4 },
+  'mom-sofa': { w: 38, h: 44, pad: 4 },
 };
 
 export function drawCharacter(ctx: CanvasRenderingContext2D, kind: PropKind, frame: number): void {
   const size = PROP_SIZE[kind];
-  const { w, h } = DRAWN_SIZE[kind] ?? size;
+  const { w, h, pad } = DRAWN_SIZE[kind] ?? { ...size, pad: 0 };
   ctx.save();
   ctx.scale(size.w / w, size.h / h);
-  drawAt(ctx, kind, frame, w, h);
+  ctx.translate(pad, 0);
+  drawAt(ctx, kind, frame, w - 2 * pad, h);
   ctx.restore();
 }
 

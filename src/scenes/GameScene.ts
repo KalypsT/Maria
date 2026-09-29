@@ -522,7 +522,7 @@ export class GameScene extends Phaser.Scene {
     );
     // Monde étrange (D-35) : présage en grimpant, effets, tremblement (visuel seulement).
     const fx = this.fx;
-    fx.setOmen(this.story.omen(this.level.id, this.puppet.y));
+    fx.setOmen(this.story.omen(this.level.id, this.puppet.x, this.puppet.y - box.height / 2));
     const view = this.fxView;
     view.setTo(
       camera.x - camera.viewWidth / 2,

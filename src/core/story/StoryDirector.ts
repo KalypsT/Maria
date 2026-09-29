@@ -115,14 +115,15 @@ export class StoryDirector {
   }
 
   /**
-   * Présage (D-35) : étrangeté de 0 à 1 selon la hauteur des pieds (px) de Céleste dans la salle.
+   * Présage (D-35, D-40) : étrangeté de 0 à 1 selon la distance de Céleste (x, y en px, le centre
+   * de sa hitbox) au point visé.
    */
-  omen(room: string, feetY: number): number {
+  omen(room: string, x: number, y: number): number {
     for (const omen of this.data.omens) {
       if (omen.room === room && this.check(omen.when)) {
-        const from = (omen.fromRow + 1) * TILE_SIZE;
-        const to = (omen.toRow + 1) * TILE_SIZE;
-        return Math.min(1, Math.max(0, (from - feetY) / (from - to)));
+        const dx = x / TILE_SIZE - (omen.col + 0.5);
+        const dy = y / TILE_SIZE - (omen.row + 0.5);
+        return Math.min(1, Math.max(0, 1 - Math.hypot(dx, dy) / omen.radius));
       }
     }
     return 0;

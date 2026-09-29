@@ -418,6 +418,12 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
 - **Buanderie** : un fil à linge (décor).
 - **Vérifié par les tests** : la maison reste facile, jamais coincée ; les endroits prévus demandent toujours l'escalade ; route haute du salon en grimpant (facile) ; trouvailles du salon et de la cuisine en grimpant, au plus moyennes ; photo de Céleste bébé seulement après le monde étrange.
 
+## D-40 — Retours du téléphone : présage et mains des parents
+
+- **Présage corrigé** (remplace la bande de hauteur de D-35) : il dépend de la **distance à la case de Maria** (en haut de la bibliothèque), avec un rayon de 13 tuiles, et non plus de la hauteur dans la pièce. Avant, on le déclenchait à l'autre bout du salon, sur la tringle du rideau. Maintenant rien sur la tringle ni sur le canapé ; il commence au pied de la bibliothèque et devient fort tout près de Maria.
+- **Mains des parents** : la main tendue sortait du cadre du dessin et était coupée. Le cadre a maintenant une **marge symétrique** de chaque côté du corps (papa à la porte 8, à la cuisine 6, maman 4, en px de dessin). Le corps reste centré sur sa tuile, retourné ou non, et les bulles ne bougent pas.
+- **Image de Céleste fournie par l'utilisateur** : en attente du choix de son usage (voir PROGRESS).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
