@@ -9,10 +9,12 @@ import {
   deserializeSave,
   encodeSaveCode,
   migrateLegacySettings,
+  migrateSaveData,
   serializeSave,
   validateSaveData,
   type SaveData,
 } from '../src/core/save/saveData';
+import { LEGACY_STORY_FLAGS } from '../src/config/story';
 import { serializeControlSettings } from '../src/core/settings/controlSettings';
 import { serializeDisplaySettings } from '../src/core/settings/displaySettings';
 
@@ -22,6 +24,7 @@ function sample(): SaveData {
   data.activatedCheckpoints = ['checkpoints:c12-7', 'checkpoints:c3-7'];
   data.settings.controls.buttonScale = 1.2;
   data.settings.display.renderMode = 'screen';
+  data.story.flags = ['evening.played'];
   return data;
 }
 
@@ -67,7 +70,9 @@ describe('saveData', () => {
     expect(
       validateSaveData({ ...data, progression: { ...data.progression, abilities: [3] } }),
     ).toBeNull();
-    expect(validateSaveData({ ...data, version: 2 })).toBeNull();
+    expect(validateSaveData({ ...data, version: 3 })).toBeNull();
+    expect(validateSaveData({ ...data, story: undefined })).toBeNull();
+    expect(validateSaveData({ ...data, story: { flags: [''] } })).toBeNull();
     const odd = validateSaveData({
       ...data,
       settings: { controls: { buttonScale: 99 }, display: { renderMode: '8k' } },
@@ -104,6 +109,31 @@ describe('saveData', () => {
     expect(decodeSaveCode(flipped).ok).toBe(false);
     expect(decodeSaveCode(code.slice(0, -3)).ok).toBe(false);
     expect(decodeSaveCode('bonjour')).toEqual({ ok: false, problem: 'format' });
+  });
+
+  it('migre une sauvegarde et un code de la version 1 (D-31) : prologue considéré comme vécu', () => {
+    const current = sample();
+    const v1: Record<string, unknown> = { ...current, version: 1 };
+    delete v1['story'];
+    const payload = JSON.stringify(v1);
+    const record = { format: 'maria-save', version: 1, checksum: checksum(payload), payload };
+    const expected: SaveData = { ...current, story: { flags: [...LEGACY_STORY_FLAGS] } };
+    expect(deserializeSave(JSON.stringify(record))).toEqual({ ok: true, data: expected });
+    const bytes = new TextEncoder().encode(payload);
+    const base64 = btoa(String.fromCharCode(...bytes))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+    expect(decodeSaveCode(`MARIA1.${base64}.${checksum(payload)}`)).toEqual({
+      ok: true,
+      data: expected,
+    });
+    expect(migrateSaveData(v1)).toMatchObject({ version: 2 });
+    expect(migrateSaveData('texte')).toBe('texte');
+  });
+
+  it('une nouvelle partie commence avant le prologue', () => {
+    expect(createNewSave('bedroom', 0).story).toEqual({ flags: [] });
   });
 
   it('calcule une somme de contrôle stable', () => {
