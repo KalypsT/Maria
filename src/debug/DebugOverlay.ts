@@ -297,6 +297,10 @@ export function installDebugOverlay(scene: GameScene): void {
     scene.debugClimb = checked;
     scene.applyAbilities();
   });
+  addCheck(panel, 'Capacité : saut mural', scene.debugWallJump, (checked) => {
+    scene.debugWallJump = checked;
+    scene.applyAbilities();
+  });
 
   const refreshMovement = addSliders<MovementParams>(panel, {
     title: 'Mouvement',

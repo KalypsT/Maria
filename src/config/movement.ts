@@ -82,6 +82,21 @@ export interface MovementParams {
   ledgeClimbMs: number;
   /** Après avoir lâché un bord, délai avant de pouvoir se raccrocher (ms). */
   ledgeRegrabMs: number;
+  /**
+   * Saut mural (D-44) : axe (0–1) au-delà duquel on pousse vers un mur (glissade, appui du saut).
+   * Plus haut que celui de l'escalade : une diagonale molle ne fait pas glisser.
+   */
+  wallInputThreshold: number;
+  /** Vitesse de chute maximale pendant la glissade contre un mur (px/s). */
+  wallSlideSpeed: number;
+  /** Hauteur d'un saut mural complet (tuiles), bouton maintenu. */
+  wallJumpHeightTiles: number;
+  /** Vitesse horizontale donnée par le saut mural, à l'opposé du mur (px/s). */
+  wallJumpSpeedX: number;
+  /** Après un saut mural, durée pendant laquelle la direction est ignorée (ms). */
+  wallJumpLockMs: number;
+  /** Saut mural encore permis après avoir quitté le contact du mur (ms). */
+  wallCoyoteMs: number;
 }
 
 export const DEFAULT_MOVEMENT: Readonly<MovementParams> = {
@@ -115,6 +130,12 @@ export const DEFAULT_MOVEMENT: Readonly<MovementParams> = {
   ledgeHangMinMs: 120,
   ledgeClimbMs: 240,
   ledgeRegrabMs: 250,
+  wallInputThreshold: 0.5,
+  wallSlideSpeed: 60,
+  wallJumpHeightTiles: 2.5,
+  wallJumpSpeedX: 150,
+  wallJumpLockMs: 130,
+  wallCoyoteMs: 80,
 };
 
 /** Bornes des réglages en direct de l'overlay de debug. */
@@ -151,6 +172,12 @@ export const MOVEMENT_PARAM_RANGES: Readonly<
   ledgeHangMinMs: { min: 0, max: 500, step: 10 },
   ledgeClimbMs: { min: 60, max: 600, step: 10 },
   ledgeRegrabMs: { min: 0, max: 800, step: 10 },
+  wallInputThreshold: { min: 0.1, max: 0.95, step: 0.05 },
+  wallSlideSpeed: { min: 10, max: 380, step: 5 },
+  wallJumpHeightTiles: { min: 0.5, max: 6, step: 0.1 },
+  wallJumpSpeedX: { min: 40, max: 400, step: 5 },
+  wallJumpLockMs: { min: 0, max: 400, step: 10 },
+  wallCoyoteMs: { min: 0, max: 250, step: 5 },
 };
 
 /** Hissé sur un rebord, Céleste se tient à cette distance du bord (px), bien posée. */
@@ -183,6 +210,10 @@ export interface DerivedMovement {
   ledgeHangMinSteps: number;
   ledgeClimbSteps: number;
   ledgeRegrabSteps: number;
+  /** Vitesse initiale d'un saut mural (px/s, vers le haut), sous la gravité de montée. */
+  wallJumpVelocity: number;
+  wallJumpLockSteps: number;
+  wallCoyoteSteps: number;
 }
 
 export function msToSteps(ms: number, stepHz: number = PHYSICS_STEP_HZ): number {
@@ -205,6 +236,9 @@ export function deriveMovement(
     ledgeHangMinSteps: 0,
     ledgeClimbSteps: 0,
     ledgeRegrabSteps: 0,
+    wallJumpVelocity: 0,
+    wallJumpLockSteps: 0,
+    wallCoyoteSteps: 0,
   },
 ): DerivedMovement {
   const heightPx = params.jumpHeightTiles * TILE_SIZE;
@@ -220,5 +254,8 @@ export function deriveMovement(
   out.ledgeHangMinSteps = msToSteps(params.ledgeHangMinMs, stepHz);
   out.ledgeClimbSteps = Math.max(1, msToSteps(params.ledgeClimbMs, stepHz));
   out.ledgeRegrabSteps = msToSteps(params.ledgeRegrabMs, stepHz);
+  out.wallJumpVelocity = Math.sqrt(2 * out.riseGravity * params.wallJumpHeightTiles * TILE_SIZE);
+  out.wallJumpLockSteps = msToSteps(params.wallJumpLockMs, stepHz);
+  out.wallCoyoteSteps = msToSteps(params.wallCoyoteMs, stepHz);
   return out;
 }
