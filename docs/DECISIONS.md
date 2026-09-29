@@ -175,10 +175,32 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
   - L'ambiance de salle modifie la **couleur d'effacement du rendu**. Un fond de caméra coûtait ~350 octets par pas (rectangle redessiné à chaque image).
   - Les identifiants de salle sont uniques entre zones et parcours ; ce sont les clés de sauvegarde (testé).
 
-## D-26 — Première capacité : grimper aux rebords (prévue)
+## D-26 — Première capacité : grimper aux rebords
 
-- **Décision** (validée) : la première capacité de mouvement sera **grimper aux rebords** (s'accrocher au bord d'un meuble et se hisser ; spec §15 : « escalade ou interaction verticale »). Elle est **préparée** dans la zone de la Phase 6 (corniches trop hautes, passages visibles mais inaccessibles : signposting §25.3) et **implémentée dans une petite phase dédiée** juste après.
-- **Conséquences** : la Phase 6 ne modifie pas le mouvement ; les emplacements prévus sont notés dans les salles (`; @note:`).
+- **Décision** (validée) : la première capacité de mouvement est **grimper aux rebords** (s'accrocher au bord d'un meuble et se hisser ; spec §15 : « escalade ou interaction verticale »). Elle a été préparée dans la zone de la Phase 6 (signposting §25.3), puis implémentée dans une petite phase dédiée.
+- **Geste (option B validée)** :
+  - **Accroche** : en descente, en poussant vers un mur, Céleste attrape le bord d'une **tuile pleine** dont le dessus est à hauteur des mains. Les étagères traversables ne s'attrapent pas.
+  - **Suspension** : Saut hisse aussitôt ; pousser vers le bord ou vers le haut hisse après un court instant ; pousser vers le bas ou à l'opposé lâche, avec un délai avant de pouvoir se raccrocher.
+  - **Aucun nouveau bouton** (pilier 3).
+- **Garde-fous** :
+  - on n'attrape que si on pousse vers le bord, et seulement en descente ;
+  - les pieds doivent être nettement sous le bord : un saut qui suffisait pour s'y poser n'est jamais interrompu ;
+  - le trajet du hissage est vérifié à l'accroche : place pour se tenir debout, pas de danger, pas de coincement.
+- **Règle unique** : tous les bords pleins s'attrapent, pas une liste de meubles marqués.
+- **Réglages** dans `src/config/movement.ts` (`ledge*`), dans l'overlay et l'export JSON. Sans la capacité, le mouvement est **inchangé** : parcours d'essai et difficultés identiques, ce que les tests vérifient.
+- **Obtention (validée)** : un objet placeholder dans la buanderie (`A` dans l'ASCII, capacité nommée par `; @ability:`). La capacité est enregistrée dans `progression.abilities` (champ déjà prévu, sans migration). Un indice de prototype s'affiche à l'obtention, à revoir avec la narration (pilier 6).
+- **Vérification** : l'analyse de faisabilité (D-16) prend l'escalade en option. Les tests de la maison couvrent les deux états (sans et avec escalade) :
+  - aucun endroit sans retour facile, dans les deux cas ;
+  - l'objet est atteignable sans grimper ;
+  - l'armoire, la bibliothèque, les placards hauts et la trappe à linge ne sont atteignables **qu'en grimpant**, et alors facilement ;
+  - on remonte de la buanderie à la trappe : la boucle de la maison est fermée.
+
+## D-27 — Ordre de travail après l'escalade
+
+- **Décision** (validée) : deux étapes s'ajoutent à l'ordre de la spec (§42), avant de juger le vertical slice :
+  1. une **passe de level design** sur la maison, avec l'escalade : vraie boucle, embranchements, verticalité, un premier secret (§25.2). Elle pourra passer par un éditeur visuel (par exemple Tiled) à la place du script de génération ;
+  2. une courte **phase de direction artistique** : 2 ou 3 écrans de test dans des styles différents sur la même salle, choix par l'utilisateur, et décision sur qui produit les images (dessin par le code, packs d'assets, illustrations, images générées puis retravaillées).
+- **Raison** : la spec ne prévoit aucune phase de production graphique, alors que le vertical slice (§53) doit montrer le contraste monde réel / monde étrange. Le level design est la priorité n°2 (§52) et ne doit pas attendre la fin.
 
 ## Risques identifiés à suivre
 
