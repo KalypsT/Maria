@@ -3,7 +3,14 @@ import { TILE_SIZE as T } from '../src/config/display';
 import { STRANGE_FX } from '../src/config/strangeFx';
 import { floatingDecor } from '../src/core/level/decor';
 import { parseAsciiLevel } from '../src/core/level/parseAsciiLevel';
-import { createEyes, isClearSpot, seededRandom, stepEyes } from '../src/core/fx/strangeLife';
+import {
+  createEyes,
+  createTremor,
+  isClearSpot,
+  seededRandom,
+  stepEyes,
+  stepTremor,
+} from '../src/core/fx/strangeLife';
 import { buildZone } from '../src/core/world/zone';
 import { HOUSE } from '../src/levels/house/zone';
 
@@ -85,5 +92,30 @@ describe('meubles qui flottent', () => {
     };
     expect(kinds('living-strange')).toContain('sofa');
     expect(kinds('bedroom')).not.toContain('bed');
+  });
+});
+
+describe('frissons du monde étrange (D-36)', () => {
+  it('de temps en temps, jamais pendant un saut, et s’apaisent', () => {
+    const rand = seededRandom(11);
+    const tremor = createTremor(0, STRANGE_FX, rand);
+    let started = -1;
+    // En l'air tout le temps : aucun frisson.
+    for (let t = 0; t < 120_000; t += 10) {
+      if (stepTremor(tremor, t, false, STRANGE_FX, rand) > 0) {
+        started = t;
+      }
+    }
+    expect(started).toBe(-1);
+    // Posée : il part aussitôt (il attendait), puis s'apaise et s'arrête.
+    const k0 = stepTremor(tremor, 120_000, true, STRANGE_FX, rand);
+    expect(k0).toBe(1);
+    const end = tremor.until;
+    expect(end - 120_000).toBeGreaterThanOrEqual(STRANGE_FX.tremorMinMs);
+    expect(end - 120_000).toBeLessThanOrEqual(STRANGE_FX.tremorMaxMs);
+    expect(stepTremor(tremor, end - 1, true, STRANGE_FX, rand)).toBeLessThan(0.1);
+    expect(stepTremor(tremor, end, true, STRANGE_FX, rand)).toBe(0);
+    // Le suivant attend au moins l'intervalle minimal.
+    expect(tremor.nextAt - end).toBeGreaterThanOrEqual(STRANGE_FX.tremorEveryMinMs);
   });
 });

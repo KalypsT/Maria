@@ -6,7 +6,7 @@
 export const STRANGE_FX = {
   /** Présage : voile turquoise froid (opacité maximale au sommet). */
   omenTint: 0.22,
-  omenTintColor: 0x1d4f55,
+  omenTintColor: 0x3a2a5c,
   /** Présage : la lumière vacille (assombrissement maximal d'un vacillement), au-delà de ce seuil. */
   omenFlicker: 0.18,
   omenFlickerFrom: 0.2,
@@ -47,4 +47,25 @@ export const STRANGE_FX = {
   /** Yeux : clignement spontané (intervalle moyen, durée, ms). */
   eyesBlinkEveryMs: 4200,
   eyesBlinkMs: 160,
+  /** Frissons (D-36) : intervalle aléatoire, durée (ms), amplitude (px logiques). */
+  tremorEveryMinMs: 25000,
+  tremorEveryMaxMs: 50000,
+  tremorMinMs: 400,
+  tremorMaxMs: 800,
+  tremorPx: 1.2,
+  /** Poussière qui tombe du plafond pendant un frisson (nombre de grains). */
+  tremorDust: 14,
+  /** Scintillements qui tombent (D-36) : nombre, vitesse (px/s), durée de vie (ms). */
+  snowCount: 16,
+  snowFallPxPerS: 11,
+  snowLifeMs: 9000,
+  /** Distance (px) à Céleste sous laquelle un scintillement s'efface (jamais devant elle). */
+  snowAvoidPx: 22,
+  /** Fenêtre sur la chambre : la lampe s'allume et s'éteint lentement (période, ms). */
+  bedroomLampMinMs: 7000,
+  bedroomLampMaxMs: 14000,
+  /** Ombre de l'ours : glissement (px/s), distance parcourue (tuiles), pause invisible (ms). */
+  bearGlidePxPerS: 3,
+  bearGlideTiles: 10,
+  bearHiddenMs: 12000,
 } as const;

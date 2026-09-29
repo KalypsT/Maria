@@ -2,11 +2,27 @@
 
 ## Phase en cours
 
-**Vertical slice, ambiance du monde étrange** (D-35) : implémentée sur la branche `ccr-5c5df983-6feqj3`, **en attente d'essai sur téléphone**. Le monde étrange jouable (D-34) est fusionné dans `main`.
+**Vertical slice, monde étrange** (D-36) : palette « crépuscule », frissons, scintillements qui tombent, fenêtre sur la chambre, ombre de l'ours ; sur la branche `ccr-5c5df983-6feqj3`, **en attente d'essai sur téléphone**. D-35 est fusionné dans `main`, et le slice a été validé par l'utilisateur (durée, difficulté, amusement).
 
-Prochaine, sans autre ajout entre les deux : **essai complet du slice sur téléphone, chronométré** (cible §53 : 15 à 30 min), avec la question « est-ce que ça donne envie de continuer ? ». Ensuite : maison plus vivante et rez-de-chaussée retravaillé, puis la croissance.
+Prochaine : **maison vivante et rez-de-chaussée retravaillé, avec les parents** (spec §8), sur plan à valider. Ensuite, la croissance.
 
 ## Fait
+
+### Monde étrange : palette crépuscule et nouvelles animations (D-36)
+
+- Palette B « crépuscule » : violet et bleu nuit, halos roses, bords turquoise. Les lueurs des effets suivent la palette.
+- Frissons de temps en temps (poussière qui tombe, lueurs qui vacillent), jamais pendant un saut.
+- Scintillements qui tombent, lampe de la chambre qui s'allume et s'éteint dans la fenêtre, ombre de l'ours qui glisse.
+- Décision : la difficulté du chemin principal montera zone après zone, jusqu'à difficile à la fin.
+- Tests : 337 (frissons : jamais en l'air, durée, intervalle).
+- **Vérifié dans Chromium** : les deux salles en palette B, frisson, scintillements, fenêtre, ours.
+
+### À vérifier sur téléphone (palette et animations)
+
+- [ ] La palette crépuscule plaît et les bords des plateformes restent bien lisibles.
+- [ ] Les frissons se remarquent sans gêner, et n'arrivent jamais pendant un saut.
+- [ ] Les scintillements qui tombent ne sont jamais pris pour des objets à ramasser.
+- [ ] L'ombre de l'ours et la lampe de la chambre se remarquent.
 
 ### Ambiance du monde étrange (D-35, retours de l'utilisateur)
 
@@ -553,7 +569,7 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. PR de l'ambiance du monde étrange (D-35) et merge.
-2. **Essai complet du slice sur téléphone, chronométré** (§53 : 15 à 30 min) : « est-ce que ça donne envie de continuer ? ».
-3. Maison plus vivante et rez-de-chaussée retravaillé.
-4. La croissance (§42 phase 7).
+1. PR de la palette et des animations (D-36) et merge.
+2. Maison plus vivante et rez-de-chaussée retravaillé, **avec les parents** (spec §8) : plan à valider.
+3. La croissance (§42 phase 7).
+4. Avant d'offrir le jeu : installation facile (PWA), sauvegarde sûre sur iPhone, option « réduire les effets ».

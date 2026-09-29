@@ -356,6 +356,23 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
 - **Accessibilité** : pas encore d'option « réduire les effets » (reportée, validé) : elle demandera un champ de réglage dans la sauvegarde, avec migration (pilier 10). Tremblements volontairement faibles.
 - **Coût mesuré** (Chromium sur ordinateur) : environ 50 objets de plus dans le passage d'ombres, 60 images/s. À mesurer sur téléphone.
 
+## D-36 — Difficulté croissante, palette « crépuscule », frissons et nouvelles animations
+
+- **Difficulté (décision de l'utilisateur)** : le jeu doit rester intéressant pour un adulte. Le **chemin principal** devient plus difficile zone après zone, jusqu'à du **difficile à la fin** ; les trouvailles optionnelles peuvent aller au-delà. Le monde étrange de la maison (moyen) est le point de départ. Remplace l'idée de garder la difficulté dans les seules trouvailles.
+- **Joueuses visées** : la compagne de l'utilisateur, puis sa fille plus tard. La difficulté n'est pas réglée pour un enfant.
+- **Palette du monde étrange : B, « crépuscule »** (choisie parmi 3 maquettes : turquoise retouché, crépuscule, encre et ambre) :
+  - fonds violets et bleu nuit, halos roses ;
+  - bords des surfaces praticables en turquoise (lisibilité) ;
+  - voile du présage violet.
+    Les lueurs des effets prennent la couleur des lampes de la palette. Les yeux, la poussière et les scintillements restent turquoise, pour trancher sur le violet.
+- **Frissons** : un court frisson (0,4 à 0,8 s) toutes les 25 à 50 s, avec de la poussière qui tombe du plafond et des lueurs qui vacillent. **Jamais pendant un saut** : il attend que Céleste ait les pieds au sol (pilier 1). Logique pure testée (`stepTremor`).
+- **Animations choisies** :
+  - **scintillements qui tombent** lentement, qui s'effacent près de Céleste (jamais devant elle) ;
+  - **fenêtre sur la chambre** : la lampe s'y allume et s'éteint lentement ;
+  - **ombre de l'ours** qui glisse le long du mur, puis disparaît un moment.
+- Non retenu : les papillons de papier, la lueur qui parcourt les bords, et les cadres qui basculent pendant les frissons (ils demanderaient de sortir les cadres du décor fixe).
+- **Parents** (rappel de l'utilisateur, spec §8) : très présents au début de l'histoire, absents du slice actuel. **À intégrer dans l'étape « maison vivante »**, avec les choix réservés à l'utilisateur (§45 : composition de la famille, apparence, rôle le soir et le matin, bulles pictogrammes).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

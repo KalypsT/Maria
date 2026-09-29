@@ -2,10 +2,20 @@ import Phaser from 'phaser';
 import type { ArtPalette } from '../config/art';
 import { TILE_SIZE as T } from '../config/display';
 import { STRANGE_FX as FX } from '../config/strangeFx';
-import { createEyes, isClearSpot, seededRandom, stepEyes, type Eyes } from '../core/fx/strangeLife';
+import {
+  createEyes,
+  createTremor,
+  isClearSpot,
+  seededRandom,
+  stepEyes,
+  stepTremor,
+  type Eyes,
+  type Tremor,
+} from '../core/fx/strangeLife';
 import { floatingDecor } from '../core/level/decor';
 import type { LevelData } from '../core/level/LevelData';
 import type { TileArea } from '../core/story/story';
+import { drawToyShadow } from './art/roomArt';
 
 /** Échelle des textures des effets (nettes jusqu'à l'échelle 3 de l'écran). */
 const S = 3;
@@ -73,6 +83,22 @@ export class StrangeFxView {
   private lamps: Swaying[] = [];
   private glows: Swaying[] = [];
   private eyes: { readonly state: Eyes; readonly image: Phaser.GameObjects.Image }[] = [];
+  private snow: Particle[] = [];
+  private falling: Particle[] = [];
+  private nextFalling = 0;
+  private bedroomLamps: {
+    readonly halo: Phaser.GameObjects.Image;
+    readonly shade: Phaser.GameObjects.Image;
+    readonly periodMs: number;
+    readonly phase: number;
+  }[] = [];
+  private bears: {
+    readonly image: Phaser.GameObjects.Image;
+    readonly x0: number;
+    startMs: number;
+  }[] = [];
+  private tremor: Tremor = createTremor(0, FX, this.rand);
+  private tremorK = 0;
 
   constructor(private readonly scene: Phaser.Scene) {
     this.createTextures();
@@ -139,6 +165,11 @@ export class StrangeFxView {
     this.lamps = [];
     this.glows = [];
     this.eyes = [];
+    this.snow = [];
+    this.falling = [];
+    this.bedroomLamps = [];
+    this.bears = [];
+    this.tremorK = 0;
     this.level = strange ? level : null;
     if (!strange) {
       return;
@@ -160,6 +191,20 @@ export class StrangeFxView {
       this.drift.push(p);
     }
     const curtain = Phaser.Display.Color.HexStringToColor(palette.curtain).color;
+    const [lr = 255, lg = 255, lb = 255] = palette.lamp.split(',').map(Number);
+    const lamp = Phaser.Display.Color.GetColor(lr, lg, lb);
+    this.tremor = createTremor(now, FX, this.rand);
+    for (let i = 0; i < FX.snowCount; i++) {
+      const p = this.particle('fx-sparkle', ABOVE_LIGHT, true);
+      own(p.image);
+      this.snow.push(p);
+    }
+    for (let i = 0; i < FX.tremorDust; i++) {
+      const p = this.particle('fx-mote', ABOVE_LIGHT, false);
+      p.image.setTint(0xb8a8d8);
+      own(p.image);
+      this.falling.push(p);
+    }
     for (const d of level.decor) {
       const x = d.col * T;
       const y = d.row * T;
@@ -196,6 +241,7 @@ export class StrangeFxView {
           this.scene.add
             .image(x + w / 2, y + 4, 'fx-halo')
             .setScale(70 / 64 / S)
+            .setTint(lamp)
             .setBlendMode(Phaser.BlendModes.ADD)
             .setDepth(ABOVE_LIGHT),
         );
@@ -209,6 +255,40 @@ export class StrangeFxView {
             .setDepth(ABOVE_LIGHT),
         );
         this.eyes.push({ state, image });
+      } else if (d.kind === 'bedroom-window') {
+        // La lampe de la chambre, au loin, s'allume et s'éteint lentement.
+        const floorY = y + h * 0.82;
+        const halo = own(
+          this.scene.add
+            .image(x + w * 0.78, floorY - h * 0.4, 'fx-halo')
+            .setScale(22 / 64 / S)
+            .setTint(0xffcf7a)
+            .setBlendMode(Phaser.BlendModes.ADD)
+            .setDepth(BEHIND_LIGHT),
+        );
+        const shade = own(
+          this.scene.add
+            .image(x, y, 'fx-dark')
+            .setOrigin(0, 0)
+            .setScale(w / 4, h / 4)
+            .setDepth(BEHIND_LIGHT),
+        );
+        const periodMs =
+          FX.bedroomLampMinMs + this.rand() * (FX.bedroomLampMaxMs - FX.bedroomLampMinMs);
+        this.bedroomLamps.push({ halo, shade, periodMs, phase: this.rand() * Math.PI * 2 });
+      } else if (d.kind === 'toy-shadow') {
+        const key = `fx-bear-${String(d.width)}x${String(d.height)}`;
+        this.make(key, w, h, (ctx) => {
+          drawToyShadow(ctx, { x: 0, y: 0, w, h });
+        });
+        const image = own(
+          this.scene.add
+            .image(x, y, key)
+            .setOrigin(0, 0)
+            .setScale(1 / S)
+            .setDepth(BEHIND_LIGHT),
+        );
+        this.bears.push({ image, x0: x, startMs: now - this.rand() * 20000 });
       }
     }
     for (const d of floatingDecor(level)) {
@@ -217,6 +297,7 @@ export class StrangeFxView {
         this.scene.add
           .image(d.col * T + w / 2, (d.row + d.height) * T + 2, 'fx-glow')
           .setScale((w + 12) / 64 / S, 1 / S)
+          .setTint(lamp)
           .setBlendMode(Phaser.BlendModes.ADD)
           .setDepth(BEHIND_LIGHT),
       );
@@ -224,11 +305,21 @@ export class StrangeFxView {
     }
   }
 
-  /** Une image : `view` est la zone visible (px logiques), Céleste au point (x, y). */
-  update(view: Phaser.Geom.Rectangle, celesteX: number, celesteY: number): void {
+  /**
+   * Une image : `view` est la zone visible (px logiques), Céleste au point (x, y), `grounded` : les
+   * pieds au sol (les frissons attendent qu'elle se pose).
+   */
+  update(view: Phaser.Geom.Rectangle, celesteX: number, celesteY: number, grounded: boolean): void {
     const now = this.scene.time.now;
     const dt = this.lastMs < 0 ? 16 : Math.min(100, now - this.lastMs);
     this.lastMs = now;
+    if (this.level) {
+      const k = stepTremor(this.tremor, now, grounded, FX, this.rand);
+      if (k > 0 && this.tremorK === 0) {
+        this.dropDust(view);
+      }
+      this.tremorK = k;
+    }
     this.updateOmen(now);
     this.updateShake(now);
     this.updateSparkles(now);
@@ -237,6 +328,31 @@ export class StrangeFxView {
     }
     this.updateDust(now, dt, view);
     this.updateDrift(now, dt, view);
+    this.updateSnow(now, dt, view, celesteX, celesteY);
+    this.updateFalling(now, dt);
+    for (const b of this.bedroomLamps) {
+      const on = Math.min(
+        1,
+        Math.max(0, 0.5 + 1.4 * Math.sin((now / b.periodMs) * Math.PI * 2 + b.phase)),
+      );
+      b.halo.setAlpha(on * 0.9);
+      b.shade.setAlpha((1 - on) * 0.45);
+    }
+    const glideMs = ((FX.bearGlideTiles * T) / FX.bearGlidePxPerS) * 1000;
+    for (const bear of this.bears) {
+      let t = now - bear.startMs;
+      if (t > glideMs + FX.bearHiddenMs) {
+        bear.startMs = now;
+        t = 0;
+      }
+      const visible = t < glideMs;
+      bear.image.setVisible(visible);
+      if (visible) {
+        // Apparition et effacement lents aux deux bouts du glissement.
+        const fade = Math.min(1, t / 4000, (glideMs - t) / 4000);
+        bear.image.setX(bear.x0 + (t / 1000) * FX.bearGlidePxPerS).setAlpha(fade);
+      }
+    }
     const tick = Math.floor(now / FX.clockTickMs);
     const within = (now % FX.clockTickMs) / 120;
     for (const hand of this.hands) {
@@ -257,7 +373,9 @@ export class StrangeFxView {
     }
     for (const glow of this.glows) {
       const k = 0.5 + 0.5 * Math.sin((now / FX.glowBreathMs) * Math.PI * 2 + glow.phase);
-      glow.image.setAlpha(FX.glowBreath * k);
+      // Pendant un frisson, les lueurs vacillent.
+      const shiver = this.tremorK > 0 ? 0.4 + this.rand() * 0.6 : 1;
+      glow.image.setAlpha(FX.glowBreath * k * shiver);
     }
     for (const e of this.eyes) {
       stepEyes(e.state, celesteX, celesteY, now, dt, FX, this.rand);
@@ -291,6 +409,7 @@ export class StrangeFxView {
       const left = (this.shakeUntil - now) / this.shakeMs;
       amp = Math.max(amp, FX.shakePx * this.shakeStrength * Math.min(1, left * 2));
     }
+    amp = Math.max(amp, FX.tremorPx * this.tremorK);
     this.offsetX = amp > 0 ? (this.rand() * 2 - 1) * amp : 0;
     this.offsetY = amp > 0 ? (this.rand() * 2 - 1) * amp * 0.6 : 0;
   }
@@ -397,6 +516,82 @@ export class StrangeFxView {
     }
   }
 
+  /** Scintillements qui tombent doucement ; ils s'effacent près de Céleste (jamais devant elle). */
+  private updateSnow(
+    now: number,
+    dt: number,
+    view: Phaser.Geom.Rectangle,
+    celesteX: number,
+    celesteY: number,
+  ): void {
+    for (const p of this.snow) {
+      if (p.bornMs < 0 || now - p.bornMs >= p.lifeMs || p.y > view.y + view.height + 8) {
+        p.x = view.x + this.rand() * view.width;
+        p.y = view.y - 8 + this.rand() * view.height * 0.6;
+        p.bornMs = now - this.rand() * FX.snowLifeMs * 0.3;
+        p.lifeMs = FX.snowLifeMs * (0.6 + this.rand() * 0.8);
+        p.phase = this.rand() * 10;
+        p.leaving = -1;
+      }
+      p.y += (FX.snowFallPxPerS * dt) / 1000;
+      const x = p.x + Math.sin(now / 1300 + p.phase) * 4;
+      if (p.leaving < 0 && Math.hypot(x - celesteX, p.y - celesteY) < FX.snowAvoidPx) {
+        p.leaving = now;
+      }
+      const t = (now - p.bornMs) / p.lifeMs;
+      let alpha = Math.sin(Math.max(0, Math.min(1, t)) * Math.PI);
+      if (p.leaving >= 0) {
+        alpha *= Math.max(0, 1 - (now - p.leaving) / 250);
+      }
+      p.image
+        .setVisible(alpha > 0)
+        .setPosition(x, p.y)
+        .setAlpha(alpha * 0.8)
+        .setRotation(now / 900 + p.phase)
+        .setScale((0.55 + 0.2 * Math.sin(now / 400 + p.phase)) / S);
+    }
+  }
+
+  /** Frisson : un peu de poussière tombe du plafond, dans la vue. */
+  private dropDust(view: Phaser.Geom.Rectangle): void {
+    const now = this.scene.time.now;
+    for (let i = 0; i < this.falling.length; i++) {
+      const p = this.falling[this.nextFalling];
+      this.nextFalling = (this.nextFalling + 1) % this.falling.length;
+      if (!p) {
+        continue;
+      }
+      p.x = view.x + this.rand() * view.width;
+      p.y = view.y + this.rand() * 12;
+      p.vx = (this.rand() - 0.5) * 6;
+      p.vy = 10 + this.rand() * 20;
+      p.bornMs = now + this.rand() * 300;
+      p.lifeMs = 1600 + this.rand() * 900;
+    }
+  }
+
+  private updateFalling(now: number, dt: number): void {
+    for (const p of this.falling) {
+      if (p.bornMs < 0 || now < p.bornMs) {
+        p.image.setVisible(false);
+        continue;
+      }
+      const t = (now - p.bornMs) / p.lifeMs;
+      if (t >= 1) {
+        p.bornMs = -1;
+        p.image.setVisible(false);
+        continue;
+      }
+      p.vy += (60 * dt) / 1000;
+      p.x += (p.vx * dt) / 1000;
+      p.y += (p.vy * dt) / 1000;
+      p.image
+        .setVisible(true)
+        .setPosition(p.x, p.y)
+        .setAlpha(0.8 * (1 - t));
+    }
+  }
+
   private particle(texture: string, depth: number, additive: boolean): Particle {
     const image = this.scene.add
       .image(0, 0, texture)
@@ -409,28 +604,31 @@ export class StrangeFxView {
     return { image, x: 0, y: 0, vx: 0, vy: 0, bornMs: -1, lifeMs: 1, phase: 0, leaving: -1 };
   }
 
-  /** Textures dessinées une fois (à l'échelle `S`). */
+  /** Texture dessinée une fois (à l'échelle `S`), réutilisée ensuite. */
+  private make(
+    key: string,
+    w: number,
+    h: number,
+    draw: (c: CanvasRenderingContext2D) => void,
+  ): void {
+    if (this.scene.textures.exists(key)) {
+      return;
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.ceil(w * S);
+    canvas.height = Math.ceil(h * S);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
+    ctx.scale(S, S);
+    draw(ctx);
+    this.scene.textures.addCanvas(key, canvas);
+  }
+
+  /** Textures communes des effets. */
   private createTextures(): void {
-    const make = (
-      key: string,
-      w: number,
-      h: number,
-      draw: (c: CanvasRenderingContext2D) => void,
-    ) => {
-      if (this.scene.textures.exists(key)) {
-        return;
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = w * S;
-      canvas.height = h * S;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        return;
-      }
-      ctx.scale(S, S);
-      draw(ctx);
-      this.scene.textures.addCanvas(key, canvas);
-    };
+    const make = this.make.bind(this);
     const radial = (ctx: CanvasRenderingContext2D, w: number, h: number, color: string) => {
       const g = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
       g.addColorStop(0, color);
@@ -457,11 +655,16 @@ export class StrangeFxView {
     make('fx-mote', 4, 4, (ctx) => {
       radial(ctx, 4, 4, 'rgba(150,255,235,0.9)');
     });
+    // Lueurs blanches, teintées à la couleur des lampes de la palette.
     make('fx-glow', 64, 16, (ctx) => {
-      radial(ctx, 64, 16, 'rgba(90,230,210,0.9)');
+      radial(ctx, 64, 16, 'rgba(255,255,255,0.9)');
     });
     make('fx-halo', 64, 64, (ctx) => {
-      radial(ctx, 64, 64, 'rgba(90,230,210,0.5)');
+      radial(ctx, 64, 64, 'rgba(255,255,255,0.5)');
+    });
+    make('fx-dark', 4, 4, (ctx) => {
+      ctx.fillStyle = '#05040a';
+      ctx.fillRect(0, 0, 4, 4);
     });
     make('fx-hand', 2, 8, (ctx) => {
       ctx.fillStyle = TURQUOISE;

@@ -30,7 +30,7 @@ export interface ArtContext {
   readonly images: ReadonlyMap<string, CanvasImageSource>;
 }
 
-type Rect = { x: number; y: number; w: number; h: number };
+export type Rect = { x: number; y: number; w: number; h: number };
 
 function rect(d: LevelDecor): Rect {
   return { x: d.col * T, y: d.row * T, w: d.width * T, h: d.height * T };
@@ -794,26 +794,8 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
       ctx.fillRect(r.x, y - 1, r.w, 2);
     }
   },
-  'toy-shadow'(a, r) {
-    // Ombre géante d'un ours en peluche sur le mur (le jouet, lui, n'est nulle part).
-    const { ctx } = a;
-    ctx.fillStyle = 'rgba(0,0,0,0.28)';
-    const cx = r.x + r.w / 2;
-    const head = r.w * 0.26;
-    ctx.beginPath();
-    ctx.arc(cx, r.y + head, head, 0, Math.PI * 2);
-    ctx.arc(cx - head * 0.85, r.y + head * 0.3, head * 0.38, 0, Math.PI * 2);
-    ctx.arc(cx + head * 0.85, r.y + head * 0.3, head * 0.38, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(cx, r.y + head * 2 + r.h * 0.22, r.w * 0.36, r.h * 0.3, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(cx - r.w * 0.36, r.y + r.h * 0.5, r.w * 0.12, r.h * 0.08, -0.6, 0, Math.PI * 2);
-    ctx.ellipse(cx + r.w * 0.36, r.y + r.h * 0.5, r.w * 0.12, r.h * 0.08, 0.6, 0, Math.PI * 2);
-    ctx.ellipse(cx - r.w * 0.2, r.y + r.h * 0.9, r.w * 0.14, r.h * 0.1, 0, 0, Math.PI * 2);
-    ctx.ellipse(cx + r.w * 0.2, r.y + r.h * 0.9, r.w * 0.14, r.h * 0.1, 0, 0, Math.PI * 2);
-    ctx.fill();
+  'toy-shadow'() {
+    // Ombre de l'ours : elle glisse le long du mur, animée par les effets du monde étrange (D-36).
   },
   'narrow-left'(a, r) {
     narrowing(a, r, -1);
@@ -840,6 +822,30 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     ctx.setLineDash([]);
   },
 };
+
+/**
+ * Ombre géante d'un ours en peluche sur le mur (le jouet, lui, n'est nulle part), dans le
+ * rectangle `r` (px). Dessinée dans une texture des effets, qui la fait glisser (D-36).
+ */
+export function drawToyShadow(ctx: CanvasRenderingContext2D, r: Rect): void {
+  ctx.fillStyle = 'rgba(0,0,0,0.28)';
+  const cx = r.x + r.w / 2;
+  const head = r.w * 0.26;
+  ctx.beginPath();
+  ctx.arc(cx, r.y + head, head, 0, Math.PI * 2);
+  ctx.arc(cx - head * 0.85, r.y + head * 0.3, head * 0.38, 0, Math.PI * 2);
+  ctx.arc(cx + head * 0.85, r.y + head * 0.3, head * 0.38, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(cx, r.y + head * 2 + r.h * 0.22, r.w * 0.36, r.h * 0.3, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(cx - r.w * 0.36, r.y + r.h * 0.5, r.w * 0.12, r.h * 0.08, -0.6, 0, Math.PI * 2);
+  ctx.ellipse(cx + r.w * 0.36, r.y + r.h * 0.5, r.w * 0.12, r.h * 0.08, 0.6, 0, Math.PI * 2);
+  ctx.ellipse(cx - r.w * 0.2, r.y + r.h * 0.9, r.w * 0.14, r.h * 0.1, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx + r.w * 0.2, r.y + r.h * 0.9, r.w * 0.14, r.h * 0.1, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
 
 /** Ouvre une transformation penchée autour du centre de `r` (à fermer par `ctx.restore()`). */
 function tilted(ctx: CanvasRenderingContext2D, r: Rect, angle: number): void {
