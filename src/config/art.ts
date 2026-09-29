@@ -50,6 +50,8 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   jarshelf: { furniture: true },
   /** Frigo de la cuisine, à escalader (D-39). */
   fridge: { furniture: true },
+  /** Armoire à linge sur pieds, près de la porte de derrière (buanderie, D-46). */
+  linencabinet: { furniture: true },
   // Fond (sans collision).
   window: { furniture: false },
   frame: { furniture: false },
