@@ -75,7 +75,11 @@ export class CombatView {
   }
 
   /** Affichage interpolé (une fois par image). */
-  render(alpha: number, player: PlayerPhysics, playerSprite: Phaser.GameObjects.Image): void {
+  render(
+    alpha: number,
+    player: PlayerPhysics,
+    playerSprite: { readonly x: number; readonly y: number; setAlpha: (alpha: number) => unknown },
+  ): void {
     const enemies = this.world.enemies;
     for (let i = 0; i < enemies.length; i++) {
       const enemy = enemies[i];

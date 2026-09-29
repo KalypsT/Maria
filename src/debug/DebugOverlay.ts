@@ -3,6 +3,7 @@ import { CAMERA_PARAM_RANGES, DEFAULT_CAMERA, type CameraParams } from '../confi
 import { COMBAT_PARAM_RANGES, DEFAULT_COMBAT, type CombatParams } from '../config/combat';
 import { DEFAULT_FEEL, FEEL_PARAM_RANGES, type FeelParams } from '../config/feel';
 import { DEFAULT_WORLD, WORLD_PARAM_RANGES, type WorldParams } from '../config/world';
+import { DEFAULT_PUPPET, PUPPET_PARAM_RANGES, type PuppetParams } from '../config/puppet';
 import { deserializeSave } from '../core/save/saveData';
 import {
   DEFAULT_MOVEMENT,
@@ -267,6 +268,16 @@ export function installDebugOverlay(scene: GameScene): void {
     },
   });
 
+  const refreshPuppet = addSliders<PuppetParams>(panel, {
+    title: 'Céleste (papier découpé)',
+    values: scene.puppetParams,
+    defaults: DEFAULT_PUPPET,
+    ranges: PUPPET_PARAM_RANGES,
+    onChange: () => {
+      scene.applyPuppet();
+    },
+  });
+
   const refreshCombat = addSliders<CombatParams>(panel, {
     title: 'Combat',
     values: scene.combatParams,
@@ -400,6 +411,9 @@ export function installDebugOverlay(scene: GameScene): void {
     save(WORLD_STORAGE_KEY, worldToJson(scene.worldParams));
     refreshCombat();
     refreshWorld();
+    Object.assign(scene.puppetParams, DEFAULT_PUPPET);
+    scene.applyPuppet();
+    refreshPuppet();
   });
   element('button', actions, undefined, 'Replacer Céleste').addEventListener('click', () => {
     scene.respawn();
