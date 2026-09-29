@@ -10,7 +10,7 @@ import {
   PLAYER_HITBOX,
   type MovementParams,
 } from '../config/movement';
-import { LEVELS, levelName } from '../levels';
+import { LEVELS, ZONES, levelName } from '../levels';
 import type { GameScene } from '../scenes/GameScene';
 import {
   cameraToJson,
@@ -197,6 +197,12 @@ export function installDebugOverlay(scene: GameScene): void {
 
   // Salle (téléportation de zone) et options d'affichage.
   const select = element('select', panel);
+  for (const zone of ZONES) {
+    for (const [id, level] of zone.rooms) {
+      const option = element('option', select, undefined, `${zone.id} · ${level.meta.name ?? id}`);
+      option.value = id;
+    }
+  }
   for (const source of LEVELS) {
     const option = element('option', select, undefined, levelName(source));
     option.value = source.id;
@@ -206,6 +212,8 @@ export function installDebugOverlay(scene: GameScene): void {
     const source = LEVELS.find((level) => level.id === select.value);
     if (source) {
       scene.loadLevel(source);
+    } else {
+      scene.teleportToRoom(select.value);
     }
     select.blur();
   });

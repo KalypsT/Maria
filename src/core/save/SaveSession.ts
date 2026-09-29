@@ -30,6 +30,19 @@ export class SaveSession {
     return this.persist();
   }
 
+  /**
+   * Salle visitée (D-25), ajoutée à la carte révélée ; écrite seulement si elle est nouvelle.
+   * Le point de retour ne change pas.
+   */
+  revealRoom(roomId: string): Promise<void> {
+    const revealed = this.current.progression.mapRevealed;
+    if (revealed.includes(roomId)) {
+      return Promise.resolve();
+    }
+    revealed.push(roomId);
+    return this.persist();
+  }
+
   setControls(controls: Readonly<ControlSettings>): Promise<void> {
     this.current.settings.controls = { ...controls };
     return this.persist();
