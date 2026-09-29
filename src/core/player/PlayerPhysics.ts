@@ -1,16 +1,21 @@
+import { TILE_SIZE as T } from '../../config/display';
 import {
+  LEDGE_CLIMB_RISE_SHARE,
+  LEDGE_STAND_INSET_PX,
   PLAYER_HITBOX,
   deriveMovement,
   type DerivedMovement,
   type MovementParams,
 } from '../../config/movement';
-import type { LevelData } from '../level/LevelData';
+import { Tile, tileAt, type LevelData } from '../level/LevelData';
 import {
   HitY,
   isBoxFree,
   isGrounded,
   moveX,
   moveY,
+  touchesHazard,
+  type Box,
   type MovingBox,
 } from '../physics/gridCollision';
 import { PlayerState, nextPlayerState } from './playerState';
@@ -28,6 +33,10 @@ export interface PlayerInput {
 
 /** Compteur « jamais » : grand entier, pour ne pas dépasser en incrémentant. */
 const NEVER = 1 << 30;
+
+/** Rebord (D-26) : rien, suspendue, en train de se hisser. */
+const Ledge = { None: 0, Hang: 1, Climb: 2 } as const;
+type Ledge = (typeof Ledge)[keyof typeof Ledge];
 
 /**
  * Physique de Céleste, indépendante de Phaser. Un appel à `step` = un pas fixe (1/120 s).
@@ -55,6 +64,20 @@ export class PlayerPhysics {
   stepsSinceJumpPressed = NEVER;
   /** Pas restants de perte de contrôle après avoir été touchée (D-20). */
   hurtSteps = 0;
+  /** Capacité « grimper aux rebords » acquise (D-26). Sans elle, le mouvement est inchangé. */
+  canClimb = false;
+  private ledge: Ledge = Ledge.None;
+  private ledgeSteps = 0;
+  /** Côté du rebord (1 : à droite de Céleste). */
+  private ledgeDir = 0;
+  /** Suspendue : hitbox en (ledgeHangX, ledgeHangY) ; debout sur le rebord : (ledgeStandX, ledgeStandY). */
+  private ledgeHangX = 0;
+  private ledgeHangY = 0;
+  private ledgeStandX = 0;
+  private ledgeStandY = 0;
+  private regrabSteps = 0;
+  /** Hitbox d'essai des positions de rebord (réutilisée : aucune allocation). */
+  private readonly probe: Box = { x: 0, y: 0, width: 0, height: 0 };
   private jumpCutAvailable = false;
   /** Saut relâché pendant la montée, en mode « gravité au relâchement » (D-19). */
   private releaseGravityActive = false;
@@ -80,11 +103,18 @@ export class PlayerPhysics {
       dy: 0,
       passOneWay: false,
     };
+    this.probe.width = PLAYER_HITBOX.width;
+    this.probe.height = PLAYER_HITBOX.height;
     this.prevX = x;
     this.prevY = y;
     this.grounded = isGrounded(level, this.box);
     this.stepsSinceGrounded = this.grounded ? 0 : NEVER;
     this.state = this.grounded ? PlayerState.Idle : PlayerState.Fall;
+  }
+
+  /** Suspendue à un rebord ou en train de s'y hisser (pas d'attaque, pas de gravité). */
+  get onLedge(): boolean {
+    return this.ledge !== Ledge.None;
   }
 
   get movement(): Readonly<MovementParams> {
@@ -109,6 +139,9 @@ export class PlayerPhysics {
     this.hurtSteps = 0;
     this.landStepsRemaining = 0;
     this.dropStepsRemaining = 0;
+    this.ledge = Ledge.None;
+    this.ledgeSteps = 0;
+    this.regrabSteps = 0;
     this.box.passOneWay = false;
     this.grounded = isGrounded(level, this.box);
     this.stepsSinceGrounded = this.grounded ? 0 : NEVER;
@@ -142,6 +175,15 @@ export class PlayerPhysics {
     this.hurtSteps = other.hurtSteps;
     this.landStepsRemaining = other.landStepsRemaining;
     this.dropStepsRemaining = other.dropStepsRemaining;
+    this.canClimb = other.canClimb;
+    this.ledge = other.ledge;
+    this.ledgeSteps = other.ledgeSteps;
+    this.ledgeDir = other.ledgeDir;
+    this.ledgeHangX = other.ledgeHangX;
+    this.ledgeHangY = other.ledgeHangY;
+    this.ledgeStandX = other.ledgeStandX;
+    this.ledgeStandY = other.ledgeStandY;
+    this.regrabSteps = other.regrabSteps;
   }
 
   /**
@@ -149,6 +191,7 @@ export class PlayerPhysics {
    * argument) ; pendant `steps` pas, direction et saut sont ignorés.
    */
   startHurt(steps: number): void {
+    this.ledge = Ledge.None;
     this.hurtSteps = steps;
     this.state = PlayerState.Hurt;
     this.grounded = false;
@@ -165,6 +208,10 @@ export class PlayerPhysics {
     const box = this.box;
     this.prevX = box.x;
     this.prevY = box.y;
+    if (this.ledge !== Ledge.None) {
+      this.stepLedge(input);
+      return;
+    }
 
     // Touchée : direction et saut ignorés pendant la perte de contrôle.
     const hurt = this.hurtSteps > 0;
@@ -288,6 +335,11 @@ export class PlayerPhysics {
     if (this.hurtSteps > 0) {
       this.hurtSteps--;
     }
+    if (this.regrabSteps > 0) {
+      this.regrabSteps--;
+    } else if (this.canClimb && !hurt && !this.grounded && this.vy >= 0 && this.tryGrab(input)) {
+      return;
+    }
     this.state = nextPlayerState(
       this.state,
       this.grounded,
@@ -296,6 +348,124 @@ export class PlayerPhysics {
       this.landStepsRemaining,
       this.hurtSteps > 0,
     );
+  }
+
+  /**
+   * En descente contre un mur, en poussant vers lui : attrape le bord d'une tuile pleine dont le
+   * dessus est à hauteur des mains (D-26). Le hissage est vérifié d'avance (passage libre, rebord
+   * praticable) : une fois accrochée, Céleste ne peut pas se coincer.
+   */
+  private tryGrab(input: PlayerInput): boolean {
+    const p = this.params;
+    const threshold = p.ledgeInputThreshold;
+    const dir = input.moveX >= threshold ? 1 : input.moveX <= -threshold ? -1 : 0;
+    if (dir === 0) {
+      return false;
+    }
+    const level = this.level;
+    const box = this.box;
+    const probe = this.probe;
+    const col =
+      dir > 0
+        ? Math.floor((box.x + box.width + p.ledgeGrabSidePx) / T)
+        : Math.floor((box.x - p.ledgeGrabSidePx) / T);
+    const rowFrom = Math.ceil((box.y - p.ledgeGrabAbovePx) / T);
+    const rowTo = Math.floor((box.y + p.ledgeGrabBelowPx) / T);
+    for (let row = rowFrom; row <= rowTo; row++) {
+      if (tileAt(level, col, row) !== Tile.Solid || tileAt(level, col, row - 1) === Tile.Solid) {
+        continue;
+      }
+      const top = row * T;
+      // Suspendue, contre le mur.
+      probe.x = dir > 0 ? col * T - box.width : (col + 1) * T;
+      probe.y = top - p.ledgeHangOffsetPx;
+      if (!isBoxFree(level, probe)) {
+        continue;
+      }
+      // Montée le long du mur, jusqu'au-dessus du bord.
+      probe.y = top - box.height;
+      if (!isBoxFree(level, probe)) {
+        continue;
+      }
+      // Debout sur le rebord.
+      probe.x =
+        dir > 0 ? col * T + LEDGE_STAND_INSET_PX : (col + 1) * T - box.width - LEDGE_STAND_INSET_PX;
+      if (
+        !isBoxFree(level, probe) ||
+        !isGrounded(level, probe, false) ||
+        touchesHazard(level, probe)
+      ) {
+        continue;
+      }
+      this.ledge = Ledge.Hang;
+      this.ledgeSteps = 0;
+      this.ledgeDir = dir;
+      this.ledgeHangX = dir > 0 ? col * T - box.width : (col + 1) * T;
+      this.ledgeHangY = top - p.ledgeHangOffsetPx;
+      this.ledgeStandX = probe.x;
+      this.ledgeStandY = top - box.height;
+      box.x = this.ledgeHangX;
+      box.y = this.ledgeHangY;
+      this.vx = 0;
+      this.vy = 0;
+      this.facing = dir;
+      this.grounded = false;
+      this.stepsSinceGrounded = NEVER;
+      this.stepsSinceJumpPressed = NEVER;
+      this.jumpCutAvailable = false;
+      this.releaseGravityActive = false;
+      this.landStepsRemaining = 0;
+      this.dropStepsRemaining = 0;
+      box.passOneWay = false;
+      this.state = PlayerState.Hang;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Suspendue : Saut hisse ; pousser vers le bord ou vers le haut hisse après un court instant ;
+   * pousser vers le bas ou à l'opposé lâche. Hissage : montée puis avance sur le rebord, sur un
+   * trajet vérifié à l'accroche (sans collision).
+   */
+  private stepLedge(input: PlayerInput): void {
+    const p = this.params;
+    const d = this.derived;
+    const box = this.box;
+    this.ledgeSteps++;
+    if (this.ledge === Ledge.Hang) {
+      const threshold = p.ledgeInputThreshold;
+      const toward = input.moveX * this.ledgeDir >= threshold || input.moveY <= -threshold;
+      const away = input.moveX * this.ledgeDir <= -threshold || input.moveY >= threshold;
+      if (input.jumpPressed || (toward && this.ledgeSteps >= d.ledgeHangMinSteps)) {
+        this.ledge = Ledge.Climb;
+        this.ledgeSteps = 0;
+        this.state = PlayerState.Climb;
+      } else if (away) {
+        this.ledge = Ledge.None;
+        this.regrabSteps = d.ledgeRegrabSteps;
+        this.state = PlayerState.Fall;
+      }
+      return;
+    }
+    const t = Math.min(1, this.ledgeSteps / d.ledgeClimbSteps);
+    if (t < LEDGE_CLIMB_RISE_SHARE) {
+      box.x = this.ledgeHangX;
+      box.y = this.ledgeHangY + (this.ledgeStandY - this.ledgeHangY) * (t / LEDGE_CLIMB_RISE_SHARE);
+    } else {
+      box.y = this.ledgeStandY;
+      box.x =
+        this.ledgeHangX +
+        (this.ledgeStandX - this.ledgeHangX) *
+          ((t - LEDGE_CLIMB_RISE_SHARE) / (1 - LEDGE_CLIMB_RISE_SHARE));
+    }
+    if (t >= 1) {
+      this.ledge = Ledge.None;
+      this.grounded = isGrounded(this.level, box);
+      this.stepsSinceGrounded = this.grounded ? 0 : NEVER;
+      this.stepsSinceJumpPressed = NEVER;
+      this.state = this.grounded ? PlayerState.Idle : PlayerState.Fall;
+    }
   }
 
   /**
