@@ -1,4 +1,4 @@
-/** États du joueur (spec §30). Les autres (WallSlide, Dash…) viendront avec leurs capacités. */
+/** États du joueur (spec §30). Les autres (Dash…) viendront avec leurs capacités. */
 export const PlayerState = {
   Idle: 'Idle',
   Run: 'Run',
@@ -12,6 +12,8 @@ export const PlayerState = {
   Hang: 'Hang',
   /** Se hisse sur un rebord (D-26). */
   Climb: 'Climb',
+  /** Glisse contre un mur, en descente, en poussant vers lui (D-44). */
+  WallSlide: 'WallSlide',
 } as const;
 export type PlayerState = (typeof PlayerState)[keyof typeof PlayerState];
 
@@ -26,12 +28,16 @@ export function nextPlayerState(
   moving: boolean,
   landStepsRemaining: number,
   hurt = false,
+  onWall = false,
 ): PlayerState {
   if (hurt) {
     return PlayerState.Hurt;
   }
   if (!grounded) {
-    return rising ? PlayerState.Jump : PlayerState.Fall;
+    if (rising) {
+      return PlayerState.Jump;
+    }
+    return onWall ? PlayerState.WallSlide : PlayerState.Fall;
   }
   if (moving) {
     return PlayerState.Run;

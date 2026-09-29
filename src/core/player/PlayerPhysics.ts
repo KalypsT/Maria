@@ -34,6 +34,13 @@ export interface PlayerInput {
 /** Compteur « jamais » : grand entier, pour ne pas dépasser en incrémentant. */
 const NEVER = 1 << 30;
 
+/**
+ * Saut mural (D-44) : le mur est touché si une tuile pleine est à cette distance du côté de la
+ * hitbox (px), à hauteur des mains (`WALL_GRIP_FROM_TOP_PX` sous le haut de la hitbox).
+ */
+const WALL_CONTACT_PX = 1;
+const WALL_GRIP_FROM_TOP_PX = 4;
+
 /** Rebord (D-26) : rien, suspendue, en train de se hisser. */
 const Ledge = { None: 0, Hang: 1, Climb: 2 } as const;
 type Ledge = (typeof Ledge)[keyof typeof Ledge];
@@ -66,6 +73,23 @@ export class PlayerPhysics {
   hurtSteps = 0;
   /** Capacité « grimper aux rebords » acquise (D-26). Sans elle, le mouvement est inchangé. */
   canClimb = false;
+  /** Capacité « saut mural » acquise (D-44). Sans elle, le mouvement est inchangé. */
+  canWallJump = false;
+  /** Côté du mur touché en poussant vers lui à la fin du dernier pas (1 : à droite), 0 sinon. */
+  wallDir = 0;
+  /** Pas écoulés depuis le dernier contact avec un mur (tolérance du saut mural). */
+  private stepsSinceWall = NEVER;
+  /** Dernier mur touché : côté et colonne de sa tuile. */
+  private lastWallDir = 0;
+  private lastWallCol = 0;
+  /** Pas restants pendant lesquels la direction est ignorée, après un saut mural. */
+  private wallLockSteps = 0;
+  /**
+   * Mur quitté par le dernier saut mural (côté, colonne) : il ne retient plus Céleste avant
+   * qu'elle ait touché le sol, un rebord ou un autre mur. Un seul mur ne se remonte donc pas.
+   */
+  private noCatchDir = 0;
+  private noCatchCol = 0;
   private ledge: Ledge = Ledge.None;
   private ledgeSteps = 0;
   /** Côté du rebord (1 : à droite de Céleste). */
@@ -157,6 +181,7 @@ export class PlayerPhysics {
     this.ledge = Ledge.None;
     this.ledgeSteps = 0;
     this.regrabSteps = 0;
+    this.clearWall();
     this.box.passOneWay = false;
     this.grounded = isGrounded(level, this.box);
     this.stepsSinceGrounded = this.grounded ? 0 : NEVER;
@@ -199,6 +224,27 @@ export class PlayerPhysics {
     this.ledgeStandX = other.ledgeStandX;
     this.ledgeStandY = other.ledgeStandY;
     this.regrabSteps = other.regrabSteps;
+    this.canWallJump = other.canWallJump;
+    this.wallDir = other.wallDir;
+    this.stepsSinceWall = other.stepsSinceWall;
+    this.lastWallDir = other.lastWallDir;
+    this.lastWallCol = other.lastWallCol;
+    this.wallLockSteps = other.wallLockSteps;
+    this.noCatchDir = other.noCatchDir;
+    this.noCatchCol = other.noCatchCol;
+  }
+
+  /** Oublie tout contact avec un mur (sol, rebord, remise à zéro, coup reçu). */
+  private clearWall(): void {
+    this.wallDir = 0;
+    this.stepsSinceWall = NEVER;
+    this.wallLockSteps = 0;
+    this.noCatchDir = 0;
+  }
+
+  /** En glissade contre un mur (D-44). */
+  get wallSliding(): boolean {
+    return this.state === PlayerState.WallSlide;
   }
 
   /**
@@ -207,6 +253,7 @@ export class PlayerPhysics {
    */
   startHurt(steps: number): void {
     this.ledge = Ledge.None;
+    this.clearWall();
     this.hurtSteps = steps;
     this.state = PlayerState.Hurt;
     this.grounded = false;
@@ -234,9 +281,13 @@ export class PlayerPhysics {
     const jumpHeld = input.jumpHeld && !hurt;
 
     // Horizontal : accélération vers la vitesse visée, demi-tour plus vif, décélération sans entrée.
-    const moveInput = hurt ? 0 : input.moveX;
+    // Juste après un saut mural, la direction est ignorée et l'élan conservé (D-44).
+    const locked = this.wallLockSteps > 0;
+    const moveInput = hurt || locked ? 0 : input.moveX;
     let accel: number;
-    if (moveInput !== 0) {
+    if (locked) {
+      accel = 0;
+    } else if (moveInput !== 0) {
       const turning = this.vx !== 0 && Math.sign(this.vx) !== Math.sign(moveInput);
       if (this.grounded) {
         accel = turning ? p.groundTurnAcceleration : p.groundAcceleration;
@@ -280,6 +331,25 @@ export class PlayerPhysics {
       this.stepsSinceJumpPressed = NEVER;
       this.jumpCutAvailable = true;
       this.releaseGravityActive = false;
+    } else if (
+      this.canWallJump &&
+      !this.grounded &&
+      this.stepsSinceJumpPressed <= d.jumpBufferSteps &&
+      this.stepsSinceWall <= d.wallCoyoteSteps
+    ) {
+      // Saut mural (D-44) : impulsion en diagonale, à l'opposé du dernier mur touché.
+      const away = -this.lastWallDir;
+      this.vx = away * p.wallJumpSpeedX;
+      this.vy = -d.wallJumpVelocity;
+      this.facing = away;
+      this.wallLockSteps = d.wallJumpLockSteps;
+      this.noCatchDir = this.lastWallDir;
+      this.noCatchCol = this.lastWallCol;
+      this.wallDir = 0;
+      this.stepsSinceWall = NEVER;
+      this.stepsSinceJumpPressed = NEVER;
+      this.jumpCutAvailable = true;
+      this.releaseGravityActive = false;
     }
     // Hauteur variable : relâcher pendant la montée coupe la vitesse (ou, en mode 1, alourdit la
     // gravité jusqu'au sommet), une fois par saut.
@@ -307,8 +377,22 @@ export class PlayerPhysics {
     ) {
       gravity *= p.apexGravityMultiplier;
     }
+    // Glissade (D-44) : en descente, contre le mur touché au pas précédent, en poussant toujours
+    // vers lui : la chute est aussitôt ramenée à la vitesse de glissade.
+    let maxFall = p.maxFallSpeed;
+    if (
+      this.wallDir !== 0 &&
+      this.vy >= 0 &&
+      moveInput * this.wallDir >= p.wallInputThreshold &&
+      !this.grounded
+    ) {
+      maxFall = p.wallSlideSpeed;
+      if (this.vy > maxFall) {
+        this.vy = maxFall;
+      }
+    }
     const startVy = this.vy;
-    this.vy = Math.min(startVy + gravity * dt, p.maxFallSpeed);
+    this.vy = Math.min(startVy + gravity * dt, maxFall);
     box.dy = (startVy + this.vy) * 0.5 * dt;
     box.dx = this.vx * dt;
 
@@ -350,6 +434,13 @@ export class PlayerPhysics {
     if (this.hurtSteps > 0) {
       this.hurtSteps--;
     }
+    if (this.wallLockSteps > 0) {
+      this.wallLockSteps--;
+    }
+    if (this.grounded) {
+      this.noCatchDir = 0;
+    }
+    this.updateWallContact(moveInput, hurt);
     if (this.regrabSteps > 0) {
       this.regrabSteps--;
     } else if (this.canClimb && !hurt && !this.grounded && this.vy >= 0 && this.tryGrab(input)) {
@@ -362,7 +453,44 @@ export class PlayerPhysics {
       this.vx !== 0 || moveInput !== 0,
       this.landStepsRemaining,
       this.hurtSteps > 0,
+      this.wallDir !== 0,
     );
+    if (this.state === PlayerState.WallSlide) {
+      // Dos au mur, tournée vers le côté où elle va rebondir.
+      this.facing = -this.wallDir;
+    }
+  }
+
+  /**
+   * Contact avec un mur (D-44) : en l'air, en poussant vers une tuile pleine touchée à hauteur des
+   * mains. Sert à la glissade (pas suivant) et au saut mural, avec une courte tolérance après
+   * l'avoir quitté. Le mur quitté par le dernier saut mural ne compte pas.
+   */
+  private updateWallContact(moveInput: number, hurt: boolean): void {
+    const p = this.params;
+    const dir = moveInput >= p.wallInputThreshold ? 1 : moveInput <= -p.wallInputThreshold ? -1 : 0;
+    this.wallDir = 0;
+    if (this.canWallJump && !hurt && !this.grounded && dir !== 0) {
+      const box = this.box;
+      const col =
+        dir > 0
+          ? Math.floor((box.x + box.width + WALL_CONTACT_PX) / T)
+          : Math.floor((box.x - WALL_CONTACT_PX) / T);
+      const row = Math.floor((box.y + WALL_GRIP_FROM_TOP_PX) / T);
+      if (
+        tileAt(this.level, col, row) === Tile.Solid &&
+        (dir !== this.noCatchDir || col !== this.noCatchCol)
+      ) {
+        this.wallDir = dir;
+        this.lastWallDir = dir;
+        this.lastWallCol = col;
+        this.stepsSinceWall = 0;
+        return;
+      }
+    }
+    if (this.stepsSinceWall < NEVER) {
+      this.stepsSinceWall++;
+    }
   }
 
   /**
@@ -415,6 +543,7 @@ export class PlayerPhysics {
       this.ledge = Ledge.Hang;
       this.ledgeSteps = 0;
       this.ledgeDir = dir;
+      this.clearWall();
       this.ledgeHangX = dir > 0 ? col * T - box.width : (col + 1) * T;
       this.ledgeHangY = top - p.ledgeHangOffsetPx;
       this.ledgeStandX = probe.x;

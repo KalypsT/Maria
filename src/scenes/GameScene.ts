@@ -157,6 +157,8 @@ export class GameScene extends Phaser.Scene {
   readonly pickups = new Pickups();
   /** Outil de debug : escalade débloquée sans objet ni sauvegarde. */
   debugClimb = false;
+  /** Outil de debug : saut mural débloqué sans objet ni sauvegarde (D-44). */
+  debugWallJump = false;
   /** Aperçu du monde étrange (D-28, overlay) : mêmes formes, autre palette. */
   strangeWorld = false;
   private roomArt!: RoomArtView;
@@ -822,6 +824,7 @@ export class GameScene extends Phaser.Scene {
     this.run.load(level, this.session.data.activatedCheckpoints, checkpointId);
     const { abilities, collectibles } = this.session.data.progression;
     this.pickups.load(level, abilities, collectibles);
+    this.applyAbilities();
     this.worldView.rebuild();
     this.props.load(this.story.data.props, level.id, this.story.flags);
     this.storyView.rebuild();
@@ -831,10 +834,16 @@ export class GameScene extends Phaser.Scene {
     this.fx.load(level, isStrangeRoom(level), this.palette(), this.story.timeOfDay() === 'morning');
   }
 
-  /** Capacités acquises (sauvegarde) ou débloquées par l'overlay, appliquées à Céleste. */
+  /**
+   * Capacités acquises (sauvegarde), débloquées par l'overlay ou prêtées par un parcours d'essai
+   * (`; @abilities:`, hors partie), appliquées à Céleste.
+   */
   applyAbilities(): void {
-    this.player.canClimb =
-      this.debugClimb || this.session.data.progression.abilities.includes(Ability.Climb);
+    const owned = this.session.data.progression.abilities;
+    const lent = this.zone ? [] : (this.level.meta.abilities ?? '').split(/\s+/);
+    const has = (ability: Ability) => owned.includes(ability) || lent.includes(ability);
+    this.player.canClimb = this.debugClimb || has(Ability.Climb);
+    this.player.canWallJump = this.debugWallJump || has(Ability.WallJump);
   }
 
   /**

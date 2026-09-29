@@ -186,6 +186,15 @@ export class CelestePoser {
         t.bodyTilt = 10 * DEG * Math.sin(k * Math.PI);
         break;
       }
+      case PlayerState.WallSlide:
+        // Dos au mur (D-44) : une main et un pied contre lui, l'autre bras prêt à l'élan.
+        t.bodyTilt = -6 * DEG;
+        t.headTilt = -6 * DEG;
+        t.armBack = -115 * DEG;
+        t.armFront = 50 * DEG;
+        t.legBack = -35 * DEG;
+        t.legFront = 18 * DEG;
+        break;
       case PlayerState.Hurt:
         t.bodyTilt = -14 * DEG;
         t.headTilt = -10 * DEG;
