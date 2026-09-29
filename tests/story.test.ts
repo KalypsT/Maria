@@ -28,6 +28,8 @@ function recorder() {
       ),
     pose: (pose) => log.push(`pose ${pose}`),
     think: (icon) => log.push(`think ${icon}`),
+    sparkle: (area) => log.push(`sparkle ${String(area.col)},${String(area.row)}`),
+    shake: (ms) => log.push(`shake ${String(ms)}`),
   };
   return { log, host };
 }
@@ -58,6 +60,7 @@ function story(steps: StoryStep[], on: 'interact' | 'touch' = 'interact', lock =
     props: [],
     times: [{ when: { all: ['done'] }, time: 'morning' }],
     lockedRooms: [{ room: 'r', when: { none: ['done'] } }],
+    omens: [{ room: 'r', when: { none: ['done'] }, fromRow: 10, toRow: 4 }],
   };
 }
 
@@ -144,6 +147,43 @@ describe('StoryDirector', () => {
     d.setFlags(['done']);
     expect(d.timeOfDay()).toBe('morning');
     expect(d.exitsLocked('r')).toBe(false);
+  });
+
+  it('présage : l’étrangeté monte avec la hauteur de Céleste, puis s’éteint (D-35)', () => {
+    const { host } = recorder();
+    const d = new StoryDirector(story([]), host, HZ);
+    const feet = (row: number) => (row + 1) * T;
+    expect(d.omen('r', feet(12))).toBe(0);
+    expect(d.omen('r', feet(10))).toBe(0);
+    expect(d.omen('r', feet(7))).toBeCloseTo(0.5);
+    expect(d.omen('r', feet(4))).toBe(1);
+    expect(d.omen('r', feet(1))).toBe(1);
+    expect(d.omen('autre', feet(4))).toBe(0);
+    d.setFlags(['done']);
+    expect(d.omen('r', feet(4))).toBe(0);
+  });
+
+  it('fondu en cercle : la forme suit l’étape, le voile garde son sens (D-35)', () => {
+    const { log, host } = recorder();
+    const d = new StoryDirector(
+      story([
+        { do: 'sparkle', area: { col: 1, row: 1, w: 2, h: 2 }, ms: 500 },
+        { do: 'shake', ms: 300, strength: 1 },
+        { do: 'fadeOut', ms: 100 },
+        { do: 'fadeIn', ms: 100, shape: 'iris' },
+      ]),
+      host,
+      HZ,
+    );
+    d.step('r', standing(2, 3), true);
+    expect(log.slice(0, 2)).toEqual(['sparkle 1,1', 'shake 300']);
+    expect(d.veilShape).toBe('plain');
+    for (let i = 0; i < 12; i++) {
+      d.step('r', standing(2, 3), false);
+    }
+    expect(d.veilShape).toBe('iris');
+    expect(d.veil).toBeGreaterThan(0);
+    expect(d.veil).toBeLessThan(1);
   });
 
   it('setFlags arrête le script et lève le voile', () => {
@@ -414,7 +454,7 @@ describe('histoire de la maison (D-31)', () => {
     };
     // Retour au point de retour réel (évanouissement), puis de nouveau en haut : clignement bref.
     run('living', standing(50, 8));
-    expect(log).toEqual(['room living-strange 50,8,-1']);
+    expect(log).toEqual(['sparkle 48,5', 'shake 500', 'room living-strange 50,8,-1']);
     // Tout en haut du passage d'ombres : le berceau vide ; Agir.
     const cradle = standing(26, 5);
     d.step('shadows', cradle, false);

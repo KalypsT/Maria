@@ -69,6 +69,12 @@ export const STORY_TIMING = {
   blinkInMs: 1500,
   /** Retour dans le monde étrange après un échec : clignement plus bref, sans bulle. */
   reblinkInMs: 800,
+  /** Avant le clignement (D-35) : scintillements et tremblement, Céleste immobile. */
+  omenPeakMs: 1100,
+  /** Retour bref après un échec : scintillements plus courts. */
+  reomenPeakMs: 500,
+  /** Fin : scintillements autour du berceau avant que le cercle se referme sur Céleste. */
+  cradleSparkleMs: 1400,
 } as const;
 
 /** Agrandissement des bulles de pensée (retour de l'utilisateur : mieux lisibles sur téléphone). */

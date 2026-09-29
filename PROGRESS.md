@@ -2,11 +2,31 @@
 
 ## Phase en cours
 
-**Vertical slice, A : monde étrange jouable** (D-34) implémenté sur la branche `ccr-5c5df983-6feqj3`, **en attente d'essai sur téléphone**. Tout ce qui précède (D-30 à D-33) est fusionné dans `main`.
+**Vertical slice, ambiance du monde étrange** (D-35) : implémentée sur la branche `ccr-5c5df983-6feqj3`, **en attente d'essai sur téléphone**. Le monde étrange jouable (D-34) est fusionné dans `main`.
 
-Prochaine : essai complet du slice sur téléphone, **chronométré** (cible §53 : 15 à 30 min), avec la question « est-ce que ça donne envie de continuer ? ». Ensuite : maison plus vivante et rez-de-chaussée retravaillé, puis la croissance.
+Prochaine, sans autre ajout entre les deux : **essai complet du slice sur téléphone, chronométré** (cible §53 : 15 à 30 min), avec la question « est-ce que ça donne envie de continuer ? ». Ensuite : maison plus vivante et rez-de-chaussée retravaillé, puis la croissance.
 
 ## Fait
+
+### Ambiance du monde étrange (D-35, retours de l'utilisateur)
+
+- **Passage réel → étrange** :
+  - en grimpant vers Maria, les couleurs se refroidissent, la lumière vacille, puis un léger tremblement ;
+  - au sommet, des scintillements autour de Maria (jamais sur elle) et un tremblement avant le clignement ;
+  - le monde étrange se révèle en cercle autour de Céleste ;
+  - à la fin, le cercle se referme sur elle près du berceau.
+- **Maison déformée** : cadres penchés, portes au plafond et murée, escalier dans le mur, papier peint qui pèle, chaise et crayon géants, fenêtre sur la chambre de Céleste, ombre d'ours géante, murs qui se resserrent.
+- **Vie étrange** : poussière qui monte, objets de la maison à la dérive, horloge qui recule, rideaux sans vent, lampes qui vacillent, lueurs qui respirent, yeux qui se ferment quand Céleste approche.
+- Tests : 336 (yeux, zones vides des objets à la dérive, meubles flottants, présage, fondu en cercle, nouvelles étapes).
+- **Vérifié dans Chromium** : présage pendant l'escalade, scintillements, ouverture et fermeture en cercle, habillage des deux salles, 60 images/s.
+
+### À vérifier sur téléphone (ambiance)
+
+- [ ] Le présage se sent pendant l'escalade sans gêner les sauts.
+- [ ] Le tremblement ne met pas mal à l'aise (sinon, réduire `STRANGE_FX.omenShakePx` et `shakePx`).
+- [ ] Les objets à la dérive et l'escalier dans le mur ne sont jamais pris pour des plateformes.
+- [ ] Les yeux inquiètent un peu, jamais trop.
+- [ ] Fluidité dans le passage d'ombres (environ 50 objets animés de plus).
 
 ### Monde étrange jouable (§6.2, D-34)
 
@@ -533,7 +553,7 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. PR du monde étrange jouable (D-34) et merge.
+1. PR de l'ambiance du monde étrange (D-35) et merge.
 2. **Essai complet du slice sur téléphone, chronométré** (§53 : 15 à 30 min) : « est-ce que ça donne envie de continuer ? ».
 3. Maison plus vivante et rez-de-chaussée retravaillé.
 4. La croissance (§42 phase 7).

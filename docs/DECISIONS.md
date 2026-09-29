@@ -336,6 +336,26 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
   - l'analyse de difficulté ignore les ennemis : aucun jouet-ombre n'est placé sur une réception d'un saut moyen, à confirmer sur téléphone ;
   - la durée (3 à 5 min) est une estimation sur plan, à chronométrer.
 
+## D-35 — Ambiance du monde étrange : maison déformée, vie étrange, passage réel → étrange
+
+- **Retour de l'utilisateur** (après D-34) : la difficulté du passage d'ombres convient (plus exigeant que la maison, largement accessible) ; **les zones suivantes devront monter d'un cran**. L'ambiance, elle, manquait de « maison déformée » et de vie ; le passage vers l'étrange était trop sec.
+- **Passage réel → étrange (validé)** :
+  - **présage** en grimpant vers Maria (données `omens` de l'histoire) : les couleurs se refroidissent avec la hauteur, la lumière vacille, puis un léger tremblement (1,2 px au sommet) ;
+  - au sommet : **scintillements turquoise autour de Maria, jamais sur elle** (pilier 5), tremblement, puis le clignement ;
+  - arrivée : le monde étrange se révèle **en cercle autour de Céleste** (fondu `iris`) ;
+  - fin en miroir : le berceau scintille, le cercle se referme sur Céleste ;
+  - ré-entrée après un échec : version courte.
+- **Maison déformée** (décor de fond, jamais de collision) : cadres penchés, horloge sans aiguilles, porte accrochée au plafond à l'envers, porte murée, escalier qui entre dans le mur (pâle, sans liseré : jamais pris pour une surface), papier peint qui pèle, chaise et crayon géants, fenêtre trop haute qui donne sur la chambre de Céleste, ombre géante d'un ours en peluche, murs du passage qui se resserrent en planches courbées. Écarté : un lit miniature, lu comme une plateforme.
+- **Vie étrange** (salles étranges seulement) : poussière turquoise qui monte, **objets de la maison à la dérive** (livre, cube, chausson, tasse, crayon, biberon), seulement dans des zones vides (jamais pris pour une plateforme), horloge dont l'aiguille recule par à-coups, rideaux qui ondulent sans vent, lampes qui vacillent, lueur sous les meubles flottants qui respire, **yeux dans l'ombre** (validés) : ils clignent, se ferment quand Céleste approche, se rouvrent quand elle est loin depuis un moment.
+- **Règles** : rien de ce qui bouge ne touche à la collision ni au mouvement (pilier 1) ; Maria n'est jamais animée (pilier 5) ; inquiétant, jamais horreur (pilier 8).
+- **Mise en œuvre** :
+  - étapes de script `sparkle` et `shake`, forme de fondu `iris` (voile DOM en dégradé radial centré sur Céleste) ;
+  - `StrangeFxView` : stock d'images par salle, aucune allocation par image ; réglages dans `src/config/strangeFx.ts` ;
+  - logique pure testée (`src/core/fx/strangeLife.ts`) : yeux, zones vides ;
+  - yeux placés par les données (`; @decor: eyes col ligne 1 1`).
+- **Accessibilité** : pas encore d'option « réduire les effets » (reportée, validé) : elle demandera un champ de réglage dans la sauvegarde, avec migration (pilier 10). Tremblements volontairement faibles.
+- **Coût mesuré** (Chromium sur ordinateur) : environ 50 objets de plus dans le passage d'ombres, 60 images/s. À mesurer sur téléphone.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

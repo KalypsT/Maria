@@ -8,10 +8,11 @@
 ; @note-2: trouvaille (en haut à droite, colonnes 44-45) : saut difficile depuis l'étagère sous le berceau ; un échec ramène sur le chemin.
 ; @note-3: deux sauts moyens (écart de 6 tuiles) : vers la gauche au milieu, puis vers le berceau ; une étagère rattrape chaque chute.
 ; @wall: planks
+; @decor: narrow-left 1 1 6 12
+; @decor: narrow-right 40 1 5 12
 ; @decor: window 6 4 7 6
-; @decor: frame 36 26 3 2
 ; @decor: clock 9 30 2 2
-; @decor: frame 30 12 3 2
+; @decor: frame 24 21 3 2
 ; @decor: lamp 14 22 1 2
 ; @decor: drawing 40 38 3 3
 ; @decor: coatrack 4 34 3 3
@@ -31,6 +32,15 @@
 ; @decor: shelf 20 6 8 1
 ; @decor: shelf 2 20 4 1
 ; @decor: shelf 43 3 2 1
+; @decor: toy-shadow 14 30 8 10
+; @decor: door-upside 16 1 3 5
+; @decor: wallstairs 1 37 7 5
+; @decor: peel 24 38 6 4
+; @decor: giant-pencil 3 24 10 3
+; @decor: bedroom-window 17 18 3 6
+; @decor: eyes 8 12 1 1
+; @decor: eyes 18 33 1 1
+; @decor: eyes 43 30 1 1
 ; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), ^ briques de jeu (danger), e jouet mécanique, C veilleuse (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 ##############################################
 #............................................#

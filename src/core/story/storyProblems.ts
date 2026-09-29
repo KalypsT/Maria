@@ -92,7 +92,9 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
     let dark = false;
     let room = t.room;
     for (const step of t.steps) {
-      if (step.do === 'fadeOut') {
+      if (step.do === 'sparkle') {
+        inRoom(room, step.area, what);
+      } else if (step.do === 'fadeOut') {
         dark = true;
       } else if (step.do === 'fadeIn') {
         dark = false;
@@ -148,6 +150,14 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
   }
   for (const rule of story.times) {
     knownFlags(rule.when, 'moment de la journée');
+  }
+  for (const omen of story.omens) {
+    const what = `présage ${omen.room}`;
+    knownFlags(omen.when, what);
+    inRoom(omen.room, { col: 0, row: omen.toRow, w: 1, h: omen.fromRow - omen.toRow + 1 }, what);
+    if (omen.toRow >= omen.fromRow) {
+      problems.push(`${what} : la ligne d'arrivée doit être plus haute que celle du départ`);
+    }
   }
   for (const lock of story.lockedRooms) {
     knownFlags(lock.when, `porte fermée ${lock.room}`);

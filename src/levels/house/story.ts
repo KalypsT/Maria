@@ -3,6 +3,8 @@ import type { StoryData, StoryStep, TileArea } from '../../core/story/story';
 
 /** Haut de la bibliothèque du salon, là où Maria était assise. */
 const LIVING_TOP: TileArea = { col: 46, row: 5, w: 10, h: 3 };
+/** Autour de Maria, en haut de la bibliothèque : là où l'air scintille. */
+const MARIA_SPOT: TileArea = { col: 48, row: 5, w: 6, h: 4 };
 /** Arrivée dans le salon étrange : à la même place, sur la bibliothèque (dans le noir). */
 const STRANGE_ARRIVAL: StoryStep = {
   do: 'room',
@@ -151,11 +153,16 @@ export const HOUSE_STORY: StoryData = {
       when: { all: [F.Slept], none: [F.MariaVanished] },
       lock: true,
       steps: [
+        // L'air scintille autour d'elle (jamais sur elle), tout tremble… puis le noir.
+        { do: 'sparkle', area: MARIA_SPOT, ms: S.omenPeakMs + 400 },
+        { do: 'shake', ms: S.omenPeakMs, strength: 1 },
+        { do: 'wait', ms: S.omenPeakMs },
         { do: 'fadeOut', ms: S.blinkOutMs },
         { do: 'flag', id: F.MariaVanished },
         STRANGE_ARRIVAL,
         { do: 'wait', ms: S.blinkBlackMs },
-        { do: 'fadeIn', ms: S.blinkInMs },
+        // Le monde étrange se révèle autour de Céleste.
+        { do: 'fadeIn', ms: S.blinkInMs, shape: 'iris' },
         { do: 'wait', ms: 500 },
         { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs + 800 },
         { do: 'wait', ms: S.lookMs },
@@ -171,10 +178,13 @@ export const HOUSE_STORY: StoryData = {
       when: { all: [F.MariaVanished], none: [F.StrangeDone] },
       lock: true,
       steps: [
+        { do: 'sparkle', area: MARIA_SPOT, ms: S.reomenPeakMs + 300 },
+        { do: 'shake', ms: S.reomenPeakMs, strength: 0.6 },
+        { do: 'wait', ms: S.reomenPeakMs },
         { do: 'fadeOut', ms: S.blinkOutMs },
         STRANGE_ARRIVAL,
         { do: 'wait', ms: S.blinkBlackMs },
-        { do: 'fadeIn', ms: S.reblinkInMs },
+        { do: 'fadeIn', ms: S.reblinkInMs, shape: 'iris' },
       ],
     },
     {
@@ -188,7 +198,10 @@ export const HOUSE_STORY: StoryData = {
       when: { all: [F.MariaVanished], none: [F.StrangeDone] },
       lock: true,
       steps: [
-        { do: 'fadeOut', ms: S.nightFadeOutMs },
+        // Le berceau scintille, puis le cercle se referme sur Céleste.
+        { do: 'sparkle', area: { col: 24, row: 3, w: 5, h: 3 }, ms: S.cradleSparkleMs + 600 },
+        { do: 'wait', ms: S.cradleSparkleMs },
+        { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
         { do: 'flag', id: F.StrangeDone },
         { do: 'room', room: 'bedroom', col: 12, row: 15, facing: 1, returnPoint: true },
         { do: 'pose', pose: 'sit' },
@@ -283,4 +296,8 @@ export const HOUSE_STORY: StoryData = {
   ],
   times: [{ when: { all: [F.Slept] }, time: 'morning' }],
   lockedRooms: [{ room: 'bedroom', when: { none: [F.Slept] } }],
+  omens: [
+    // En grimpant vers Maria, la lumière vacille, les couleurs se refroidissent, puis tout tremble.
+    { room: 'living', when: { all: [F.Slept], none: [F.StrangeDone] }, fromRow: 21, toRow: 8 },
+  ],
 };

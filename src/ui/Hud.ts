@@ -2,7 +2,8 @@ import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 
 /**
  * HUD minimal (spec §38, D-21) en DOM : jauge de peur discrète en haut de l'écran et voile de
- * l'évanouissement. Le DOM n'est modifié que si une valeur change.
+ * l'évanouissement (uniforme, ou en cercle autour de Céleste, D-35). Le DOM n'est modifié que si une
+ * valeur change.
  */
 export class Hud {
   private readonly gauge: HTMLElement;
@@ -13,6 +14,7 @@ export class Hud {
   private shownFear = -1;
   private shownMax = -1;
   private shownVeil = -1;
+  private shownBackground = '';
 
   constructor(parent: HTMLElement = document.body) {
     this.gauge = document.createElement('div');
@@ -49,8 +51,30 @@ export class Hud {
   }
 
   /** Voile d'évanouissement (0 transparent → 1 noir), arrondi pour limiter les écritures. */
-  setVeil(opacity: number): void {
+  setVeil(opacity: number, iris: { x: number; y: number } | null = null): void {
     const value = Math.round(Math.min(1, Math.max(0, opacity)) * 50) / 50;
+    if (iris && value > 0 && value < 1) {
+      // Fondu en cercle (D-35) : un trou autour de Céleste (coordonnées de l'écran, px CSS), qui
+      // rétrécit quand le voile monte. Le voile est alors opaque autour du trou.
+      const reach = Math.hypot(window.innerWidth, window.innerHeight);
+      const radius = Math.round((1 - value) * reach);
+      const background = `radial-gradient(circle at ${String(Math.round(iris.x))}px ${String(
+        Math.round(iris.y),
+      )}px, transparent ${String(radius)}px, var(--veil) ${String(radius + 28)}px)`;
+      if (background !== this.shownBackground) {
+        this.veil.style.background = background;
+        this.shownBackground = background;
+      }
+      this.veil.style.opacity = '1';
+      this.veil.style.visibility = 'visible';
+      this.shownVeil = -1;
+      return;
+    }
+    if (this.shownBackground !== '') {
+      this.veil.style.background = '';
+      this.shownBackground = '';
+      this.shownVeil = -1;
+    }
     if (value === this.shownVeil) {
       return;
     }

@@ -7,8 +7,10 @@ import {
   type FlagCondition,
   type ScriptPose,
   type StoryData,
+  type FadeShape,
   type StoryStep,
   type StoryTrigger,
+  type TileArea,
   type ThoughtIcon,
   type TimeOfDay,
 } from './story';
@@ -22,6 +24,9 @@ export interface StoryHost {
   room(room: string, col: number, row: number, facing: 1 | -1, returnPoint: boolean): void;
   pose(pose: ScriptPose): void;
   think(icon: ThoughtIcon, ms: number): void;
+  /** Scintillements étranges dans une zone (tuiles) de la salle courante. */
+  sparkle(area: TileArea, ms: number): void;
+  shake(ms: number, strength: number): void;
 }
 
 /**
@@ -32,6 +37,8 @@ export class StoryDirector {
   readonly flags = new Set<string>();
   /** Voile noir des fondus (0 → 1). */
   veil = 0;
+  /** Forme du voile : uniforme, ou en cercle autour de Céleste (D-35). */
+  veilShape: FadeShape = 'plain';
   /** Déclencheur Agir disponible là où se tient Céleste (-1 : aucun). */
   interactable = -1;
   private running: StoryTrigger | null = null;
@@ -95,10 +102,25 @@ export class StoryDirector {
     return false;
   }
 
+  /**
+   * Présage (D-35) : étrangeté de 0 à 1 selon la hauteur des pieds (px) de Céleste dans la salle.
+   */
+  omen(room: string, feetY: number): number {
+    for (const omen of this.data.omens) {
+      if (omen.room === room && this.check(omen.when)) {
+        const from = (omen.fromRow + 1) * TILE_SIZE;
+        const to = (omen.toRow + 1) * TILE_SIZE;
+        return Math.min(1, Math.max(0, (from - feetY) / (from - to)));
+      }
+    }
+    return 0;
+  }
+
   /** Arrête le script en cours et lève le voile (changement de salle, réapparition). */
   cancel(): void {
     this.running = null;
     this.veil = 0;
+    this.veilShape = 'plain';
     this.interactable = -1;
   }
 
@@ -175,6 +197,10 @@ export class StoryDirector {
       switch (step.do) {
         case 'fadeOut':
         case 'fadeIn':
+          this.veilShape = step.shape ?? 'plain';
+          this.stepTotal = msToSteps(step.ms, this.stepHz);
+          this.veilFrom = this.veil;
+          return;
         case 'wait':
           this.stepTotal = msToSteps(step.ms, this.stepHz);
           this.veilFrom = this.veil;
@@ -205,6 +231,12 @@ export class StoryDirector {
         break;
       case 'pose':
         this.host.pose(step.pose);
+        break;
+      case 'sparkle':
+        this.host.sparkle(step.area, step.ms);
+        break;
+      case 'shake':
+        this.host.shake(step.ms, step.strength);
         break;
       default:
         break;

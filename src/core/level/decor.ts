@@ -1,5 +1,5 @@
 import { DECOR_KINDS } from '../../config/art';
-import { Material, Tile, type LevelData } from './LevelData';
+import { Material, Tile, tileAt, type LevelData, type LevelDecor } from './LevelData';
 
 /**
  * Cohérence de l'habillage (D-28) avec la collision : noms connus, et chaque tuile de meuble (bois,
@@ -40,4 +40,26 @@ export function decorProblems(level: LevelData): string[] {
     }
   }
   return problems;
+}
+
+/**
+ * Meubles qui flottent (rien sous eux) : une lueur turquoise les souligne dans le monde étrange
+ * (D-34), et respire (D-35).
+ */
+export function floatingDecor(level: LevelData): LevelDecor[] {
+  return level.decor.filter((d) => {
+    if (!(DECOR_KINDS[d.kind]?.furniture ?? false)) {
+      return false;
+    }
+    const below = d.row + d.height;
+    if (below >= level.height) {
+      return false;
+    }
+    for (let col = d.col; col < d.col + d.width; col++) {
+      if (tileAt(level, col, below) !== Tile.Empty) {
+        return false;
+      }
+    }
+    return true;
+  });
 }
