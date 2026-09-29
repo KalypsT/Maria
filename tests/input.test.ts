@@ -77,6 +77,20 @@ describe('KeyboardSource', () => {
     expect(raw.moveX).toBe(0);
   });
 
+  it('ne perd pas une pression faite et relâchée entre deux images', () => {
+    const keyboard = new KeyboardSource();
+    const input = new InputController();
+    input.sources.push(keyboard);
+    keyboard.handleKey('Escape', true);
+    keyboard.handleKey('Escape', false);
+    input.update();
+    expect(input.consumePressed('Pause')).toBe(true);
+    // Vue une seule fois : la lecture suivante ne la voit plus tenue.
+    input.update();
+    expect(input.isHeld('Pause')).toBe(false);
+    expect(input.consumePressed('Pause')).toBe(false);
+  });
+
   it('garde la direction si une seconde touche de la même direction est relâchée', () => {
     const keyboard = new KeyboardSource();
     keyboard.handleKey('ArrowLeft', true);
