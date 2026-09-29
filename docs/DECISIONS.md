@@ -401,6 +401,23 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
   - la case « en haut de la bibliothèque » attend le rez-de-chaussée retravaillé (PR 3).
 - **Cahier de Céleste** : deux onglets manuscrits, « Ma maison » (la carte) et « Mes souvenirs » ; une case par souvenir, dessiné s'il est trouvé, en pointillés sinon (complétion explicite, §23) ; toucher un souvenir l'affiche en grand. Pas d'autre texte que les titres (pilier 6).
 
+## D-39 — Rez-de-chaussée retravaillé (maison vivante, PR 3)
+
+- **Plan validé** : salon et cuisine en profondeur, buanderie légère ; règle « pas de jouet mécanique près d'un adulte » ; souvenir en haut de la bibliothèque : **une photo de Céleste bébé avec Maria dans les bras**.
+- **Salon** :
+  - **vrai canapé** : accoudoirs pleins, assise plus basse, dossier dessiné derrière (`sofaback`) ; maman est assise _dans_ le canapé ;
+  - **route haute par la gauche** : meuble mural (en grimpant, facile), étagères, **tringle du rideau**, étagère, jusqu'en haut de la bibliothèque ;
+  - **trouvaille** dans un recoin à droite du haut de la bibliothèque (saut moyen, le sol rattrape un raté) ;
+  - **souvenir** en haut de la bibliothèque, là où Maria était assise, **seulement après le monde étrange** (raison de revenir, pilier 2) ;
+  - la bibliothèque ne bouge pas : le monde étrange s'appuie sur sa position.
+- **Cuisine** :
+  - le **frigo prévu est écarté** : au sol, il coupait le chemin vers le plan de travail (et la buanderie) ; nulle part ailleurs il ne laissait les sorties libres ;
+  - à la place, une **chaîne d'étagères à bocaux** de la table vers les placards hauts, la dernière marche en grimpant ;
+  - **trouvaille** sur les placards hauts ;
+  - le jouet mécanique patrouille sur la table, loin de papa.
+- **Buanderie** : un fil à linge (décor).
+- **Vérifié par les tests** : la maison reste facile, jamais coincée ; les endroits prévus demandent toujours l'escalade ; route haute du salon en grimpant (facile) ; trouvailles du salon et de la cuisine en grimpant, au plus moyennes ; photo de Céleste bébé seulement après le monde étrange.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

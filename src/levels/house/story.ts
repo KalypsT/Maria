@@ -163,8 +163,8 @@ export const HOUSE_STORY: StoryData = {
       id: 'morning-mom',
       room: 'living',
       on: 'interact',
-      area: { col: 7, row: 13, w: 11, h: 9 },
-      mark: { col: 14, row: 12 },
+      area: { col: 8, row: 14, w: 13, h: 8 },
+      mark: { col: 14, row: 13 },
       when: { all: [F.Slept], none: [F.MorningMom] },
       lock: true,
       steps: [
@@ -345,6 +345,22 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: S.lookMs },
       ],
     },
+    {
+      // Souvenir en haut de la bibliothèque (D-39) : une raison de revenir au salon.
+      id: 'look-baby-photo',
+      room: 'living',
+      on: 'interact',
+      area: LIVING_TOP,
+      mark: { col: 51, row: 6 },
+      when: { all: [F.StrangeDone] },
+      lock: true,
+      repeat: true,
+      steps: [
+        { do: 'memory', id: 'bookcase' },
+        { do: 'thought', icon: 'baby', ms: S.thoughtMs + 800 },
+        { do: 'wait', ms: S.lookMs + 400 },
+      ],
+    },
   ],
   props: [
     {
@@ -462,13 +478,23 @@ export const HOUSE_STORY: StoryData = {
       row: 21,
       when: { all: [F.Slept] },
     },
+    // Maman est assise dans le canapé, entre les accoudoirs (D-39).
     {
       id: 'mom-sofa',
       room: 'living',
       kind: 'mom-sofa',
-      col: 12,
-      row: 18,
+      col: 14,
+      row: 19,
       when: { all: [F.Slept] },
+    },
+    // Après le monde étrange, là où Maria était assise : une photo de Céleste bébé avec Maria.
+    {
+      id: 'baby-photo',
+      room: 'living',
+      kind: 'baby-photo',
+      col: 51,
+      row: 8,
+      when: { all: [F.StrangeDone] },
     },
     { id: 'cat-sit', room: 'living', kind: 'cat-sit', col: 44, row: 21, when: { all: [F.Slept] } },
     { id: 'music-box', room: 'bedroom', kind: 'music-box', col: 12, row: 12, when: {} },

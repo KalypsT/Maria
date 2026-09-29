@@ -222,15 +222,49 @@ function headband(ctx: CanvasRenderingContext2D, s: number): void {
   ctx.fill();
 }
 
-/** Souvenir encore mystérieux (en haut de la bibliothèque, à venir) : une petite étoile. */
-function star(ctx: CanvasRenderingContext2D, s: number): void {
-  ctx.fillStyle = '#e6c27a';
+/** La photo de Céleste bébé, Maria dans les bras (D-39). */
+function babyPhoto(ctx: CanvasRenderingContext2D, s: number): void {
+  roundRect(ctx, -s * 0.4, -s * 0.44, s * 0.8, s * 0.88, s * 0.04, '#e6c27a');
+  roundRect(ctx, -s * 0.33, -s * 0.37, s * 0.66, s * 0.74, s * 0.02, '#f6e7d8');
+  // Céleste bébé, assise, grosse tête ronde, petites couettes.
+  ctx.fillStyle = '#f1a9bd';
   ctx.beginPath();
-  for (let i = 0; i < 10; i++) {
-    const a = -Math.PI / 2 + (i * Math.PI) / 5;
-    const r = i % 2 === 0 ? s * 0.3 : s * 0.13;
-    ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
-  }
+  ctx.ellipse(-s * 0.04, s * 0.18, s * 0.17, s * 0.15, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#e7b995';
+  ctx.beginPath();
+  ctx.arc(-s * 0.04, -s * 0.08, s * 0.14, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#5a3a2a';
+  ctx.beginPath();
+  ctx.arc(-s * 0.04, -s * 0.12, s * 0.14, Math.PI * 1.1, Math.PI * 1.9);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(-s * 0.19, -s * 0.12, s * 0.035, 0, Math.PI * 2);
+  ctx.arc(s * 0.11, -s * 0.12, s * 0.035, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#2b1d18';
+  ctx.fillRect(-s * 0.09, -s * 0.07, s * 0.025, s * 0.03);
+  ctx.fillRect(s * 0.01, -s * 0.07, s * 0.025, s * 0.03);
+  // Maria dans ses bras : petite tête et bandeau rose.
+  ctx.fillStyle = '#b77a52';
+  ctx.beginPath();
+  ctx.arc(s * 0.13, s * 0.1, s * 0.075, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#f6b6c8';
+  ctx.fillRect(s * 0.06, s * 0.05, s * 0.15, s * 0.03);
+  ctx.fillStyle = PINK;
+  ctx.beginPath();
+  ctx.arc(s * 0.08, s * 0.05, s * 0.025, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = ROSE;
+  ctx.beginPath();
+  ctx.ellipse(s * 0.13, s * 0.21, s * 0.07, s * 0.06, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Le bras de Céleste autour de Maria.
+  ctx.fillStyle = '#e7b995';
+  ctx.beginPath();
+  ctx.ellipse(s * 0.06, s * 0.16, s * 0.1, s * 0.035, -0.3, 0, Math.PI * 2);
   ctx.fill();
 }
 
@@ -260,7 +294,7 @@ export function drawMemory(
       headband(ctx, size);
       break;
     case 'bookcase':
-      star(ctx, size);
+      babyPhoto(ctx, size);
       break;
   }
   ctx.restore();

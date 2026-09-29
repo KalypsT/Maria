@@ -24,9 +24,10 @@ const easy = byDifficulty('easy');
 const home = () => node(zone.start, analysis(zone.start, false).start);
 
 /** Surface où est posé le premier objet d'un type (capacité D-26, trouvaille D-27). */
-function entityNode(type: EntityType): Node {
+function entityNode(type: EntityType, only?: string): Node {
   for (const [room, data] of zone.rooms) {
-    const entity = isStrangeRoom(data) ? undefined : data.entities.find((e) => e.type === type);
+    const skip = isStrangeRoom(data) || (only !== undefined && room !== only);
+    const entity = skip ? undefined : data.entities.find((e) => e.type === type);
     if (entity) {
       return node(room, surfaceAt(room, entity.col, entity.row));
     }
@@ -109,7 +110,7 @@ describe('grimper aux rebords dans la maison (D-26)', () => {
   });
 
   it('le premier secret est un passage de difficulté moyenne (D-27)', { timeout: TIMEOUT }, () => {
-    const secret = entityNode(EntityType.Secret);
+    const secret = entityNode(EntityType.Secret, 'attic');
     expect(reachable(zoneGraph(false, null), home()).has(secret), 'sans grimper').toBe(false);
     expect(reachable(zoneGraph(true, easy), home()).has(secret), 'trop facile').toBe(false);
     const medium = zoneGraph(true, byDifficulty('medium'));
@@ -132,4 +133,34 @@ describe('grimper aux rebords dans la maison (D-26)', () => {
       expect(reachable(graph, attic).has(home())).toBe(true);
     },
   );
+});
+
+describe('rez-de-chaussée retravaillé (D-39)', () => {
+  const medium = byDifficulty('medium');
+
+  it(
+    'route haute du salon : en grimpant (facile), jusqu’en haut de la bibliothèque',
+    { timeout: TIMEOUT },
+    () => {
+      const cabinet = node('living', surfaceAt('living', 4, 13));
+      const rod = node('living', surfaceAt('living', 28, 4));
+      const top = node('living', surfaceAt('living', 50, 8));
+      expect(reachable(zoneGraph(false, null), home()).has(cabinet), 'sans grimper').toBe(false);
+      const seen = reachable(zoneGraph(true, easy), home());
+      expect(seen.has(cabinet), 'meuble mural').toBe(true);
+      expect(
+        reachable(zoneGraph(true, easy), rod).has(top),
+        'de la tringle à la bibliothèque',
+      ).toBe(true);
+    },
+  );
+
+  it.each([
+    ['salon', 'living'],
+    ['cuisine', 'kitchen'],
+  ])('trouvaille du %s : en grimpant, au plus moyenne', { timeout: TIMEOUT }, (_name, room) => {
+    const secret = entityNode(EntityType.Secret, room);
+    expect(reachable(zoneGraph(false, null), home()).has(secret), 'sans grimper').toBe(false);
+    expect(reachable(zoneGraph(true, medium), home()).has(secret), 'trop difficile').toBe(true);
+  });
 });

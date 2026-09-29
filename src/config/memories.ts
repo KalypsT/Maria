@@ -15,13 +15,13 @@ export const MEMORIES = [
   'plant',
   /** Le bandeau de Maria, trouvé à la fin du monde étrange. */
   'headband',
-  /** En haut de la bibliothèque du salon (rez-de-chaussée retravaillé, à venir). */
+  /** En haut de la bibliothèque du salon, après le monde étrange : Céleste bébé avec Maria. */
   'bookcase',
 ] as const;
 export type MemoryId = (typeof MEMORIES)[number];
 
 /** Souvenirs dont l'obtention n'est pas encore en jeu (la case reste vide). */
-export const MEMORIES_LATER: readonly MemoryId[] = ['bookcase'];
+export const MEMORIES_LATER: readonly MemoryId[] = [];
 
 export function isMemory(id: string): id is MemoryId {
   return (MEMORIES as readonly string[]).includes(id);

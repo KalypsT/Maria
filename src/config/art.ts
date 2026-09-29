@@ -42,11 +42,21 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   hood: { furniture: true },
   machine: { furniture: true },
   laundry: { furniture: true },
+  /** Tringle du rideau (planche traversable), D-39. */
+  rod: { furniture: true },
+  /** Étagère à bocaux de la cuisine (planche traversable), D-39. */
+  jarshelf: { furniture: true },
+  /** Frigo de la cuisine, à escalader (D-39). */
+  fridge: { furniture: true },
   // Fond (sans collision).
   window: { furniture: false },
   frame: { furniture: false },
   /** Photo de famille (souvenir, D-38). */
   photo: { furniture: false },
+  /** Dossier du canapé, dessiné derrière l'assise (D-39). */
+  sofaback: { furniture: false },
+  /** Fil à linge et chaussettes qui sèchent (buanderie, D-39). */
+  clothesline: { furniture: false },
   drawing: { furniture: false },
   rug: { furniture: false },
   lamp: { furniture: false },
