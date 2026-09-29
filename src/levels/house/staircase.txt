@@ -1,5 +1,6 @@
 ; Escalier : de l'étage (sortie 1, en haut à gauche) au salon (sortie 2, en bas à droite).
 ; @name: Escalier
+; @icon: stairs
 ; @ambient: #282b36
 ; @note: embranchement vers le grenier (sortie 3) : buffet, étagère, corniche, en grimpant (D-27).
 ; @wall: planks

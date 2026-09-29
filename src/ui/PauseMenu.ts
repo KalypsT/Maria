@@ -14,6 +14,8 @@ export interface PauseMenuOptions {
   /** Afficher les réglages tactiles (inutile sans commandes tactiles). */
   showTouchSettings: boolean;
   onResume: () => void;
+  /** Ouvrir la carte (§24) ; absent : pas de bouton. */
+  onOpenMap?: () => void;
   onSettingsChange: (settings: ControlSettings) => void;
   /** Code de sauvegarde (D-22) : afficher pour copier, ou importer. */
   onExportSave: () => void;
@@ -58,6 +60,10 @@ export class PauseMenu {
     element('h2', header, undefined, 'Pause');
     const resume = element('button', header, 'pause-primary', 'Reprendre');
     resume.addEventListener('click', options.onResume);
+    const openMap = options.onOpenMap;
+    if (openMap) {
+      element('button', panel, undefined, 'Carte').addEventListener('click', openMap);
+    }
 
     if (options.showTouchSettings) {
       element('h3', panel, undefined, 'Commandes tactiles');

@@ -1,5 +1,6 @@
 ; Cuisine : chaises, table, plan de travail ; la porte de la buanderie est au-dessus du plan.
 ; @name: Cuisine
+; @icon: pot
 ; @ambient: #2f3036
 ; @note: dessus des placards hauts (colonnes 39-51) : en grimpant par la hotte (D-26).
 ; @wall: tiles

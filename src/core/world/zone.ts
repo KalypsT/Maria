@@ -19,6 +19,18 @@ export interface ZoneSource {
   readonly start: string;
   readonly rooms: readonly RoomSource[];
   readonly links: readonly (readonly [string, string])[];
+  /**
+   * Carte dessinée par Céleste (§24) : boîte de chaque salle, en unités de carte (x vers la
+   * droite, y vers le bas). Disposition « imparfaite », dessinée à la main.
+   */
+  readonly map?: Readonly<Record<string, MapBox>>;
+}
+
+export interface MapBox {
+  readonly x: number;
+  readonly y: number;
+  readonly w: number;
+  readonly h: number;
 }
 
 export interface ExitRef {
@@ -30,6 +42,9 @@ export interface Zone {
   readonly id: string;
   readonly start: string;
   readonly rooms: ReadonlyMap<string, LevelData>;
+  /** Liaisons telles que déclarées (une fois chacune). */
+  readonly links: readonly (readonly [ExitRef, ExitRef])[];
+  readonly map: Readonly<Record<string, MapBox>>;
   /** Sortie d'arrivée quand on passe la sortie `exit` de la salle `room` (null si non reliée). */
   destination(room: string, exit: number): ExitRef | null;
 }
@@ -64,6 +79,7 @@ export function buildZone(source: ZoneSource): Zone {
   }
   const key = (ref: ExitRef) => `${ref.room}:${ref.exit}`;
   const table = new Map<string, ExitRef>();
+  const links: [ExitRef, ExitRef][] = [];
   for (const [a, b] of source.links) {
     const from = parseRef(source.id, a);
     const to = parseRef(source.id, b);
@@ -78,6 +94,7 @@ export function buildZone(source: ZoneSource): Zone {
       }
       return exit;
     });
+    links.push([from, to]);
     if (exits[0]?.side === exits[1]?.side) {
       throw new Error(`Zone ${source.id} : ${a} ↔ ${b} relie deux murs du même côté`);
     }
@@ -108,6 +125,8 @@ export function buildZone(source: ZoneSource): Zone {
     id: source.id,
     start: source.start,
     rooms,
+    links,
+    map: source.map ?? {},
     destination: (room, exit) => table.get(`${room}:${exit}`) ?? null,
   };
 }

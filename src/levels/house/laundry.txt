@@ -1,5 +1,6 @@
 ; Buanderie : on y trouve de quoi grimper (objet A, placeholder) ; on en ressort par la trappe à linge.
 ; @name: Buanderie
+; @icon: machine
 ; @ambient: #29303a
 ; @ability: climb
 ; @note: machine, placard mural, rebord de la trappe (sortie 1) : chaîne d'escalade (D-26).

@@ -1,5 +1,6 @@
 ; Grenier : entre l'escalier (sortie 1) et la chambre, derrière l'armoire (sortie 2).
 ; @name: Grenier
+; @icon: roof
 ; @ambient: #2c2a31
 ; @note: poutres jusqu'au recoin sous le toit : secret de plateforme, difficulté moyenne (D-27).
 ; @note-2: lucarne (colonnes 26-28) hors de portée même en grimpant : pour une capacité future.
