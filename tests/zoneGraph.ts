@@ -1,7 +1,7 @@
 import { DIFFICULTY_MIN_WINDOW_MS, type Difficulty } from '../src/config/levelDesign';
-import { DEFAULT_MOVEMENT } from '../src/config/movement';
+import { DEFAULT_MOVEMENT, PLAYER_HITBOX } from '../src/config/movement';
 import { analyzeLevel, type LevelAnalysis } from '../src/core/analysis/analyzeLevel';
-import { surfaceUnder } from '../src/core/analysis/surfaces';
+import { findSurfaces, surfaceUnder, type SurfaceMap } from '../src/core/analysis/surfaces';
 import type { StoryData } from '../src/core/story/story';
 import { buildZone } from '../src/core/world/zone';
 import { HOUSE_STORY } from '../src/levels/house/story';
@@ -34,9 +34,23 @@ export function analysis(room: string, climb: boolean): LevelAnalysis {
   return result;
 }
 
+/**
+ * Surfaces de chaque salle : les mêmes (mêmes indices) que celles de l'analyse, sans calculer les
+ * passages (plusieurs secondes par salle).
+ */
+const surfaceMaps = new Map<string, SurfaceMap>();
+function surfaces(room: string): SurfaceMap {
+  let map = surfaceMaps.get(room);
+  if (!map) {
+    map = findSurfaces(level(room), PLAYER_HITBOX.height);
+    surfaceMaps.set(room, map);
+  }
+  return map;
+}
+
 /** Surface sous une tuile (col, row) : celle où l'on se tient à cet endroit (-1 : aucune). */
 export function surfaceAt(room: string, col: number, row: number): number {
-  return surfaceUnder(level(room), analysis(room, false).map, col, row);
+  return surfaceUnder(level(room), surfaces(room), col, row);
 }
 
 /** Surface sur laquelle on arrive par une sortie (et d'où on la franchit). */
