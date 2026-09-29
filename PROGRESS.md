@@ -2,13 +2,37 @@
 
 ## Phase en cours
 
-**Passe de level design sur la maison** (D-27) : implémentée sur la branche `claude/house-level-design`, plan validé par l'utilisateur, **en attente de PR puis d'essai sur téléphone**.
+**Direction artistique** (D-28) : style D validé ; **la chambre est habillée** sur la branche `claude/art-bedroom`, **en attente de validation puis d'essai sur téléphone**.
 
-Escalade, Phase 6 (maison), PWA et Phase 5 : mergées, en attente d'essai sur téléphone. Mouvement, commandes et combat : validation provisoire par l'utilisateur, à confirmer en jeu réel.
+Level design, escalade, Phase 6 (maison), PWA et Phase 5 : mergés, en attente d'essai sur téléphone. Mouvement, commandes et combat : validation provisoire par l'utilisateur, à confirmer en jeu réel.
 
-Prochaine : direction artistique (D-27).
+Prochaine : après validation de la chambre, Céleste en « papier découpé » (animation), puis l'habillage des autres salles.
 
 ## Fait
+
+### Direction artistique : la chambre (D-28)
+
+- **Choix du style** : maquettes A (cahier, crayons), B (ombres et lumière), C (livre illustré), puis D (C enrichi avec la lumière de B ; monde étrange en silhouettes de B). **D validé.**
+- **Guide pour créer des images** (IA ou autre) : document « MARIA — Créer des images pour le jeu ».
+- **Habillage des salles** : `; @decor:` dans l'ASCII (nom d'élément et rectangle en tuiles). Un test vérifie que chaque tuile de meuble est couverte par un meuble déclaré.
+- **La chambre**, dessinée par le code à l'échelle de l'écran :
+  - fond : mur à motif, lambris, parquet, fenêtre à rideaux avec la lune, cadre, dessin punaisé, tapis ;
+  - meubles : armoire, tête de lit, lit à couette, étagères, coffre à jouets, tabouret, bureau, pile de livres ;
+  - encadrement des sorties.
+- **Lumière** : obscurité percée par la veilleuse, la lune (et son rai jusqu'au sol) et le passage derrière l'armoire ; halos ; liseré clair sur les surfaces praticables. Les personnages restent au-dessus, lisibles.
+- **Céleste** dessinée par le code : pyjama rose à pois, couettes et rubans, lunettes rondes roses, chaussons. Veilleuses (petite lampe champignon), objets et trouvailles redessinés nets.
+- **Monde étrange** (overlay « Monde étrange (aperçu) ») : mêmes formes, silhouettes et lumière turquoise.
+- **Images fournies** : `ART_IMAGES` dans `src/config/art.ts` (fichiers sous `public/art/`) ; une image remplace le dessin de l'élément du même nom, Céleste comprise.
+- Tests : 286 (format `@decor`, cohérence habillage et collision).
+- **Vérifié dans Chromium** (paysage 844 × 390, écran ×3) : chambre en résolution logique et en résolution de l'écran, monde étrange ; passages de salle et reprise inchangés.
+
+### À vérifier sur téléphone (chambre habillée)
+
+- [ ] Menu pause → résolution : comparer **logique** et **écran**. Le style est-il nettement plus beau en mode écran, et le jeu reste-t-il fluide (FPS) ?
+- [ ] L'ambiance : assez sombre pour être nocturne, pas trop pour jouer ?
+- [ ] Les surfaces où l'on marche se repèrent au premier coup d'œil (liserés).
+- [ ] Céleste se voit bien sur le lit et devant les meubles.
+- [ ] Monde étrange (DEBUG) : inquiétant sans être effrayant ?
 
 ### Passe de level design sur la maison (D-27)
 
@@ -362,7 +386,8 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. PR de la passe de level design et merge, puis essai sur téléphone (listes « level design », « escalade », « Phase 6 », « PWA » et « Phase 5 »).
-2. **Direction artistique** (D-27) : écrans de test dans 2 ou 3 styles sur la même salle ; qui produit les images.
-3. Plus tard : retravailler le rez-de-chaussée (verticalité, jouets placés autour du mouvement, récompenses en haut de la bibliothèque et des placards).
-4. Ensuite (§42) : croissance, carte et secrets (compteurs, carte dessinée), narration.
+1. Validation de la chambre habillée, PR et merge, puis essai sur téléphone (liste « chambre habillée » et précédentes).
+2. **Céleste en « papier découpé »** : pièces dessinées par le code (puis images éventuelles), animées selon l'état (course, saut, suspension, hissage).
+3. **Habillage des autres salles** (couloir, escalier, salon, cuisine, buanderie, grenier) et des jouets mécaniques.
+4. Décider du mode de rendu par défaut (D-18) d'après l'essai sur téléphone.
+5. Plus tard : retravailler le rez-de-chaussée (level design), puis croissance, carte et secrets, narration.
