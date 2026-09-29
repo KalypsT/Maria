@@ -132,6 +132,14 @@ export function buildZone(source: ZoneSource): Zone {
 }
 
 /**
+ * Salle du monde étrange (`; @world: strange`, §6.2) : toujours dessinée en silhouettes, absente
+ * de la carte de Céleste (D-34).
+ */
+export function isStrangeRoom(level: LevelData): boolean {
+  return level.meta.world === 'strange';
+}
+
+/**
  * Position (coin haut gauche, px) d'une hitbox arrivant par une sortie : juste à l'intérieur, hors de
  * l'ouverture (pour ne pas repartir aussitôt), pieds au bas de l'ouverture.
  */

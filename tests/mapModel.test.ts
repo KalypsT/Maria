@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { TILE_SIZE as T } from '../src/config/display';
 import { buildMapModel, mapProblems, type MapProgress } from '../src/core/world/mapModel';
-import { buildZone } from '../src/core/world/zone';
+import { buildZone, isStrangeRoom } from '../src/core/world/zone';
 import { HOUSE } from '../src/levels/house/zone';
 
 const zone = buildZone(HOUSE);
@@ -28,7 +28,8 @@ describe('carte dessinée par Céleste (§24)', () => {
           ? [a, b]
           : [b, a];
       const far = new Set(['hall:3', 'attic:2']);
-      if (far.has(`${left.room}:${String(left.exit)}`)) {
+      // Le monde étrange n'est pas sur la carte (D-34).
+      if (far.has(`${left.room}:${String(left.exit)}`) || !zone.map[left.room]) {
         continue;
       }
       const leftBox = zone.map[left.room];
@@ -38,8 +39,21 @@ describe('carte dessinée par Céleste (§24)', () => {
       );
     }
     for (const [id, level] of zone.rooms) {
-      expect(level.meta.icon, id).toBeDefined();
+      if (!isStrangeRoom(level)) {
+        expect(level.meta.icon, id).toBeDefined();
+      }
     }
+  });
+
+  it('le monde étrange n’apparaît jamais ; Céleste n’y est pas dessinée (D-34)', () => {
+    const model = buildMapModel(zone, {
+      ...progress(),
+      visited: [...progress().visited, 'living-strange', 'shadows'],
+      celeste: { room: 'shadows', x: 100, y: 100 },
+    });
+    expect(model.rooms.map((room) => room.id)).not.toContain('shadows');
+    expect(model.rooms.map((room) => room.id)).not.toContain('living-strange');
+    expect(model.celeste).toBeNull();
   });
 
   it('salles visitées dessinées, voisines devinées, les autres cachées', () => {

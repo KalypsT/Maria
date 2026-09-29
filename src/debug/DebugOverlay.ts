@@ -245,11 +245,11 @@ export function installDebugOverlay(scene: GameScene): void {
       [F.EveningPlayed, F.EveningBlanket, F.EveningTucked, F.Slept, F.TraceHall, F.TraceStairs],
     ],
     [
-      'Histoire : Maria disparue (salon étrange)',
+      'Histoire : Maria disparue (monde étrange ouvert)',
       [F.EveningPlayed, F.EveningBlanket, F.EveningTucked, F.Slept, F.MariaSeen, F.MariaVanished],
     ],
     [
-      'Histoire : retour au réel (bandeau sur le lit)',
+      'Histoire : fin du monde étrange (bandeau sur le lit)',
       [
         F.EveningPlayed,
         F.EveningBlanket,
@@ -257,7 +257,7 @@ export function installDebugOverlay(scene: GameScene): void {
         F.Slept,
         F.MariaSeen,
         F.MariaVanished,
-        F.LivingLeft,
+        F.StrangeDone,
       ],
     ],
   ];
