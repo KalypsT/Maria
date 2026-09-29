@@ -2,8 +2,9 @@ import type { ArtPalette } from '../../config/art';
 
 /**
  * Pièces de Céleste en « papier découpé » (D-29), dessinées par le code dans le style D-28 :
- * enfant de 5-6 ans (tête ronde assez grosse), pyjama rose à pois, couettes et rubans, lunettes
- * rondes roses, chaussons. Monde étrange : silhouettes, seules les lunettes restent roses.
+ * enfant de 5-6 ans (tête ronde assez grosse), couettes basses à nœuds roses, lunettes rondes
+ * roses, taches de rousseur. Tenue d'après l'illustration de l'utilisateur (D-41). Monde étrange :
+ * silhouettes, seules les lunettes restent roses.
  * Chaque pièce a sa taille (px logiques) et son point d'attache (origine, en fraction).
  */
 export const CELESTE_PARTS = {
@@ -15,10 +16,21 @@ export const CELESTE_PARTS = {
 } as const;
 export type CelestePart = keyof typeof CELESTE_PARTS;
 
-const PYJAMA = '#f1a9bd';
-const SKIN = '#e7b995';
-const HAIR = '#5a3a2a';
-const RIBBON = '#d9788f';
+/**
+ * Tenue de la maison (D-41) : pyjama bleu à myrtilles, liserés roses, chaussons lapin roses. Les
+ * autres zones auront leur tenue (ouvert, spec §45). Le bleu est plus clair que les murs de la
+ * maison, et le liseré sombre détache la silhouette du décor (lisibilité, pilier 1).
+ */
+const PYJAMA = '#86b0ea';
+const PYJAMA_EDGE = 'rgba(28,38,78,0.55)';
+const BERRY = '#3d55b0';
+const PIPING = '#f7c1cf';
+const SLIPPER = '#f3aabb';
+const SLIPPER_FACE = '#fbe9dc';
+const SKIN = '#f0c19e';
+const HAIR = '#6b4329';
+const RIBBON = '#f08aa6';
+const FRECKLE = 'rgba(176,98,70,0.7)';
 const GLASSES = '#ff6fa3';
 const SILHOUETTE = '#07080d';
 
@@ -56,6 +68,10 @@ export function drawCelestePart(
         ctx.fill();
         ctx.fillStyle = 'rgba(217,120,143,0.35)';
         circle(ctx, cx + 3.8, cy + 2.8, 1.1);
+        ctx.fillStyle = FRECKLE;
+        ctx.fillRect(cx + 2.6, cy + 2.4, 0.5, 0.5);
+        ctx.fillRect(cx + 3.5, cy + 2.9, 0.5, 0.5);
+        ctx.fillRect(cx + 4.5, cy + 2.4, 0.5, 0.5);
       }
       // Lunettes rondes roses (identité de Céleste, spec §2), de trois quarts.
       ctx.strokeStyle = GLASSES;
@@ -77,8 +93,19 @@ export function drawCelestePart(
       ctx.beginPath();
       ctx.ellipse(2.5, 4, 2.2, 3, 0, 0, Math.PI * 2);
       ctx.fill();
+      // Nœud rose : deux boucles et le centre.
       ctx.fillStyle = dark ? SILHOUETTE : RIBBON;
-      circle(ctx, 2.5, 1.2, 1.2);
+      ctx.beginPath();
+      ctx.moveTo(2.5, 1.3);
+      ctx.lineTo(0.2, 0.2);
+      ctx.lineTo(0.2, 2.4);
+      ctx.closePath();
+      ctx.moveTo(2.5, 1.3);
+      ctx.lineTo(4.8, 0.2);
+      ctx.lineTo(4.8, 2.4);
+      ctx.closePath();
+      ctx.fill();
+      circle(ctx, 2.5, 1.3, 0.7);
       break;
     case 'torso':
       ctx.fillStyle = dark ? SILHOUETTE : PYJAMA;
@@ -86,17 +113,31 @@ export function drawCelestePart(
       ctx.roundRect(0.5, 0, 10, 9, [3.5, 3.5, 2, 2]);
       ctx.fill();
       if (!dark) {
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.strokeStyle = PYJAMA_EDGE;
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+        // Myrtilles.
+        ctx.fillStyle = BERRY;
         for (const [x, y] of [
-          [3, 3],
-          [7.5, 2.5],
-          [5, 6],
-          [8.5, 7],
+          [3, 3.2],
+          [3.9, 3.7],
+          [7.4, 2.6],
+          [4.6, 6.4],
         ] as const) {
-          circle(ctx, x, y, 0.65);
+          circle(ctx, x, y, 0.7);
         }
-        ctx.fillStyle = 'rgba(0,0,0,0.08)';
-        ctx.fillRect(0.5, 7.5, 10, 1.5);
+        // Col et patte boutonnée, liserés roses.
+        ctx.strokeStyle = PIPING;
+        ctx.lineWidth = 0.6;
+        ctx.beginPath();
+        ctx.moveTo(6.2, 0.4);
+        ctx.lineTo(8.2, 2);
+        ctx.lineTo(9.6, 0.8);
+        ctx.moveTo(8.9, 2.2);
+        ctx.lineTo(8.9, 8.6);
+        ctx.moveTo(0.8, 8.4);
+        ctx.lineTo(10.2, 8.4);
+        ctx.stroke();
       }
       break;
     case 'arm':
@@ -104,6 +145,13 @@ export function drawCelestePart(
       ctx.beginPath();
       ctx.roundRect(0.5, 0, 3, 5.8, 1.4);
       ctx.fill();
+      if (!dark) {
+        ctx.strokeStyle = PYJAMA_EDGE;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+        ctx.fillStyle = PIPING;
+        ctx.fillRect(0.6, 5, 2.8, 0.6);
+      }
       ctx.fillStyle = dark ? SILHOUETTE : SKIN;
       circle(ctx, 2, 6.6, 1.3);
       break;
@@ -112,10 +160,27 @@ export function drawCelestePart(
       ctx.beginPath();
       ctx.roundRect(1, 0, 3, 7.4, 1.2);
       ctx.fill();
-      ctx.fillStyle = dark ? SILHOUETTE : palette.linen;
+      if (!dark) {
+        ctx.strokeStyle = PYJAMA_EDGE;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+        ctx.fillStyle = BERRY;
+        circle(ctx, 2.4, 3.2, 0.6);
+        ctx.fillStyle = PIPING;
+        ctx.fillRect(1.1, 6.2, 2.8, 0.6);
+      }
+      // Chausson lapin : une oreille dressée à l'avant, le museau clair.
+      ctx.fillStyle = dark ? SILHOUETTE : SLIPPER;
       ctx.beginPath();
       ctx.roundRect(0.6, 6.8, 5, 2.2, 1.1);
       ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(4.3, 6.4, 0.5, 1, 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      if (!dark) {
+        ctx.fillStyle = SLIPPER_FACE;
+        circle(ctx, 4.6, 7.9, 0.7);
+      }
       break;
   }
 }

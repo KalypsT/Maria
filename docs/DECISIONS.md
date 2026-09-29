@@ -422,7 +422,14 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
 
 - **Présage corrigé** (remplace la bande de hauteur de D-35) : il dépend de la **distance à la case de Maria** (en haut de la bibliothèque), avec un rayon de 13 tuiles, et non plus de la hauteur dans la pièce. Avant, on le déclenchait à l'autre bout du salon, sur la tringle du rideau. Maintenant rien sur la tringle ni sur le canapé ; il commence au pied de la bibliothèque et devient fort tout près de Maria.
 - **Mains des parents** : la main tendue sortait du cadre du dessin et était coupée. Le cadre a maintenant une **marge symétrique** de chaque côté du corps (papa à la porte 8, à la cuisine 6, maman 4, en px de dessin). Le corps reste centré sur sa tuile, retourné ou non, et les bulles ne bougent pas.
-- **Image de Céleste fournie par l'utilisateur** : en attente du choix de son usage (voir PROGRESS).
+- **Image de Céleste fournie par l'utilisateur** : usage décidé en D-41.
+
+## D-41 — Céleste d'après l'illustration de l'utilisateur
+
+- L'illustration (vue de côté : couettes basses à nœuds roses, lunettes rondes roses, pyjama bleu à myrtilles avec liserés roses, chaussons lapin roses) **ne remplace pas la marionnette** : à environ 26 px de haut, ses détails ne se lisent pas, et une image fixe ne court ni ne saute. Aucune autre orientation n'est nécessaire, le jeu retourne l'image.
+- **Écran de départ** : l'illustration détourée (`public/art/celeste.png`, fond blanc retiré, 900 px de haut) à gauche du menu, masquée en portrait. **Pas dans le cahier**, qui reste sans Céleste (choix antérieur de l'utilisateur).
+- **Marionnette redessinée** d'après elle (D-29 conservé) : pyjama bleu clair, myrtilles, col et patte boutonnée à liseré rose, poignets et chevilles roses, nœuds roses, taches de rousseur, chaussons lapin roses (une oreille, le museau clair). Un **liseré sombre** détache le pyjama des murs bleus de la maison (lisibilité, pilier 1). À vérifier sur téléphone, surtout sur le mur clair du salon le matin.
+- **Le pyjama est la tenue de la maison seulement** (décision de l'utilisateur) : les tenues des autres zones restent ouvertes (§45) ; elles viendront avec ces zones.
 
 ## Risques identifiés à suivre
 

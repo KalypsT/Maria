@@ -2,9 +2,9 @@
 
 ## Phase en cours
 
-**Retours du téléphone sur la maison vivante** (D-40 : présage près de Maria, mains des parents) : sur la branche `ccr-5c5df983-6feqj3`, **en attente de PR et d'essai sur téléphone**. La maison vivante (D-37 à D-39) est fusionnée.
+**Retours du téléphone sur la maison vivante** (D-40 : présage près de Maria, mains des parents ; D-41 : Céleste d'après l'illustration) : sur la branche `ccr-5c5df983-6feqj3`, **en attente de PR et d'essai sur téléphone**. La maison vivante (D-37 à D-39) est fusionnée.
 
-Prochaine : décider de l'usage de l'image de Céleste fournie, puis la croissance (§42 phase 7).
+Prochaine : la croissance (§42 phase 7).
 
 ## Fait
 
@@ -12,12 +12,14 @@ Prochaine : décider de l'usage de l'image de Céleste fournie, puis la croissan
 
 - Le présage du salon dépend de la distance à Maria (rayon 13 tuiles), plus de la hauteur : rien sur la tringle ni sur le canapé.
 - Les mains des parents ne sont plus coupées : le cadre du dessin a une marge de chaque côté.
-- Image de Céleste fournie par l'utilisateur (pyjama bleu à myrtilles, nœuds roses, chaussons lapin) : usage à choisir.
+- Céleste d'après l'illustration de l'utilisateur (D-41) : l'illustration sur l'écran de départ, la marionnette redessinée (pyjama bleu à myrtilles, liserés et nœuds roses, taches de rousseur, chaussons lapin). Le pyjama est la tenue de la maison seulement.
 
 ### À vérifier sur téléphone (retours)
 
 - Le salon : l'effet étrange ne vient qu'en s'approchant de la bibliothèque, et monte bien près de Maria.
 - Les mains : papa à la porte, sa tasse, maman au lit et son livre.
+- Céleste en pyjama bleu : bien visible sur les murs de la maison, la nuit comme le matin (salon surtout).
+- L'écran de départ : l'illustration à gauche du menu, nette, sans bord blanc.
 
 ### Rez-de-chaussée retravaillé (D-39)
 
