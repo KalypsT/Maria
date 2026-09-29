@@ -91,20 +91,21 @@ export class PlayerPhysics {
     params: Readonly<MovementParams>,
     x: number,
     y: number,
+    hitbox: Readonly<{ width: number; height: number }> = PLAYER_HITBOX,
   ) {
     this.params = { ...params };
     this.derived = deriveMovement(this.params);
     this.box = {
       x,
       y,
-      width: PLAYER_HITBOX.width,
-      height: PLAYER_HITBOX.height,
+      width: hitbox.width,
+      height: hitbox.height,
       dx: 0,
       dy: 0,
       passOneWay: false,
     };
-    this.probe.width = PLAYER_HITBOX.width;
-    this.probe.height = PLAYER_HITBOX.height;
+    this.probe.width = hitbox.width;
+    this.probe.height = hitbox.height;
     this.prevX = x;
     this.prevY = y;
     this.grounded = isGrounded(level, this.box);
@@ -125,6 +126,20 @@ export class PlayerPhysics {
   setParams(params: Readonly<MovementParams>): void {
     Object.assign(this.params, params);
     deriveMovement(this.params, undefined, this.derived);
+  }
+
+  /**
+   * Change la taille de la hitbox (croissance, D-43), pieds et centre à la même place. À appeler
+   * seulement là où la place suffit (pendant un noir, avant `reset` à un point sûr).
+   */
+  setHitbox(hitbox: Readonly<{ width: number; height: number }>): void {
+    const box = this.box;
+    box.x += (box.width - hitbox.width) / 2;
+    box.y += box.height - hitbox.height;
+    box.width = this.probe.width = hitbox.width;
+    box.height = this.probe.height = hitbox.height;
+    this.prevX = box.x;
+    this.prevY = box.y;
   }
 
   /** Replace le joueur, immobile, à une position. */

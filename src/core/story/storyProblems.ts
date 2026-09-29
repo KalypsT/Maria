@@ -3,7 +3,13 @@ import { isMemory } from '../../config/memories';
 import { EntityType, Tile, tileAt, type LevelData } from '../level/LevelData';
 import type { Zone } from '../world/zone';
 import { propBox } from './PropStage';
-import { CHARACTER_KINDS, type FlagCondition, type StoryData, type TileArea } from './story';
+import {
+  CHARACTER_KINDS,
+  WALL_PROP_KINDS,
+  type FlagCondition,
+  type StoryData,
+  type TileArea,
+} from './story';
 
 /** Tuile libre (Céleste y tient debout, deux tuiles de haut) au-dessus d'un sol. */
 function standable(level: LevelData, col: number, row: number): boolean {
@@ -158,7 +164,11 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
       } else if (below !== Tile.Solid && below !== Tile.OneWay) {
         problems.push(`${what} : ne repose sur rien`);
       }
-      if (box.height > 2 * TILE_SIZE && !CHARACTER_KINDS.has(prop.kind)) {
+      if (
+        box.height > 2 * TILE_SIZE &&
+        !CHARACTER_KINDS.has(prop.kind) &&
+        !WALL_PROP_KINDS.has(prop.kind)
+      ) {
         problems.push(`${what} : trop grand`);
       }
     }

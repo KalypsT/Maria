@@ -658,3 +658,58 @@ describe('rez-de-chaussée (D-39)', () => {
     expect(shown()).not.toContain('maria-bookcase');
   });
 });
+
+describe('quelques mois plus tard (D-43)', () => {
+  const END = [...LEGACY_STORY_FLAGS, F.MariaSeen, F.MariaVanished, F.StrangeDone];
+
+  it('après la visite de papa, se recoucher fait grandir Céleste, dans le noir', () => {
+    const { log, host } = recorder();
+    const d = new StoryDirector(HOUSE_STORY, host, HZ);
+    const box = standing(12, 15);
+    const run = () => {
+      d.step('bedroom', box, true);
+      for (let i = 0; i < 3000 && d.busy; i++) {
+        d.step('bedroom', box, false);
+      }
+    };
+    d.setFlags(END);
+    run();
+    expect(d.flags.has(F.Grown), 'pas avant la visite de papa').toBe(false);
+    d.setFlags([...END, F.DadVisit]);
+    let veilAtGrowth = -1;
+    const flagSet = host.flagSet.bind(host);
+    host.flagSet = (id) => {
+      flagSet(id);
+      if (id === F.Grown) {
+        veilAtGrowth = d.veil;
+      }
+    };
+    run();
+    expect(d.flags.has(F.Grown)).toBe(true);
+    expect(veilAtGrowth, 'grandit dans le noir complet').toBe(1);
+    expect(d.veil).toBe(0);
+    expect(log).toContain('think maria-missing');
+    // Une seule fois.
+    log.length = 0;
+    run();
+    expect(log).toEqual([]);
+  });
+
+  it('la toise a un trait de plus, et devient un souvenir', () => {
+    const { log, host } = recorder();
+    const d = new StoryDirector(HOUSE_STORY, host, HZ);
+    const shown = () => {
+      const stage = new PropStage();
+      stage.load(HOUSE_STORY.props, 'bedroom', d.flags);
+      return stage.props.filter((_, i) => stage.shown[i]).map((p) => p.id);
+    };
+    d.setFlags([...END, F.DadVisit]);
+    expect(shown()).toContain('height-chart');
+    expect(shown()).not.toContain('height-chart-grown');
+    d.setFlags([...END, F.DadVisit, F.Grown]);
+    expect(shown()).toContain('height-chart-grown');
+    expect(shown()).not.toContain('height-chart');
+    d.step('bedroom', standing(42, 19), true);
+    expect(log).toContain('memory height');
+  });
+});

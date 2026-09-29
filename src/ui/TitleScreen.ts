@@ -1,4 +1,5 @@
-import { TITLE_IMAGE } from '../config/art';
+import { TITLE_IMAGES } from '../config/art';
+import { growthPhase } from '../config/growth';
 import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 import type { InstallHint } from '../core/platform/install';
 import type { LoadReport } from '../core/save/SaveManager';
@@ -49,7 +50,9 @@ export function showTitleScreen(
     root.id = 'title-screen';
     root.setAttribute(UI_OVERLAY_ATTRIBUTE, '');
     const portrait = element('img', root, 'title-celeste');
-    portrait.src = TITLE_IMAGE;
+    // Céleste telle qu'elle est dans la partie sauvegardée (D-43).
+    const flags = new Set(report.data?.story.flags ?? []);
+    portrait.src = TITLE_IMAGES[growthPhase(flags).outfit];
     portrait.alt = '';
     portrait.draggable = false;
     const panel = element('div', root, 'title-panel');

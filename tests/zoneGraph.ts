@@ -1,5 +1,6 @@
 import { DIFFICULTY_MIN_WINDOW_MS, type Difficulty } from '../src/config/levelDesign';
-import { DEFAULT_MOVEMENT, PLAYER_HITBOX } from '../src/config/movement';
+import { GROWTH_PHASES, phaseMovement, type GrowthPhase } from '../src/config/growth';
+import { DEFAULT_MOVEMENT } from '../src/config/movement';
 import { analyzeLevel, type LevelAnalysis } from '../src/core/analysis/analyzeLevel';
 import { findSurfaces, surfaceUnder, type SurfaceMap } from '../src/core/analysis/surfaces';
 import type { StoryData } from '../src/core/story/story';
@@ -22,13 +23,29 @@ export function level(room: string) {
   return result;
 }
 
-/** Analyse de chaque salle, sans puis avec l'escalade (les surfaces sont les mêmes). */
+/** Phase de croissance (D-43) d'après son numéro. */
+export function phase(id: number): GrowthPhase {
+  const result = GROWTH_PHASES.find((p) => p.id === id);
+  if (!result) {
+    throw new Error(`phase ${String(id)} absente`);
+  }
+  return result;
+}
+
+/**
+ * Analyse de chaque salle, sans puis avec l'escalade, à une phase de croissance (les surfaces
+ * sont les mêmes : toute hauteur de hitbox < 2 tuiles demande les mêmes 2 tuiles libres).
+ */
 const analyses = new Map<string, LevelAnalysis>();
-export function analysis(room: string, climb: boolean): LevelAnalysis {
-  const key = `${room}:${String(climb)}`;
+export function analysis(room: string, climb: boolean, growth = 1): LevelAnalysis {
+  const key = `${room}:${String(climb)}:${String(growth)}`;
   let result = analyses.get(key);
   if (!result) {
-    result = analyzeLevel(level(room), DEFAULT_MOVEMENT, { climb });
+    const p = phase(growth);
+    result = analyzeLevel(level(room), phaseMovement(DEFAULT_MOVEMENT, p), {
+      climb,
+      hitbox: p.hitbox,
+    });
     analyses.set(key, result);
   }
   return result;
@@ -42,7 +59,7 @@ const surfaceMaps = new Map<string, SurfaceMap>();
 function surfaces(room: string): SurfaceMap {
   let map = surfaceMaps.get(room);
   if (!map) {
-    map = findSurfaces(level(room), PLAYER_HITBOX.height);
+    map = findSurfaces(level(room), phase(1).hitbox.height);
     surfaceMaps.set(room, map);
   }
   return map;
@@ -105,7 +122,7 @@ export function storyPassages(story: StoryData = HOUSE_STORY): [Node, Node][] {
   return passages;
 }
 
-export function zoneGraph(climb: boolean, rule: WindowRule): Map<Node, Set<Node>> {
+export function zoneGraph(climb: boolean, rule: WindowRule, growth = 1): Map<Node, Set<Node>> {
   const graph = new Map<Node, Set<Node>>();
   const edge = (from: Node, to: Node) => {
     const set = graph.get(from) ?? new Set<Node>();
@@ -114,7 +131,7 @@ export function zoneGraph(climb: boolean, rule: WindowRule): Map<Node, Set<Node>
   };
   for (const [room, data] of zone.rooms) {
     const min = rule ? rule(room) : 0;
-    for (const move of analysis(room, climb).moves) {
+    for (const move of analysis(room, climb, growth).moves) {
       if (move.windowMs >= min) {
         edge(node(room, move.from), node(room, move.to));
       }

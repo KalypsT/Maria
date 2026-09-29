@@ -222,6 +222,50 @@ function headband(ctx: CanvasRenderingContext2D, s: number): void {
   ctx.fill();
 }
 
+/**
+ * Toise (D-43) : une bande graduée, des traits au crayon aux tailles de Céleste ; `grown` : un
+ * nouveau trait plus haut, avec un petit cœur (quelques mois ont passé). Hauteur `h`, centrée
+ * horizontalement en 0, le bas en `h / 2`.
+ */
+export function heightChart(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  grown: boolean,
+): void {
+  const top = -h / 2;
+  roundRect(ctx, -w / 2, top, w, h, w * 0.15, '#f6e7c8');
+  ctx.fillStyle = '#d9b98a';
+  ctx.fillRect(-w / 2, top, w * 0.14, h);
+  // Graduations.
+  ctx.fillStyle = 'rgba(120,90,60,0.55)';
+  for (let i = 1; i < 10; i++) {
+    const y = top + (h * i) / 10;
+    ctx.fillRect(-w / 2, y, w * (i % 2 === 0 ? 0.55 : 0.35), h * 0.012 + 0.2);
+  }
+  // Traits des tailles passées (au crayon), puis la taille d'aujourd'hui.
+  const mark = (fromBottom: number, color: string, thick: number) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(-w / 2, h / 2 - fromBottom * h, w * 1.05, thick);
+  };
+  mark(0.5, INK, h * 0.018 + 0.3);
+  mark(0.6, INK, h * 0.018 + 0.3);
+  mark(0.7, PINK, h * 0.02 + 0.4);
+  if (grown) {
+    mark(0.8, PINK, h * 0.022 + 0.45);
+    ctx.fillStyle = PINK;
+    const r = w * 0.13;
+    const x = w * 0.28;
+    const y = h / 2 - 0.86 * h;
+    ctx.beginPath();
+    ctx.arc(x - r * 0.55, y, r * 0.6, Math.PI, 0);
+    ctx.arc(x + r * 0.55, y, r * 0.6, Math.PI, 0);
+    ctx.lineTo(x, y + r * 1.3);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
 /** La photo de Céleste bébé, Maria dans les bras (D-39). */
 function babyPhoto(ctx: CanvasRenderingContext2D, s: number): void {
   roundRect(ctx, -s * 0.4, -s * 0.44, s * 0.8, s * 0.88, s * 0.04, '#e6c27a');
@@ -295,6 +339,9 @@ export function drawMemory(
       break;
     case 'bookcase':
       babyPhoto(ctx, size);
+      break;
+    case 'height':
+      heightChart(ctx, size * 0.34, size * 0.95, true);
       break;
   }
   ctx.restore();

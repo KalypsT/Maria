@@ -37,6 +37,8 @@ export const StoryFlag = {
   CatPetted: 'cat.petted',
   /** Après le monde étrange, papa est passé voir Céleste. */
   DadVisit: 'end.dad',
+  /** Quelques mois plus tard (D-43) : Céleste a grandi (phase de croissance 2). */
+  Grown: 'growth.2',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -85,6 +87,9 @@ export const STORY_TIMING = {
   reomenPeakMs: 500,
   /** Fin : scintillements autour du berceau avant que le cercle se referme sur Céleste. */
   cradleSparkleMs: 1400,
+  /** Quelques mois plus tard (D-43) : le noir le plus long du jeu, puis le retour lent. */
+  monthsBlackMs: 4200,
+  monthsFadeInMs: 3200,
 } as const;
 
 /** Période du petit mouvement en boucle des personnages (ms), D-37. */
@@ -130,4 +135,6 @@ export const PROP_SIZE = {
   'music-box': { w: 10, h: 11 },
   plant: { w: 10, h: 16 },
   'baby-photo': { w: 11, h: 10 },
+  'height-chart': { w: 7, h: 40 },
+  'height-chart-grown': { w: 7, h: 40 },
 } as const satisfies Readonly<Record<PropKind, { w: number; h: number }>>;

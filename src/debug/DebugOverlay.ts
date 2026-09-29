@@ -6,12 +6,7 @@ import { DEFAULT_FEEL, FEEL_PARAM_RANGES, type FeelParams } from '../config/feel
 import { DEFAULT_WORLD, WORLD_PARAM_RANGES, type WorldParams } from '../config/world';
 import { DEFAULT_PUPPET, PUPPET_PARAM_RANGES, type PuppetParams } from '../config/puppet';
 import { deserializeSave } from '../core/save/saveData';
-import {
-  DEFAULT_MOVEMENT,
-  MOVEMENT_PARAM_RANGES,
-  PLAYER_HITBOX,
-  type MovementParams,
-} from '../config/movement';
+import { DEFAULT_MOVEMENT, MOVEMENT_PARAM_RANGES, type MovementParams } from '../config/movement';
 import { LEVELS, ZONES, levelName } from '../levels';
 import type { GameScene } from '../scenes/GameScene';
 import {
@@ -260,6 +255,20 @@ export function installDebugOverlay(scene: GameScene): void {
         F.StrangeDone,
       ],
     ],
+    [
+      'Histoire : quelques mois plus tard (Céleste a grandi)',
+      [
+        F.EveningPlayed,
+        F.EveningBlanket,
+        F.EveningTucked,
+        F.Slept,
+        F.MariaSeen,
+        F.MariaVanished,
+        F.StrangeDone,
+        F.DadVisit,
+        F.Grown,
+      ],
+    ],
   ];
   const current = [...scene.story.flags].sort().join();
   for (const [label, flags] of steps) {
@@ -272,6 +281,16 @@ export function installDebugOverlay(scene: GameScene): void {
   storySelect.addEventListener('change', () => {
     scene.setStoryFlags(storySelect.value ? storySelect.value.split(',') : []);
     storySelect.blur();
+  });
+  // Phase de croissance (D-43) : le drapeau de l'histoire, sans sauvegarde.
+  addCheck(panel, 'Croissance : Céleste a grandi', scene.story.flags.has(F.Grown), (checked) => {
+    const flags = new Set(scene.story.flags);
+    if (checked) {
+      flags.add(F.Grown);
+    } else {
+      flags.delete(F.Grown);
+    }
+    scene.setStoryFlags([...flags]);
   });
   // Déblocage des capacités (D-26) : pour la partie en cours seulement, sans sauvegarde.
   addCheck(panel, 'Capacité : grimper aux rebords', scene.debugClimb, (checked) => {
@@ -486,8 +505,8 @@ export function installDebugOverlay(scene: GameScene): void {
       graphics.strokeRect(
         player.box.x + 0.5,
         player.box.y + 0.5,
-        PLAYER_HITBOX.width - 1,
-        PLAYER_HITBOX.height - 1,
+        player.box.width - 1,
+        player.box.height - 1,
       );
     }
     if (showHitbox) {

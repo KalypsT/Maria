@@ -1,3 +1,5 @@
+import type { CelesteOutfit } from './growth';
+
 /**
  * Direction artistique (D-28) : livre illustré en aplats doux, nuit bleutée, lumière de veilleuse ;
  * monde étrange en silhouettes et lumière turquoise. PROVISOIRE : couleurs et intensités à régler
@@ -91,10 +93,14 @@ export const ART_IMAGES: Readonly<Record<string, string>> = {
 };
 
 /**
- * Illustration de Céleste fournie par l'utilisateur (D-41), détourée : écran de départ seulement.
- * En jeu, Céleste reste la marionnette dessinée par le code (D-29), inspirée de cette image.
+ * Illustrations de Céleste fournies par l'utilisateur (D-41, D-43), détourées, une par tenue :
+ * écran de départ seulement (celle de la partie sauvegardée). En jeu, Céleste reste la marionnette
+ * dessinée par le code (D-29), inspirée de ces images.
  */
-export const TITLE_IMAGE = 'art/celeste.png';
+export const TITLE_IMAGES: Readonly<Record<CelesteOutfit, string>> = {
+  pyjama: 'art/celeste.png',
+  dress: 'art/celeste-dress.png',
+};
 
 /** Palette d'une salle habillée ; le monde étrange en est une variante (§6.2). */
 export interface ArtPalette {

@@ -435,6 +435,33 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
 
 - Retour du téléphone : le chat était trop petit à côté des parents agrandis (D-37). Il est agrandi par `CAT_SCALE = 2` (même principe que `PARENT_SCALE`) : endormi, il occupe les deux tiers du tabouret de la chambre ; assis, sa tête arrive à celle de Céleste. PROVISOIRE, à régler sur téléphone.
 
+## D-43 — Croissance : première phase (§7, §16, §42 phase 7)
+
+- **Réponses de l'utilisateur** : même coiffure un peu plus longue ; nouvelle tenue d'après son illustration (robe rose à fleurs, sabots roses) ; « quelques mois » seulement ; pas d'iPhone prévu (la passe « sauvegarde iOS » n'est plus prioritaire).
+- **Phase déduite des drapeaux de l'histoire** (`growth.2`) : déjà sauvegardés, donc **aucune migration**. `src/config/growth.ts` décrit chaque phase :
+  - la hitbox ;
+  - des **facteurs** sur les paramètres de mouvement (les réglages en direct du debug restent valables) ;
+  - l'allongement du corps et des couettes ;
+  - la tenue.
+- **Phase 2 (PROVISOIRE)** :
+  - hitbox 12×26 au lieu de 12×22, toujours sous 2 tuiles : tous les couloirs restent praticables sans rien redessiner ;
+  - saut ×1,2 (4,2 tuiles) ;
+  - vitesse ×1,03 ;
+  - corps ×1,25 (la tête ne grandit pas) ;
+  - couettes ×1,3.
+  - Honnêtement, c'est un peu plus que « quelques mois » dans la réalité, mais c'est le minimum pour un vrai effet de jeu : se hisser sur un rebord de 6 tuiles, hors de portée en phase 1.
+- **Passage du temps** : après la visite de papa, Céleste se recouche.
+  - Le noir le plus long du jeu (4,2 s), puis un retour lent. Elle a grandi, et sa première pensée reste Maria (introuvable).
+  - Aucun texte (pilier 6). Le changement de taille a lieu dans le noir complet (vérifié par un test).
+- **Signes des mois passés** : une **toise** au mur de la chambre, avec un nouveau trait rose plus haut. En la regardant, elle devient le souvenir « la toise ». Les traits correspondent aux tailles de Céleste en phase 1 et 2.
+- **Raison de revenir** (pilier 2) : une **trouvaille sur une étagère haute du couloir**, au-dessus de la console, visible dès le début.
+  - Vérifié par les tests : hors d'atteinte en phase 1, même en grimpant et en difficile ; atteignable en phase 2, au plus moyenne.
+  - Rien de ce qui était atteignable en phase 1 ne se ferme en phase 2.
+- **Marionnette** : pièce « jupe » ajoutée (vide en pyjama) ; robe rose à fleurs avec col blanc, manches ballon, jambes nues et sabots roses.
+- **Écran de départ** : l'illustration correspond à la tenue de la partie sauvegardée (pyjama ou robe).
+- **Porte du jardin écartée pour l'instant** : sans le jardin, ce serait une porte qui ne mène nulle part. Elle viendra avec la zone suivante.
+- **Debug** : une étape d'histoire « quelques mois plus tard » et une case « Croissance : Céleste a grandi ».
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
