@@ -44,7 +44,20 @@ import {
 import { Hud } from '../ui/Hud';
 import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
 import { PauseMenu } from '../ui/PauseMenu';
-import { ART_IMAGES, MAX_ART_SCALE, REAL_PALETTE, STRANGE_PALETTE } from '../config/art';
+import {
+  ART_IMAGES,
+  DAY_PALETTE,
+  MAX_ART_SCALE,
+  REAL_PALETTE,
+  STRANGE_PALETTE,
+} from '../config/art';
+import { STORY_TIMING } from '../config/story';
+import { PropStage } from '../core/story/PropStage';
+import { StoryDirector } from '../core/story/StoryDirector';
+import type { TimeOfDay } from '../core/story/story';
+import { HOUSE_STORY } from '../levels/house/story';
+import type { Box } from '../core/physics/gridCollision';
+import { StoryView } from './StoryView';
 import { CombatView } from './CombatView';
 import { CelestePuppet } from './CelestePuppet';
 import { RoomArtView } from './RoomArtView';
@@ -176,6 +189,16 @@ export class GameScene extends Phaser.Scene {
     DEFAULT_MOVEMENT.maxRunSpeed,
   );
   private readonly levelImages: Phaser.GameObjects.Image[] = [];
+  /** Histoire (§33, D-31) : étapes vécues, scripts, objets de mise en scène. */
+  story!: StoryDirector;
+  readonly props = new PropStage();
+  private storyView!: StoryView;
+  /** Moment de la journée de la salle dessinée. */
+  private drawnTime: TimeOfDay = 'evening';
+  /** Vue de la caméra (px logiques), pour les objets de mise en scène (pilier 5). */
+  private readonly viewBox: Box = { x: 0, y: 0, width: 0, height: 0 };
+  /** Heure (ms) avant laquelle une porte fermée ne redonne pas de bulle. */
+  private lockedThoughtUntil = 0;
   private readonly playerInput: PlayerInput = {
     moveX: 0,
     moveY: 0,
@@ -196,6 +219,22 @@ export class GameScene extends Phaser.Scene {
 
   create(): void {
     this.session = this.registry.get(SESSION_KEY) as SaveSession;
+    this.story = new StoryDirector(HOUSE_STORY, {
+      flagSet: (id) => {
+        void this.session.addStoryFlag(id);
+      },
+      place: (col, row, facing) => {
+        this.placeCeleste(col, row, facing);
+      },
+      pose: (pose) => {
+        this.poser.sitting = pose === 'sit';
+      },
+      think: (icon, ms) => {
+        this.storyView.think(icon, ms);
+      },
+    });
+    this.story.setFlags(this.session.data.story.flags);
+    this.drawnTime = this.story.timeOfDay();
     this.roomArt = new RoomArtView(this);
     this.artScale = this.computeArtScale();
     const save = this.session.data;
@@ -218,6 +257,9 @@ export class GameScene extends Phaser.Scene {
     this.combatView.setArt(this.artScale, this.palette());
     this.worldView = new WorldView(this, this.run, this.pickups);
     this.worldView.setArtScale(this.artScale);
+    this.props.load(this.story.data.props, this.level.id, this.story.flags);
+    this.storyView = new StoryView(this, this.props, this.story);
+    this.storyView.setArt(this.artScale, this.artImages());
     this.hud = new Hud();
     this.applyMovement();
     this.applyAbilities();
@@ -327,7 +369,7 @@ export class GameScene extends Phaser.Scene {
     if (this.paused) {
       return;
     }
-    if (mapPressed) {
+    if (mapPressed && !this.story.locked) {
       this.openMap();
       return;
     }
@@ -364,12 +406,22 @@ export class GameScene extends Phaser.Scene {
         }
         continue;
       }
-      input.moveX = this.controls.moveX;
-      input.moveY = this.controls.moveY;
-      input.jumpPressed = this.controls.consumePressed('Jump');
-      input.jumpHeld = this.controls.isHeld('Jump');
+      // Histoire (D-31) : près de ce qu'on peut faire, Action devient Agir.
+      const story = this.story;
+      const near = story.interactable >= 0;
+      const interact = this.controls.consumePressed('Interact');
+      const action = this.controls.consumePressed('Attack');
+      story.step(this.level.id, this.player.box, interact || (near && action));
+      const locked = story.locked;
+      input.moveX = locked ? 0 : this.controls.moveX;
+      input.moveY = locked ? 0 : this.controls.moveY;
+      input.jumpPressed = this.controls.consumePressed('Jump') && !locked;
+      input.jumpHeld = this.controls.isHeld('Jump') && !locked;
+      if (this.poser.sitting && !locked && (input.moveX !== 0 || input.jumpPressed)) {
+        this.poser.sitting = false; // Céleste se relève dès qu'on la fait bouger.
+      }
       this.player.step(input);
-      combat.step(this.player, this.controls.consumePressed('Attack'));
+      combat.step(this.player, action && !near && !locked);
       if (combat.events !== 0) {
         this.combatView.onEvents(combat.events);
       }
@@ -389,7 +441,13 @@ export class GameScene extends Phaser.Scene {
       if (zone && (run.events & RunEvent.Fainted) === 0) {
         const exit = touchedExit(this.level, this.player.box);
         const target = exit !== 0 ? zone.destination(this.level.id, exit) : null;
-        if (target) {
+        if (target && story.exitsLocked(this.level.id)) {
+          // Ce n'est pas le moment de sortir (le soir) : une bulle le rappelle, sans texte.
+          if (this.time.now >= this.lockedThoughtUntil && !story.busy) {
+            this.storyView.think('bed', STORY_TIMING.thoughtMs);
+            this.lockedThoughtUntil = this.time.now + STORY_TIMING.lockedExitThoughtMs;
+          }
+        } else if (target) {
           transition.start(target, this.player.vx);
         }
       }
@@ -397,6 +455,7 @@ export class GameScene extends Phaser.Scene {
       camera.step(this.player);
       feel.step(this.player);
       this.stepPose();
+      this.stepStage();
       if (feel.events !== 0) {
         this.dust.emit(feel.events, this.player.box, this.player.facing);
       }
@@ -419,6 +478,7 @@ export class GameScene extends Phaser.Scene {
       this.poser.pose,
     );
     this.combatView.render(alpha, player, this.puppet);
+    this.storyView.render(this.puppet.x, this.puppet.y, box.height);
     this.worldView.render();
     this.renderRunState();
     this.dust.update();
@@ -570,7 +630,7 @@ export class GameScene extends Phaser.Scene {
       this.puppet.setAlpha(1 - progress);
       return;
     }
-    let veil = this.transition.veil;
+    let veil = Math.max(this.transition.veil, this.story.veil);
     if (this.reappearAtMs >= 0) {
       const duration = this.worldParams.reappearMs;
       const k = duration > 0 ? (this.time.now - this.reappearAtMs) / duration : 1;
@@ -598,6 +658,7 @@ export class GameScene extends Phaser.Scene {
    * modifiée, « La maison » ramène au point de retour de la partie.
    */
   loadLevel(source: LevelSource): void {
+    this.story.cancel();
     this.setRoom(parseAsciiLevel(source.id, source.text), null, null);
     this.respawn();
   }
@@ -618,6 +679,7 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     const { checkpointId, levelId } = this.session.data.checkpoint;
+    this.story.cancel();
     this.setRoom(room.level, room.zone, levelId === id ? checkpointId : null);
     const { spawn } = room.level;
     this.player.reset(
@@ -676,6 +738,10 @@ export class GameScene extends Phaser.Scene {
     const { abilities, collectibles } = this.session.data.progression;
     this.pickups.load(level, abilities, collectibles);
     this.worldView.rebuild();
+    this.props.load(this.story.data.props, level.id, this.story.flags);
+    this.storyView.rebuild();
+    this.storyView.clearThought();
+    this.poser.sitting = false;
   }
 
   /** Capacités acquises (sauvegarde) ou débloquées par l'overlay, appliquées à Céleste. */
@@ -742,7 +808,9 @@ export class GameScene extends Phaser.Scene {
 
   /** Redessine la salle et Céleste (échelle ou palette changée). */
   private redrawArt(): void {
+    this.drawnTime = this.story.timeOfDay();
     this.worldView.setArtScale(this.artScale);
+    this.storyView.setArt(this.artScale, this.artImages());
     this.combatView.setArt(this.artScale, this.palette());
     this.drawLevel();
     this.puppet.redraw(this.artScale, this.palette(), this.artImages());
@@ -781,8 +849,7 @@ export class GameScene extends Phaser.Scene {
     this.levelImages.length = 0;
     const level = this.level;
     // Salle habillée (D-28) : dessinée par l'habillage, pas tuile par tuile.
-    const palette = this.strangeWorld ? STRANGE_PALETTE : REAL_PALETTE;
-    if (this.roomArt.build(level, palette, this.artScale, this.artImages())) {
+    if (this.roomArt.build(level, this.palette(), this.artScale, this.artImages())) {
       return;
     }
     const chunkPx = LEVEL_CHUNK_TILES * TILE_SIZE;
@@ -907,8 +974,54 @@ export class GameScene extends Phaser.Scene {
     this.poser.setParams(this.puppetParams, this.movement.maxRunSpeed);
   }
 
-  /** Palette courante : maison réelle ou monde étrange (D-28). */
+  /** Palette courante : monde étrange (D-28), ou maison le soir ou le matin (D-31). */
   private palette() {
-    return this.strangeWorld ? STRANGE_PALETTE : REAL_PALETTE;
+    if (this.strangeWorld) {
+      return STRANGE_PALETTE;
+    }
+    return this.story.timeOfDay() === 'morning' ? DAY_PALETTE : REAL_PALETTE;
+  }
+
+  /**
+   * Objets de mise en scène (pilier 5) : un changement n'est appliqué que hors de la vue ou dans
+   * le noir ; le moment de la journée change dans le noir (la salle est redessinée).
+   */
+  private stepStage(): void {
+    const camera = this.camera;
+    const view = this.viewBox;
+    view.width = camera.viewWidth;
+    view.height = camera.viewHeight;
+    view.x = camera.x - view.width / 2;
+    view.y = camera.y - view.height / 2;
+    const story = this.story;
+    const veil = Math.max(story.veil, this.transition.veil);
+    if (this.props.update(story.flags, view, veil)) {
+      this.storyView.refresh();
+    }
+    if (veil >= 1 && story.timeOfDay() !== this.drawnTime) {
+      this.redrawArt();
+    }
+    this.touch?.setLabel('Attack', story.interactable >= 0 && !story.busy ? 'Agir' : null);
+  }
+
+  /** Céleste placée debout sur une tuile par l'histoire (dans le noir d'un fondu). */
+  private placeCeleste(col: number, row: number, facing: 1 | -1): void {
+    this.player.reset(
+      (col + 0.5) * TILE_SIZE - PLAYER_HITBOX.width / 2,
+      (row + 1) * TILE_SIZE - PLAYER_HITBOX.height,
+      this.level,
+    );
+    this.player.facing = facing;
+    this.feel.reset(this.player);
+    this.poser.reset();
+    this.resetCamera();
+  }
+
+  /** Outil de debug : étapes de l'histoire remplacées (sans sauvegarde), salle redessinée. */
+  setStoryFlags(flags: readonly string[]): void {
+    this.story.setFlags(flags);
+    this.props.load(this.story.data.props, this.level.id, this.story.flags);
+    this.poser.sitting = false;
+    this.redrawArt();
   }
 }

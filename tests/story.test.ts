@@ -281,6 +281,6 @@ describe('histoire de la maison (D-31)', () => {
     };
     // Du lit à Maria (sur le tapis), puis du berceau (où Céleste se retrouve) au lit.
     expect(reach(at(12, 15)).has(at(19, 19))).toBe(true);
-    expect(reach(at(44, 19)).has(at(12, 15))).toBe(true);
+    expect(reach(at(25, 17)).has(at(12, 15))).toBe(true);
   });
 });

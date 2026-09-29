@@ -601,7 +601,7 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     ctx.arc(r.x + r.w * 0.72, r.y + r.h * 0.3, 9, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < (p.stars ? 12 : 0); i++) {
       ctx.fillRect(r.x + ((i * 37) % r.w), r.y + ((i * 23) % (r.h - 6)) + 3, 1, 1);
     }
     if (p.silhouettes) {
@@ -954,10 +954,16 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
     ctx.fillRect(x - radius, y - radius, 2 * radius, 2 * radius);
   };
   for (const lamp of lamps) {
-    glow((lamp.col + 0.5) * T, (lamp.row + 0.5) * T, LAMP_LIGHT_RADIUS * 0.8, p.lamp, 0.28);
+    glow(
+      (lamp.col + 0.5) * T,
+      (lamp.row + 0.5) * T,
+      LAMP_LIGHT_RADIUS * 0.8,
+      p.lamp,
+      0.28 * p.glow,
+    );
   }
   for (const light of lights) {
-    glow(light.x + light.w / 2, light.y + 4, LAMP_LIGHT_RADIUS * 0.6, p.lamp, 0.22);
+    glow(light.x + light.w / 2, light.y + 4, LAMP_LIGHT_RADIUS * 0.6, p.lamp, 0.22 * p.glow);
   }
   for (const exit of level.exits.filter(
     (e) => e.side === 'left' && e.rowMax < floorRow(level) - 4,

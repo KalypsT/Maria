@@ -258,6 +258,30 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
   - lecture de la sauvegarde existante (`mapRevealed`, checkpoints, trouvailles), sans migration.
 - **Vérifié** : modèle pur testé ; test de disposition (un mur droit mène à la salle de droite).
 
+## D-31 — Histoire pilotée par des données, prologue du soir, sauvegarde v2
+
+- **Système d'événements (§33)**, pur et testé (`src/core/story/`) :
+  - **déclencheurs** Agir ou contact, dans une zone de la salle, sous condition d'étapes vécues (drapeaux) ;
+  - **scripts courts** : fondus, attente, bulle de pensée, étape notée (sauvegardée aussitôt), Céleste placée, pose assise ;
+  - **objets de mise en scène** qui dépendent des étapes ; **moment de la journée** (soir, matin) ; **portes fermées**.
+
+  L'histoire d'une zone tient dans un fichier de données (`src/levels/house/story.ts`). Un test vérifie sa cohérence : chaque déclencheur se désactive lui-même, Céleste n'est déplacée que dans le noir, les objets reposent sur une surface.
+
+- **Pilier 5, garanti par le code** : un objet de mise en scène (Maria comprise) n'apparaît ou ne disparaît que **hors de la vue ou dans le noir complet** d'un fondu (`canChangeProp`, testé). Maria ne change de place que pendant un fondu : Céleste la « porte » hors de l'écran.
+- **Prologue (validé)**, PLACEHOLDER :
+  1. le soir, Maria est assise sur le tapis ; Agir : Céleste joue avec elle (assise, bulle cœur) ;
+  2. Agir de nouveau : Céleste la couche dans le berceau (sur le coffre à jouets) ;
+  3. Agir sur le lit : la nuit passe ; au matin, le berceau est vide et défait, bulle « Maria ? » ;
+  4. des traces (chausson dans le couloir, biberon dans l'escalier) donnent une bulle avec le visage de Maria.
+
+  Le soir, les portes de la chambre sont fermées (bulle « au lit » à la porte). Écart assumé avec le plan : on couche Maria en agissant **sur Maria**, pas sur le berceau, sinon elle semblerait s'y téléporter.
+
+- **Commandes** : pas de nouveau bouton. Près de ce qu'on peut faire, une étincelle apparaît et le bouton Action devient **« Agir »** (clavier : E, ou la touche d'Action).
+- **Aucun texte** : bulles de pensée à pictogrammes seulement (cœur, berceau, lit, visage de Maria, « ? »).
+- **Palette du matin** (première version de la palette jour) : murs clairs, ciel d'aube, obscurité presque levée, halos atténués. Le soir garde la palette de nuit.
+- **Maria** : image fournie par l'utilisateur, détourée (`public/art/maria.png`, clé `maria`) ; la tête sert aussi dans le berceau et les bulles. Repli : un poupon dessiné par le code. À juger sur téléphone (décalage de style possible avec le papier découpé) ; si besoin, version simplifiée dessinée d'après l'image.
+- **Sauvegarde v2 (signalée, pilier 10)** : nouveau champ `story.flags`. Migration v1 → v2 à la lecture (sauvegarde et code) : une partie commencée avant l'histoire reçoit le **prologue comme vécu** (pas de retour au coucher). Testé : ancienne sauvegarde, ancien code, schéma.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

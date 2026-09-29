@@ -57,6 +57,9 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
     }
     ids.add(t.id);
     inRoom(t.room, t.area, what);
+    if (t.on === 'interact' && !t.mark) {
+      problems.push(`${what} : sans repère (étincelle)`);
+    }
     knownFlags(t.when, what);
     const selfDisabling = t.steps.some(
       (step) => step.do === 'flag' && (t.when.none ?? []).includes(step.id),

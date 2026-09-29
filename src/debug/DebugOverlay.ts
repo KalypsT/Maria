@@ -1,3 +1,4 @@
+import { StoryFlag } from '../config/story';
 import Phaser from 'phaser';
 import { CAMERA_PARAM_RANGES, DEFAULT_CAMERA, type CameraParams } from '../config/camera';
 import { COMBAT_PARAM_RANGES, DEFAULT_COMBAT, type CombatParams } from '../config/combat';
@@ -229,6 +230,31 @@ export function installDebugOverlay(scene: GameScene): void {
   // Aperçu du monde étrange (D-28) : mêmes formes, autre palette et lumière.
   addCheck(panel, 'Monde étrange (aperçu)', scene.strangeWorld, (checked) => {
     scene.setStrangeWorld(checked);
+  });
+  // Étape de l'histoire (D-31) : pour la partie en cours seulement, sans sauvegarde.
+  const storySelect = element('select', panel);
+  const F = StoryFlag;
+  const steps: [string, string[]][] = [
+    ['Histoire : le soir (début)', []],
+    ['Histoire : a joué avec Maria', [F.EveningPlayed]],
+    ['Histoire : Maria couchée', [F.EveningPlayed, F.EveningTucked]],
+    ['Histoire : le matin', [F.EveningPlayed, F.EveningTucked, F.Slept]],
+    [
+      'Histoire : traces vues',
+      [F.EveningPlayed, F.EveningTucked, F.Slept, F.TraceHall, F.TraceStairs],
+    ],
+  ];
+  const current = [...scene.story.flags].sort().join();
+  for (const [label, flags] of steps) {
+    const option = element('option', storySelect, undefined, label);
+    option.value = flags.join();
+    if ([...flags].sort().join() === current) {
+      storySelect.value = option.value;
+    }
+  }
+  storySelect.addEventListener('change', () => {
+    scene.setStoryFlags(storySelect.value ? storySelect.value.split(',') : []);
+    storySelect.blur();
   });
   // Déblocage des capacités (D-26) : pour la partie en cours seulement, sans sauvegarde.
   addCheck(panel, 'Capacité : grimper aux rebords', scene.debugClimb, (checked) => {

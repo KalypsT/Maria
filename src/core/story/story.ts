@@ -47,6 +47,8 @@ export interface StoryTrigger {
   /** `interact` : bouton Agir dans la zone ; `touch` : Céleste entre dans la zone. */
   readonly on: 'interact' | 'touch';
   readonly area: TileArea;
+  /** Tuile où une petite étincelle signale ce qu'on peut faire (déclencheur Agir). */
+  readonly mark?: { readonly col: number; readonly row: number };
   readonly when: FlagCondition;
   /** Commandes de Céleste suspendues pendant le script. */
   readonly lock: boolean;
