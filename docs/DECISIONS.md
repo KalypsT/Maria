@@ -530,6 +530,18 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
 - **Tests** : le graphe de zone suit les passages de l'histoire selon la phase (maison en phase 1, jardin en phase 2) et n'ouvre la haie qu'avec le saut mural.
 - **Limite** : l'analyse ignore l'escargot, qui se trouve justement sur une paroi de cheminée.
 
+## D-50 — Retours du téléphone : bulles, parents du jardin, graphisme du jardin
+
+- **Bulles** : `THOUGHT_SCALE` 1,9 (au lieu de 1,6), nuage ×1,2, pictogramme ×1,3 dans le nuage. Même taille pour Céleste et les parents.
+- **Parents au jardin** (retour de l'utilisateur : varier le « ? ») : maman répond par une **loupe** (« cherche bien »), papa par la **cabane dans l'arbre**, un indice sans texte (pilier 6) ; puis un cœur. Les parents de la maison gardent « ? » puis cœur.
+- **Cohérence** (rien ne flotte dans le monde réel) :
+  - grand arbre : le vieux mur descend jusqu'à un portail de 3 tuiles (linteau, passage dans l'ombre) ; l'analyse est inchangée (vieux mur toujours réservé au saut mural, testé) ;
+  - potager : chaque planche tient sur deux perches croisées plantées dans le sol ou dans un bac ;
+  - allée : la haie continue derrière le passage, en tunnel ;
+  - plancher de la cabane : jambes de force.
+    Le monde étrange garde ses éléments suspendus (lueur dessous, D-34).
+- **Dessins plus riches**, toujours par le code et exactement sur la collision : feuillage en volumes, écorce ombrée, bacs de légumes, glycine, nappe, clôture, pierres irrégulières, façade ; ciel à deux plans de collines et arbres lointains.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

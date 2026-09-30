@@ -11,6 +11,7 @@
 ; @decor: hedge 55 13 1 11
 ; @decor: oldwall 34 13 21 11
 ; @decor: hedge 34 1 2 10
+; @decor: hedgetunnel 34 11 2 2
 ; @decor: shed 18 5 12 19
 ; @decor: fence 1 9 12 15
 ; @decor: sun 6 2 3 3

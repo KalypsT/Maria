@@ -8,6 +8,20 @@ Prochaine : à décider (zone suivante : le quartier, §26 ; ou passe de réglag
 
 ## Fait
 
+### Retours du téléphone : bulles, parents, graphisme du jardin (D-50)
+
+- **Bulles plus grandes** : ×1,9 au lieu de ×1,6, nuage un peu plus large, pictogrammes agrandis de 30 % dans la bulle (environ +55 % à l'écran).
+- **Parents au jardin** : maman répond par une loupe (« cherche bien »), papa par la cabane dans l'arbre (un indice), puis un cœur.
+- **Jardin retravaillé** :
+  - plus rien ne flotte : le vieux mur du grand arbre descend jusqu'à un portail en pierre avec linteau ; les planches du potager tiennent sur des perches croisées plantées dans le sol ou les bacs ; la haie de l'allée continue en tunnel derrière le passage ; le plancher de la cabane a des jambes de force ;
+  - dessins plus riches : feuillage en volumes et festons, buissons fleuris, tronc ombré avec nœuds et mousse, branches qui s'amincissent, bacs de légumes (choux, carottes, salades), pergola et glycine, nappe à carreaux, pots fleuris, remise (porte, fenêtre, jardinière), clôture à lattes et lierre, vieux mur en pierres irrégulières, façade de la maison (volets, jardinière) ;
+  - ciel : nuages en coussins, deux plans de collines, arbres lointains ; herbe en touffes avec quelques fleurs.
+
+### À vérifier sur téléphone (retours D-50)
+
+- [ ] Les bulles : assez grandes maintenant, pas trop ?
+- [ ] Le jardin : plus joli, cohérent ? Quelque chose flotte-t-il encore ?
+
 ### Retour du téléphone (jardin)
 
 - Le fil à linge de la terrasse était trop haut pour la main de maman : descendu de 3 tuiles, la chaussette qu'elle tient est maintenant sur le fil.
