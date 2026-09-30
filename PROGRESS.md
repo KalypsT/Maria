@@ -8,9 +8,23 @@
 
 **Musique** (D-57) : lecteur en place, en attente des morceaux.
 
-Prochaine : intégrer les morceaux dès qu'ils sont prêts ; zone suivante (le quartier, §26) ou passe de réglage d'après les essais.
+**Le quartier** (D-60) : le portillon et la rue en place ; les quatre lieux (aire de jeux, école, supérette, chantier) attendent l'histoire.
+
+Prochaine : le premier lieu du quartier (quand l'histoire est prête) ; intégrer les morceaux de musique.
 
 ## Fait
+
+### La sortie du jardin : le portillon et la rue (D-60)
+
+- **Le portillon**, au bout d'un passage sous le vieux mur de l'allée (au fond de la cheminée). Il s'ouvre en tirant la **chevillette**, pendue haut dans la cheminée (saut mural), après le bonnet. Papa, au potager, montre le portillon.
+- **La rue** : un grand niveau en long (200 tuiles, de jour). Trottoir facile, étage du dessus plus difficile (rebords, corniche, store, lampadaires, échafaudage), deux trouvailles moyennes, deux lanternes. Quatre portes fermées pour l'instant (bulle « ? ») : aire de jeux, école, supérette, chantier.
+- **Carte** : nouvelle page « Mon quartier » dans le cahier.
+- **Moteur** : les salles ne dessinent plus que les morceaux proches de la caméra (mémoire et temps de chargement maîtrisés, même pour la rue).
+- Tests : 435. Vérifié dans Chromium : portillon fermé (on bute), chevillette et ficelle, passage vers la rue et retour, la rue d'un bout à l'autre, toits, page du cahier, salon inchangé.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « le bonnet trouvé ») : la chevillette se voit-elle, et comprend-on qu'il faut la tirer ? L'atteindre en saut mural : juste assez difficile ?
+- [ ] La rue : agréable à parcourir, pas trop longue ? L'étage du dessus donne-t-il envie ? Les deux trouvailles (école, échafaudage) : moyennes ?
+- [ ] Changement de salle vers la rue : le noir ne dure pas trop ; pas d'accroc en courant (blocs dessinés à la volée) ; nombre de « blocs » dans les INFOS.
+- [ ] Les façades (maisons, école, supérette, chantier) : lisibles, pas trop chargées ?
 
 ### Menu pause allégé, mode debug depuis le menu (D-59)
 

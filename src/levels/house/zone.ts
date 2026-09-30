@@ -15,6 +15,7 @@ import living from './living.txt?raw';
 import livingStrange from './living-strange.txt?raw';
 import shadows from './shadows.txt?raw';
 import staircase from './staircase.txt?raw';
+import street from '../street/street.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -26,6 +27,10 @@ import staircase from './staircase.txt?raw';
  * Le jardin (D-46), derrière la porte de la buanderie (buanderie:3, fermée tant que Céleste n'a
  * pas grandi) : terrasse, potager, grand arbre et sa cabane, puis l'allée des toits, qui ramène du
  * haut du vieux mur à la terrasse (saut mural).
+ *
+ * Le quartier (D-60) : par le portillon au bout de l'allée (allée:3, fermé tant que la chevillette
+ * n'est pas tirée), la rue, un grand niveau en long. Même zone (une seule histoire, une seule
+ * analyse), mais une autre page du cahier (« Mon quartier »).
  */
 export const HOUSE: ZoneSource = {
   id: 'house',
@@ -50,6 +55,8 @@ export const HOUSE: ZoneSource = {
     // Derrière la haie (D-49) : le monde étrange du jardin, par l'histoire (le trou de la haie).
     { id: 'garden-upside', text: gardenUpside },
     { id: 'garden-thorns', text: gardenThorns },
+    // Le quartier (D-60).
+    { id: 'street', text: street },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -68,6 +75,7 @@ export const HOUSE: ZoneSource = {
     ['garden-alley:2', 'garden-tree:3'],
     ['garden-terrace:3', 'garden-alley:1'],
     ['garden-upside:1', 'garden-thorns:1'],
+    ['garden-alley:3', 'street:1'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur
@@ -87,5 +95,7 @@ export const HOUSE: ZoneSource = {
     'garden-tree': { x: 25.0, y: 2.1, w: 2.4, h: 4.6 },
     'garden-treehouse': { x: 27.8, y: 2.1, w: 1.6, h: 0.9 },
     'garden-alley': { x: 18.9, y: 2.9, w: 5.8, h: 1.4 },
+    // Mon quartier : la rue en long (D-60).
+    street: { x: 0, y: 0, w: 16, h: 2.4, page: 'street' },
   },
 };

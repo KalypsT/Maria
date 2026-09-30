@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { TILE_SIZE as T } from '../src/config/display';
 import { buildMapModel, mapProblems, type MapProgress } from '../src/core/world/mapModel';
-import { buildZone, isStrangeRoom } from '../src/core/world/zone';
+import { buildZone, isStrangeRoom, mapPage } from '../src/core/world/zone';
 import { HOUSE } from '../src/levels/house/zone';
 
 const zone = buildZone(HOUSE);
@@ -29,7 +29,12 @@ describe('carte dessinée par Céleste (§24)', () => {
           : [b, a];
       const far = new Set(['hall:3', 'attic:2']);
       // Le monde étrange n'est pas sur la carte (D-34).
-      if (far.has(`${left.room}:${String(left.exit)}`) || !zone.map[left.room]) {
+      // Le monde étrange n'est pas sur la carte (D-34) ; le quartier est sur une autre page (D-60).
+      if (
+        far.has(`${left.room}:${String(left.exit)}`) ||
+        !zone.map[left.room] ||
+        mapPage(zone, left.room) !== mapPage(zone, right.room)
+      ) {
         continue;
       }
       const leftBox = zone.map[left.room];

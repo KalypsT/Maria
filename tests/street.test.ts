@@ -1,0 +1,174 @@
+import { describe, expect, it } from 'vitest';
+import { phaseMovement } from '../src/config/growth';
+import { DEFAULT_MOVEMENT } from '../src/config/movement';
+import { StoryFlag } from '../src/config/story';
+import { TILE_SIZE as T } from '../src/config/display';
+import { EntityType } from '../src/core/level/LevelData';
+import { isStreetRoom, mapPage } from '../src/core/world/zone';
+import { HOUSE_STORY } from '../src/levels/house/story';
+import { StoryDirector } from '../src/core/story/StoryDirector';
+import {
+  analysis,
+  byDifficulty,
+  exitSurface,
+  level,
+  node,
+  nodeAt,
+  phase,
+  reachable,
+  roomDifficulty,
+  roomOf,
+  surfaceAt,
+  where,
+  zone,
+  zoneGraph,
+  type Node,
+} from './zoneGraph';
+
+const TIMEOUT = 300_000;
+const F = StoryFlag;
+const easy = byDifficulty('easy');
+const medium = byDifficulty('medium');
+const OPEN = [F.GateOpen];
+/** Arrivée dans la rue par le portillon. */
+const arrival = () => node('street', exitSurface('street', 1));
+const home = () => node(zone.start, analysis(zone.start, false).start);
+const trigger = (id: string) => {
+  const t = HOUSE_STORY.triggers.find((candidate) => candidate.id === id);
+  if (!t) {
+    throw new Error(`déclencheur ${id} absent`);
+  }
+  return t;
+};
+
+describe('la rue (D-60)', () => {
+  it('une seule salle en long, dehors, sur sa propre page du cahier', () => {
+    const street = level('street');
+    expect(isStreetRoom(street)).toBe(true);
+    expect(street.width).toBeGreaterThanOrEqual(180);
+    expect(mapPage(zone, 'street')).toBe('street');
+    expect(mapPage(zone, 'garden-alley')).toBe('house');
+    expect(zone.destination('garden-alley', 3)).toEqual({ room: 'street', exit: 1 });
+    expect(street.entities.filter((e) => e.type === EntityType.Checkpoint)).toHaveLength(2);
+  });
+
+  it(
+    'le portillon ferme la rue tant que la chevillette n’est pas tirée',
+    { timeout: TIMEOUT },
+    () => {
+      const closed = reachable(zoneGraph(true, null, 2, true), home());
+      expect([...closed].filter((n) => roomOf(n) === 'street')).toEqual([]);
+      const open = reachable(zoneGraph(true, medium, 2, true, OPEN), home());
+      expect(open.has(arrival())).toBe(true);
+      const lock = HOUSE_STORY.lockedRooms.find((l) => l.room === 'garden-alley');
+      expect(lock?.exit).toBe(3);
+      expect(lock?.when.none).toContain(F.GateOpen);
+    },
+  );
+
+  it('la chevillette : après le bonnet, trop haute pour être atteinte depuis le sol', () => {
+    const cord = trigger('gate-cord');
+    expect(cord.when.all).toContain(F.HedgeDone);
+    const area = cord.area;
+    if (!area) {
+      throw new Error('chevillette sans zone');
+    }
+    // Du fond de la cheminée (le sol du passage), même en sautant le plus haut possible, la tête
+    // de Céleste n'atteint pas la zone : il faut le saut mural.
+    const grown = phase(2);
+    const jump = phaseMovement(DEFAULT_MOVEMENT, grown).jumpHeightTiles * T;
+    const floorY = 24 * T;
+    const headTop = floorY - grown.hitbox.height - jump;
+    expect(headTop).toBeGreaterThan((area.row + area.h) * T);
+    expect(surfaceAt('garden-alley', 32, 23)).toBeGreaterThanOrEqual(0);
+  });
+
+  it('tirer la chevillette ouvre le portillon ; rien à tirer avant le bonnet', () => {
+    const noop = () => undefined;
+    const director = (flags: readonly string[]) => {
+      const d = new StoryDirector(
+        HOUSE_STORY,
+        {
+          flagSet: noop,
+          place: noop,
+          room: noop,
+          pose: noop,
+          think: noop,
+          sparkle: noop,
+          shake: noop,
+          memory: noop,
+          hush: noop,
+        },
+        100,
+      );
+      d.setFlags(flags);
+      return d;
+    };
+    // Céleste en l'air dans la cheminée, à hauteur de la chevillette (saut mural).
+    const inPit = { x: 32 * T, y: 15.5 * T, width: 12, height: 26 };
+    const pull = (d: StoryDirector) => {
+      d.step('garden-alley', inPit, true);
+      for (let i = 0; i < 2000 && d.busy; i++) {
+        d.step('garden-alley', inPit, false);
+      }
+    };
+    const before = director([F.Grown]);
+    expect(before.exitsLocked('garden-alley', 3)).toBe(true);
+    expect(before.lockIcon('garden-alley', 3)).toBe('gate');
+    pull(before);
+    expect(before.flags.has(F.GateOpen), 'avant le bonnet').toBe(false);
+    const after = director([F.Grown, F.HedgeDone]);
+    pull(after);
+    expect(after.flags.has(F.GateOpen)).toBe(true);
+    expect(after.exitsLocked('garden-alley', 3)).toBe(false);
+  });
+
+  it('papa montre le portillon après le bonnet ; ouvert, il reste ouvert', () => {
+    const dad = trigger('garden-dad-gate');
+    expect(dad.when.all).toContain(F.HedgeDone);
+    expect(dad.steps.some((s) => s.do === 'thought' && s.icon === 'gate')).toBe(true);
+    const gate = HOUSE_STORY.props.find((p) => p.id === 'gate');
+    const open = HOUSE_STORY.props.find((p) => p.id === 'gate-open');
+    expect(gate?.when.none).toContain(F.GateOpen);
+    expect(open?.when.all).toContain(F.GateOpen);
+  });
+
+  it(
+    'le trottoir se parcourt facilement jusqu’au bout, et aux quatre portes',
+    { timeout: TIMEOUT },
+    () => {
+      const seen = reachable(zoneGraph(true, easy, 2, true, OPEN), arrival());
+      expect(seen.has(nodeAt('street', 197, 27)), 'bout de la rue').toBe(true);
+      for (const id of ['street-playground', 'street-school', 'street-shop', 'street-site']) {
+        const area = trigger(id).area;
+        if (!area) {
+          throw new Error(`${id} sans zone`);
+        }
+        expect(seen.has(nodeAt('street', area.col + 2, 27)), id).toBe(true);
+      }
+    },
+  );
+
+  it(
+    'les trouvailles, sur les toits et l’échafaudage : jamais faciles, au plus moyennes',
+    { timeout: TIMEOUT },
+    () => {
+      const secrets = level('street').entities.filter((e) => e.type === EntityType.Secret);
+      expect(secrets).toHaveLength(2);
+      const byEasy = reachable(zoneGraph(true, easy, 2, true, OPEN), arrival());
+      const byMedium = reachable(zoneGraph(true, medium, 2, true, OPEN), arrival());
+      for (const s of secrets) {
+        const at = nodeAt('street', s.col, s.row);
+        expect(byEasy.has(at), `trop facile (${String(s.col)})`).toBe(false);
+        expect(byMedium.has(at), `trop difficile (${String(s.col)})`).toBe(true);
+      }
+    },
+  );
+
+  it('ne coince jamais Céleste : la maison reste atteignable', { timeout: TIMEOUT }, () => {
+    const safe = zoneGraph(true, roomDifficulty, 2, true, OPEN);
+    const all = reachable(zoneGraph(true, null, 2, true, OPEN), arrival());
+    const stuck = [...all].filter((n: Node) => !reachable(safe, n).has(home()));
+    expect(where(stuck, true), 'surfaces sans retour possible').toEqual([]);
+  });
+});

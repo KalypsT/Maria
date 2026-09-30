@@ -18,6 +18,8 @@ export const MUSIC_TRACKS = [
   'strange',
   /** Derrière la haie (le monde étrange, dehors). */
   'hedge',
+  /** La rue du quartier (D-60). */
+  'street',
 ] as const;
 export type MusicTrack = (typeof MUSIC_TRACKS)[number];
 

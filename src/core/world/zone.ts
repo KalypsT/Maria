@@ -31,6 +31,17 @@ export interface MapBox {
   readonly y: number;
   readonly w: number;
   readonly h: number;
+  /**
+   * Page du cahier où la salle est dessinée (D-60) : « Ma maison », « Mon quartier »… Absente :
+   * la page de la zone (son identifiant).
+   */
+  readonly page?: string;
+}
+
+/** Page de carte d'une salle (null : absente de la carte). */
+export function mapPage(zone: Zone, room: string): string | null {
+  const box = zone.map[room];
+  return box ? (box.page ?? zone.id) : null;
 }
 
 export interface ExitRef {
@@ -137,6 +148,11 @@ export function buildZone(source: ZoneSource): Zone {
  */
 export function isStrangeRoom(level: LevelData): boolean {
   return level.meta.world === 'strange';
+}
+
+/** La rue et le quartier (D-60) : dehors, de jour (`; @world: street`). */
+export function isStreetRoom(level: LevelData): boolean {
+  return level.meta.world === 'street';
 }
 
 /** Salle du jardin (D-46) : dehors, de jour (`; @world: garden`), sur la carte. */

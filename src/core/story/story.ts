@@ -52,6 +52,8 @@ export const THOUGHT_ICONS = [
   'hedge',
   /** Maman (papa la montre après le monde étrange, D-58). */
   'mom',
+  /** Le portillon du jardin (fermé, ou montré par papa, D-60). */
+  'gate',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
@@ -161,18 +163,26 @@ export const PROP_KINDS = [
   /** Toise au mur de la chambre (D-43) ; un trait de plus quand Céleste a grandi. */
   'height-chart',
   'height-chart-grown',
-  /** Le bonnet de Maria (D-49) : au bout de la ronce, puis sur une branche du grand arbre. */
+  /** Le bonnet de Maria (D-49) : au bout de la ronce, puis dans l'herbe au pied du grand arbre. */
   'bonnet',
+  /** Le portillon au bout de l'allée (D-60), fermé puis ouvert. */
+  'gate',
+  'gate-open',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 
 /** Objets animés en boucle (deux images), sans être des personnages. */
 export const LOOP_OBJECT_KINDS: ReadonlySet<PropKind> = new Set<PropKind>(['music-box', 'plant']);
 
-/** Fixés au mur (la toise, D-43) : aussi hauts que Céleste, sans rien cacher. */
+/**
+ * Fixés au mur (la toise, D-43) ou faisant partie du mur (le portillon, D-60) : plus hauts que
+ * Céleste, sans rien cacher.
+ */
 export const WALL_PROP_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'height-chart',
   'height-chart-grown',
+  'gate',
+  'gate-open',
 ]);
 
 /** Personnages : grands (les adultes), animés en boucle, ils peuvent avoir une bulle. */

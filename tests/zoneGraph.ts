@@ -134,6 +134,8 @@ export function zoneGraph(
   rule: WindowRule,
   growth = 1,
   wallJump = false,
+  /** Étapes vécues qui ouvrent des portes fermées (le portillon, D-60). */
+  flags: readonly string[] = [],
 ): Map<Node, Set<Node>> {
   const graph = new Map<Node, Set<Node>>();
   const edge = (from: Node, to: Node) => {
@@ -142,7 +144,7 @@ export function zoneGraph(
     graph.set(from, set);
   };
   // Portes fermées selon la phase de croissance (la porte de derrière, D-46), dans les deux sens.
-  const phaseFlags = new Set<string>(growth >= 2 ? [StoryFlag.Grown] : []);
+  const phaseFlags = new Set<string>([...flags, ...(growth >= 2 ? [StoryFlag.Grown] : [])]);
   const closed = new Set<string>();
   for (const lock of HOUSE_STORY.lockedRooms) {
     if (lock.exit !== undefined && checkCondition(phaseFlags, lock.when)) {

@@ -16,6 +16,7 @@ import {
 } from '../../core/level/LevelData';
 import { floatingDecor } from '../../core/level/decor';
 import { gardenDrawers } from './gardenArt';
+import { streetDrawers } from './streetArt';
 import { drawMemory } from './memoryArt';
 
 /**
@@ -30,6 +31,24 @@ export interface ArtContext {
   readonly palette: Readonly<ArtPalette>;
   /** Images fournies (nom d'élément → image) qui remplacent le dessin par code. */
   readonly images: ReadonlyMap<string, CanvasImageSource>;
+  /**
+   * Bloc en cours de dessin (px logiques, D-60) : les éléments de décor loin de lui sont sautés.
+   * Absent : toute la salle.
+   */
+  readonly clip?: Rect;
+}
+
+/** Débord possible d'un élément de décor hors de ses tuiles (ombres, feuillage, halos). */
+const DECOR_OVERHANG = 4 * T;
+
+function decorVisible(r: Rect, clip: Rect | undefined): boolean {
+  return (
+    !clip ||
+    (r.x < clip.x + clip.w + DECOR_OVERHANG &&
+      r.x + r.w > clip.x - DECOR_OVERHANG &&
+      r.y < clip.y + clip.h + DECOR_OVERHANG &&
+      r.y + r.h > clip.y - DECOR_OVERHANG)
+  );
 }
 
 export type Rect = { x: number; y: number; w: number; h: number };
@@ -148,6 +167,7 @@ const fabric = (a: ArtContext, r: Rect) => {
 
 const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
   ...gardenDrawers({ tileShape, rounded }),
+  ...streetDrawers({ tileShape, rounded }),
   console(a, r) {
     wood(a, r);
     if (!a.palette.silhouettes) {
@@ -1149,6 +1169,9 @@ export function drawRoomBackground(a: ArtContext): void {
         continue;
       }
       const r = rect(d);
+      if (!decorVisible(r, a.clip)) {
+        continue;
+      }
       const image = images.get(d.kind);
       if (image) {
         ctx.drawImage(image, r.x, r.y, r.w, r.h);
@@ -1301,7 +1324,21 @@ function drawStructure(a: ArtContext, floorY: number): void {
       }
       const x = col * T;
       const y = row * T;
-      if (y >= floorY && p.outdoor) {
+      if (y >= floorY && p.paved) {
+        // Trottoir (D-60) : dalles grises, joints, bordure claire en haut.
+        ctx.fillStyle = p.floor;
+        ctx.fillRect(x, y, T, T);
+        ctx.fillStyle = 'rgba(0,0,0,0.12)';
+        if (col % 2 === 0) {
+          ctx.fillRect(x, y, 1, T);
+        }
+        if (y === floorY) {
+          ctx.fillStyle = p.floorEdge;
+          ctx.fillRect(x, y, T, 4);
+          ctx.fillStyle = 'rgba(0,0,0,0.15)';
+          ctx.fillRect(x, y + 4, T, 1);
+        }
+      } else if (y >= floorY && p.outdoor) {
         // Terre sous une bande d'herbe.
         ctx.fillStyle = p.floor;
         ctx.fillRect(x, y, T, T);

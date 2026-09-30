@@ -44,6 +44,10 @@ export const StoryFlag = {
   BottleTaken: 'maria.bottle',
   HeadbandTaken: 'maria.headband',
   BonnetTaken: 'maria.bonnet',
+  /** Papa a montré le portillon, après le bonnet (D-60). */
+  GardenDadGate: 'garden.dad-gate',
+  /** Le portillon au bout de l'allée est ouvert (chevillette tirée, D-60) : la rue. */
+  GateOpen: 'garden.gate',
   /** Quelques mois plus tard (D-43) : Céleste a grandi (phase de croissance 2). */
   Grown: 'growth.2',
   /** Le jardin (D-46) : Céleste est sortie pour la première fois (il fait beau, et Maria ?). */
@@ -163,4 +167,7 @@ export const PROP_SIZE = {
   'height-chart': { w: 7, h: 40 },
   'height-chart-grown': { w: 7, h: 40 },
   bonnet: { w: 14, h: 12 },
+  // Le portillon au bout du passage sous le vieux mur (D-60), fermé puis ouvert.
+  gate: { w: 14, h: 46 },
+  'gate-open': { w: 14, h: 46 },
 } as const satisfies Readonly<Record<PropKind, { w: number; h: number }>>;
