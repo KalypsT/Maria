@@ -2,8 +2,8 @@ import { TILE_SIZE as T } from '../../config/display';
 import { PHYSICS_STEP_HZ, msToSteps } from '../../config/movement';
 import type { WorldParams } from '../../config/world';
 import { CombatEvent } from '../combat/CombatWorld';
-import { EntityType, Tile, type LevelData, type TilePos } from '../level/LevelData';
-import { touchesTile, type Box } from '../physics/gridCollision';
+import { EntityType, type LevelData, type TilePos } from '../level/LevelData';
+import type { Box } from '../physics/gridCollision';
 import { checkpointId } from '../save/saveData';
 
 export const LifePhase = { Alive: 0, Fainting: 1 } as const;
@@ -146,11 +146,6 @@ export class RunState {
         this.startFaint(FaintCause.Fear);
         return;
       }
-    }
-    // Seuls les dangers fatals font s'évanouir aussitôt ; ceux qui piquent passent par le combat.
-    if (touchesTile(this.level, player, Tile.Deadly)) {
-      this.startFaint(FaintCause.Hazard);
-      return;
     }
     const checkpoints = this.checkpoints;
     for (let i = 0; i < checkpoints.length; i++) {

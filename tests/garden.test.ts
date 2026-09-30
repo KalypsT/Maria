@@ -203,15 +203,15 @@ describe('araignées et orties du jardin, adoucies (D-51)', () => {
     },
   );
 
-  it('les orties du jardin piquent (^), les ronces de derrière la haie sont fatales (!)', () => {
+  it('orties (^) dans le vrai jardin, ronces (!) seulement derrière la haie', () => {
     const count = (room: string, tile: number) =>
       [...level(room).tiles].filter((t) => t === tile).length;
     for (const room of ['garden-vegetables', 'garden-alley']) {
       expect(count(room, Tile.Hazard), room).toBeGreaterThan(0);
-      expect(count(room, Tile.Deadly), room).toBe(0);
+      expect(count(room, Tile.Thorns), room).toBe(0);
     }
     for (const room of ['garden-upside', 'garden-thorns']) {
-      expect(count(room, Tile.Deadly), room).toBeGreaterThan(0);
+      expect(count(room, Tile.Thorns), room).toBeGreaterThan(0);
       expect(count(room, Tile.Hazard), room).toBe(0);
     }
   });

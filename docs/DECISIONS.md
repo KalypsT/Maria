@@ -584,6 +584,15 @@ Retour du téléphone : le jardin était trop dur (araignées touchées à chaqu
 - Si Céleste trouve la cabane avant d'avoir parlé à papa, il montre directement la haie (plus la cabane, déjà trouvée). Après être passée derrière la haie, plus d'indice.
 - Nouvelle étape `garden.dad-hedge` ; aucune migration.
 
+## D-56 — Tous les dangers du sol piquent ; élan gardé ; ennemis vaincus absents jusqu'à la sortie de la salle
+
+Retours du téléphone.
+
+- **Tous les dangers du sol piquent** (remplace le « fatal » de D-51) : orties et briques de jeu (`^`), ronces de derrière la haie (`!`, dessin inchangé, tuile renommée `Tile.Thorns`). Plus aucun évanouissement immédiat au contact ; seules trois piqûres ou coups rapprochés (jauge de peur) font s'évanouir. Une fosse fermée dont on ne sort pas finit donc par un évanouissement, pas par un blocage.
+- **Élan gardé** : sur un danger du sol, Céleste rebondit vers le haut **dans le sens où elle allait** (vers l'avant ; immobile, du côté où elle regarde). Le recul à l'opposé ne reste que pour le contact d'un ennemi.
+- **Ennemis vaincus** : dispersés, ils le restent tant que Céleste est dans la salle, même après un évanouissement et un retour à une lanterne de la même salle. Ils reviennent quand on revient dans la salle plus tard (rechargement de la salle). L'outil de debug « remettre les ennemis » les ranime tous.
+- L'analyse de faisabilité évite toujours les deux dangers (difficultés inchangées).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

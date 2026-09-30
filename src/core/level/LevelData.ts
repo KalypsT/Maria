@@ -11,8 +11,8 @@ export const Tile = {
    * Céleste est touchée comme par un ennemi (rebond, jauge de peur).
    */
   Hazard: 3,
-  /** Danger fatal (ronces du monde étrange, D-51) : non solide, son contact fait s'évanouir. */
-  Deadly: 4,
+  /** Ronces du monde étrange (D-51) : non solides, dessinées à part ; piquent comme les orties (D-56). */
+  Thorns: 4,
 } as const;
 export type Tile = (typeof Tile)[keyof typeof Tile];
 

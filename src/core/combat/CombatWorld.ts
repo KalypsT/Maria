@@ -2,7 +2,7 @@ import type { CombatParams } from '../../config/combat';
 import { TILE_SIZE } from '../../config/display';
 import { PHYSICS_STEP_HZ, msToSteps } from '../../config/movement';
 import { EntityType, Tile, tileAt, type LevelData } from '../level/LevelData';
-import { touchesTile, type Box } from '../physics/gridCollision';
+import { touchesHazard, type Box } from '../physics/gridCollision';
 import type { PlayerPhysics } from '../player/PlayerPhysics';
 import { PlayerAttack } from './PlayerAttack';
 import { EnemyKind, Patroller, type PatrollerTuning } from './Patroller';
@@ -122,10 +122,15 @@ export class CombatWorld {
     this.reset();
   }
 
-  /** Ennemis remis à leur départ, coup et invulnérabilité annulés (réapparition). */
-  reset(): void {
+  /**
+   * Ennemis remis à leur départ, coup et invulnérabilité annulés. `revive` faux (réapparition dans
+   * la même salle, D-56) : les ennemis dispersés le restent jusqu'à ce que Céleste quitte la salle.
+   */
+  reset(revive = true): void {
     for (const enemy of this.enemies) {
-      enemy.reset();
+      if (revive || !enemy.dispersed) {
+        enemy.reset();
+      }
     }
     this.attack.reset();
     this.hitstopSteps = 0;
@@ -159,14 +164,14 @@ export class CombatWorld {
     for (const enemy of enemies) {
       enemy.step(this.level, tuning);
     }
-    // Danger qui pique (orties, briques de jeu, D-51) : Céleste rebondit vers le haut et en arrière
-    // (d'où elle venait), comme touchée par un ennemi ; la jauge de peur monte. Son propre délai,
-    // plus court que l'invulnérabilité : rester dedans pique encore (on ne traverse pas une fosse).
+    // Danger du sol (orties, ronces, briques de jeu, D-51, D-56) : il pique. Céleste rebondit vers
+    // le haut en gardant son élan (elle continue dans le sens où elle allait) ; la peur monte. Son
+    // propre délai, plus court que l'invulnérabilité : rester dedans pique encore.
     if (this.stingSteps > 0) {
       this.stingSteps--;
-    } else if (touchesTile(this.level, player.box, Tile.Hazard)) {
-      const back = player.vx > 0 ? -1 : player.vx < 0 ? 1 : -player.facing;
-      player.vx = back * this.params.hurtKnockbackX;
+    } else if (touchesHazard(this.level, player.box)) {
+      const forward = player.vx > 0 ? 1 : player.vx < 0 ? -1 : player.facing;
+      player.vx = forward * this.params.hurtKnockbackX;
       player.vy = -this.params.stingBounceY;
       player.startHurt(this.hurtSteps);
       this.stingSteps = this.stingTotal;

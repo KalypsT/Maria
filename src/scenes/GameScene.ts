@@ -740,7 +740,8 @@ export class GameScene extends Phaser.Scene {
     this.player.reset(x, y, this.level);
     this.feel.reset(this.player);
     this.poser.reset();
-    this.combat.reset();
+    // Même salle : les ennemis dispersés le restent (D-56) ; ils reviennent en changeant de salle.
+    this.combat.reset(false);
     this.clock.reset();
     this.transition.cancel();
     this.resetCamera();
@@ -1025,7 +1026,7 @@ export class GameScene extends Phaser.Scene {
       }
       return true;
     }
-    if (tile === Tile.Hazard || tile === Tile.Deadly) {
+    if (tile === Tile.Hazard || tile === Tile.Thorns) {
       // Placeholder de danger (design ouvert, §45) : rangée de pointes émoussées, sans violence.
       g.fillStyle(PLACEHOLDER_COLORS.hazard);
       for (let i = 0; i < 4; i++) {
