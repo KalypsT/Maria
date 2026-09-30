@@ -383,7 +383,7 @@ export const HOUSE_STORY: StoryData = {
       on: 'interact',
       area: { col: 1, row: 16, w: 8, h: 6 },
       mark: { col: 7, row: 15 },
-      when: { all: [F.Grown], none: [F.GardenDad] },
+      when: { all: [F.Grown], none: [F.GardenDad, F.GardenTreehouse] },
       lock: true,
       steps: [
         { do: 'flag', id: F.GardenDad },
@@ -391,6 +391,26 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: S.thoughtMs },
         // Papa montre, sans rien savoir, la cabane dans l'arbre : un indice (D-50).
         { do: 'thought', icon: 'treehouse', ms: S.thoughtMs, by: 'dad-garden' },
+        { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'dad-garden' },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // Une fois le saut mural trouvé (D-55), papa montre la haie au fond du jardin : le trou qui
+      // scintille, la suite. Toujours sans rien savoir de Maria.
+      id: 'garden-dad-hedge',
+      room: 'garden-vegetables',
+      on: 'interact',
+      area: { col: 1, row: 16, w: 8, h: 6 },
+      mark: { col: 7, row: 15 },
+      when: { all: [F.Grown, F.GardenTreehouse], none: [F.GardenDadHedge, F.HedgeEntered] },
+      lock: true,
+      steps: [
+        { do: 'flag', id: F.GardenDadHedge },
+        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
+        { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'hedge', ms: S.thoughtMs, by: 'dad-garden' },
         { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'dad-garden' },
         { do: 'wait', ms: S.lookMs },

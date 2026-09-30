@@ -8,6 +8,11 @@ Prochaine : à décider (zone suivante : le quartier, §26 ; ou passe de réglag
 
 ## Fait
 
+### Papa montre la suite (D-55)
+
+- Une fois le saut mural trouvé, papa au potager montre la haie et son trou qui scintille (retourner le voir : l'indicateur réapparaît au-dessus de lui). Suite : au pied du grand arbre, devant le trou de la haie, Action.
+- [ ] À vérifier sur téléphone : l'indice se comprend-il ?
+
 ### Araignées : juste milieu (D-54)
 
 - Deux araignées dans le grand arbre et deux dans l'allée (une de plus dans chaque), un peu plus rapides (3,8 s au lieu de 4,5 s). Il existe toujours un moment pour passer (testé).
