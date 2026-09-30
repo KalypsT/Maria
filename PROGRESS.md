@@ -15,7 +15,8 @@ Prochaine : à décider (zone suivante : le quartier, §26 ; ou passe de réglag
 - **Jardin retravaillé** :
   - plus rien ne flotte : le vieux mur du grand arbre descend jusqu'à un portail en pierre avec linteau ; les planches du potager tiennent sur des perches croisées plantées dans le sol ou les bacs ; la haie de l'allée continue en tunnel derrière le passage ; le plancher de la cabane a des jambes de force ;
   - dessins plus riches : feuillage en volumes et festons, buissons fleuris, tronc ombré avec nœuds et mousse, branches qui s'amincissent, bacs de légumes (choux, carottes, salades), pergola et glycine, nappe à carreaux, pots fleuris, remise (porte, fenêtre, jardinière), clôture à lattes et lierre, vieux mur en pierres irrégulières, façade de la maison (volets, jardinière) ;
-  - ciel : nuages en coussins, deux plans de collines, arbres lointains ; herbe en touffes avec quelques fleurs.
+  - ciel : nuages en coussins, deux plans de collines, arbres lointains ; herbe en touffes avec quelques fleurs ;
+  - fil à linge tenu par deux piquets plantés dans le sol (terrasse et buanderie).
 
 ### À vérifier sur téléphone (retours D-50)
 
