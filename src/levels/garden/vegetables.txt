@@ -14,7 +14,7 @@
 ; @decor: planter 50 19 5 3
 ; @decor: beanpoles 20 4 23 12
 ; @decor: sun 48 2 3 3
-; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (danger), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (fatales), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 v................................................................v
 v................................................................v
@@ -33,7 +33,7 @@ v................................................................v
 v....................===.........................................v
 v................................................................v
 v.......................................bbbb.....................v
-v...................bbbb................bbbb.....................v
+v...................bbbb.......C........bbbb.....................v
 1........bbbbb......bbbb......bbbb......bbbb......bbbbb..........2
 1........bbbbb......bbbb......bbbb......bbbb......bbbbb..........2
 1..P.....bbbbb......bbbb......bbbb......bbbb......bbbbb..........2

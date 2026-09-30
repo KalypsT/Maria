@@ -21,7 +21,7 @@
 ; @decor: branch 26 16 7 1
 ; @decor: deck 36 12 9 1
 ; @decor: hedgehole 39 37 6 3
-; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (danger), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (fatales), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
@@ -31,11 +31,11 @@ vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 3...................bbbbbb...................v
 3...................bbbbbb...................v
 3...................bbbbbb...................v
-################....bbbbbb...................2
+################....bbbbbb........a..........2
 ################....bbbbbb...................2
 ################....bbbbbb...................2
 ################....bbbbbb..........bbbbbbbbbv
-################....bbbbbb........a..........v
+################....bbbbbb...................v
 ################....bbbbbb...................v
 ################....bbbbbb...................v
 ################....bbbbbb-------............v
@@ -44,7 +44,7 @@ vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 ################....bbbbbb...................v
 ################....bbbbbb...........vvvvvvvvv
 ################....bbbbbb...........vvvvvvvvv
-################....bbbbbb.........a.........v
+################....bbbbbb...................v
 ################....bbbbbb...................v
 ################....bbbbbb-------............v
 ################....bbbbbb...................v

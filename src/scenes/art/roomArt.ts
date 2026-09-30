@@ -51,7 +51,7 @@ export function floorRow(level: LevelData): number {
     for (let col = 0; col < level.width && full; col++) {
       const tile = tileAt(level, col, row - 1);
       // Les dangers posés dans le sol (briques de jeu) font partie du sol.
-      full = tile === Tile.Solid || tile === Tile.Hazard;
+      full = tile === Tile.Solid || tile === Tile.Hazard || tile === Tile.Deadly;
     }
     if (!full) {
       break;
@@ -1364,6 +1364,12 @@ function drawStructure(a: ArtContext, floorY: number): void {
           ctx.fillStyle = 'rgba(0,0,0,0.18)';
           ctx.fillRect(x, y + 4, T, 3);
         }
+      } else if (tile === Tile.Deadly) {
+        if (y >= floorY) {
+          ctx.fillStyle = p.floor;
+          ctx.fillRect(x, y, T, T);
+        }
+        drawThorns(ctx, p, x, y >= floorY ? y + 3 : y + T, col);
       } else if (tile === Tile.Hazard) {
         if (y >= floorY) {
           ctx.fillStyle = p.floor;
@@ -1416,6 +1422,45 @@ function drawStructure(a: ArtContext, floorY: number): void {
     ctx.fillStyle = p.wood;
     ctx.fillRect(exit.side === 'left' ? x + T - 3 : x, y - 3, 3, h + 3);
     ctx.fillRect(x, y - 3, T, 3);
+  }
+}
+
+/**
+ * Ronces (danger fatal, D-51) : tiges sombres entrelacées hérissées d'épines, bien plus hautes
+ * et plus pointues que les orties, pour qu'on ne les confonde jamais.
+ */
+function drawThorns(
+  ctx: CanvasRenderingContext2D,
+  p: Readonly<ArtPalette>,
+  x: number,
+  base: number,
+  col: number,
+): void {
+  const stem = p.silhouettes ? '#0f0b1e' : '#4a2f38';
+  const spike = p.silhouettes ? p.rim : '#c7485f';
+  ctx.strokeStyle = stem;
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  for (let i = 0; i < 2; i++) {
+    const x0 = x + (i === 0 ? 1 : T - 1);
+    ctx.moveTo(x0, base);
+    ctx.quadraticCurveTo(
+      x + T / 2,
+      base - 14 - ((col + i) % 3) * 2,
+      x + (i === 0 ? T : 0),
+      base - 6,
+    );
+  }
+  ctx.stroke();
+  ctx.fillStyle = spike;
+  for (let k = 0; k < 5; k++) {
+    const sx = x + 2 + ((col * 5 + k * 7) % 12);
+    const sy = base - 3 - ((col * 3 + k * 5) % 9);
+    ctx.beginPath();
+    ctx.moveTo(sx - 1.5, sy + 1);
+    ctx.lineTo(sx, sy - 3);
+    ctx.lineTo(sx + 1.5, sy + 1);
+    ctx.fill();
   }
 }
 
@@ -1551,7 +1596,8 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
         (tile === Tile.Solid || tile === Tile.OneWay) &&
         above !== Tile.Solid &&
         above !== Tile.OneWay &&
-        above !== Tile.Hazard
+        above !== Tile.Hazard &&
+        above !== Tile.Deadly
       ) {
         ctx.fillRect(col * T, row * T, T, 1);
       }

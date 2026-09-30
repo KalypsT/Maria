@@ -150,9 +150,15 @@ export function isGrounded(level: LevelData, box: Box, includeOneWay = true): bo
 
 /** Vrai si le rectangle ne chevauche aucune tuile pleine (les traversables sont ignorées). */
 /**
- * Vrai si la hitbox, réduite de `HAZARD_INSET_PX` de chaque côté, touche une tuile de danger (D-21).
+ * Vrai si la hitbox, réduite de `HAZARD_INSET_PX` de chaque côté, touche une tuile de danger (D-21),
+ * qui pique ou fatale (l'analyse de faisabilité et l'escalade évitent les deux).
  */
 export function touchesHazard(level: LevelData, box: Box): boolean {
+  return touchesTile(level, box, Tile.Hazard) || touchesTile(level, box, Tile.Deadly);
+}
+
+/** Même contact, avec une seule sorte de danger (qui pique ou fatal, D-51). */
+export function touchesTile(level: LevelData, box: Box, kind: Tile): boolean {
   const inset = HAZARD_INSET_PX;
   const colFrom = Math.floor((box.x + inset) / TILE_SIZE);
   const colTo = Math.floor((box.x + box.width - inset - EDGE_EPSILON) / TILE_SIZE);
@@ -160,7 +166,7 @@ export function touchesHazard(level: LevelData, box: Box): boolean {
   const rowTo = Math.floor((box.y + box.height - inset - EDGE_EPSILON) / TILE_SIZE);
   for (let row = rowFrom; row <= rowTo; row++) {
     for (let col = colFrom; col <= colTo; col++) {
-      if (tileAt(level, col, row) === Tile.Hazard) {
+      if (tileAt(level, col, row) === kind) {
         return true;
       }
     }

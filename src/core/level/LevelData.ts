@@ -6,8 +6,13 @@ export const Tile = {
   Solid: 1,
   /** Plateforme traversable par le dessous, solide seulement par le dessus. */
   OneWay: 2,
-  /** Danger (D-21) : non solide, son contact fait s'évanouir Céleste. */
+  /**
+   * Danger qui pique (orties, briques de jeu, D-21 revu en D-51) : non solide ; au contact,
+   * Céleste est touchée comme par un ennemi (rebond, jauge de peur).
+   */
   Hazard: 3,
+  /** Danger fatal (ronces du monde étrange, D-51) : non solide, son contact fait s'évanouir. */
+  Deadly: 4,
 } as const;
 export type Tile = (typeof Tile)[keyof typeof Tile];
 
