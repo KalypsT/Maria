@@ -516,6 +516,20 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
 - Testé : dans la maison, le saut mural n'ouvre **que** cet endroit, facilement. Hors d'atteinte sans lui.
 - L'étagère basse de la buanderie est déplacée un peu à gauche.
 
+## D-49 — Derrière la haie (§6.1, §7.2), PR 2b
+
+- **Plan validé** (« vas-y ») : sur la même branche que le jardin (2a pas encore en PR). Un ou deux passages difficiles sur le chemin principal, juste après une veilleuse ; le bonnet de Maria ; l'escargot.
+- **Entrée par l'histoire** (comme D-34) : le trou de la haie, au pied du grand arbre, trop serré pour passer. Agir, une fois le saut mural trouvé (étape `garden.treehouse`, posée en le ramassant dans la cabane). Présage en approchant (rayon de 12 tuiles), puis clignement dans le noir et révélation en cercle. Ré-entrée courte après un évanouissement.
+- **Deux salles étranges**, dehors : `; @world: strange` et `; @outdoor: yes` (palette « crépuscule » avec le ciel au lieu du mur). Absentes de la carte.
+  - **jardin renversé** (moyen) : bacs géants au-dessus des ronces, décors démesurés (fleur, arrosoir), une cheminée de 4 tuiles entre deux tuteurs géants ;
+  - **la ronce** (difficile) : cheminée moyenne avec un escargot, veilleuse turquoise, puis cheminée de 5 tuiles (difficile, testé : moyen jusqu'à la veilleuse, difficile après).
+- **Maria** : assise sur un rebord hors d'atteinte (testé, même en grimpant et avec le saut mural) ; elle est là dès l'arrivée et ne bouge jamais ; elle disparaît dans le noir de la fin (pilier 5).
+- **Fin et trace (§6.3)** : le bonnet de Maria (PLACEHOLDER, choix de l'utilisateur possible). Le cercle se referme ; Céleste est au pied du grand arbre, le bonnet accroché à une branche. Nouveau souvenir « le bonnet ». Une lanterne est ajoutée au pied de l'arbre (point de retour de la fin).
+- **Escargot** (§18, « patrouille sur un mur ») : `o` dans l'ASCII, collé au mur plein voisin ; monte et descend, demi-tour aux bouts ; un coup le fait rentrer dans sa coquille, deux le dispersent. Réglage `snailSpeed` (20 px/s).
+- **Sauvegarde** : aucune migration (étapes `garden.treehouse`, `hedge.entered`, `hedge.done`).
+- **Tests** : le graphe de zone suit les passages de l'histoire selon la phase (maison en phase 1, jardin en phase 2) et n'ouvre la haie qu'avec le saut mural.
+- **Limite** : l'analyse ignore l'escargot, qui se trouve justement sur une paroi de cheminée.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
