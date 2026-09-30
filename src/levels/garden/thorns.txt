@@ -1,0 +1,61 @@
+; Derrière la haie (D-49) : la ronce. Une montée par deux cheminées au-dessus des épines : la
+; première (moyenne) le long de la haie, avec un escargot ; la seconde (difficile) juste après la
+; veilleuse turquoise. En haut, le bonnet de Maria. Maria est assise de l'autre côté du vide.
+; @name: La ronce
+; @world: strange
+; @outdoor: yes
+; @difficulty: hard
+; @ambient: #1a1f2c
+; @note: Maria (rebord de droite) : jamais atteignable, même en grimpant et avec le saut mural.
+; @decor: canopy 0 0 46 1
+; @decor: hedge 0 1 1 34
+; @decor: hedge 45 1 1 37
+; @decor: bush 5 20 5 14
+; @decor: bush 1 6 4 9
+; @decor: bush 10 6 2 10
+; @decor: deck 17 8 10 1
+; @decor: deck 40 4 3 1
+; @decor: giantflower 30 8 8 18
+; @decor: eyes 33 20 1 1
+; @decor: eyes 20 30 1 1
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (danger), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+v............................................v
+v............................................v
+v............................................v
+v.......................................bbb..v
+v............................................v
+vvvvv.....vv.................................v
+vvvvv.....vv.................................v
+vvvvv.....vv.....bbbbbbbbbb..................v
+vvvvv.....vv.................................v
+vvvvv.....vv.................................v
+vvvvv.....vv.................................v
+vvvvv.....vv.................................v
+vvvvv.....vv.................................v
+vvvvv.....vv.................................v
+v.........vv.................................v
+v............................................v
+v............................................v
+v............................................v
+v.....C......................................v
+v....vvvvv...................................v
+v....vvvvv...................................v
+v....vvvvv...................................v
+v....vvvvv...................................v
+v....vvvvv...................................v
+v....vvvvv...................................v
+v....vvvvv...................................v
+v...ovvvvv...................................v
+v....vvvvv...................................v
+v....vvvvv...................................v
+v....vvvvv...................................v
+v....vvvvv...................................v
+v....vvvvv...................................v
+v....vvvvv...................................v
+v............................................v
+1............................................v
+1............................................v
+1..C..P......................................v
+#########^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
+##############################################

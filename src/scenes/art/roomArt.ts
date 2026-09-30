@@ -1370,7 +1370,8 @@ function drawNettles(
     ctx.fillRect(x, y, T, T);
   }
   const base = inFloor ? y + 3 : y + T;
-  ctx.fillStyle = '#3f8f4a';
+  // Monde étrange (D-49) : des ronces en ombre, bordées de turquoise (lisibles, pilier 1).
+  ctx.fillStyle = p.silhouettes ? p.rim : '#3f8f4a';
   for (let i = 0; i < 3; i++) {
     const cx = x + 3 + i * 5;
     const h = 7 + ((col * 3 + i * 5) % 4);
@@ -1384,8 +1385,10 @@ function drawNettles(
     ctx.lineTo(cx + 2.5, base);
     ctx.fill();
   }
-  ctx.fillStyle = '#b7e36b';
-  ctx.fillRect(x + 7.5, base - 8, 1, 1);
+  if (!p.silhouettes) {
+    ctx.fillStyle = '#b7e36b';
+    ctx.fillRect(x + 7.5, base - 8, 1, 1);
+  }
 }
 
 /**

@@ -373,6 +373,79 @@ export function gardenDrawers({ tileShape, rounded }: ShapeTools): Record<string
       ctx.fillStyle = g;
       ctx.fillRect(r.x, r.y, r.w, r.h);
     },
+    // Derrière la haie (D-49) : le jardin à une échelle démesurée, en silhouettes.
+    giantstake(a, r) {
+      const { ctx, palette: p } = a;
+      tileShape(a, r, p.woodDark, p.silhouettes ? p.woodDark : p.woodLight);
+      // Ficelle nouée, comme sur les tuteurs du potager.
+      ctx.strokeStyle = p.silhouettes ? p.rim : '#d8c7a0';
+      ctx.globalAlpha = 0.6;
+      ctx.lineWidth = 1;
+      for (let y = r.y + 3 * T; y < r.y + r.h; y += 5 * T) {
+        ctx.beginPath();
+        ctx.moveTo(r.x, y);
+        ctx.lineTo(r.x + r.w, y + 3);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    },
+    giantflower(a, r) {
+      const { ctx, palette: p } = a;
+      // Une fleur plus haute qu'un arbre, penchée : tige, feuilles, corolle (fond, sans collision).
+      ctx.fillStyle = p.silhouettes ? p.wallBottom : p.leafDark;
+      ctx.globalAlpha = p.silhouettes ? 0.9 : 1;
+      const cx = r.x + r.w / 2;
+      ctx.beginPath();
+      ctx.moveTo(cx - 2, r.y + r.h + 3 * T);
+      ctx.quadraticCurveTo(cx + r.w * 0.3, r.y + r.h * 0.5, cx + r.w * 0.2, r.y + r.w * 0.4);
+      ctx.lineTo(cx + r.w * 0.2 + 4, r.y + r.w * 0.4);
+      ctx.quadraticCurveTo(cx + r.w * 0.3 + 4, r.y + r.h * 0.5, cx + 2, r.y + r.h + 3 * T);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(cx - r.w * 0.15, r.y + r.h * 0.6, r.w * 0.25, r.w * 0.08, -0.5, 0, Math.PI * 2);
+      ctx.fill();
+      for (let i = 0; i < 7; i++) {
+        const angle = (i * 2 * Math.PI) / 7;
+        ctx.beginPath();
+        ctx.ellipse(
+          cx + r.w * 0.2 + Math.cos(angle) * r.w * 0.22,
+          r.y + r.w * 0.4 + Math.sin(angle) * r.w * 0.22,
+          r.w * 0.16,
+          r.w * 0.08,
+          angle,
+          0,
+          Math.PI * 2,
+        );
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      if (p.silhouettes) {
+        ctx.fillStyle = `rgba(${p.lamp},0.35)`;
+        ctx.beginPath();
+        ctx.arc(cx + r.w * 0.2, r.y + r.w * 0.4, r.w * 0.1, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    },
+    giantcan(a, r) {
+      const { ctx, palette: p } = a;
+      // L'arrosoir de papa, géant, qui flotte de travers (fond, sans collision).
+      ctx.save();
+      ctx.translate(r.x + r.w / 2, r.y + r.h / 2);
+      ctx.rotate(-0.25);
+      ctx.fillStyle = p.silhouettes ? p.wallBottom : '#7fa37a';
+      ctx.beginPath();
+      ctx.roundRect(-r.w * 0.3, -r.h * 0.35, r.w * 0.6, r.h * 0.7, 6);
+      ctx.fill();
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = ctx.fillStyle;
+      ctx.beginPath();
+      ctx.moveTo(r.w * 0.25, r.h * 0.1);
+      ctx.lineTo(r.w * 0.55, -r.h * 0.3);
+      ctx.moveTo(-r.w * 0.2, -r.h * 0.35);
+      ctx.quadraticCurveTo(0, -r.h * 0.65, r.w * 0.2, -r.h * 0.35);
+      ctx.stroke();
+      ctx.restore();
+    },
     cushions(a, r) {
       const { ctx } = a;
       const colors = ['#e58fa6', '#8fb8e5', '#f2c14e'];

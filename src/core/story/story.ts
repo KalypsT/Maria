@@ -148,6 +148,8 @@ export const PROP_KINDS = [
   /** Toise au mur de la chambre (D-43) ; un trait de plus quand Céleste a grandi. */
   'height-chart',
   'height-chart-grown',
+  /** Le bonnet de Maria (D-49) : au bout de la ronce, puis sur une branche du grand arbre. */
+  'bonnet',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 
