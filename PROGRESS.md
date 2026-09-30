@@ -2,11 +2,30 @@
 
 ## Phase en cours
 
-**Le jardin, PR 2a** (§7.2, D-46 à D-48) : sur la branche `ccr-53d22df4-9euiqo`, **en attente de PR et d'essai sur téléphone**. Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
+**Le jardin (2a) et derrière la haie (2b)** (§7.2, §6, D-46 à D-49) : sur la même branche `ccr-53d22df4-9euiqo` (la 2a n'était pas encore en PR), **en attente de PR et d'essai sur téléphone**. Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
 
-Prochaine : PR 2b, **derrière la haie** (monde étrange du jardin : premiers passages difficiles, escargot sur les murs, Maria aperçue, trace dans le monde réel).
+Prochaine : à décider (zone suivante : le quartier, §26 ; ou passe de réglage d'après les essais).
 
 ## Fait
+
+### Derrière la haie (D-49)
+
+- **Entrée** : le trou de la haie, au pied du grand arbre. Une fois le saut mural trouvé dans la cabane, un présage monte en s'en approchant ; Agir : scintillement, tremblement, clignement dans le noir, le jardin renversé se révèle en cercle.
+- **Jardin renversé** (moyen) : bacs géants au-dessus des ronces, fleur et arrosoir démesurés en silhouettes, une cheminée entre deux tuteurs géants (saut mural).
+- **La ronce** (difficile) : une première cheminée (moyenne) le long d'une haie, avec un **escargot** qui monte et descend sur elle ; une veilleuse turquoise ; puis la cheminée difficile, jusqu'au **bonnet de Maria**. Maria est assise de l'autre côté du vide, hors d'atteinte.
+- **Fin** : le cercle se referme ; Céleste est au pied du grand arbre (nouvelle lanterne, point de retour), le bonnet accroché à une branche. Souvenir « le bonnet » dans le cahier ; on peut revenir le regarder.
+- **Règles** (comme D-34) : pas de sortie volontaire ; un évanouissement avant la veilleuse ramène au jardin, et le trou de la haie y ramène (version courte).
+- **Escargot** (`o`) : collé à son mur, monte et descend, demi-tour aux bouts ; un coup le fait rentrer dans sa coquille (inoffensif), deux le dispersent.
+- Tests : 399. Salles étranges hors carte, entrée par la haie seulement et après la cabane, chemin difficile exactement, moyen jusqu'à la dernière veilleuse, Maria hors d'atteinte, fin au grand arbre avec souvenir, escargot.
+- Vérifié dans Chromium : Agir au trou → jardin renversé ; la ronce ; Agir sur le bonnet → retour au grand arbre, bulle Maria, bonnet sur la branche.
+
+### À vérifier sur téléphone (derrière la haie)
+
+- [ ] Le présage et le passage par la haie : assez lents, assez étranges, jamais effrayants ?
+- [ ] La lisibilité des ronces (danger) et des bords en turquoise sur le fond violet.
+- [ ] L'escargot : se voit-il sur la haie ? Gêne-t-il la glissade juste ce qu'il faut ?
+- [ ] La cheminée difficile (5 tuiles) : difficile mais juste ? Trop tôt dans le jeu ?
+- [ ] Le bonnet se lit-il comme un bonnet, sur le rebord puis sur la branche ?
 
 ### Le jardin (D-46 à D-48)
 
@@ -701,6 +720,6 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. PR du jardin (2a), merge, essai sur téléphone ; réglage des valeurs du saut mural.
-2. Derrière la haie (PR 2b) : monde étrange du jardin.
+1. PR du jardin (2a + 2b), merge, essai sur téléphone ; réglage des valeurs du saut mural.
+2. Zone suivante (le quartier, §26), avec les liaisons entre zones.
 3. Avant d'offrir le jeu : installation facile (PWA), sauvegarde sûre sur iPhone, option « réduire les effets ».

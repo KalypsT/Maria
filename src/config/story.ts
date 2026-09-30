@@ -153,5 +153,5 @@ export const PROP_SIZE = {
   'baby-photo': { w: 11, h: 10 },
   'height-chart': { w: 7, h: 40 },
   'height-chart-grown': { w: 7, h: 40 },
-  bonnet: { w: 9, h: 8 },
+  bonnet: { w: 14, h: 12 },
 } as const satisfies Readonly<Record<PropKind, { w: number; h: number }>>;
