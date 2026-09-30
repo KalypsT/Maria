@@ -129,28 +129,67 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: 2000 },
       ],
     },
+    // Les affaires de Maria (D-58) : Agir les ramasse ; elles quittent le jeu pour le cahier.
     {
-      id: 'trace-hall',
+      id: 'take-slipper',
       room: 'hall',
-      on: 'touch',
-      area: { col: 21, row: 12, w: 7, h: 4 },
-      when: { all: [F.Slept], none: [F.TraceHall] },
+      on: 'interact',
+      area: { col: 22, row: 13, w: 5, h: 3 },
+      mark: { col: 24, row: 14 },
+      when: { all: [F.Slept], none: [F.SlipperTaken] },
       lock: true,
       steps: [
         { do: 'flag', id: F.TraceHall },
+        { do: 'flag', id: F.SlipperTaken },
+        { do: 'memory', id: 'slipper' },
         { do: 'thought', icon: 'maria', ms: S.thoughtMs },
         { do: 'wait', ms: S.lookMs },
       ],
     },
     {
-      id: 'trace-stairs',
+      id: 'take-bottle',
       room: 'staircase',
-      on: 'touch',
-      area: { col: 32, row: 12, w: 6, h: 4 },
-      when: { all: [F.Slept], none: [F.TraceStairs] },
+      on: 'interact',
+      area: { col: 33, row: 13, w: 5, h: 3 },
+      mark: { col: 35, row: 14 },
+      when: { all: [F.Slept], none: [F.BottleTaken] },
       lock: true,
       steps: [
         { do: 'flag', id: F.TraceStairs },
+        { do: 'flag', id: F.BottleTaken },
+        { do: 'memory', id: 'bottle' },
+        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // Le bandeau, posé sur le lit à côté de Céleste à la fin du monde étrange.
+      id: 'take-headband',
+      room: 'bedroom',
+      on: 'interact',
+      area: { col: 13, row: 14, w: 4, h: 2 },
+      mark: { col: 15, row: 14 },
+      when: { all: [F.StrangeDone], none: [F.HeadbandTaken] },
+      lock: true,
+      steps: [
+        { do: 'flag', id: F.HeadbandTaken },
+        { do: 'memory', id: 'headband' },
+        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // Le bonnet, dans l'herbe à côté de Céleste, au retour de derrière la haie.
+      id: 'take-bonnet',
+      room: 'garden-tree',
+      on: 'interact',
+      area: { col: 25, row: 38, w: 4, h: 2 },
+      mark: { col: 27, row: 38 },
+      when: { all: [F.HedgeDone], none: [F.BonnetTaken] },
+      lock: true,
+      steps: [
+        { do: 'flag', id: F.BonnetTaken },
+        { do: 'memory', id: 'bonnet' },
         { do: 'thought', icon: 'maria', ms: S.thoughtMs },
         { do: 'wait', ms: S.lookMs },
       ],
@@ -162,7 +201,7 @@ export const HOUSE_STORY: StoryData = {
       on: 'interact',
       area: { col: 22, row: 14, w: 8, h: 8 },
       mark: { col: 27, row: 13 },
-      when: { all: [F.Slept], none: [F.MorningDad, F.Grown] },
+      when: { all: [F.Slept], none: [F.MorningDad, F.MomHug, F.Grown] },
       lock: true,
       steps: [
         { do: 'flag', id: F.MorningDad },
@@ -181,7 +220,7 @@ export const HOUSE_STORY: StoryData = {
       on: 'interact',
       area: { col: 8, row: 14, w: 13, h: 8 },
       mark: { col: 14, row: 13 },
-      when: { all: [F.Slept], none: [F.MorningMom, F.Grown] },
+      when: { all: [F.Slept], none: [F.MorningMom, F.DadVisit, F.Grown] },
       lock: true,
       steps: [
         { do: 'flag', id: F.MorningMom },
@@ -288,7 +327,6 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: S.cradleSparkleMs },
         { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
         { do: 'flag', id: F.StrangeDone },
-        { do: 'memory', id: 'headband' },
         { do: 'room', room: 'bedroom', col: 12, row: 15, facing: 1, returnPoint: true },
         { do: 'pose', pose: 'sit' },
         { do: 'wait', ms: S.nightBlackMs },
@@ -299,6 +337,9 @@ export const HOUSE_STORY: StoryData = {
         // Papa passe la tête par la porte : il s'inquiète, sans rien savoir (D-37).
         { do: 'thought', icon: 'question', ms: S.thoughtMs, by: 'dad-door-end' },
         { do: 'wait', ms: S.thoughtMs + 300 },
+        // …et montre maman, en bas (D-58).
+        { do: 'thought', icon: 'mom', ms: S.thoughtMs, by: 'dad-door-end' },
+        { do: 'wait', ms: S.thoughtMs + 300 },
         { do: 'fadeOut', ms: S.fadeMs },
         { do: 'flag', id: F.DadVisit },
         { do: 'pose', pose: 'stand' },
@@ -306,7 +347,33 @@ export const HOUSE_STORY: StoryData = {
       ],
     },
     {
-      // Quelques mois plus tard (D-43) : après la visite de papa, Céleste se recouche. Le noir le
+      // Après la visite de papa (D-58) : maman, au salon, fait un câlin. Puis la journée passe, la
+      // nuit tombe, et Céleste pense à son lit.
+      id: 'mom-hug',
+      room: 'living',
+      on: 'interact',
+      area: { col: 8, row: 14, w: 13, h: 8 },
+      mark: { col: 14, row: 13 },
+      when: { all: [F.DadVisit], none: [F.MomHug] },
+      lock: true,
+      steps: [
+        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
+        { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'heart', ms: S.holdMs, by: 'mom-sofa' },
+        { do: 'wait', ms: S.holdMs },
+        { do: 'thought', icon: 'heart', ms: S.holdMs },
+        { do: 'wait', ms: S.holdMs },
+        { do: 'fadeOut', ms: S.nightFadeOutMs },
+        { do: 'flag', id: F.MomHug },
+        { do: 'wait', ms: S.nightBlackMs },
+        { do: 'fadeIn', ms: S.nightFadeInMs },
+        { do: 'wait', ms: 800 },
+        { do: 'thought', icon: 'bed', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // Quelques mois plus tard (D-43) : le soir après le câlin de maman, Céleste se couche. Le noir le
       // plus long ; au retour, elle a grandi (hitbox, saut, tenue) et la toise a un trait de plus.
       // Aucun texte (pilier 6) ; Maria reste introuvable.
       id: 'months-later',
@@ -314,7 +381,7 @@ export const HOUSE_STORY: StoryData = {
       on: 'interact',
       area: { col: 7, row: 13, w: 11, h: 3 },
       mark: { col: 9, row: 14 },
-      when: { all: [F.DadVisit], none: [F.Grown] },
+      when: { all: [F.MomHug], none: [F.Grown] },
       lock: true,
       steps: [
         { do: 'pose', pose: 'sit' },
@@ -520,29 +587,14 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: S.cradleSparkleMs },
         { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
         { do: 'flag', id: F.HedgeDone },
-        { do: 'memory', id: 'bonnet' },
         { do: 'room', room: 'garden-tree', col: 29, row: 39, facing: -1, returnPoint: true },
+        // Assise dans l'herbe, comme au réveil (D-58) ; elle se relève dès qu'on la fait bouger.
+        { do: 'pose', pose: 'sit' },
         { do: 'wait', ms: S.nightBlackMs },
         { do: 'fadeIn', ms: S.nightFadeInMs },
         { do: 'wait', ms: 1200 },
         { do: 'thought', icon: 'maria', ms: S.thoughtMs + 800 },
         { do: 'wait', ms: S.lookMs + 600 },
-      ],
-    },
-    {
-      // Le bonnet accroché à la branche : on peut revenir le regarder.
-      id: 'look-bonnet',
-      room: 'garden-tree',
-      on: 'interact',
-      area: { col: 26, row: 29, w: 7, h: 3 },
-      mark: { col: 29, row: 30 },
-      when: { all: [F.HedgeDone] },
-      lock: true,
-      repeat: true,
-      steps: [
-        { do: 'memory', id: 'bonnet' },
-        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
-        { do: 'wait', ms: S.lookMs },
       ],
     },
     // Objets à regarder (D-38) : la première fois, ils deviennent des souvenirs du cahier ; on
@@ -683,7 +735,15 @@ export const HOUSE_STORY: StoryData = {
       instant: true,
       when: { all: [F.EveningPlayed], none: [F.EveningBlanket] },
     },
-    { id: 'slipper', room: 'hall', kind: 'slipper', col: 24, row: 15, when: { all: [F.Slept] } },
+    {
+      id: 'slipper',
+      room: 'hall',
+      kind: 'slipper',
+      col: 24,
+      row: 15,
+      instant: true,
+      when: { all: [F.Slept], none: [F.SlipperTaken] },
+    },
     {
       id: 'bottle',
       room: 'staircase',
@@ -691,7 +751,8 @@ export const HOUSE_STORY: StoryData = {
       col: 35,
       row: 15,
       flip: true,
-      when: { all: [F.Slept] },
+      instant: true,
+      when: { all: [F.Slept], none: [F.BottleTaken] },
     },
     {
       id: 'maria-bookcase',
@@ -755,8 +816,9 @@ export const HOUSE_STORY: StoryData = {
       kind: 'dad-kitchen',
       col: 26,
       row: 21,
-      // Quelques mois plus tard, les parents sont au jardin (D-46).
-      when: { all: [F.Slept], none: [F.Grown] },
+      // Quelques mois plus tard, les parents sont au jardin (D-46). La nuit du câlin, ils ne sont
+      // plus en bas (D-58).
+      when: { all: [F.Slept], none: [F.MomHug, F.Grown] },
     },
     // Maman est assise dans le canapé, entre les accoudoirs (D-39).
     {
@@ -765,7 +827,7 @@ export const HOUSE_STORY: StoryData = {
       kind: 'mom-sofa',
       col: 14,
       row: 19,
-      when: { all: [F.Slept], none: [F.Grown] },
+      when: { all: [F.Slept], none: [F.MomHug, F.Grown] },
     },
     // Après le monde étrange, là où Maria était assise : une photo de Céleste bébé avec Maria.
     {
@@ -799,12 +861,13 @@ export const HOUSE_STORY: StoryData = {
       when: { none: [F.HedgeDone] },
     },
     {
-      id: 'bonnet-tree',
+      id: 'bonnet-grass',
       room: 'garden-tree',
       kind: 'bonnet',
-      col: 29,
-      row: 31,
-      when: { all: [F.HedgeDone] },
+      col: 27,
+      row: 39,
+      instant: true,
+      when: { all: [F.HedgeDone], none: [F.BonnetTaken] },
     },
     // Au jardin (D-46) : maman étend le linge sur la terrasse, papa arrose le potager, loin des
     // araignées (pas d'ennemi près d'un adulte, D-39).
@@ -830,10 +893,15 @@ export const HOUSE_STORY: StoryData = {
       kind: 'headband',
       col: 15,
       row: 15,
-      when: { all: [F.StrangeDone] },
+      instant: true,
+      when: { all: [F.StrangeDone], none: [F.HeadbandTaken] },
     },
   ],
-  times: [{ when: { all: [F.Slept] }, time: 'morning' }],
+  // La nuit après le câlin de maman (D-58), puis le matin quelques mois plus tard.
+  times: [
+    { when: { all: [F.MomHug], none: [F.Grown] }, time: 'evening' },
+    { when: { all: [F.Slept] }, time: 'morning' },
+  ],
   lockedRooms: [
     { room: 'bedroom', when: { none: [F.Slept] }, speaker: 'dad-door' },
     // La porte de derrière (D-46) : la poignée est trop haute tant que Céleste n'a pas grandi.

@@ -236,8 +236,17 @@ export function installDebugOverlay(scene: GameScene): void {
     ['Histoire : Maria couchée', [F.EveningPlayed, F.EveningBlanket, F.EveningTucked]],
     ['Histoire : le matin', [F.EveningPlayed, F.EveningBlanket, F.EveningTucked, F.Slept]],
     [
-      'Histoire : traces vues',
-      [F.EveningPlayed, F.EveningBlanket, F.EveningTucked, F.Slept, F.TraceHall, F.TraceStairs],
+      'Histoire : chausson et biberon ramassés',
+      [
+        F.EveningPlayed,
+        F.EveningBlanket,
+        F.EveningTucked,
+        F.Slept,
+        F.TraceHall,
+        F.TraceStairs,
+        F.SlipperTaken,
+        F.BottleTaken,
+      ],
     ],
     [
       'Histoire : Maria disparue (monde étrange ouvert)',
@@ -256,6 +265,33 @@ export function installDebugOverlay(scene: GameScene): void {
       ],
     ],
     [
+      'Histoire : papa est passé (aller voir maman)',
+      [
+        F.EveningPlayed,
+        F.EveningBlanket,
+        F.EveningTucked,
+        F.Slept,
+        F.MariaSeen,
+        F.MariaVanished,
+        F.StrangeDone,
+        F.DadVisit,
+      ],
+    ],
+    [
+      'Histoire : câlin de maman (la nuit, aller se coucher)',
+      [
+        F.EveningPlayed,
+        F.EveningBlanket,
+        F.EveningTucked,
+        F.Slept,
+        F.MariaSeen,
+        F.MariaVanished,
+        F.StrangeDone,
+        F.DadVisit,
+        F.MomHug,
+      ],
+    ],
+    [
       'Histoire : quelques mois plus tard (Céleste a grandi)',
       [
         F.EveningPlayed,
@@ -266,6 +302,7 @@ export function installDebugOverlay(scene: GameScene): void {
         F.MariaVanished,
         F.StrangeDone,
         F.DadVisit,
+        F.MomHug,
         F.Grown,
       ],
     ],

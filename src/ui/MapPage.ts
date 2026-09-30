@@ -1,7 +1,7 @@
 import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 import type { MapModel, MapPoint, MapRoom } from '../core/world/mapModel';
 import type { MapBox } from '../core/world/zone';
-import { MEMORIES, type MemoryId } from '../config/memories';
+import { MARIA_THINGS, MEMORIES, type MemoryId } from '../config/memories';
 import { drawMemory } from '../scenes/art/memoryArt';
 
 /** Durée du tracé d'une salle découverte depuis la dernière ouverture (ms). */
@@ -31,13 +31,16 @@ function seeded(text: string): () => number {
  * qu'elle est ouverte ; un toucher ou le bouton Carte la referme. Dessinée au crayon : salles
  * visitées, salles devinées (« ? »), passages, veilleuses allumées, trouvailles, Céleste.
  */
+type NotebookPage = 'map' | 'memories' | 'maria';
+
 export class MapPage {
   private readonly root: HTMLElement;
   private readonly canvas: HTMLCanvasElement;
   private readonly title: HTMLButtonElement;
   private readonly memoriesTab: HTMLButtonElement;
-  /** Page affichée : la carte, ou les souvenirs (D-38). */
-  private page: 'map' | 'memories' = 'map';
+  private readonly mariaTab: HTMLButtonElement;
+  /** Page affichée : la carte, les souvenirs (D-38) ou les affaires de Maria (D-58). */
+  private page: NotebookPage = 'map';
   private found: ReadonlySet<string> = new Set();
   /** Souvenir affiché en grand (null : la grille). */
   private selected: MemoryId | null = null;
@@ -55,7 +58,7 @@ export class MapPage {
     this.root.hidden = true;
     const panel = document.createElement('div');
     panel.className = 'map-panel';
-    // Deux onglets manuscrits : la carte et les souvenirs (D-38).
+    // Trois onglets manuscrits : la carte, les souvenirs (D-38) et les affaires de Maria (D-58).
     const tabs = document.createElement('div');
     tabs.className = 'map-tabs';
     this.title = document.createElement('button');
@@ -63,10 +66,14 @@ export class MapPage {
     this.memoriesTab = document.createElement('button');
     this.memoriesTab.className = 'map-title';
     this.memoriesTab.textContent = 'Mes souvenirs';
-    tabs.append(this.title, this.memoriesTab);
+    this.mariaTab = document.createElement('button');
+    this.mariaTab.className = 'map-title';
+    this.mariaTab.textContent = 'Les affaires de Maria';
+    tabs.append(this.title, this.memoriesTab, this.mariaTab);
     for (const [tab, page] of [
       [this.title, 'map'],
       [this.memoriesTab, 'memories'],
+      [this.mariaTab, 'maria'],
     ] as const) {
       tab.type = 'button';
       tab.addEventListener('pointerup', (event) => {
@@ -77,7 +84,7 @@ export class MapPage {
     this.canvas = document.createElement('canvas');
     this.canvas.className = 'map-canvas';
     this.canvas.addEventListener('pointerup', (event) => {
-      if (this.page === 'memories' && this.touchMemories(event)) {
+      if (this.page !== 'map' && this.touchMemories(event)) {
         event.stopPropagation();
       }
     });
@@ -124,11 +131,13 @@ export class MapPage {
     this.root.remove();
   }
 
-  private show(page: 'map' | 'memories'): void {
+  private show(page: NotebookPage): void {
     this.page = page;
     this.selected = null;
+    this.cells = [];
     this.title.classList.toggle('active', page === 'map');
     this.memoriesTab.classList.toggle('active', page === 'memories');
+    this.mariaTab.classList.toggle('active', page === 'maria');
   }
 
   /** Toucher sur la page des souvenirs : ouvre ou referme un souvenir ; vrai s'il est traité. */
@@ -156,7 +165,12 @@ export class MapPage {
    * Page des souvenirs (D-38) : une case par souvenir, dessiné s'il est trouvé, en pointillés
    * sinon (complétion explicite, §23) ; un souvenir touché s'affiche en grand.
    */
-  private drawMemories(ctx: CanvasRenderingContext2D, width: number, height: number): void {
+  private drawMemories(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    list: readonly MemoryId[],
+  ): void {
     const pencil = themeColor('--pencil');
     const ink = themeColor('--ink');
     ctx.lineCap = 'round';
@@ -170,12 +184,12 @@ export class MapPage {
       drawMemory(ctx, this.selected, width / 2, height / 2, size * 0.85);
       return;
     }
-    const cols = 3;
-    const rows = Math.ceil(MEMORIES.length / cols);
+    const cols = list.length <= 4 ? list.length : 3;
+    const rows = Math.ceil(list.length / cols);
     const size = Math.min((width - 24) / cols, (height - 12) / rows) * 0.84;
     const gapX = (width - cols * size) / (cols + 1);
     const gapY = (height - rows * size) / (rows + 1);
-    this.cells = MEMORIES.map((id, i) => ({
+    this.cells = list.map((id, i) => ({
       id,
       x: gapX + (i % cols) * (size + gapX) + size / 2,
       y: gapY + Math.floor(i / cols) * (size + gapY) + size / 2,
@@ -218,8 +232,8 @@ export class MapPage {
     }
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.clearRect(0, 0, width, height);
-    if (this.page === 'memories') {
-      this.drawMemories(ctx, width, height);
+    if (this.page !== 'map') {
+      this.drawMemories(ctx, width, height, this.page === 'maria' ? MARIA_THINGS : MEMORIES);
       return;
     }
     const margin = 18;

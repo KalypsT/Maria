@@ -254,6 +254,90 @@ function headband(ctx: CanvasRenderingContext2D, s: number): void {
   ctx.fill();
 }
 
+/** Le chausson de Maria (D-58) : petit chausson rose, semelle claire, pompon blanc. */
+function slipper(ctx: CanvasRenderingContext2D, s: number): void {
+  ctx.fillStyle = '#e8d6c8';
+  ctx.beginPath();
+  ctx.ellipse(0, s * 0.2, s * 0.38, s * 0.08, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = ROSE;
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.36, s * 0.18);
+  ctx.quadraticCurveTo(-s * 0.36, -s * 0.02, -s * 0.12, -s * 0.04);
+  ctx.quadraticCurveTo(s * 0.22, -s * 0.12, s * 0.36, s * 0.14);
+  ctx.lineTo(s * 0.36, s * 0.18);
+  ctx.closePath();
+  ctx.fill();
+  // Ouverture du chausson, côté talon.
+  ctx.fillStyle = '#c96f8c';
+  ctx.beginPath();
+  ctx.ellipse(-s * 0.2, s * 0.02, s * 0.12, s * 0.04, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#fff4f7';
+  ctx.beginPath();
+  ctx.arc(s * 0.16, -s * 0.06, s * 0.07, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/** Le biberon de Maria (D-58) : flacon transparent, lait, bague rose, tétine. */
+function bottle(ctx: CanvasRenderingContext2D, s: number): void {
+  ctx.save();
+  ctx.rotate(-0.35);
+  roundRect(ctx, -s * 0.13, -s * 0.12, s * 0.26, s * 0.46, s * 0.06, 'rgba(225,238,250,0.95)');
+  roundRect(ctx, -s * 0.11, s * 0.06, s * 0.22, s * 0.26, s * 0.05, '#f6f0e6');
+  ctx.strokeStyle = 'rgba(91,74,68,0.35)';
+  ctx.lineWidth = Math.max(0.5, s * 0.015);
+  ctx.beginPath();
+  for (const y of [0, 0.1, 0.2]) {
+    ctx.moveTo(-s * 0.13, s * y);
+    ctx.lineTo(-s * 0.06, s * y);
+  }
+  ctx.stroke();
+  roundRect(ctx, -s * 0.15, -s * 0.2, s * 0.3, s * 0.09, s * 0.02, PINK);
+  ctx.fillStyle = '#e8c89a';
+  ctx.beginPath();
+  ctx.ellipse(0, -s * 0.28, s * 0.07, s * 0.1, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+/** Maman (bulle de papa, D-58) : visage et longs cheveux bruns, comme sur la photo de famille. */
+export function momHead(ctx: CanvasRenderingContext2D, x: number, y: number, r: number): void {
+  const hair = '#4a2e1f';
+  // Boucles qui tombent sur les épaules, de chaque côté (jamais sous le menton : pas une barbe).
+  ctx.fillStyle = hair;
+  for (const side of [-1, 1]) {
+    for (const [dx, dy, k] of [
+      [0.95, 0.1, 0.5],
+      [1.05, 0.75, 0.45],
+      [0.95, 1.3, 0.4],
+    ] as const) {
+      ctx.beginPath();
+      ctx.arc(x + side * r * dx, y + r * dy, r * k, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  // Tee-shirt rose, col en V.
+  roundRect(ctx, x - r * 1.05, y + r * 1.15, r * 2.1, r * 0.75, r * 0.3, '#f1a9bd');
+  ctx.fillStyle = '#e2a881';
+  ctx.beginPath();
+  ctx.moveTo(x - r * 0.28, y + r * 1.15);
+  ctx.lineTo(x + r * 0.28, y + r * 1.15);
+  ctx.lineTo(x, y + r * 1.5);
+  ctx.fill();
+  headAt(ctx, x, y, r * 0.85, '#e2a881', hair, false);
+  ctx.fillStyle = INK;
+  ctx.beginPath();
+  ctx.arc(x - r * 0.3, y + r * 0.05, r * 0.09, 0, Math.PI * 2);
+  ctx.arc(x + r * 0.3, y + r * 0.05, r * 0.09, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#b5605f';
+  ctx.lineWidth = Math.max(0.5, r * 0.1);
+  ctx.beginPath();
+  ctx.arc(x, y + r * 0.3, r * 0.25, 0.2 * Math.PI, 0.8 * Math.PI);
+  ctx.stroke();
+}
+
 /**
  * Toise (D-43) : une bande graduée, des traits au crayon aux tailles de Céleste ; `grown` : un
  * nouveau trait plus haut, avec un petit cœur (quelques mois ont passé). Hauteur `h`, centrée
@@ -377,6 +461,12 @@ export function drawMemory(
       break;
     case 'bonnet':
       bonnet(ctx, size);
+      break;
+    case 'slipper':
+      slipper(ctx, size);
+      break;
+    case 'bottle':
+      bottle(ctx, size);
       break;
   }
   ctx.restore();
