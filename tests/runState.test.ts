@@ -196,20 +196,26 @@ describe('dangers du sol : ils piquent tous (D-51, D-56)', () => {
 });
 
 describe('ennemis dispersés (D-56)', () => {
-  it('restent absents tant que Céleste est dans la salle, reviennent en changeant de salle', () => {
+  it('restent absents dans la salle, reviennent après un évanouissement ou en revenant', () => {
     const r = rig(['################', '#..............#', '#e....P........#', '################']);
     const enemy = r.combat.enemies[0];
     if (!enemy) {
       throw new Error('ennemi absent');
     }
-    for (let swing = 0; swing < 10 && !enemy.dispersed; swing++) {
-      enemy.hit(swing, 1, r.combat.tuning);
-    }
+    const disperse = () => {
+      for (let swing = 0; swing < 10 && !enemy.dispersed; swing++) {
+        enemy.hit(swing, 1, r.combat.tuning);
+      }
+      expect(enemy.dispersed).toBe(true);
+    };
+    disperse();
+    r.step(600);
     expect(enemy.dispersed).toBe(true);
-    // Réapparition de Céleste dans la même salle.
-    r.combat.reset(false);
-    expect(r.combat.enemies[0]?.dispersed).toBe(true);
+    // Évanouissement : réapparition, même à une lanterne de la même salle.
+    r.combat.reset();
+    expect(enemy.dispersed).toBe(false);
     // Retour dans la salle plus tard.
+    disperse();
     r.combat.load(r.level);
     expect(r.combat.enemies[0]?.dispersed).toBe(false);
   });
