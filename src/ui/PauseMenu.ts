@@ -26,7 +26,14 @@ export interface PauseMenuOptions {
   onImportSave: () => void;
   /** Retour à l'écran d'accueil (après confirmation). */
   onQuitToTitle: () => void;
-  /** Parcours d'essai proposés (PROVISOIRE, prototype de la Phase 2). */
+  /**
+   * Outils de réglage (build de debug, D-59) : résolution, mode du joystick et parcours d'essai
+   * n'apparaissent qu'avec eux.
+   */
+  debugTools: boolean;
+  /** Passer au mode debug, ou le quitter (autre adresse, même sauvegarde). */
+  onSwitchDebug: () => void;
+  /** Parcours d'essai proposés (build de debug seulement). */
   levels: readonly { id: string; name: string }[];
   currentLevelId: () => string;
   onLevelChange: (id: string) => void;
@@ -49,7 +56,10 @@ function element<K extends keyof HTMLElementTagNameMap>(
   return el;
 }
 
-/** Menu pause en DOM : reprendre et régler les commandes tactiles (spec §40). */
+/**
+ * Menu pause en DOM (D-59, allégé) : reprendre, carte, accueil, son, commandes tactiles,
+ * sauvegarde, mode debug. Les réglages d'essai ne sont que dans le build de debug.
+ */
 export class PauseMenu {
   private readonly root: HTMLElement;
   private readonly refreshers: (() => void)[] = [];
@@ -78,7 +88,9 @@ export class PauseMenu {
       element('h3', panel, undefined, 'Commandes tactiles');
       this.addSlider(panel, 'Taille des boutons', 'buttonScale', (v) => `${Math.round(v * 100)} %`);
       this.addSlider(panel, 'Opacité', 'opacity', (v) => `${Math.round(v * 100)} %`);
-      this.addModeChoice(panel);
+      if (options.debugTools) {
+        this.addModeChoice(panel);
+      }
       const reset = element('button', panel, undefined, 'Réinitialiser les commandes');
       reset.addEventListener('click', () => {
         this.settings = { ...DEFAULT_CONTROL_SETTINGS };
@@ -88,7 +100,6 @@ export class PauseMenu {
         });
       });
     }
-    this.addRenderChoice(panel);
     element('h3', panel, undefined, 'Sauvegarde');
     const saveRow = element('div', panel, 'pause-levels');
     element('button', saveRow, undefined, 'Code de sauvegarde').addEventListener(
@@ -99,9 +110,23 @@ export class PauseMenu {
       'click',
       options.onImportSave,
     );
-    if (options.levels.length > 1) {
-      this.addLevelChoice(panel);
+    if (options.debugTools) {
+      this.addRenderChoice(panel);
+      if (options.levels.length > 1) {
+        this.addLevelChoice(panel);
+      }
     }
+    element('h3', panel, undefined, 'Mode debug');
+    const debug = element(
+      'button',
+      panel,
+      undefined,
+      options.debugTools ? 'Quitter le mode debug' : 'Passer en mode debug',
+    );
+    debug.addEventListener('click', () => {
+      debug.disabled = true;
+      options.onSwitchDebug();
+    });
     document.body.appendChild(this.root);
   }
 

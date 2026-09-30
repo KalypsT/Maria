@@ -30,6 +30,8 @@ const CAMERA_STORAGE_KEY = 'maria.debug.camera';
 const FEEL_STORAGE_KEY = 'maria.debug.feel';
 const COMBAT_STORAGE_KEY = 'maria.debug.combat';
 const WORLD_STORAGE_KEY = 'maria.debug.world';
+/** Cadre d'infos (FPS, position…) affiché ou masqué (D-59). */
+const STATS_STORAGE_KEY = 'maria.debug.stats';
 const ATTACK_COLOR = 0xff5d5d;
 const ENEMY_BOX_COLOR = 0xffa24d;
 const ENEMY_STATE_LABEL = ['patrouille', 'étourdi', 'dispersé'] as const;
@@ -45,6 +47,7 @@ const STYLE = `
 #${OVERLAY_ID} button { font: inherit; color: #fff; background: #3b3850; border: 1px solid #6b678a;
   border-radius: 6px; padding: 6px 10px; }
 #${OVERLAY_ID} .dbg-bar { display: flex; gap: 4px; align-items: center; }
+#${OVERLAY_ID} .dbg-stats[hidden] { display: none; }
 #${OVERLAY_ID} .dbg-stats { background: rgb(0 0 0 / 60%); padding: 4px 6px; border-radius: 4px;
   white-space: pre; text-align: left; }
 #${OVERLAY_ID} .dbg-panel { background: rgb(20 18 30 / 92%); border: 1px solid #6b678a;
@@ -185,6 +188,19 @@ export function installDebugOverlay(scene: GameScene): void {
   root.dataset.uiOverlay = '';
   const bar = element('div', root, 'dbg-bar');
   const stats = element('div', bar, 'dbg-stats');
+  // Cadre d'infos : masqué ou affiché d'un toucher, choix retenu (D-59).
+  let statsShown = true;
+  try {
+    statsShown = localStorage.getItem(STATS_STORAGE_KEY) !== 'hidden';
+  } catch {
+    // Stockage indisponible : affiché.
+  }
+  stats.hidden = !statsShown;
+  const infoToggle = element('button', bar, undefined, 'INFOS');
+  infoToggle.addEventListener('click', () => {
+    stats.hidden = !stats.hidden;
+    save(STATS_STORAGE_KEY, stats.hidden ? 'hidden' : 'shown');
+  });
   const toggle = element('button', bar, undefined, 'DEBUG');
   const panel = element('div', root, 'dbg-panel');
   panel.hidden = true;
