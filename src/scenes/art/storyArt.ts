@@ -621,6 +621,34 @@ function drawIcon(
       ctx.fillStyle = '#7a7066';
       ctx.fillRect(cx + 2, cy - 3.5, 2.2, 1);
       break;
+    case 'umbrella': {
+      // Aide du parapluie (D-62) : deux pressions de Saut (flèches), puis le parapluie ouvert.
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 1;
+      ctx.lineCap = 'round';
+      for (const x of [cx - 7.5, cx - 4]) {
+        ctx.beginPath();
+        ctx.moveTo(x, cy + 3);
+        ctx.lineTo(x, cy - 2);
+        ctx.moveTo(x - 1.3, cy - 0.6);
+        ctx.lineTo(x, cy - 2);
+        ctx.lineTo(x + 1.3, cy - 0.6);
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#f2c14e';
+      ctx.beginPath();
+      ctx.moveTo(cx - 1, cy - 1);
+      ctx.quadraticCurveTo(cx + 3.5, cy - 8.5, cx + 8, cy - 1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#8a5a44';
+      ctx.beginPath();
+      ctx.moveTo(cx + 3.5, cy - 3);
+      ctx.lineTo(cx + 3.5, cy + 4);
+      ctx.arc(cx + 4.4, cy + 4, 0.9, Math.PI, 0, true);
+      ctx.stroke();
+      break;
+    }
     case 'question':
       // « ? » seul, au crayon : un parent qui ne sait pas (D-37).
       ctx.strokeStyle = INK;

@@ -54,6 +54,8 @@ export const THOUGHT_ICONS = [
   'mom',
   /** Le portillon du jardin (fermé, ou montré par papa, D-60). */
   'gate',
+  /** Aide du parapluie (D-62) : Saut deux fois, puis le parapluie ouvert. */
+  'umbrella',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 

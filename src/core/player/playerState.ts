@@ -14,6 +14,8 @@ export const PlayerState = {
   Climb: 'Climb',
   /** Glisse contre un mur, en descente, en poussant vers lui (D-44). */
   WallSlide: 'WallSlide',
+  /** Plane sous le parapluie ouvert, en descente (D-62). */
+  Glide: 'Glide',
 } as const;
 export type PlayerState = (typeof PlayerState)[keyof typeof PlayerState];
 
@@ -29,6 +31,7 @@ export function nextPlayerState(
   landStepsRemaining: number,
   hurt = false,
   onWall = false,
+  gliding = false,
 ): PlayerState {
   if (hurt) {
     return PlayerState.Hurt;
@@ -37,12 +40,18 @@ export function nextPlayerState(
     if (rising) {
       return PlayerState.Jump;
     }
-    return onWall ? PlayerState.WallSlide : PlayerState.Fall;
+    if (onWall) {
+      return PlayerState.WallSlide;
+    }
+    return gliding ? PlayerState.Glide : PlayerState.Fall;
   }
   if (moving) {
     return PlayerState.Run;
   }
   const landing =
-    previous === PlayerState.Jump || previous === PlayerState.Fall || previous === PlayerState.Land;
+    previous === PlayerState.Jump ||
+    previous === PlayerState.Fall ||
+    previous === PlayerState.Glide ||
+    previous === PlayerState.Land;
   return landing && landStepsRemaining > 0 ? PlayerState.Land : PlayerState.Idle;
 }

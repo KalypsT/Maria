@@ -8,11 +8,23 @@
 
 **Musique** (D-57) : lecteur en place, en attente des morceaux.
 
-**Le quartier** (D-60, D-61) : plan validé (4 PR). PR 1 faite : portes de façade et aire de jeux (maman).
+**Le quartier** (D-60, D-61) : plan validé (4 PR). PR 1 faite : portes de façade et aire de jeux (maman). PR 2 faite : le parapluie (D-62), dans un parcours d'essai.
 
-Prochaine : PR 2, le parapluie seul (parcours d'essai, bulle d'aide, page des capacités dans le cahier) ; puis supérette et chantier, puis l'école et son monde étrange. Intégrer les morceaux de musique.
+Prochaine : PR 3, supérette et chantier (le parapluie s'y obtient) ; puis l'école et son monde étrange. Intégrer les morceaux de musique.
 
 ## Fait
+
+### Le quartier, PR 2 : le parapluie (D-62)
+
+- **Geste** : en l'air, appuyer encore sur Saut et le garder : le parapluie s'ouvre, Céleste plane (chute lente). Lâcher : il se referme. Les sauts ordinaires ne changent pas ; le jump buffering marche toujours.
+- **Marionnette** : Céleste tient le parapluie (jaune à pois) bien haut.
+- **Aide** : bulle pictogramme à l'obtention (deux sauts, le parapluie) ; nouvel onglet du cahier **« Mes capacités »** (pictogramme et comment s'en servir, cases vides pour les autres).
+- **Parcours d'essai 8 « Parapluie »** (menu pause) ; case « Capacité : parapluie » dans DEBUG ; réglages `glideFallSpeed` et `glideBrake`.
+- **Analyse de faisabilité** avec le parapluie (option) : sans elle, rien ne change.
+- Tests : 455. Vérifié dans Chromium : plané dans le parcours 8 (50 px/s), parapluie dessiné, bulle d'aide, page « Mes capacités ».
+- [ ] À vérifier sur téléphone (menu pause → Parcours d'essai → « 8. Parapluie ») : la deuxième pression vient-elle naturellement au pouce ? Le parapluie s'ouvre-t-il quand on le veut, et jamais sans le vouloir ?
+- [ ] La vitesse du plané (`glideFallSpeed`, 50) et le freinage (`glideBrake`) : trop lent, trop « flotteur » ? Exporter le JSON du debug.
+- [ ] La bulle d'aide se comprend-elle ? La page « Mes capacités » : lisible, les quatre onglets se touchent-ils bien ?
 
 ### Le quartier, PR 1 : portes de façade et aire de jeux (D-61)
 

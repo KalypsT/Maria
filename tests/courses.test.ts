@@ -41,7 +41,11 @@ describe.each(COURSE_IDS)('parcours %s', (id) => {
   let cached: LevelAnalysis | undefined;
   // Capacités prêtées par le parcours (`; @abilities:`, D-44).
   const lent = (level.meta.abilities ?? '').split(/\s+/);
-  const abilities = { climb: lent.includes('climb'), wallJump: lent.includes('wall-jump') };
+  const abilities = {
+    climb: lent.includes('climb'),
+    wallJump: lent.includes('wall-jump'),
+    glide: lent.includes('umbrella'),
+  };
   const analysis = () => (cached ??= analyzeLevel(level, DEFAULT_MOVEMENT, abilities));
 
   it(

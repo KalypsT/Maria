@@ -1,0 +1,34 @@
+; Parcours 8 : le parapluie (moyen, D-62). Capacités prêtées par le parcours (hors partie).
+; Du haut de la tour, on plane au-dessus des briques de jeu jusqu'à l'îlot (facile avec le
+; parapluie, impossible sans) ; puis, sous un plafond bas, une longue traversée jusqu'à l'arrivée
+; (moyen). En l'air, appuyer encore sur Saut et le garder : le parapluie s'ouvre.
+; @name: 8. Parapluie
+; @difficulty: medium
+; @abilities: climb wall-jump umbrella
+; Légende : # plein, b bois (plein), ^ briques de jeu (danger), . vide, P départ, G arrivée.
+########################################################################
+#...................................bbbbbbbbbbbbbbb....................#
+#...................................bbbbbbbbbbbbbbb....................#
+#...................................bbbbbbbbbbbbbbb....................#
+#...................................bbbbbbbbbbbbbbb....................#
+#...................................bbbbbbbbbbbbbbb....................#
+#...................................bbbbbbbbbbbbbbb....................#
+#...................................bbbbbbbbbbbbbbb....................#
+#...................................bbbbbbbbbbbbbbb....................#
+#...................................bbbbbbbbbbbbbbb....................#
+#...................................bbbbbbbbbbbbbbb....................#
+#...................................bbbbbbbbbbbbbbb....................#
+#...................................bbbbbbbbbbbbbbb....................#
+#...................................bbbbbbbbbbbbbbb....................#
+#...................................bbbbbbbbbbbbbbb....................#
+#...................................bbbbbbbbbbbbbbb....................#
+#...bbbbbb.............................................................#
+#...bbbbbb.............................................................#
+#...bbbbbb.............................................................#
+#.P.bbbbbb.............................................................#
+#bbbbbbbbb....................bbbb................................G....#
+#bbbbbbbbb....................bbbb..................bbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbb....................bbbb..................bbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbb....................bbbb..................bbbbbbbbbbbbbbbbbbb#
+##########^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^####################
+########################################################################
