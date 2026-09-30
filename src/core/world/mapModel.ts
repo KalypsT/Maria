@@ -155,15 +155,27 @@ export function buildMapModel(zone: Zone, progress: MapProgress, page: string = 
   return { rooms, links, celeste };
 }
 
+/** Côté d'une sortie : -1 mur gauche, 1 mur droit, 0 porte de façade (D-61). */
 function exitSide(zone: Zone, roomId: string, exitId: number): number {
-  const exit = zone.rooms.get(roomId)?.exits.find((e) => e.id === exitId);
+  const level = zone.rooms.get(roomId);
+  if (level?.doors.some((d) => d.id === exitId)) {
+    return 0;
+  }
+  const exit = level?.exits.find((e) => e.id === exitId);
   return exit?.side === 'left' ? -1 : 1;
 }
 
-/** Point d'une sortie sur le bord de la boîte de sa salle. */
+/**
+ * Point d'une sortie sur le bord de la boîte de sa salle ; une porte de façade (D-61) part du haut
+ * de la boîte (le lieu est « derrière » la façade).
+ */
 function exitPoint(zone: Zone, roomId: string, exitId: number): MapPoint | null {
   const box = zone.map[roomId];
   const level = zone.rooms.get(roomId);
+  const door = level?.doors.find((d) => d.id === exitId);
+  if (box && level && door) {
+    return { x: box.x + ((door.col + 0.5) / level.width) * box.w, y: box.y };
+  }
   const exit = level?.exits.find((e) => e.id === exitId);
   if (!box || !level || !exit) {
     return null;

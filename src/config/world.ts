@@ -41,3 +41,9 @@ export const WORLD_PARAM_RANGES: Readonly<
  * une tuile de danger ; un frôlement ne compte pas (précision avant réalisme).
  */
 export const HAZARD_INSET_PX = 2;
+
+/**
+ * Portes de façade (D-61) : on peut en ouvrir une (Agir) à au plus ce nombre de tuiles de part et
+ * d'autre de la tuile où l'on se tient devant elle.
+ */
+export const DOOR_REACH_TILES = 2;

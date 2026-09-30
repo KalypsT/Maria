@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DIFFICULTY_MIN_WINDOW_MS } from '../src/config/levelDesign';
 import { EntityType } from '../src/core/level/LevelData';
-import { isStrangeRoom } from '../src/core/world/zone';
+import { isStrangeRoom, mapPage } from '../src/core/world/zone';
 import {
   analysis,
   byDifficulty,
@@ -51,12 +51,13 @@ describe.each([false, true])('maison (D-25), escalade %s', (climb) => {
     'toutes les salles sont atteignables depuis le lit (grenier et monde étrange en grimpant)',
     { timeout: TIMEOUT },
     () => {
-      // Le jardin (D-46) reste fermé tant que Céleste n'a pas grandi : voir garden.test.ts ; la rue
-      // (D-60), derrière le portillon du jardin : voir street.test.ts.
+      // Le jardin (D-46) reste fermé tant que Céleste n'a pas grandi : voir garden.test.ts ; le
+      // quartier (D-60, D-61), derrière le portillon du jardin : voir street.test.ts.
       const seen = reachable(zoneGraph(climb, roomDifficulty), home());
       const rooms = new Set([...seen].map((n) => n.split('#')[0]));
       const missing = [...zone.rooms.keys()].filter(
-        (room) => !rooms.has(room) && !room.startsWith('garden-') && room !== 'street',
+        (room) =>
+          !rooms.has(room) && !room.startsWith('garden-') && mapPage(zone, room) !== 'street',
       );
       expect(missing).toEqual(climb ? [] : ['attic', 'living-strange', 'shadows']);
       expect([...seen].filter((n) => roomOf(n).startsWith('garden-'))).toEqual([]);

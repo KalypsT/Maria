@@ -650,6 +650,28 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Sauvegarde** : aucune migration (étapes `garden.gate`, `garden.dad-gate`).
 - **Debug** : étapes « le bonnet trouvé (portillon à ouvrir) » et « portillon ouvert (la rue) ».
 
+## D-61 — Le quartier : plan du niveau, portes de façade, l'aire de jeux (PR 1)
+
+- **Plan validé** (le quartier, d'après `MARIA_Histoire_Monde_Etrange.md`) :
+  - **un seul niveau**, des lieux **connectés** derrière les façades plutôt qu'une étoile de culs-de-sac (changement de structure signalé et accepté) : aire de jeux → cour de l'école → école (sa porte de façade s'ouvre de l'intérieur : raccourci) ; supérette → réserve → chantier → haut de l'échafaudage de la rue (boucle) ;
+  - **ordre de jeu** : l'aire de jeux (maman), où l'on voit la cour de l'école hors d'atteinte ; la supérette (papa) et le chantier, où l'on trouve le **parapluie** ; retour à l'aire de jeux, et en planant la cour, puis l'école ;
+  - **le monde étrange est dans l'école** (choix de l'utilisateur) : l'école déformée ; la **boîte à formes** (objet d'enfance, seulement dans le monde étrange) ; **Maria n'y est pas montrée**, seulement suggérée par un trou en forme de Maria dans la boîte (option B, si lisible ; sinon rien, option C). On ne ramasse pas la boîte : on la regarde, elle devient un souvenir d'une nouvelle rubrique du cahier, « Monde étrange » ;
+  - **parapluie** (nouvelle capacité, choix de l'utilisateur) : planer en appuyant une **deuxième fois** sur Saut en l'air (le garder appuyé ne change aucun saut actuel). Testé seul d'abord (parcours d'essai), avec une **bulle d'aide** et une **page du cahier** qui liste les capacités acquises et comment s'en servir (demande de l'utilisateur) ;
+  - **parents** : maman à l'aire de jeux, papa à la supérette ;
+  - **fin du niveau** : cour de l'école au crépuscule, maman vient chercher Céleste, la nuit dans sa chambre avec une lueur turquoise au loin par la fenêtre ; au matin, la palissade du chantier s'ouvre vers le niveau suivant, **avec des indices pour y retourner** (demande de l'utilisateur) ;
+  - pas de croissance dans ce niveau ; le portique de bébé (jardin renversé) reste de côté ;
+  - découpage : PR 1 portes de façade et aire de jeux ; PR 2 le parapluie seul ; PR 3 supérette et chantier ; PR 4 l'école et son monde étrange, fin du niveau.
+- **Portes de façade** (moteur) :
+  - directive `; @door: <n> <col> <ligne>` : une sortie au milieu d'une salle, numérotée comme les sorties latérales ; la tuile est celle où Céleste se tient devant la porte ;
+  - reliée dans `zone.ts` comme une sortie (`street:2` ↔ `playground:1`), à une sortie latérale ou à une autre porte ; validée (reliée une fois, on tient debout devant) ;
+  - on la franchit avec **Agir**, au sol, à 2 tuiles près (`DOOR_REACH_TILES`) : étincelle au-dessus de la porte, bouton « Agir » ; jamais en la touchant. Un déclencheur de l'histoire à portée passe avant ;
+  - `lockedRooms` s'applique aux portes (bulle, sans passage) ;
+  - on arrive devant la porte arrêtée ; même fondu qu'une sortie ;
+  - carte : trait direct de la porte (bord haut de la rue) au lieu, dessiné au-dessus ; analyse de faisabilité : une porte est un passage comme une sortie.
+- **L'aire de jeux** (`playground`, PLACEHOLDER, `; @world: street`, sol souple par `; @floor:`) : banc de maman et lanterne, bac à sable, tourniquet, cage à écureuil, portique, tour du toboggan (**moyenne** exactement : saut de 6 tuiles du portique à la plateforme), toit de la tour, nichoir en haut de son mât (trouvaille **difficile** exactement, depuis le toit) ; au fond, le grillage de l'école et son trou, **hors d'atteinte** (testé : même en difficile), pour le parapluie.
+- **Histoire** : une fois le portillon ouvert, maman quitte le linge (terrasse) pour un banc de l'aire de jeux (hors de la vue) ; Agir : Maria disparue, maman « cherche bien », cœur (étape `street.mom`). Le déclencheur « ? » de la porte de l'aire de jeux est remplacé par la porte.
+- **Sauvegarde** : aucune migration (étape `street.mom`).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

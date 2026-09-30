@@ -67,31 +67,37 @@ Le jeu ne doit cependant jamais confirmer explicitement si Maria est entrée vol
 # 5. Les objets perdus
 
 ## Portique de bébé
+
 **Période :** toute petite enfance / bébé.
 
 Premier élément très ancien. Il introduit discrètement le nouveau thème et peut apparaître dans le monde étrange du jardin.
 
 ## Boîte à formes
+
 **Période :** très jeune enfance.
 
 Jeu à valeur affective moyenne. Première découverte permettant de comprendre que le monde étrange contient d'anciens jouets de Céleste.
 
 ## Roger, peluche singe
+
 **Période :** environ 1 à 2 ans.
 
 Doudou très important. Premier objet à forte valeur affective et premier vrai souvenir significatif.
 
 ## Livre musical
+
 **Période :** environ 1 à 3 ans.
 
 Objet lié aux habitudes de petite enfance. Il peut déclencher un court flashback, puis progressivement des souvenirs plus jouables.
 
 ## Cuisine d'enfant rose
+
 **Période :** environ 2 à 4 ans.
 
 Jeu associé à une période où Céleste développe davantage son imagination et son autonomie. Peut déclencher un flashback jouable plus développé.
 
 ## Torchon blanc
+
 **Période :** une grande partie de l'enfance.
 
 Objet de réconfort, et non un jouet. Son importance est très personnelle pour Céleste.
@@ -105,15 +111,19 @@ Le flashback peut montrer une petite Céleste serrant son torchon contre elle.
 # 6. Progression des souvenirs
 
 ### Début
+
 Les objets sont simplement découverts.
 
 ### Milieu
+
 Certains objets déclenchent de très courts souvenirs montrant Céleste plus petite.
 
 ### Approche de la fin
+
 Les souvenirs deviennent plus longs et commencent à être jouables.
 
 ### Avant-dernier monde
+
 Plusieurs objets peuvent être présents dans le même monde étrange. Le monde devient une concentration de différentes périodes de l'enfance de Céleste.
 
 ---
@@ -161,6 +171,7 @@ C'est le moment où le sens du monde étrange devient pratiquement évident.
 # 8. Structure générale
 
 ### Jardin
+
 Le jardin possède déjà son monde étrange : le jardin inversé.
 
 Élément établi : **bonnet de Maria**.
@@ -168,6 +179,7 @@ Le jardin possède déjà son monde étrange : le jardin inversé.
 Le **portique de bébé** peut être intégré à ce monde pour introduire discrètement le nouveau thème.
 
 ### Niveau Rue / Quartier
+
 Le niveau contient plusieurs lieux connectés, notamment la rue et d'autres espaces comme l'école ou l'aire de jeu.
 
 Il s'agit d'un **seul niveau**, pas de plusieurs niveaux distincts.
@@ -179,11 +191,13 @@ Le monde étrange peut apparaître dans une zone précise.
 Les autres espaces peuvent rester réels pour créer du contraste.
 
 ### Niveaux suivants
+
 Les niveaux suivants peuvent intégrer progressivement Roger, le livre musical, la cuisine rose et le torchon blanc.
 
 Il n'est pas obligatoire de conserver strictement un objet par niveau.
 
 ### Avant-dernier niveau
+
 Niveau presque entièrement étrange, avec quelques éléments réels.
 
 Plusieurs anciens objets de Céleste peuvent y être présents.
@@ -191,6 +205,7 @@ Plusieurs anciens objets de Céleste peuvent y être présents.
 Le niveau se termine avec **Eden** et son flashback jouable.
 
 ### Dernier niveau
+
 Dernier monde étrange consacré **uniquement à Maria**.
 
 Il ne doit plus fonctionner comme une chasse aux objets.
@@ -224,6 +239,7 @@ Puis elle retrouve Maria.
 Le jeu ne donne jamais d'explication officielle de sa nature.
 
 Il peut être interprété comme :
+
 - un véritable monde surnaturel ;
 - un espace lié aux souvenirs et à l'enfance ;
 - un endroit que les enfants perçoivent différemment des adultes ;

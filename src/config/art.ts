@@ -147,6 +147,23 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   shopsign: { furniture: true },
   /** Échafaudage du chantier (planches traversables). */
   scaffold: { furniture: true },
+  // L'aire de jeux (D-61), dessinée par le code (PLACEHOLDER).
+  /** Bac à sable (bois plein, bas). */
+  sandbox: { furniture: true },
+  /** Tourniquet (plateau plein, bas). */
+  roundabout: { furniture: true },
+  /** Cage à écureuil : barreaux traversables, arceaux dessinés jusqu'au sol. */
+  climbingdome: { furniture: true },
+  /** Portique des balançoires : la poutre est traversable, pieds et balançoires en fond. */
+  swingset: { furniture: true },
+  /** Nichoir en haut d'un mât : son toit est un perchoir traversable. */
+  birdhouse: { furniture: true },
+  /** Tour du toboggan : plancher traversable, toit plein ; poteaux et toboggan en fond. */
+  slidetower: { furniture: true },
+  /** Jeu à ressort (fond). */
+  springrider: { furniture: false },
+  /** Grillage de l'école, plein, avec son trou ; la cour se voit à travers. */
+  schoolfence: { furniture: true },
   cushions: { furniture: false },
   // Derrière la haie (D-49).
   /** Tuteur géant (bois plein), paroi d'une cheminée. */

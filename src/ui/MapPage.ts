@@ -560,6 +560,19 @@ function drawIcon(
       ctx.moveTo(x - s, y - s * 0.1);
       ctx.lineTo(x + s, y - s * 0.1);
       break;
+    case 'swing':
+      // Un portique et sa balançoire (l'aire de jeux, D-61).
+      ctx.moveTo(x - s, y + s * 0.7);
+      ctx.lineTo(x - s * 0.6, y - s * 0.6);
+      ctx.lineTo(x + s * 0.6, y - s * 0.6);
+      ctx.lineTo(x + s, y + s * 0.7);
+      ctx.moveTo(x - s * 0.2, y - s * 0.6);
+      ctx.lineTo(x - s * 0.2, y + s * 0.2);
+      ctx.moveTo(x + s * 0.2, y - s * 0.6);
+      ctx.lineTo(x + s * 0.2, y + s * 0.2);
+      ctx.moveTo(x - s * 0.35, y + s * 0.2);
+      ctx.lineTo(x + s * 0.35, y + s * 0.2);
+      break;
     case 'street':
       // Un lampadaire et une petite maison au bord d'une route (D-60).
       ctx.moveTo(x - s, y + s * 0.6);

@@ -4,6 +4,7 @@ import {
   Material,
   Tile,
   type LevelData,
+  type LevelDoor,
   type LevelEntity,
   type LevelExit,
   type TilePos,
@@ -53,6 +54,8 @@ const COMMENT = ';';
 const META = /^;\s*@([\w-]+)\s*:\s*(.*)$/;
 /** Élément d'habillage (D-28), répétable : `; @decor: bed 7 16 11 4` (nom, colonne, ligne, largeur, hauteur). */
 const DECOR = /^([a-z][\w-]*)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
+/** Porte de façade (D-61), répétable : `; @door: 2 50 27` (numéro, colonne, ligne où l'on se tient). */
+const DOOR = /^([1-9])\s+(\d+)\s+(\d+)$/;
 
 /**
  * Convertit une carte ASCII (décision D-06) en `LevelData`.
@@ -62,12 +65,13 @@ const DECOR = /^([a-z][\w-]*)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
  * `b` bois, `t` tissu et `v` feuillage (pleins, D-46), `-` étagère (traversable), `1`-`9` sortie dans un mur latéral,
  * `A` objet de capacité (au plus un, capacité nommée par `; @ability:`), `S` trouvaille (secret).
  * Les commentaires `; @clé: valeur` sont des métadonnées ; `; @decor:` (répétable) déclare
- * l'habillage (D-28).
+ * l'habillage (D-28), `; @door:` (répétable) une porte de façade (D-61).
  */
 export function parseAsciiLevel(id: string, text: string): LevelData {
   const rows: { text: string; line: number }[] = [];
   const meta: Record<string, string> = {};
   const decor: LevelDecor[] = [];
+  const doors: LevelDoor[] = [];
   text.split('\n').forEach((raw, index) => {
     const line = raw.replace(/\r$/, '').trimEnd();
     if (!line.startsWith(COMMENT)) {
@@ -90,6 +94,12 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         width: width ?? 0,
         height: height ?? 0,
       });
+    } else if (match?.[1] === 'door' && match[2] !== undefined) {
+      const d = DOOR.exec(match[2].trim());
+      if (!d) {
+        throw new Error(`Niveau ${id}, ligne ${index + 1} : @door attend « numéro col ligne »`);
+      }
+      doors.push({ id: Number(d[1]), col: Number(d[2]), row: Number(d[3]) });
     } else if (match?.[1] !== undefined && match[2] !== undefined) {
       meta[match[1]] = match[2];
     }
@@ -168,7 +178,28 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
       throw new Error(`Niveau ${id} : @decor ${d.kind} hors de la salle`);
     }
   }
-  return { id, width, height, tiles, spawn, goal, meta, entities, materials, exits, decor };
+  for (const door of doors) {
+    if (exits.some((e) => e.id === door.id) || doors.filter((d) => d.id === door.id).length > 1) {
+      throw new Error(`Niveau ${id} : porte ${door.id} en double`);
+    }
+    if (door.col >= width || door.row >= height) {
+      throw new Error(`Niveau ${id} : porte ${door.id} hors de la salle`);
+    }
+  }
+  return {
+    id,
+    width,
+    height,
+    tiles,
+    spawn,
+    goal,
+    meta,
+    entities,
+    materials,
+    exits,
+    doors,
+    decor,
+  };
 }
 
 /** Une sortie : tuiles d'une même colonne de mur latéral, contiguës, au moins 2 de haut. */
