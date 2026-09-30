@@ -31,7 +31,13 @@ import { LEVELS, levelName, startRoom, zoneRoom, type LevelSource, type ZoneRoom
 import { DEFAULT_WORLD, type WorldParams } from '../config/world';
 import { checkpointId } from '../core/save/saveData';
 import type { SaveSession } from '../core/save/SaveSession';
-import { ABILITY_HINTS, ABILITY_HINT_MS, Ability, isAbility } from '../config/abilities';
+import {
+  ABILITY_HELP_ICONS,
+  ABILITY_HINTS,
+  ABILITY_HINT_MS,
+  Ability,
+  isAbility,
+} from '../config/abilities';
 import { PickupKind, Pickups } from '../core/world/Pickups';
 import { RoomTransition } from '../core/world/RoomTransition';
 import { RunEvent, RunState } from '../core/world/RunState';
@@ -174,6 +180,8 @@ export class GameScene extends Phaser.Scene {
   debugClimb = false;
   /** Outil de debug : saut mural débloqué sans objet ni sauvegarde (D-44). */
   debugWallJump = false;
+  /** Outil de debug : parapluie débloqué sans objet ni sauvegarde (D-62). */
+  debugUmbrella = false;
   /** Aperçu du monde étrange (D-28, overlay) : mêmes formes, autre palette. */
   strangeWorld = false;
   private roomArt!: RoomArtView;
@@ -645,6 +653,7 @@ export class GameScene extends Phaser.Scene {
       MAP_TITLES[page] ?? page,
       mapBounds(zone, page),
       data.progression.memories,
+      this.ownedAbilities(),
     );
   }
 
@@ -939,6 +948,16 @@ export class GameScene extends Phaser.Scene {
     this.fx.load(level, isStrangeRoom(level), this.palette(), this.story.timeOfDay() === 'morning');
   }
 
+  /** Capacités de Céleste en ce moment (sauvegarde, debug, parcours d'essai), pour le cahier. */
+  private ownedAbilities(): Ability[] {
+    const player = this.player;
+    return [
+      ...(player.canClimb ? [Ability.Climb] : []),
+      ...(player.canWallJump ? [Ability.WallJump] : []),
+      ...(player.canGlide ? [Ability.Umbrella] : []),
+    ];
+  }
+
   /**
    * Capacités acquises (sauvegarde), débloquées par l'overlay ou prêtées par un parcours d'essai
    * (`; @abilities:`, hors partie), appliquées à Céleste.
@@ -949,6 +968,7 @@ export class GameScene extends Phaser.Scene {
     const has = (ability: Ability) => owned.includes(ability) || lent.includes(ability);
     this.player.canClimb = this.debugClimb || has(Ability.Climb);
     this.player.canWallJump = this.debugWallJump || has(Ability.WallJump);
+    this.player.canGlide = this.debugUmbrella || has(Ability.Umbrella);
   }
 
   /**
@@ -972,6 +992,11 @@ export class GameScene extends Phaser.Scene {
     void this.session.unlockAbility(item.id);
     this.applyAbilities();
     this.hud.showHint(ABILITY_HINTS[item.id], ABILITY_HINT_MS);
+    // Bulle d'aide (D-62, demande de l'utilisateur) : comment s'en servir, en pictogramme.
+    const help = ABILITY_HELP_ICONS[item.id];
+    if (help) {
+      this.storyView.think(help, ABILITY_HINT_MS);
+    }
   }
 
   private resetCamera(): void {

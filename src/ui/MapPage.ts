@@ -1,7 +1,9 @@
 import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 import type { MapModel, MapPoint, MapRoom } from '../core/world/mapModel';
 import type { MapBox } from '../core/world/zone';
+import { ABILITY_HINTS, Ability } from '../config/abilities';
 import { MARIA_THINGS, MEMORIES, type MemoryId } from '../config/memories';
+import { drawAbility } from '../scenes/art/abilityArt';
 import { drawMemory } from '../scenes/art/memoryArt';
 
 /** Durée du tracé d'une salle découverte depuis la dernière ouverture (ms). */
@@ -31,7 +33,7 @@ function seeded(text: string): () => number {
  * qu'elle est ouverte ; un toucher ou le bouton Carte la referme. Dessinée au crayon : salles
  * visitées, salles devinées (« ? »), passages, veilleuses allumées, trouvailles, Céleste.
  */
-type NotebookPage = 'map' | 'memories' | 'maria';
+type NotebookPage = 'map' | 'memories' | 'maria' | 'abilities';
 
 export class MapPage {
   private readonly root: HTMLElement;
@@ -39,6 +41,9 @@ export class MapPage {
   private readonly title: HTMLButtonElement;
   private readonly memoriesTab: HTMLButtonElement;
   private readonly mariaTab: HTMLButtonElement;
+  private readonly abilitiesTab: HTMLButtonElement;
+  /** Capacités acquises (D-62), pour la page « Mes capacités ». */
+  private abilities: ReadonlySet<string> = new Set();
   /** Page affichée : la carte, les souvenirs (D-38) ou les affaires de Maria (D-58). */
   private page: NotebookPage = 'map';
   private found: ReadonlySet<string> = new Set();
@@ -58,7 +63,8 @@ export class MapPage {
     this.root.hidden = true;
     const panel = document.createElement('div');
     panel.className = 'map-panel';
-    // Trois onglets manuscrits : la carte, les souvenirs (D-38) et les affaires de Maria (D-58).
+    // Onglets manuscrits : la carte, les souvenirs (D-38), les affaires de Maria (D-58) et les
+    // capacités acquises (D-62).
     const tabs = document.createElement('div');
     tabs.className = 'map-tabs';
     this.title = document.createElement('button');
@@ -69,11 +75,15 @@ export class MapPage {
     this.mariaTab = document.createElement('button');
     this.mariaTab.className = 'map-title';
     this.mariaTab.textContent = 'Les affaires de Maria';
-    tabs.append(this.title, this.memoriesTab, this.mariaTab);
+    this.abilitiesTab = document.createElement('button');
+    this.abilitiesTab.className = 'map-title';
+    this.abilitiesTab.textContent = 'Mes capacités';
+    tabs.append(this.title, this.memoriesTab, this.mariaTab, this.abilitiesTab);
     for (const [tab, page] of [
       [this.title, 'map'],
       [this.memoriesTab, 'memories'],
       [this.mariaTab, 'maria'],
+      [this.abilitiesTab, 'abilities'],
     ] as const) {
       tab.type = 'button';
       tab.addEventListener('pointerup', (event) => {
@@ -84,7 +94,7 @@ export class MapPage {
     this.canvas = document.createElement('canvas');
     this.canvas.className = 'map-canvas';
     this.canvas.addEventListener('pointerup', (event) => {
-      if (this.page !== 'map' && this.touchMemories(event)) {
+      if ((this.page === 'memories' || this.page === 'maria') && this.touchMemories(event)) {
         event.stopPropagation();
       }
     });
@@ -102,13 +112,20 @@ export class MapPage {
 
   /**
    * Ouvre le cahier sur la carte. `bounds` : boîte englobant toute la zone (disposition stable) ;
-   * `memories` : souvenirs trouvés.
+   * `memories` : souvenirs trouvés ; `abilities` : capacités acquises.
    */
-  open(model: MapModel, title: string, bounds: MapBox, memories: readonly string[] = []): void {
+  open(
+    model: MapModel,
+    title: string,
+    bounds: MapBox,
+    memories: readonly string[] = [],
+    abilities: readonly string[] = [],
+  ): void {
     this.model = model;
     this.bounds = bounds;
     this.title.textContent = title;
     this.found = new Set(memories);
+    this.abilities = new Set(abilities);
     this.show('map');
     this.root.hidden = false;
     this.openedAt = performance.now();
@@ -138,6 +155,49 @@ export class MapPage {
     this.title.classList.toggle('active', page === 'map');
     this.memoriesTab.classList.toggle('active', page === 'memories');
     this.mariaTab.classList.toggle('active', page === 'maria');
+    this.abilitiesTab.classList.toggle('active', page === 'abilities');
+  }
+
+  /**
+   * Page « Mes capacités » (D-62, demande de l'utilisateur) : une ligne par capacité, dans l'ordre
+   * où on les trouve. Acquise : son pictogramme et comment s'en servir ; sinon une case vide en
+   * pointillés, sans rien dévoiler (complétion explicite, §23).
+   */
+  private drawAbilities(ctx: CanvasRenderingContext2D, width: number, height: number): void {
+    const ink = themeColor('--ink');
+    const pencil = themeColor('--pencil');
+    const rose = themeColor('--crayon-rose');
+    const font = getComputedStyle(document.body).fontFamily;
+    const list = Object.values(Ability);
+    const rowH = Math.min(96, (height - 16) / list.length);
+    const box = rowH * 0.78;
+    const left = 24;
+    ctx.lineCap = 'round';
+    list.forEach((ability, i) => {
+      const cy = 8 + rowH * (i + 0.5);
+      const owned = this.abilities.has(ability);
+      ctx.strokeStyle = owned ? ink : pencil;
+      ctx.lineWidth = owned ? 2 : 1.6;
+      ctx.setLineDash(owned ? [] : [6, 5]);
+      ctx.beginPath();
+      ctx.roundRect(left, cy - box / 2, box, box, 10);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      if (!owned) {
+        return;
+      }
+      drawAbility(ctx, ability, left + box / 2, cy, box * 0.8, ink, rose);
+      ctx.fillStyle = ink;
+      ctx.font = `italic 600 ${String(Math.round(Math.min(17, rowH * 0.2)))}px ${font}`;
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'left';
+      const x = left + box + 18;
+      const lines = wrapText(ctx, ABILITY_HINTS[ability], width - x - 16);
+      const lineH = Math.min(22, rowH * 0.26);
+      lines.forEach((line, k) => {
+        ctx.fillText(line, x, cy + (k - (lines.length - 1) / 2) * lineH);
+      });
+    });
   }
 
   /** Toucher sur la page des souvenirs : ouvre ou referme un souvenir ; vrai s'il est traité. */
@@ -232,6 +292,10 @@ export class MapPage {
     }
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.clearRect(0, 0, width, height);
+    if (this.page === 'abilities') {
+      this.drawAbilities(ctx, width, height);
+      return;
+    }
     if (this.page !== 'map') {
       this.drawMemories(ctx, width, height, this.page === 'maria' ? MARIA_THINGS : MEMORIES);
       return;
@@ -589,4 +653,23 @@ function drawIcon(
       ctx.arc(x, y, s * 0.3, 0, Math.PI * 2);
   }
   ctx.stroke();
+}
+
+/** Coupe un texte en lignes qui tiennent dans `maxWidth` (px), mot par mot. */
+function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+  const lines: string[] = [];
+  let line = '';
+  for (const word of text.split(' ')) {
+    const candidate = line ? `${line} ${word}` : word;
+    if (line && ctx.measureText(candidate).width > maxWidth) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = candidate;
+    }
+  }
+  if (line) {
+    lines.push(line);
+  }
+  return lines;
 }

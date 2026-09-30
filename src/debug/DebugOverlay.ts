@@ -391,6 +391,10 @@ export function installDebugOverlay(scene: GameScene): void {
     scene.debugWallJump = checked;
     scene.applyAbilities();
   });
+  addCheck(panel, 'Capacité : parapluie', scene.debugUmbrella, (checked) => {
+    scene.debugUmbrella = checked;
+    scene.applyAbilities();
+  });
 
   const refreshMovement = addSliders<MovementParams>(panel, {
     title: 'Mouvement',

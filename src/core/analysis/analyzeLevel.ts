@@ -42,6 +42,8 @@ export interface Move {
   readonly windowMs: number;
   /** Passage par les appuis sur les murs (D-44) : type du premier élan. */
   readonly start?: MoveKind;
+  /** Parapluie ouvert en l'air (D-62) : nouvelle pression de Saut au sommet, tenue jusqu'au sol. */
+  readonly glide?: boolean;
 }
 
 /**
@@ -85,6 +87,8 @@ interface Family {
   readonly dir: number;
   readonly holdSteps: number;
   readonly airRelease: boolean;
+  /** Parapluie ouvert au sommet (D-62). */
+  readonly glide: boolean;
   /** Surface atteinte pour chaque essai successif (-1 : aucune autre surface). */
   readonly targets: number[];
 }
@@ -105,6 +109,8 @@ class MoveExplorer {
   private readonly reachPx: number;
   /** Hauteur prudente au-dessus des pieds balayée par un saut (tuiles). */
   private readonly reachUpTiles: number;
+  /** Durée maximale simulée en l'air (pas) : plus longue sous le parapluie (D-62). */
+  private readonly maxAirSteps: number;
   /** Appuis sur les murs découverts (D-44), numérotés après les surfaces. */
   readonly wallNodes: WallNode[] = [];
   private readonly wallIds = new Map<string, number>();
@@ -120,6 +126,7 @@ class MoveExplorer {
     canClimb: boolean,
     private readonly hitbox: Readonly<{ width: number; height: number }>,
     private readonly canWallJump = false,
+    private readonly canGlide = false,
   ) {
     this.main = new PlayerPhysics(level, params, 0, 0, hitbox);
     this.probe = new PlayerPhysics(level, params, 0, 0, hitbox);
@@ -127,13 +134,20 @@ class MoveExplorer {
     this.probe.canClimb = canClimb;
     this.main.canWallJump = canWallJump;
     this.probe.canWallJump = canWallJump;
+    this.main.canGlide = canGlide;
+    this.probe.canGlide = canGlide;
     const derived = deriveMovement(params);
     this.stepMs = derived.dt * 1000;
     this.coyoteSteps = derived.coyoteSteps;
     const apexPx = (derived.jumpVelocity * derived.jumpVelocity) / (2 * derived.riseGravity);
     const airtime =
       derived.jumpVelocity / derived.riseGravity + Math.sqrt((2 * apexPx) / derived.fallGravity);
-    this.reachPx = 1.5 * params.maxRunSpeed * airtime + 3 * T;
+    // Sous le parapluie (D-62), on va aussi loin que la hauteur de la salle le permet.
+    const glideTime = canGlide ? (level.height * T) / params.glideFallSpeed : 0;
+    this.reachPx = 1.5 * params.maxRunSpeed * (airtime + glideTime) + 3 * T;
+    this.maxAirSteps = canGlide
+      ? MOVE_SEARCH.maxSteps + Math.ceil(glideTime / derived.dt)
+      : MOVE_SEARCH.maxSteps;
     // En grimpant, les mains atteignent un bord au-dessus de la tête (D-26).
     const grabPx = canClimb ? hitbox.height + params.ledgeGrabAbovePx : 0;
     this.reachUpTiles = Math.ceil((apexPx + hitbox.height + grabPx) / T) + 2;
@@ -166,8 +180,11 @@ class MoveExplorer {
     for (const dir of dirs) {
       for (const holdSteps of MOVE_SEARCH.jumpHoldSteps) {
         for (const airRelease of withRelease ? [false, true] : [false]) {
-          families.push({ kind, dir, holdSteps, airRelease, targets: [] });
+          families.push({ kind, dir, holdSteps, airRelease, glide: false, targets: [] });
         }
+      }
+      if (this.canGlide) {
+        families.push({ kind, dir, holdSteps: 0, airRelease: false, glide: true, targets: [] });
       }
     }
     return families;
@@ -210,6 +227,7 @@ class MoveExplorer {
           holdSteps: family.holdSteps,
           airRelease: family.airRelease,
           windowMs: count * msPerTry,
+          ...(family.glide ? { glide: true } : {}),
         });
       }
     }
@@ -263,7 +281,9 @@ class MoveExplorer {
       const worth = this.worthTrying(surface, main.box.x, dirs);
       for (const family of families) {
         family.targets.push(
-          worth ? this.tryJump(main, dir, family.holdSteps, family.airRelease) : surface.id,
+          worth
+            ? this.tryJump(main, dir, family.holdSteps, family.airRelease, family.glide)
+            : surface.id,
         );
       }
       input.moveX = dir;
@@ -292,6 +312,20 @@ class MoveExplorer {
         airRelease: false,
         windowMs: Number.POSITIVE_INFINITY,
       });
+      if (this.canGlide) {
+        // Tomber du bord, puis ouvrir le parapluie (D-62).
+        this.probe.copyFrom(main);
+        offer({
+          from: surface.id,
+          to: this.finish(dir, true),
+          kind: MoveKind.WalkOff,
+          dir,
+          holdSteps: 0,
+          airRelease: false,
+          windowMs: Number.POSITIVE_INFINITY,
+          glide: true,
+        });
+      }
     }
   }
 
@@ -308,7 +342,7 @@ class MoveExplorer {
         let target = surface.id;
         if (worth) {
           this.main.reset(x, y, this.level);
-          target = this.tryJump(this.main, family.dir, family.holdSteps, false);
+          target = this.tryJump(this.main, family.dir, family.holdSteps, false, family.glide);
         }
         family.targets.push(target);
       }
@@ -346,24 +380,31 @@ class MoveExplorer {
     }
   }
 
-  /** Depuis l'état de `from`, saute maintenant et retourne la surface où Céleste s'arrête. */
+  /**
+   * Depuis l'état de `from`, saute maintenant et retourne la surface où Céleste s'arrête. `glide` :
+   * au sommet, nouvelle pression de Saut qui ouvre le parapluie, tenue jusqu'au sol (D-62).
+   */
   private tryJump(
     from: PlayerPhysics,
     dir: number,
     holdSteps: number,
     airRelease: boolean,
+    glide = false,
   ): number {
     const probe = this.probe;
     probe.copyFrom(from);
     const input = this.input;
     input.moveY = 0;
     let airborne = false;
-    for (let s = 0; s < MOVE_SEARCH.maxSteps; s++) {
+    let opened = false;
+    for (let s = 0; s < this.maxAirSteps; s++) {
       if (airborne && probe.grounded) {
         break;
       }
-      input.jumpPressed = s === 0;
-      input.jumpHeld = holdSteps === 0 || s < holdSteps;
+      const open: boolean = glide && !opened && airborne && probe.vy >= 0;
+      opened ||= open;
+      input.jumpPressed = s === 0 || open;
+      input.jumpHeld = opened || holdSteps === 0 || s < holdSteps;
       input.moveX = airRelease && s > 0 ? 0 : dir;
       const before = probe.state;
       probe.step(input);
@@ -375,7 +416,7 @@ class MoveExplorer {
       }
       airborne ||= !probe.grounded;
     }
-    return this.finish(0);
+    return this.finish(0, glide);
   }
 
   /** Vrai si `probe` vient d'entrer en glissade contre un mur (appui du saut mural, D-44). */
@@ -439,8 +480,8 @@ class MoveExplorer {
       }
     };
     const w = node.dir;
-    const families = this.families(MoveKind.WallJump, [-w, 0, w], false).filter((family) =>
-      WALL_SEARCH.jumpHoldSteps.includes(family.holdSteps),
+    const families = this.families(MoveKind.WallJump, [-w, 0, w], false).filter(
+      (family) => !family.glide && WALL_SEARCH.jumpHoldSteps.includes(family.holdSteps),
     );
     const main = this.main;
     main.copyFrom(node.snapshot);
@@ -503,17 +544,18 @@ class MoveExplorer {
 
   /**
    * Termine le mouvement de `probe` : garde la direction courante (`dir`) jusqu'à l'atterrissage,
-   * puis lâche tout jusqu'à l'arrêt. Retourne la surface d'arrivée, -1 si aucune.
+   * puis lâche tout jusqu'à l'arrêt. Retourne la surface d'arrivée, -1 si aucune. `glide` : Saut
+   * tenu jusqu'au sol, pressé au premier pas si le parapluie n'est pas encore ouvert (D-62).
    */
-  private finish(dir: number): number {
+  private finish(dir: number, glide = false): number {
     const probe = this.probe;
     const input = this.input;
     input.moveX = dir;
     input.moveY = 0;
-    input.jumpPressed = false;
-    input.jumpHeld = false;
+    input.jumpHeld = glide;
     let s = 0;
-    while (!probe.grounded && s < MOVE_SEARCH.maxSteps) {
+    while (!probe.grounded && s < this.maxAirSteps) {
+      input.jumpPressed = glide && s === 0 && !probe.glideOpen;
       const before = probe.state;
       probe.step(input);
       if (touchesHazard(this.level, probe.box)) {
@@ -525,6 +567,8 @@ class MoveExplorer {
       s++;
     }
     input.moveX = 0;
+    input.jumpPressed = false;
+    input.jumpHeld = false;
     for (let settle = 0; settle < MOVE_SEARCH.settleSteps; settle++) {
       if (probe.grounded && probe.vx === 0) {
         break;
@@ -610,6 +654,8 @@ export interface AnalysisAbilities {
   readonly climb?: boolean;
   /** Saut mural (D-44) : glissade contre les murs et rebonds, enchaînés d'un mur à l'autre. */
   readonly wallJump?: boolean;
+  /** Parapluie (D-62) : ouvert au sommet d'un saut ou après une chute, tenu jusqu'au sol. */
+  readonly glide?: boolean;
   /** Hitbox de Céleste (croissance, D-43) ; par défaut, celle de la première phase. */
   readonly hitbox?: Readonly<{ width: number; height: number }>;
 }
@@ -632,6 +678,7 @@ export function analyzeLevel(
     abilities.climb ?? false,
     hitbox,
     abilities.wallJump ?? false,
+    abilities.glide ?? false,
   );
   const moves = exploreAll(explorer, map);
   const start = surfaceUnder(level, map, level.spawn.col, level.spawn.row);
@@ -665,6 +712,7 @@ export function movesFrom(
     abilities.climb ?? false,
     abilities.hitbox ?? PLAYER_HITBOX,
     abilities.wallJump ?? false,
+    abilities.glide ?? false,
   );
   const moves = explorer.explore(surface);
   if (explorer.wallNodes.length === 0) {
@@ -838,7 +886,7 @@ export function describeMove(move: Move, map: SurfaceMap): string {
   };
   const arrow = move.dir > 0 ? '→' : move.dir < 0 ? '←' : '↑';
   const hold = move.holdSteps === 0 ? 'maintenu' : `maintien ${move.holdSteps} pas`;
-  const air = move.airRelease ? ', direction relâchée' : '';
+  const air = (move.airRelease ? ', direction relâchée' : '') + (move.glide ? ', parapluie' : '');
   if (move.start) {
     const timing = Number.isFinite(move.windowMs) ? `, fenêtre ${move.windowMs.toFixed(0)} ms` : '';
     return `${where(move.from)} → ${where(move.to)} : ${KIND_LABEL[move.start]} ${arrow} puis appuis sur les murs${timing}`;

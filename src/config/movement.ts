@@ -97,6 +97,13 @@ export interface MovementParams {
   wallJumpLockMs: number;
   /** Saut mural encore permis après avoir quitté le contact du mur (ms). */
   wallCoyoteMs: number;
+  /**
+   * Parapluie (D-62) : une deuxième pression de Saut en l'air l'ouvre ; tant que Saut est tenu, la
+   * chute est ramenée à cette vitesse (px/s). Les sauts ordinaires ne changent pas.
+   */
+  glideFallSpeed: number;
+  /** Freinage de la chute à l'ouverture du parapluie (px/s²), jusqu'à `glideFallSpeed`. */
+  glideBrake: number;
 }
 
 export const DEFAULT_MOVEMENT: Readonly<MovementParams> = {
@@ -136,6 +143,8 @@ export const DEFAULT_MOVEMENT: Readonly<MovementParams> = {
   wallJumpSpeedX: 150,
   wallJumpLockMs: 130,
   wallCoyoteMs: 80,
+  glideFallSpeed: 50,
+  glideBrake: 1600,
 };
 
 /** Bornes des réglages en direct de l'overlay de debug. */
@@ -178,6 +187,8 @@ export const MOVEMENT_PARAM_RANGES: Readonly<
   wallJumpSpeedX: { min: 40, max: 400, step: 5 },
   wallJumpLockMs: { min: 0, max: 400, step: 10 },
   wallCoyoteMs: { min: 0, max: 250, step: 5 },
+  glideFallSpeed: { min: 10, max: 380, step: 5 },
+  glideBrake: { min: 100, max: 6000, step: 50 },
 };
 
 /** Hissé sur un rebord, Céleste se tient à cette distance du bord (px), bien posée. */

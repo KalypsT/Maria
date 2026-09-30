@@ -18,6 +18,8 @@ export interface CelestePose {
   pigtails: number;
   /** Allongement des bras (1 au repos) : tendus vers le rebord quand elle est suspendue. */
   armReach: number;
+  /** Ouverture du parapluie (D-62) : 0 fermé (invisible), 1 grand ouvert. */
+  umbrella: number;
 }
 
 /** Ce que la marionnette lit de Céleste et du combat, à chaque pas. */
@@ -48,6 +50,7 @@ export class CelestePoser {
     legBack: 0,
     pigtails: 0,
     armReach: 1,
+    umbrella: 0,
   };
   /** Phase du cycle de pas (radians). */
   runPhase = 0;
@@ -68,6 +71,7 @@ export class CelestePoser {
     legBack: 0,
     pigtails: 0,
     armReach: 1,
+    umbrella: 0,
   };
 
   constructor(
@@ -90,6 +94,7 @@ export class CelestePoser {
     pose.bodyY = pose.bodyTilt = pose.headTilt = 0;
     pose.armFront = pose.armBack = pose.legFront = pose.legBack = pose.pigtails = 0;
     pose.armReach = 1;
+    pose.umbrella = 0;
     this.pigtailVel = 0;
     this.runPhase = 0;
     this.stateSteps = 0;
@@ -122,6 +127,7 @@ export class CelestePoser {
     t.bodyTilt = 0;
     t.headTilt = 0;
     t.armReach = 1;
+    t.umbrella = 0;
     const state = this.sitting ? SITTING : subject.state;
     switch (state) {
       case SITTING: {
@@ -164,6 +170,15 @@ export class CelestePoser {
         t.legBack = -12 * DEG;
         t.armFront = 55 * DEG;
         t.armBack = -45 * DEG;
+        break;
+      case PlayerState.Glide:
+        // Sous le parapluie (D-62) : le bras avant le tient bien haut, les jambes pendent.
+        t.armFront = 172 * DEG;
+        t.armBack = 25 * DEG;
+        t.legFront = 8 * DEG;
+        t.legBack = -6 * DEG;
+        t.headTilt = -5 * DEG;
+        t.umbrella = 1;
         break;
       case PlayerState.Hang: {
         const sway = Math.sin((this.time * 1000 * Math.PI * 2) / p.hangSwingMs);
@@ -235,6 +250,8 @@ export class CelestePoser {
     pose.legFront += (t.legFront - pose.legFront) * limbK;
     pose.legBack += (t.legBack - pose.legBack) * limbK;
     pose.armReach += (t.armReach - pose.armReach) * k;
+    // Le parapluie s'ouvre et se ferme vite (on voit qu'il répond à Saut).
+    pose.umbrella += (t.umbrella - pose.umbrella) * Math.max(k, 0.25);
     // Couettes : ressort amorti, tirées vers l'arrière par la course et vers le haut par la chute.
     const max = p.pigtailMaxDeg * DEG;
     const run = Math.min(1, speed / Math.max(1, this.maxRunSpeed));

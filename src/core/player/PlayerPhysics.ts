@@ -75,6 +75,13 @@ export class PlayerPhysics {
   canClimb = false;
   /** Capacité « saut mural » acquise (D-44). Sans elle, le mouvement est inchangé. */
   canWallJump = false;
+  /** Capacité « parapluie » acquise (D-62). Sans elle, le mouvement est inchangé. */
+  canGlide = false;
+  /**
+   * Parapluie ouvert (D-62) : par une pression de Saut en l'air qui ne fait ni saut ni saut mural ;
+   * refermé dès que Saut est relâché, au sol, contre un mur, suspendue ou touchée.
+   */
+  glideOpen = false;
   /** Côté du mur touché en poussant vers lui à la fin du dernier pas (1 : à droite), 0 sinon. */
   wallDir = 0;
   /** Pas écoulés depuis le dernier contact avec un mur (tolérance du saut mural). */
@@ -181,6 +188,7 @@ export class PlayerPhysics {
     this.ledge = Ledge.None;
     this.ledgeSteps = 0;
     this.regrabSteps = 0;
+    this.glideOpen = false;
     this.clearWall();
     this.box.passOneWay = false;
     this.grounded = isGrounded(level, this.box);
@@ -232,6 +240,8 @@ export class PlayerPhysics {
     this.wallLockSteps = other.wallLockSteps;
     this.noCatchDir = other.noCatchDir;
     this.noCatchCol = other.noCatchCol;
+    this.canGlide = other.canGlide;
+    this.glideOpen = other.glideOpen;
   }
 
   /** Oublie tout contact avec un mur (sol, rebord, remise à zéro, coup reçu). */
@@ -268,6 +278,7 @@ export class PlayerPhysics {
     this.ledge = Ledge.None;
     this.clearWall();
     this.hurtSteps = steps;
+    this.glideOpen = false;
     this.state = PlayerState.Hurt;
     this.grounded = false;
     this.stepsSinceGrounded = NEVER;
@@ -363,6 +374,13 @@ export class PlayerPhysics {
       this.stepsSinceJumpPressed = NEVER;
       this.jumpCutAvailable = true;
       this.releaseGravityActive = false;
+    } else if (this.canGlide && jumpPressed && !this.grounded) {
+      // Parapluie (D-62) : une pression en l'air qui n'est ni un saut ni un saut mural l'ouvre.
+      // La pression reste mémorisée (jump buffering) : juste avant d'atterrir, elle fait sauter.
+      this.glideOpen = true;
+    }
+    if (this.glideOpen && (!jumpHeld || this.grounded)) {
+      this.glideOpen = false;
     }
     // Hauteur variable : relâcher pendant la montée coupe la vitesse (ou, en mode 1, alourdit la
     // gravité jusqu'au sommet), une fois par saut.
@@ -403,6 +421,14 @@ export class PlayerPhysics {
       if (this.vy > maxFall) {
         this.vy = maxFall;
       }
+    }
+    // Parapluie ouvert, en descente (D-62) : la chute est freinée jusqu'à la vitesse du plané.
+    // Une glissade contre un mur passe avant (il se referme, voir plus bas).
+    if (this.glideOpen && this.vy >= 0 && maxFall === p.maxFallSpeed) {
+      if (this.vy > p.glideFallSpeed) {
+        this.vy = Math.max(p.glideFallSpeed, this.vy - p.glideBrake * dt);
+      }
+      maxFall = Math.max(p.glideFallSpeed, this.vy);
     }
     const startVy = this.vy;
     this.vy = Math.min(startVy + gravity * dt, maxFall);
@@ -454,6 +480,9 @@ export class PlayerPhysics {
       this.noCatchDir = 0;
     }
     this.updateWallContact(moveInput, hurt);
+    if (this.grounded || this.wallDir !== 0) {
+      this.glideOpen = false;
+    }
     if (this.regrabSteps > 0) {
       this.regrabSteps--;
     } else if (this.canClimb && !hurt && !this.grounded && this.vy >= 0 && this.tryGrab(input)) {
@@ -467,6 +496,7 @@ export class PlayerPhysics {
       this.landStepsRemaining,
       this.hurtSteps > 0,
       this.wallDir !== 0,
+      this.glideOpen,
     );
     if (this.state === PlayerState.WallSlide) {
       // Dos au mur, tournée vers le côté où elle va rebondir.
@@ -556,6 +586,7 @@ export class PlayerPhysics {
       this.ledge = Ledge.Hang;
       this.ledgeSteps = 0;
       this.ledgeDir = dir;
+      this.glideOpen = false;
       this.clearWall();
       this.ledgeHangX = dir > 0 ? col * T - box.width : (col + 1) * T;
       this.ledgeHangY = top - p.ledgeHangOffsetPx;

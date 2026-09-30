@@ -151,4 +151,13 @@ describe('Céleste en papier découpé (D-29)', () => {
     poser.reset();
     expect(poser.sitting).toBe(false);
   });
+
+  it('sous le parapluie (D-62), le bras le tient en haut ; au sol, il se referme', () => {
+    const poser = new CelestePoser(DEFAULT_PUPPET, DT, MAX_RUN);
+    run(poser, subject(PlayerState.Glide, MAX_RUN, 50), 60);
+    expect(poser.pose.umbrella).toBeGreaterThan(0.95);
+    expect(poser.pose.armFront).toBeGreaterThan(Math.PI * 0.8);
+    run(poser, subject(PlayerState.Idle), 60);
+    expect(poser.pose.umbrella).toBeLessThan(0.05);
+  });
 });

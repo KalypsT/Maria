@@ -16,6 +16,8 @@ export const CELESTE_PARTS = {
   leg: { width: 6, height: 9, originX: 2.5 / 6, originY: 0.05 },
   /** Jupe de la robe (D-43), attachée à la hanche, devant les jambes ; vide en pyjama. */
   skirt: { width: 14, height: 7, originX: 0.5, originY: 1.5 / 7 },
+  /** Parapluie (D-62), tenu par le manche (en bas) ; ouvert par la pose. */
+  umbrella: { width: 24, height: 20, originX: 0.5, originY: 1 },
 } as const;
 export type CelestePart = keyof typeof CELESTE_PARTS;
 
@@ -62,6 +64,10 @@ export function drawCelestePart(
   outfit: CelesteOutfit = 'pyjama',
 ): void {
   const dark = palette.silhouettes;
+  if (part === 'umbrella') {
+    drawUmbrella(ctx, dark);
+    return;
+  }
   if (outfit === 'dress' && part !== 'head' && part !== 'pigtail') {
     drawDressPart(ctx, part, dark);
     return;
@@ -306,4 +312,55 @@ function drawDressPart(ctx: CanvasRenderingContext2D, part: CelestePart, dark: b
     default:
       break;
   }
+}
+
+/** Couleurs du parapluie (D-62), PLACEHOLDER : jaune d'enfant, pois blancs, lisible sur le ciel. */
+const UMBRELLA = '#f2c14e';
+const UMBRELLA_EDGE = '#c9912a';
+const UMBRELLA_DOT = '#fff8e6';
+const UMBRELLA_HANDLE = '#8a5a44';
+
+/** Parapluie ouvert, vu de côté : dôme festonné, pois, baleines, manche recourbé (bas au centre). */
+function drawUmbrella(ctx: CanvasRenderingContext2D, dark: boolean): void {
+  const cx = 12;
+  ctx.strokeStyle = dark ? SILHOUETTE : UMBRELLA_HANDLE;
+  ctx.lineWidth = 1.2;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(cx, 3);
+  ctx.lineTo(cx, 18);
+  ctx.arc(cx + 1.8, 18, 1.8, Math.PI, 0, true);
+  ctx.stroke();
+  ctx.fillStyle = dark ? SILHOUETTE : UMBRELLA;
+  ctx.beginPath();
+  ctx.moveTo(1, 9);
+  ctx.quadraticCurveTo(cx, -3, 23, 9);
+  for (let k = 0; k < 4; k++) {
+    const x1 = 23 - k * 5.5;
+    ctx.quadraticCurveTo(x1 - 2.75, 7, x1 - 5.5, 9);
+  }
+  ctx.fill();
+  if (dark) {
+    return;
+  }
+  ctx.strokeStyle = UMBRELLA_EDGE;
+  ctx.lineWidth = 0.6;
+  ctx.beginPath();
+  for (const x of [6.5, 12, 17.5]) {
+    ctx.moveTo(cx, 3);
+    ctx.lineTo(x, 8.6);
+  }
+  ctx.stroke();
+  ctx.fillStyle = UMBRELLA_DOT;
+  for (const [x, y] of [
+    [6, 6],
+    [12, 4.5],
+    [18, 6],
+    [9, 7.5],
+    [15, 7.5],
+  ] as const) {
+    circle(ctx, x, y, 0.9);
+  }
+  ctx.fillStyle = UMBRELLA_EDGE;
+  circle(ctx, cx, 2.2, 0.9);
 }

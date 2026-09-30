@@ -15,6 +15,9 @@ const LEG_FRONT = { x: 1.5, y: 0 };
 /** Couettes, par rapport au cou (suivent la tête). */
 const PIGTAIL_BACK = { x: -6.2, y: -6.5 };
 const PIGTAIL_FRONT = { x: 5.8, y: -7 };
+/** Longueur du bras (px, de l'épaule à la main) et prise du manche du parapluie (D-62). */
+const ARM_LENGTH = 7.2;
+const UMBRELLA_GRIP = 2;
 /** Teinte des membres du côté caché (lecture de la profondeur). */
 const BACK_TINT = 0xb9aebf;
 
@@ -36,6 +39,8 @@ export class CelestePuppet {
   private readonly skirt: PartImage;
   private readonly head: PartImage;
   private readonly armFront: PartImage;
+  /** Parapluie (D-62), dans la main avant ; visible seulement ouvert. */
+  private readonly umbrella: PartImage;
   /** Repère courant de `place` et échelle des textures (champs : aucune allocation par image). */
   private hipX = 0;
   private hipY = 0;
@@ -59,8 +64,10 @@ export class CelestePuppet {
     this.pigtailFront = part('pigtail');
     this.head = part('head');
     this.armFront = part('arm');
+    this.umbrella = part('umbrella').setVisible(false);
     this.container = scene.add
       .container(0, 0, [
+        this.umbrella,
         this.armBack,
         this.legBack,
         this.pigtailBack,
@@ -134,6 +141,7 @@ export class CelestePuppet {
     assign(this.torso, 'torso', growth.bodyScale);
     assign(this.skirt, 'skirt', growth.bodyScale);
     assign(this.head, 'head');
+    assign(this.umbrella, 'umbrella');
     this.skirt.setVisible(growth.outfit === 'dress');
   }
 
@@ -168,6 +176,19 @@ export class CelestePuppet {
     this.armBack.scaleY = reach;
     this.armFront.scaleY = reach;
     this.place(this.head, NECK.x, NECK.y * body, tilt + pose.headTilt);
+    // Parapluie (D-62) : le manche dans la main avant (au bout du bras), le dôme droit au-dessus.
+    const open = pose.umbrella;
+    this.umbrella.setVisible(open > 0.05);
+    if (open > 0.05) {
+      const arm = ARM_LENGTH * pose.armReach * body;
+      this.place(
+        this.umbrella,
+        SHOULDER_FRONT.x + arm * Math.sin(pose.armFront),
+        SHOULDER_FRONT.y * body + arm * Math.cos(pose.armFront) + UMBRELLA_GRIP,
+        tilt * 0.5,
+      );
+      this.umbrella.setScale(open / this.scale, (0.4 + 0.6 * open) / this.scale);
+    }
     this.legBack
       .setPosition(this.hipX + LEG_BACK.x, this.hipY + LEG_BACK.y)
       .setRotation(-pose.legBack);

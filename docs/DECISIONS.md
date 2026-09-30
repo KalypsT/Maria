@@ -672,6 +672,24 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Histoire** : une fois le portillon ouvert, maman quitte le linge (terrasse) pour un banc de l'aire de jeux (hors de la vue) ; Agir : Maria disparue, maman « cherche bien », cœur (étape `street.mom`). Le déclencheur « ? » de la porte de l'aire de jeux est remplacé par la porte.
 - **Sauvegarde** : aucune migration (étape `street.mom`).
 
+## D-62 — Troisième capacité : le parapluie (le quartier, PR 2)
+
+- **Plan validé** (D-61) : le parapluie seul d'abord, dans un parcours d'essai, comme le saut mural (D-44). Il s'obtiendra au chantier (PR 3). **Changement de mouvement** signalé et accepté.
+- **Geste** (aucun nouveau bouton) :
+  - en l'air, une **nouvelle pression de Saut** qui n'est ni un saut (coyote, jump buffering) ni un saut mural **ouvre le parapluie** ; tant que Saut est tenu et que Céleste descend, la chute est freinée (`glideBrake`, 1 600 px/s²) jusqu'à `glideFallSpeed` (50 px/s, contre 380) ; le contrôle aérien est inchangé ;
+  - **lâcher Saut le referme** ; il se referme aussi au sol, contre un mur (la glissade passe avant), suspendue à un rebord ou touchée ;
+  - **les sauts actuels ne changent pas** : garder Saut appuyé pendant un saut ordinaire n'ouvre rien (testé : trajectoire identique avec et sans la capacité) ;
+  - la pression reste mémorisée : juste avant d'atterrir, elle fait toujours sauter (jump buffering, testé).
+- **Réglages** `glideFallSpeed` et `glideBrake` dans `src/config/movement.ts`, l'overlay et l'export JSON. PROVISOIRES, à régler sur téléphone. Case « Capacité : parapluie » dans l'overlay.
+- **État** `Glide` ; marionnette : le bras avant tient le parapluie bien haut (pièce `umbrella`, jaune à pois, PLACEHOLDER, remplaçable par une image `celeste-umbrella`), il s'ouvre et se ferme vite.
+- **Capacité** `umbrella` dans `progression.abilities` : **aucune migration**.
+- **Aide** (demandes de l'utilisateur) :
+  - à l'obtention, en plus de l'indice écrit (comme les autres capacités), une **bulle d'aide** pictogramme au-dessus de Céleste : deux flèches de saut, puis le parapluie ouvert ;
+  - **nouvel onglet du cahier, « Mes capacités »** : une ligne par capacité, dans l'ordre où on les trouve ; acquise, son pictogramme et comment s'en servir ; sinon une case vide en pointillés, sans rien dévoiler. Un texte court dans le cahier (interface), comme les titres des onglets.
+- **Analyse de faisabilité** (D-16 étendue) : avec l'option `glide`, chaque saut (en courant ou sans élan) est aussi essayé avec une nouvelle pression au sommet, tenue jusqu'au sol, et chaque chute par le bord avec le parapluie ouvert aussitôt ; portée et durée simulées allongées d'autant. Sans l'option, l'analyse est inchangée (difficultés de toutes les salles identiques). Limite : l'ouverture n'est essayée qu'au sommet (la plus longue), pas plus tard ; pas de parapluie après un saut mural dans l'analyse (prudente).
+- **Parcours d'essai 8 « Parapluie »** (menu pause, hors partie, prête escalade, saut mural et parapluie) : du haut d'une tour, planer au-dessus des briques de jeu jusqu'à un îlot (facile avec le parapluie, impossible sans), puis une longue traversée sous un plafond bas (moyen, 108 ms).
+- **Limite connue** : quatre onglets tiennent sur un téléphone en paysage ; un cinquième (« Monde étrange », PR 4) demandera des onglets plus petits.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
