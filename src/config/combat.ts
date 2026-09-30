@@ -46,6 +46,8 @@ export interface CombatParams {
   spiderDropTiles: number;
   /** Araignée : durée d'une descente et d'une remontée complètes (ms). */
   spiderPeriodMs: number;
+  /** Escargot (D-49) : vitesse le long de son mur (px/s). */
+  snailSpeed: number;
   /** Clignotement blanc d'un ennemi touché (ms). */
   hitFlashMs: number;
   /** Tremblement de caméra à l'impact (px, 0 = désactivé : §37, pas de mouvement parasite). */
@@ -75,6 +77,7 @@ export const DEFAULT_COMBAT: Readonly<CombatParams> = {
   patrollerMaxFall: 380,
   spiderDropTiles: 4,
   spiderPeriodMs: 3200,
+  snailSpeed: 20,
   hitFlashMs: 100,
   screenShakePx: 0,
 };
@@ -104,6 +107,7 @@ export const COMBAT_PARAM_RANGES: Readonly<
   patrollerMaxFall: { min: 100, max: 900, step: 10 },
   spiderDropTiles: { min: 0.5, max: 10, step: 0.5 },
   spiderPeriodMs: { min: 600, max: 8000, step: 100 },
+  snailSpeed: { min: 2, max: 120, step: 1 },
   hitFlashMs: { min: 0, max: 400, step: 10 },
   screenShakePx: { min: 0, max: 6, step: 0.5 },
 };
@@ -112,3 +116,5 @@ export const COMBAT_PARAM_RANGES: Readonly<
 export const PATROLLER_HITBOX = { width: 14, height: 12 } as const;
 /** Hitbox de l'araignée (px, PROVISOIRE). */
 export const SPIDER_HITBOX = { width: 12, height: 10 } as const;
+/** Hitbox de l'escargot, collé à son mur (px, PROVISOIRE). */
+export const SNAIL_HITBOX = { width: 10, height: 12 } as const;

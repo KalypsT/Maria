@@ -1,7 +1,7 @@
 import type { CombatParams } from '../../config/combat';
 import { TILE_SIZE } from '../../config/display';
 import { PHYSICS_STEP_HZ, msToSteps } from '../../config/movement';
-import { EntityType, type LevelData } from '../level/LevelData';
+import { EntityType, Tile, tileAt, type LevelData } from '../level/LevelData';
 import type { Box } from '../physics/gridCollision';
 import type { PlayerPhysics } from '../player/PlayerPhysics';
 import { PlayerAttack } from './PlayerAttack';
@@ -44,6 +44,7 @@ export class CombatWorld {
     flashSteps: 0,
     spiderDrop: 0,
     spiderPhaseStep: 0,
+    snailStep: 0,
   };
   private hitstopTotal = 0;
   private hurtSteps = 0;
@@ -89,21 +90,31 @@ export class CombatWorld {
     t.flashSteps = msToSteps(p.hitFlashMs, hz);
     t.spiderDrop = p.spiderDropTiles * TILE_SIZE;
     t.spiderPhaseStep = (2 * Math.PI * 1000) / (p.spiderPeriodMs * hz);
+    t.snailStep = p.snailSpeed / hz;
   }
 
   /** Nouvelle salle : ennemis créés depuis ses marqueurs (allocation au chargement seulement). */
   load(level: LevelData): void {
     this.level = level;
     this.enemies = level.entities
-      .filter((e) => e.type === EntityType.Patroller || e.type === EntityType.Spider)
-      .map(
+      .filter(
         (e) =>
-          new Patroller(
-            e.col,
-            e.row,
-            e.type === EntityType.Spider ? EnemyKind.Spider : EnemyKind.Walker,
-          ),
-      );
+          e.type === EntityType.Patroller ||
+          e.type === EntityType.Spider ||
+          e.type === EntityType.Snail,
+      )
+      .map((e) => {
+        if (e.type === EntityType.Snail) {
+          // Collé au mur plein à sa gauche, sinon à sa droite.
+          const side = tileAt(level, e.col - 1, e.row) === Tile.Solid ? -1 : 1;
+          return new Patroller(e.col, e.row, EnemyKind.Snail, side);
+        }
+        return new Patroller(
+          e.col,
+          e.row,
+          e.type === EntityType.Spider ? EnemyKind.Spider : EnemyKind.Walker,
+        );
+      });
     this.reset();
   }
 
