@@ -101,6 +101,11 @@ export class SaveManager {
     return this.queue;
   }
 
+  /** Attend la fin des écritures en cours (avant de quitter la partie). */
+  flush(): Promise<void> {
+    return this.queue;
+  }
+
   /** Efface tout (nouvelle partie volontaire). */
   async clear(): Promise<void> {
     await this.queue;

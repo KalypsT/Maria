@@ -350,6 +350,12 @@ export class GameScene extends Phaser.Scene {
           }
         });
       },
+      onQuitToTitle: () => {
+        // Écritures en cours terminées, puis relance : le démarrage affiche l'accueil.
+        void this.session.manager.flush().then(() => {
+          location.reload();
+        });
+      },
       levels: [
         { id: HOME_CHOICE, name: 'La maison (partie)' },
         ...LEVELS.map((level) => ({ id: level.id, name: levelName(level) })),

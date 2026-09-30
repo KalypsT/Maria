@@ -94,4 +94,14 @@ describe('SaveManager', () => {
     await manager.clear();
     expect((await new SaveManager(storage).load()).source).toBe('none');
   });
+
+  it('attend les écritures en cours avant de quitter, sans réécrire', async () => {
+    const storage = new MemorySaveStorage();
+    const manager = new SaveManager(storage);
+    void manager.save(save(1));
+    void manager.save(save(2));
+    await manager.flush();
+    expect(storage.writes).toBe(2);
+    expect((await new SaveManager(storage).load()).data).toEqual(save(2));
+  });
 });
