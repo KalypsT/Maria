@@ -1,6 +1,6 @@
 import { PROP_SIZE } from '../../config/story';
 import type { PropKind, ThoughtIcon } from '../../core/story/story';
-import { drawMemory, drawNotes, heightChart } from './memoryArt';
+import { bonnet, drawMemory, drawNotes, heightChart } from './memoryArt';
 
 /**
  * Dessins de l'histoire (D-31), PLACEHOLDERS du style D-28 : objets de mise en scène (berceau,
@@ -252,6 +252,12 @@ export function drawProp(
       break;
     case 'blanket':
       drawBlanket(ctx, w, h);
+      break;
+    case 'bonnet':
+      ctx.save();
+      ctx.translate(w / 2, h / 2 + 1);
+      bonnet(ctx, Math.min(w, h * 1.1));
+      ctx.restore();
       break;
     case 'baby-photo':
       // Photo encadrée posée debout, en haut de la bibliothèque.

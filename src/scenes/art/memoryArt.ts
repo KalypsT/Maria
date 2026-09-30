@@ -204,6 +204,34 @@ function plant(ctx: CanvasRenderingContext2D, s: number): void {
   ctx.fill();
 }
 
+/**
+ * Le bonnet de Maria (D-49), PLACEHOLDER : petit bonnet tricoté rose, côtes au bord, pompon.
+ * Centré sur (0, 0), de taille `s`.
+ */
+export function bonnet(ctx: CanvasRenderingContext2D, s: number): void {
+  ctx.fillStyle = '#f2a7bd';
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.38, s * 0.22);
+  ctx.quadraticCurveTo(-s * 0.4, -s * 0.3, 0, -s * 0.3);
+  ctx.quadraticCurveTo(s * 0.4, -s * 0.3, s * 0.38, s * 0.22);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#e07f9d';
+  ctx.fillRect(-s * 0.4, s * 0.12, s * 0.8, s * 0.16);
+  ctx.strokeStyle = 'rgba(160,64,95,0.45)';
+  ctx.lineWidth = Math.max(0.5, s * 0.03);
+  ctx.beginPath();
+  for (let x = -s * 0.32; x < s * 0.36; x += s * 0.11) {
+    ctx.moveTo(x, s * 0.13);
+    ctx.lineTo(x, s * 0.27);
+  }
+  ctx.stroke();
+  ctx.fillStyle = '#fff4f7';
+  ctx.beginPath();
+  ctx.arc(0, -s * 0.34, s * 0.11, 0, Math.PI * 2);
+  ctx.fill();
+}
+
 /** Le bandeau de Maria : anneau rose et nœud fleuri. */
 function headband(ctx: CanvasRenderingContext2D, s: number): void {
   ctx.strokeStyle = '#f6b6c8';
@@ -342,6 +370,9 @@ export function drawMemory(
       break;
     case 'height':
       heightChart(ctx, size * 0.34, size * 0.95, true);
+      break;
+    case 'bonnet':
+      bonnet(ctx, size);
       break;
   }
   ctx.restore();

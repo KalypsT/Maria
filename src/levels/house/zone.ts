@@ -2,7 +2,9 @@ import type { ZoneSource } from '../../core/world/zone';
 import gardenAlley from '../garden/alley.txt?raw';
 import gardenTerrace from '../garden/terrace.txt?raw';
 import gardenTree from '../garden/tree.txt?raw';
+import gardenThorns from '../garden/thorns.txt?raw';
 import gardenTreehouse from '../garden/treehouse.txt?raw';
+import gardenUpside from '../garden/upside.txt?raw';
 import gardenVegetables from '../garden/vegetables.txt?raw';
 import attic from './attic.txt?raw';
 import bedroom from './bedroom.txt?raw';
@@ -45,6 +47,9 @@ export const HOUSE: ZoneSource = {
     { id: 'garden-tree', text: gardenTree },
     { id: 'garden-treehouse', text: gardenTreehouse },
     { id: 'garden-alley', text: gardenAlley },
+    // Derrière la haie (D-49) : le monde étrange du jardin, par l'histoire (le trou de la haie).
+    { id: 'garden-upside', text: gardenUpside },
+    { id: 'garden-thorns', text: gardenThorns },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -62,6 +67,7 @@ export const HOUSE: ZoneSource = {
     ['garden-tree:2', 'garden-treehouse:1'],
     ['garden-alley:2', 'garden-tree:3'],
     ['garden-terrace:3', 'garden-alley:1'],
+    ['garden-upside:1', 'garden-thorns:1'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur

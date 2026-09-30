@@ -19,6 +19,8 @@ export const MEMORIES = [
   'bookcase',
   /** Quelques mois plus tard (D-43) : la toise de la chambre, avec un nouveau trait. */
   'height',
+  /** Derrière la haie (D-49) : le bonnet de Maria, retrouvé accroché au grand arbre. */
+  'bonnet',
 ] as const;
 export type MemoryId = (typeof MEMORIES)[number];
 

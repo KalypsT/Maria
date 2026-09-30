@@ -57,7 +57,7 @@ function strangeGraph(rule: Parameters<typeof zoneGraph>[1]): Map<Node, Set<Node
 describe('monde étrange (D-34)', () => {
   it('ses salles sont déclarées étranges et absentes de la carte', () => {
     const strange = [...zone.rooms].filter(([, l]) => isStrangeRoom(l)).map(([id]) => id);
-    expect(strange).toEqual(['living-strange', 'shadows']);
+    expect(strange).toEqual(['living-strange', 'shadows', 'garden-upside', 'garden-thorns']);
     for (const id of strange) {
       expect(zone.map[id], id).toBeUndefined();
     }

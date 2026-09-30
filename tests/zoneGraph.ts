@@ -167,11 +167,15 @@ export function zoneGraph(
       }
     }
   }
-  // Les passages de l'histoire (monde étrange) ont tous lieu avant que Céleste grandisse.
-  if (growth < 2) {
-    for (const [from, to] of storyPassages()) {
-      edge(from, to);
+  // Passages de l'histoire : le monde étrange de la maison a lieu avant que Céleste grandisse,
+  // celui du jardin après (D-49), et le trou de la haie ne s'ouvre qu'une fois le saut mural
+  // trouvé dans la cabane.
+  for (const [from, to] of storyPassages()) {
+    const inGarden = roomOf(from).startsWith('garden-');
+    if (inGarden !== growth >= 2 || (roomOf(from) === 'garden-tree' && !wallJump)) {
+      continue;
     }
+    edge(from, to);
   }
   return graph;
 }

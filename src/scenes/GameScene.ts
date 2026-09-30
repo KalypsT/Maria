@@ -1078,7 +1078,8 @@ export class GameScene extends Phaser.Scene {
   /** Palette courante : monde étrange (D-28), ou maison le soir ou le matin (D-31). */
   private palette() {
     if (this.strangeWorld || isStrangeRoom(this.level)) {
-      return STRANGE_PALETTE;
+      // Derrière la haie (D-49) : le monde étrange, dehors (ciel violet au lieu du mur).
+      return this.level.meta.outdoor ? { ...STRANGE_PALETTE, outdoor: true } : STRANGE_PALETTE;
     }
     if (isGardenRoom(this.level)) {
       return GARDEN_PALETTE;

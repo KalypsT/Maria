@@ -46,6 +46,12 @@ export const StoryFlag = {
   GardenDad: 'garden.dad',
   /** Céleste a regardé dans le trou de la haie, au fond du jardin. */
   GardenHedge: 'garden.hedge',
+  /** Céleste a trouvé la cabane dans l'arbre (et le saut mural). */
+  GardenTreehouse: 'garden.treehouse',
+  /** Derrière la haie (D-49) : Céleste est passée dans le jardin renversé (première fois). */
+  HedgeEntered: 'hedge.entered',
+  /** Fin de derrière la haie : le bonnet de Maria ; Céleste revient au pied du grand arbre. */
+  HedgeDone: 'hedge.done',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -147,4 +153,5 @@ export const PROP_SIZE = {
   'baby-photo': { w: 11, h: 10 },
   'height-chart': { w: 7, h: 40 },
   'height-chart-grown': { w: 7, h: 40 },
+  bonnet: { w: 9, h: 8 },
 } as const satisfies Readonly<Record<PropKind, { w: number; h: number }>>;

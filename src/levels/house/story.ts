@@ -14,6 +14,17 @@ const STRANGE_ARRIVAL: StoryStep = {
   facing: -1,
 };
 
+/** Le trou de la haie, au fond du jardin (D-49) : là où l'on passe derrière la haie. */
+const HEDGE_HOLE: TileArea = { col: 38, row: 36, w: 7, h: 4 };
+/** Arrivée dans le jardin renversé (dans le noir). */
+const HEDGE_ARRIVAL: StoryStep = {
+  do: 'room',
+  room: 'garden-upside',
+  col: 3,
+  row: 23,
+  facing: 1,
+};
+
 /**
  * Histoire de la maison (§5.2, D-31), PLACEHOLDER : le soir, Céleste joue avec Maria, la couche
  * dans son berceau, puis se couche ; au matin, Maria n'est plus là et des traces mènent vers le
@@ -400,6 +411,102 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: S.lookMs },
       ],
     },
+    {
+      // La cabane dans l'arbre (D-46) : Céleste y trouve le saut mural, et pense à Maria.
+      id: 'treehouse-find',
+      room: 'garden-treehouse',
+      on: 'touch',
+      area: { col: 12, row: 9, w: 4, h: 3 },
+      when: { none: [F.GardenTreehouse] },
+      lock: false,
+      steps: [
+        { do: 'flag', id: F.GardenTreehouse },
+        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+      ],
+    },
+    {
+      // Derrière la haie (D-49) : une fois le saut mural trouvé, le trou de la haie scintille et
+      // attire Céleste. Agir : un clignement dans le noir, et le jardin renversé se révèle.
+      id: 'hedge-enter',
+      room: 'garden-tree',
+      on: 'interact',
+      area: HEDGE_HOLE,
+      mark: { col: 41, row: 36 },
+      when: { all: [F.GardenTreehouse], none: [F.HedgeEntered] },
+      lock: true,
+      steps: [
+        { do: 'sparkle', area: { col: 39, row: 37, w: 5, h: 3 }, ms: S.omenPeakMs + 400 },
+        { do: 'shake', ms: S.omenPeakMs, strength: 1 },
+        { do: 'wait', ms: S.omenPeakMs },
+        { do: 'fadeOut', ms: S.blinkOutMs },
+        { do: 'flag', id: F.HedgeEntered },
+        HEDGE_ARRIVAL,
+        { do: 'wait', ms: S.blinkBlackMs },
+        { do: 'fadeIn', ms: S.blinkInMs, shape: 'iris' },
+        { do: 'wait', ms: 500 },
+        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs + 800 },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // Après un évanouissement (avant la veilleuse turquoise) : le trou y ramène, plus vite.
+      id: 'hedge-reenter',
+      room: 'garden-tree',
+      on: 'interact',
+      area: HEDGE_HOLE,
+      mark: { col: 41, row: 36 },
+      when: { all: [F.HedgeEntered], none: [F.HedgeDone] },
+      lock: true,
+      steps: [
+        { do: 'sparkle', area: { col: 39, row: 37, w: 5, h: 3 }, ms: S.reomenPeakMs + 300 },
+        { do: 'shake', ms: S.reomenPeakMs, strength: 0.6 },
+        { do: 'wait', ms: S.reomenPeakMs },
+        { do: 'fadeOut', ms: S.blinkOutMs },
+        HEDGE_ARRIVAL,
+        { do: 'wait', ms: S.blinkBlackMs },
+        { do: 'fadeIn', ms: S.reblinkInMs, shape: 'iris' },
+      ],
+    },
+    {
+      // Fin (D-49) : au bout de la ronce, le bonnet de Maria. Le cercle se referme ; Céleste est au
+      // pied du grand arbre, et le bonnet est accroché à une branche. Aucune explication.
+      id: 'thorns-bonnet',
+      room: 'garden-thorns',
+      on: 'interact',
+      area: { col: 18, row: 5, w: 9, h: 3 },
+      mark: { col: 24, row: 5 },
+      when: { all: [F.HedgeEntered], none: [F.HedgeDone] },
+      lock: true,
+      steps: [
+        { do: 'sparkle', area: { col: 22, row: 5, w: 5, h: 3 }, ms: S.cradleSparkleMs + 600 },
+        { do: 'wait', ms: S.cradleSparkleMs },
+        { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
+        { do: 'flag', id: F.HedgeDone },
+        { do: 'memory', id: 'bonnet' },
+        { do: 'room', room: 'garden-tree', col: 29, row: 39, facing: -1, returnPoint: true },
+        { do: 'wait', ms: S.nightBlackMs },
+        { do: 'fadeIn', ms: S.nightFadeInMs },
+        { do: 'wait', ms: 1200 },
+        { do: 'thought', icon: 'maria', ms: S.thoughtMs + 800 },
+        { do: 'wait', ms: S.lookMs + 600 },
+      ],
+    },
+    {
+      // Le bonnet accroché à la branche : on peut revenir le regarder.
+      id: 'look-bonnet',
+      room: 'garden-tree',
+      on: 'interact',
+      area: { col: 26, row: 29, w: 7, h: 3 },
+      mark: { col: 29, row: 30 },
+      when: { all: [F.HedgeDone] },
+      lock: true,
+      repeat: true,
+      steps: [
+        { do: 'memory', id: 'bonnet' },
+        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
     // Objets à regarder (D-38) : la première fois, ils deviennent des souvenirs du cahier ; on
     // peut les regarder autant qu'on veut.
     {
@@ -634,6 +741,33 @@ export const HOUSE_STORY: StoryData = {
     { id: 'cat-sit', room: 'living', kind: 'cat-sit', col: 44, row: 21, when: { all: [F.Slept] } },
     { id: 'music-box', room: 'bedroom', kind: 'music-box', col: 12, row: 12, when: {} },
     { id: 'plant', room: 'kitchen', kind: 'plant', col: 52, row: 16, when: {} },
+    // Derrière la haie (D-49) : Maria de l'autre côté du vide, hors d'atteinte ; elle est là dès
+    // l'arrivée dans la ronce et ne bouge jamais (pilier 5). Le bonnet, au bout du chemin, puis
+    // accroché à une branche du grand arbre.
+    {
+      id: 'maria-thorns',
+      room: 'garden-thorns',
+      kind: 'maria-sit',
+      col: 41,
+      row: 3,
+      when: { none: [F.HedgeDone] },
+    },
+    {
+      id: 'bonnet-thorns',
+      room: 'garden-thorns',
+      kind: 'bonnet',
+      col: 24,
+      row: 7,
+      when: { none: [F.HedgeDone] },
+    },
+    {
+      id: 'bonnet-tree',
+      room: 'garden-tree',
+      kind: 'bonnet',
+      col: 29,
+      row: 31,
+      when: { all: [F.HedgeDone] },
+    },
     // Au jardin (D-46) : maman étend le linge sur la terrasse, papa arrose le potager, loin des
     // araignées (pas d'ennemi près d'un adulte, D-39).
     {
@@ -668,6 +802,14 @@ export const HOUSE_STORY: StoryData = {
     { room: 'laundry', exit: 3, when: { none: [F.Grown] }, icon: 'handle' },
   ],
   omens: [
+    // Derrière la haie (D-49) : en approchant du trou, une fois le saut mural trouvé.
+    {
+      room: 'garden-tree',
+      when: { all: [F.GardenTreehouse], none: [F.HedgeDone] },
+      col: 41,
+      row: 38,
+      radius: 12,
+    },
     // En approchant de Maria (en grimpant la bibliothèque), la lumière vacille, les couleurs se
     // refroidissent, puis tout tremble ; rien à l'autre bout de la pièce (D-40).
     {

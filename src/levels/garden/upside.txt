@@ -1,0 +1,50 @@
+; Derrière la haie (D-49) : le jardin renversé. Les silhouettes du potager, à une échelle démesurée ;
+; on y arrive par le trou de la haie (histoire), jamais par une porte. Une cheminée entre deux tuteurs
+; géants mène à la sortie (saut mural).
+; @name: Jardin renversé
+; @world: strange
+; @outdoor: yes
+; @difficulty: medium
+; @ambient: #1a1f2c
+; @decor: canopy 0 0 60 1
+; @decor: hedge 0 1 1 23
+; @decor: hedge 59 1 1 2
+; @decor: hedge 59 6 1 18
+; @decor: planter 12 20 5 4
+; @decor: planter 24 19 4 5
+; @decor: planter 34 20 3 4
+; @decor: planter 40 20 8 4
+; @decor: giantstake 39 1 2 16
+; @decor: giantstake 45 6 2 11
+; @decor: deck 48 6 11 1
+; @decor: giantflower 3 3 8 14
+; @decor: giantcan 17 5 10 8
+; @decor: eyes 29 9 1 1
+; @decor: eyes 52 14 1 1
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (danger), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+v......................................bb..................v
+v......................................bb..................v
+v......................................bb..................1
+v......................................bb..................1
+v......................................bb..................1
+v......................................bb....bb.bbbbbbbbbbbv
+v......................................bb....bb............v
+v......................................bb....bb............v
+v......................................bb....bb............v
+v......................................bb....bb............v
+v......................................bb....bb............v
+v......................................bb....bb............v
+v......................................bb....bb............v
+v......................................bb....bb............v
+v......................................bb....bb............v
+v......................................bb....bb............v
+v..........................................................v
+v..........................................................v
+v.......................bbbb...............................v
+v...........bbbbb.......bbbb......bbb...bbbbbbbb...........v
+v...........bbbbb.......bbbb......bbb...bbbbbbbb...........v
+v...........bbbbb.......bbbb......bbb...bbbbbbbb...........v
+v..P........bbbbb.......bbbb......bbb...bbbbbbbb...........v
+###########^#####^^^^^^^####^^^^^^###^^^########^^^^^^^^^^^#
+############################################################
