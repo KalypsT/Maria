@@ -13,20 +13,35 @@ export const MEMORIES = [
   'music-box',
   /** La plante de la cuisine. */
   'plant',
-  /** Le bandeau de Maria, trouvé à la fin du monde étrange. */
-  'headband',
   /** En haut de la bibliothèque du salon, après le monde étrange : Céleste bébé avec Maria. */
   'bookcase',
   /** Quelques mois plus tard (D-43) : la toise de la chambre, avec un nouveau trait. */
   'height',
-  /** Derrière la haie (D-49) : le bonnet de Maria, retrouvé accroché au grand arbre. */
+] as const;
+
+/**
+ * Les affaires de Maria (D-58), un autre onglet du cahier : ramassées avec Agir, elles quittent
+ * alors le jeu. Enregistrées avec les souvenirs dans la sauvegarde (aucune migration). L'ordre est
+ * celui des cases.
+ */
+export const MARIA_THINGS = [
+  /** Un chausson de poupée, au matin, dans le couloir. */
+  'slipper',
+  /** Un biberon de poupée, sur le palier de l'escalier. */
+  'bottle',
+  /** Le bandeau de Maria, à la fin du monde étrange. */
+  'headband',
+  /** Le bonnet de Maria, à la sortie de derrière la haie (D-49). */
   'bonnet',
 ] as const;
-export type MemoryId = (typeof MEMORIES)[number];
+
+export type MemoryId = (typeof MEMORIES)[number] | (typeof MARIA_THINGS)[number];
 
 /** Souvenirs dont l'obtention n'est pas encore en jeu (la case reste vide). */
 export const MEMORIES_LATER: readonly MemoryId[] = [];
 
 export function isMemory(id: string): id is MemoryId {
-  return (MEMORIES as readonly string[]).includes(id);
+  return (
+    (MEMORIES as readonly string[]).includes(id) || (MARIA_THINGS as readonly string[]).includes(id)
+  );
 }

@@ -607,6 +607,24 @@ Retours du téléphone.
 - **Debug** : ligne « musique » dans l'overlay (thème voulu, fichier présent ou non, lecture, volume, silence).
 - Vérifié dans Chromium avec des sons d'essai (non commités) : démarrage au premier geste, fondu nuit → matin, monde étrange, silence puis retour, boucle en fondu, pause, coupure sauvegardée, jingle, précache.
 
+## D-58 — Du monde étrange à la croissance ; les affaires de Maria ; réveil dans l'herbe
+
+Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour l'instant ; les réglages du DEBUG restent en place pour une passe plus poussée plus tard.
+
+- **Du monde étrange à la croissance** (choix de l'utilisateur : le câlin de maman, puis la nuit). Avant, il fallait se recoucher en plein matin, sans raison.
+  - Fin du monde étrange inchangée jusqu'à papa à la porte : « ? », puis sa bulle montre **maman** (nouveau pictogramme `mom` : boucles brunes, tee-shirt rose).
+  - Au salon, Agir près de maman : bulle Maria disparue, cœur de maman, cœur de Céleste. Long fondu : **la nuit tombe** (palette et musique de nuit), les parents ne sont plus en bas, Céleste pense à son **lit**.
+  - Se coucher déclenche « quelques mois plus tard » (inchangé).
+  - Nouvelle étape `end.mom-hug` ; le moment de la journée vaut « soir » entre le câlin et la croissance. Les réponses du matin de maman et de papa ne se déclenchent plus après la visite de papa (le câlin les remplace) ni la nuit.
+  - Une partie arrêtée après la visite de papa passe simplement par le câlin (aucune migration).
+- **Les affaires de Maria** : chausson (couloir), biberon (escalier), bandeau (lit, fin du monde étrange), bonnet (dans l'herbe, fin de derrière la haie).
+  - On les **ramasse avec Agir** (étincelle, bulle Maria) ; elles disparaissent aussitôt du jeu (`instant`, un geste de Céleste et non un déplacement de Maria : pilier 5 respecté).
+  - Le chausson et le biberon remplacent les traces qu'on voyait au passage (déclencheurs `touch`).
+  - **Nouvel onglet du cahier**, « Les affaires de Maria », à côté de « Ma maison » et « Mes souvenirs ». Le bandeau et le bonnet quittent « Mes souvenirs ».
+  - Le bonnet n'est plus accroché à la branche, et on ne revient plus le regarder.
+  - Sauvegarde : les affaires sont enregistrées avec les souvenirs (`progression.memories`), leur liste est dans `MARIA_THINGS`. Nouvelles étapes `maria.slipper`, `maria.bottle`, `maria.headband`, `maria.bonnet` ; aucune migration. Une partie qui avait déjà le bandeau ou le bonnet les revoit une fois dans le jeu jusqu'à les ramasser (sans effet dans le cahier).
+- **Sortie de derrière la haie** : Céleste est **assise dans l'herbe** au pied du grand arbre et se relève dès qu'on la bouge, comme au réveil dans la maison (pose assise existante ; une pose allongée reste possible plus tard).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

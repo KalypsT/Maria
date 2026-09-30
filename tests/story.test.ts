@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DIFFICULTY_MIN_WINDOW_MS } from '../src/config/levelDesign';
 import { DEFAULT_MOVEMENT, PLAYER_HITBOX } from '../src/config/movement';
 import { TILE_SIZE as T } from '../src/config/display';
-import { MEMORIES, MEMORIES_LATER } from '../src/config/memories';
+import { MARIA_THINGS, MEMORIES, MEMORIES_LATER } from '../src/config/memories';
 import { LEGACY_STORY_FLAGS, PROP_SIZE, StoryFlag as F } from '../src/config/story';
 import { analyzeLevel } from '../src/core/analysis/analyzeLevel';
 import { surfaceUnder } from '../src/core/analysis/surfaces';
@@ -596,7 +596,7 @@ describe('souvenirs (D-38)', () => {
         }
       }
     }
-    for (const id of MEMORIES) {
+    for (const id of [...MEMORIES, ...MARIA_THINGS]) {
       expect(given.has(id), id).toBe(!MEMORIES_LATER.includes(id));
     }
   });
@@ -663,20 +663,29 @@ describe('rez-de-chaussée (D-39)', () => {
 describe('quelques mois plus tard (D-43)', () => {
   const END = [...LEGACY_STORY_FLAGS, F.MariaSeen, F.MariaVanished, F.StrangeDone];
 
-  it('après la visite de papa, se recoucher fait grandir Céleste, dans le noir', () => {
+  it('papa montre maman ; son câlin fait tomber la nuit ; se coucher fait grandir Céleste (D-58)', () => {
     const { log, host } = recorder();
     const d = new StoryDirector(HOUSE_STORY, host, HZ);
-    const box = standing(12, 15);
-    const run = () => {
-      d.step('bedroom', box, true);
+    const run = (room: string, box: Box) => {
+      d.step(room, box, true);
       for (let i = 0; i < 3000 && d.busy; i++) {
-        d.step('bedroom', box, false);
+        d.step(room, box, false);
       }
     };
+    const bed = standing(12, 15);
+    const sofa = standing(15, 21);
     d.setFlags(END);
-    run();
+    run('bedroom', bed);
     expect(d.flags.has(F.Grown), 'pas avant la visite de papa').toBe(false);
     d.setFlags([...END, F.DadVisit]);
+    run('bedroom', bed);
+    expect(d.flags.has(F.Grown), 'pas avant le câlin de maman').toBe(false);
+    expect(d.timeOfDay()).toBe('morning');
+    run('living', sofa);
+    expect(d.flags.has(F.MomHug)).toBe(true);
+    expect(log).toContain('think heart mom-sofa');
+    expect(log).toContain('think bed');
+    expect(d.timeOfDay(), 'la nuit est tombée').toBe('evening');
     let veilAtGrowth = -1;
     const flagSet = host.flagSet.bind(host);
     host.flagSet = (id) => {
@@ -685,15 +694,56 @@ describe('quelques mois plus tard (D-43)', () => {
         veilAtGrowth = d.veil;
       }
     };
-    run();
+    run('bedroom', bed);
     expect(d.flags.has(F.Grown)).toBe(true);
     expect(veilAtGrowth, 'grandit dans le noir complet').toBe(1);
     expect(d.veil).toBe(0);
     expect(log).toContain('think maria-missing');
+    expect(d.timeOfDay(), 'quelques mois plus tard, le matin').toBe('morning');
     // Une seule fois.
     log.length = 0;
-    run();
+    run('bedroom', bed);
     expect(log).toEqual([]);
+  });
+
+  it('papa, à la porte, montre maman après le monde étrange (D-58)', () => {
+    const end = HOUSE_STORY.triggers.find((t) => t.id === 'shadows-cradle');
+    expect(
+      end?.steps.some((s) => s.do === 'thought' && s.icon === 'mom' && s.by === 'dad-door-end'),
+    ).toBe(true);
+  });
+
+  it('les affaires de Maria se ramassent avec Agir et quittent le jeu (D-58)', () => {
+    const { log, host } = recorder();
+    const d = new StoryDirector(HOUSE_STORY, host, HZ);
+    const cases = [
+      { room: 'hall', box: standing(24, 15), id: 'slipper', prop: 'slipper' },
+      { room: 'staircase', box: standing(35, 15), id: 'bottle', prop: 'bottle' },
+      { room: 'bedroom', box: standing(15, 15), id: 'headband', prop: 'headband' },
+      { room: 'garden-tree', box: standing(27, 39), id: 'bonnet', prop: 'bonnet-grass' },
+    ];
+    d.setFlags([...END, F.GardenTreehouse, F.HedgeEntered, F.HedgeDone, F.Grown]);
+    for (const c of cases) {
+      const shown = () => {
+        const stage = new PropStage();
+        stage.load(HOUSE_STORY.props, c.room, d.flags);
+        return stage.props.filter((_, i) => stage.shown[i]).map((p) => p.id);
+      };
+      expect(shown(), c.id).toContain(c.prop);
+      d.step(c.room, c.box, true);
+      for (let i = 0; i < 3000 && d.busy; i++) {
+        d.step(c.room, c.box, false);
+      }
+      expect(log, c.id).toContain(`memory ${c.id}`);
+      expect(shown(), c.id).not.toContain(c.prop);
+      expect(HOUSE_STORY.props.find((p) => p.id === c.prop)?.instant, c.id).toBe(true);
+    }
+    // Plus rien à ramasser ensuite.
+    log.length = 0;
+    for (const c of cases) {
+      d.step(c.room, c.box, true);
+    }
+    expect(log.filter((line) => line.startsWith('memory'))).toEqual([]);
   });
 
   it('la toise a un trait de plus, et devient un souvenir', () => {

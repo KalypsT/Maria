@@ -35,8 +35,15 @@ export const StoryFlag = {
   MorningMom: 'morning.mom',
   /** Céleste a caressé le chat. */
   CatPetted: 'cat.petted',
-  /** Après le monde étrange, papa est passé voir Céleste. */
+  /** Après le monde étrange, papa est passé voir Céleste (il montre maman). */
   DadVisit: 'end.dad',
+  /** Câlin de maman au salon (D-58) ; puis la nuit tombe, il faut aller se coucher. */
+  MomHug: 'end.mom-hug',
+  /** Les affaires de Maria ramassées (D-58) : elles quittent le jeu pour le cahier. */
+  SlipperTaken: 'maria.slipper',
+  BottleTaken: 'maria.bottle',
+  HeadbandTaken: 'maria.headband',
+  BonnetTaken: 'maria.bonnet',
   /** Quelques mois plus tard (D-43) : Céleste a grandi (phase de croissance 2). */
   Grown: 'growth.2',
   /** Le jardin (D-46) : Céleste est sortie pour la première fois (il fait beau, et Maria ?). */

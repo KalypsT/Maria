@@ -1,6 +1,6 @@
 import { PROP_SIZE } from '../../config/story';
 import type { PropKind, ThoughtIcon } from '../../core/story/story';
-import { bonnet, drawMemory, drawNotes, heightChart } from './memoryArt';
+import { bonnet, drawMemory, drawNotes, heightChart, momHead } from './memoryArt';
 
 /**
  * Dessins de l'histoire (D-31), PLACEHOLDERS du style D-28 : objets de mise en scène (berceau,
@@ -481,6 +481,9 @@ function drawIcon(
       ctx.fill();
       break;
     }
+    case 'mom':
+      momHead(ctx, cx, cy - 2, 4.8);
+      break;
     case 'search': {
       // Une loupe : « cherche bien » (D-50).
       ctx.strokeStyle = WOOD_DARK;

@@ -4,11 +4,23 @@
 
 **Le jardin (2a) et derrière la haie (2b)** (§7.2, §6, D-46 à D-49) : fusionnés (PR #29), **essai sur téléphone en cours** (début du jardin testé ; jardin adouci (D-51) sur `ccr-53d22df4-9euiqo`). Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
 
+**Mouvement et difficulté validés** par l'utilisateur pour l'instant (réglages du DEBUG conservés pour une passe plus poussée plus tard).
+
 **Musique** (D-57) : lecteur en place, en attente des morceaux.
 
 Prochaine : intégrer les morceaux dès qu'ils sont prêts ; zone suivante (le quartier, §26) ou passe de réglage d'après les essais.
 
 ## Fait
+
+### Retours du téléphone : croissance, affaires de Maria, réveil dans l'herbe (D-58)
+
+- **Après le monde étrange** : papa à la porte montre maman ; au salon, câlin de maman ; la nuit tombe ; se coucher fait passer « quelques mois plus tard ».
+- **Les affaires de Maria** : chausson, biberon, bandeau et bonnet se ramassent avec Agir, disparaissent du jeu et vont dans un nouvel onglet du cahier, « Les affaires de Maria ».
+- **Sortie de derrière la haie** : Céleste assise dans l'herbe, le bonnet à côté d'elle.
+- Tests : 425. Vérifié dans Chromium : bandeau ramassé, bulle de papa (maman), câlin puis nuit et bulle « lit », les deux pages du cahier, réveil dans l'herbe.
+- [ ] À vérifier sur téléphone : la bulle de papa se comprend-elle (aller voir maman) ? La nuit qui tombe après le câlin : assez lente ? On pense à aller se coucher ?
+- [ ] Les affaires de Maria : les étincelles se voient ; l'onglet se touche facilement (trois onglets sur la largeur).
+- [ ] Le réveil dans l'herbe se lit-il (assise, puis debout) ? Le bonnet dans l'herbe se voit-il ?
 
 ### Musique : le lecteur est prêt (D-57)
 

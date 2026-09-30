@@ -110,13 +110,16 @@ describe('derrière la haie (D-49)', () => {
     },
   );
 
-  it('la fin ramène au pied du grand arbre, où le bonnet est accroché ; c’est un souvenir', () => {
+  it('la fin ramène au pied du grand arbre, Céleste assise dans l’herbe, le bonnet à côté (D-58)', () => {
     const end = trigger('thorns-bonnet');
     const room = end.steps.find((s) => s.do === 'room');
     expect(room?.do === 'room' && room.room).toBe('garden-tree');
     expect(room?.do === 'room' && room.returnPoint).toBe(true);
-    expect(end.steps.some((s) => s.do === 'memory' && s.id === 'bonnet')).toBe(true);
-    expect(prop('bonnet-tree').room).toBe('garden-tree');
+    const after = end.steps.slice(end.steps.indexOf(room as (typeof end.steps)[number]));
+    expect(after.some((s) => s.do === 'pose' && s.pose === 'sit')).toBe(true);
+    // Le bonnet se ramasse ensuite avec Agir (les affaires de Maria).
+    expect(end.steps.some((s) => s.do === 'memory')).toBe(false);
+    expect(prop('bonnet-grass').room).toBe('garden-tree');
     expect(level('garden-tree').entities.some((e) => e.type === EntityType.Checkpoint)).toBe(true);
   });
 

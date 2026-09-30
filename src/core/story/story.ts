@@ -50,6 +50,8 @@ export const THOUGHT_ICONS = [
   'treehouse',
   /** La haie et son trou qui scintille (papa au jardin, après le saut mural, D-55). */
   'hedge',
+  /** Maman (papa la montre après le monde étrange, D-58). */
+  'mom',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
