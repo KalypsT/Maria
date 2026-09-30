@@ -44,6 +44,10 @@ export const THOUGHT_ICONS = [
   'handle',
   /** Le soleil : il fait beau, envie de jouer dehors (D-46). */
   'sun',
+  /** Une loupe : « cherche bien » (maman au jardin, D-50). */
+  'search',
+  /** La cabane dans l'arbre (papa au jardin, D-50) : un indice, sans texte. */
+  'treehouse',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 

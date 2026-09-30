@@ -369,7 +369,8 @@ export const HOUSE_STORY: StoryData = {
         { do: 'flag', id: F.GardenMom },
         { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
         { do: 'wait', ms: S.thoughtMs },
-        { do: 'thought', icon: 'question', ms: S.thoughtMs, by: 'mom-garden' },
+        // Au jardin, maman ne sait pas non plus, mais encourage : « cherche bien » (D-50).
+        { do: 'thought', icon: 'search', ms: S.thoughtMs, by: 'mom-garden' },
         { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'mom-garden' },
         { do: 'wait', ms: S.lookMs },
@@ -388,7 +389,8 @@ export const HOUSE_STORY: StoryData = {
         { do: 'flag', id: F.GardenDad },
         { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
         { do: 'wait', ms: S.thoughtMs },
-        { do: 'thought', icon: 'question', ms: S.thoughtMs, by: 'dad-garden' },
+        // Papa montre, sans rien savoir, la cabane dans l'arbre : un indice (D-50).
+        { do: 'thought', icon: 'treehouse', ms: S.thoughtMs, by: 'dad-garden' },
         { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'dad-garden' },
         { do: 'wait', ms: S.lookMs },

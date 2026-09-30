@@ -109,7 +109,7 @@ export const STORY_TIMING = {
 export const CHARACTER_LOOP_MS = { parent: 1600, cat: 2400 } as const;
 
 /** Agrandissement des bulles de pensée (retour de l'utilisateur : mieux lisibles sur téléphone). */
-export const THOUGHT_SCALE = 1.6;
+export const THOUGHT_SCALE = 1.9;
 
 /**
  * Agrandissement des parents (D-37) par rapport à leur dessin de référence (62 px debout, environ
