@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { EntityType } from '../src/core/level/LevelData';
+import { DEFAULT_COMBAT, SPIDER_HITBOX } from '../src/config/combat';
+import { phaseMovement } from '../src/config/growth';
+import { DEFAULT_MOVEMENT } from '../src/config/movement';
+import { EntityType, Tile } from '../src/core/level/LevelData';
 import { isGardenRoom } from '../src/core/world/zone';
 import { HOUSE_STORY } from '../src/levels/house/story';
 import {
@@ -8,6 +11,7 @@ import {
   exitSurface,
   level,
   node,
+  phase,
   reachable,
   roomDifficulty,
   roomOf,
@@ -144,5 +148,72 @@ describe('le jardin (D-46)', () => {
     expect(hole).toBeDefined();
     const trigger = HOUSE_STORY.triggers.find((t) => t.id === 'garden-hedge');
     expect(trigger?.room).toBe('garden-tree');
+  });
+});
+
+describe('araignées et orties du jardin, adoucies (D-51)', () => {
+  const T = 16;
+  const grown = phase(2);
+  const params = phaseMovement(DEFAULT_MOVEMENT, grown);
+  const spiders = (room: string) =>
+    level(room).entities.filter((e) => e.type === EntityType.Spider);
+  /** Bas de l'araignée tout en haut de sa course (px). */
+  const spiderTopBottom = (row: number) => row * T + SPIDER_HITBOX.height;
+  /** Bas de l'araignée tout en bas de sa course (px). */
+  const spiderLowBottom = (row: number) =>
+    row * T + DEFAULT_COMBAT.spiderDropTiles * T + SPIDER_HITBOX.height;
+
+  it('une seule araignée dans le grand arbre, une dans l’allée, aucune ailleurs', () => {
+    expect(spiders('garden-tree')).toHaveLength(1);
+    expect(spiders('garden-alley')).toHaveLength(1);
+    for (const room of ['garden-terrace', 'garden-vegetables', 'garden-treehouse']) {
+      expect(spiders(room), room).toHaveLength(0);
+    }
+  });
+
+  it('grand arbre : en haut de sa course, l’araignée laisse passer le saut vers la cabane', () => {
+    const [spider] = spiders('garden-tree');
+    if (!spider) {
+      throw new Error('araignée absente');
+    }
+    // Saut depuis la dernière branche (pieds à la ligne 16) : le haut de Céleste au sommet.
+    const apexTop = 16 * T - params.jumpHeightTiles * T - grown.hitbox.height;
+    expect(spiderTopBottom(spider.row)).toBeLessThan(apexTop);
+    // En bas de sa course, elle barre le passage : il faut choisir son moment.
+    expect(spiderLowBottom(spider.row)).toBeGreaterThan(apexTop);
+  });
+
+  it('allée : on passe sous l’araignée quand elle est remontée, pas quand elle descend', () => {
+    const [spider] = spiders('garden-alley');
+    if (!spider) {
+      throw new Error('araignée absente');
+    }
+    // Toit de la remise sous l'araignée : Céleste debout, le haut de sa tête.
+    let roof = spider.row + 1;
+    while (level('garden-alley').tiles[roof * level('garden-alley').width + spider.col] === 0) {
+      roof++;
+    }
+    const headTop = roof * T - grown.hitbox.height;
+    expect(spiderTopBottom(spider.row)).toBeLessThan(headTop);
+    expect(spiderLowBottom(spider.row)).toBeGreaterThan(headTop);
+  });
+
+  it('les orties du jardin piquent (^), les ronces de derrière la haie sont fatales (!)', () => {
+    const count = (room: string, tile: number) =>
+      [...level(room).tiles].filter((t) => t === tile).length;
+    for (const room of ['garden-vegetables', 'garden-alley']) {
+      expect(count(room, Tile.Hazard), room).toBeGreaterThan(0);
+      expect(count(room, Tile.Deadly), room).toBe(0);
+    }
+    for (const room of ['garden-upside', 'garden-thorns']) {
+      expect(count(room, Tile.Deadly), room).toBeGreaterThan(0);
+      expect(count(room, Tile.Hazard), room).toBe(0);
+    }
+  });
+
+  it('une lanterne au milieu du potager', () => {
+    expect(level('garden-vegetables').entities.some((e) => e.type === EntityType.Checkpoint)).toBe(
+      true,
+    );
   });
 });

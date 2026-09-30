@@ -26,6 +26,7 @@ const LEGEND: Readonly<Record<string, number>> = {
   A: Tile.Empty,
   S: Tile.Empty,
   '^': Tile.Hazard,
+  '!': Tile.Deadly,
 };
 /** Marqueurs d'entités (la tuile elle-même est vide). */
 const ENTITIES: Readonly<Record<string, EntityType>> = {
@@ -57,7 +58,7 @@ const DECOR = /^([a-z][\w-]*)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
  * Convertit une carte ASCII (décision D-06) en `LevelData`.
  * Lignes vides en début et fin ignorées, lignes commençant par `;` ignorées (commentaires).
  * Légende : `#` plein, `=` traversable par le dessous, `.` vide, `P` départ (une seule fois),
- * `G` arrivée d'un parcours (au plus une fois), `e` patrouilleur, `a` araignée (D-46), `o` escargot (D-49), `C` checkpoint, `^` danger,
+ * `G` arrivée d'un parcours (au plus une fois), `e` patrouilleur, `a` araignée (D-46), `o` escargot (D-49), `C` checkpoint, `^` danger qui pique, `!` danger fatal (D-51),
  * `b` bois, `t` tissu et `v` feuillage (pleins, D-46), `-` étagère (traversable), `1`-`9` sortie dans un mur latéral,
  * `A` objet de capacité (au plus un, capacité nommée par `; @ability:`), `S` trouvaille (secret).
  * Les commentaires `; @clé: valeur` sont des métadonnées ; `; @decor:` (répétable) déclare

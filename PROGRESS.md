@@ -2,11 +2,24 @@
 
 ## Phase en cours
 
-**Le jardin (2a) et derrière la haie (2b)** (§7.2, §6, D-46 à D-49) : fusionnés (PR #29), **essai sur téléphone en cours** (début du jardin testé ; correctif du fil à linge sur `ccr-53d22df4-9euiqo`). Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
+**Le jardin (2a) et derrière la haie (2b)** (§7.2, §6, D-46 à D-49) : fusionnés (PR #29), **essai sur téléphone en cours** (début du jardin testé ; jardin adouci (D-51) sur `ccr-53d22df4-9euiqo`). Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
 
 Prochaine : à décider (zone suivante : le quartier, §26 ; ou passe de réglage d'après les essais).
 
 ## Fait
+
+### Jardin adouci (D-51)
+
+- **Orties qui piquent** (`^`) : Céleste rebondit en arrière, la peur monte d'un cran ; plus de retour immédiat à la lanterne. Trois piqûres rapprochées la font s'évanouir. Les briques de jeu de la maison piquent aussi.
+- **Ronces fatales** (`!`, nouvelles, épines rouges) : derrière la haie seulement, et pour les zones suivantes.
+- **Araignées** : une dans le grand arbre, une dans l'allée, aucune ailleurs ; plus lentes (4,5 s) et descendant moins bas (3 tuiles) ; testé qu'il existe toujours un moment pour passer.
+- **Lanterne** au milieu du potager.
+
+### À vérifier sur téléphone (D-51)
+
+- [ ] Orties : le rebond est-il lisible et juste assez punitif ? (réglages **DEBUG → Combat** : `stingBounceY`, `stingCooldownMs`)
+- [ ] Araignées : on voit quand passer ? Encore trop gênantes ou devenues trop faciles ? (`spiderDropTiles`, `spiderPeriodMs`)
+- [ ] Derrière la haie : les ronces se reconnaissent-elles comme plus dangereuses que les orties ?
 
 ### Retours du téléphone : bulles, parents, graphisme du jardin (D-50)
 

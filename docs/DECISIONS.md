@@ -542,6 +542,19 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
     Le monde étrange garde ses éléments suspendus (lueur dessous, D-34).
 - **Dessins plus riches**, toujours par le code et exactement sur la collision : feuillage en volumes, écorce ombrée, bacs de légumes, glycine, nappe, clôture, pierres irrégulières, façade ; ciel à deux plans de collines et arbres lointains.
 
+## D-51 — Jardin adouci : orties qui piquent, ronces fatales, araignées moins bien placées
+
+Retour du téléphone : le jardin était trop dur (araignées touchées à chaque saut, orties qui renvoient aussitôt à la lanterne). Ce niveau de difficulté reste celui visé pour les zones suivantes (D-36).
+
+- **Deux dangers de sol** :
+  - `^` **pique** (`Tile.Hazard`) : orties du jardin, briques de jeu de la maison. Céleste rebondit vers le haut et en arrière (`stingBounceY` 360 px/s, recul de l'ennemi), perd un instant le contrôle et la peur monte d'un cran ; trois piqûres rapprochées la font s'évanouir comme trois coups d'ennemi. Délai propre `stingCooldownMs` (500 ms), plus court que l'invulnérabilité : rester dans une fosse pique de nouveau, on ne la traverse pas en marchant.
+  - `!` **fatal** (`Tile.Deadly`) : ronces de derrière la haie (upside, thorns) et des zones suivantes. Évanouissement immédiat, retour à la lanterne (comportement d'avant).
+  - L'analyse de faisabilité traite les deux comme des sols interdits (inchangée).
+- **Araignées** : une seule dans le grand arbre (au-dessus du dernier saut vers la cabane), une dans l'allée (au-dessus du toit de la remise), aucune ailleurs. Descente de 3 tuiles (au lieu de 4), période de 4,5 s (au lieu de 3,2 s). Tests géométriques : en haut de sa course, l'araignée laisse passer (saut ou tête de Céleste), en bas elle barre : il faut choisir son moment, il existe toujours un moment sûr.
+- **Potager** : une lanterne sur un bac au milieu (la salle était longue et sans point de retour).
+- **Derrière la haie** : inchangé (difficile, voulu).
+- **Sauvegarde** : aucune migration.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

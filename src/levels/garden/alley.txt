@@ -15,15 +15,15 @@
 ; @decor: shed 18 5 12 19
 ; @decor: fence 1 9 12 15
 ; @decor: sun 6 2 3 3
-; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (danger), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (fatales), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-v.................................vv...................v
+v.......................a.........vv...................v
 v.................................vv...................v
 v.................................vv...................v
 v.................................vv...................v
 v.................bbbbbbbbbbbb....vv...................v
 1.................bbbbbbbbbbbb....vv...................v
-1.................bbbbbbbbbbbb.a..vv...................v
+1.................bbbbbbbbbbbb....vv...................v
 1.................bbbbbbbbbbbb....vv...................v
 vbbbbbbbbbbbb.....bbbbbbbbbbbb....vv...................v
 vbbbbbbbbbbbb.....bbbbbbbbbbbb....vv...................2

@@ -46,7 +46,7 @@ const faintSteps = msToSteps(DEFAULT_WORLD.faintMs);
 
 describe('RunState (D-21)', () => {
   it('danger : évanouissement, puis retour au départ sans checkpoint', () => {
-    const r = rig(['##########', '#........#', '#P...^...#', '##########']);
+    const r = rig(['##########', '#........#', '#P...!...#', '##########']);
     r.input.moveX = 1;
     r.step(200);
     const events = r.takeEvents();
@@ -56,7 +56,7 @@ describe('RunState (D-21)', () => {
   });
 
   it('l’évanouissement dure le temps réglé', () => {
-    const r = rig(['##########', '#........#', '#P^......#', '##########']);
+    const r = rig(['##########', '#........#', '#P!......#', '##########']);
     r.input.moveX = 1;
     let fainted = -1;
     let respawned = -1;
@@ -75,7 +75,7 @@ describe('RunState (D-21)', () => {
   });
 
   it('checkpoint : activé au contact, devient le point de retour et vide la jauge', () => {
-    const r = rig(['############', '#..........#', '#P...C..^..#', '############']);
+    const r = rig(['############', '#..........#', '#P...C..!..#', '############']);
     r.run.fear = 2;
     r.input.moveX = 1;
     r.step(60);
@@ -135,5 +135,48 @@ describe('RunState (D-21)', () => {
     expect(r.run.respawnTile()).toEqual({ col: 8, row: 2 });
     r.run.load(r.level, [], 'inconnu');
     expect(r.run.respawnTile()).toEqual(r.level.spawn);
+  });
+});
+
+describe('dangers qui piquent et dangers fatals (D-51)', () => {
+  it('les orties (^) piquent : rebond vers le haut et en arrière, peur, pas d’évanouissement', () => {
+    const r = rig(['############', '#..........#', '#..........#', '#P...^^....#', '############']);
+    r.input.moveX = 1;
+    let hurt = false;
+    let bounced = false;
+    for (let i = 0; i < 240 && !hurt; i++) {
+      r.step(1);
+      if (r.combat.events & CombatEvent.Hurt) {
+        hurt = true;
+        bounced = r.player.vy < 0 && r.player.vx < 0;
+      }
+    }
+    expect(hurt).toBe(true);
+    expect(bounced).toBe(true);
+    expect(r.run.fear).toBe(1);
+    expect(r.run.fainting).toBe(false);
+    expect(r.takeEvents() & RunEvent.Fainted).toBe(0);
+  });
+
+  it('à force de piquer, la jauge de peur pleine fait s’évanouir', () => {
+    const r = rig(['############', '#..........#', '#P...^^....#', '############'], {
+      fearDecayMs: 0,
+    });
+    r.input.moveX = 1;
+    let fainted = false;
+    for (let i = 0; i < 3000 && !fainted; i++) {
+      r.step(1);
+      fainted = (r.takeEvents() & RunEvent.Fainted) !== 0;
+    }
+    expect(fainted).toBe(true);
+    expect(r.run.faintCause).toBe(FaintCause.Fear);
+  });
+
+  it('les ronces (!) restent fatales : évanouissement aussitôt', () => {
+    const r = rig(['##########', '#........#', '#P..!....#', '##########']);
+    r.input.moveX = 1;
+    r.step(120);
+    expect(r.takeEvents() & RunEvent.Fainted).not.toBe(0);
+    expect(r.run.faintCause).toBe(FaintCause.Hazard);
   });
 });

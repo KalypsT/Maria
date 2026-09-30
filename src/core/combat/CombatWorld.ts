@@ -2,7 +2,7 @@ import type { CombatParams } from '../../config/combat';
 import { TILE_SIZE } from '../../config/display';
 import { PHYSICS_STEP_HZ, msToSteps } from '../../config/movement';
 import { EntityType, Tile, tileAt, type LevelData } from '../level/LevelData';
-import type { Box } from '../physics/gridCollision';
+import { touchesTile, type Box } from '../physics/gridCollision';
 import type { PlayerPhysics } from '../player/PlayerPhysics';
 import { PlayerAttack } from './PlayerAttack';
 import { EnemyKind, Patroller, type PatrollerTuning } from './Patroller';
@@ -47,6 +47,9 @@ export class CombatWorld {
     snailStep: 0,
   };
   private hitstopTotal = 0;
+  /** Pas restants avant qu'un danger qui pique puisse piquer de nouveau (D-51). */
+  private stingSteps = 0;
+  private stingTotal = 0;
   private hurtSteps = 0;
   private invulnerableTotal = 0;
   private readonly params: CombatParams;
@@ -78,6 +81,7 @@ export class CombatWorld {
     this.hitstopTotal = msToSteps(p.hitstopMs, hz);
     this.hurtSteps = msToSteps(p.hurtControlMs, hz);
     this.invulnerableTotal = msToSteps(p.invulnerabilityMs, hz);
+    this.stingTotal = msToSteps(p.stingCooldownMs, hz);
     const t = this.tuning;
     t.dt = 1 / hz;
     t.speed = p.patrollerSpeed;
@@ -126,6 +130,7 @@ export class CombatWorld {
     this.attack.reset();
     this.hitstopSteps = 0;
     this.invulnerableSteps = 0;
+    this.stingSteps = 0;
     this.events = 0;
     this.lastEnemy = -1;
   }
@@ -154,6 +159,22 @@ export class CombatWorld {
     for (const enemy of enemies) {
       enemy.step(this.level, tuning);
     }
+    // Danger qui pique (orties, briques de jeu, D-51) : Céleste rebondit vers le haut et en arrière
+    // (d'où elle venait), comme touchée par un ennemi ; la jauge de peur monte. Son propre délai,
+    // plus court que l'invulnérabilité : rester dedans pique encore (on ne traverse pas une fosse).
+    if (this.stingSteps > 0) {
+      this.stingSteps--;
+    } else if (touchesTile(this.level, player.box, Tile.Hazard)) {
+      const back = player.vx > 0 ? -1 : player.vx < 0 ? 1 : -player.facing;
+      player.vx = back * this.params.hurtKnockbackX;
+      player.vy = -this.params.stingBounceY;
+      player.startHurt(this.hurtSteps);
+      this.stingSteps = this.stingTotal;
+      this.invulnerableSteps = Math.max(this.invulnerableSteps, this.stingTotal);
+      this.events |= CombatEvent.Hurt;
+      this.lastEnemy = -1;
+      return;
+    }
     if (this.invulnerableSteps > 0) {
       this.invulnerableSteps--;
       return;
@@ -170,7 +191,7 @@ export class CombatWorld {
         this.invulnerableSteps = this.invulnerableTotal;
         this.events |= CombatEvent.Hurt;
         this.lastEnemy = i;
-        break;
+        return;
       }
     }
   }

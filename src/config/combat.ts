@@ -25,6 +25,10 @@ export interface CombatParams {
   hurtKnockbackX: number;
   /** Recul de Céleste touchée : vitesse verticale vers le haut (px/s). */
   hurtKnockbackY: number;
+  /** Rebond vers le haut sur un danger qui pique (px/s), pour sortir d'une fosse (D-51). */
+  stingBounceY: number;
+  /** Délai avant qu'un danger qui pique pique de nouveau (ms), plus court que l'invulnérabilité. */
+  stingCooldownMs: number;
   /** Perte de contrôle après avoir été touchée (ms). */
   hurtControlMs: number;
   /** Invulnérabilité après avoir été touchée (ms). */
@@ -66,6 +70,8 @@ export const DEFAULT_COMBAT: Readonly<CombatParams> = {
   hitstopMs: 50,
   hurtKnockbackX: 150,
   hurtKnockbackY: 200,
+  stingBounceY: 360,
+  stingCooldownMs: 500,
   hurtControlMs: 200,
   invulnerabilityMs: 1000,
   patrollerSpeed: 32,
@@ -75,8 +81,8 @@ export const DEFAULT_COMBAT: Readonly<CombatParams> = {
   patrollerFriction: 700,
   patrollerGravity: 1400,
   patrollerMaxFall: 380,
-  spiderDropTiles: 4,
-  spiderPeriodMs: 3200,
+  spiderDropTiles: 3,
+  spiderPeriodMs: 4500,
   snailSpeed: 20,
   hitFlashMs: 100,
   screenShakePx: 0,
@@ -96,6 +102,8 @@ export const COMBAT_PARAM_RANGES: Readonly<
   hitstopMs: { min: 0, max: 150, step: 5 },
   hurtKnockbackX: { min: 0, max: 400, step: 10 },
   hurtKnockbackY: { min: 0, max: 400, step: 10 },
+  stingBounceY: { min: 100, max: 600, step: 10 },
+  stingCooldownMs: { min: 100, max: 2000, step: 50 },
   hurtControlMs: { min: 0, max: 600, step: 10 },
   invulnerabilityMs: { min: 0, max: 3000, step: 50 },
   patrollerSpeed: { min: 0, max: 120, step: 2 },
