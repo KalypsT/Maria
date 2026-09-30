@@ -10,6 +10,7 @@ Déposer ici les morceaux, nommés d'après leur emplacement :
 | `garden`         | le jardin                                          |
 | `strange`        | le monde étrange de la maison                      |
 | `hedge`          | derrière la haie                                   |
+| `street`         | la rue du quartier                                 |
 | `found` (court)  | capacité ou trouvaille ramassée                    |
 | `memory` (court) | nouveau souvenir                                   |
 | `maria` (court)  | apparition de Maria (sans ce fichier : le silence) |

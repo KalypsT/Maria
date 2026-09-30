@@ -1,5 +1,7 @@
 ; Jardin : l'allée des toits (D-46), du haut du vieux mur jusqu'au toit de la pergola de la terrasse.
 ; Raccourci qui boucle le jardin ; la cheminée entre la remise et le mur demande le saut mural.
+; Au fond de cette cheminée, un passage sous le vieux mur mène au portillon (sortie 3, la rue, D-60) :
+; il s'ouvre en tirant la chevillette, pendue haut dans la cheminée (saut mural), après le bonnet.
 ; @name: Allée
 ; @icon: fence
 ; @world: garden
@@ -10,6 +12,7 @@
 ; @decor: hedge 55 1 1 9
 ; @decor: hedge 55 13 1 11
 ; @decor: oldwall 34 13 21 11
+; @decor: gatecord 33 15 22 6
 ; @decor: hedge 34 1 2 10
 ; @decor: hedgetunnel 34 11 2 2
 ; @decor: shed 18 5 12 19
@@ -37,8 +40,8 @@ vbbbbbbbbbbbb.....bbbbbbbbbbbb....#####################v
 vbbbbbbbbbbbb.....bbbbbbbbbbbb....#####################v
 vbbbbbbbbbbbb.....bbbbbbbbbbbb....#####################v
 vbbbbbbbbbbbb.....bbbbbbbbbbbb....#####################v
-vbbbbbbbbbbbb.....bbbbbbbbbbbb....#####################v
-vbbbbbbbbbbbb.....bbbbbbbbbbbb....#####################v
-vbbbbbbbbbbbb.....bbbbbbbbbbbb....#####################v
-#############^^^^^############^^^^######################
+vbbbbbbbbbbbb.....bbbbbbbbbbbb.........................3
+vbbbbbbbbbbbb.....bbbbbbbbbbbb.........................3
+vbbbbbbbbbbbb.....bbbbbbbbbbbb.........................3
+#############^^^^^############^^########################
 ########################################################

@@ -118,6 +118,35 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   hedgehole: { furniture: false },
   /** Passage sous une haie (fond), allée des toits. */
   hedgetunnel: { furniture: false },
+  /**
+   * Ficelle du portillon (D-60) : le long du plafond du passage sous le vieux mur, puis le long du
+   * mur de la cheminée, jusqu'à la chevillette.
+   */
+  gatecord: { furniture: false },
+  // La rue (D-60), dessinée par le code (PLACEHOLDER).
+  /** Maisons de ville mitoyennes (fond). */
+  houses: { furniture: false },
+  /** Platane du trottoir (fond). */
+  planetree: { furniture: false },
+  /** Les quatre lieux, fermés pour l'instant (fond, avec leur porte). */
+  playground: { furniture: false },
+  school: { furniture: false },
+  shop: { furniture: false },
+  site: { furniture: false },
+  bins: { furniture: true },
+  car: { furniture: true },
+  /** Lampadaire : son chapeau est une plateforme traversable, le mât est du fond. */
+  lamppost: { furniture: true },
+  /** Abribus : le toit est une plateforme traversable. */
+  busstop: { furniture: true },
+  crates: { furniture: true },
+  /** Rebord de fenêtre, corniche, store, enseigne : plateformes traversables. */
+  sill: { furniture: true },
+  cornice: { furniture: true },
+  awning: { furniture: true },
+  shopsign: { furniture: true },
+  /** Échafaudage du chantier (planches traversables). */
+  scaffold: { furniture: true },
   cushions: { furniture: false },
   // Derrière la haie (D-49).
   /** Tuteur géant (bois plein), paroi d'une cheminée. */
@@ -184,6 +213,8 @@ export interface ArtPalette {
   glow: number;
   /** Dehors (jardin, D-46) : ciel au lieu du mur, herbe, pierres, orties. */
   outdoor: boolean;
+  /** Sol pavé (la rue, D-60) au lieu de l'herbe. */
+  paved: boolean;
   /** Feuillage (haies, frondaisons, buissons). */
   leaf: string;
   leafLight: string;
@@ -217,6 +248,7 @@ export const REAL_PALETTE: Readonly<ArtPalette> = {
   stars: true,
   glow: 1,
   outdoor: false,
+  paved: false,
   leaf: '#4f7a4a',
   leafLight: '#78a567',
   leafDark: '#3a5c3a',
@@ -305,6 +337,18 @@ export const GARDEN_PALETTE: Readonly<ArtPalette> = {
   leaf: '#5d9152',
   leafLight: '#8cc26f',
   leafDark: '#3f6b3d',
+};
+
+/**
+ * La rue (D-60), de jour : le ciel du jardin, un trottoir de dalles grises avec sa bordure.
+ * PROVISOIRE, à juger sur téléphone.
+ */
+export const STREET_PALETTE: Readonly<ArtPalette> = {
+  ...GARDEN_PALETTE,
+  floor: '#9a958d',
+  floorEdge: '#cfc8bb',
+  structure: '#b8a98f',
+  paved: true,
 };
 
 /** Rayon du halo d'une veilleuse (px logiques). */

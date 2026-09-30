@@ -9,6 +9,8 @@ export interface MusicContext {
   readonly outdoor: boolean;
   /** Salle du jardin (`; @world: garden`). */
   readonly garden: boolean;
+  /** La rue du quartier (`; @world: street`, D-60). */
+  readonly street: boolean;
   readonly time: TimeOfDay;
 }
 
@@ -19,6 +21,9 @@ export function chooseMusic(context: MusicContext): MusicTrack {
   }
   if (context.garden) {
     return 'garden';
+  }
+  if (context.street) {
+    return 'street';
   }
   return context.time === 'morning' ? 'house-day' : 'house-night';
 }

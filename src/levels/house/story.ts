@@ -475,6 +475,41 @@ export const HOUSE_STORY: StoryData = {
       ],
     },
     {
+      // Après le bonnet (D-60), papa montre le portillon au bout de l'allée : la suite.
+      id: 'garden-dad-gate',
+      room: 'garden-vegetables',
+      on: 'interact',
+      area: { col: 1, row: 16, w: 8, h: 6 },
+      mark: { col: 7, row: 15 },
+      when: { all: [F.HedgeDone], none: [F.GardenDadGate, F.GateOpen] },
+      lock: true,
+      steps: [
+        { do: 'flag', id: F.GardenDadGate },
+        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
+        { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'gate', ms: S.thoughtMs, by: 'dad-garden' },
+        { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'dad-garden' },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // La chevillette (D-60), pendue haut dans la cheminée de l'allée : on l'atteint en saut
+      // mural, après le bonnet. Tirée, elle ouvre le portillon au bout du passage.
+      id: 'gate-cord',
+      room: 'garden-alley',
+      on: 'interact',
+      area: { col: 31, row: 15, w: 3, h: 3 },
+      mark: { col: 32, row: 15 },
+      when: { all: [F.HedgeDone], none: [F.GateOpen] },
+      lock: true,
+      steps: [
+        { do: 'flag', id: F.GateOpen },
+        { do: 'thought', icon: 'gate', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
       // Une fois le saut mural trouvé (D-55), papa montre la haie au fond du jardin : le trou qui
       // scintille, la suite. Toujours sans rien savoir de Maria.
       id: 'garden-dad-hedge',
@@ -595,6 +630,68 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: 1200 },
         { do: 'thought', icon: 'maria', ms: S.thoughtMs + 800 },
         { do: 'wait', ms: S.lookMs + 600 },
+      ],
+    },
+    // La rue (D-60) : quatre lieux fermés pour l'instant (PLACEHOLDER). Agir devant la porte : une
+    // bulle « ? », rejouable ; ils s'ouvriront avec leur propre salle.
+    {
+      // L'aire de jeux.
+      id: 'street-playground',
+      room: 'street',
+      on: 'interact',
+      area: { col: 47, row: 25, w: 6, h: 3 },
+      mark: { col: 50, row: 24 },
+      when: {},
+      lock: true,
+      repeat: true,
+      steps: [
+        { do: 'thought', icon: 'question', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // L'école.
+      id: 'street-school',
+      room: 'street',
+      on: 'interact',
+      area: { col: 95, row: 25, w: 6, h: 3 },
+      mark: { col: 97, row: 24 },
+      when: {},
+      lock: true,
+      repeat: true,
+      steps: [
+        { do: 'thought', icon: 'question', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // La supérette.
+      id: 'street-shop',
+      room: 'street',
+      on: 'interact',
+      area: { col: 134, row: 25, w: 6, h: 3 },
+      mark: { col: 136, row: 24 },
+      when: {},
+      lock: true,
+      repeat: true,
+      steps: [
+        { do: 'thought', icon: 'question', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // Le chantier.
+      id: 'street-site',
+      room: 'street',
+      on: 'interact',
+      area: { col: 165, row: 25, w: 6, h: 3 },
+      mark: { col: 167, row: 24 },
+      when: {},
+      lock: true,
+      repeat: true,
+      steps: [
+        { do: 'thought', icon: 'question', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
       ],
     },
     // Objets à regarder (D-38) : la première fois, ils deviennent des souvenirs du cahier ; on
@@ -860,6 +957,25 @@ export const HOUSE_STORY: StoryData = {
       row: 7,
       when: { none: [F.HedgeDone] },
     },
+    // Le portillon au bout du passage sous le vieux mur (D-60), ouvert par la chevillette.
+    {
+      id: 'gate',
+      room: 'garden-alley',
+      kind: 'gate',
+      col: 54,
+      row: 23,
+      instant: true,
+      when: { none: [F.GateOpen] },
+    },
+    {
+      id: 'gate-open',
+      room: 'garden-alley',
+      kind: 'gate-open',
+      col: 54,
+      row: 23,
+      instant: true,
+      when: { all: [F.GateOpen] },
+    },
     {
       id: 'bonnet-grass',
       room: 'garden-tree',
@@ -906,6 +1022,8 @@ export const HOUSE_STORY: StoryData = {
     { room: 'bedroom', when: { none: [F.Slept] }, speaker: 'dad-door' },
     // La porte de derrière (D-46) : la poignée est trop haute tant que Céleste n'a pas grandi.
     { room: 'laundry', exit: 3, when: { none: [F.Grown] }, icon: 'handle' },
+    // Le portillon (D-60) : fermé tant que la chevillette n'est pas tirée.
+    { room: 'garden-alley', exit: 3, when: { none: [F.GateOpen] }, icon: 'gate' },
   ],
   omens: [
     // Derrière la haie (D-49) : en approchant du trou, une fois le saut mural trouvé.

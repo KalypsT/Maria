@@ -732,6 +732,29 @@ export function gardenDrawers({ tileShape, rounded }: ShapeTools): Record<string
       ctx.arc(cx, cy, r.w / 3, 0, Math.PI * 2);
       ctx.fill();
     },
+    gatecord(a, r) {
+      const { ctx, palette: p } = a;
+      // De la droite du bas (le portillon) au plafond du passage, puis en haut à gauche, le long
+      // du mur, jusqu'à la chevillette (un petit bout de bois) qui pend dans la cheminée.
+      const right = r.x + r.w - 10;
+      // Juste sous le linteau (dessiné par-dessus le fond), pour rester visible.
+      const ceiling = r.y + r.h + 3;
+      const wallX = r.x + T - 1.5;
+      // Ficelle rouge, bien visible sur la pierre : elle mène l'œil du portillon à la chevillette.
+      ctx.strokeStyle = '#b5534a';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(right, ceiling + 4);
+      ctx.lineTo(right, ceiling);
+      ctx.lineTo(wallX, ceiling);
+      ctx.lineTo(wallX, r.y + 8);
+      ctx.stroke();
+      ctx.fillStyle = p.woodDark;
+      rounded(ctx, { x: wallX - 3, y: r.y + 4, w: 6, h: 12 }, 3);
+      ctx.fill();
+      ctx.fillStyle = p.woodLight;
+      ctx.fillRect(wallX - 1.5, r.y + 6, 1.5, 8);
+    },
     hedgetunnel(a, r) {
       const { ctx, palette: p } = a;
       // Passage sous la haie (fond) : la haie continue derrière, dans l'ombre, et une frange de

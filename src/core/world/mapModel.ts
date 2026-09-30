@@ -2,7 +2,7 @@ import { TILE_SIZE as T } from '../../config/display';
 import { EntityType } from '../level/LevelData';
 import { checkpointId } from '../save/saveData';
 import { secretId } from './Pickups';
-import { isStrangeRoom, type MapBox, type Zone } from './zone';
+import { isStrangeRoom, mapPage, type MapBox, type Zone } from './zone';
 
 /** Point sur la carte (unités de carte). */
 export interface MapPoint {
@@ -62,7 +62,7 @@ const DIRECT_GAP = 0.6;
  * Modèle de la carte dessinée par Céleste (§24), pur : quelles salles dessiner, lesquelles sont
  * devinées, où placer les liaisons, Céleste, les veilleuses allumées et les trouvailles trouvées.
  */
-export function buildMapModel(zone: Zone, progress: MapProgress): MapModel {
+export function buildMapModel(zone: Zone, progress: MapProgress, page: string = zone.id): MapModel {
   const visited = new Set(progress.visited.filter((id) => zone.rooms.has(id)));
   const guessed = new Set<string>();
   for (const [a, b] of zone.links) {
@@ -88,7 +88,8 @@ export function buildMapModel(zone: Zone, progress: MapProgress): MapModel {
   for (const [id, level] of zone.rooms) {
     const box = zone.map[id];
     const isVisited = visited.has(id);
-    if (!box || (!isVisited && !guessed.has(id))) {
+    // Une page du cahier par lieu (D-60) : seules les salles de cette page.
+    if (!box || mapPage(zone, id) !== page || (!isVisited && !guessed.has(id))) {
       continue;
     }
     const lamps: (MapPoint & { current: boolean })[] = [];
@@ -149,7 +150,8 @@ export function buildMapModel(zone: Zone, progress: MapProgress): MapModel {
     }
   }
   const c = progress.celeste;
-  const celeste = c && visited.has(c.room) ? at(c.room, c.x, c.y) : null;
+  const celeste =
+    c && visited.has(c.room) && mapPage(zone, c.room) === page ? at(c.room, c.x, c.y) : null;
   return { rooms, links, celeste };
 }
 
@@ -188,7 +190,16 @@ export function mapProblems(zone: Zone): string[] {
     for (let j = i + 1; j < boxes.length; j++) {
       const a = boxes[i]?.box;
       const b = boxes[j]?.box;
-      if (a && b && a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h) {
+      const samePage = (a?.page ?? zone.id) === (b?.page ?? zone.id);
+      if (
+        a &&
+        b &&
+        samePage &&
+        a.x < b.x + b.w &&
+        b.x < a.x + a.w &&
+        a.y < b.y + b.h &&
+        b.y < a.y + a.h
+      ) {
         problems.push(
           `${String(boxes[i]?.id)} et ${String(boxes[j]?.id)} se chevauchent sur la carte`,
         );

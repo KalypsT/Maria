@@ -39,6 +39,8 @@ import {
   arrivalPosition,
   isGardenRoom,
   isStrangeRoom,
+  isStreetRoom,
+  mapPage,
   touchedExit,
   type ExitRef,
   type MapBox,
@@ -51,6 +53,7 @@ import {
   ART_IMAGES,
   DAY_PALETTE,
   GARDEN_PALETTE,
+  STREET_PALETTE,
   MAX_ART_SCALE,
   REAL_PALETTE,
   STRANGE_PALETTE,
@@ -101,11 +104,14 @@ const SOLID_COLORS: Readonly<Partial<Record<number, SolidColors>>> = {
 };
 
 /** Titre de la carte de chaque zone (écrit par Céleste). */
-const MAP_TITLES: Readonly<Record<string, string>> = { house: 'Ma maison' };
+const MAP_TITLES: Readonly<Record<string, string>> = {
+  house: 'Ma maison',
+  street: 'Mon quartier',
+};
 
-/** Boîte englobant toutes les salles de la carte d'une zone (disposition stable). */
-function mapBounds(zone: Zone): MapBox {
-  const boxes = Object.values(zone.map);
+/** Boîte englobant toutes les salles d'une page de la carte (disposition stable). */
+function mapBounds(zone: Zone, page: string): MapBox {
+  const boxes = Object.values(zone.map).filter((box) => (box.page ?? zone.id) === page);
   const x = Math.min(...boxes.map((b) => b.x));
   const y = Math.min(...boxes.map((b) => b.y));
   const right = Math.max(...boxes.map((b) => b.x + b.w));
@@ -214,6 +220,8 @@ export class GameScene extends Phaser.Scene {
   private fx!: StrangeFxView;
   private readonly fxView = new Phaser.Geom.Rectangle();
   private readonly irisPoint = { x: 0, y: 0 };
+  /** Vue de la caméra pour l'habillage par blocs (réutilisée, aucune allocation). */
+  private readonly artView = { x: 0, y: 0, w: 0, h: 0 };
   /** Moment de la journée et monde étrange de la salle dessinée. */
   private drawnTime: TimeOfDay = 'evening';
   private drawnStrange = false;
@@ -225,6 +233,7 @@ export class GameScene extends Phaser.Scene {
     strange: false,
     outdoor: false,
     garden: false,
+    street: false,
     time: 'evening' as TimeOfDay,
   };
   /** Heure (ms) avant laquelle une porte fermée ne redonne pas de bulle. */
@@ -584,9 +593,21 @@ export class GameScene extends Phaser.Scene {
       camera.viewHeight,
     );
     fx.update(view, this.puppet.x, this.puppet.y - box.height / 2, player.grounded);
+    // Habillage par blocs proches de la vue (D-60) ; tout ce qui manque d'un coup dans le noir.
+    const artView = this.artView;
+    artView.x = view.x;
+    artView.y = view.y;
+    artView.w = view.width;
+    artView.h = view.height;
+    this.roomArt.update(artView, Math.max(this.story.veil, this.transition.veil) >= 1);
     main.scrollX += fx.offsetX;
     main.scrollY += fx.offsetY;
     this.renderRunState();
+  }
+
+  /** Blocs d'habillage dessinés en ce moment (outil de debug, D-60). */
+  get artChunks(): number {
+    return this.roomArt.preparedCount;
   }
 
   /**
@@ -600,14 +621,20 @@ export class GameScene extends Phaser.Scene {
     }
     const data = this.session.data;
     const box = this.player.box;
-    const model = buildMapModel(zone, {
-      visited: data.progression.mapRevealed,
-      seen: this.mapSeen,
-      activatedCheckpoints: data.activatedCheckpoints,
-      checkpoint: data.checkpoint,
-      collectibles: data.progression.collectibles,
-      celeste: { room: this.level.id, x: box.x + box.width / 2, y: box.y + box.height },
-    });
+    // Page du cahier de la salle ; dans le monde étrange (hors carte), celle de la zone.
+    const page = mapPage(zone, this.level.id) ?? zone.id;
+    const model = buildMapModel(
+      zone,
+      {
+        visited: data.progression.mapRevealed,
+        seen: this.mapSeen,
+        activatedCheckpoints: data.activatedCheckpoints,
+        checkpoint: data.checkpoint,
+        collectibles: data.progression.collectibles,
+        celeste: { room: this.level.id, x: box.x + box.width / 2, y: box.y + box.height },
+      },
+      page,
+    );
     for (const room of data.progression.mapRevealed) {
       this.mapSeen.add(room);
     }
@@ -615,8 +642,8 @@ export class GameScene extends Phaser.Scene {
     this.touch?.releaseAll();
     this.mapPage.open(
       model,
-      MAP_TITLES[zone.id] ?? zone.id,
-      mapBounds(zone),
+      MAP_TITLES[page] ?? page,
+      mapBounds(zone, page),
       data.progression.memories,
     );
   }
@@ -1127,6 +1154,9 @@ export class GameScene extends Phaser.Scene {
     if (isGardenRoom(this.level)) {
       return GARDEN_PALETTE;
     }
+    if (isStreetRoom(this.level)) {
+      return STREET_PALETTE;
+    }
     const base = this.story.timeOfDay() === 'morning' ? DAY_PALETTE : REAL_PALETTE;
     // Couleur de mur propre à une salle (`; @walls: haut bas`), la cabane en bois par exemple.
     const walls = this.level.meta.walls?.split(/\s+/);
@@ -1166,6 +1196,7 @@ export class GameScene extends Phaser.Scene {
     music.strange = isStrangeRoom(this.level);
     music.outdoor = Boolean(this.level.meta.outdoor);
     music.garden = isGardenRoom(this.level);
+    music.street = isStreetRoom(this.level);
     music.time = story.timeOfDay();
     this.audio.setMusic(chooseMusic(music));
   }

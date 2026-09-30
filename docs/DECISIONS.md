@@ -633,6 +633,23 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Mode debug = l'autre adresse** : « Passer en mode debug » ouvre `/Maria/debug/`, « Quitter le mode debug » ramène à `/Maria/`. Les écritures de sauvegarde en cours sont terminées d'abord. Même site, donc **même sauvegarde** (IndexedDB par origine) : on reprend à la dernière lanterne. D-12 est inchangée : le jeu ne contient toujours aucun outil de debug. Limite : le mode debug demande du réseau (il n'est pas précaché, D-23). En dev, « quitter » recharge simplement la page.
 - **Overlay de debug** : bouton **INFOS** à côté de DEBUG, qui masque ou affiche le cadre d'infos (FPS, état, position, caméra, combat, musique). Le choix est retenu (`localStorage`, build de debug).
 
+## D-60 — La sortie du jardin : le portillon et la rue
+
+- **Plan validé** : le portillon au bout de l'allée, ouvert après le bonnet par une chevillette qu'on atteint en saut mural ; la rue, un grand niveau en long, sur deux étages ; quatre lieux (aire de jeux, école, supérette, chantier, ce dernier choisi par l'utilisateur), fermés pour l'instant ; pas de croissance dans cette phase.
+- **Le portillon** : au fond de la cheminée de l'allée (entre la remise et le vieux mur), un passage sous le vieux mur mène au portillon (allée:3 ↔ rue:1). Une ficelle rouge court du portillon, sous le linteau, puis le long du mur jusqu'à une **chevillette** pendue haut dans la cheminée (« tire la chevillette… »). On ne l'atteint qu'en saut mural (testé : même au plus haut d'un saut depuis le sol, la tête n'y arrive pas), et seulement après le bonnet. Agir la tire : le portillon s'ouvre et reste ouvert (étape `garden.gate`). Fermé, il bloque la sortie avec une bulle « portillon ».
+  - Le fond de la cheminée n'a plus que deux cases d'orties sur quatre (on y marche pour entrer dans le passage) ; la cheminée elle-même ne change pas.
+  - Papa, au potager, montre le portillon une fois le bonnet trouvé (étape `garden.dad-gate`, nouveau pictogramme `gate`).
+- **La rue** (`; @world: street`, 200 × 30 tuiles, PLACEHOLDER, de jour) :
+  - **trottoir facile** (testé) : poubelles, voitures garées, banc, abribus, cagettes ; deux lanternes (près du portillon, sous l'abribus) ;
+  - **au-dessus, plus difficile** : rebords des fenêtres et corniche de l'école, lampadaires, store, enseigne et toit de la supérette, échafaudage du chantier ; deux trouvailles (toit de l'école, haut de l'échafaudage), **moyennes exactement** (testé : impossibles par des passages faciles) ;
+  - **quatre portes fermées** (Agir : bulle « ? », rejouable) ; chaque lieu aura sa propre salle. Les portes de façade (sorties au milieu d'une salle) ne sont pas encore nécessaires : elles viendront avec le premier lieu ;
+  - pas d'ennemi pour l'instant ; ni orties ni ronces (une rue) ;
+  - palette `STREET_PALETTE` (le ciel du jardin, un trottoir de dalles grises) ; nouvel emplacement de musique `street`.
+- **Une zone, deux pages de carte** : la rue est dans la même zone que la maison et le jardin (une seule histoire, une seule analyse de faisabilité, aucune liaison entre zones à écrire) ; `MapBox.page` range chaque salle sur une page du cahier : « Ma maison » ou **« Mon quartier »**. Les liaisons entre zones séparées restent possibles plus tard si le monde grandit beaucoup.
+- **Habillage par blocs proches de la vue** (moteur) : seuls les blocs (512 px) proches de la caméra sont dessinés, un par image, tout d'un coup dans le noir ; les blocs lointains sont libérés, et chaque bloc ne dessine que les éléments de décor qui le touchent. Une salle très longue ne coûte donc pas plus de mémoire qu'une salle de la maison (au plus 10 blocs mesurés dans la rue). Nombre de blocs affiché dans l'overlay de debug.
+- **Sauvegarde** : aucune migration (étapes `garden.gate`, `garden.dad-gate`).
+- **Debug** : étapes « le bonnet trouvé (portillon à ouvrir) » et « portillon ouvert (la rue) ».
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

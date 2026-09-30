@@ -560,6 +560,18 @@ function drawIcon(
       ctx.moveTo(x - s, y - s * 0.1);
       ctx.lineTo(x + s, y - s * 0.1);
       break;
+    case 'street':
+      // Un lampadaire et une petite maison au bord d'une route (D-60).
+      ctx.moveTo(x - s, y + s * 0.6);
+      ctx.lineTo(x + s, y + s * 0.6);
+      ctx.moveTo(x - s * 0.6, y + s * 0.6);
+      ctx.lineTo(x - s * 0.6, y - s * 0.6);
+      ctx.lineTo(x - s * 0.3, y - s * 0.6);
+      ctx.rect(x, y - s * 0.1, s * 0.8, s * 0.7);
+      ctx.moveTo(x - s * 0.1, y - s * 0.1);
+      ctx.lineTo(x + s * 0.4, y - s * 0.5);
+      ctx.lineTo(x + s * 0.9, y - s * 0.1);
+      break;
     default:
       ctx.arc(x, y, s * 0.3, 0, Math.PI * 2);
   }

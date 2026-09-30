@@ -186,6 +186,43 @@ function drawBottle(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   ctx.fill();
 }
 
+/**
+ * Le portillon (D-60), PLACEHOLDER : lattes de bois sous une traverse, loquet en haut. Ouvert, il
+ * est rabattu contre le mur et laisse voir la lumière de la rue.
+ */
+function drawGate(ctx: CanvasRenderingContext2D, w: number, h: number, open: boolean): void {
+  if (open) {
+    const g = ctx.createLinearGradient(0, 0, w, 0);
+    g.addColorStop(0, 'rgba(255,241,200,0.15)');
+    g.addColorStop(1, 'rgba(255,241,200,0.75)');
+    ctx.fillStyle = g;
+    ctx.fillRect(3, 2, w - 3, h - 2);
+    ctx.fillStyle = WOOD_DARK;
+    ctx.fillRect(0, 1, 3, h - 1);
+    ctx.fillStyle = '#b58a5f';
+    ctx.fillRect(0.5, 2, 1.5, h - 3);
+    return;
+  }
+  ctx.fillStyle = '#b58a5f';
+  for (let x = 0.5; x < w - 1; x += 3.4) {
+    ctx.beginPath();
+    ctx.roundRect(x, 3, 2.6, h - 3, [1.3, 1.3, 0, 0]);
+    ctx.fill();
+  }
+  ctx.fillStyle = WOOD_DARK;
+  ctx.fillRect(0, 10, w, 2.5);
+  ctx.fillRect(0, h - 12, w, 2.5);
+  // Écharpe en diagonale, et le loquet tout en haut.
+  ctx.strokeStyle = WOOD_DARK;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(1, h - 11);
+  ctx.lineTo(w - 1, 12);
+  ctx.stroke();
+  ctx.fillStyle = '#7a7066';
+  ctx.fillRect(w - 5, 4, 5, 2);
+}
+
 /** Couverture de Maria, pliée : rose à pois clairs, bord festonné. */
 function drawBlanket(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   ctx.fillStyle = '#f19bb5';
@@ -258,6 +295,12 @@ export function drawProp(
       ctx.translate(w / 2, h / 2 + 1);
       bonnet(ctx, Math.min(w, h * 1.1));
       ctx.restore();
+      break;
+    case 'gate':
+      drawGate(ctx, w, h, false);
+      break;
+    case 'gate-open':
+      drawGate(ctx, w, h, true);
       break;
     case 'baby-photo':
       // Photo encadrée posée debout, en haut de la bibliothèque.
@@ -564,6 +607,20 @@ function drawIcon(
       ctx.restore();
       break;
     }
+    case 'gate':
+      // Le portillon (D-60) : deux piliers, lattes, traverse.
+      ctx.fillStyle = '#a89478';
+      ctx.fillRect(cx - 7, cy - 5, 2.5, 11);
+      ctx.fillRect(cx + 4.5, cy - 5, 2.5, 11);
+      ctx.fillStyle = '#b58a5f';
+      for (let x = cx - 4; x < cx + 4; x += 2.2) {
+        ctx.fillRect(x, cy - 3, 1.5, 8);
+      }
+      ctx.fillStyle = WOOD_DARK;
+      ctx.fillRect(cx - 4.5, cy - 1, 9, 1.4);
+      ctx.fillStyle = '#7a7066';
+      ctx.fillRect(cx + 2, cy - 3.5, 2.2, 1);
+      break;
     case 'question':
       // « ? » seul, au crayon : un parent qui ne sait pas (D-37).
       ctx.strokeStyle = INK;

@@ -4,7 +4,7 @@ import { AudioMix, equalPower, loopOverlapSec } from '../src/core/audio/AudioMix
 import { audioFileMap } from '../src/core/audio/audioFiles';
 import { chooseMusic } from '../src/core/audio/musicChoice';
 import { sanitizeAudioSettings } from '../src/core/settings/audioSettings';
-import { isGardenRoom, isStrangeRoom } from '../src/core/world/zone';
+import { isGardenRoom, isStrangeRoom, isStreetRoom } from '../src/core/world/zone';
 import { HOUSE } from '../src/levels/house/zone';
 import { HOUSE_STORY } from '../src/levels/house/story';
 import { parseAsciiLevel } from '../src/core/level/parseAsciiLevel';
@@ -17,7 +17,7 @@ function run(mix: AudioMix, ms: number): void {
 }
 
 describe('choix du thème (D-57)', () => {
-  const base = { strange: false, outdoor: false, garden: false } as const;
+  const base = { strange: false, outdoor: false, garden: false, street: false } as const;
 
   it('maison de nuit et de jour, jardin, monde étrange, derrière la haie', () => {
     expect(chooseMusic({ ...base, time: 'evening' })).toBe('house-night');
@@ -37,6 +37,7 @@ describe('choix du thème (D-57)', () => {
           strange: isStrangeRoom(level),
           outdoor: Boolean(level.meta.outdoor),
           garden: isGardenRoom(level),
+          street: isStreetRoom(level),
           time: 'morning',
         }),
       );
@@ -47,6 +48,7 @@ describe('choix du thème (D-57)', () => {
     expect(themes.get('shadows')).toBe('strange');
     expect(themes.get('garden-upside')).toBe('hedge');
     expect(themes.get('garden-thorns')).toBe('hedge');
+    expect(themes.get('street')).toBe('street');
   });
 });
 

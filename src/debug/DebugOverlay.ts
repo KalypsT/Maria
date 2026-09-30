@@ -308,6 +308,43 @@ export function installDebugOverlay(scene: GameScene): void {
       ],
     ],
     [
+      'Histoire : le bonnet trouvé (portillon à ouvrir)',
+      [
+        F.EveningPlayed,
+        F.EveningBlanket,
+        F.EveningTucked,
+        F.Slept,
+        F.MariaSeen,
+        F.MariaVanished,
+        F.StrangeDone,
+        F.DadVisit,
+        F.MomHug,
+        F.Grown,
+        F.GardenTreehouse,
+        F.HedgeEntered,
+        F.HedgeDone,
+      ],
+    ],
+    [
+      'Histoire : portillon ouvert (la rue)',
+      [
+        F.EveningPlayed,
+        F.EveningBlanket,
+        F.EveningTucked,
+        F.Slept,
+        F.MariaSeen,
+        F.MariaVanished,
+        F.StrangeDone,
+        F.DadVisit,
+        F.MomHug,
+        F.Grown,
+        F.GardenTreehouse,
+        F.HedgeEntered,
+        F.HedgeDone,
+        F.GateOpen,
+      ],
+    ],
+    [
       'Histoire : quelques mois plus tard (Céleste a grandi)',
       [
         F.EveningPlayed,
@@ -626,7 +663,7 @@ export function installDebugOverlay(scene: GameScene): void {
         `cam ${camera.x.toFixed(0)} ${camera.y.toFixed(0)}  avance ${camera.lookAheadOffset.toFixed(0)}  ` +
         `vue ${camera.viewWidth.toFixed(0)}×${camera.viewHeight.toFixed(0)} rendu ×${scene.renderScale.toFixed(2)}\n` +
         `simu ${((simMsSum / frames) * 1000).toFixed(0)} µs/img (max ${(simMsMax * 1000).toFixed(0)})  ` +
-        `pas perdus ${scene.clock.droppedSteps}`;
+        `pas perdus ${scene.clock.droppedSteps}  blocs ${String(scene.artChunks)}`;
       const combat = scene.combat;
       const states = combat.enemies.map((enemy) => ENEMY_STATE_LABEL[enemy.state]).join(' ');
       stats.textContent +=
