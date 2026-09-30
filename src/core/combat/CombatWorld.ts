@@ -123,14 +123,13 @@ export class CombatWorld {
   }
 
   /**
-   * Ennemis remis à leur départ, coup et invulnérabilité annulés. `revive` faux (réapparition dans
-   * la même salle, D-56) : les ennemis dispersés le restent jusqu'à ce que Céleste quitte la salle.
+   * Ennemis remis à leur départ, coup et invulnérabilité annulés (réapparition après un
+   * évanouissement, D-56 : les ennemis vaincus reviennent aussi). Sans cela, un ennemi dispersé le
+   * reste tant que Céleste est dans la salle.
    */
-  reset(revive = true): void {
+  reset(): void {
     for (const enemy of this.enemies) {
-      if (revive || !enemy.dispersed) {
-        enemy.reset();
-      }
+      enemy.reset();
     }
     this.attack.reset();
     this.hitstopSteps = 0;

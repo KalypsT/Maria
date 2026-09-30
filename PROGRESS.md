@@ -12,7 +12,7 @@ Prochaine : à décider (zone suivante : le quartier, §26 ; ou passe de réglag
 
 - Tous les dangers du sol piquent (orties, briques de jeu, ronces de derrière la haie) : rebond vers l'avant, la peur monte ; plus d'évanouissement immédiat.
 - Contact d'un ennemi : recul inchangé.
-- Un ennemi vaincu reste absent tant que Céleste est dans la salle (même après un évanouissement), et revient la prochaine fois.
+- Un ennemi vaincu reste absent tant que Céleste est dans la salle ; il revient après un évanouissement ou quand on revient dans la salle.
 - [ ] À vérifier sur téléphone : le rebond vers l'avant sur les orties et les ronces ; derrière la haie, encore assez tendu ?
 
 ### Papa montre la suite (D-55)

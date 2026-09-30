@@ -740,8 +740,7 @@ export class GameScene extends Phaser.Scene {
     this.player.reset(x, y, this.level);
     this.feel.reset(this.player);
     this.poser.reset();
-    // Même salle : les ennemis dispersés le restent (D-56) ; ils reviennent en changeant de salle.
-    this.combat.reset(false);
+    this.combat.reset();
     this.clock.reset();
     this.transition.cancel();
     this.resetCamera();
