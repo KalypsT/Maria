@@ -8,6 +8,13 @@ Prochaine : à décider (zone suivante : le quartier, §26 ; ou passe de réglag
 
 ## Fait
 
+### Dangers du sol et ennemis vaincus (D-56)
+
+- Tous les dangers du sol piquent (orties, briques de jeu, ronces de derrière la haie) : rebond vers l'avant, la peur monte ; plus d'évanouissement immédiat.
+- Contact d'un ennemi : recul inchangé.
+- Un ennemi vaincu reste absent tant que Céleste est dans la salle (même après un évanouissement), et revient la prochaine fois.
+- [ ] À vérifier sur téléphone : le rebond vers l'avant sur les orties et les ronces ; derrière la haie, encore assez tendu ?
+
 ### Papa montre la suite (D-55)
 
 - Une fois le saut mural trouvé, papa au potager montre la haie et son trou qui scintille (retourner le voir : l'indicateur réapparaît au-dessus de lui). Suite : au pied du grand arbre, devant le trou de la haie, Action.
