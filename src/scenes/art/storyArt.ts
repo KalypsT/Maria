@@ -276,7 +276,10 @@ export function drawProp(
 }
 
 /** Taille d'une bulle de pensée (px logiques), petites bulles de la traîne comprises. */
-export const THOUGHT_SIZE = { w: 28, h: 26 } as const;
+export const THOUGHT_SIZE = { w: 34, h: 31 } as const;
+/** Agrandissement du nuage et du pictogramme dans la bulle (retour de l'utilisateur). */
+const CLOUD_SCALE = 1.2;
+const ICON_SCALE = 1.3;
 
 /**
  * Bulle de pensée : nuage clair, deux petites bulles vers la tête (en bas à gauche), pictogramme.
@@ -286,28 +289,45 @@ export function drawThought(
   icon: ThoughtIcon,
   images: ReadonlyMap<string, CanvasImageSource>,
 ): void {
-  const cx = 16;
-  const cy = 10;
+  const cx = 19;
+  const cy = 12.5;
+  const c = CLOUD_SCALE;
   ctx.fillStyle = 'rgba(253,248,238,0.95)';
   ctx.strokeStyle = 'rgba(91,74,68,0.55)';
   ctx.lineWidth = 0.8;
   ctx.beginPath();
   for (const [x, y, r] of [
-    [cx - 6, cy + 1, 5],
-    [cx, cy - 3, 6.5],
-    [cx + 6.5, cy + 1, 5],
-    [cx, cy + 4, 5.5],
+    [-6, 1, 5],
+    [0, -3, 6.5],
+    [6.5, 1, 5],
+    [0, 4, 5.5],
   ] as const) {
-    ctx.moveTo(x + r, y);
-    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.moveTo(cx + x * c + r * c, cy + y * c);
+    ctx.arc(cx + x * c, cy + y * c, r * c, 0, Math.PI * 2);
   }
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(cx - 9, cy + 11, 2, 0, Math.PI * 2);
-  ctx.moveTo(cx - 11.3, cy + 15);
-  ctx.arc(cx - 12.5, cy + 15, 1.2, 0, Math.PI * 2);
+  ctx.arc(cx - 11, cy + 12.5, 2.2, 0, Math.PI * 2);
+  ctx.moveTo(cx - 13.5, cy + 16.8);
+  ctx.arc(cx - 14.7, cy + 16.8, 1.3, 0, Math.PI * 2);
   ctx.fill();
   ctx.stroke();
+  // Pictogramme agrandi autour du centre du nuage.
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(ICON_SCALE, ICON_SCALE);
+  ctx.translate(-cx, -cy);
+  drawIcon(ctx, icon, images, cx, cy);
+  ctx.restore();
+}
+
+function drawIcon(
+  ctx: CanvasRenderingContext2D,
+  icon: ThoughtIcon,
+  images: ReadonlyMap<string, CanvasImageSource>,
+  cx: number,
+  cy: number,
+): void {
   const maria = images.get('maria');
   switch (icon) {
     case 'heart':
@@ -459,6 +479,46 @@ export function drawThought(
       ctx.beginPath();
       ctx.arc(cx + 6, cy, 1.8, 0, Math.PI * 2);
       ctx.fill();
+      break;
+    }
+    case 'search': {
+      // Une loupe : « cherche bien » (D-50).
+      ctx.strokeStyle = WOOD_DARK;
+      ctx.lineWidth = 1.6;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx + 2.5, cy + 2.5);
+      ctx.lineTo(cx + 6, cy + 6);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(191,227,240,0.8)';
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.arc(cx - 1, cy - 1, 4.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      ctx.fillRect(cx - 3, cy - 3.5, 1.2, 1.2);
+      break;
+    }
+    case 'treehouse': {
+      // La cabane dans l'arbre (D-50) : feuillage, tronc, petite maison et son toit.
+      ctx.fillStyle = '#6f9a62';
+      ctx.beginPath();
+      ctx.arc(cx, cy - 3.5, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#7b5a3e';
+      ctx.fillRect(cx - 1.2, cy - 1, 2.4, 8);
+      ctx.fillStyle = '#c79d6f';
+      ctx.fillRect(cx - 4, cy - 3, 8, 4.5);
+      ctx.fillStyle = '#9b5b4a';
+      ctx.beginPath();
+      ctx.moveTo(cx - 5, cy - 3);
+      ctx.lineTo(cx, cy - 6.5);
+      ctx.lineTo(cx + 5, cy - 3);
+      ctx.fill();
+      ctx.fillStyle = '#3a3228';
+      ctx.fillRect(cx - 1, cy - 1.5, 2, 3);
       break;
     }
     case 'question':
