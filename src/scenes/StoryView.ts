@@ -38,6 +38,11 @@ export class StoryView {
   private loopKeys: (readonly [string, string, number] | null)[] = [];
   private readonly thought: Phaser.GameObjects.Image;
   private readonly sparkle: Phaser.GameObjects.Image;
+  /**
+   * Étincelle d'une porte de façade à portée (D-61), tuile au-dessus de la porte ; posée par la
+   * scène (null : aucune).
+   */
+  doorMark: { col: number; row: number } | null = null;
   private artScale = 0;
   private thoughtKey = '';
   private thoughtStart = -1;
@@ -208,7 +213,7 @@ export class StoryView {
       }
     }
     const trigger = this.director.data.triggers[this.director.interactable];
-    const mark = trigger?.mark;
+    const mark = trigger?.mark ?? this.doorMark;
     if (mark && !this.director.busy) {
       const pulse = 0.75 + 0.25 * Math.sin((now / SPARKLE_MS) * Math.PI * 2);
       this.sparkle

@@ -1,10 +1,12 @@
 ; Le quartier : la rue (D-60), un grand niveau en long, de jour. Le trottoir se parcourt facilement ;
 ; au-dessus, rebords, stores, lampadaires et échafaudage mènent aux trouvailles (plus difficile).
-; Quatre portes (aire de jeux, école, supérette, chantier), fermées pour l'instant (PLACEHOLDER).
+; Quatre portes : l'aire de jeux (porte de façade 2, D-61) ; école, supérette, chantier, fermées
+; pour l'instant (PLACEHOLDER).
 ; @name: La rue
 ; @icon: street
 ; @world: street
 ; @difficulty: easy
+; @door: 2 50 27
 ; @decor: canopy 0 0 200 1
 ; @decor: houses 1 6 34 22
 ; @decor: planetree 18 1 4 27

@@ -162,19 +162,29 @@ export function streetDrawers({ tileShape, rounded }: ShapeTools): Record<string
       ctx.stroke();
       ctx.fillStyle = '#6d86c2';
       ctx.fillRect(r.x + 21.5 * T, ground - 3 * T, 3 * T, 4);
-      // Grille verte, et son portillon (fermé par une chaîne) au milieu.
-      ctx.fillStyle = '#4f7a4a';
-      ctx.fillRect(r.x, ground - 4 * T, r.w, 3);
-      for (let x = r.x + 2; x < r.x + r.w; x += 6) {
-        ctx.fillRect(x, ground - 4 * T, 1.5, 4 * T);
-      }
+      // Grille verte, et son portillon ouvert au milieu (porte de façade, D-61) : un battant
+      // poussé vers l'intérieur, le sol souple de l'aire de jeux derrière.
       const gate = r.x + 12 * T;
+      ctx.fillStyle = '#4f7a4a';
+      ctx.fillRect(r.x, ground - 4 * T, gate - r.x, 3);
+      ctx.fillRect(gate + 4 * T, ground - 4 * T, r.x + r.w - gate - 4 * T, 3);
+      for (let x = r.x + 2; x < r.x + r.w; x += 6) {
+        if (x < gate - 2 || x > gate + 4 * T + 2) {
+          ctx.fillRect(x, ground - 4 * T, 1.5, 4 * T);
+        }
+      }
+      ctx.fillStyle = '#c98a6b';
+      ctx.fillRect(gate, ground - 6, 4 * T, 6);
       ctx.fillStyle = '#3f6b3d';
       ctx.fillRect(gate - 3, ground - 5 * T, 3, 5 * T);
       ctx.fillRect(gate + 4 * T, ground - 5 * T, 3, 5 * T);
-      ctx.fillStyle = '#c9c3b8';
+      ctx.fillRect(gate, ground - 5 * T, 4 * T + 3, 2.5);
+      ctx.fillStyle = '#4f7a4a';
       ctx.beginPath();
-      ctx.arc(gate + 2 * T, ground - 2.6 * T, 3, 0, Math.PI * 2);
+      ctx.moveTo(gate, ground - 4 * T);
+      ctx.lineTo(gate + 1.4 * T, ground - 3.4 * T);
+      ctx.lineTo(gate + 1.4 * T, ground - 0.6 * T);
+      ctx.lineTo(gate, ground);
       ctx.fill();
     },
     school(a, r) {

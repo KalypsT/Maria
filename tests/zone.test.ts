@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { PLAYER_HITBOX } from '../src/config/movement';
 import type { Box } from '../src/core/physics/gridCollision';
-import { arrivalPosition, buildZone, touchedExit, type ZoneSource } from '../src/core/world/zone';
+import {
+  arrivalPosition,
+  buildZone,
+  doorAt,
+  touchedExit,
+  type ZoneSource,
+} from '../src/core/world/zone';
 
 const A = ['########', '#......#', '#......1', '#P.....1', '########'].join('\n');
 const B = ['########', '#......#', '#......#', '1P.....2', '1......2', '########'].join('\n');
@@ -93,5 +99,56 @@ describe('zone (D-25)', () => {
     // En reculant d'un pixel vers l'ouverture, on la touche.
     box.x -= 2;
     expect(touchedExit(b, box)).toBe(1);
+  });
+
+  it('relie une porte de façade (D-61) à une sortie latérale, et y fait arriver debout', () => {
+    const street = [
+      '; @door: 2 5 3',
+      '##########',
+      '#........#',
+      '#........#',
+      '#P.......#',
+      '##########',
+    ].join('\n');
+    const z = buildZone(zone([['a:2', 'c:1']], { a: street, c: C }));
+    expect(z.destination('a', 2)).toEqual({ room: 'c', exit: 1 });
+    expect(z.destination('c', 1)).toEqual({ room: 'a', exit: 2 });
+    const a = z.rooms.get('a');
+    if (!a) {
+      throw new Error('salle a');
+    }
+    const { width, height } = PLAYER_HITBOX;
+    const at = arrivalPosition(a, 2, width, height);
+    expect(at.x + width / 2).toBe(5.5 * 16);
+    expect(at.y + height).toBe(4 * 16);
+    // Agir est possible devant la porte, pas à l'autre bout de la salle ; une porte ne se
+    // franchit jamais en la touchant (ce n'est pas une sortie latérale).
+    const box: Box = { x: at.x, y: at.y, width, height };
+    expect(doorAt(a, box)).toBe(2);
+    expect(touchedExit(a, box)).toBe(0);
+    expect(doorAt(a, { ...box, x: 16 + 1 })).toBe(0);
+  });
+
+  it('signale une porte reliée à rien ou devant laquelle on ne tient pas debout', () => {
+    const lonely = [
+      '; @door: 2 5 3',
+      '##########',
+      '#........#',
+      '#........#',
+      '#P.......#',
+      '##########',
+    ].join('\n');
+    expect(() => buildZone(zone([], { a: lonely }))).toThrow(/porte a:2 reliée à rien/);
+    const floating = [
+      '; @door: 2 5 2',
+      '##########',
+      '#........#',
+      '#........#',
+      '#P.......#',
+      '##########',
+    ].join('\n');
+    expect(() => buildZone(zone([['a:2', 'c:1']], { a: floating, c: C }))).toThrow(
+      /debout devant la porte a:2/,
+    );
   });
 });

@@ -77,8 +77,12 @@ export function surfaceAt(room: string, col: number, row: number): number {
   return surfaceUnder(level(room), surfaces(room), col, row);
 }
 
-/** Surface sur laquelle on arrive par une sortie (et d'où on la franchit). */
+/** Surface sur laquelle on arrive par une sortie ou une porte de façade (et d'où on la franchit). */
 export function exitSurface(room: string, exitId: number): number {
+  const door = level(room).doors.find((d) => d.id === exitId);
+  if (door) {
+    return surfaceAt(room, door.col, door.row);
+  }
   const exit = level(room).exits.find((e) => e.id === exitId);
   if (!exit) {
     throw new Error(`sortie ${room}:${exitId} absente`);
@@ -162,7 +166,7 @@ export function zoneGraph(
         edge(node(room, move.from), node(room, move.to));
       }
     }
-    for (const exit of data.exits) {
+    for (const exit of [...data.exits, ...data.doors]) {
       const to = zone.destination(room, exit.id);
       if (to && !closed.has(`${room}:${String(exit.id)}`)) {
         edge(node(room, exitSurface(room, exit.id)), node(to.room, exitSurface(to.room, to.exit)));

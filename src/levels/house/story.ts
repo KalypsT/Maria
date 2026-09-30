@@ -441,7 +441,7 @@ export const HOUSE_STORY: StoryData = {
       on: 'interact',
       area: { col: 10, row: 16, w: 10, h: 6 },
       mark: { col: 17, row: 15 },
-      when: { all: [F.Grown], none: [F.GardenMom] },
+      when: { all: [F.Grown], none: [F.GardenMom, F.GateOpen] },
       lock: true,
       steps: [
         { do: 'flag', id: F.GardenMom },
@@ -632,23 +632,9 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: S.lookMs + 600 },
       ],
     },
-    // La rue (D-60) : quatre lieux fermés pour l'instant (PLACEHOLDER). Agir devant la porte : une
-    // bulle « ? », rejouable ; ils s'ouvriront avec leur propre salle.
-    {
-      // L'aire de jeux.
-      id: 'street-playground',
-      room: 'street',
-      on: 'interact',
-      area: { col: 47, row: 25, w: 6, h: 3 },
-      mark: { col: 50, row: 24 },
-      when: {},
-      lock: true,
-      repeat: true,
-      steps: [
-        { do: 'thought', icon: 'question', ms: S.thoughtMs },
-        { do: 'wait', ms: S.lookMs },
-      ],
-    },
+    // La rue (D-60) : trois lieux encore fermés (PLACEHOLDER). Agir devant la porte : une bulle
+    // « ? », rejouable ; ils s'ouvriront avec leur propre salle, derrière une porte de façade, comme
+    // l'aire de jeux (D-61).
     {
       // L'école.
       id: 'street-school',
@@ -691,6 +677,27 @@ export const HOUSE_STORY: StoryData = {
       repeat: true,
       steps: [
         { do: 'thought', icon: 'question', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // À l'aire de jeux (D-61), maman sur un banc : elle ne sait pas non plus où est Maria ; elle
+      // encourage (« cherche bien »), puis un cœur. PLACEHOLDER : sa réponse montrera papa à la
+      // supérette quand elle sera ouverte.
+      id: 'street-mom',
+      room: 'playground',
+      on: 'interact',
+      area: { col: 6, row: 22, w: 8, h: 6 },
+      mark: { col: 10, row: 20 },
+      when: { all: [F.GateOpen], none: [F.StreetMom] },
+      lock: true,
+      steps: [
+        { do: 'flag', id: F.StreetMom },
+        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
+        { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'search', ms: S.thoughtMs, by: 'mom-bench' },
+        { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'mom-bench' },
         { do: 'wait', ms: S.lookMs },
       ],
     },
@@ -988,12 +995,22 @@ export const HOUSE_STORY: StoryData = {
     // Au jardin (D-46) : maman étend le linge sur la terrasse, papa arrose le potager, loin des
     // araignées (pas d'ennemi près d'un adulte, D-39).
     {
+      // Une fois le portillon ouvert, maman n'étend plus le linge : elle attend Céleste à l'aire
+      // de jeux (D-61). Elle change de place hors de la vue (règle des objets de mise en scène).
       id: 'mom-garden',
       room: 'garden-terrace',
       kind: 'mom-garden',
       col: 15,
       row: 21,
-      when: { all: [F.Grown] },
+      when: { all: [F.Grown], none: [F.GateOpen] },
+    },
+    {
+      id: 'mom-bench',
+      room: 'playground',
+      kind: 'mom-bench',
+      col: 10,
+      row: 26,
+      when: { all: [F.GateOpen] },
     },
     {
       id: 'dad-garden',

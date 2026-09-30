@@ -37,6 +37,8 @@ export interface LevelData {
   readonly materials: Uint8Array;
   /** Sorties vers d'autres salles (D-25), dans les murs latéraux. */
   readonly exits: readonly LevelExit[];
+  /** Portes de façade (D-61) : sorties au milieu d'une salle, franchies avec Agir. */
+  readonly doors: readonly LevelDoor[];
   /** Habillage (D-28) : meubles et éléments dessinés, déclarés par `; @decor:` (vide : tuiles). */
   readonly decor: readonly LevelDecor[];
 }
@@ -65,6 +67,17 @@ export interface LevelExit {
   readonly col: number;
   readonly rowMin: number;
   readonly rowMax: number;
+}
+
+/**
+ * Porte de façade (D-61) : une sortie au milieu d'une salle (la porte d'un lieu, dans la rue), qu'on
+ * franchit avec Agir. Même numérotation que les sorties latérales (un chiffre par salle).
+ */
+export interface LevelDoor {
+  readonly id: number;
+  /** Tuile où Céleste se tient devant la porte (ses pieds au bas de cette tuile). */
+  readonly col: number;
+  readonly row: number;
 }
 
 export const EntityType = {

@@ -28,6 +28,10 @@ describe('carte dessinée par Céleste (§24)', () => {
           ? [a, b]
           : [b, a];
       const far = new Set(['hall:3', 'attic:2']);
+      // Une porte de façade (D-61) mène au lieu dessiné au-dessus de la rue, pas à côté.
+      if ([a, b].some((ref) => zone.rooms.get(ref.room)?.doors.some((d) => d.id === ref.exit))) {
+        continue;
+      }
       // Le monde étrange n'est pas sur la carte (D-34).
       // Le monde étrange n'est pas sur la carte (D-34) ; le quartier est sur une autre page (D-60).
       if (

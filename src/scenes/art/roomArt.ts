@@ -16,6 +16,7 @@ import {
 } from '../../core/level/LevelData';
 import { floatingDecor } from '../../core/level/decor';
 import { gardenDrawers } from './gardenArt';
+import { playgroundDrawers } from './playgroundArt';
 import { streetDrawers } from './streetArt';
 import { drawMemory } from './memoryArt';
 
@@ -168,6 +169,7 @@ const fabric = (a: ArtContext, r: Rect) => {
 const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
   ...gardenDrawers({ tileShape, rounded }),
   ...streetDrawers({ tileShape, rounded }),
+  ...playgroundDrawers({ tileShape, rounded }),
   console(a, r) {
     wood(a, r);
     if (!a.palette.silhouettes) {

@@ -1,5 +1,6 @@
 import { TILE_SIZE as T } from '../../config/display';
-import { Tile, tileAt, type LevelData, type LevelExit } from '../level/LevelData';
+import { DOOR_REACH_TILES } from '../../config/world';
+import { Tile, tileAt, type LevelData, type LevelDoor, type LevelExit } from '../level/LevelData';
 import { parseAsciiLevel } from '../level/parseAsciiLevel';
 import type { Box } from '../physics/gridCollision';
 
@@ -72,10 +73,20 @@ function findExit(level: LevelData, id: number): LevelExit | undefined {
   return level.exits.find((exit) => exit.id === id);
 }
 
+function findDoor(level: LevelData, id: number): LevelDoor | undefined {
+  return level.doors.find((door) => door.id === id);
+}
+
+/** Sortie latérale ou porte de façade (D-61) de ce numéro. */
+function findEnd(level: LevelData, id: number): LevelExit | LevelDoor | undefined {
+  return findExit(level, id) ?? findDoor(level, id);
+}
+
 /**
  * Construit et valide une zone : salles lisibles, liaisons vers des sorties existantes, chaque sortie
- * reliée exactement une fois, un mur gauche relié à un mur droit (cohérence spatiale), un sol sous
- * chaque sortie pour y arriver debout. Toute incohérence lève une erreur explicite.
+ * (ou porte de façade, D-61) reliée exactement une fois, un mur gauche relié à un mur droit
+ * (cohérence spatiale), un sol sous chaque sortie et devant chaque porte pour y arriver debout.
+ * Toute incohérence lève une erreur explicite.
  */
 export function buildZone(source: ZoneSource): Zone {
   const rooms = new Map<string, LevelData>();
@@ -99,14 +110,15 @@ export function buildZone(source: ZoneSource): Zone {
       if (!level) {
         throw new Error(`Zone ${source.id} : salle « ${ref.room} » inconnue (${a} ↔ ${b})`);
       }
-      const exit = findExit(level, ref.exit);
+      const exit = findEnd(level, ref.exit);
       if (!exit) {
         throw new Error(`Zone ${source.id} : sortie ${key(ref)} absente de la carte`);
       }
       return exit;
     });
     links.push([from, to]);
-    if (exits[0]?.side === exits[1]?.side) {
+    const [sideA, sideB] = exits.map((exit) => ('side' in exit ? exit.side : null));
+    if (sideA && sideA === sideB) {
       throw new Error(`Zone ${source.id} : ${a} ↔ ${b} relie deux murs du même côté`);
     }
     for (const [ref, other] of [
@@ -129,6 +141,19 @@ export function buildZone(source: ZoneSource): Zone {
       const floor = tileAt(level, inward, exit.rowMax + 1);
       if (floor !== Tile.Solid && floor !== Tile.OneWay) {
         throw new Error(`Zone ${source.id} : pas de sol à l'arrivée de la sortie ${key(ref)}`);
+      }
+    }
+    for (const door of level.doors) {
+      const ref = { room: roomId, exit: door.id };
+      if (!table.has(key(ref))) {
+        throw new Error(`Zone ${source.id} : porte ${key(ref)} reliée à rien`);
+      }
+      const floor = tileAt(level, door.col, door.row + 1);
+      const free =
+        tileAt(level, door.col, door.row) === Tile.Empty &&
+        tileAt(level, door.col, door.row - 1) === Tile.Empty;
+      if (!free || (floor !== Tile.Solid && floor !== Tile.OneWay)) {
+        throw new Error(`Zone ${source.id} : on ne tient pas debout devant la porte ${key(ref)}`);
       }
     }
   }
@@ -162,7 +187,8 @@ export function isGardenRoom(level: LevelData): boolean {
 
 /**
  * Position (coin haut gauche, px) d'une hitbox arrivant par une sortie : juste à l'intérieur, hors de
- * l'ouverture (pour ne pas repartir aussitôt), pieds au bas de l'ouverture.
+ * l'ouverture (pour ne pas repartir aussitôt), pieds au bas de l'ouverture. Par une porte de façade
+ * (D-61) : debout devant la porte.
  */
 export function arrivalPosition(
   level: LevelData,
@@ -170,6 +196,10 @@ export function arrivalPosition(
   width: number,
   height: number,
 ): { x: number; y: number } {
+  const door = findDoor(level, exitId);
+  if (door) {
+    return { x: (door.col + 0.5) * T - width / 2, y: (door.row + 1) * T - height };
+  }
   const exit = findExit(level, exitId);
   if (!exit) {
     throw new Error(`Salle ${level.id} : sortie ${exitId} absente`);
@@ -198,6 +228,28 @@ export function touchedExit(level: LevelData, box: Box): number {
       box.y + box.height > top
     ) {
       return exit.id;
+    }
+  }
+  return 0;
+}
+
+/**
+ * Porte de façade (D-61) devant laquelle se tient la hitbox (0 si aucune) : quelques tuiles de
+ * part et d'autre, à hauteur de la porte. Sans allocation : appelée à chaque pas.
+ */
+export function doorAt(level: LevelData, box: Box): number {
+  const doors = level.doors;
+  for (let i = 0; i < doors.length; i++) {
+    const door = doors[i];
+    if (!door) {
+      continue;
+    }
+    const left = (door.col - DOOR_REACH_TILES) * T;
+    const right = (door.col + DOOR_REACH_TILES + 1) * T;
+    const top = (door.row - 2) * T;
+    const bottom = (door.row + 1) * T;
+    if (box.x < right && box.x + box.width > left && box.y < bottom && box.y + box.height > top) {
+      return door.id;
     }
   }
   return 0;

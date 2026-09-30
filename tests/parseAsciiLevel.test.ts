@@ -106,6 +106,22 @@ describe('parseAsciiLevel', () => {
     );
   });
 
+  it('lit les portes de façade @door (D-61), répétables, sans doublon', () => {
+    const level = parseAsciiLevel('t', '; @door: 2 1 1\n; @door: 3 2 1\n1###\n1P.#\n####');
+    expect(level.doors).toEqual([
+      { id: 2, col: 1, row: 1 },
+      { id: 3, col: 2, row: 1 },
+    ]);
+    expect(level.meta.door).toBeUndefined();
+    expect(() => parseAsciiLevel('t', '; @door: 2 1\n####\n#P.#\n####')).toThrow(/@door/);
+    expect(() => parseAsciiLevel('t', '; @door: 1 1 1\n1###\n1P.#\n####')).toThrow(
+      /porte 1 en double/,
+    );
+    expect(() => parseAsciiLevel('t', '; @door: 2 9 1\n####\n#P.#\n####')).toThrow(
+      /hors de la salle/,
+    );
+  });
+
   it('charge la salle de test de la Phase 1', () => {
     const level = parseAsciiLevel('test-room', testRoom);
     expect(level.width).toBe(40);

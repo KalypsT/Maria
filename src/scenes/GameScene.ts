@@ -41,6 +41,7 @@ import {
   isStrangeRoom,
   isStreetRoom,
   mapPage,
+  doorAt,
   touchedExit,
   type ExitRef,
   type MapBox,
@@ -238,6 +239,8 @@ export class GameScene extends Phaser.Scene {
   };
   /** Heure (ms) avant laquelle une porte fermée ne redonne pas de bulle. */
   private lockedThoughtUntil = 0;
+  /** Porte de façade à portée (D-61), 0 si aucune. */
+  private nearDoor = 0;
   private readonly playerInput: PlayerInput = {
     moveX: 0,
     moveY: 0,
@@ -496,12 +499,19 @@ export class GameScene extends Phaser.Scene {
         }
         continue;
       }
-      // Histoire (D-31) : près de ce qu'on peut faire, Action devient Agir.
+      // Histoire (D-31) : près de ce qu'on peut faire, Action devient Agir. Une porte de façade
+      // (D-61) s'ouvre aussi avec Agir, si aucun déclencheur de l'histoire n'est à portée.
       const story = this.story;
-      const near = story.interactable >= 0;
+      const door = this.zone && !story.busy ? doorAt(this.level, this.player.box) : 0;
+      const near = story.interactable >= 0 || door !== 0;
       const interact = this.controls.consumePressed('Interact');
       const action = this.controls.consumePressed('Attack');
-      story.step(this.level.id, this.player.box, interact || (near && action));
+      const pressed = interact || (near && action);
+      story.step(this.level.id, this.player.box, pressed);
+      this.nearDoor = story.interactable < 0 && !story.busy ? door : 0;
+      if (this.nearDoor !== 0 && pressed && this.player.grounded) {
+        this.openDoor(this.nearDoor);
+      }
       const locked = story.locked;
       input.moveX = locked ? 0 : this.controls.moveX;
       input.moveY = locked ? 0 : this.controls.moveY;
@@ -532,17 +542,7 @@ export class GameScene extends Phaser.Scene {
         const exit = touchedExit(this.level, this.player.box);
         const target = exit !== 0 ? zone.destination(this.level.id, exit) : null;
         if (target && story.exitsLocked(this.level.id, exit)) {
-          // Ce n'est pas le moment de sortir (le soir), ou la porte ne s'ouvre pas encore (la
-          // porte de derrière, D-46) : une bulle le rappelle, sans texte.
-          if (this.time.now >= this.lockedThoughtUntil && !story.busy) {
-            // Un parent le rappelle (D-37), sinon Céleste y pense elle-même.
-            this.storyView.think(
-              story.lockIcon(this.level.id, exit),
-              STORY_TIMING.thoughtMs,
-              story.lockSpeaker(this.level.id, exit) ?? undefined,
-            );
-            this.lockedThoughtUntil = this.time.now + STORY_TIMING.lockedExitThoughtMs;
-          }
+          this.lockedExitThought(exit);
         } else if (target) {
           transition.start(target, this.player.vx);
         }
@@ -850,6 +850,38 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
+   * Ce n'est pas le moment de sortir (le soir), ou la porte ne s'ouvre pas encore (la porte de
+   * derrière, D-46) : une bulle le rappelle, sans texte. Un parent le rappelle (D-37), sinon Céleste
+   * y pense elle-même.
+   */
+  private lockedExitThought(exit: number): void {
+    const story = this.story;
+    if (this.time.now < this.lockedThoughtUntil || story.busy) {
+      return;
+    }
+    this.storyView.think(
+      story.lockIcon(this.level.id, exit),
+      STORY_TIMING.thoughtMs,
+      story.lockSpeaker(this.level.id, exit) ?? undefined,
+    );
+    this.lockedThoughtUntil = this.time.now + STORY_TIMING.lockedExitThoughtMs;
+  }
+
+  /** Agir devant une porte de façade (D-61) : on entre (même fondu qu'une sortie), ou une bulle. */
+  private openDoor(door: number): void {
+    const target = this.zone?.destination(this.level.id, door) ?? null;
+    if (!target) {
+      return;
+    }
+    if (this.story.exitsLocked(this.level.id, door)) {
+      this.lockedThoughtUntil = 0;
+      this.lockedExitThought(door);
+      return;
+    }
+    this.transition.start(target, 0);
+  }
+
+  /**
    * Arrivée par une sortie (D-25) : nouvelle salle, Céleste juste à l'intérieur avec son élan
    * horizontal. Le point de retour ne change pas.
    */
@@ -870,7 +902,8 @@ export class GameScene extends Phaser.Scene {
       this.growth.hitbox.height,
     );
     this.player.reset(x, y, room.level);
-    this.player.vx = vx;
+    // Devant une porte de façade (D-61), Céleste arrive arrêtée, face à la rue.
+    this.player.vx = room.level.doors.some((d) => d.id === target.exit) ? 0 : vx;
     this.feel.reset(this.player);
     this.poser.reset();
     this.resetCamera();
@@ -1155,7 +1188,11 @@ export class GameScene extends Phaser.Scene {
       return GARDEN_PALETTE;
     }
     if (isStreetRoom(this.level)) {
-      return STREET_PALETTE;
+      // Sol propre à un lieu du quartier (`; @floor: dessus bord`), le sol souple de l'aire de jeux.
+      const floor = this.level.meta.floor?.split(/\s+/);
+      return floor?.[0] && floor[1]
+        ? { ...STREET_PALETTE, floor: floor[0], floorEdge: floor[1] }
+        : STREET_PALETTE;
     }
     const base = this.story.timeOfDay() === 'morning' ? DAY_PALETTE : REAL_PALETTE;
     // Couleur de mur propre à une salle (`; @walls: haut bas`), la cabane en bois par exemple.
@@ -1191,7 +1228,15 @@ export class GameScene extends Phaser.Scene {
     if (veil >= 1 && story.timeOfDay() !== this.drawnTime) {
       this.redrawArt();
     }
-    this.touch?.setLabel('Attack', story.interactable >= 0 && !story.busy ? 'Agir' : null);
+    const near = (story.interactable >= 0 || this.nearDoor !== 0) && !story.busy;
+    this.touch?.setLabel('Attack', near ? 'Agir' : null);
+    const door = this.level.doors.find((d) => d.id === this.nearDoor);
+    const mark = this.storyView.doorMark;
+    if (!door) {
+      this.storyView.doorMark = null;
+    } else if (mark?.col !== door.col || mark.row !== door.row - 3) {
+      this.storyView.doorMark = { col: door.col, row: door.row - 3 };
+    }
     const music = this.musicContext;
     music.strange = isStrangeRoom(this.level);
     music.outdoor = Boolean(this.level.meta.outdoor);

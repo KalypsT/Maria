@@ -155,6 +155,8 @@ export const PROP_KINDS = [
   // Au jardin (D-46).
   'mom-garden',
   'dad-garden',
+  // À l'aire de jeux du quartier (D-61).
+  'mom-bench',
   // Objets à regarder (D-38), avec un petit mouvement en boucle.
   'music-box',
   'plant',
@@ -195,6 +197,7 @@ export const CHARACTER_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'cat-sit',
   'mom-garden',
   'dad-garden',
+  'mom-bench',
 ]);
 
 export interface StoryProp {

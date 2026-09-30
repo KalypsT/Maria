@@ -277,12 +277,13 @@ function standing(
   return { handX: sx + Math.sin(armAngle) * 18.5, handY: sy + Math.cos(armAngle) * 18.5 };
 }
 
-/** Adulte assis (sur un lit, un canapé), genoux pliés vers la droite. */
+/** Adulte assis (sur un lit, un canapé, un banc), genoux pliés vers la droite. */
 function sitting(
   ctx: CanvasRenderingContext2D,
   p: Person,
   h: number,
   armAngle: number,
+  glasses = false,
 ): { handX: number; handY: number } {
   const hip = 8;
   // Cuisse et jambe (côté visible), pied posé sur l'assise.
@@ -303,7 +304,7 @@ function sitting(
   ctx.rotate(0.08);
   tee(ctx, p, -6, -23, 13, 23);
   ctx.restore();
-  head(ctx, p, hip + 6, h - 32, 6, false);
+  head(ctx, p, hip + 6, h - 32, 6, glasses);
   const sx = hip + 5;
   const sy = h - 25;
   ctx.save();
@@ -416,6 +417,7 @@ const DRAWN_SIZE: Readonly<Partial<Record<PropKind, { w: number; h: number; pad:
   'cat-sit': { w: 12, h: 14, pad: 0 },
   'mom-garden': { w: 40, h: 62, pad: 6 },
   'dad-garden': { w: 44, h: 62, pad: 8 },
+  'mom-bench': { w: 38, h: 44, pad: 4 },
 };
 
 export function drawCharacter(ctx: CanvasRenderingContext2D, kind: PropKind, frame: number): void {
@@ -499,6 +501,10 @@ function drawAt(
       }
       break;
     }
+    case 'mom-bench':
+      // À l'aire de jeux (D-61), maman sur un banc, au soleil (lunettes) ; elle respire.
+      sitting(ctx, MOM, h, frame === 0 ? 0.35 : 0.45, true);
+      break;
     case 'cat-sleep':
       catSleep(ctx, w, h, frame);
       break;

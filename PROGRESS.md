@@ -8,11 +8,21 @@
 
 **Musique** (D-57) : lecteur en place, en attente des morceaux.
 
-**Le quartier** (D-60) : le portillon et la rue en place ; les quatre lieux (aire de jeux, école, supérette, chantier) attendent l'histoire.
+**Le quartier** (D-60, D-61) : plan validé (4 PR). PR 1 faite : portes de façade et aire de jeux (maman).
 
-Prochaine : le premier lieu du quartier (quand l'histoire est prête) ; intégrer les morceaux de musique.
+Prochaine : PR 2, le parapluie seul (parcours d'essai, bulle d'aide, page des capacités dans le cahier) ; puis supérette et chantier, puis l'école et son monde étrange. Intégrer les morceaux de musique.
 
 ## Fait
+
+### Le quartier, PR 1 : portes de façade et aire de jeux (D-61)
+
+- **Plan du niveau validé** (D-61) : lieux connectés, monde étrange dans l'école (boîte à formes), parapluie au chantier, maman à l'aire de jeux et papa à la supérette, fin au crépuscule et palissade du chantier ouverte au matin.
+- **Portes de façade** : Agir devant une porte au milieu d'une salle (étincelle, bouton « Agir ») pour entrer dans un lieu ; on en ressort par sa sortie et on se retrouve devant la porte. Carte : trait de la porte au lieu, dessiné au-dessus de la rue.
+- **L'aire de jeux** (derrière le portillon de la rue) : maman sur un banc (bulles), lanterne, bac à sable, tourniquet, cage à écureuil, portique, tour du toboggan (moyenne), nichoir (trouvaille difficile, depuis le toit de la tour). Au fond, le grillage de l'école et son trou, hors d'atteinte pour l'instant (le parapluie).
+- Tests : 444. Vérifié dans Chromium : la porte (étincelle, Agir), l'arrivée, maman et ses bulles, la tour, le toit, le nichoir, le retour dans la rue devant la porte, la page « Mon quartier ».
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « portillon ouvert (la rue) ») : la porte de l'aire de jeux se remarque-t-elle (portillon ouvert, étincelle) ? Agir y fait-il entrer sans hésiter ?
+- [ ] L'aire de jeux : agréable, lisible (sol souple, barreaux, poutre du portique) ? Le saut vers la tour : moyen ? Le nichoir : difficile mais juste ?
+- [ ] Le grillage de l'école et son trou donnent-ils envie de revenir ? Maman sur le banc : bien placée, pas trop grande ?
 
 ### La sortie du jardin : le portillon et la rue (D-60)
 

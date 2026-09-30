@@ -48,6 +48,8 @@ export const StoryFlag = {
   GardenDadGate: 'garden.dad-gate',
   /** Le portillon au bout de l'allée est ouvert (chevillette tirée, D-60) : la rue. */
   GateOpen: 'garden.gate',
+  /** À l'aire de jeux (D-61), Céleste a parlé de Maria à maman, assise sur un banc. */
+  StreetMom: 'street.mom',
   /** Quelques mois plus tard (D-43) : Céleste a grandi (phase de croissance 2). */
   Grown: 'growth.2',
   /** Le jardin (D-46) : Céleste est sortie pour la première fois (il fait beau, et Maria ?). */
@@ -156,6 +158,8 @@ export const PROP_SIZE = {
   'mom-sofa': { w: 38 * PARENT_SCALE, h: 44 * PARENT_SCALE },
   // Au jardin (D-46).
   'mom-garden': { w: 40 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  // À l'aire de jeux (D-61), sur un banc.
+  'mom-bench': { w: 38 * PARENT_SCALE, h: 44 * PARENT_SCALE },
   'dad-garden': { w: 44 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // Le chat gris, agrandi par CAT_SCALE (D-42).
   'cat-sleep': { w: 16 * CAT_SCALE, h: 8 * CAT_SCALE },
