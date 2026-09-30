@@ -8,6 +8,11 @@ Prochaine : à décider (zone suivante : le quartier, §26 ; ou passe de réglag
 
 ## Fait
 
+### Retour à l'accueil depuis la pause (D-52)
+
+- Bouton « Retour à l'accueil » dans le menu pause, à côté de « Carte », avec confirmation. La partie est déjà sauvegardée à chaque lanterne et événement ; les écritures en cours sont terminées avant de revenir à l'accueil, et « Continuer » reprend à la dernière lanterne.
+- [ ] À vérifier sur téléphone : le bouton, la confirmation, puis « Continuer » (application installée et hors ligne aussi).
+
 ### Jardin adouci (D-51)
 
 - **Orties qui piquent** (`^`) : Céleste rebondit en arrière, la peur monte d'un cran ; plus de retour immédiat à la lanterne. Trois piqûres rapprochées la font s'évanouir. Les briques de jeu de la maison piquent aussi.

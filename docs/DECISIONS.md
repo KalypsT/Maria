@@ -555,6 +555,13 @@ Retour du téléphone : le jardin était trop dur (araignées touchées à chaqu
 - **Derrière la haie** : inchangé (difficile, voulu).
 - **Sauvegarde** : aucune migration.
 
+## D-52 — Retour à l'accueil depuis la pause
+
+- Bouton « Retour à l'accueil » dans le menu pause, à côté de « Carte », confirmé par un second appui (« Quitter ? Tu reprendras à la dernière lanterne »), comme « Nouvelle partie » sur l'accueil.
+- **Aucun changement du modèle de sauvegarde** : la progression est déjà écrite à chaque lanterne, salle découverte, capacité, trouvaille, souvenir, étape d'histoire et réglage. On attend la fin des écritures en cours (`SaveManager.flush`), puis la page est rechargée : le démarrage affiche l'accueil, et « Continuer » reprend à la dernière lanterne, comme après une fermeture de l'appli.
+- Recharger plutôt que détruire et recréer le jeu Phaser : plus simple et sans fuite (écouteurs, DOM) ; hors ligne, le service worker sert la page (D-23).
+- Écarté pour l'instant : sauvegarder la position exacte au moment de quitter (changerait le sens du point de retour, pilier 10 ; à proposer séparément si besoin).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

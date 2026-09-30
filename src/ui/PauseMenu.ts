@@ -20,6 +20,8 @@ export interface PauseMenuOptions {
   /** Code de sauvegarde (D-22) : afficher pour copier, ou importer. */
   onExportSave: () => void;
   onImportSave: () => void;
+  /** Retour à l'écran d'accueil (après confirmation). */
+  onQuitToTitle: () => void;
   /** Parcours d'essai proposés (PROVISOIRE, prototype de la Phase 2). */
   levels: readonly { id: string; name: string }[];
   currentLevelId: () => string;
@@ -60,10 +62,12 @@ export class PauseMenu {
     element('h2', header, undefined, 'Pause');
     const resume = element('button', header, 'pause-primary', 'Reprendre');
     resume.addEventListener('click', options.onResume);
+    const topRow = element('div', panel, 'pause-levels');
     const openMap = options.onOpenMap;
     if (openMap) {
-      element('button', panel, undefined, 'Carte').addEventListener('click', openMap);
+      element('button', topRow, undefined, 'Carte').addEventListener('click', openMap);
     }
+    this.addQuit(topRow);
 
     if (options.showTouchSettings) {
       element('h3', panel, undefined, 'Commandes tactiles');
@@ -199,6 +203,28 @@ export class PauseMenu {
       }
     };
     refresh();
+  }
+
+  /**
+   * Retour à l'accueil, confirmé par un second appui (comme « Nouvelle partie ») : la partie est
+   * déjà sauvegardée à chaque lanterne et chaque événement, on la reprend à la dernière lanterne.
+   */
+  private addQuit(parent: HTMLElement): void {
+    const quit = element('button', parent, 'pause-quit', "Retour à l'accueil");
+    let confirming = false;
+    quit.addEventListener('click', () => {
+      if (!confirming) {
+        confirming = true;
+        quit.textContent = 'Quitter ? Tu reprendras à la dernière lanterne';
+        return;
+      }
+      quit.disabled = true;
+      this.options.onQuitToTitle();
+    });
+    this.refreshers.push(() => {
+      confirming = false;
+      quit.textContent = "Retour à l'accueil";
+    });
   }
 
   /** Parcours d'essai : en choisir un y replace Céleste et reprend le jeu. */
