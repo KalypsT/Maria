@@ -1,4 +1,4 @@
-import { PATROLLER_HITBOX, SPIDER_HITBOX } from '../../config/combat';
+import { PATROLLER_HITBOX, SNAIL_HITBOX, SPIDER_HITBOX } from '../../config/combat';
 import { TILE_SIZE as T } from '../../config/display';
 import { Tile, tileAt, type LevelData } from '../level/LevelData';
 import { HitY, isGrounded, moveX, moveY, type MovingBox } from '../physics/gridCollision';
@@ -7,9 +7,10 @@ export const PatrollerState = { Patrol: 0, Stunned: 1, Dispersed: 2 } as const;
 
 /**
  * Sorte d'ennemi : jouet qui marche sur sa plateforme (D-20), ou araignée qui monte et descend au
- * bout de son fil (jardin, D-46), sous son point d'attache (le haut de sa tuile de départ).
+ * bout de son fil (jardin, D-46), sous son point d'attache (le haut de sa tuile de départ), ou
+ * escargot qui monte et descend le long d'un mur (derrière la haie, D-49), là où l'on glisse.
  */
-export const EnemyKind = { Walker: 0, Spider: 1 } as const;
+export const EnemyKind = { Walker: 0, Spider: 1, Snail: 2 } as const;
 export type EnemyKind = (typeof EnemyKind)[keyof typeof EnemyKind];
 export type PatrollerState = (typeof PatrollerState)[keyof typeof PatrollerState];
 
@@ -27,6 +28,8 @@ export interface PatrollerTuning {
   /** Araignée : descente (px) et avance de la phase par pas (rad). */
   spiderDrop: number;
   spiderPhaseStep: number;
+  /** Escargot : vitesse le long du mur (px par pas). */
+  snailStep: number;
 }
 
 /** Petit saut du patrouilleur repoussé, pour que le coup se lise (px/s vers le haut). */
@@ -59,8 +62,15 @@ export class Patroller {
     readonly spawnCol: number,
     readonly spawnRow: number,
     readonly kind: EnemyKind = EnemyKind.Walker,
+    /** Escargot : côté du mur auquel il est collé (-1 : à sa gauche, 1 : à sa droite). */
+    readonly wallSide: number = 1,
   ) {
-    const hitbox = kind === EnemyKind.Spider ? SPIDER_HITBOX : PATROLLER_HITBOX;
+    const hitbox =
+      kind === EnemyKind.Spider
+        ? SPIDER_HITBOX
+        : kind === EnemyKind.Snail
+          ? SNAIL_HITBOX
+          : PATROLLER_HITBOX;
     this.box = {
       x: 0,
       y: 0,
@@ -80,7 +90,12 @@ export class Patroller {
 
   /** Remet à la position de départ, en patrouille, vers la droite. */
   reset(): void {
-    this.box.x = this.prevX = (this.spawnCol + 0.5) * T - this.box.width / 2;
+    this.box.x = this.prevX =
+      this.kind === EnemyKind.Snail
+        ? this.wallSide < 0
+          ? this.spawnCol * T
+          : (this.spawnCol + 1) * T - this.box.width
+        : (this.spawnCol + 0.5) * T - this.box.width / 2;
     this.box.y = this.prevY =
       this.kind === EnemyKind.Spider ? this.anchorY : (this.spawnRow + 1) * T - this.box.height;
     // Araignées voisines décalées : elles ne montent pas toutes ensemble.
@@ -122,7 +137,7 @@ export class Patroller {
     }
     this.state = PatrollerState.Stunned;
     this.stunSteps = tuning.stunSteps;
-    if (this.kind === EnemyKind.Spider) {
+    if (this.kind !== EnemyKind.Walker) {
       // L'araignée effrayée remonte vers son point d'attache.
       return true;
     }
@@ -144,6 +159,10 @@ export class Patroller {
     }
     if (this.kind === EnemyKind.Spider) {
       this.stepSpider(tuning);
+      return;
+    }
+    if (this.kind === EnemyKind.Snail) {
+      this.stepSnail(level, tuning);
       return;
     }
     const dt = tuning.dt;
@@ -201,6 +220,35 @@ export class Patroller {
     }
     this.dir = this.phase < Math.PI ? 1 : -1;
     this.box.y = this.anchorY + tuning.spiderDrop * 0.5 * (1 - Math.cos(this.phase));
+  }
+
+  /**
+   * Escargot (D-49) : monte et descend lentement le long de son mur, fait demi-tour au bout du mur
+   * ou contre un obstacle. Touché, il rentre dans sa coquille un moment (inoffensif), sans bouger.
+   */
+  private stepSnail(level: LevelData, tuning: Readonly<PatrollerTuning>): void {
+    if (this.state === PatrollerState.Stunned) {
+      this.stunSteps--;
+      if (this.stunSteps <= 0) {
+        this.state = PatrollerState.Patrol;
+      }
+      return;
+    }
+    const box = this.box;
+    const next = box.y + this.dir * tuning.snailStep;
+    const wallCol = this.wallSide < 0 ? this.spawnCol - 1 : this.spawnCol + 1;
+    const top = Math.floor(next / T);
+    const bottom = Math.floor((next + box.height - 1e-6) / T);
+    const ahead = this.dir < 0 ? top : bottom;
+    if (
+      tileAt(level, wallCol, top) !== Tile.Solid ||
+      tileAt(level, wallCol, bottom) !== Tile.Solid ||
+      tileAt(level, this.spawnCol, ahead) !== Tile.Empty
+    ) {
+      this.dir = -this.dir;
+      return;
+    }
+    box.y = next;
   }
 
   /** Vrai si le sol s'arrête juste devant (bord de plateforme) : on fait demi-tour sans tomber. */

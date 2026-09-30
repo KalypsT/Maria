@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import type { CombatParams } from '../config/combat';
 import type { ArtPalette } from '../config/art';
-import { PATROLLER_HITBOX, SPIDER_HITBOX } from '../config/combat';
+import { PATROLLER_HITBOX, SNAIL_HITBOX, SPIDER_HITBOX } from '../config/combat';
 import { PLACEHOLDER_COLORS, TILE_SIZE } from '../config/display';
 import { msToSteps } from '../config/movement';
 import { AttackPhase } from '../core/combat/PlayerAttack';
@@ -13,6 +13,7 @@ import type { DustPool } from './DustPool';
 
 const PATROLLER_TEXTURE = 'patroller-placeholder';
 const SPIDER_TEXTURE = 'spider-placeholder';
+const SNAIL_TEXTURE = 'snail-placeholder';
 const THREAD_TEXTURE = 'spider-thread';
 const STICK_TEXTURE = 'stick-placeholder';
 const SLASH_TEXTURE = 'slash-placeholder';
@@ -71,7 +72,15 @@ export class CombatView {
     const level = this.world.room;
     this.enemySprites = this.world.enemies.map((enemy) =>
       this.scene.add
-        .image(0, 0, enemy.kind === EnemyKind.Spider ? SPIDER_TEXTURE : PATROLLER_TEXTURE)
+        .image(
+          0,
+          0,
+          enemy.kind === EnemyKind.Spider
+            ? SPIDER_TEXTURE
+            : enemy.kind === EnemyKind.Snail
+              ? SNAIL_TEXTURE
+              : PATROLLER_TEXTURE,
+        )
         .setOrigin(0.5, 1)
         .setScale(1 / this.artScale)
         .setDepth(8),
@@ -146,7 +155,12 @@ export class CombatView {
           enemy.prevX + (box.x - enemy.prevX) * alpha + box.width / 2,
           enemy.prevY + (box.y - enemy.prevY) * alpha + box.height,
         )
-        .setFlipX(enemy.kind === EnemyKind.Walker && enemy.dir < 0)
+        .setFlipX(
+          enemy.kind === EnemyKind.Snail
+            ? enemy.wallSide < 0
+            : enemy.kind === EnemyKind.Walker && enemy.dir < 0,
+        )
+        .setFlipY(enemy.kind === EnemyKind.Snail && enemy.dir > 0)
         // Étourdi : penché et terni (lisible sans violence).
         .setRotation(
           enemy.state === PatrollerState.Stunned && enemy.kind === EnemyKind.Walker
@@ -278,7 +292,54 @@ export class CombatView {
     }
     textures.addCanvas(PATROLLER_TEXTURE, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
     this.drawSpider(scale, dark, palette);
+    this.drawSnail(scale, dark, palette);
     this.rebuild();
+  }
+
+  /**
+   * Escargot de derrière la haie (D-49), placeholder : collé au mur (dessiné à droite), la tête
+   * vers le haut, une coquille en spirale. Retourné selon son mur et son sens.
+   */
+  private drawSnail(scale: number, dark: boolean, palette: Readonly<ArtPalette>): void {
+    const { width: w, height: h } = SNAIL_HITBOX;
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.ceil(w * scale);
+    canvas.height = Math.ceil(h * scale);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
+    ctx.scale(scale, scale);
+    // Corps le long du mur, tête et cornes en haut.
+    ctx.fillStyle = dark ? '#2a3140' : '#c9b48a';
+    ctx.beginPath();
+    ctx.roundRect(w - 4, 1.5, 3.5, h - 2, 1.7);
+    ctx.fill();
+    ctx.strokeStyle = dark ? palette.rim : '#8a7650';
+    ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(w - 3, 2);
+    ctx.lineTo(w - 4, 0.2);
+    ctx.moveTo(w - 1.5, 2);
+    ctx.lineTo(w - 1, 0.2);
+    ctx.stroke();
+    // Coquille.
+    ctx.fillStyle = dark ? '#1d1832' : '#b0714f';
+    ctx.beginPath();
+    ctx.arc(w / 2 - 0.5, h * 0.58, 4.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = dark ? palette.rim : '#e0a56a';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    for (let t = 0; t < 10; t += 0.3) {
+      ctx.lineTo(w / 2 - 0.5 + Math.cos(t) * t * 0.38, h * 0.58 + Math.sin(t) * t * 0.38);
+    }
+    ctx.stroke();
+    const textures = this.scene.textures;
+    if (textures.exists(SNAIL_TEXTURE)) {
+      textures.remove(SNAIL_TEXTURE);
+    }
+    textures.addCanvas(SNAIL_TEXTURE, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
   }
 
   /**
@@ -354,6 +415,14 @@ export class CombatView {
       g.fillStyle(PLACEHOLDER_COLORS.enemy);
       g.fillCircle(width / 2, height / 2, height / 2);
       g.generateTexture(SPIDER_TEXTURE, width, height);
+      g.destroy();
+    }
+    if (!textures.exists(SNAIL_TEXTURE)) {
+      const { width, height } = SNAIL_HITBOX;
+      const g = this.scene.make.graphics({}, false);
+      g.fillStyle(PLACEHOLDER_COLORS.enemy);
+      g.fillCircle(width / 2, height / 2, width / 2);
+      g.generateTexture(SNAIL_TEXTURE, width, height);
       g.destroy();
     }
     if (!textures.exists(THREAD_TEXTURE)) {

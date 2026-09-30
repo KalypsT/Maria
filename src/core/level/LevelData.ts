@@ -66,6 +66,8 @@ export const EntityType = {
   Patroller: 'patroller',
   /** Araignée au bout de son fil (jardin, D-46) : monte et descend sous son point d'attache. */
   Spider: 'spider',
+  /** Escargot qui monte et descend le long d'un mur (derrière la haie, D-49). */
+  Snail: 'snail',
   Checkpoint: 'checkpoint',
   /** Objet qui donne une capacité, nommée par `; @ability:` (D-26). */
   Ability: 'ability',

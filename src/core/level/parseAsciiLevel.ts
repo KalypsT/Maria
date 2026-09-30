@@ -21,6 +21,7 @@ const LEGEND: Readonly<Record<string, number>> = {
   G: Tile.Empty,
   e: Tile.Empty,
   a: Tile.Empty,
+  o: Tile.Empty,
   C: Tile.Empty,
   A: Tile.Empty,
   S: Tile.Empty,
@@ -30,6 +31,7 @@ const LEGEND: Readonly<Record<string, number>> = {
 const ENTITIES: Readonly<Record<string, EntityType>> = {
   e: EntityType.Patroller,
   a: EntityType.Spider,
+  o: EntityType.Snail,
   C: EntityType.Checkpoint,
   A: EntityType.Ability,
   S: EntityType.Secret,
@@ -55,7 +57,7 @@ const DECOR = /^([a-z][\w-]*)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
  * Convertit une carte ASCII (décision D-06) en `LevelData`.
  * Lignes vides en début et fin ignorées, lignes commençant par `;` ignorées (commentaires).
  * Légende : `#` plein, `=` traversable par le dessous, `.` vide, `P` départ (une seule fois),
- * `G` arrivée d'un parcours (au plus une fois), `e` patrouilleur, `a` araignée (D-46), `C` checkpoint, `^` danger,
+ * `G` arrivée d'un parcours (au plus une fois), `e` patrouilleur, `a` araignée (D-46), `o` escargot (D-49), `C` checkpoint, `^` danger,
  * `b` bois, `t` tissu et `v` feuillage (pleins, D-46), `-` étagère (traversable), `1`-`9` sortie dans un mur latéral,
  * `A` objet de capacité (au plus un, capacité nommée par `; @ability:`), `S` trouvaille (secret).
  * Les commentaires `; @clé: valeur` sont des métadonnées ; `; @decor:` (répétable) déclare

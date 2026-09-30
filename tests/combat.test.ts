@@ -268,3 +268,54 @@ describe('araignée au bout de son fil (D-46)', () => {
     expect(r.takeEvents() & CombatEvent.Hurt).not.toBe(0);
   });
 });
+
+describe('escargot sur son mur (D-49)', () => {
+  // Mur de gauche plein ; un pilier (colonne 5, lignes 2 à 6) le long duquel l'escargot monte.
+  const SNAIL_ROOM = [
+    '##############',
+    '#............#',
+    '#....#.......#',
+    '#....#.......#',
+    '#....#o......#',
+    '#....#.......#',
+    '#....#.......#',
+    '#P...........#',
+    '##############',
+  ];
+
+  it('reste collé à son mur et fait demi-tour à ses deux bouts', () => {
+    const r = rig(SNAIL_ROOM);
+    const snail = r.world.enemies[0];
+    if (!snail) {
+      throw new Error('escargot absent');
+    }
+    expect(snail.wallSide).toBe(-1);
+    let top = Infinity;
+    let bottom = -Infinity;
+    r.run(msToSteps(20_000), () => {
+      expect(snail.box.x).toBe(6 * T);
+      top = Math.min(top, snail.box.y);
+      bottom = Math.max(bottom, snail.box.y + snail.box.height);
+    });
+    expect(top).toBeGreaterThanOrEqual(2 * T);
+    expect(top).toBeLessThan(2 * T + 2);
+    expect(bottom).toBeLessThanOrEqual(7 * T + 1e-6);
+    expect(bottom).toBeGreaterThan(7 * T - 2);
+  });
+
+  it('touché, il rentre dans sa coquille (immobile, inoffensif), puis repart', () => {
+    const r = rig(SNAIL_ROOM);
+    const snail = r.world.enemies[0];
+    if (!snail) {
+      throw new Error('escargot absent');
+    }
+    r.run(30);
+    snail.hit(1, 1, r.world.tuning);
+    const y = snail.box.y;
+    expect(snail.dangerous).toBe(false);
+    r.run(msToSteps(DEFAULT_COMBAT.patrollerStunMs) - 2);
+    expect(snail.box.y).toBe(y);
+    r.run(4);
+    expect(snail.dangerous).toBe(true);
+  });
+});
