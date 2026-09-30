@@ -8,6 +8,12 @@ Prochaine : à décider (zone suivante : le quartier, §26 ; ou passe de réglag
 
 ## Fait
 
+### Les parents d'après tes illustrations (D-53)
+
+- Maman : longs cheveux bouclés, tee-shirt rose, jean clair. Papa : cheveux ondulés, barbe courte, tee-shirt marine, jean foncé retroussé. Mêmes baskets claires à bande bleue. Poses inchangées.
+- Lunettes de soleil au jardin seulement. La photo de famille du salon suit les nouvelles couleurs.
+- [ ] À vérifier sur téléphone : reconnaissables ? Papa en marine se détache-t-il assez des murs bleus la nuit (porte de la chambre) ?
+
 ### Retour à l'accueil depuis la pause (D-52)
 
 - Bouton « Retour à l'accueil » dans le menu pause, à côté de « Carte », avec confirmation. La partie est déjà sauvegardée à chaque lanterne et événement ; les écritures en cours sont terminées avant de revenir à l'accueil, et « Continuer » reprend à la dernière lanterne.
