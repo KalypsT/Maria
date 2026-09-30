@@ -5,6 +5,8 @@ import { DEFAULT_MOVEMENT } from '../src/config/movement';
 import { EntityType, Tile } from '../src/core/level/LevelData';
 import { isGardenRoom } from '../src/core/world/zone';
 import { HOUSE_STORY } from '../src/levels/house/story';
+import { StoryFlag } from '../src/config/story';
+import { checkCondition } from '../src/core/story/story';
 import {
   analysis,
   byDifficulty,
@@ -218,5 +220,28 @@ describe('araignées et orties du jardin, adoucies (D-51)', () => {
     expect(level('garden-vegetables').entities.some((e) => e.type === EntityType.Checkpoint)).toBe(
       true,
     );
+  });
+});
+
+describe('papa montre la suite (D-55)', () => {
+  const F = StoryFlag;
+  /** Pensée de papa (hors cœur) proposée au potager avec ces étapes vécues. */
+  const dadHint = (flags: string[]) => {
+    const set = new Set(flags);
+    const active = HOUSE_STORY.triggers.filter(
+      (t) => t.room === 'garden-vegetables' && t.on === 'interact' && checkCondition(set, t.when),
+    );
+    expect(active.length, flags.join(',')).toBeLessThanOrEqual(1);
+    return active[0]?.steps.find(
+      (s) => s.do === 'thought' && s.by === 'dad-garden' && s.icon !== 'heart',
+    );
+  };
+
+  it('avant la cabane : la cabane ; après le saut mural : la haie ; derrière la haie : plus rien', () => {
+    expect(dadHint([F.Grown])).toMatchObject({ icon: 'treehouse' });
+    expect(dadHint([F.Grown, F.GardenDad, F.GardenTreehouse])).toMatchObject({ icon: 'hedge' });
+    expect(dadHint([F.Grown, F.GardenTreehouse])).toMatchObject({ icon: 'hedge' });
+    expect(dadHint([F.Grown, F.GardenTreehouse, F.GardenDadHedge])).toBeUndefined();
+    expect(dadHint([F.Grown, F.GardenTreehouse, F.HedgeEntered])).toBeUndefined();
   });
 });

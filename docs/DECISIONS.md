@@ -577,6 +577,13 @@ Retour du téléphone : le jardin était trop dur (araignées touchées à chaqu
 - Retour du téléphone après D-51 : devenu un peu trop simple. Une araignée de plus dans le grand arbre (au-dessus du buisson où l'on atterrit depuis la branche du bas) et une dans l'allée (au-dessus du chemin, côté terrasse) : deux par salle. Aller-retour en 3,8 s (entre les 3,2 s d'origine et les 4,5 s de D-51) ; descente toujours de 3 tuiles.
 - Toujours un moment sûr : test générique, pour chaque araignée au-dessus d'un sol, remontée elle laisse passer Céleste debout, descendue elle barre le passage.
 
+## D-55 — Papa montre la suite : la haie
+
+- Retour du téléphone : après le saut mural, on ne savait pas quoi faire. Le seul signal (le trou de la haie qui scintille, au pied du grand arbre) est à un endroit où l'on ne repasse pas forcément.
+- **Choix de l'utilisateur (B)** : une fois le saut mural trouvé, papa au potager a une nouvelle réponse. Il pense d'abord à Maria disparue, puis sa bulle montre **la haie et son trou qui scintille** (nouveau pictogramme `hedge`), puis un cœur. L'indicateur d'interaction réapparaît au-dessus de lui. Toujours sans texte (pilier 6), et papa ne sait rien de Maria.
+- Si Céleste trouve la cabane avant d'avoir parlé à papa, il montre directement la haie (plus la cabane, déjà trouvée). Après être passée derrière la haie, plus d'indice.
+- Nouvelle étape `garden.dad-hedge` ; aucune migration.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

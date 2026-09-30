@@ -44,6 +44,8 @@ export const StoryFlag = {
   /** Au jardin, Céleste a parlé de Maria à maman (terrasse) et à papa (potager). */
   GardenMom: 'garden.mom',
   GardenDad: 'garden.dad',
+  /** Papa a montré la haie, une fois le saut mural trouvé (D-55). */
+  GardenDadHedge: 'garden.dad-hedge',
   /** Céleste a regardé dans le trou de la haie, au fond du jardin. */
   GardenHedge: 'garden.hedge',
   /** Céleste a trouvé la cabane dans l'arbre (et le saut mural). */

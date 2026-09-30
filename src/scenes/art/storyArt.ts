@@ -521,6 +521,46 @@ function drawIcon(
       ctx.fillRect(cx - 1, cy - 1.5, 2, 3);
       break;
     }
+    case 'hedge': {
+      // La haie (D-55) : un buisson, un trou sombre au pied, une étincelle dedans. Réduite pour
+      // tenir dans le nuage.
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.scale(0.78, 0.78);
+      ctx.translate(-cx, -cy + 1);
+      ctx.fillStyle = '#6f9a62';
+      for (const [dx, dy, r] of [
+        [-4, -1, 4],
+        [0, -3, 4.5],
+        [4, -1, 4],
+        [-5, 3, 3],
+        [5, 3, 3],
+      ] as const) {
+        ctx.beginPath();
+        ctx.arc(cx + dx, cy + dy, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillRect(cx - 7, cy + 1, 14, 5);
+      ctx.fillStyle = '#2d3a2a';
+      ctx.beginPath();
+      ctx.ellipse(cx, cy + 4, 3.2, 2.6, 0, Math.PI, 0);
+      ctx.lineTo(cx + 3.2, cy + 6);
+      ctx.lineTo(cx - 3.2, cy + 6);
+      ctx.fill();
+      ctx.fillStyle = '#f5e27a';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + 1.6);
+      ctx.lineTo(cx + 0.8, cy + 3.4);
+      ctx.lineTo(cx + 2.4, cy + 4.1);
+      ctx.lineTo(cx + 0.8, cy + 4.8);
+      ctx.lineTo(cx, cy + 6.4);
+      ctx.lineTo(cx - 0.8, cy + 4.8);
+      ctx.lineTo(cx - 2.4, cy + 4.1);
+      ctx.lineTo(cx - 0.8, cy + 3.4);
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
     case 'question':
       // « ? » seul, au crayon : un parent qui ne sait pas (D-37).
       ctx.strokeStyle = INK;

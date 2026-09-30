@@ -48,6 +48,8 @@ export const THOUGHT_ICONS = [
   'search',
   /** La cabane dans l'arbre (papa au jardin, D-50) : un indice, sans texte. */
   'treehouse',
+  /** La haie et son trou qui scintille (papa au jardin, après le saut mural, D-55). */
+  'hedge',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
