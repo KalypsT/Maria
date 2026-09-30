@@ -82,7 +82,7 @@ export const DEFAULT_COMBAT: Readonly<CombatParams> = {
   patrollerGravity: 1400,
   patrollerMaxFall: 380,
   spiderDropTiles: 3,
-  spiderPeriodMs: 4500,
+  spiderPeriodMs: 3800,
   snailSpeed: 20,
   hitFlashMs: 100,
   screenShakePx: 0,

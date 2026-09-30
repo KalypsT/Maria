@@ -572,6 +572,11 @@ Retour du téléphone : le jardin était trop dur (araignées touchées à chaqu
 - **Lunettes de soleil au jardin seulement** (choix de l'utilisateur) : dans la maison, de jour comme la nuit, on voit leurs yeux.
 - La **photo de famille** (souvenir, D-38) prend les mêmes couleurs.
 
+## D-54 — Araignées du jardin : juste milieu
+
+- Retour du téléphone après D-51 : devenu un peu trop simple. Une araignée de plus dans le grand arbre (au-dessus du buisson où l'on atterrit depuis la branche du bas) et une dans l'allée (au-dessus du chemin, côté terrasse) : deux par salle. Aller-retour en 3,8 s (entre les 3,2 s d'origine et les 4,5 s de D-51) ; descente toujours de 3 tuiles.
+- Toujours un moment sûr : test générique, pour chaque araignée au-dessus d'un sol, remontée elle laisse passer Céleste debout, descendue elle barre le passage.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
