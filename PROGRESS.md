@@ -12,6 +12,15 @@ Prochaine : intégrer les morceaux dès qu'ils sont prêts ; zone suivante (le q
 
 ## Fait
 
+### Menu pause allégé, mode debug depuis le menu (D-59)
+
+- Menu du jeu : Carte, Retour à l'accueil, Son, Commandes tactiles (taille, opacité), Sauvegarde, **Mode debug**.
+- Joystick numérique/analogique, résolution et parcours d'essai : dans le mode debug seulement.
+- « Passer en mode debug » / « Quitter le mode debug » : même partie, reprise à la dernière lanterne (réseau nécessaire pour le mode debug).
+- Overlay de debug : bouton **INFOS** pour masquer ou afficher le cadre d'infos (choix retenu).
+- Vérifié sur les deux builds servis ensemble (`vite preview`) : aller-retour entre les deux, partie retrouvée, menus sur téléphone émulé.
+- [ ] À vérifier sur téléphone : le passage en mode debug et retour, aussi depuis l'application installée.
+
 ### Retours du téléphone : croissance, affaires de Maria, réveil dans l'herbe (D-58)
 
 - **Après le monde étrange** : papa à la porte montre maman ; au salon, câlin de maman ; la nuit tombe ; se coucher fait passer « quelques mois plus tard ».

@@ -75,6 +75,7 @@ import { DustPool } from './DustPool';
 import { WorldView } from './WorldView';
 import type { AudioPlayer } from '../platform/audioPlayer';
 import { chooseMusic } from '../core/audio/musicChoice';
+import { debugSwitchUrl } from '../core/platform/debugSwitch';
 
 /** Durée d'image maximale prise en compte (onglet en arrière-plan, pause du navigateur). */
 const MAX_FRAME_SECONDS = 0.25;
@@ -374,6 +375,13 @@ export class GameScene extends Phaser.Scene {
             await this.session.replace(data);
             location.reload();
           }
+        });
+      },
+      debugTools: __DEBUG_TOOLS__,
+      onSwitchDebug: () => {
+        // Même site, donc même sauvegarde : on reprend à la dernière lanterne dans l'autre version.
+        void this.session.manager.flush().then(() => {
+          location.assign(debugSwitchUrl(import.meta.env.BASE_URL, __DEBUG_TOOLS__));
         });
       },
       onQuitToTitle: () => {

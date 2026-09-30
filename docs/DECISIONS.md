@@ -625,6 +625,14 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
   - Sauvegarde : les affaires sont enregistrées avec les souvenirs (`progression.memories`), leur liste est dans `MARIA_THINGS`. Nouvelles étapes `maria.slipper`, `maria.bottle`, `maria.headband`, `maria.bonnet` ; aucune migration. Une partie qui avait déjà le bandeau ou le bonnet les revoit une fois dans le jeu jusqu'à les ramasser (sans effet dans le cahier).
 - **Sortie de derrière la haie** : Céleste est **assise dans l'herbe** au pied du grand arbre et se relève dès qu'on la bouge, comme au réveil dans la maison (pose assise existante ; une pose allongée reste possible plus tard).
 
+## D-59 — Menu pause allégé ; passage au mode debug depuis le menu
+
+- **Demande de l'utilisateur** : trop d'options dans le menu ; pouvoir passer en mode debug sans taper `/debug`, avec une option visible.
+- **Menu du jeu** : Reprendre · Carte · Retour à l'accueil ; Son (volume, couper) ; Commandes tactiles (taille, opacité, réinitialiser) ; Sauvegarde (code, importer) ; Mode debug.
+- **Seulement dans le build de debug** : mode du joystick (numérique ou analogique), résolution (logique ou écran, D-18) et parcours d'essai. Les réglages déjà enregistrés s'appliquent toujours.
+- **Mode debug = l'autre adresse** : « Passer en mode debug » ouvre `/Maria/debug/`, « Quitter le mode debug » ramène à `/Maria/`. Les écritures de sauvegarde en cours sont terminées d'abord. Même site, donc **même sauvegarde** (IndexedDB par origine) : on reprend à la dernière lanterne. D-12 est inchangée : le jeu ne contient toujours aucun outil de debug. Limite : le mode debug demande du réseau (il n'est pas précaché, D-23). En dev, « quitter » recharge simplement la page.
+- **Overlay de debug** : bouton **INFOS** à côté de DEBUG, qui masque ou affiche le cadre d'infos (FPS, état, position, caméra, combat, musique). Le choix est retenu (`localStorage`, build de debug).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
