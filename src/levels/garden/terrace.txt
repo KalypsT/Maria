@@ -13,7 +13,7 @@
 ; @decor: flowerpot 27 21 2 1
 ; @decor: facade 0 1 3 21
 ; @decor: backdoor 0 16 1 6
-; @decor: clothesline 6 11 16 2
+; @decor: clothesline 6 14 16 2
 ; @decor: sun 12 2 3 3
 ; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (danger), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv

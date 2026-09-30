@@ -2,11 +2,15 @@
 
 ## Phase en cours
 
-**Le jardin (2a) et derrière la haie (2b)** (§7.2, §6, D-46 à D-49) : sur la même branche `ccr-53d22df4-9euiqo` (la 2a n'était pas encore en PR), **en attente de PR et d'essai sur téléphone**. Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
+**Le jardin (2a) et derrière la haie (2b)** (§7.2, §6, D-46 à D-49) : fusionnés (PR #29), **essai sur téléphone en cours** (début du jardin testé ; correctif du fil à linge sur `ccr-53d22df4-9euiqo`). Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
 
 Prochaine : à décider (zone suivante : le quartier, §26 ; ou passe de réglage d'après les essais).
 
 ## Fait
+
+### Retour du téléphone (jardin)
+
+- Le fil à linge de la terrasse était trop haut pour la main de maman : descendu de 3 tuiles, la chaussette qu'elle tient est maintenant sur le fil.
 
 ### Derrière la haie (D-49)
 
