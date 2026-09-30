@@ -367,8 +367,19 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     }
   },
   clothesline(a, r) {
-    // Un fil qui pend un peu, des pinces, des chaussettes et un petit pyjama rose.
-    const { ctx, palette: p } = a;
+    // Deux piquets plantés dans le sol (le fil ne flotte pas), un fil qui pend un peu, des
+    // pinces, des chaussettes et un petit pyjama rose.
+    const { ctx, level, palette: p } = a;
+    const ground = floorRow(level) * T;
+    for (const x of [r.x - 1.5, r.x + r.w - 1.5]) {
+      ctx.fillStyle = p.woodDark;
+      ctx.fillRect(x, r.y - 3, 3, ground - r.y + 3);
+      ctx.fillRect(x - 4, r.y - 3, 11, 2.5);
+      if (!p.silhouettes) {
+        ctx.fillStyle = 'rgba(255,230,190,0.25)';
+        ctx.fillRect(x + 0.5, r.y - 1, 1, ground - r.y);
+      }
+    }
     ctx.strokeStyle = p.silhouettes ? p.structure : '#8a7b6c';
     ctx.lineWidth = 0.8;
     ctx.beginPath();
