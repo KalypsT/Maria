@@ -116,6 +116,8 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   sun: { furniture: false },
   /** Trou sombre dans la haie, au fond du jardin (pour plus tard, §25.3). */
   hedgehole: { furniture: false },
+  /** Passage sous une haie (fond), allée des toits. */
+  hedgetunnel: { furniture: false },
   cushions: { furniture: false },
   // Derrière la haie (D-49).
   /** Tuteur géant (bois plein), paroi d'une cheminée. */

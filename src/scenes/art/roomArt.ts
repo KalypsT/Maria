@@ -1154,7 +1154,7 @@ export function drawRoomBackground(a: ArtContext): void {
   drawDecor(true);
 }
 
-/** Dehors (jardin, D-46) : ciel, nuages, collines lointaines. */
+/** Dehors (jardin, D-46) : ciel, nuages, deux plans de collines, arbres lointains. */
 function drawSky(a: ArtContext, width: number, height: number, floorY: number): void {
   const { ctx, palette: p } = a;
   const sky = ctx.createLinearGradient(0, 0, 0, floorY);
@@ -1162,25 +1162,55 @@ function drawSky(a: ArtContext, width: number, height: number, floorY: number): 
   sky.addColorStop(1, p.wallBottom);
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = p.wallpaper;
-  for (let x = 20; x < width; x += 90) {
-    const y = 30 + ((x * 7) % 50);
+  // Nuages en coussins : ombre dessous, lumière dessus.
+  for (let x = 20; x < width; x += 110) {
+    const y = 26 + ((x * 7) % 60);
+    const puffs = [
+      [0, 0, 14, 6],
+      [12, -5, 12, 8],
+      [25, -2, 13, 7],
+      [37, 1, 11, 5],
+    ] as const;
+    ctx.fillStyle = p.silhouettes ? p.wallpaper : 'rgba(205,220,235,0.7)';
+    for (const [dx, dy, rx, ry] of puffs) {
+      ctx.beginPath();
+      ctx.ellipse(x + dx, y + dy + 2, rx, ry, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = p.wallpaper;
+    for (const [dx, dy, rx, ry] of puffs) {
+      ctx.beginPath();
+      ctx.ellipse(x + dx, y + dy, rx, ry, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  // Collines lointaines (pâles), puis plus proches avec une rangée d'arbres ronds : de la
+  // profondeur, jamais pris pour une surface (pâles et sans liseré).
+  const hills = (base: number, amp: number, alpha: number, seed: number) => {
+    ctx.fillStyle = p.wainscot;
+    ctx.globalAlpha = alpha;
     ctx.beginPath();
-    ctx.ellipse(x, y, 16, 6, 0, 0, Math.PI * 2);
-    ctx.ellipse(x + 12, y - 4, 12, 7, 0, 0, Math.PI * 2);
-    ctx.ellipse(x + 24, y, 14, 5, 0, 0, Math.PI * 2);
+    ctx.moveTo(0, floorY);
+    for (let x = 0; x <= width; x += 10) {
+      ctx.lineTo(x, floorY - base - Math.sin(x / (40 + seed) + seed) * amp - Math.sin(x / 13) * 3);
+    }
+    ctx.lineTo(width, floorY);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  };
+  hills(5 * T, 14, 0.3, 7);
+  hills(3 * T, 10, 0.45, 2);
+  ctx.fillStyle = p.wainscot;
+  ctx.globalAlpha = 0.55;
+  for (let x = 30; x < width; x += 70 + ((x * 13) % 40)) {
+    const base = floorY - 3 * T - Math.sin(x / 42 + 2) * 10;
+    ctx.fillRect(x - 1.5, base - 10, 3, 12);
+    ctx.beginPath();
+    ctx.arc(x, base - 16, 9, 0, Math.PI * 2);
+    ctx.arc(x - 6, base - 11, 6, 0, Math.PI * 2);
+    ctx.arc(x + 6, base - 11, 6, 0, Math.PI * 2);
     ctx.fill();
   }
-  // Haies et arbres lointains, plus pâles : de la profondeur, jamais pris pour une surface.
-  ctx.fillStyle = p.wainscot;
-  ctx.globalAlpha = 0.5;
-  ctx.beginPath();
-  ctx.moveTo(0, floorY);
-  for (let x = 0; x <= width; x += 12) {
-    ctx.lineTo(x, floorY - 3 * T - Math.sin(x / 37) * 10 - Math.sin(x / 11) * 4);
-  }
-  ctx.lineTo(width, floorY);
-  ctx.fill();
   ctx.globalAlpha = 1;
 }
 
@@ -1265,10 +1295,32 @@ function drawStructure(a: ArtContext, floorY: number): void {
         ctx.fillStyle = p.floor;
         ctx.fillRect(x, y, T, T);
         if (y === floorY) {
+          // Herbe : bande, touffes, et de temps en temps une petite fleur (dehors seulement).
           ctx.fillStyle = p.floorEdge;
           ctx.fillRect(x, y, T, 5);
-          ctx.fillRect(x + ((col * 5) % 13), y - 2, 1.5, 3);
-          ctx.fillRect(x + ((col * 11) % 13) + 1, y - 3, 1.5, 4);
+          ctx.fillStyle = 'rgba(0,0,0,0.12)';
+          ctx.fillRect(x, y + 5, T, 1.5);
+          ctx.fillStyle = p.floorEdge;
+          for (let k = 0; k < 4; k++) {
+            const gx = x + ((col * 7 + k * 5) % 15);
+            const gh = 2 + ((col + k * 3) % 3);
+            ctx.beginPath();
+            ctx.moveTo(gx - 1, y + 1);
+            ctx.lineTo(gx, y - gh);
+            ctx.lineTo(gx + 1, y + 1);
+            ctx.fill();
+          }
+          if (!p.silhouettes && (col * 13) % 7 === 0) {
+            ctx.fillStyle = (col * 5) % 3 === 0 ? '#fff6f0' : '#f2c14e';
+            ctx.beginPath();
+            ctx.arc(x + 8, y - 2, 1.3, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        } else if (!p.silhouettes && (col * 7 + row * 3) % 4 === 0) {
+          ctx.fillStyle = 'rgba(0,0,0,0.14)';
+          ctx.beginPath();
+          ctx.ellipse(x + 5 + ((col * 3) % 7), y + 8, 2, 1.2, 0, 0, Math.PI * 2);
+          ctx.fill();
         }
       } else if (y >= floorY) {
         ctx.fillStyle = p.floor;
