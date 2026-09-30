@@ -30,6 +30,8 @@ export interface StoryHost {
   shake(ms: number, strength: number): void;
   /** Souvenir trouvé (D-38). */
   memory(id: string): void;
+  /** Silence de Maria (D-57). */
+  hush(ms: number): void;
 }
 
 /**
@@ -265,6 +267,9 @@ export class StoryDirector {
         break;
       case 'memory':
         this.host.memory(step.id);
+        break;
+      case 'hush':
+        this.host.hush(step.ms);
         break;
       default:
         break;

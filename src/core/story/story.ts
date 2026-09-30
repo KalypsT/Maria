@@ -100,7 +100,12 @@ export type StoryStep =
   /** Souvenir trouvé (D-38), sauvegardé aussitôt ; sans effet s'il l'est déjà. */
   | { readonly do: 'memory'; readonly id: string }
   /** Tremblement de l'image (non bloquant, D-35) ; amplitude dans `src/config/strangeFx.ts`. */
-  | { readonly do: 'shake'; readonly ms: number; readonly strength: number };
+  | { readonly do: 'shake'; readonly ms: number; readonly strength: number }
+  /**
+   * Maria apparaît (non bloquant, D-57) : la musique se tait pendant `ms` (jingle étrange s'il
+   * existe), puis revient lentement.
+   */
+  | { readonly do: 'hush'; readonly ms: number };
 
 export interface StoryTrigger {
   readonly id: string;

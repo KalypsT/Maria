@@ -581,6 +581,7 @@ export function installDebugOverlay(scene: GameScene): void {
         (states ? `  ennemis ${states}` : '') +
         `\npeur ${scene.run.fear}/${scene.worldParams.fearMax}  retour ${scene.run.currentKey ?? 'départ'}` +
         (scene.run.fainting ? '  évanouie' : '');
+      stats.textContent += `\n${scene.audio.status()}`;
       const touch = scene.touch;
       if (touch) {
         const stick = touch.controller.joystick;

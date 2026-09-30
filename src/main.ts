@@ -6,7 +6,9 @@ import { SaveSession } from './core/save/SaveSession';
 import { createNewSave, migrateLegacySettings, type SaveData } from './core/save/saveData';
 import { roomName, startRoom } from './levels';
 import { openBrowserSaveStorage, requestPersistentStorage } from './platform/browserSaveStorage';
-import { DISPLAY_SETTINGS_EVENT, GameScene, SESSION_KEY } from './scenes/GameScene';
+import { AUDIO_KEY, DISPLAY_SETTINGS_EVENT, GameScene, SESSION_KEY } from './scenes/GameScene';
+import { AudioPlayer } from './platform/audioPlayer';
+import { DEFAULT_AUDIO_SETTINGS } from './config/audio';
 import { installHint } from './core/platform/install';
 import { installEnvironment, Pwa } from './platform/pwa';
 import { showTitleScreen } from './ui/TitleScreen';
@@ -35,7 +37,7 @@ function newGame(): SaveData {
   return createNewSave(startRoom().level.id, Date.now(), legacySettings());
 }
 
-function startGame(parent: HTMLElement, session: SaveSession): Phaser.Game {
+function startGame(parent: HTMLElement, session: SaveSession, audio: AudioPlayer): Phaser.Game {
   let display: DisplaySettings = session.data.settings.display;
   /** Taille du canvas : largeur logique (D-01) × échelle de rendu (D-18). */
   const canvasSize = () => {
@@ -61,6 +63,7 @@ function startGame(parent: HTMLElement, session: SaveSession): Phaser.Game {
     scene: [GameScene],
   });
   game.registry.set(SESSION_KEY, session);
+  game.registry.set(AUDIO_KEY, audio);
   const fitGameSize = () => {
     const { width, height } = canvasSize();
     if (width !== game.scale.gameSize.width || height !== game.scale.gameSize.height) {
@@ -83,6 +86,9 @@ async function boot(): Promise<void> {
   const manager = new SaveManager(await openBrowserSaveStorage());
   const report = await manager.load();
   const saved = report.data;
+  // Musique (D-57) : thème de l'accueil, qui démarre au premier toucher.
+  const audio = new AudioPlayer(saved?.settings.audio ?? DEFAULT_AUDIO_SETTINGS);
+  audio.setMusic('title');
   const choice = await showTitleScreen(
     report,
     saved ? roomName(saved.checkpoint.levelId) : null,
@@ -97,12 +103,13 @@ async function boot(): Promise<void> {
       : choice.kind === 'import'
         ? choice.data
         : newGame();
+  audio.setSettings(data.settings.audio);
   const session = new SaveSession(manager, data);
   if (choice.kind !== 'continue') {
     // Nouvelle partie ou import : écrite tout de suite (l'ancienne devient l'état précédent).
     await session.persist();
   }
-  startGame(parent, session);
+  startGame(parent, session, audio);
 }
 
 void boot();

@@ -47,12 +47,13 @@ export default defineConfig(({ mode }) => {
           ],
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,png,svg}'],
+          // Musique (D-57) : précachée aussi, jouable hors ligne dès l'installation.
+          globPatterns: ['**/*.{js,css,html,png,svg,ogg,opus,m4a,mp3}'],
           // Le build de debug est publié sous /Maria/debug/ : jamais précaché ni servi par ce SW.
           globIgnores: ['debug/**'],
           navigateFallbackDenylist: [/^\/Maria\/debug(\/|$)/],
-          // Phaser seul pèse ~1,5 Mo minifié.
-          maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+          // Phaser seul pèse ~1,5 Mo minifié ; un morceau de musique peut peser davantage (D-57).
+          maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
           cleanupOutdatedCaches: true,
         },
       }),

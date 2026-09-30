@@ -32,6 +32,7 @@ function recorder() {
     sparkle: (area) => log.push(`sparkle ${String(area.col)},${String(area.row)}`),
     shake: (ms) => log.push(`shake ${String(ms)}`),
     memory: (id) => log.push(`memory ${id}`),
+    hush: (ms) => log.push(`hush ${String(ms)}`),
   };
   return { log, host };
 }

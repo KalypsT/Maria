@@ -1,6 +1,6 @@
 // Vérifie la PWA (décision D-23) après `build` puis `build:debug` : service worker et manifeste
 // dans le build principal, /debug/ exclu, aucun doublon précaché, aucun service worker en debug.
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 
 const errors = [];
 const check = (ok, message) => {
@@ -18,6 +18,13 @@ if (existsSync('dist/sw.js')) {
   check(!urls.some((url) => url.startsWith('debug/')), 'le précache contient le build de debug');
   const duplicates = urls.filter((url, i) => urls.indexOf(url) !== i);
   check(duplicates.length === 0, `doublons dans le précache : ${duplicates.join(', ')}`);
+  // Musique (D-57) : chaque morceau publié doit être précaché (jouable hors ligne).
+  const audio = readdirSync('dist/assets').filter((name) => /\.(ogg|opus|m4a|mp3)$/.test(name));
+  const missing = audio.filter((name) => !urls.includes(`assets/${name}`));
+  check(
+    missing.length === 0,
+    `musique absente du précache (trop lourde ?) : ${missing.join(', ')}`,
+  );
   check(/Maria\\\/debug/.test(sw), 'le service worker n’exclut pas /Maria/debug/ des navigations');
 }
 if (existsSync('dist/manifest.webmanifest')) {

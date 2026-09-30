@@ -1,7 +1,9 @@
 import { DEFAULT_CONTROL_SETTINGS, type ControlSettings } from '../../config/controls';
 import { DEFAULT_DISPLAY_SETTINGS, type DisplaySettings } from '../../config/display';
+import { DEFAULT_AUDIO_SETTINGS, type AudioSettings } from '../../config/audio';
 import { parseControlSettings, sanitizeControlSettings } from '../settings/controlSettings';
 import { parseDisplaySettings, sanitizeDisplaySettings } from '../settings/displaySettings';
+import { sanitizeAudioSettings } from '../settings/audioSettings';
 import { LEGACY_STORY_FLAGS } from '../../config/story';
 
 /**
@@ -22,7 +24,8 @@ export interface SaveData {
   checkpoint: { levelId: string; checkpointId: string | null };
   /** Checkpoints déjà activés, sous la forme `salle:identifiant`. */
   activatedCheckpoints: string[];
-  settings: { controls: ControlSettings; display: DisplaySettings };
+  /** Son (D-57) : absent des sauvegardes plus anciennes, valeurs par défaut (aucune migration). */
+  settings: { controls: ControlSettings; display: DisplaySettings; audio: AudioSettings };
   /** Progression permanente : prévue, vide tant que ces systèmes n'existent pas. */
   progression: {
     abilities: string[];
@@ -74,9 +77,10 @@ export function checksum(text: string): string {
 export function createNewSave(
   levelId: string,
   now: number,
-  settings: { controls: ControlSettings; display: DisplaySettings } = {
+  settings: SaveData['settings'] = {
     controls: { ...DEFAULT_CONTROL_SETTINGS },
     display: { ...DEFAULT_DISPLAY_SETTINGS },
+    audio: { ...DEFAULT_AUDIO_SETTINGS },
   },
 ): SaveData {
   return {
@@ -84,7 +88,11 @@ export function createNewSave(
     savedAt: now,
     checkpoint: { levelId, checkpointId: null },
     activatedCheckpoints: [],
-    settings: { controls: { ...settings.controls }, display: { ...settings.display } },
+    settings: {
+      controls: { ...settings.controls },
+      display: { ...settings.display },
+      audio: { ...settings.audio },
+    },
     progression: { abilities: [], collectibles: [], memories: [], mapRevealed: [] },
     story: { flags: [] },
   };
@@ -97,10 +105,11 @@ export function createNewSave(
 export function migrateLegacySettings(
   controlsText: string | null,
   displayText: string | null,
-): { controls: ControlSettings; display: DisplaySettings } {
+): SaveData['settings'] {
   return {
     controls: parseControlSettings(controlsText),
     display: parseDisplaySettings(displayText),
+    audio: { ...DEFAULT_AUDIO_SETTINGS },
   };
 }
 
@@ -172,6 +181,7 @@ export function validateSaveData(raw: unknown): SaveData | null {
     settings: {
       controls: sanitizeControlSettings(settings['controls']),
       display: sanitizeDisplaySettings(settings['display']),
+      audio: sanitizeAudioSettings(settings['audio']),
     },
     progression: { abilities, collectibles, memories, mapRevealed },
     story: { flags },

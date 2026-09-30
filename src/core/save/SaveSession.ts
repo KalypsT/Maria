@@ -1,3 +1,4 @@
+import type { AudioSettings } from '../../config/audio';
 import type { ControlSettings } from '../../config/controls';
 import type { DisplaySettings } from '../../config/display';
 import type { SaveData } from './saveData';
@@ -90,6 +91,11 @@ export class SaveSession {
 
   setDisplay(display: Readonly<DisplaySettings>): Promise<void> {
     this.current.settings.display = { ...display };
+    return this.persist();
+  }
+
+  setAudio(audio: Readonly<AudioSettings>): Promise<void> {
+    this.current.settings.audio = { ...audio };
     return this.persist();
   }
 
