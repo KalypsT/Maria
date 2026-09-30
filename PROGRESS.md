@@ -8,6 +8,11 @@ Prochaine : à décider (zone suivante : le quartier, §26 ; ou passe de réglag
 
 ## Fait
 
+### Araignées : juste milieu (D-54)
+
+- Deux araignées dans le grand arbre et deux dans l'allée (une de plus dans chaque), un peu plus rapides (3,8 s au lieu de 4,5 s). Il existe toujours un moment pour passer (testé).
+- [ ] À vérifier sur téléphone : le bon niveau de difficulté cette fois ?
+
 ### Les parents d'après tes illustrations (D-53)
 
 - Maman : longs cheveux bouclés, tee-shirt rose, jean clair. Papa : cheveux ondulés, barbe courte, tee-shirt marine, jean foncé retroussé. Mêmes baskets claires à bande bleue. Poses inchangées.

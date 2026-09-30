@@ -163,16 +163,16 @@ describe('araignées et orties du jardin, adoucies (D-51)', () => {
   const spiderLowBottom = (row: number) =>
     row * T + DEFAULT_COMBAT.spiderDropTiles * T + SPIDER_HITBOX.height;
 
-  it('une seule araignée dans le grand arbre, une dans l’allée, aucune ailleurs', () => {
-    expect(spiders('garden-tree')).toHaveLength(1);
-    expect(spiders('garden-alley')).toHaveLength(1);
+  it('deux araignées dans le grand arbre, deux dans l’allée, aucune ailleurs', () => {
+    expect(spiders('garden-tree')).toHaveLength(2);
+    expect(spiders('garden-alley')).toHaveLength(2);
     for (const room of ['garden-terrace', 'garden-vegetables', 'garden-treehouse']) {
       expect(spiders(room), room).toHaveLength(0);
     }
   });
 
   it('grand arbre : en haut de sa course, l’araignée laisse passer le saut vers la cabane', () => {
-    const [spider] = spiders('garden-tree');
+    const spider = spiders('garden-tree').find((e) => e.row === 9);
     if (!spider) {
       throw new Error('araignée absente');
     }
@@ -183,20 +183,23 @@ describe('araignées et orties du jardin, adoucies (D-51)', () => {
     expect(spiderLowBottom(spider.row)).toBeGreaterThan(apexTop);
   });
 
-  it('allée : on passe sous l’araignée quand elle est remontée, pas quand elle descend', () => {
-    const [spider] = spiders('garden-alley');
-    if (!spider) {
-      throw new Error('araignée absente');
-    }
-    // Toit de la remise sous l'araignée : Céleste debout, le haut de sa tête.
-    let roof = spider.row + 1;
-    while (level('garden-alley').tiles[roof * level('garden-alley').width + spider.col] === 0) {
-      roof++;
-    }
-    const headTop = roof * T - grown.hitbox.height;
-    expect(spiderTopBottom(spider.row)).toBeLessThan(headTop);
-    expect(spiderLowBottom(spider.row)).toBeGreaterThan(headTop);
-  });
+  it.each(['garden-tree', 'garden-alley'])(
+    '%s : au-dessus d’un sol, on passe quand l’araignée est remontée, pas quand elle descend',
+    (room) => {
+      const data = level(room);
+      for (const spider of spiders(room).filter((e) => e.row !== 9 || room !== 'garden-tree')) {
+        // Premier sol plein sous l'araignée : Céleste debout, le haut de sa tête.
+        let floor = spider.row + 1;
+        while (data.tiles[floor * data.width + spider.col] === Tile.Empty) {
+          floor++;
+        }
+        const headTop = floor * T - grown.hitbox.height;
+        const at = `${room} (${String(spider.col)}, ${String(spider.row)})`;
+        expect(spiderTopBottom(spider.row), at).toBeLessThan(headTop);
+        expect(spiderLowBottom(spider.row), at).toBeGreaterThan(headTop);
+      }
+    },
+  );
 
   it('les orties du jardin piquent (^), les ronces de derrière la haie sont fatales (!)', () => {
     const count = (room: string, tile: number) =>

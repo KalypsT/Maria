@@ -25,7 +25,7 @@ v.................bbbbbbbbbbbb....vv...................v
 1.................bbbbbbbbbbbb....vv...................v
 1.................bbbbbbbbbbbb....vv...................v
 1.................bbbbbbbbbbbb....vv...................v
-vbbbbbbbbbbbb.....bbbbbbbbbbbb....vv...................v
+vbbbbbbbbbbbb.....bbbbbbbbbbbb....vv..........a........v
 vbbbbbbbbbbbb.....bbbbbbbbbbbb....vv...................2
 vbbbbbbbbbbbb.....bbbbbbbbbbbb.........................2
 vbbbbbbbbbbbb.....bbbbbbbbbbbb..........P..............2
