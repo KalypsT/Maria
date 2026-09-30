@@ -58,12 +58,16 @@ function photo(ctx: CanvasRenderingContext2D, s: number): void {
   ctx.fillStyle = '#9bc49a';
   ctx.fillRect(-s * 0.4, s * 0.12, s * 0.8, s * 0.18);
   // Papa (grand), maman (cheveux longs), Céleste devant, le chat à ses pieds.
-  ctx.fillStyle = '#4f6f8f';
-  ctx.fillRect(-s * 0.3, -s * 0.04, s * 0.16, s * 0.3);
-  headAt(ctx, -s * 0.22, -s * 0.12, s * 0.08, '#d9a27c', '#3b2a22', false);
-  ctx.fillStyle = '#b56e8a';
-  ctx.fillRect(s * 0.1, -s * 0.02, s * 0.16, s * 0.28);
-  headAt(ctx, s * 0.18, -s * 0.1, s * 0.075, '#e7b995', '#6b3f2a', true);
+  ctx.fillStyle = '#46618f';
+  ctx.fillRect(-s * 0.28, s * 0.14, s * 0.12, s * 0.12);
+  ctx.fillStyle = '#3b4870';
+  ctx.fillRect(-s * 0.3, -s * 0.04, s * 0.16, s * 0.18);
+  headAt(ctx, -s * 0.22, -s * 0.12, s * 0.08, '#dca07a', '#8a5a36', false);
+  ctx.fillStyle = '#7196c6';
+  ctx.fillRect(s * 0.12, s * 0.14, s * 0.12, s * 0.12);
+  ctx.fillStyle = '#f1b9c7';
+  ctx.fillRect(s * 0.1, -s * 0.02, s * 0.16, s * 0.16);
+  headAt(ctx, s * 0.18, -s * 0.1, s * 0.075, '#e2a881', '#4a2e1f', true);
   ctx.fillStyle = '#f1a9bd';
   ctx.fillRect(-s * 0.07, s * 0.08, s * 0.12, s * 0.18);
   headAt(ctx, -s * 0.01, s * 0.03, s * 0.065, '#e7b995', '#5a3a2a', false);

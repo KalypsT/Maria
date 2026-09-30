@@ -562,6 +562,16 @@ Retour du téléphone : le jardin était trop dur (araignées touchées à chaqu
 - Recharger plutôt que détruire et recréer le jeu Phaser : plus simple et sans fuite (écouteurs, DOM) ; hors ligne, le service worker sert la page (D-23).
 - Écarté pour l'instant : sauvegarder la position exacte au moment de quitter (changerait le sens du point de retour, pilier 10 ; à proposer séparément si besoin).
 
+## D-53 — Les parents d'après les illustrations de l'utilisateur
+
+- Deux illustrations fournies (vues de profil, debout). Comme pour Céleste (D-41), elles **ne sont pas collées dans le jeu** : les parents y sont assis, tendent la main, tiennent une tasse, un arrosoir, étendent le linge, et une image fixe ne fait aucune de ces poses ; à ~125 px de haut sur téléphone, seules la silhouette de la coiffure et les couleurs se lisent ; le rendu aquarelle jurerait avec les aplats. Les illustrations ne sont pas ajoutées au dépôt.
+- **Parents redessinés par le code** (`familyArt.ts`), poses et animations inchangées :
+  - maman : longs cheveux bruns bouclés jusqu'au milieu du dos (boucles en disques, quelques boucles sombres), petite boucle d'oreille, tee-shirt rose col en V rentré dans un jean bleu clair droit ;
+  - papa : cheveux châtains ondulés en volume, rejetés en arrière, barbe courte, tee-shirt bleu marine col en V, jean foncé retroussé ;
+  - tous deux : manches courtes (bras nus), nez de profil, baskets claires à bande bleue et semelle blanche ; peau un peu plus hâlée.
+- **Lunettes de soleil au jardin seulement** (choix de l'utilisateur) : dans la maison, de jour comme la nuit, on voit leurs yeux.
+- La **photo de famille** (souvenir, D-38) prend les mêmes couleurs.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
