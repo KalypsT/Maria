@@ -73,11 +73,15 @@ import { CelestePoser, PoseAttack } from '../core/player/celestePose';
 import { AttackPhase } from '../core/combat/PlayerAttack';
 import { DustPool } from './DustPool';
 import { WorldView } from './WorldView';
+import type { AudioPlayer } from '../platform/audioPlayer';
+import { chooseMusic } from '../core/audio/musicChoice';
 
 /** Durée d'image maximale prise en compte (onglet en arrière-plan, pause du navigateur). */
 const MAX_FRAME_SECONDS = 0.25;
 /** Clé du registre Phaser où main.ts dépose la partie en cours (D-22). */
 export const SESSION_KEY = 'maria-session';
+/** Clé du registre où main.ts dépose le lecteur de musique (D-57). */
+export const AUDIO_KEY = 'maria-audio';
 
 /** Couleurs des tuiles pleines selon le matériau (placeholders, D-24). */
 interface SolidColors {
@@ -214,6 +218,14 @@ export class GameScene extends Phaser.Scene {
   private drawnStrange = false;
   /** Vue de la caméra (px logiques), pour les objets de mise en scène (pilier 5). */
   private readonly viewBox: Box = { x: 0, y: 0, width: 0, height: 0 };
+  /** Musique (D-57) ; le contexte est réutilisé à chaque image (aucune allocation). */
+  audio!: AudioPlayer;
+  private readonly musicContext = {
+    strange: false,
+    outdoor: false,
+    garden: false,
+    time: 'evening' as TimeOfDay,
+  };
   /** Heure (ms) avant laquelle une porte fermée ne redonne pas de bulle. */
   private lockedThoughtUntil = 0;
   private readonly playerInput: PlayerInput = {
@@ -236,6 +248,7 @@ export class GameScene extends Phaser.Scene {
 
   create(): void {
     this.session = this.registry.get(SESSION_KEY) as SaveSession;
+    this.audio = this.registry.get(AUDIO_KEY) as AudioPlayer;
     this.story = new StoryDirector(HOUSE_STORY, {
       flagSet: (id) => {
         void this.session.addStoryFlag(id);
@@ -261,7 +274,13 @@ export class GameScene extends Phaser.Scene {
         this.fx.shake(ms, strength);
       },
       memory: (id) => {
+        if (!this.session.data.progression.memories.includes(id)) {
+          this.audio.playJingle('memory');
+        }
         void this.session.addMemory(id);
+      },
+      hush: (ms) => {
+        this.audio.hush(ms);
       },
     });
     this.story.setFlags(this.session.data.story.flags);
@@ -325,6 +344,13 @@ export class GameScene extends Phaser.Scene {
       display: this.displaySettings,
       onDisplayChange: (settings) => {
         this.setDisplaySettings(settings);
+      },
+      audio: save.settings.audio,
+      onAudioChange: (settings, persist) => {
+        this.audio.setSettings(settings);
+        if (persist) {
+          void this.session.setAudio(settings);
+        }
       },
       showTouchSettings: this.touch !== undefined,
       onResume: () => {
@@ -599,6 +625,7 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     this.paused = paused;
+    this.audio.setPaused(paused);
     this.clock.reset();
     this.touch?.releaseAll();
     if (paused) {
@@ -866,12 +893,14 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     if (item.kind === PickupKind.Secret) {
+      this.audio.playJingle('found');
       void this.session.addCollectible(item.id);
       return;
     }
     if (!isAbility(item.id)) {
       return;
     }
+    this.audio.playJingle('found');
     void this.session.unlockAbility(item.id);
     this.applyAbilities();
     this.hud.showHint(ABILITY_HINTS[item.id], ABILITY_HINT_MS);
@@ -1125,6 +1154,12 @@ export class GameScene extends Phaser.Scene {
       this.redrawArt();
     }
     this.touch?.setLabel('Attack', story.interactable >= 0 && !story.busy ? 'Agir' : null);
+    const music = this.musicContext;
+    music.strange = isStrangeRoom(this.level);
+    music.outdoor = Boolean(this.level.meta.outdoor);
+    music.garden = isGardenRoom(this.level);
+    music.time = story.timeOfDay();
+    this.audio.setMusic(chooseMusic(music));
   }
 
   /** Centre du fondu en cercle (D-35) : Céleste, en px CSS de la page. */

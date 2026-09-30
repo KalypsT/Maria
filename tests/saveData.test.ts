@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_CONTROL_SETTINGS } from '../src/config/controls';
 import { DEFAULT_DISPLAY_SETTINGS } from '../src/config/display';
+import { DEFAULT_AUDIO_SETTINGS } from '../src/config/audio';
 import {
   checkpointId,
   checksum,
@@ -92,7 +93,26 @@ describe('saveData', () => {
     expect(migrateLegacySettings(null, 'n’importe quoi')).toEqual({
       controls: DEFAULT_CONTROL_SETTINGS,
       display: DEFAULT_DISPLAY_SETTINGS,
+      audio: DEFAULT_AUDIO_SETTINGS,
     });
+  });
+
+  it('garde les réglages du son, et en donne par défaut à une sauvegarde plus ancienne (D-57)', () => {
+    const data = sample();
+    data.settings.audio = { volume: 0.25, muted: true };
+    expect(deserializeSave(serializeSave(data))).toMatchObject({
+      ok: true,
+      data: { settings: { audio: { volume: 0.25, muted: true } } },
+    });
+    const older = { controls: data.settings.controls, display: data.settings.display };
+    expect(validateSaveData({ ...data, settings: older })?.settings.audio).toEqual(
+      DEFAULT_AUDIO_SETTINGS,
+    );
+    const odd = validateSaveData({
+      ...data,
+      settings: { ...data.settings, audio: { volume: 7, muted: 'oui' } },
+    });
+    expect(odd?.settings.audio).toEqual({ volume: 1, muted: false });
   });
 
   it('exporte et réimporte un code de sauvegarde, et refuse un code abîmé', () => {

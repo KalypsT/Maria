@@ -5,12 +5,16 @@ import {
   type JoystickMode,
 } from '../config/controls';
 import type { DisplaySettings, RenderMode } from '../config/display';
+import type { AudioSettings } from '../config/audio';
 import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 
 export interface PauseMenuOptions {
   settings: ControlSettings;
   display: DisplaySettings;
   onDisplayChange: (settings: DisplaySettings) => void;
+  /** Son (D-57) : appliqué aussitôt ; `persist` quand le réglage est terminé (curseur lâché). */
+  audio: AudioSettings;
+  onAudioChange: (settings: AudioSettings, persist: boolean) => void;
   /** Afficher les réglages tactiles (inutile sans commandes tactiles). */
   showTouchSettings: boolean;
   onResume: () => void;
@@ -68,6 +72,7 @@ export class PauseMenu {
       element('button', topRow, undefined, 'Carte').addEventListener('click', openMap);
     }
     this.addQuit(topRow);
+    this.addAudio(panel);
 
     if (options.showTouchSettings) {
       element('h3', panel, undefined, 'Commandes tactiles');
@@ -175,6 +180,43 @@ export class PauseMenu {
     };
     refresh();
     this.refreshers.push(refresh);
+  }
+
+  /** Son (D-57) : volume général et coupure. */
+  private addAudio(parent: HTMLElement): void {
+    element('h3', parent, undefined, 'Son');
+    const audio = { ...this.options.audio };
+    const row = element('label', parent, 'pause-row');
+    element('span', row, undefined, 'Volume');
+    const value = element('span', row, 'pause-value');
+    const slider = element('input', row);
+    slider.type = 'range';
+    slider.min = '0';
+    slider.max = '1';
+    slider.step = '0.05';
+    const mute = element('button', parent);
+    const refresh = () => {
+      slider.value = String(audio.volume);
+      value.textContent = `${String(Math.round(audio.volume * 100))} %`;
+      mute.textContent = audio.muted ? 'Remettre le son' : 'Couper le son';
+      mute.classList.toggle('selected', audio.muted);
+    };
+    slider.addEventListener('input', () => {
+      audio.volume = Number(slider.value);
+      // Monter le volume remet le son.
+      audio.muted = false;
+      refresh();
+      this.options.onAudioChange({ ...audio }, false);
+    });
+    slider.addEventListener('change', () => {
+      this.options.onAudioChange({ ...audio }, true);
+    });
+    mute.addEventListener('click', () => {
+      audio.muted = !audio.muted;
+      refresh();
+      this.options.onAudioChange({ ...audio }, true);
+    });
+    refresh();
   }
 
   /** Résolution de rendu (D-18) : logique (par défaut) ou écran (déplacements plus fins). */

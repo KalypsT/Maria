@@ -4,9 +4,21 @@
 
 **Le jardin (2a) et derrière la haie (2b)** (§7.2, §6, D-46 à D-49) : fusionnés (PR #29), **essai sur téléphone en cours** (début du jardin testé ; jardin adouci (D-51) sur `ccr-53d22df4-9euiqo`). Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
 
-Prochaine : à décider (zone suivante : le quartier, §26 ; ou passe de réglage d'après les essais).
+**Musique** (D-57) : lecteur en place, en attente des morceaux.
+
+Prochaine : intégrer les morceaux dès qu'ils sont prêts ; zone suivante (le quartier, §26) ou passe de réglage d'après les essais.
 
 ## Fait
+
+### Musique : le lecteur est prêt (D-57)
+
+- **Déposer les morceaux** dans `src/assets/audio/` (voir `LISEZMOI.md`), nommés : `title`, `house-night`, `house-day`, `garden`, `strange`, `hedge` ; jingles courts `found`, `memory`, `maria`. Formats : `.ogg`/`.opus` (préféré), `.m4a`, `.mp3`. Un emplacement vide reste silencieux.
+- **Poids** : 12 Mo au total au maximum (tests). Environ 96 kbit/s par morceau.
+- Fondus enchaînés entre thèmes, boucle en fondu enchaîné avec la fin du morceau, musique baissée pendant la pause et les jingles.
+- **Silence de Maria** : la musique se tait au réveil devant le berceau vide, quand on aperçoit Maria, à sa disparition, à l'entrée derrière la haie, devant le berceau vide et le bonnet. Jingle `maria` s'il existe.
+- Menu pause : **Son** (volume, couper le son), sauvegardé.
+- [ ] À vérifier sur téléphone, une fois les morceaux déposés : volume par défaut (70 %), fondus (2,5 s), la boucle s'entend-elle ? Le silence de Maria : silence ou jingle étrange ? Le son se coupe-t-il bien quand on quitte l'appli (et reprend au retour) ? La musique démarre au premier toucher sur l'accueil.
+- [ ] Taille du téléchargement à l'installation.
 
 ### Dangers du sol et ennemis vaincus (D-56)
 

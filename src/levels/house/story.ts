@@ -115,6 +115,11 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: S.holdMs },
         { do: 'fadeOut', ms: S.nightFadeOutMs },
         { do: 'flag', id: F.Slept },
+        // Le berceau vide (D-57) : silence jusqu'à la fin de la bulle, puis le thème du matin.
+        {
+          do: 'hush',
+          ms: S.nightBlackMs + S.nightFadeInMs + 1200 + S.thoughtMs + 1500,
+        },
         { do: 'place', col: 12, row: 15, facing: 1 },
         { do: 'pose', pose: 'sit' },
         { do: 'wait', ms: S.nightBlackMs },
@@ -213,6 +218,7 @@ export const HOUSE_STORY: StoryData = {
       lock: true,
       steps: [
         { do: 'flag', id: F.MariaSeen },
+        { do: 'hush', ms: S.thoughtMs + S.lookMs },
         { do: 'thought', icon: 'maria', ms: S.thoughtMs },
         { do: 'wait', ms: S.lookMs },
       ],
@@ -227,7 +233,8 @@ export const HOUSE_STORY: StoryData = {
       when: { all: [F.Slept], none: [F.MariaVanished] },
       lock: true,
       steps: [
-        // L'air scintille autour d'elle (jamais sur elle), tout tremble… puis le noir.
+        // L'air scintille autour d'elle (jamais sur elle), tout tremble… puis le noir, en silence.
+        { do: 'hush', ms: S.omenPeakMs + S.blinkOutMs + S.blinkBlackMs },
         { do: 'sparkle', area: MARIA_SPOT, ms: S.omenPeakMs + 400 },
         { do: 'shake', ms: S.omenPeakMs, strength: 1 },
         { do: 'wait', ms: S.omenPeakMs },
@@ -273,6 +280,10 @@ export const HOUSE_STORY: StoryData = {
       lock: true,
       steps: [
         // Le berceau scintille, puis le cercle se referme sur Céleste.
+        {
+          do: 'hush',
+          ms: S.cradleSparkleMs + S.nightFadeOutMs + S.nightBlackMs + S.nightFadeInMs + 1200,
+        },
         { do: 'sparkle', area: { col: 24, row: 3, w: 5, h: 3 }, ms: S.cradleSparkleMs + 600 },
         { do: 'wait', ms: S.cradleSparkleMs },
         { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
@@ -457,6 +468,7 @@ export const HOUSE_STORY: StoryData = {
       when: { all: [F.GardenTreehouse], none: [F.HedgeEntered] },
       lock: true,
       steps: [
+        { do: 'hush', ms: S.omenPeakMs + S.blinkOutMs + S.blinkBlackMs },
         { do: 'sparkle', area: { col: 39, row: 37, w: 5, h: 3 }, ms: S.omenPeakMs + 400 },
         { do: 'shake', ms: S.omenPeakMs, strength: 1 },
         { do: 'wait', ms: S.omenPeakMs },
@@ -500,6 +512,10 @@ export const HOUSE_STORY: StoryData = {
       when: { all: [F.HedgeEntered], none: [F.HedgeDone] },
       lock: true,
       steps: [
+        {
+          do: 'hush',
+          ms: S.cradleSparkleMs + S.nightFadeOutMs + S.nightBlackMs + S.nightFadeInMs + 1200,
+        },
         { do: 'sparkle', area: { col: 22, row: 5, w: 5, h: 3 }, ms: S.cradleSparkleMs + 600 },
         { do: 'wait', ms: S.cradleSparkleMs },
         { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },

@@ -593,6 +593,20 @@ Retours du téléphone.
 - **Ennemis vaincus** : dispersés, ils le restent tant que Céleste est dans la salle. Ils reviennent après un **évanouissement** (même si la lanterne est dans la même salle, précision de l'utilisateur) et quand on revient dans la salle plus tard.
 - L'analyse de faisabilité évite toujours les deux dangers (difficultés inchangées).
 
+## D-57 — Musique : lecteur, emplacements, silence de Maria (§39, §40)
+
+- **Plan validé** (« A ») : le lecteur est prêt avant les morceaux (Suno, préparés par l'utilisateur). Un emplacement sans fichier reste silencieux.
+- **Emplacements** (`src/config/audio.ts`) : 6 thèmes et 3 jingles. Thèmes : `title` (accueil), `house-night` (maison le soir), `house-day` (maison le matin et après la croissance), `garden`, `strange` (monde étrange de la maison), `hedge` (derrière la haie). Jingles : `found` (capacité, trouvaille), `memory` (nouveau souvenir), `maria` (optionnel). La maison de nuit et de jour sont séparées (demande de l'utilisateur).
+- **Fichiers dans `src/assets/audio/`** et non `public/audio/` : Vite leur donne un nom avec empreinte (un morceau remplacé est bien retéléchargé, pas d'ancien morceau servi par le cache) et ne publie que les fichiers présents. Nom = emplacement (`garden.ogg`). Formats : Opus/Ogg de préférence, M4A ou MP3 acceptés.
+- **Choix du thème** : fonction pure (`chooseMusic`) selon le monde de la salle et le moment de la journée ; il change dans le noir des fondus, comme la palette.
+- **Mixage pur et testé** (`AudioMix`) : fondus enchaînés à puissance constante (2,5 s) ; boucle en fondu enchaîné avec la fin du morceau (4 s, au plus un quart du morceau), car les morceaux de Suno ne sont pas composés pour boucler ; musique baissée pendant un jingle (30 %) et la pause (45 %).
+- **Lecteur** : `HTMLAudioElement` plutôt que des tampons Web Audio. Un morceau de 3 min décodé pèse environ 60 Mo en mémoire, contre 3 Mo compressé. Le fichier est lu une fois en mémoire (blob) : le service worker n'a pas de requêtes partielles à servir, et les deux lecteurs d'une même boucle partagent cette copie. Le son démarre au premier toucher (règle des navigateurs : le thème de l'accueil commence donc au premier toucher). Il s'arrête quand l'appli passe en arrière-plan.
+- **Silence de Maria** (§39, choix de l'utilisateur : « à tester, ou un jingle étrange ») : nouvelle étape de script `hush` (non bloquante). La musique s'éteint en 1,2 s, reste tue, puis revient en 3,5 s. Le jingle `maria` est joué s'il existe ; sinon, c'est le silence. Les autres jingles ne sont pas joués pendant ce silence (le souvenir du bandeau, du bonnet). Placée : réveil devant le berceau vide, Maria aperçue sur la bibliothèque, sa disparition, entrée derrière la haie, berceau vide du passage d'ombres, bonnet. Jamais dans un script rejouable (testé).
+- **Réglages** : volume et « Couper le son » dans le menu pause. Enregistrés dans la sauvegarde (`settings.audio`), sans migration : une sauvegarde plus ancienne prend les valeurs par défaut (70 %, son actif).
+- **Hors ligne et poids** : les morceaux sont précachés (jouables hors ligne dès l'installation). Budget total de 12 Mo (`AUDIO_BUDGET_BYTES`), vérifié par les tests ; `check:pwa` vérifie que chaque morceau publié est précaché (plafond de 6 Mo par fichier). Recommandation : Opus ou MP3 à 96 kbit/s, soit environ 2 Mo par thème de 3 min. Un MP3 brut de Suno (192 kbit/s et plus) ferait dépasser le budget avec 5 thèmes.
+- **Debug** : ligne « musique » dans l'overlay (thème voulu, fichier présent ou non, lecture, volume, silence).
+- Vérifié dans Chromium avec des sons d'essai (non commités) : démarrage au premier geste, fondu nuit → matin, monde étrange, silence puis retour, boucle en fondu, pause, coupure sauvegardée, jingle, précache.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
