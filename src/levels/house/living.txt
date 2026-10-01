@@ -5,7 +5,7 @@
 ; @icon: sofa
 ; @ambient: #2e2b33
 ; @note: route haute (en grimpant, facile) : placard mural, deux plantes suspendues, tringle du rideau, lustre, dessus de la bibliothèque.
-; @note-2: sans grimper : table basse (les briques de jeu dessous), manteau de la cheminée, étagères de la bibliothèque ; Maria et la trouvaille se voient, hors d'atteinte.
+; @note-2: sans grimper : étagères de la bibliothèque, manteau de la cheminée ; Maria et la trouvaille se voient, hors d'atteinte. Au sol, les briques de jeu se sautent.
 ; @note-3: trouvaille sur l'horloge comtoise (saut moyen depuis la bibliothèque, l'étagère rattrape un raté) ; souvenir en haut de la bibliothèque après le monde étrange.
 ; @wall: dots
 ; @decor: understairs 1 1 12 6
@@ -25,7 +25,6 @@
 ; @decor: sofaback 8 16 13 3
 ; @decor: sofa 8 18 13 4
 ; @decor: pouf 21 20 2 2
-; @decor: table 25 19 9 3
 ; @decor: bookcase 46 9 10 11
 ; @decor: shelf 56 13 4 1
 ; @decor: clocktop 60 9 3 1
@@ -49,8 +48,8 @@
 #................................------------.--------...........#
 #................................................................#
 #.......tt.........tt............................................#
-1.......tt.........tt....bbbbbbbbb............--------...........2
-1...tt..ttttttttttttttt..b.......b...............................2
-1.P.tt..ttttttttttttttt..b.......b........................e......2
+1.......tt.........tt.........................--------...........2
+1...tt..ttttttttttttttt..........................................2
+1.P.tt..ttttttttttttttt...................................e......2
 ##########################^^^^####################################
 ##################################################################
