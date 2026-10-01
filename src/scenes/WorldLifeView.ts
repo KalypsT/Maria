@@ -25,6 +25,13 @@ const FIRE_DEPTH = 4.52;
 /** Balancier : derrière la vitre de l'horloge, dans la pénombre de la pièce. */
 const PENDULUM_DEPTH = -4.6;
 const GLOW_TEXTURE = 'life-fire-glow';
+/** Mobile, étoiles de la veilleuse, poussière, papillon (D-75). */
+const MOBILE_DEPTH = -4.6;
+const SPARK_DEPTH = 4.52;
+const DOT_TEXTURE = 'life-dot';
+const STAR_TEXTURE = 'life-star';
+const MOON_TEXTURE = 'life-mobile-moon';
+const MOTH_TEXTURE = 'life-moth';
 const FRAME_NAMES = Array.from({ length: Math.max(LAUNDRY_FRAMES, LEAF_FRAMES) }, (_, i) =>
   String(i),
 );
@@ -96,6 +103,47 @@ interface Laundry {
   readonly phase: number;
 }
 
+/** Une pièce du mobile : son fil et sa figure, à un angle du tour. */
+interface MobilePiece {
+  readonly thread: Phaser.GameObjects.Image;
+  readonly figure: Phaser.GameObjects.Image;
+  readonly angle: number;
+  readonly drop: number;
+}
+
+interface Mobile {
+  readonly thread: Phaser.GameObjects.Image;
+  readonly x: number;
+  readonly barY: number;
+  readonly radius: number;
+  readonly bars: readonly Phaser.GameObjects.Image[];
+  readonly pieces: readonly MobilePiece[];
+}
+
+/** Un point qui bouge dans un rectangle (étoile projetée, grain de poussière). */
+interface Spark {
+  readonly image: Phaser.GameObjects.Image;
+  readonly a: number;
+  readonly b: number;
+  readonly phase: number;
+}
+
+interface SparkField {
+  readonly kind: 'stars' | 'dust';
+  readonly x: number;
+  readonly y: number;
+  readonly w: number;
+  readonly h: number;
+  readonly alpha: number;
+  readonly sparks: readonly Spark[];
+}
+
+interface Moth {
+  readonly image: Phaser.GameObjects.Image;
+  readonly x: number;
+  readonly y: number;
+}
+
 interface Fire {
   readonly flames: Phaser.GameObjects.Image;
   readonly glow: Phaser.GameObjects.Image;
@@ -114,6 +162,9 @@ export class WorldLifeView {
   private readonly laundry: Laundry[] = [];
   private readonly fires: Fire[] = [];
   private readonly pendulums: Phaser.GameObjects.Image[] = [];
+  private readonly mobiles: Mobile[] = [];
+  private readonly fields: SparkField[] = [];
+  private readonly moths: Moth[] = [];
   /** Textures propres à la salle, retirées avec elle. */
   private readonly roomTextures: string[] = [];
   private readonly rand = Math.random;
@@ -141,6 +192,27 @@ export class WorldLifeView {
       image.destroy();
     }
     this.pendulums.length = 0;
+    for (const mobile of this.mobiles) {
+      mobile.thread.destroy();
+      for (const bar of mobile.bars) {
+        bar.destroy();
+      }
+      for (const piece of mobile.pieces) {
+        piece.thread.destroy();
+        piece.figure.destroy();
+      }
+    }
+    this.mobiles.length = 0;
+    for (const field of this.fields) {
+      for (const spark of field.sparks) {
+        spark.image.destroy();
+      }
+    }
+    this.fields.length = 0;
+    for (const moth of this.moths) {
+      moth.image.destroy();
+    }
+    this.moths.length = 0;
     for (const key of this.roomTextures) {
       this.scene.textures.remove(key);
     }
@@ -163,6 +235,15 @@ export class WorldLifeView {
         this.makeFire(`${level.id}-${String(i)}`, r, artScale);
       } else if (d.kind === 'grandclock') {
         this.makePendulum(`${level.id}-${String(i)}`, r, artScale);
+      } else if (d.kind === 'mobile') {
+        this.makeMobile(r);
+      } else if (d.kind === 'nightstars') {
+        // Les étoiles de la veilleuse : la nuit surtout ; le matin, à peine.
+        this.makeSparks('stars', r, WORLD_LIFE.nightStars.alpha * (palette.stars ? 1 : 0.3));
+      } else if (d.kind === 'dust') {
+        this.makeSparks('dust', r, WORLD_LIFE.dust.alpha);
+      } else if (d.kind === 'moth' && palette.stars) {
+        this.makeMoth(r);
       }
     });
   }
@@ -271,6 +352,216 @@ export class WorldLifeView {
         .setScale(1 / artScale)
         .setDepth(PENDULUM_DEPTH),
     );
+  }
+
+  /** Petites textures communes (point doux, étoile, croissant, papillon), créées une fois. */
+  private ensureSprites(): void {
+    const textures = this.scene.textures;
+    const make = (key: string, size: number, draw: (ctx: CanvasRenderingContext2D) => void) => {
+      if (textures.exists(key)) {
+        return;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        draw(ctx);
+        textures.addCanvas(key, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
+      }
+    };
+    make(DOT_TEXTURE, 16, (ctx) => {
+      const g = ctx.createRadialGradient(8, 8, 0, 8, 8, 8);
+      g.addColorStop(0, 'rgba(255,255,255,1)');
+      g.addColorStop(0.5, 'rgba(255,255,255,0.8)');
+      g.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 16, 16);
+    });
+    make(STAR_TEXTURE, 32, (ctx) => {
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const angle = (i * Math.PI) / 5 - Math.PI / 2;
+        const radius = i % 2 === 0 ? 15 : 6.5;
+        ctx.lineTo(16 + Math.cos(angle) * radius, 16 + Math.sin(angle) * radius);
+      }
+      ctx.fill();
+    });
+    make(MOON_TEXTURE, 32, (ctx) => {
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(16, 16, 14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.arc(23, 11, 12, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    if (!textures.exists(MOTH_TEXTURE)) {
+      // Deux images : ailes ouvertes, ailes repliées.
+      let open = true;
+      framedTexture(
+        this.scene,
+        MOTH_TEXTURE,
+        2,
+        8,
+        6,
+        4,
+        3,
+        4,
+        () => 0,
+        (ctx) => {
+          ctx.fillStyle = '#cbbfa8';
+          const span = open ? 3.6 : 1.6;
+          ctx.beginPath();
+          ctx.ellipse(-span / 2 - 0.4, -0.4, span / 2 + 0.4, 2.2, -0.3, 0, Math.PI * 2);
+          ctx.ellipse(span / 2 + 0.4, -0.4, span / 2 + 0.4, 2.2, 0.3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#6e6252';
+          ctx.fillRect(-0.5, -1.5, 1, 3.5);
+          open = !open;
+        },
+      );
+    }
+  }
+
+  /** Le mobile de la chambre (D-75) : un fil au plafond, deux baguettes, une lune et des étoiles. */
+  private makeMobile(r: { x: number; y: number; w: number; h: number }): void {
+    this.ensureSprites();
+    const x = r.x + r.w / 2;
+    const barY = r.y + r.h * 0.5;
+    const radius = r.w / 2 - 6;
+    const add = (key: string) =>
+      this.scene.add.image(0, 0, key).setDepth(MOBILE_DEPTH).setOrigin(0.5, 0);
+    const thread = add(DOT_TEXTURE)
+      .setPosition(x, r.y + 1)
+      .setDisplaySize(1, barY - r.y)
+      .setTint(0x3a3330);
+    const bars = [
+      this.scene.add.image(x, barY, DOT_TEXTURE),
+      this.scene.add.image(x, barY, DOT_TEXTURE),
+    ];
+    for (const bar of bars) {
+      bar.setDepth(MOBILE_DEPTH).setTint(0x9a7352);
+    }
+    const figures: readonly [string, number, number][] = [
+      [MOON_TEXTURE, 0xf2d28a, 30],
+      [STAR_TEXTURE, 0xf1a9bd, 20],
+      [STAR_TEXTURE, 0x9fc0e8, 34],
+      [STAR_TEXTURE, 0xf2d28a, 24],
+    ];
+    const pieces = figures.map(([key, tint, drop], i) => ({
+      thread: add(DOT_TEXTURE).setTint(0x3a3330),
+      figure: this.scene.add.image(0, 0, key).setDepth(MOBILE_DEPTH).setTint(tint),
+      angle: (i * Math.PI) / 2,
+      drop,
+    }));
+    this.mobiles.push({ x, barY, radius, thread, bars, pieces });
+  }
+
+  /**
+   * Points qui bougent dans un rectangle : les étoiles de la veilleuse tournent lentement autour
+   * de son centre (projetées sur le mur, aplaties) ; la poussière monte et dérive dans la lumière.
+   */
+  private makeSparks(
+    kind: 'stars' | 'dust',
+    r: { x: number; y: number; w: number; h: number },
+    alpha: number,
+  ): void {
+    this.ensureSprites();
+    const count = kind === 'stars' ? WORLD_LIFE.nightStars.count : WORLD_LIFE.dust.count;
+    const sparks: Spark[] = [];
+    for (let i = 0; i < count; i++) {
+      // Répartition régulière (angle d'or) : jamais deux points l'un sur l'autre.
+      const t = (i + 0.5) / count;
+      const phase = i * 2.39996;
+      const image = this.scene.add
+        .image(0, 0, kind === 'stars' ? STAR_TEXTURE : DOT_TEXTURE)
+        .setDepth(SPARK_DEPTH)
+        .setBlendMode(Phaser.BlendModes.ADD)
+        .setTint(kind === 'stars' ? 0xfff0c0 : 0xfff3d6);
+      const size = kind === 'stars' ? 4 + (i % 3) * 1.5 : 1.6 + (i % 2) * 0.8;
+      image.setDisplaySize(size, size);
+      sparks.push({
+        image,
+        a: kind === 'stars' ? 0.25 + 0.75 * Math.sqrt(t) : t,
+        b: (phase / 7) % 1,
+        phase,
+      });
+    }
+    this.fields.push({ kind, ...r, alpha, sparks });
+  }
+
+  /** Le papillon de nuit autour d'une lampe (D-75), le soir. */
+  private makeMoth(r: { x: number; y: number; w: number; h: number }): void {
+    this.ensureSprites();
+    const image = this.scene.add
+      .image(0, 0, MOTH_TEXTURE, FRAME_NAMES[0])
+      .setScale(1 / 4)
+      .setDepth(SPARK_DEPTH);
+    this.moths.push({ image, x: r.x + r.w / 2, y: r.y + r.h / 2 });
+  }
+  /** Mobile, étoiles, poussière, papillon : positions d'après l'heure, sans allocation. */
+  private updateRoomLife(nowMs: number): void {
+    const cfg = WORLD_LIFE;
+    const turn = (nowMs / cfg.mobile.periodMs) * Math.PI * 2;
+    for (const mobile of this.mobiles) {
+      mobile.bars.forEach((bar, i) => {
+        const c = Math.cos(turn + (i * Math.PI) / 2);
+        bar.setDisplaySize(Math.max(1.5, 2 * mobile.radius * Math.abs(c)), 1.5);
+      });
+      for (const piece of mobile.pieces) {
+        const angle = turn + piece.angle;
+        const x = mobile.x + mobile.radius * Math.cos(angle);
+        const z = Math.sin(angle);
+        const scale = 0.85 + 0.15 * z;
+        piece.thread.setPosition(x, mobile.barY).setDisplaySize(0.8, piece.drop);
+        piece.figure
+          .setPosition(x, mobile.barY + piece.drop + 4)
+          .setDisplaySize(9 * scale, 9 * scale)
+          .setAlpha(0.8 + 0.2 * z);
+      }
+    }
+    for (const field of this.fields) {
+      if (field.kind === 'stars') {
+        const spin = (nowMs / cfg.nightStars.periodMs) * Math.PI * 2;
+        const cx = field.x + field.w / 2;
+        const cy = field.y + field.h / 2;
+        for (const spark of field.sparks) {
+          const angle = spin + spark.phase;
+          const twinkle = 0.65 + 0.35 * Math.sin(nowMs / 1300 + spark.phase * 3);
+          spark.image
+            .setPosition(
+              cx + (field.w / 2) * spark.a * Math.cos(angle),
+              cy + (field.h / 2) * spark.a * Math.sin(angle),
+            )
+            .setAlpha(field.alpha * twinkle);
+        }
+      } else {
+        const rise = (nowMs / 1000) * cfg.dust.driftPxPerS;
+        for (const spark of field.sparks) {
+          const wobble = 6 * Math.sin(nowMs / 3100 + spark.phase);
+          const x = (((spark.a * field.w + wobble + rise * 0.4) % field.w) + field.w) % field.w;
+          const y = (((spark.b * field.h - rise) % field.h) + field.h) % field.h;
+          const twinkle = 0.5 + 0.5 * Math.sin(nowMs / 900 + spark.phase);
+          // Plus pâle près des bords du rayon.
+          const edge = Math.min(1, (4 * Math.min(y, field.h - y)) / field.h);
+          spark.image.setPosition(field.x + x, field.y + y).setAlpha(field.alpha * twinkle * edge);
+        }
+      }
+    }
+    const fly = (nowMs / cfg.moth.periodMs) * Math.PI * 2;
+    const wing = FRAME_NAMES[Math.floor(nowMs / cfg.moth.flapMs) % 2] ?? '0';
+    for (const moth of this.moths) {
+      const radius = cfg.moth.radiusPx;
+      moth.image
+        .setPosition(
+          moth.x + radius * Math.cos(fly) + 3 * Math.sin(fly * 3.7),
+          moth.y + radius * 0.5 * Math.sin(2 * fly) + 2 * Math.sin(fly * 5.3),
+        )
+        .setFrame(wing, false, false);
+    }
   }
 
   private makeLeaves(street: boolean): void {
@@ -394,6 +685,7 @@ export class WorldLifeView {
     for (const image of this.pendulums) {
       image.setFrame(tickFrame, false, false);
     }
+    this.updateRoomLife(nowMs);
     const dt = Math.min(dtMs, 100) / 1000;
     const [slow, fast] = cfg.leaves.fallPxPerS;
     for (const leaf of this.leaves) {

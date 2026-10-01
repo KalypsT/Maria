@@ -1,18 +1,25 @@
-; Escalier : de l'étage (sortie 1, en haut à gauche) au salon (sortie 2, en bas à droite).
+; Escalier (D-75) : de l'étage (sortie 1, en haut à gauche) au salon (sortie 2, en bas à droite). La
+; volée et sa rampe, la grande fenêtre du palier, la bibliothèque en escalier sous le palier.
 ; @name: Escalier
 ; @icon: stairs
 ; @ambient: #282b36
-; @note: embranchement vers le grenier (sortie 3) : buffet, étagère, corniche, en grimpant (D-27).
+; @note: embranchement vers le grenier (sortie 3) : buffet, rebord de la fenêtre, palier du grenier, en grimpant (D-27).
+; @note-2: rien ne flotte : le palier repose sur la bibliothèque en escalier, le palier du grenier sur son poteau.
 ; @wall: planks
-; @decor: window 9 18 7 5
 ; @decor: frame 21 3 3 2
-; @decor: lamp 3 19 1 2
-; @decor: rug 17 28 10 1
+; @decor: tallwindow 34 2 4 6
+; @decor: dust 22 7 14 10
+; @decor: banister 1 2 32 12
+; @decor: pendant 18 13 3 7
+; @decor: coatstand 3 19 3 9
+; @decor: floorplant 26 24 3 4
+; @decor: stepshelf 33 17 10 11
+; @decor: rug 12 28 10 1
 ; @decor: stairs 1 6 32 9
 ; @decor: landing 33 16 10 1
 ; @decor: buffet 40 12 3 4
-; @decor: wallshelf 34 8 4 1
-; @decor: ledge 40 5 3 1
+; @decor: windowsill 34 8 4 1
+; @decor: atticstep 40 5 3 7
 ; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), ^ briques de jeu (danger), e jouet mécanique, C veilleuse (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 ############################################
 #..........................................#
@@ -24,11 +31,11 @@
 #........###...............................#
 #........######...................bbbb.....#
 #........#########.........................#
-#........############......................#
-#........###############...................#
-#........##################.............bbb#
-#........#####################..........bbb#
-#........########################.......bbb#
+#...........#########......................#
+#..............#########...................#
+#.................#########.............bbb#
+#....................#########..........bbb#
+#.......................#########.......bbb#
 #.....................................C.bbb#
 #................................----------#
 #..........................................#

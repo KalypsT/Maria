@@ -98,6 +98,47 @@ export const DECOR_KINDS: Readonly<
   grandclock: { furniture: false },
   /** Chapeau de l'horloge comtoise (plein). */
   clocktop: { furniture: true },
+  // La maison refaite (D-75), d'après la grille du salon : l'étage.
+  /** Mansarde : le toit en pente vu de l'intérieur (plafond plein), lambris et chevrons. */
+  mansard: { furniture: true },
+  /** Plafond bas (retombée, soupente) : plein, bordé d'une poutre. */
+  soffit: { furniture: true },
+  /** Lit cabane : montants posés sur le lit, toit en fil de bois ; la traverse est une étagère. */
+  bedhouse: { furniture: true },
+  /** Surmeuble du bureau : montants posés sur le bureau ; son étagère est traversable. */
+  hutch: { furniture: true },
+  /** Mobile (lune, étoiles) pendu au plafond, qui tourne doucement (animé). */
+  mobile: { furniture: false },
+  /** Étoiles projetées par la veilleuse sur les murs (animées, rien de dessiné dans le décor). */
+  nightstars: { furniture: false },
+  /** Miroir posé sur la console ; son fronton est plein (on s'y pose). */
+  trumeau: { furniture: true },
+  /** Œil-de-bœuf : fenêtre ronde, vitre transparente (D-72). */
+  roundwindow: { furniture: false },
+  /** Placard plein au-dessus d'une porte (le passage reste dessous). */
+  overdoor: { furniture: true },
+  /** Commode basse posée au sol. */
+  commode: { furniture: true },
+  /** Rampe de l'escalier et garde-corps du palier de l'étage (fond, derrière les marches). */
+  banister: { furniture: false },
+  /** Grande fenêtre haute en plein cintre (palier), vitre transparente. */
+  tallwindow: { furniture: false },
+  /** Rebord de fenêtre (plein). */
+  windowsill: { furniture: true },
+  /** Bibliothèque en escalier : montants et livres autour des planches (fond, sous le palier). */
+  stepshelf: { furniture: false },
+  /** Petit palier devant la porte du grenier, sur son poteau (le dessus est plein). */
+  atticstep: { furniture: true },
+  /** Suspension : un fil, un abat-jour, de la lumière dessous (fond). */
+  pendant: { furniture: false },
+  /** Portemanteau sur pied, manteaux et écharpe (fond). */
+  coatstand: { furniture: false },
+  /** Grande plante en pot posée au sol (fond). */
+  floorplant: { furniture: false },
+  /** Poussière qui danse dans un rayon de lumière (animée). */
+  dust: { furniture: false },
+  /** Papillon de nuit autour d'une lampe, le soir (animé). */
+  moth: { furniture: false },
   // Le jardin (D-46), dessiné par le code (PLACEHOLDER, pas d'image clé pour l'instant).
   /** Frondaison des arbres en haut des salles (feuillage plein). */
   canopy: { furniture: true },
@@ -701,6 +742,14 @@ export const WORLD_LIFE = {
   fire: { frameMs: 110, glowMin: 0.28, glowMax: 0.5 },
   /** Le balancier de l'horloge comtoise (D-74) : angle maximal, aller-retour (ms). */
   pendulum: { swingRad: 0.085, periodMs: 2000 },
+  /** Le mobile de la chambre (D-75) : un tour (ms). */
+  mobile: { periodMs: 16000 },
+  /** Étoiles de la veilleuse (D-75) : nombre, un tour (ms), opacité la nuit (le matin × 0,3). */
+  nightStars: { count: 11, periodMs: 90000, alpha: 0.5 },
+  /** Poussière dans la lumière (D-75) : grains, dérive (px/s), opacité. */
+  dust: { count: 12, driftPxPerS: 3, alpha: 0.55 },
+  /** Papillon de nuit (D-75) : un tour de la lampe (ms), rayon (px), battement (ms). */
+  moth: { periodMs: 5200, radiusPx: 14, flapMs: 90 },
 } as const;
 
 /** Rayon du halo d'une veilleuse (px logiques). */

@@ -24,6 +24,7 @@ import { drawUmbrellaTips, stationDrawers } from './stationArt';
 import { streetDrawers } from './streetArt';
 import { drawMemory } from './memoryArt';
 import { livingDrawers } from './livingArt';
+import { houseDrawers } from './houseArt';
 import { paperGrainPattern } from './paperGrain';
 
 /**
@@ -253,6 +254,7 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
   ...schoolDrawers({ tileShape, rounded }),
   ...stationDrawers({ tileShape, rounded }),
   ...livingDrawers({ tileShape, rounded }),
+  ...houseDrawers({ tileShape, rounded }),
   console(a, r) {
     wood(a, r);
     if (!a.palette.silhouettes) {
@@ -1281,7 +1283,7 @@ export function drawRoomBackground(
     // Opaque : la découpe efface tout (sinon elle prendrait l'opacité du dernier remplissage).
     a.ctx.fillStyle = '#000';
     for (const pane of windowPanes(level)) {
-      a.ctx.fillRect(pane.x, pane.y, pane.w, pane.h);
+      cutPane(a.ctx, pane);
     }
     a.ctx.restore();
   }
@@ -1324,18 +1326,45 @@ export function seesOutside(p: Readonly<ArtPalette>): boolean {
   return p.outdoor || !p.silhouettes;
 }
 
+/** Vitre d'une fenêtre : rectangle, ronde (œil-de-bœuf) ou en plein cintre (D-75). */
+export type Pane = Rect & { readonly shape: 'rect' | 'round' | 'arch' };
+
 /** Vitres des fenêtres et des lucarnes de la salle (px logiques). */
-export function windowPanes(level: LevelData): Rect[] {
-  const panes: Rect[] = [];
+export function windowPanes(level: LevelData): Pane[] {
+  const panes: Pane[] = [];
   for (const d of level.decor) {
     const r = rect(d);
     if (d.kind === 'window') {
-      panes.push(r);
+      panes.push({ ...r, shape: 'rect' });
+    } else if (d.kind === 'roundwindow') {
+      panes.push({ ...r, shape: 'round' });
+    } else if (d.kind === 'tallwindow') {
+      panes.push({ ...r, shape: 'arch' });
     } else if (d.kind === 'skylight') {
-      panes.push({ x: r.x, y: r.y - 6, w: r.w, h: T + 2 });
+      panes.push({ x: r.x, y: r.y - 6, w: r.w, h: T + 2, shape: 'rect' });
     }
   }
   return panes;
+}
+
+/** Découpe une vitre dans ce qui est déjà dessiné (composition `destination-out`, couleur opaque). */
+function cutPane(ctx: CanvasRenderingContext2D, pane: Pane): void {
+  if (pane.shape === 'rect') {
+    ctx.fillRect(pane.x, pane.y, pane.w, pane.h);
+    return;
+  }
+  ctx.beginPath();
+  if (pane.shape === 'round') {
+    ctx.arc(pane.x + pane.w / 2, pane.y + pane.h / 2, Math.min(pane.w, pane.h) / 2, 0, Math.PI * 2);
+  } else {
+    const radius = pane.w / 2;
+    ctx.moveTo(pane.x, pane.y + pane.h);
+    ctx.lineTo(pane.x, pane.y + radius);
+    ctx.arc(pane.x + radius, pane.y + radius, radius, Math.PI, 0);
+    ctx.lineTo(pane.x + pane.w, pane.y + pane.h);
+    ctx.closePath();
+  }
+  ctx.fill();
 }
 
 /**
@@ -1853,7 +1882,9 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
   const width = level.width * T;
   const height = level.height * T;
   const lamps = level.entities.filter((e) => e.type === EntityType.Checkpoint);
-  const windows = level.decor.filter((d) => d.kind === 'window').map(rect);
+  const windows = level.decor
+    .filter((d) => d.kind === 'window' || d.kind === 'roundwindow' || d.kind === 'tallwindow')
+    .map(rect);
   // Sources de lumière du décor : lampes, lustre (sous l'abat-jour), feu de la cheminée (D-74).
   const lights = level.decor.flatMap((d) => {
     const r = rect(d);
@@ -1865,6 +1896,9 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
     }
     if (d.kind === 'fireplace') {
       return [{ x: r.x + r.w / 2, y: r.y + r.h - 12, k: 1.25 }];
+    }
+    if (d.kind === 'pendant') {
+      return [{ x: r.x + r.w / 2, y: r.y + r.h + 4, k: 1 }];
     }
     return [];
   });

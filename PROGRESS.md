@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Passe graphique** (D-71) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étapes 1, 2, 3 et 5 faites** (finition « papier découpé », D-71 ; profondeur, D-72 ; vie du monde réel, D-73 ; **le salon, salle témoin**, D-74) sur `ccr-8742f994-82xjq9` ; l'étape 4 (identifiants fixes de la sauvegarde) est écartée jusqu'à la sortie. Prochaine : essai sur téléphone, puis tri des autres salles (à refaire, à retoucher, à laisser) selon la grille de D-74. Pas de nouveau niveau d'ici là.
+**Passe graphique** (D-71) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étapes 1, 2, 3 et 5 faites** (finition « papier découpé », D-71 ; profondeur, D-72 ; vie du monde réel, D-73 ; **le salon, salle témoin**, D-74) sur `ccr-8742f994-82xjq9` ; l'étape 4 (identifiants fixes de la sauvegarde) est écartée jusqu'à la sortie. Ensuite : **toutes les salles du monde réel refaites en profondeur** selon la grille de D-74, dans l'ordre de l'histoire, une PR par zone (les mondes étranges : lisibilité seulement). **La maison (D-75)** : PR A (l'étage : chambre, couloir, escalier) faite sur `ccr-126f1100-llmv5d` ; PR B (cuisine, buanderie, grenier, lisibilité du salon étrange et du passage d'ombres) à suivre. Puis le jardin, le quartier, la gare. Pas de nouveau niveau d'ici là.
 
 **Le jardin (2a) et derrière la haie (2b)** (§7.2, §6, D-46 à D-49) : fusionnés (PR #29), **essai sur téléphone en cours** (début du jardin testé ; jardin adouci (D-51) sur `ccr-53d22df4-9euiqo`). Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
 
@@ -17,6 +17,20 @@
 Prochaine : essai de la gare (réelle, étrange, la fin, la phase 3) sur téléphone. Le niveau suivant (le train ?) reste à décider. Intégrer les morceaux de musique.
 
 ## Fait
+
+### La maison refaite, PR A : l'étage (D-75)
+
+- **Chambre** : la mansarde en pente à droite ; le lit cabane (la boîte à musique sur sa traverse) ; le surmeuble du bureau (la couverture) ; un mobile qui tourne au-dessus du berceau ; la veilleuse projette des étoiles sur les murs.
+- **Couloir** : un plafond bas à gauche ; la trouvaille sur le fronton d'un grand miroir posé sur la console ; un œil-de-bœuf sous la lune, de la poussière dans son rayon ; un placard au-dessus de la porte de l'escalier (la trappe à linge, en grimpant depuis la commode) ; un papillon de nuit autour d'une applique.
+- **Escalier** : un vrai escalier avec sa rampe ; la grande fenêtre du palier ; le palier porté par une bibliothèque en escalier ; le palier du grenier sur son poteau ; une suspension, un portemanteau, une plante.
+- Rien d'atteignable ne change de difficulté ; aucune trouvaille ni lanterne déplacée (sauvegardes intactes).
+- Tests : 545. Vérifié dans Chromium : les trois salles, le soir et le matin, en entier et à hauteur de jeu.
+- [ ] À vérifier sur téléphone : les trois salles sont-elles plus belles, plus lisibles ? Rien ne semble-t-il flotter ?
+- [ ] La mansarde : se lit-elle comme un toit (et pas comme un escalier) ?
+- [ ] Le mobile, les étoiles de la veilleuse, la poussière, le papillon : assez discrets, assez vivants ? (`WORLD_LIFE`)
+- [ ] Le couloir : le placard au-dessus de la porte et la commode se comprennent-ils comme le chemin de la trappe ?
+- [ ] L'escalier : la rampe gêne-t-elle la lecture des marches ? La bibliothèque sous le palier se lit-elle comme un meuble à escalader ?
+- [ ] La trotteuse des horloges (couloir) : en pointillés ?
 
 ### Passe graphique, étape 5 : le salon, salle témoin (D-74)
 

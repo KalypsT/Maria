@@ -1,30 +1,35 @@
-; Chambre de Céleste : départ d'une nouvelle partie (dans le lit).
+; Chambre de Céleste (D-75) : départ d'une nouvelle partie (dans le lit). Sous le toit : la mansarde
+; à droite, le lit cabane, le mobile au-dessus du berceau, la veilleuse qui projette des étoiles.
 ; @name: Chambre
 ; @icon: bed
 ; @ambient: #2b2f3d
 ; @note: dessus de l'armoire (colonnes 2-6) : en grimpant depuis la tête de lit (D-26) ;
 ; @note-2: derrière l'armoire, passage vers le grenier (sortie 2) : raccourci du retour (D-27).
+; @note-3: rien ne flotte : la boîte à musique est sur la traverse du lit cabane, la couverture sur le surmeuble du bureau.
 ; Habillage (D-28) : @decor nom colonne ligne largeur hauteur (en tuiles, depuis 0).
+; @decor: mansard 33 1 12 5
 ; @decor: window 24 3 9 7
 ; @decor: frame 14 5 3 2
 ; @decor: drawing 37 5 3 3
+; @decor: mobile 19 1 5 10
+; @decor: nightstars 6 1 30 15
 ; @decor: rug 18 20 9 1
 ; @decor: wardrobe 1 9 5 11
 ; @decor: headboard 6 13 1 7
 ; @decor: bed 7 16 11 4
-; @decor: shelf 9 13 6 1
+; @decor: bedhouse 9 9 6 7
 ; @decor: toybox 22 18 4 2
 ; @decor: stool 26 17 3 3
 ; @decor: desk 29 15 9 5
-; @decor: shelf 31 12 6 1
+; @decor: hutch 30 9 8 6
 ; @decor: books 38 17 3 3
 ; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), ^ briques de jeu (danger), e jouet mécanique, C veilleuse (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 ##############################################
-#............................................#
-#............................................#
-#............................................#
-#............................................#
-#............................................#
+#.................................############
+#...................................##########
+#.....................................########
+#.......................................######
+#.........................................####
 2............................................#
 2............................................#
 2............................................#
