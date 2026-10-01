@@ -5,6 +5,7 @@ import { COMBAT_PARAM_RANGES, DEFAULT_COMBAT, type CombatParams } from '../confi
 import { DEFAULT_FEEL, FEEL_PARAM_RANGES, type FeelParams } from '../config/feel';
 import { DEFAULT_WORLD, WORLD_PARAM_RANGES, type WorldParams } from '../config/world';
 import { DEFAULT_PUPPET, PUPPET_PARAM_RANGES, type PuppetParams } from '../config/puppet';
+import { ART_FINISH_RANGES, DEFAULT_ART_FINISH, type ArtFinish } from '../config/art';
 import { deserializeSave } from '../core/save/saveData';
 import { DEFAULT_MOVEMENT, MOVEMENT_PARAM_RANGES, type MovementParams } from '../config/movement';
 import { LEVELS, ZONES, levelName } from '../levels';
@@ -241,6 +242,27 @@ export function installDebugOverlay(scene: GameScene): void {
   // Aperçu du monde étrange (D-28) : mêmes formes, autre palette et lumière.
   addCheck(panel, 'Monde étrange (aperçu)', scene.strangeWorld, (checked) => {
     scene.setStrangeWorld(checked);
+  });
+  // Finition (D-71) : avant / après, sans toucher aux réglages.
+  let finishBackup: ArtFinish | null = null;
+  addCheck(panel, 'Comparer : sans finition', false, (checked) => {
+    if (checked) {
+      finishBackup = { ...scene.artFinish };
+      Object.assign(scene.artFinish, {
+        playShadow: 0,
+        backShadow: 0,
+        contactShadow: 0,
+        grain: 0,
+        celesteShadow: 0,
+        veil: 0,
+        vignette: 0,
+      });
+    } else if (finishBackup) {
+      Object.assign(scene.artFinish, finishBackup);
+      finishBackup = null;
+    }
+    scene.applyFinish();
+    refreshFinish();
   });
   // Étape de l'histoire (D-31) : pour la partie en cours seulement, sans sauvegarde.
   const storySelect = element('select', panel);
@@ -618,6 +640,21 @@ export function installDebugOverlay(scene: GameScene): void {
     },
   });
 
+  // La salle est redessinée (un peu coûteux) : seulement une fois le curseur immobile.
+  let finishTimer = 0;
+  const refreshFinish = addSliders<ArtFinish>(panel, {
+    title: 'Habillage (finition)',
+    values: scene.artFinish,
+    defaults: DEFAULT_ART_FINISH,
+    ranges: ART_FINISH_RANGES,
+    onChange: () => {
+      window.clearTimeout(finishTimer);
+      finishTimer = window.setTimeout(() => {
+        scene.applyFinish();
+      }, 200);
+    },
+  });
+
   const refreshCombat = addSliders<CombatParams>(panel, {
     title: 'Combat',
     values: scene.combatParams,
@@ -709,6 +746,7 @@ export function installDebugOverlay(scene: GameScene): void {
         feel: orderedParams(scene.feelParams, FEEL_PARAM_RANGES),
         combat: orderedParams(scene.combatParams, COMBAT_PARAM_RANGES),
         world: orderedParams(scene.worldParams, WORLD_PARAM_RANGES),
+        finish: orderedParams(scene.artFinish, ART_FINISH_RANGES),
       },
       null,
       2,
@@ -754,6 +792,9 @@ export function installDebugOverlay(scene: GameScene): void {
     Object.assign(scene.puppetParams, DEFAULT_PUPPET);
     scene.applyPuppet();
     refreshPuppet();
+    Object.assign(scene.artFinish, DEFAULT_ART_FINISH);
+    scene.applyFinish();
+    refreshFinish();
   });
   element('button', actions, undefined, 'Replacer Céleste').addEventListener('click', () => {
     scene.respawn();

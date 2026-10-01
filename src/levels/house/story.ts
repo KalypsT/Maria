@@ -831,8 +831,9 @@ export const HOUSE_STORY: StoryData = {
       id: 'look-photo',
       room: 'living',
       on: 'interact',
-      area: { col: 12, row: 10, w: 5, h: 12 },
-      mark: { col: 14, row: 7 },
+      // Au-dessus du canapé (D-74).
+      area: { col: 15, row: 10, w: 5, h: 12 },
+      mark: { col: 17, row: 10 },
       when: {},
       lock: true,
       repeat: true,

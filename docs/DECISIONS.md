@@ -825,6 +825,66 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Bulles « Maria »** (32 → 15) : gardées au prologue de la maison, au début de chaque niveau (réveil au jardin, première question à maman au jardin et à l'aire de jeux, arrivée à la gare, réveil après la gare) et à la fin de chaque monde étrange (le bonnet, le trou en forme de Maria de la boîte, Roger sous l'horloge). Ailleurs : un cœur pour les affaires de Maria ramassées, un « ? » pour les questions suivantes aux parents et l'entrée derrière la haie, ou rien (avant de dormir, la cabane, quand papa ou maman montrent la suite).
 - **Sauvegarde** : aucune migration.
 
+## D-71 — Passe graphique, étape 1 : finition « papier découpé »
+
+- **Contexte** (retour de l'utilisateur après analyse de l'existant) : le jeu manque de beauté, de lisibilité, et un peu d'intérêt à parcourir. Plan validé en 5 étapes, tout en dessin par le code (images IA éventuellement plus tard) : (1) fondations du rendu, (2) profondeur (parallaxe, avant-plan), (3) vie du monde réel, (4) ~~identifiants fixes des trouvailles~~, (5) une salle témoin refaite, **le salon**, puis propagation.
+- **Étape 4 abandonnée (décision de l'utilisateur)** : les trouvailles et les lanternes restent identifiées par leur position (`secretId`, `checkpointId`). Le jeu est encore en essai : refaire une partie après une modification de salle est accepté. **À revoir avant la sortie** (pilier 10).
+- **Décision (étape 1)** : le décor adopte le langage de Céleste (papier découpé, D-29). Chaque plan est une feuille posée sur la précédente, avec son ombre douce :
+  - **fond lointain** (`far` dans `DECOR_KINDS` : cadres, dessins, horloge murale, platane, verrières, façade de la gare…), voilé par le dégradé du mur ou du ciel (**perspective atmosphérique**, `veil` de la palette ; 0 dans le monde étrange, déjà en silhouettes). Jamais une porte ni un repère de jeu ; les façades de la rue restent nettes (voilées, elles devenaient ternes) ;
+  - **fond proche** (fenêtres, dossier du canapé, façades) : une ombre légère sur le mur ;
+  - **couche jouable** (murs, sol, meubles, dangers) : une ombre nette, décalée vers le bas à droite (lumière d'en haut à gauche). C'est ce qui la détache du fond (lisibilité) ;
+  - **ombres de contact** sous chaque meuble posé sur une surface ;
+  - **grain de papier** (bruit déterministe, en lumière douce) sur tout le décor ;
+  - **ombre de Céleste au sol**, d'autant plus petite et pâle qu'elle est haut (on voit où elle va retomber), fonction pure testée (`groundBelow`) ;
+  - **vignettage** léger, selon la palette (plus présent la nuit et dans le monde étrange).
+- **Mise en œuvre** :
+  - réglages dans `src/config/art.ts` (`DEFAULT_ART_FINISH`, PROVISOIRES), réglables dans l'overlay (« Habillage (finition) ») ; case **« Comparer : sans finition »** pour l'avant/après ; les réglages sont dans l'export JSON ;
+  - les feuilles sont dessinées sur une toile de travail avec une **marge de 24 px** autour du bloc : sans elle, l'ombre était coupée net entre deux blocs ;
+  - `FinishView` : deux images (ombre, vignettage), aucune allocation par image.
+- **Rien ne touche à la collision ni au mouvement** (pilier 1) : purement visuel.
+- **Coût mesuré** (Chromium sans GPU, échelle 3, salon entier) : environ 225 ms sans finition, 400 ms avec. En jeu, un bloc est dessiné par image en approchant : la saccade possible est plus longue qu'avant. **À mesurer sur téléphone** ; leviers : moins de flou, pas d'ombre du fond proche, dessin à l'échelle 2.
+- **Résolution** : le mode « Écran » (D-18) rend nettement mieux le dessin par le code ; le passer par défaut attend la mesure des images/s sur le téléphone de l'utilisateur.
+- **Sauvegarde** : aucune migration.
+
+## D-72 — Passe graphique, étape 2 : la profondeur
+
+- **Plans lointains** (`BackdropView`, `src/scenes/art/backdropArt.ts`) : textures dessinées une fois par salle, qui défilent moins vite que la salle (parallaxe : à l'écran, `x − vue × facteur`). Positionnées à chaque image d'après la vue réelle (zoom compris), recadrées sur la salle (au-delà de ses murs, la couleur d'ambiance comme avant), sous le fond de la salle.
+  - **Dehors** : le ciel (nuages, soleil : `sky` dans `DECOR_KINDS`) ne bouge presque pas ; collines lointaines ; puis, au jardin, deux rangées de collines arborées, et dans le quartier et à la gare, deux rangées de **toits de la ville** (fenêtres allumées le soir). Le fond de la salle devient transparent là où était le ciel.
+  - **Dedans** : les **vitres sont transparentes** (fenêtres, lucarnes, monde réel seulement) ; derrière, un plan juste au-delà de la vitre : le ciel de la palette, les étoiles, la lune (placée dans la plus grande fenêtre quand la vue est centrée sur elle) et les toits de la ville, fenêtres allumées la nuit. En marchant, la lune et les toits glissent un peu dans la fenêtre. Le monde étrange garde ses fenêtres peintes.
+  - Facteurs dans `PARALLAX` (`src/config/art.ts`), PROVISOIRES. Textures plafonnées à l'échelle 1,5 (plans lointains, flous) et à 4096 px.
+- **Avant-plan** (`ForegroundView`, logique pure testée `src/core/fx/foreground.ts`) : silhouettes sombres et floues au bas de l'écran (herbes, fleurs au jardin ; herbes folles dans la rue et à la gare), qui défilent plus vite (× 1,35). Elles dépassent du sol de 8 à 22 px au plus et **s'effacent** près de Céleste, des ennemis au sol, des dangers du sol, des objets de jeu et des sorties (pilier 1).
+  - **Écart avec le plan** : pas d'avant-plan dans la maison. Les jouets et livres flous essayés se lisaient comme des taches, pas comme des objets. Les pavés flous de la rue aussi, retirés.
+- **Corrections au passage** (étape 1) : la découpe d'une vitre prenait l'opacité du dernier remplissage (vitre à moitié découpée) ; les ombres de contact suivent maintenant les colonnes où le meuble touche vraiment une surface (la passerelle de la gare faisait une ombre de toute la largeur de la salle) ; le voile et le grain ne touchent plus le transparent.
+- **Rien ne touche à la collision ni au mouvement.**
+- **Coût mesuré** (Chromium sans GPU, échelle 3) : construction des plans 30 à 45 ms dans le salon, 100 à 200 ms dehors, pendant le fondu du changement de salle ; avant-plan < 20 ms. **Mémoire graphique** : jusqu'à environ 25 Mo de plus dans la rue (quatre plans). À surveiller sur téléphone ; levier : `PARALLAX.maxScale` à 1.
+- **Sauvegarde** : aucune migration.
+
+## D-73 — Passe graphique, étape 3 : la vie du monde réel
+
+- **Un vent commun** (`wind`, logique pure testée, `src/core/fx/worldLife.ts`) : calmes et rafales lentes ; le linge, les feuilles et les nuages le suivent ensemble.
+- **Nuages qui dérivent** : sortis du ciel peint, ils deviennent des images accrochées aux plans lointains (`BackdropView`), qui avancent au vent et reviennent de l'autre côté. Dehors, dans le ciel ; **dedans, devant la lune**, dans la vue par les fenêtres (sombres la nuit, blancs le matin). Recadrés sur la salle.
+- **Oiseaux** : de temps en temps (12 à 28 s), un petit vol de 2 à 4 traverse l'écran haut dans le ciel, en battant des ailes, sur le plan des collines lointaines. Jamais dans le monde étrange.
+- **Feuilles** (`WorldLifeView`) : là où il y a des arbres ou des haies, quelques feuilles (7 au plus) tombent en voletant, poussées par le vent ; vertes au jardin, ocres sous les platanes de la rue. Derrière les personnages, jamais devant Céleste.
+- **Linge** : dehors, les chaussettes et le pyjama du fil de la terrasse se balancent, en une vague qui court le long du fil (dedans, à la buanderie, ils restent immobiles : pas de vent).
+- **Inclinaisons dessinées d'avance** : tourner à l'affichage de très petits sprites les déformait dans Chromium (morceaux manquants), même sans arrondi des sommets. Le linge (9 angles) et les feuilles (8 angles) choisissent l'image de l'angle le plus proche. **Remarque** : la trotteuse existante des horloges (D-38) montre le même défaut dans Chromium sans GPU (aiguille en pointillés). À vérifier sur téléphone ; même remède au besoin.
+- **Avant-plan** : la forme « feuillage » retirée (une tache sombre) ; restent herbes et fleurs.
+- Réglages : `WORLD_LIFE` (`src/config/art.ts`), PROVISOIRES.
+- **Rien ne touche à la collision ni au mouvement** ; aucune allocation par image.
+- **Sauvegarde** : aucune migration.
+
+## D-74 — Passe graphique, étape 5 : le salon, salle témoin
+
+- **Plan validé** par l'utilisateur, choix « petit feu allumé ». Les repères de l'histoire restent en place : la bibliothèque et Maria (le salon étrange s'y appuie), le canapé de maman, la place du chat, les deux portes ; le salon reste facile, son sommet réservé à l'escalade.
+- **Une pièce, pas une boîte** : le dessous de l'escalier qui monte à l'étage descend dans le coin haut gauche (bois, en marches) ; une poutre au plafond à droite.
+- **Rien ne flotte** : les étagères murales de la route haute deviennent **deux plantes en pot suspendues** (cordes en macramé) et **un lustre** pendu à son fil ; l'étagère de la trouvaille devient **une horloge comtoise** posée au sol (la trouvaille sur son chapeau) ; la tringle du rideau est allongée vers la gauche. Les écarts de saut de la route haute sont ceux d'avant (déjà validés).
+- **Repères** : la **cheminée** au centre, contre le mur (on passe devant), son **petit feu** animé qui éclaire la pièce (source de lumière), un miroir au-dessus ; son **manteau** est une planche, atteignable sans grimper depuis la **table basse** (déplacée entre le canapé et la cheminée, les briques de jeu dessous) ; de là, les étagères de la bibliothèque. L'horloge comtoise et son **balancier**. Le lustre éclaire aussi.
+- **Parcours** : en bas, sans escalade, on traverse et on peut monter table, manteau, étagères, d'où l'on voit Maria et la trouvaille, hors d'atteinte. En haut, avec l'escalade : placard mural, deux plantes, tringle (au-dessus de la fenêtre), on se laisse tomber sur le lustre, saut jusqu'au sommet de la bibliothèque, puis saut vers l'horloge pour la trouvaille (l'étagère rattrape un raté).
+- **Ailleurs** : la photo de famille passe au-dessus du canapé (zone d'interaction déplacée) ; l'applique de gauche passe sous l'escalier ; l'horloge murale et l'applique de droite sont retirées (l'horloge comtoise et le lustre les remplacent). Le salon étrange n'est pas touché.
+- **Rendu** : `src/scenes/art/livingArt.ts` (dessins), animations dans `WorldLifeView` (feu : 6 images qui alternent et une lueur qui palpite ; balancier : 9 inclinaisons dessinées d'avance), réglages `WORLD_LIFE.fire` et `WORLD_LIFE.pendulum`.
+- **Vérifié par les tests** : la maison reste facile et ne coince jamais (un premier placement de la table laissait un trou d'une tuile entre le pouf et un pied : corrigé) ; route haute en grimpant ; sommet et trouvaille seulement en grimpant, trouvaille au plus moyenne ; monde étrange inchangé.
+- **Sauvegarde** : la trouvaille du salon a changé de place ; si elle était ramassée, elle redevient à trouver (identifiants par position, étape 4 écartée, D-71). Aucune migration.
+- **Grille pour les autres salles** (à appliquer aux futurs niveaux, et aux salles existantes après tri) : une silhouette de salle, pas une boîte ; rien ne flotte (chaque appui pend ou tient au sol, ou fait partie d'un meuble) ; un repère fort qui guide le regard ; des sauts au rythme varié ; ce qu'on ne peut pas encore atteindre se voit ; une source de lumière qui compose la pièce ; un peu de vie.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

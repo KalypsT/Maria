@@ -2,6 +2,8 @@
 
 ## Phase en cours
 
+**Passe graphique** (D-71) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étapes 1, 2, 3 et 5 faites** (finition « papier découpé », D-71 ; profondeur, D-72 ; vie du monde réel, D-73 ; **le salon, salle témoin**, D-74) sur `ccr-8742f994-82xjq9` ; l'étape 4 (identifiants fixes de la sauvegarde) est écartée jusqu'à la sortie. Prochaine : essai sur téléphone, puis tri des autres salles (à refaire, à retoucher, à laisser) selon la grille de D-74. Pas de nouveau niveau d'ici là.
+
 **Le jardin (2a) et derrière la haie (2b)** (§7.2, §6, D-46 à D-49) : fusionnés (PR #29), **essai sur téléphone en cours** (début du jardin testé ; jardin adouci (D-51) sur `ccr-53d22df4-9euiqo`). Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
 
 **Mouvement et difficulté validés** par l'utilisateur pour l'instant (réglages du DEBUG conservés pour une passe plus poussée plus tard).
@@ -15,6 +17,52 @@
 Prochaine : essai de la gare (réelle, étrange, la fin, la phase 3) sur téléphone. Le niveau suivant (le train ?) reste à décider. Intégrer les morceaux de musique.
 
 ## Fait
+
+### Passe graphique, étape 5 : le salon, salle témoin (D-74)
+
+- L'escalier descend de l'étage dans le coin ; une poutre au plafond.
+- Rien ne flotte : deux plantes suspendues, un lustre, une horloge comtoise (la trouvaille sur son chapeau), la tringle allongée.
+- La cheminée et son petit feu animé, qui éclaire la pièce ; un miroir au-dessus ; son manteau est une plateforme (depuis la table basse, déplacée).
+- Le balancier de l'horloge bat.
+- La photo de famille passe au-dessus du canapé.
+- Les repères de l'histoire n'ont pas bougé (bibliothèque et Maria, canapé, chat, portes) ; le salon étrange est inchangé.
+- Tests : 537. Vérifié dans Chromium : le salon de nuit, en marchant, et son aperçu en monde étrange.
+- [ ] À vérifier sur téléphone : le salon est-il plus beau, plus lisible, plus agréable à traverser ? La route haute (plantes, tringle, lustre) se lit-elle ?
+- [ ] Le feu : assez vivant, pas trop vif ? Le balancier se remarque-t-il ?
+- [ ] La trouvaille sur l'horloge : le saut depuis la bibliothèque est-il juste (moyen) ?
+
+### Passe graphique, étape 3 : la vie du monde réel (D-73)
+
+- Un vent commun, par rafales douces.
+- Les nuages dérivent dans le ciel, et la nuit devant la lune, dans les fenêtres.
+- Un petit vol d'oiseaux de temps en temps.
+- Des feuilles tombent au vent là où il y a des arbres (vertes au jardin, ocres dans la rue).
+- Le linge de la terrasse se balance.
+- Tests : 537. Vérifié dans Chromium : terrasse, grand arbre, rue, salon, cuisine.
+- [ ] À vérifier sur téléphone : le vent et les feuilles, assez doux ? Les oiseaux, trop fréquents ?
+- [ ] La trotteuse des horloges s'affiche-t-elle en pointillés ? (défaut vu dans Chromium sans GPU)
+
+### Passe graphique, étape 2 : la profondeur (D-72)
+
+- Dehors : ciel, collines et toits de la ville en plans qui défilent moins vite que la salle (parallaxe).
+- Dedans : les vitres laissent voir la nuit (ou le matin), la lune et les toits de la ville, fenêtres allumées ; ils glissent un peu en marchant.
+- Avant-plan dehors : herbes et fleurs floues au bas de l'écran, qui s'effacent près de Céleste, des ennemis, des dangers et des objets. Pas d'avant-plan dans la maison (des taches plutôt que des objets).
+- Corrigé : vitres à moitié découpées, ombre de contact géante sous la passerelle de la gare.
+- Tests : 534. Vérifié dans Chromium : salon, chambre, grenier, école, hall et quais de la gare, potager, grand arbre, cabane, derrière la haie, rue.
+- [ ] À vérifier sur téléphone : la parallaxe est-elle agréable ou donne-t-elle le tournis ? (facteurs dans `PARALLAX`)
+- [ ] La mémoire : la rue et la gare se chargent-elles sans ralentir ? Le changement de salle dehors est-il plus long ?
+- [ ] L'avant-plan : gêne-t-il la lecture du sol ou des ennemis ?
+
+### Passe graphique, étape 1 : finition « papier découpé » (D-71)
+
+- Le décor en feuilles superposées, chacune avec son ombre douce : fond lointain voilé, fond proche, couche jouable (murs, sol, meubles) nettement détachée du fond.
+- Ombres de contact sous les meubles, grain de papier, vignettage selon la palette.
+- Ombre de Céleste au sol, plus petite et pâle quand elle est haut.
+- DEBUG : « Habillage (finition) » (curseurs), case « Comparer : sans finition », valeurs dans l'export JSON.
+- Tests : 531. Vérifié dans Chromium : salon, chambre, cuisine, passage d'ombres, grand arbre, rue, aire de jeux, hall de la gare.
+- [ ] À vérifier sur téléphone : le mode « Écran » (menu pause → Affichage) tient-il 55–60 images/s ? Si oui, il passera par défaut.
+- [ ] Les changements de bloc en marchant (la rue, la gare) saccadent-ils plus qu'avant ?
+- [ ] Les ombres et le grain : trop, pas assez ? (DEBUG → « Comparer : sans finition », curseurs « Habillage (finition) », puis Exporter JSON.)
 
 ### Retours du téléphone (D-70)
 

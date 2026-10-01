@@ -99,6 +99,10 @@ export class CelestePuppet {
     return this.container.y;
   }
 
+  get alpha(): number {
+    return this.container.alpha;
+  }
+
   setAlpha(alpha: number): this {
     this.container.setAlpha(alpha);
     return this;

@@ -8,9 +8,13 @@ import type { CelesteOutfit } from './growth';
 
 /**
  * Éléments d'habillage connus. `furniture` : meuble posé sur des tuiles pleines ou traversables
- * (vérifié) ; sinon élément de fond (fenêtre, cadre…), sans contrainte.
+ * (vérifié) ; sinon élément de fond (fenêtre, cadre…), sans contrainte. `far` : élément de fond
+ * lointain, voilé par la perspective atmosphérique (D-71) ; jamais une porte ni un repère de jeu.
+ * `sky` : dessiné dans le plan du ciel, qui défile à peine (D-72).
  */
-export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean }>> = {
+export const DECOR_KINDS: Readonly<
+  Record<string, { readonly furniture: boolean; readonly far?: boolean; readonly sky?: boolean }>
+> = {
   // Chambre.
   wardrobe: { furniture: true },
   headboard: { furniture: true },
@@ -54,18 +58,18 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   linencabinet: { furniture: true },
   // Fond (sans collision).
   window: { furniture: false },
-  frame: { furniture: false },
+  frame: { furniture: false, far: true },
   /** Photo de famille (souvenir, D-38). */
   photo: { furniture: false },
   /** Dossier du canapé, dessiné derrière l'assise (D-39). */
   sofaback: { furniture: false },
   /** Fil à linge et chaussettes qui sèchent (buanderie, D-39). */
   clothesline: { furniture: false },
-  drawing: { furniture: false },
+  drawing: { furniture: false, far: true },
   rug: { furniture: false },
   lamp: { furniture: false },
   coatrack: { furniture: false },
-  clock: { furniture: false },
+  clock: { furniture: false, far: true },
   // Maison déformée (monde étrange, D-35) : fond seulement, jamais de collision.
   door: { furniture: false },
   'door-upside': { furniture: false },
@@ -79,6 +83,21 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   'narrow-right': { furniture: false },
   /** Yeux dans l'ombre : rien de dessiné dans le décor, animés par les effets (D-35). */
   eyes: { furniture: false },
+  // Le salon refait en salle témoin (D-74).
+  /** Dessous de l'escalier qui monte à l'étage (bois plein, en marches). */
+  understairs: { furniture: true },
+  /** Plante en pot suspendue : le bord du pot est une planche traversable. */
+  hangingplant: { furniture: true },
+  /** Lustre : le dessus de l'abat-jour est une planche traversable. */
+  ceilinglamp: { furniture: true },
+  /** Cheminée contre le mur (fond) : miroir, âtre, bûches ; le feu est animé. */
+  fireplace: { furniture: false },
+  /** Manteau de la cheminée (planche traversable). */
+  mantel: { furniture: true },
+  /** Corps de l'horloge comtoise (fond) ; le balancier est animé. */
+  grandclock: { furniture: false },
+  /** Chapeau de l'horloge comtoise (plein). */
+  clocktop: { furniture: true },
   // Le jardin (D-46), dessiné par le code (PLACEHOLDER, pas d'image clé pour l'instant).
   /** Frondaison des arbres en haut des salles (feuillage plein). */
   canopy: { furniture: true },
@@ -113,7 +132,7 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   facade: { furniture: false },
   /** Porte de derrière (buanderie, terrasse), autour de la sortie. */
   backdoor: { furniture: false },
-  sun: { furniture: false },
+  sun: { furniture: false, sky: true },
   /** Trou sombre dans la haie, au fond du jardin (pour plus tard, §25.3). */
   hedgehole: { furniture: false },
   /** Passage sous une haie (fond), allée des toits. */
@@ -127,7 +146,7 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   /** Maisons de ville mitoyennes (fond). */
   houses: { furniture: false },
   /** Platane du trottoir (fond). */
-  planetree: { furniture: false },
+  planetree: { furniture: false, far: true },
   /** Les quatre lieux, fermés pour l'instant (fond, avec leur porte). */
   playground: { furniture: false },
   school: { furniture: false },
@@ -231,7 +250,7 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   lostpile: { furniture: true },
   // La gare (D-66), dessinée par le code (PLACEHOLDER).
   /** La gare au fond des voies (fond). */
-  stationfacade: { furniture: false },
+  stationfacade: { furniture: false, far: true },
   /** Traverses et rails sur le ballast (fond). */
   rails: { furniture: false },
   /** Quai de béton et sa bande de sécurité (plein). */
@@ -243,11 +262,11 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   /** Feu de voie (fond), allumé par le train qui approche. */
   signal: { furniture: false },
   /** Mât de caténaire (fond) ; le câble est déclaré par `; @cable:`. */
-  catenarymast: { furniture: false },
+  catenarymast: { furniture: false, far: true },
   /** Poste d'aiguillage sur pilotis (plein). */
   signalbox: { furniture: true },
   /** Marquise de verre au-dessus des quais (fond). */
-  canopyroof: { furniture: false },
+  canopyroof: { furniture: false, far: true },
   /** Pilier de fonte de la marquise (plein). */
   pillar: { furniture: true },
   /** Passerelle au-dessus des voies : marches et tablier traversables. */
@@ -255,7 +274,7 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   /** Horloge de quai sur son mât (fond). */
   stationclock: { furniture: false },
   /** Verrière du hall (fond). */
-  glassroof: { furniture: false },
+  glassroof: { furniture: false, far: true },
   /** Grande horloge du hall (fond). */
   bigclock: { furniture: false },
   /** Tableau des départs, suspendu (fond). */
@@ -277,13 +296,13 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   /** Casiers de consigne (pleins), une lueur turquoise tout en haut. */
   lockers: { furniture: true },
   /** Verrières d'atelier du dépôt (fond). */
-  depotwindows: { furniture: false },
+  depotwindows: { furniture: false, far: true },
   /** Wagon de marchandises garé (plein). */
   wagon: { furniture: true },
   /** Crochet du pont roulant (traversable). */
   cranehook: { furniture: true },
   /** Pont roulant (fond). */
-  overheadcrane: { furniture: false },
+  overheadcrane: { furniture: false, far: true },
   // Derrière la haie (D-49).
   /** Tuteur géant (bois plein), paroi d'une cheminée. */
   giantstake: { furniture: true },
@@ -358,6 +377,15 @@ export interface ArtPalette {
   leaf: string;
   leafLight: string;
   leafDark: string;
+  /**
+   * Perspective atmosphérique (D-71) : opacité du voile (couleur du mur ou du ciel) posé sur le
+   * fond lointain (`far`), pour que la couche jouable ressorte.
+   */
+  veil: number;
+  /** Vignettage (D-71) : opacité dans les coins de l'écran (0 : aucun). */
+  vignette: number;
+  /** Couleur du vignettage (« r,g,b »). */
+  vignetteColor: string;
 }
 
 export const REAL_PALETTE: Readonly<ArtPalette> = {
@@ -391,6 +419,9 @@ export const REAL_PALETTE: Readonly<ArtPalette> = {
   leaf: '#4f7a4a',
   leafLight: '#78a567',
   leafDark: '#3a5c3a',
+  veil: 0.2,
+  vignette: 0.4,
+  vignetteColor: '8,10,24',
 };
 
 /**
@@ -413,6 +444,8 @@ export const DAY_PALETTE: Readonly<ArtPalette> = {
   darkness: 0.1,
   stars: false,
   glow: 0.35,
+  vignette: 0.22,
+  vignetteColor: '40,30,40',
 };
 
 /**
@@ -447,6 +480,10 @@ export const STRANGE_PALETTE: Readonly<ArtPalette> = {
   leaf: '#16112a',
   leafLight: '#16112a',
   leafDark: '#0f0b1e',
+  // Déjà en silhouettes sur un fond sombre : pas de voile, un vignettage plus présent.
+  veil: 0,
+  vignette: 0.5,
+  vignetteColor: '6,4,16',
 };
 
 /**
@@ -476,6 +513,9 @@ export const GARDEN_PALETTE: Readonly<ArtPalette> = {
   leaf: '#5d9152',
   leafLight: '#8cc26f',
   leafDark: '#3f6b3d',
+  veil: 0.15,
+  vignette: 0.16,
+  vignetteColor: '40,50,30',
 };
 
 /**
@@ -509,7 +549,159 @@ export const STREET_DUSK_PALETTE: Readonly<ArtPalette> = {
   leaf: '#3e5e48',
   leafLight: '#5c7f5c',
   leafDark: '#2c4536',
+  vignette: 0.3,
+  vignetteColor: '30,20,40',
 };
+
+/**
+ * Finition de l'habillage (D-71), « papier découpé » : chaque plan est une feuille posée sur la
+ * précédente, avec son ombre douce ; grain de papier ; ombres de contact ; ombre de Céleste au sol.
+ * PROVISOIRE : à régler sur téléphone (overlay → « Habillage (finition) »). Distances en px
+ * logiques ; 0 désactive un effet.
+ */
+export interface ArtFinish {
+  /** Opacité de l'ombre portée par la couche jouable (murs, sol, meubles) sur le fond. */
+  playShadow: number;
+  /** Décalage de cette ombre (lumière venant d'en haut à gauche). */
+  playShadowX: number;
+  playShadowY: number;
+  /** Flou de cette ombre. */
+  playShadowBlur: number;
+  /** Opacité de l'ombre portée par le fond proche (fenêtres, cadres, façades) sur le mur. */
+  backShadow: number;
+  /** Opacité de l'ombre de contact sous les meubles posés. */
+  contactShadow: number;
+  /** Opacité du grain de papier sur le décor. */
+  grain: number;
+  /** Opacité de l'ombre de Céleste au sol. */
+  celesteShadow: number;
+  /** Distance au-delà de laquelle l'ombre de Céleste disparaît (tuiles). */
+  celesteShadowTiles: number;
+  /** Multiplicateur du voile atmosphérique des palettes (1 : tel que défini). */
+  veil: number;
+  /** Multiplicateur du vignettage des palettes. */
+  vignette: number;
+}
+
+export const DEFAULT_ART_FINISH: Readonly<ArtFinish> = {
+  playShadow: 0.5,
+  playShadowX: 3,
+  playShadowY: 4,
+  playShadowBlur: 4,
+  backShadow: 0.3,
+  contactShadow: 0.55,
+  grain: 0.3,
+  celesteShadow: 0.5,
+  celesteShadowTiles: 6,
+  veil: 1,
+  vignette: 1,
+};
+
+/** Bornes des réglages en direct de l'overlay de debug. */
+export const ART_FINISH_RANGES: Readonly<
+  Record<keyof ArtFinish, { min: number; max: number; step: number }>
+> = {
+  playShadow: { min: 0, max: 1, step: 0.02 },
+  playShadowX: { min: -6, max: 6, step: 0.5 },
+  playShadowY: { min: -6, max: 8, step: 0.5 },
+  playShadowBlur: { min: 0, max: 10, step: 0.5 },
+  backShadow: { min: 0, max: 1, step: 0.02 },
+  contactShadow: { min: 0, max: 1, step: 0.02 },
+  grain: { min: 0, max: 0.5, step: 0.01 },
+  celesteShadow: { min: 0, max: 1, step: 0.02 },
+  celesteShadowTiles: { min: 1, max: 12, step: 1 },
+  veil: { min: 0, max: 3, step: 0.1 },
+  vignette: { min: 0, max: 2, step: 0.1 },
+};
+
+/**
+ * Profondeur (D-72) : vitesse de défilement des plans lointains par rapport à la salle (0 : fixes à
+ * l'écran, 1 : avec la salle) et de l'avant-plan (> 1 : plus vite). PROVISOIRE, à juger sur
+ * téléphone.
+ */
+export const PARALLAX = {
+  sky: 0.06,
+  farHills: 0.16,
+  midHills: 0.3,
+  nearHills: 0.48,
+  farRoofs: 0.28,
+  nearRoofs: 0.45,
+  /** Vue par les fenêtres : juste derrière la vitre (le ciel uni ne bouge pas, les toits un peu). */
+  outside: 0.75,
+  /** Avant-plan : silhouettes posées au bas de l'écran. */
+  foreground: 1.35,
+  /** Échelle maximale des textures des plans lointains : flous, ils n'ont pas besoin de plus. */
+  maxScale: 1.5,
+  /** Marge autour de la vue (tremblements, arrondis), px logiques. */
+  marginPx: 48,
+} as const;
+
+/**
+ * Avant-plan (D-72) : herbes et fleurs posées au bas de l'écran, dehors seulement (dedans, des
+ * jouets flous se lisaient comme des taches). PROVISOIRE.
+ */
+export const FOREGROUND = {
+  /** Écart entre deux pièces (px du plan) et largeur d'une pièce. */
+  spacing: { min: 90, max: 280, width: [26, 64] as [number, number] },
+  /** Hauteur au-dessus du sol (px) : basse, et effacée près de ce qui compte. */
+  minRisePx: 8,
+  maxRisePx: 22,
+  /** Flou (px logiques) : ce qui est trop près de l'objectif. */
+  blurPx: 2,
+  /** Opacité normale, et effacée près de Céleste, d'un ennemi, d'un danger ou d'un objet. */
+  alpha: 0.78,
+  fadedAlpha: 0.12,
+  /** Marge autour de Céleste où une pièce s'efface (px). */
+  fadeMarginPx: 44,
+  /** Marge autour des dangers et objets de jeu au sol (px). */
+  protectMarginPx: 8,
+  /** Constante de temps de l'effacement (ms). */
+  fadeTimeMs: 120,
+} as const;
+
+/**
+ * Vie du monde réel (D-73) : nuages qui dérivent, oiseaux, feuilles et linge au vent. Doux, jamais
+ * devant Céleste, jamais pris pour une surface. PROVISOIRE, à juger sur téléphone.
+ */
+export const WORLD_LIFE = {
+  clouds: {
+    /** Un nuage pour tant de px de large du plan du ciel. */
+    spacingPx: 170,
+    /** Dans les fenêtres (la nuit, devant la lune), plus espacés. */
+    windowSpacingPx: 230,
+    /** Vitesse de dérive (px/s), multipliée par le vent. */
+    speedPxPerS: [3, 7] as [number, number],
+  },
+  birds: {
+    /** Délai entre deux vols (ms). */
+    everyMs: [12000, 28000] as [number, number],
+    /** Durée de la traversée de l'écran (ms). */
+    crossMs: 9000,
+    count: [2, 4] as [number, number],
+    /** Battement d'ailes (ms). */
+    flapMs: 320,
+  },
+  leaves: {
+    /** Feuilles à l'écran au plus. */
+    count: 7,
+    /** Chute (px/s) et poussée du vent (px/s, × vent). */
+    fallPxPerS: [9, 16] as [number, number],
+    windPxPerS: 22,
+    /** Battement de la chute (amplitude px, période ms). */
+    flutterPx: 5,
+    flutterMs: 1600,
+    alpha: 0.85,
+  },
+  laundry: {
+    /** Balancement du linge (angle maximal par vent fort, radians ; période ms). */
+    swayRad: 0.22,
+    periodMs: 1300,
+  },
+  /** Le petit feu de la cheminée du salon (D-74) : une image toutes les ~ms, lueur. */
+  fire: { frameMs: 110, glowMin: 0.28, glowMax: 0.5 },
+  /** Le balancier de l'horloge comtoise (D-74) : angle maximal, aller-retour (ms). */
+  pendulum: { swingRad: 0.085, periodMs: 2000 },
+} as const;
 
 /** Rayon du halo d'une veilleuse (px logiques). */
 export const LAMP_LIGHT_RADIUS = 110;

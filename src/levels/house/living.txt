@@ -1,51 +1,56 @@
-; Salon : canapé et poufs, briques de jeu sur le tapis, table basse, bibliothèque.
+; Salon (D-74, salle témoin de la passe graphique) : l'escalier descend de l'étage dans le coin,
+; la cheminée et son feu au milieu, la grande bibliothèque où Maria est assise, l'horloge comtoise.
+; Rien ne flotte : les appuis de la route haute pendent (plantes, lustre) ou tiennent au sol.
 ; @name: Salon
 ; @icon: sofa
 ; @ambient: #2e2b33
-; @note: dessus de la bibliothèque (colonnes 47-56) : en grimpant depuis l'étagère haute (D-26).
-; @note-2: route haute par la gauche (D-39) : meuble mural en grimpant, étagères, tringle du rideau, jusqu'à la bibliothèque.
-; @note-3: trouvaille à droite du haut de la bibliothèque (saut moyen) ; souvenir en haut de la bibliothèque après le monde étrange.
+; @note: route haute (en grimpant, facile) : placard mural, deux plantes suspendues, tringle du rideau, lustre, dessus de la bibliothèque.
+; @note-2: sans grimper : table basse (les briques de jeu dessous), manteau de la cheminée, étagères de la bibliothèque ; Maria et la trouvaille se voient, hors d'atteinte.
+; @note-3: trouvaille sur l'horloge comtoise (saut moyen depuis la bibliothèque, l'étagère rattrape un raté) ; souvenir en haut de la bibliothèque après le monde étrange.
 ; @wall: dots
+; @decor: understairs 1 1 12 6
+; @decor: beam 56 1 6 1
 ; @decor: window 24 6 8 6
-; @decor: photo 13 8 3 2
-; @decor: lamp 16 5 1 2
-; @decor: clock 49 3 2 2
-; @decor: lamp 43 11 1 2
+; @decor: rod 19 5 18 1
+; @decor: lamp 7 9 1 2
+; @decor: photo 16 12 3 2
+; @decor: fireplace 33 10 12 12
+; @decor: grandclock 60 10 3 12
+; @decor: hangingplant 9 3 3 9
+; @decor: hangingplant 14 1 3 8
+; @decor: ceilinglamp 39 1 3 8
+; @decor: mantel 33 16 12 1
+; @decor: cupboard 2 14 5 2
 ; @decor: pouf 4 20 2 2
 ; @decor: sofaback 8 16 13 3
 ; @decor: sofa 8 18 13 4
 ; @decor: pouf 21 20 2 2
-; @decor: table 33 19 9 3
+; @decor: table 25 19 9 3
 ; @decor: bookcase 46 9 10 11
-; @decor: shelf 56 13 5 1
-; @decor: cupboard 2 14 5 2
-; @decor: wallshelf 9 11 5 1
-; @decor: wallshelf 16 8 5 1
-; @decor: rod 21 5 15 1
-; @decor: wallshelf 38 9 5 1
-; @decor: wallshelf 62 9 2 1
+; @decor: shelf 56 13 4 1
+; @decor: clocktop 60 9 3 1
 ; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), ^ briques de jeu (danger), e jouet mécanique, C veilleuse (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 ##################################################################
+#bbbbbbbbbbbb...........................................bbbbbb...#
+#bbbbbbbbbb......................................................#
+#bbbbbbbb........................................................#
+#bbbbbb..........................................................#
+#bbbb..............------------------............................#
+#bb..............................................................#
 #................................................................#
+#.............---......................---...................S...#
+#.............................................bbbbbbbbbb....bbb..#
 #................................................................#
-#................................................................#
-#................................................................#
-#....................---------------.............................#
-#................................................................#
-#................................................................#
-#...............-----.........................................S..#
-#.....................................-----...bbbbbbbbbb......--.#
-#................................................................#
-#........-----...................................................#
+#........---.....................................................#
 #................................................................#
 #.............................................--------------.....#
 #.bbbbb..........................................................#
 #.bbbbb..........................................................#
-#.............................................--------...........#
+#................................------------.--------...........#
 #................................................................#
 #.......tt.........tt............................................#
-1.......tt.........tt............bbbbbbbbb....--------...........2
-1...tt..ttttttttttttttt..........b.......b.......................2
-1.P.tt..ttttttttttttttt..........b.......b................e......2
+1.......tt.........tt....bbbbbbbbb............--------...........2
+1...tt..ttttttttttttttt..b.......b...............................2
+1.P.tt..ttttttttttttttt..b.......b........................e......2
 ##########################^^^^####################################
 ##################################################################
