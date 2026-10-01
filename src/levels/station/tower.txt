@@ -10,9 +10,7 @@
 ; @ambient: #1a1f2c
 ; @camera: up
 ; @chase: 7
-; @chase-phase: 73 5.1
-; @chase-phase: 59 1.1
-; @chase-phase: 7 2.3
+; @chase-phase: 7 2.8
 ; @chase-trip: 17 53 6 6 6
 ; @cable: 37 55 7 57
 ; @decor: upsideclock 10 36 10 10

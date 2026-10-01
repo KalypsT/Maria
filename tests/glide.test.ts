@@ -43,7 +43,7 @@ function step(player: PlayerPhysics, moveX: number, jumpPressed = false, jumpHel
 /**
  * Saut depuis le perchoir vers la droite. `hold` : Saut tenu jusqu'au sol ; `apex` : tenu jusqu'au
  * sommet, puis relâché (un saut complet sans parapluie) ; `repress` : relâché au sommet, puis une
- * nouvelle pression tenue. `releaseAfterSteps` : Saut relâché ce nombre de pas après le sommet.
+ * nouvelle pression tenue, relâchée `releaseAfterSteps` pas après le sommet.
  * Retourne la trajectoire (x, y par pas) jusqu'au sol.
  */
 function flight(
@@ -63,14 +63,14 @@ function flight(
     const held =
       after < 0 ||
       (mode === 'hold' && after < releaseAfterSteps) ||
-      (mode === 'repress' && after >= 1);
+      (mode === 'repress' && after >= 1 && after < releaseAfterSteps);
     step(player, 1, pressed, held);
     path.push(player.box.x, player.box.y);
   }
   return path;
 }
 
-describe('parapluie (D-62, D-65)', () => {
+describe('parapluie (D-62, D-70)', () => {
   it('sans la capacité, tenir Saut ou presser de nouveau en l’air ne change rien', () => {
     const plain = flight(makePlayer(false), 'apex');
     expect(flight(makePlayer(false), 'hold')).toEqual(plain);
@@ -93,28 +93,28 @@ describe('parapluie (D-62, D-65)', () => {
     }
   });
 
-  it('Saut tenu : le parapluie s’ouvre peu après le sommet, chute lente, bien plus loin', () => {
+  it('Saut tenu jusqu’au sol n’ouvre rien (D-70 : plus d’ouverture automatique)', () => {
+    expect(flight(makePlayer(true), 'hold')).toEqual(flight(makePlayer(false), 'hold'));
+  });
+
+  it('nouvelle pression au sommet : chute lente, bien plus loin', () => {
     const plain = flight(makePlayer(true), 'apex');
-    const glide = flight(makePlayer(true), 'hold');
-    // Identique jusqu'au sommet et pendant le court délai (D-65 : 40 ms).
-    let same = 0;
-    while (same < plain.length && plain[same] === glide[same]) {
-      same++;
-    }
-    const apexStep = Math.round(D.jumpVelocity / D.riseGravity / D.dt);
-    expect(same / 2).toBeGreaterThanOrEqual(apexStep + D.glideAutoDelaySteps - 2);
-    expect(same / 2).toBeLessThanOrEqual(apexStep + D.glideAutoDelaySteps + 2);
-    expect(D.glideAutoDelaySteps).toBe(Math.round((P.glideAutoDelayMs / 1000) * 120));
+    const glide = flight(makePlayer(true), 'repress');
     expect(glide.length).toBeGreaterThan(plain.length * 2);
     const far = (path: number[]) => path[path.length - 2] ?? 0;
     expect(far(glide) - far(plain)).toBeGreaterThan(20 * T);
     // Pendant le plané, la chute ne dépasse jamais la vitesse du parapluie (après le freinage).
     const p2 = makePlayer(true);
     step(p2, 1, true, true);
+    let apex = -1;
     let opened = -1;
     let fastest = 0;
     for (let s = 1; s < 3000 && !p2.grounded; s++) {
-      step(p2, 1, false, true);
+      if (apex < 0 && p2.vy >= 0) {
+        apex = s;
+      }
+      const after = apex < 0 ? -1 : s - apex;
+      step(p2, 1, after === 1, after < 0 || after >= 1);
       if (opened < 0 && p2.glideOpen) {
         opened = s;
       }
@@ -126,7 +126,7 @@ describe('parapluie (D-62, D-65)', () => {
         expect(p2.state).toBe(PlayerState.Glide);
       }
     }
-    expect(opened).toBeGreaterThan(0);
+    expect(opened).toBe(apex + 1);
     expect(fastest).toBeLessThanOrEqual(P.glideFallSpeed + 1e-9);
   });
 
@@ -147,8 +147,8 @@ describe('parapluie (D-62, D-65)', () => {
 
   it('lâcher Saut referme le parapluie : la chute reprend', () => {
     const player = makePlayer(true);
-    const held = flight(makePlayer(true), 'hold');
-    const released = flight(player, 'hold', 30);
+    const held = flight(makePlayer(true), 'repress');
+    const released = flight(player, 'repress', 30);
     expect(released.length).toBeLessThan(held.length / 2);
     expect(player.glideOpen).toBe(false);
   });

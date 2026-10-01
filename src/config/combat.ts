@@ -68,14 +68,20 @@ export interface CombatParams {
   trainGustX: number;
   trainGustY: number;
   /**
-   * Poursuite verticale (boss, D-67). Au départ et après une réapparition, il attend
-   * `chaseStartDelayMs` puis monte, à la vitesse de la phase (× `chaseSpeedScale`).
+   * Poursuite verticale (boss, D-67, D-70). Au départ et après une réapparition, il attend
+   * `chaseStartDelayMs` puis monte à vitesse constante (celle de la salle × `chaseSpeedScale`).
    */
   chaseStartDelayMs: number;
-  /** Facteur sur les vitesses de montée des phases (réglage en direct). */
+  /** Facteur sur la vitesse de montée (réglage en direct). */
   chaseSpeedScale: number;
-  /** Il ne reste jamais plus loin que ça sous les pieds de Céleste (tuiles) : il rattrape. */
-  chaseMaxGapTiles: number;
+  /**
+   * Rattrapage doux (D-70) : au-delà de `chaseCatchUpGapTiles` sous les pieds de Céleste, il
+   * accélère de `chaseCatchUpRate` tuiles/s par tuile de retard en plus, sans dépasser
+   * `chaseCatchUpMaxSpeed` tuiles/s. Jamais de saut.
+   */
+  chaseCatchUpGapTiles: number;
+  chaseCatchUpRate: number;
+  chaseCatchUpMaxSpeed: number;
   /** À la réapparition, il repart à cette distance sous les pieds de Céleste (tuiles). */
   chaseRestartGapTiles: number;
   /** Contact : Céleste rebondit vers le haut (px/s), il recule (tuiles) et s'arrête (ms). */
@@ -119,10 +125,12 @@ export const DEFAULT_COMBAT: Readonly<CombatParams> = {
   trainPassMs: 1600,
   trainGustX: 260,
   trainGustY: 300,
-  chaseStartDelayMs: 1500,
+  chaseStartDelayMs: 2500,
   chaseSpeedScale: 1,
-  chaseMaxGapTiles: 7,
-  chaseRestartGapTiles: 7,
+  chaseCatchUpGapTiles: 12,
+  chaseCatchUpRate: 0.4,
+  chaseCatchUpMaxSpeed: 6,
+  chaseRestartGapTiles: 9,
   chaseContactBounceY: 420,
   chaseContactRecoilTiles: 3,
   chaseContactPauseMs: 1200,
@@ -166,7 +174,9 @@ export const COMBAT_PARAM_RANGES: Readonly<
   trainGustY: { min: 0, max: 600, step: 10 },
   chaseStartDelayMs: { min: 0, max: 6000, step: 100 },
   chaseSpeedScale: { min: 0, max: 3, step: 0.05 },
-  chaseMaxGapTiles: { min: 4, max: 30, step: 1 },
+  chaseCatchUpGapTiles: { min: 4, max: 30, step: 1 },
+  chaseCatchUpRate: { min: 0, max: 3, step: 0.05 },
+  chaseCatchUpMaxSpeed: { min: 1, max: 15, step: 0.5 },
   chaseRestartGapTiles: { min: 2, max: 30, step: 1 },
   chaseContactBounceY: { min: 100, max: 800, step: 10 },
   chaseContactRecoilTiles: { min: 0, max: 10, step: 0.5 },

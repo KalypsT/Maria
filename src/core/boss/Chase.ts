@@ -13,9 +13,10 @@ const CONTACT_DEPTH_PX = 3;
 const SINK_SPEED = 90;
 
 /**
- * Poursuite verticale (boss, D-67), pure et indépendante de Phaser : un « front » (le haut d'une
- * masse sans visage) monte sous Céleste, à la vitesse de la phase où elle se trouve. S'il prend
- * trop de retard, il remonte hors de la vue (il reste présent sans devenir injuste). Le toucher
+ * Poursuite verticale (boss, D-67, D-70), pure et indépendante de Phaser : un « front » (le haut
+ * d'une masse sans visage) monte sous Céleste à vitesse constante (la phase où elle se trouve, une
+ * seule en général). S'il prend trop de retard, il accélère peu à peu (rattrapage doux, jamais de
+ * saut) : il reste présent sans devenir injuste. Le toucher
  * fait rebondir Céleste et monter la peur ; il recule alors un peu et s'arrête un instant. Passer
  * par un croc-en-jambe le fait reculer et s'arrêter. La poursuite s'arrête quand Céleste atteint la
  * ligne d'arrivée ; il redescend alors. Aucune allocation dans `step`.
@@ -96,13 +97,15 @@ export class Chase {
     if (this.pauseSteps > 0) {
       this.pauseSteps--;
     } else {
-      this.frontY -= (data.phases[phase]?.speed ?? 0) * p.chaseSpeedScale * T * this.dt;
-    }
-    // Trop loin (Céleste a pris de l'avance) : il remonte hors de la vue. Pas pendant un arrêt :
-    // le recul d'un croc-en-jambe ou d'un contact compte jusqu'au bout.
-    const farthest = feet + p.chaseMaxGapTiles * T;
-    if (this.pauseSteps === 0 && this.frontY > farthest) {
-      this.frontY = farthest;
+      let speed = (data.phases[phase]?.speed ?? 0) * p.chaseSpeedScale;
+      const behind = (this.frontY - feet) / T - p.chaseCatchUpGapTiles;
+      if (behind > 0) {
+        speed = Math.max(
+          speed,
+          Math.min(p.chaseCatchUpMaxSpeed, speed + behind * p.chaseCatchUpRate),
+        );
+      }
+      this.frontY -= speed * T * this.dt;
     }
     for (let i = 0; i < data.trips.length; i++) {
       const trip = data.trips[i];

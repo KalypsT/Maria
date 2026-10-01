@@ -870,19 +870,19 @@ function drawIcon(
       ctx.fillRect(cx + 2, cy - 3.5, 2.2, 1);
       break;
     case 'umbrella': {
-      // Aide du parapluie (D-65) : Saut tenu (une longue flèche, un trait sous elle), puis le
-      // parapluie ouvert.
+      // Aide du parapluie (D-62, D-70) : deux flèches de saut (une nouvelle pression en l'air),
+      // puis le parapluie ouvert.
       ctx.strokeStyle = INK;
       ctx.lineWidth = 1;
       ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(cx - 6, cy + 5);
+      for (const y of [cy + 1, cy - 4]) {
+        ctx.moveTo(cx - 7.6, y + 2.2);
+        ctx.lineTo(cx - 6, y);
+        ctx.lineTo(cx - 4.4, y + 2.2);
+      }
+      ctx.moveTo(cx - 6, cy + 6);
       ctx.lineTo(cx - 6, cy - 4);
-      ctx.moveTo(cx - 7.4, cy - 2.6);
-      ctx.lineTo(cx - 6, cy - 4);
-      ctx.lineTo(cx - 4.6, cy - 2.6);
-      ctx.moveTo(cx - 8, cy + 5.5);
-      ctx.lineTo(cx - 4, cy + 5.5);
       ctx.stroke();
       ctx.fillStyle = '#f2c14e';
       ctx.beginPath();

@@ -17,6 +17,12 @@
 ; @decor: scaffold 27 6 27 36
 ; @decor: floodlight 7 6 2 36
 ; @decor: sill 1 12 4 1
+; @decor: scaffold 23 40 3 1
+; @decor: scaffold 29 40 3 1
+; @decor: scaffold 35 40 3 1
+; @decor: scaffold 41 40 3 1
+; @decor: scaffold 47 40 3 1
+; @decor: scaffold 52 40 2 1
 ; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 ################################################################
 #..............................................................#
@@ -58,7 +64,7 @@
 #...........bbb....bbb..................................bb.....#
 #..................bbb..................................bb.....#
 1..................bbb..................................bb.....#
-1..................bbb..................................bb.....#
-1..P..C............bbb..................................bb.....#
+1......................---...---...---...---...---..--..bb.....#
+1..P..C.................................................bb.....#
 ######################^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 ################################################################

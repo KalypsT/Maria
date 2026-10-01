@@ -17,6 +17,10 @@
 ; @decor: cranehook 67 18 2 1
 ; @decor: cranehook 73 14 2 1
 ; @decor: overheadcrane 58 3 20 3
+; @decor: scaffold 58 28 3 1
+; @decor: scaffold 64 28 3 1
+; @decor: scaffold 70 28 3 1
+; @decor: scaffold 75 28 2 1
 ; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 ##########################################################################################
 #........................................................................................#
@@ -46,7 +50,7 @@
 #..................................................C.....................................#
 #.............bbbbbbbbbbb.....bbbbbbbbbbb.....bbbbbbbbbbb.....................bbbbbbbbbbb#
 #.............bbbbbbbbbbb.....bbbbbbbbbbb.....bbbbbbbbbbb.....................bbbbbbbbbbb#
-1.............bbbbbbbbbbb.....bbbbbbbbbbb.....bbbbbbbbbbb.....................bbbbbbbbbbb#
+1.............bbbbbbbbbbb.....bbbbbbbbbbb.....bbbbbbbbbbb.---...---...---..--.bbbbbbbbbbb#
 1..P...C......bbbbbbbbbbb.....bbbbbbbbbbb.....bbbbbbbbbbb.....................bbbbbbbbbbb#
 ##############^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^###
 ##########################################################################################
