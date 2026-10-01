@@ -386,7 +386,6 @@ export class PlayerPhysics {
       this.stepsSinceJumpPressed = NEVER;
       this.jumpCutAvailable = true;
       this.releaseGravityActive = false;
-      this.armGlide();
     } else if (
       this.canWallJump &&
       !this.grounded &&
@@ -406,10 +405,10 @@ export class PlayerPhysics {
       this.stepsSinceJumpPressed = NEVER;
       this.jumpCutAvailable = true;
       this.releaseGravityActive = false;
-      this.armGlide();
     } else if (jumpPressed && this.stepsSinceCable <= d.cableJumpSteps) {
       // Saut depuis un câble (D-65) : Saut relâché puis pressé de nouveau juste après avoir lâché
-      // le câble. L'élan de la glissade est gardé.
+      // le câble. L'élan de la glissade est gardé. Tenu, le parapluie se rouvre seul au sommet
+      // (D-70) : on enchaîne les câbles.
       this.vy = -d.cableJumpVelocity;
       this.stepsSinceCable = NEVER;
       this.stepsSinceJumpPressed = NEVER;
@@ -511,8 +510,8 @@ export class PlayerPhysics {
     if (this.stepsSinceCable < NEVER) {
       this.stepsSinceCable++;
     }
-    // Parapluie au sommet d'un saut tenu (D-65) : Saut maintenu depuis l'impulsion, il s'ouvre un
-    // court instant après le sommet. Relâcher Saut avant renonce.
+    // Parapluie au sommet d'un saut depuis un câble (D-65, D-70) : Saut maintenu depuis
+    // l'impulsion, il s'ouvre un court instant après le sommet. Relâcher Saut avant renonce.
     if (this.glideArmed) {
       if (!jumpHeld || this.grounded) {
         this.glideArmed = false;
@@ -563,7 +562,10 @@ export class PlayerPhysics {
     }
   }
 
-  /** Un saut vient de partir : avec le parapluie, il s'ouvrira au sommet si Saut reste tenu. */
+  /**
+   * Un saut depuis un câble vient de partir : avec le parapluie, il s'ouvrira au sommet si Saut
+   * reste tenu (D-70 : seulement depuis un câble ; ailleurs, une nouvelle pression l'ouvre).
+   */
   private armGlide(): void {
     this.glideArmed = this.canGlide;
     this.glideApexSteps = 0;

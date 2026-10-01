@@ -155,7 +155,7 @@ describe('l’école et son monde étrange (D-64)', () => {
   );
 
   it(
-    'le monde étrange de l’école : moyen jusqu’à la première lanterne, difficile ensuite jusqu’à la boîte',
+    'le monde étrange de l’école : un plané jusqu’à la règle, moyen jusqu’à la lanterne des tables, difficile ensuite jusqu’à la boîte',
     { timeout: TIMEOUT },
     () => {
       const [start] = storyPassages()
@@ -167,7 +167,11 @@ describe('l’école et son monde étrange (D-64)', () => {
       const lamps = level('school-strange').entities.filter(
         (e) => e.type === EntityType.Checkpoint,
       );
-      const first = lamps.reduce((a, b) => (b.row > a.row ? b : a));
+      // La lanterne au bout des tables (D-64), au pied de la cheminée des piles de livres.
+      const first = lamps.find((l) => l.col > 30 && l.col < 45 && l.row > 20);
+      if (!first) {
+        throw new Error('lanterne des tables absente');
+      }
       const lamp = nodeAt('school-strange', first.col, first.row);
       const box = areaNodes('school-box');
       const reaches = (rule: Parameters<typeof zoneGraph>[1], glide: boolean, from: Node) =>
@@ -183,6 +187,14 @@ describe('l’école et son monde étrange (D-64)', () => {
         box.some((n) => reaches(null, false, start).has(n)),
         'sans parapluie',
       ).toBe(false);
+      // La section ajoutée (D-70) : de l'arrivée, un long plané jusqu'à la règle et sa veilleuse.
+      const ruler = lamps.find((l) => l.col > 45);
+      if (!ruler) {
+        throw new Error('veilleuse de la règle absente');
+      }
+      const rulerLamp = nodeAt('school-strange', ruler.col, ruler.row);
+      expect(reaches(easy, true, start).has(rulerLamp)).toBe(true);
+      expect(reaches(null, false, start).has(rulerLamp), 'règle sans parapluie').toBe(false);
     },
   );
 

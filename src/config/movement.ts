@@ -104,7 +104,7 @@ export interface MovementParams {
   glideFallSpeed: number;
   /** Freinage de la chute à l'ouverture du parapluie (px/s²), jusqu'à `glideFallSpeed`. */
   glideBrake: number;
-  /** Délai entre le sommet d'un saut tenu et l'ouverture du parapluie (ms, D-65). */
+  /** Délai entre le sommet d'un saut tenu depuis un câble et l'ouverture du parapluie (ms, D-65, D-70). */
   glideAutoDelayMs: number;
   /**
    * Crochet du parapluie (D-65) : en planant, le crochet s'accroche au câble qu'il croise. Hauteur
@@ -260,7 +260,7 @@ export interface DerivedMovement {
   wallJumpVelocity: number;
   wallJumpLockSteps: number;
   wallCoyoteSteps: number;
-  /** Pas entre le sommet d'un saut tenu et l'ouverture du parapluie (D-65). */
+  /** Pas entre le sommet d'un saut tenu depuis un câble et l'ouverture du parapluie (D-65, D-70). */
   glideAutoDelaySteps: number;
   /** Pas après avoir lâché un câble pendant lesquels Saut fait sauter (D-65). */
   cableJumpSteps: number;

@@ -133,8 +133,6 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.nightBlackMs },
       { do: 'fadeIn', ms: S.nightFadeInMs },
       { do: 'wait', ms: 900 },
-      { do: 'thought', icon: 'maria', ms: S.thoughtMs },
-      { do: 'wait', ms: S.thoughtMs + 300 },
       { do: 'thought', icon: 'bed', ms: S.thoughtMs },
       { do: 'wait', ms: S.lookMs },
     ],
@@ -152,7 +150,6 @@ const TRIGGERS: StoryTrigger[] = [
     lock: true,
     steps: [
       { do: 'pose', pose: 'sit' },
-      { do: 'thought', icon: 'maria', ms: S.holdMs },
       { do: 'wait', ms: S.holdMs },
       { do: 'fadeOut', ms: S.nightFadeOutMs },
       { do: 'flag', id: F.GrownOlder },

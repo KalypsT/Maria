@@ -5,7 +5,7 @@ import { StoryFlag } from '../src/config/story';
 import { EntityType } from '../src/core/level/LevelData';
 import { isStrangeRoom, mapPage } from '../src/core/world/zone';
 import { HOUSE_STORY } from '../src/levels/house/story';
-import { chasePace } from './pace';
+import { chaseRun } from './pace';
 import {
   analysis,
   byDifficulty,
@@ -111,26 +111,26 @@ describe('le monde étrange de la gare (D-68)', () => {
   );
 
   it(
-    'chaque phase de la poursuite laisse le temps de passer, sans être trop lâche (Céleste grandie)',
+    'la poursuite (Céleste grandie) : le chemin le plus rapide la devance toujours, un joueur bien plus lent est rattrapé',
     { timeout: TIMEOUT },
     () => {
       const tower = level(TOWER);
       const a = analysis(TOWER, true, 2, true, true, true);
-      const pace = chasePace(
-        tower,
-        a,
+      const top = { col: 27, row: 6 };
+      const starts = [
         tower.spawn,
-        { col: 27, row: 6 },
-        DIFFICULTY_MIN_WINDOW_MS.medium,
-      );
-      const report = pace.map(
-        (p, i) => `phase ${String(i + 1)} : ${p.time.toFixed(0)} / ${p.front.toFixed(0)} ms`,
-      );
-      console.info(report.join('\n'));
-      for (const { time, front } of pace) {
-        expect(time, report.join(' ; ')).toBeLessThan(front * 0.8);
-        expect(time, report.join(' ; ')).toBeGreaterThan(front * 0.4);
+        ...tower.entities.filter(
+          (e) => e.type === EntityType.Checkpoint && e.row < tower.spawn.row,
+        ),
+      ];
+      for (const start of starts) {
+        const run = chaseRun(tower, a, start, top, DIFFICULTY_MIN_WINDOW_MS.medium);
+        expect(run.contacts, `depuis la ligne ${String(start.row)}`).toBe(0);
+        expect(run.margin, `depuis la ligne ${String(start.row)}`).toBeGreaterThan(3);
       }
+      // Un peu difficile : 50 % plus lent que le chemin parfait, il touche Céleste.
+      const slow = chaseRun(tower, a, tower.spawn, top, DIFFICULTY_MIN_WINDOW_MS.medium, 1.5);
+      expect(slow.contacts).toBeGreaterThan(0);
     },
   );
 

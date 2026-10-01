@@ -16,6 +16,20 @@ Prochaine : essai de la gare (réelle, étrange, la fin, la phase 3) sur télép
 
 ## Fait
 
+### Retours du téléphone (D-70)
+
+- **Parapluie** : de nouveau une nouvelle pression de Saut en l'air (tenir pour planer) ; il ne s'ouvre plus tout seul au sommet, sauf après un saut depuis un câble.
+- **Poursuite de la tour** : une seule vitesse (2,8 tuiles/s), et s'il est loin, il accélère doucement au lieu de sauter. Le chemin parfait ne se fait jamais toucher ; 50 % plus lent, on se fait toucher.
+- **Plateformes basses** au-dessus des longues fosses (jardin renversé, ronces, chantier, dépôt, école étrange, gare étrange) ; au chantier, un passage sous le mur de béton ramène au départ.
+- **École étrange allongée** : nouvelle arrivée en bas à droite, une section avec un long plané au parapluie, une veilleuse de plus, puis la classe d'avant.
+- **Moins de bulles Maria** (32 → 15) : prologue, début de chaque niveau, fin de chaque monde étrange.
+- Tests : 535. Vérifié dans Chromium : les salles modifiées.
+- [ ] À vérifier sur téléphone : le parapluie (nouvelle pression) et l'enchaînement des câbles.
+- [ ] La poursuite : assez pressante, assez régulière ?
+- [ ] Les plateformes basses : se remarquent-elles, gâchent-elles le danger ?
+- [ ] La nouvelle section de l'école étrange : trop facile ? Le retour par la classe se comprend-il ?
+- [ ] Les bulles Maria : le bon dosage ?
+
 ### La gare, PR 5 : la fin du niveau, la phase 3, le train à quai (D-69)
 
 - **La fin** : après Roger, Céleste est assise sous la grande horloge du hall, la nuit. Papa vient la chercher (un cœur). Puis la nuit dans sa chambre ; au lit, des mois passent.

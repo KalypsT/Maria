@@ -54,12 +54,19 @@ function step(player: PlayerPhysics, moveX: number, jumpPressed = false, jumpHel
   player.step(input);
 }
 
-/** Saute du perchoir vers la droite, Saut tenu, jusqu'à s'accrocher (ou au sol) ; nombre de pas. */
+/**
+ * Saute du perchoir vers la droite ; au sommet, Saut relâché puis pressé de nouveau (le parapluie
+ * s'ouvre, D-70) et tenu, jusqu'à s'accrocher (ou au sol) ; nombre de pas.
+ */
 function jumpToCable(player: PlayerPhysics, dir = 1): number {
   step(player, dir, true, true);
+  let apex = -1;
   let s = 1;
   for (; s < 3000 && !player.grounded && player.cable < 0; s++) {
-    step(player, dir, false, true);
+    if (apex < 0 && player.vy >= 0) {
+      apex = s;
+    }
+    step(player, dir, s === apex + 1, apex < 0 || s > apex);
   }
   return s;
 }
