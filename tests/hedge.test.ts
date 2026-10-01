@@ -14,8 +14,9 @@ import {
   zoneGraph,
   type Node,
 } from './zoneGraph';
+import { ANALYSIS_TIMEOUT_MS } from './timeouts';
 
-const TIMEOUT = 180_000;
+const TIMEOUT = ANALYSIS_TIMEOUT_MS;
 
 function trigger(id: string) {
   const t = HOUSE_STORY.triggers.find((candidate) => candidate.id === id);

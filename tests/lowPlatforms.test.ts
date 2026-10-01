@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { Tile, tileAt, EntityType, type LevelData } from '../src/core/level/LevelData';
 import { surfaceUnder } from '../src/core/analysis/surfaces';
 import { analysis, level, roomDifficulty, zone } from './zoneGraph';
+import { ANALYSIS_TIMEOUT_MS } from './timeouts';
 
-const TIMEOUT = 600_000;
+const TIMEOUT = ANALYSIS_TIMEOUT_MS;
 /** Une fosse de dangers plus longue que ça a besoin de plateformes basses (D-70). */
 const MAX_BARE_PIT = 6;
 /** Une plateforme basse : au plus 3 tuiles au-dessus du fond, à 4 colonnes au plus. */

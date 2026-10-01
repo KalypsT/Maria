@@ -16,9 +16,9 @@ import {
   zoneGraph,
   type Node,
 } from './zoneGraph';
+import { ANALYSIS_TIMEOUT_MS } from './timeouts';
 
-/** Garde-fou contre un test bloqué, pas une mesure de vitesse : large, car la CI analyse les salles en parallèle. */
-const TIMEOUT = 600_000;
+const TIMEOUT = ANALYSIS_TIMEOUT_MS;
 /** La maison est la première zone : chaque passage nécessaire de la maison réelle reste facile (D-16). */
 const MIN_WINDOW_MS = DIFFICULTY_MIN_WINDOW_MS.easy;
 const easy = byDifficulty('easy');

@@ -11,6 +11,7 @@ import { parseAsciiLevel } from '../src/core/level/parseAsciiLevel';
 import { PlayerPhysics } from '../src/core/player/PlayerPhysics';
 import { LEVELS } from '../src/levels';
 import { chaseRun } from './pace';
+import { ANALYSIS_TIMEOUT_MS } from './timeouts';
 
 const P = DEFAULT_COMBAT;
 
@@ -139,7 +140,7 @@ describe('poursuite verticale (boss, D-67, D-70)', () => {
 
   it(
     'linéaire et pressant : le chemin le plus rapide le devance toujours, un joueur bien plus lent est rattrapé',
-    { timeout: 120_000 },
+    { timeout: ANALYSIS_TIMEOUT_MS },
     () => {
       const level = course();
       const a = analyzeLevel(level, DEFAULT_MOVEMENT, {

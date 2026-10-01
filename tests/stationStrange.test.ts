@@ -20,8 +20,9 @@ import {
   type Node,
   type WindowRule,
 } from './zoneGraph';
+import { ANALYSIS_TIMEOUT_MS } from './timeouts';
 
-const TIMEOUT = 600_000;
+const TIMEOUT = ANALYSIS_TIMEOUT_MS;
 const F = StoryFlag;
 const STRANGE = 'station-strange';
 const TOWER = 'station-tower';

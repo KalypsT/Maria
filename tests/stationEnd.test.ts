@@ -17,8 +17,9 @@ import {
   zoneGraph,
   type Node,
 } from './zoneGraph';
+import { ANALYSIS_TIMEOUT_MS } from './timeouts';
 
-const TIMEOUT = 900_000;
+const TIMEOUT = ANALYSIS_TIMEOUT_MS;
 const F = StoryFlag;
 const home = () => node(zone.start, analysis(zone.start, false).start);
 /** Toutes les portes ouvertes par l'histoire (portillon, palissade, école). */

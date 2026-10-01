@@ -6,9 +6,9 @@ import {
   gapWindowMs,
   type JumpProfile,
 } from '../src/core/analysis/jumpProfile';
+import { ANALYSIS_TIMEOUT_MS } from './timeouts';
 
-/** Garde-fou contre un test bloqué, pas une mesure de vitesse : large, car la CI analyse les salles en parallèle. */
-const TIMEOUT = 300_000;
+const TIMEOUT = ANALYSIS_TIMEOUT_MS;
 
 function gapAt(profile: JumpProfile, rise: number): number {
   return profile.gaps.find((gap) => gap.riseTiles === rise)?.maxGapTiles ?? 0;

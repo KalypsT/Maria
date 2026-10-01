@@ -23,8 +23,9 @@ import {
   zoneGraph,
   type Node,
 } from './zoneGraph';
+import { ANALYSIS_TIMEOUT_MS } from './timeouts';
 
-const TIMEOUT = 180_000;
+const TIMEOUT = ANALYSIS_TIMEOUT_MS;
 const home = () => node(zone.start, analysis(zone.start, false).start);
 const easy = byDifficulty('easy');
 const medium = byDifficulty('medium');
