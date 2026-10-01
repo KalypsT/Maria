@@ -17,6 +17,8 @@ import shadows from './shadows.txt?raw';
 import staircase from './staircase.txt?raw';
 import street from '../street/street.txt?raw';
 import playground from '../street/playground.txt?raw';
+import shop from '../street/shop.txt?raw';
+import site from '../street/site.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -32,7 +34,8 @@ import playground from '../street/playground.txt?raw';
  * Le quartier (D-60) : par le portillon au bout de l'allée (allée:3, fermé tant que la chevillette
  * n'est pas tirée), la rue, un grand niveau en long. Même zone (une seule histoire, une seule
  * analyse), mais une autre page du cahier (« Mon quartier »). Les lieux du quartier sont derrière
- * des portes de façade (D-61), au milieu de la rue : l'aire de jeux d'abord.
+ * des portes de façade (D-61), au milieu de la rue : l'aire de jeux, la supérette ; sa réserve
+ * donne sur le chantier, d'où l'on revient en haut de l'échafaudage de la rue (D-63).
  */
 export const HOUSE: ZoneSource = {
   id: 'house',
@@ -61,6 +64,8 @@ export const HOUSE: ZoneSource = {
     { id: 'street', text: street },
     // Les lieux du quartier, derrière leurs portes de façade (D-61).
     { id: 'playground', text: playground },
+    { id: 'shop', text: shop },
+    { id: 'site', text: site },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -82,6 +87,11 @@ export const HOUSE: ZoneSource = {
     ['garden-alley:3', 'street:1'],
     // Porte de façade (D-61) : le portillon de l'aire de jeux, au milieu de la rue.
     ['street:2', 'playground:1'],
+    // La supérette (porte de façade), sa réserve qui donne sur le chantier, et le haut du chantier
+    // qui ramène au haut de l'échafaudage de la rue (D-63) : une boucle.
+    ['street:3', 'site:2'],
+    ['street:4', 'shop:1'],
+    ['shop:2', 'site:1'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur
@@ -105,5 +115,7 @@ export const HOUSE: ZoneSource = {
     // de leur porte.
     street: { x: 0, y: 3, w: 16, h: 2.4, page: 'street' },
     playground: { x: 4, y: 0.4, w: 4.2, h: 2.2, page: 'street' },
+    shop: { x: 10.9, y: 0.6, w: 2.8, h: 1.8, page: 'street' },
+    site: { x: 14.2, y: -0.6, w: 2.8, h: 3, page: 'street' },
   },
 };

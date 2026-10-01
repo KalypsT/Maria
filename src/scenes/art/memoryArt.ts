@@ -338,6 +338,39 @@ export function momHead(ctx: CanvasRenderingContext2D, x: number, y: number, r: 
   ctx.stroke();
 }
 
+/** Papa (bulle de maman, D-63) : cheveux châtains ondulés, barbe courte, tee-shirt marine. */
+export function dadHead(ctx: CanvasRenderingContext2D, x: number, y: number, r: number): void {
+  const hair = '#6b4a2f';
+  roundRect(ctx, x - r * 1.1, y + r * 1.15, r * 2.2, r * 0.75, r * 0.3, '#2f3f66');
+  ctx.fillStyle = '#e2a881';
+  ctx.beginPath();
+  ctx.moveTo(x - r * 0.28, y + r * 1.15);
+  ctx.lineTo(x + r * 0.28, y + r * 1.15);
+  ctx.lineTo(x, y + r * 1.5);
+  ctx.fill();
+  headAt(ctx, x, y, r * 0.85, '#e2a881', hair, false);
+  // Volume ondulé au-dessus, barbe courte sur le bas du visage.
+  ctx.fillStyle = hair;
+  for (const dx of [-0.5, 0, 0.5]) {
+    ctx.beginPath();
+    ctx.arc(x + r * dx, y - r * 0.85, r * 0.35, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.beginPath();
+  ctx.arc(x, y + r * 0.2, r * 0.82, 0.08 * Math.PI, 0.92 * Math.PI);
+  ctx.fill();
+  ctx.fillStyle = INK;
+  ctx.beginPath();
+  ctx.arc(x - r * 0.3, y - r * 0.05, r * 0.09, 0, Math.PI * 2);
+  ctx.arc(x + r * 0.3, y - r * 0.05, r * 0.09, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#f3d7c0';
+  ctx.lineWidth = Math.max(0.5, r * 0.1);
+  ctx.beginPath();
+  ctx.arc(x, y + r * 0.3, r * 0.22, 0.2 * Math.PI, 0.8 * Math.PI);
+  ctx.stroke();
+}
+
 /**
  * Toise (D-43) : une bande graduée, des traits au crayon aux tailles de Céleste ; `grown` : un
  * nouveau trait plus haut, avec un petit cœur (quelques mois ont passé). Hauteur `h`, centrée

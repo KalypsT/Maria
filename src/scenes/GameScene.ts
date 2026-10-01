@@ -1212,6 +1212,13 @@ export class GameScene extends Phaser.Scene {
     if (isGardenRoom(this.level)) {
       return GARDEN_PALETTE;
     }
+    if (isStreetRoom(this.level) && this.level.meta.indoor) {
+      // Un lieu fermé du quartier (la supérette, D-63) : dedans, de jour, ses propres murs.
+      const walls = this.level.meta.walls?.split(/\s+/);
+      return walls?.[0] && walls[1]
+        ? { ...DAY_PALETTE, wallTop: walls[0], wallBottom: walls[1] }
+        : DAY_PALETTE;
+    }
     if (isStreetRoom(this.level)) {
       // Sol propre à un lieu du quartier (`; @floor: dessus bord`), le sol souple de l'aire de jeux.
       const floor = this.level.meta.floor?.split(/\s+/);

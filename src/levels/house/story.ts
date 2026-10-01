@@ -632,9 +632,9 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: S.lookMs + 600 },
       ],
     },
-    // La rue (D-60) : trois lieux encore fermés (PLACEHOLDER). Agir devant la porte : une bulle
-    // « ? », rejouable ; ils s'ouvriront avec leur propre salle, derrière une porte de façade, comme
-    // l'aire de jeux (D-61).
+    // La rue (D-60) : deux lieux encore fermés, l'école et le chantier (PLACEHOLDER). Agir devant la
+    // porte : une bulle « ? », rejouable. L'aire de jeux et la supérette ont leur porte de façade
+    // (D-61, D-63).
     {
       // L'école.
       id: 'street-school',
@@ -642,21 +642,6 @@ export const HOUSE_STORY: StoryData = {
       on: 'interact',
       area: { col: 95, row: 25, w: 6, h: 3 },
       mark: { col: 97, row: 24 },
-      when: {},
-      lock: true,
-      repeat: true,
-      steps: [
-        { do: 'thought', icon: 'question', ms: S.thoughtMs },
-        { do: 'wait', ms: S.lookMs },
-      ],
-    },
-    {
-      // La supérette.
-      id: 'street-shop',
-      room: 'street',
-      on: 'interact',
-      area: { col: 134, row: 25, w: 6, h: 3 },
-      mark: { col: 136, row: 24 },
       when: {},
       lock: true,
       repeat: true,
@@ -682,8 +667,7 @@ export const HOUSE_STORY: StoryData = {
     },
     {
       // À l'aire de jeux (D-61), maman sur un banc : elle ne sait pas non plus où est Maria ; elle
-      // encourage (« cherche bien »), puis un cœur. PLACEHOLDER : sa réponse montrera papa à la
-      // supérette quand elle sera ouverte.
+      // montre papa, parti faire les courses à la supérette (D-63), puis un cœur.
       id: 'street-mom',
       room: 'playground',
       on: 'interact',
@@ -695,9 +679,29 @@ export const HOUSE_STORY: StoryData = {
         { do: 'flag', id: F.StreetMom },
         { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
         { do: 'wait', ms: S.thoughtMs },
-        { do: 'thought', icon: 'search', ms: S.thoughtMs, by: 'mom-bench' },
+        { do: 'thought', icon: 'dad', ms: S.thoughtMs, by: 'mom-bench' },
         { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'mom-bench' },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // À la supérette (D-63), papa fait les courses. Il ne sait pas non plus où est Maria ; sans
+      // rien savoir, il montre la grue du chantier (le parapluie y est coincé), puis un cœur.
+      id: 'street-dad',
+      room: 'shop',
+      on: 'interact',
+      area: { col: 4, row: 16, w: 7, h: 6 },
+      mark: { col: 7, row: 14 },
+      when: { all: [F.GateOpen], none: [F.StreetDad] },
+      lock: true,
+      steps: [
+        { do: 'flag', id: F.StreetDad },
+        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
+        { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'crane', ms: S.thoughtMs, by: 'dad-shop' },
+        { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'dad-shop' },
         { do: 'wait', ms: S.lookMs },
       ],
     },
@@ -1018,7 +1022,16 @@ export const HOUSE_STORY: StoryData = {
       kind: 'dad-garden',
       col: 5,
       row: 21,
-      when: { all: [F.Grown] },
+      // Une fois le portillon ouvert, papa part faire les courses à la supérette (D-63).
+      when: { all: [F.Grown], none: [F.GateOpen] },
+    },
+    {
+      id: 'dad-shop',
+      room: 'shop',
+      kind: 'dad-shop',
+      col: 7,
+      row: 21,
+      when: { all: [F.GateOpen] },
     },
     {
       id: 'headband',

@@ -1,6 +1,6 @@
 import { PROP_SIZE } from '../../config/story';
 import type { PropKind, ThoughtIcon } from '../../core/story/story';
-import { bonnet, drawMemory, drawNotes, heightChart, momHead } from './memoryArt';
+import { bonnet, dadHead, drawMemory, drawNotes, heightChart, momHead } from './memoryArt';
 
 /**
  * Dessins de l'histoire (D-31), PLACEHOLDERS du style D-28 : objets de mise en scène (berceau,
@@ -526,6 +526,31 @@ function drawIcon(
     }
     case 'mom':
       momHead(ctx, cx, cy - 2, 4.8);
+      break;
+    case 'dad':
+      dadHead(ctx, cx, cy - 2, 4.8);
+      break;
+    case 'crane':
+      // La grue du chantier (D-63) : mât, flèche, crochet ; un petit point jaune au bout (le parapluie).
+      ctx.strokeStyle = '#e8b23a';
+      ctx.lineWidth = 1.4;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx + 3, cy + 7);
+      ctx.lineTo(cx + 3, cy - 6);
+      ctx.moveTo(cx - 8, cy - 4);
+      ctx.lineTo(cx + 7, cy - 4);
+      ctx.stroke();
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(cx - 2, cy - 4);
+      ctx.lineTo(cx - 2, cy + 1);
+      ctx.stroke();
+      ctx.fillStyle = '#f2c14e';
+      ctx.beginPath();
+      ctx.arc(cx - 7, cy - 5.5, 1.4, 0, Math.PI * 2);
+      ctx.fill();
       break;
     case 'search': {
       // Une loupe : « cherche bien » (D-50).

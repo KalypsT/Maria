@@ -164,6 +164,31 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   springrider: { furniture: false },
   /** Grillage de l'école, plein, avec son trou ; la cour se voit à travers. */
   schoolfence: { furniture: true },
+  // La supérette et le chantier (D-63), dessinés par le code (PLACEHOLDER).
+  /** Vitrine vue de l'intérieur (fond). */
+  shopwindow: { furniture: false },
+  /** La réserve au fond de la supérette (fond). */
+  stockroom: { furniture: false },
+  /** Caisse (plein). */
+  checkout: { furniture: true },
+  /** Rayonnage : étagères traversables, montants et produits. */
+  shelfunit: { furniture: true },
+  /** Frigos vitrés (plein). */
+  cooler: { furniture: true },
+  /** Pile de cartons sur un rayonnage ouvert dessous. */
+  cartonrack: { furniture: true },
+  /** Étagère murale de la réserve (traversable). */
+  stockshelf: { furniture: true },
+  /** Grue : mât (plein), flèche (traversable), cabine et contre-flèche en fond. */
+  crane: { furniture: true },
+  /** Banche (panneau de coffrage) pendue à la grue, ouverte dessous. */
+  banche: { furniture: true },
+  /** Mur de béton frais. */
+  concretewall: { furniture: true },
+  /** Antenne sur le toit de la supérette : sa barre est un perchoir traversable (D-63). */
+  antenna: { furniture: true },
+  /** Lampe de chantier sur son poteau : le chapeau est un perchoir traversable. */
+  floodlight: { furniture: true },
   cushions: { furniture: false },
   // Derrière la haie (D-49).
   /** Tuteur géant (bois plein), paroi d'une cheminée. */

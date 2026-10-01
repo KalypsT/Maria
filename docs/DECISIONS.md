@@ -690,6 +690,23 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Parcours d'essai 8 « Parapluie »** (menu pause, hors partie, prête escalade, saut mural et parapluie) : du haut d'une tour, planer au-dessus des briques de jeu jusqu'à un îlot (facile avec le parapluie, impossible sans), puis une longue traversée sous un plafond bas (moyen, 108 ms).
 - **Limite connue** : quatre onglets tiennent sur un téléphone en paysage ; un cinquième (« Monde étrange », PR 4) demandera des onglets plus petits.
 
+## D-63 — Le quartier, PR 3 : la supérette et le chantier
+
+- **Plan validé** (D-61) : supérette → réserve → chantier, où le parapluie s'obtient ; boucle par le haut de l'échafaudage de la rue ; papa à la supérette ; revisites avec le parapluie.
+- **La supérette** (`shop`, porte de façade 4 de la rue, dedans : `; @indoor: yes`, palette de jour et murs carrelés, musique de la rue) : vitrine, caisse, deux rayonnages, frigos ; au fond la réserve, une pile de cartons sur un rayonnage ouvert dessous (on passe dessous : aucun piège), puis un saut de 6 tuiles jusqu'à l'étagère devant la porte de la réserve (**moyen** exactement).
+- **Le chantier** (`shop:2` ↔ `site:1`, dehors, `; @difficulty: hard`, le lieu réel le plus exigeant) :
+  - une banche pendue à la grue (ouverte dessous) et un mur de béton font une cheminée de 4 (saut mural) ; l'échafaudage et sa lanterne (**moyen** exactement depuis l'entrée) ;
+  - puis des planches au-dessus des gravats jusqu'à la flèche de la grue (**difficile** exactement), avec deux araignées pendues à la flèche ; le **parapluie** est coincé au bout de la flèche ;
+  - avec lui, on plane jusqu'à la **sortie haute** (`site:2` ↔ `street:3`, le haut de l'échafaudage de la rue : **une boucle**) et jusqu'à la lampe de chantier (trouvaille **difficile**) ; sans lui, ni l'une ni l'autre (testé) ;
+  - **gravats** (`^` avec `; @hazard: rubble`) : dessin propre, mêmes règles que les orties (ils piquent) ;
+  - la cabine de la grue reste hors d'atteinte (signposting d'une capacité future).
+- **La rue** : porte de façade de la supérette ; sortie haute à droite (au bout de l'échafaudage, qui va jusqu'au mur) ; la porte du chantier reste fermée (bulle « ? »), elle s'ouvrira avec la fin du niveau (D-61). Le quartier est donc relié : rue ↔ supérette ↔ chantier ↔ rue.
+- **Histoire** : une fois le portillon ouvert, papa quitte le potager pour la supérette (hors de la vue). Maman, à l'aire de jeux, montre maintenant **papa** (nouveau pictogramme) ; papa montre **la grue** (nouveau pictogramme), sans rien savoir, puis un cœur (étape `street.dad`).
+- **Revisites avec le parapluie** (§15, pilier 2) : une trouvaille sur l'antenne du toit de la supérette, depuis la corniche de l'école (**moyenne**) ; une trouvaille sur un nichoir au fond du potager, depuis le haut des tuteurs (**moyenne**). Toutes deux impossibles sans le parapluie (testé).
+- **Faisabilité** : le graphe de zone des tests prend le parapluie en option ; « jamais coincée » est vérifié avec et sans lui.
+- **Coût des tests** : l'analyse de toute la zone avec le parapluie prend environ 2 à 3 minutes (fichier `site.test.ts`).
+- **Sauvegarde** : aucune migration (étape `street.dad`, capacité `umbrella`).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

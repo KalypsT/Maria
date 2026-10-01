@@ -56,6 +56,10 @@ export const THOUGHT_ICONS = [
   'gate',
   /** Aide du parapluie (D-62) : Saut deux fois, puis le parapluie ouvert. */
   'umbrella',
+  /** Papa (maman le montre à l'aire de jeux : il est à la supérette, D-63). */
+  'dad',
+  /** La grue du chantier (papa la montre à la supérette, D-63). */
+  'crane',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
@@ -159,6 +163,7 @@ export const PROP_KINDS = [
   'dad-garden',
   // À l'aire de jeux du quartier (D-61).
   'mom-bench',
+  'dad-shop',
   // Objets à regarder (D-38), avec un petit mouvement en boucle.
   'music-box',
   'plant',
@@ -200,6 +205,7 @@ export const CHARACTER_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'mom-garden',
   'dad-garden',
   'mom-bench',
+  'dad-shop',
 ]);
 
 export interface StoryProp {
