@@ -83,6 +83,7 @@ import { RoomArtView } from './RoomArtView';
 import { FinishView } from './FinishView';
 import { BackdropView } from './BackdropView';
 import { ForegroundView } from './ForegroundView';
+import { WorldLifeView } from './WorldLifeView';
 import { MapPage } from '../ui/MapPage';
 import { buildMapModel } from '../core/world/mapModel';
 import { DEFAULT_PUPPET, type PuppetParams } from '../config/puppet';
@@ -210,6 +211,8 @@ export class GameScene extends Phaser.Scene {
   private backdrop!: BackdropView;
   /** Avant-plan : silhouettes au bas de l'écran (D-71). */
   private foreground!: ForegroundView;
+  /** Vie du monde réel dehors : feuilles et linge au vent (D-72). */
+  private worldLife!: WorldLifeView;
   /** Échelle des textures dessinées (habillage, Céleste) : celle de l'écran, plafonnée. */
   private artScale = 1;
   /** Carte (§24) et salles déjà dessinées lors d'une ouverture précédente (tracé animé). */
@@ -339,6 +342,7 @@ export class GameScene extends Phaser.Scene {
     this.finishView = new FinishView(this);
     this.backdrop = new BackdropView(this);
     this.foreground = new ForegroundView(this);
+    this.worldLife = new WorldLifeView(this);
     this.artScale = this.computeArtScale();
     const save = this.session.data;
     const { room, checkpointId } = savedReturn(this.session);
@@ -657,12 +661,19 @@ export class GameScene extends Phaser.Scene {
     artView.w = view.width;
     artView.h = view.height;
     this.roomArt.update(artView, Math.max(this.story.veil, this.transition.veil) >= 1);
+    this.worldLife.update(this.time.now, this.game.loop.delta, artView);
     main.scrollX += fx.offsetX;
     main.scrollY += fx.offsetY;
     // Coin haut gauche de la vue (px du monde) : la caméra Phaser zoome autour de son centre.
     const unzoom = 1 - 1 / main.zoom;
     const viewLeft = main.scrollX + (main.width / 2) * unzoom;
-    this.backdrop.update(viewLeft, main.scrollY + (main.height / 2) * unzoom);
+    this.backdrop.update(
+      viewLeft,
+      main.scrollY + (main.height / 2) * unzoom,
+      camera.viewWidth,
+      this.time.now,
+      this.game.loop.delta,
+    );
     this.foreground.update(
       viewLeft,
       camera.viewWidth,
@@ -1172,10 +1183,12 @@ export class GameScene extends Phaser.Scene {
     if (this.roomArt.build(level, palette, this.artFinish, this.artScale, images)) {
       this.backdrop.build(level, palette, this.artScale, images);
       this.foreground.build(level, palette, this.artScale);
+      this.worldLife.load(level, palette, this.artScale);
       return;
     }
     this.backdrop.clear();
     this.foreground.clear();
+    this.worldLife.clear();
     const chunkPx = LEVEL_CHUNK_TILES * TILE_SIZE;
     const g = this.make.graphics({}, false);
     for (let chunkRow = 0; chunkRow * LEVEL_CHUNK_TILES < level.height; chunkRow++) {

@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Passe graphique** (D-70) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étapes 1 et 2 faites** (finition « papier découpé », D-70 ; profondeur, D-71) sur `ccr-8742f994-82xjq9`. Prochaine : étape 3, la vie du monde réel (vent, nuages, oiseaux, poussière dans la lumière). Pas de nouveau niveau d'ici là.
+**Passe graphique** (D-70) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étapes 1 à 3 faites** (finition « papier découpé », D-70 ; profondeur, D-71 ; vie du monde réel, D-72) sur `ccr-8742f994-82xjq9`. Prochaine : étape 5, **le salon** refait en salle témoin (géométrie sculptée, un repère fort, des sauts au rythme varié, rien qui flotte). Pas de nouveau niveau d'ici là.
 
 **Le jardin (2a) et derrière la haie (2b)** (§7.2, §6, D-46 à D-49) : fusionnés (PR #29), **essai sur téléphone en cours** (début du jardin testé ; jardin adouci (D-51) sur `ccr-53d22df4-9euiqo`). Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
 
@@ -17,6 +17,17 @@
 Prochaine : essai de la gare (réelle, étrange, la fin, la phase 3) sur téléphone. Le niveau suivant (le train ?) reste à décider. Intégrer les morceaux de musique.
 
 ## Fait
+
+### Passe graphique, étape 3 : la vie du monde réel (D-72)
+
+- Un vent commun, par rafales douces.
+- Les nuages dérivent dans le ciel, et la nuit devant la lune, dans les fenêtres.
+- Un petit vol d'oiseaux de temps en temps.
+- Des feuilles tombent au vent là où il y a des arbres (vertes au jardin, ocres dans la rue).
+- Le linge de la terrasse se balance.
+- Tests : 537. Vérifié dans Chromium : terrasse, grand arbre, rue, salon, cuisine.
+- [ ] À vérifier sur téléphone : le vent et les feuilles, assez doux ? Les oiseaux, trop fréquents ?
+- [ ] La trotteuse des horloges s'affiche-t-elle en pointillés ? (défaut vu dans Chromium sans GPU)
 
 ### Passe graphique, étape 2 : la profondeur (D-71)
 

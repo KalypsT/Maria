@@ -644,6 +644,46 @@ export const FOREGROUND = {
   fadeTimeMs: 120,
 } as const;
 
+/**
+ * Vie du monde réel (D-72) : nuages qui dérivent, oiseaux, feuilles et linge au vent. Doux, jamais
+ * devant Céleste, jamais pris pour une surface. PROVISOIRE, à juger sur téléphone.
+ */
+export const WORLD_LIFE = {
+  clouds: {
+    /** Un nuage pour tant de px de large du plan du ciel. */
+    spacingPx: 170,
+    /** Dans les fenêtres (la nuit, devant la lune), plus espacés. */
+    windowSpacingPx: 230,
+    /** Vitesse de dérive (px/s), multipliée par le vent. */
+    speedPxPerS: [3, 7] as [number, number],
+  },
+  birds: {
+    /** Délai entre deux vols (ms). */
+    everyMs: [12000, 28000] as [number, number],
+    /** Durée de la traversée de l'écran (ms). */
+    crossMs: 9000,
+    count: [2, 4] as [number, number],
+    /** Battement d'ailes (ms). */
+    flapMs: 320,
+  },
+  leaves: {
+    /** Feuilles à l'écran au plus. */
+    count: 7,
+    /** Chute (px/s) et poussée du vent (px/s, × vent). */
+    fallPxPerS: [9, 16] as [number, number],
+    windPxPerS: 22,
+    /** Battement de la chute (amplitude px, période ms). */
+    flutterPx: 5,
+    flutterMs: 1600,
+    alpha: 0.85,
+  },
+  laundry: {
+    /** Balancement du linge (angle maximal par vent fort, radians ; période ms). */
+    swayRad: 0.22,
+    periodMs: 1300,
+  },
+} as const;
+
 /** Rayon du halo d'une veilleuse (px logiques). */
 export const LAMP_LIGHT_RADIUS = 110;
 /** Rayon de la lumière de la lune autour d'une fenêtre (px logiques). */

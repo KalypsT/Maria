@@ -200,6 +200,50 @@ function windowView(ctx: CanvasRenderingContext2D, p: Readonly<ArtPalette>, r: R
   }
 }
 
+/** Linge d'un fil (D-72) : pince en (`x`, `y`), couleur, grand (pyjama) ou chaussette. */
+export interface LaundryItem {
+  readonly x: number;
+  readonly y: number;
+  readonly color: string;
+  readonly big: boolean;
+}
+
+/** Le linge pendu à un fil à linge (le fil pend un peu au milieu). */
+export function clotheslineItems(r: Rect): LaundryItem[] {
+  const colors = ['#f19bb5', '#9fc0e8', '#e6c27a', '#f1a9bd', '#7fa37a'];
+  const count = Math.max(3, Math.floor(r.w / 24));
+  const items: LaundryItem[] = [];
+  for (let i = 0; i < count; i++) {
+    const t = (i + 0.5) / count;
+    items.push({
+      x: r.x + t * r.w,
+      y: r.y + 2 + 5 * 4 * t * (1 - t),
+      color: colors[i % colors.length] ?? '#f19bb5',
+      big: i % 3 === 1,
+    });
+  }
+  return items;
+}
+
+/** Une pièce de linge, pince à l'origine. */
+export function drawLaundryItem(
+  ctx: CanvasRenderingContext2D,
+  item: LaundryItem,
+  p: Readonly<ArtPalette>,
+): void {
+  ctx.fillStyle = p.silhouettes ? p.wood : item.color;
+  if (item.big) {
+    rounded(ctx, { x: -6, y: 0, w: 12, h: 14 }, 3);
+  } else {
+    rounded(ctx, { x: -2.5, y: 0, w: 5, h: 11 }, [1, 1, 3, 3]);
+    ctx.fill();
+    rounded(ctx, { x: -2.5, y: 8, w: 8, h: 4 }, 2);
+  }
+  ctx.fill();
+  ctx.fillStyle = '#c79d6f';
+  ctx.fillRect(-1, -2, 2, 3);
+}
+
 const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
   ...gardenDrawers({ tileShape, rounded }),
   ...streetDrawers({ tileShape, rounded }),
@@ -450,23 +494,15 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     ctx.moveTo(r.x, r.y + 2);
     ctx.quadraticCurveTo(r.x + r.w / 2, r.y + 7, r.x + r.w, r.y + 2);
     ctx.stroke();
-    const colors = ['#f19bb5', '#9fc0e8', '#e6c27a', '#f1a9bd', '#7fa37a'];
-    const count = Math.max(3, Math.floor(r.w / 24));
-    for (let i = 0; i < count; i++) {
-      const t = (i + 0.5) / count;
-      const x = r.x + t * r.w;
-      const y = r.y + 2 + 5 * 4 * t * (1 - t);
-      ctx.fillStyle = p.silhouettes ? p.wood : (colors[i % colors.length] ?? '#f19bb5');
-      if (i % 3 === 1) {
-        rounded(ctx, { x: x - 6, y, w: 12, h: 14 }, 3);
-      } else {
-        rounded(ctx, { x: x - 2.5, y, w: 5, h: 11 }, [1, 1, 3, 3]);
-        ctx.fill();
-        rounded(ctx, { x: x - 2.5, y: y + 8, w: 8, h: 4 }, 2);
-      }
-      ctx.fill();
-      ctx.fillStyle = '#c79d6f';
-      ctx.fillRect(x - 1, y - 2, 2, 3);
+    // Dehors, le linge se balance au vent (D-72) : il est dessiné à part.
+    if (p.outdoor && !p.silhouettes) {
+      return;
+    }
+    for (const item of clotheslineItems(r)) {
+      ctx.save();
+      ctx.translate(item.x, item.y);
+      drawLaundryItem(ctx, item, p);
+      ctx.restore();
     }
   },
   sofaback(a, r) {

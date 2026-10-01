@@ -29,7 +29,7 @@ interface Piece {
   alpha: number;
 }
 
-type Shape = 'grass' | 'flowers' | 'leaves' | 'weeds';
+type Shape = 'grass' | 'flowers' | 'weeds';
 
 /** Couleur hexadécimale assombrie (`k` : part gardée). */
 function shade(hex: string, k: number): string {
@@ -185,7 +185,7 @@ function shapesFor(p: Readonly<ArtPalette>): readonly Shape[] {
   if (!p.outdoor) {
     return [];
   }
-  return p.paved ? ['weeds'] : ['grass', 'flowers', 'grass', 'leaves'];
+  return p.paved ? ['weeds'] : ['grass', 'flowers', 'grass'];
 }
 
 /** Silhouette d'une pièce, posée sur le bas de la toile (`w` × `h`, px logiques). */
@@ -226,17 +226,6 @@ function drawShape(
       ctx.beginPath();
       ctx.ellipse(w / 2, h, w / 2, h * 0.45, 0, Math.PI, 0);
       ctx.fill();
-      break;
-    }
-    case 'leaves': {
-      for (let i = 0; i < 6; i++) {
-        const x = 4 + r(i) * (w - 8);
-        const y = h * (0.25 + r(i + 0.3) * 0.5);
-        ctx.beginPath();
-        ctx.ellipse(x, y, 6 + r(i + 0.6) * 4, 3, (r(i + 0.9) - 0.5) * 1.6, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.fillRect(0, h * 0.55, w, h * 0.45);
       break;
     }
   }

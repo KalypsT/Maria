@@ -25,7 +25,7 @@ function startAt(x: number, step: number, offset = 0): number {
   return Math.floor((x - offset) / step) * step + offset;
 }
 
-/** Ciel du dehors : dégradé jusqu'à l'horizon (le sol), nuages en coussins. */
+/** Ciel du dehors : dégradé jusqu'à l'horizon (le sol). Les nuages dérivent à part (D-72). */
 export function drawSkyPlane(
   ctx: CanvasRenderingContext2D,
   p: Readonly<ArtPalette>,
@@ -37,26 +37,37 @@ export function drawSkyPlane(
   sky.addColorStop(1, p.wallBottom);
   ctx.fillStyle = sky;
   ctx.fillRect(e.x0, e.y0, e.x1 - e.x0, e.y1 - e.y0);
-  const puffs = [
-    [0, 0, 14, 6],
-    [12, -5, 12, 8],
-    [25, -2, 13, 7],
-    [37, 1, 11, 5],
-  ] as const;
-  for (let x = startAt(e.x0 - 60, 110, 20); x < e.x1; x += 110) {
-    const k = Math.round(x / 110);
-    const y = 26 + hash(k) * 70;
-    const size = 0.8 + hash(k + 0.5) * 0.6;
-    ctx.fillStyle = p.silhouettes ? p.wallpaper : 'rgba(205,220,235,0.7)';
-    for (const [dx, dy, rx, ry] of puffs) {
+}
+
+/** Taille d'un nuage (px logiques), pour sa texture. */
+export const CLOUD_SIZE = { w: 64, h: 24 } as const;
+
+/**
+ * Un nuage en coussins (D-72), dans un cadre de `CLOUD_SIZE` : ombre dessous, lumière dessus.
+ * `seed` fait varier les coussins.
+ */
+export function drawCloud(
+  ctx: CanvasRenderingContext2D,
+  light: string,
+  shadow: string,
+  seed: number,
+): void {
+  const puffs: [number, number, number, number][] = [];
+  const n = 3 + Math.floor(hash(seed) * 3);
+  for (let i = 0; i < n; i++) {
+    const t = (i + 0.5) / n;
+    const rx = 9 + hash(seed + i * 0.7) * 6;
+    const ry = 5 + hash(seed + i * 1.3) * 4 * Math.sin(t * Math.PI);
+    puffs.push([8 + t * (CLOUD_SIZE.w - 16), 14 - ry * 0.5, rx, ry + 2]);
+  }
+  for (const [color, dy] of [
+    [shadow, 2],
+    [light, 0],
+  ] as const) {
+    ctx.fillStyle = color;
+    for (const [x, y, rx, ry] of puffs) {
       ctx.beginPath();
-      ctx.ellipse(x + dx * size, y + dy * size + 2, rx * size, ry * size, 0, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.fillStyle = p.wallpaper;
-    for (const [dx, dy, rx, ry] of puffs) {
-      ctx.beginPath();
-      ctx.ellipse(x + dx * size, y + dy * size, rx * size, ry * size, 0, 0, Math.PI * 2);
+      ctx.ellipse(x, y + dy, Math.min(rx, x, CLOUD_SIZE.w - x), ry, 0, 0, Math.PI * 2);
       ctx.fill();
     }
   }

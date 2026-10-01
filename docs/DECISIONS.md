@@ -844,6 +844,19 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Coût mesuré** (Chromium sans GPU, échelle 3) : construction des plans 30 à 45 ms dans le salon, 100 à 200 ms dehors, pendant le fondu du changement de salle ; avant-plan < 20 ms. **Mémoire graphique** : jusqu'à environ 25 Mo de plus dans la rue (quatre plans). À surveiller sur téléphone ; levier : `PARALLAX.maxScale` à 1.
 - **Sauvegarde** : aucune migration.
 
+## D-72 — Passe graphique, étape 3 : la vie du monde réel
+
+- **Un vent commun** (`wind`, logique pure testée, `src/core/fx/worldLife.ts`) : calmes et rafales lentes ; le linge, les feuilles et les nuages le suivent ensemble.
+- **Nuages qui dérivent** : sortis du ciel peint, ils deviennent des images accrochées aux plans lointains (`BackdropView`), qui avancent au vent et reviennent de l'autre côté. Dehors, dans le ciel ; **dedans, devant la lune**, dans la vue par les fenêtres (sombres la nuit, blancs le matin). Recadrés sur la salle.
+- **Oiseaux** : de temps en temps (12 à 28 s), un petit vol de 2 à 4 traverse l'écran haut dans le ciel, en battant des ailes, sur le plan des collines lointaines. Jamais dans le monde étrange.
+- **Feuilles** (`WorldLifeView`) : là où il y a des arbres ou des haies, quelques feuilles (7 au plus) tombent en voletant, poussées par le vent ; vertes au jardin, ocres sous les platanes de la rue. Derrière les personnages, jamais devant Céleste.
+- **Linge** : dehors, les chaussettes et le pyjama du fil de la terrasse se balancent, en une vague qui court le long du fil (dedans, à la buanderie, ils restent immobiles : pas de vent).
+- **Inclinaisons dessinées d'avance** : tourner à l'affichage de très petits sprites les déformait dans Chromium (morceaux manquants), même sans arrondi des sommets. Le linge (9 angles) et les feuilles (8 angles) choisissent l'image de l'angle le plus proche. **Remarque** : la trotteuse existante des horloges (D-38) montre le même défaut dans Chromium sans GPU (aiguille en pointillés). À vérifier sur téléphone ; même remède au besoin.
+- **Avant-plan** : la forme « feuillage » retirée (une tache sombre) ; restent herbes et fleurs.
+- Réglages : `WORLD_LIFE` (`src/config/art.ts`), PROVISOIRES.
+- **Rien ne touche à la collision ni au mouvement** ; aucune allocation par image.
+- **Sauvegarde** : aucune migration.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
