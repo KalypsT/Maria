@@ -11,6 +11,8 @@ Déposer ici les morceaux, nommés d'après leur emplacement :
 | `strange`        | le monde étrange de la maison                      |
 | `hedge`          | derrière la haie                                   |
 | `street`         | la rue du quartier                                 |
+| `street-strange` | l'école étrange (le monde étrange du quartier)     |
+| `station`        | la gare                                            |
 | `found` (court)  | capacité ou trouvaille ramassée                    |
 | `memory` (court) | nouveau souvenir                                   |
 | `maria` (court)  | apparition de Maria (sans ce fichier : le silence) |

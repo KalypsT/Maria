@@ -31,6 +31,8 @@ const easy = byDifficulty('easy');
 const medium = byDifficulty('medium');
 const OPEN = [F.GateOpen];
 /** Colonne de la trouvaille sur l'antenne de la supérette (revisite avec le parapluie, D-63). */
+/** Le nid du platane, au bout du fil tendu depuis l'école (D-66). */
+const NEST_COL = 20;
 const ANTENNA_COL = 133;
 /** Arrivée dans la rue par le portillon. */
 const arrival = () => node('street', exitSurface('street', 1));
@@ -136,7 +138,7 @@ describe('la rue (D-60)', () => {
   });
 
   it(
-    'le trottoir se parcourt facilement jusqu’au bout, et à ses portes (aire de jeux, supérette, école)',
+    'le trottoir se parcourt facilement jusqu’au bout, et à ses portes (aire de jeux, supérette, école, palissade)',
     { timeout: TIMEOUT },
     () => {
       const seen = reachable(zoneGraph(true, easy, 2, true, OPEN), arrival());
@@ -146,16 +148,10 @@ describe('la rue (D-60)', () => {
       for (const [id, name] of [
         [4, 'supérette'],
         [5, 'école'],
+        [6, 'palissade du chantier (la gare, D-66)'],
       ] as const) {
         const d = level('street').doors.find((candidate) => candidate.id === id);
         expect(d && seen.has(nodeAt('street', d.col, d.row)), name).toBe(true);
-      }
-      for (const id of ['street-site', 'street-site-open']) {
-        const area = trigger(id).area;
-        if (!area) {
-          throw new Error(`${id} sans zone`);
-        }
-        expect(seen.has(nodeAt('street', area.col + 2, 27)), id).toBe(true);
       }
     },
   );
@@ -164,9 +160,10 @@ describe('la rue (D-60)', () => {
     'les trouvailles, sur les toits et l’échafaudage : jamais faciles, au plus moyennes',
     { timeout: TIMEOUT },
     () => {
-      // L'antenne de la supérette (D-63) ne s'atteint qu'avec le parapluie : voir site.test.ts.
+      // L'antenne de la supérette (D-63) ne s'atteint qu'avec le parapluie : voir site.test.ts ;
+      // le nid du platane (D-66), qu'avec le crochet : voir station.test.ts.
       const secrets = level('street').entities.filter(
-        (e) => e.type === EntityType.Secret && e.col !== ANTENNA_COL,
+        (e) => e.type === EntityType.Secret && e.col !== ANTENNA_COL && e.col !== NEST_COL,
       );
       expect(secrets).toHaveLength(2);
       const byEasy = reachable(zoneGraph(true, easy, 2, true, OPEN), arrival());

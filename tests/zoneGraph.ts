@@ -44,8 +44,11 @@ export function analysis(
   growth = 1,
   wallJump = false,
   glide = false,
+  hook = false,
 ): LevelAnalysis {
-  const key = `${room}:${String(climb)}:${String(growth)}:${String(wallJump)}:${String(glide)}`;
+  // Le crochet (D-65) ne change rien dans une salle sans câble : même analyse.
+  const hooked = hook && glide && level(room).cables.length > 0;
+  const key = `${room}:${String(climb)}:${String(growth)}:${String(wallJump)}:${String(glide)}:${String(hooked)}`;
   let result = analyses.get(key);
   if (!result) {
     const p = phase(growth);
@@ -53,6 +56,7 @@ export function analysis(
       climb,
       wallJump,
       glide,
+      hook: hooked,
       hitbox: p.hitbox,
     });
     analyses.set(key, result);
@@ -144,6 +148,8 @@ export function zoneGraph(
   flags: readonly string[] = [],
   /** Parapluie (D-62). */
   glide = false,
+  /** Crochet du parapluie (D-65). */
+  hook = false,
 ): Map<Node, Set<Node>> {
   const graph = new Map<Node, Set<Node>>();
   const edge = (from: Node, to: Node) => {
@@ -165,7 +171,7 @@ export function zoneGraph(
   }
   for (const [room, data] of zone.rooms) {
     const min = rule ? rule(room) : 0;
-    for (const move of analysis(room, climb, growth, wallJump, glide).moves) {
+    for (const move of analysis(room, climb, growth, wallJump, glide, hook).moves) {
       if (move.windowMs >= min) {
         edge(node(room, move.from), node(room, move.to));
       }
@@ -181,8 +187,11 @@ export function zoneGraph(
   // ceux du jardin (D-49) et de l'école (D-64) après, et le trou de la haie ne s'ouvre qu'une fois le saut mural
   // trouvé dans la cabane.
   for (const [from, to] of storyPassages()) {
-    // Le jardin (D-49) et le quartier (l'école, D-64) viennent après la croissance.
-    const late = roomOf(from).startsWith('garden-') || roomOf(from).startsWith('school');
+    // Le jardin (D-49), le quartier (l'école, D-64) et la gare (D-66) viennent après la croissance.
+    const late =
+      roomOf(from).startsWith('garden-') ||
+      roomOf(from).startsWith('school') ||
+      roomOf(from).startsWith('station-');
     if (late !== growth >= 2 || (roomOf(from) === 'garden-tree' && !wallJump)) {
       continue;
     }

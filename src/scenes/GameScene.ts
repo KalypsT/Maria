@@ -83,6 +83,7 @@ import { DEFAULT_PUPPET, type PuppetParams } from '../config/puppet';
 import { CelestePoser, PoseAttack } from '../core/player/celestePose';
 import { AttackPhase } from '../core/combat/PlayerAttack';
 import { DustPool } from './DustPool';
+import { TrainView } from './TrainView';
 import { WorldView } from './WorldView';
 import type { AudioPlayer } from '../platform/audioPlayer';
 import { isMusicTrack, type MusicTrack } from '../config/audio';
@@ -116,6 +117,7 @@ const SOLID_COLORS: Readonly<Partial<Record<number, SolidColors>>> = {
 const MAP_TITLES: Readonly<Record<string, string>> = {
   house: 'Ma maison',
   street: 'Mon quartier',
+  station: 'La gare',
 };
 
 /** Boîte englobant toutes les salles d'une page de la carte (disposition stable). */
@@ -173,6 +175,8 @@ export class GameScene extends Phaser.Scene {
   readonly combatParams: CombatParams = { ...DEFAULT_COMBAT };
   combat!: CombatWorld;
   private combatView!: CombatView;
+  /** Trains de la gare et leurs feux (D-66). */
+  private trainView!: TrainView;
   /** Échec, jauge de peur et checkpoints (D-21), modifiables par l'overlay. */
   readonly worldParams: WorldParams = { ...DEFAULT_WORLD };
   run!: RunState;
@@ -336,6 +340,10 @@ export class GameScene extends Phaser.Scene {
     this.combatView.setArt(this.artScale, this.palette());
     this.worldView = new WorldView(this, this.run, this.pickups);
     this.worldView.setArt(this.artScale, this.strangeWorld || isStrangeRoom(this.level));
+    this.worldView.setCables(this.level.cables);
+    this.trainView = new TrainView(this, this.combat);
+    this.trainView.setArt(this.artScale);
+    this.trainView.rebuild();
     this.props.load(this.story.data.props, this.level.id, this.story.flags);
     this.storyView = new StoryView(this, this.props, this.story);
     this.storyView.setArt(this.artScale, this.artImages());
@@ -587,6 +595,7 @@ export class GameScene extends Phaser.Scene {
       this.poser.pose,
     );
     this.combatView.render(alpha, player, this.puppet);
+    this.trainView.render();
     this.storyView.render(this.puppet.x, this.puppet.y, box.height);
     this.worldView.render();
     this.dust.update();
@@ -940,6 +949,7 @@ export class GameScene extends Phaser.Scene {
     }
     this.combat.load(level);
     this.combatView.rebuild();
+    this.trainView.rebuild();
     this.run.load(level, this.session.data.activatedCheckpoints, checkpointId);
     const { abilities, collectibles } = this.session.data.progression;
     this.pickups.load(level, abilities, collectibles);
@@ -1050,6 +1060,7 @@ export class GameScene extends Phaser.Scene {
     this.worldView.setArt(this.artScale, this.strangeWorld || isStrangeRoom(this.level));
     this.storyView.setArt(this.artScale, this.artImages());
     this.combatView.setArt(this.artScale, this.palette());
+    this.trainView.setArt(this.artScale);
     this.drawLevel();
     this.puppet.redraw(this.artScale, this.celestePalette(), this.artImages(), this.growth);
   }

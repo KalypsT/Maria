@@ -1,0 +1,48 @@
+; La gare (D-66) : le bureau des objets trouvés (porte de façade du hall). Personne au guichet.
+; Des étagères pleines de choses perdues (parapluies, chapeaux, valises, gants) montent jusqu'en
+; haut de l'armoire, où la poignée-crochet attend (elle s'ajoute au parapluie). Tout en haut des
+; casiers, une lueur turquoise passe par une porte entrouverte : le monde étrange (plus tard).
+; @name: Objets trouvés
+; @icon: umbrella
+; @world: street
+; @indoor: yes
+; @music: station
+; @wall: planks
+; @walls: #d8c7a6 #bfa983
+; @difficulty: medium
+; @ability: hook
+; @decor: lostcounter 8 24 10 4
+; @decor: lostshelf 19 8 8 13
+; @decor: tallcabinet 31 6 2 18
+; @decor: lockers 38 10 5 18
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+############################################
+#..........................................#
+#..........................................#
+#..........................................#
+#..........................................#
+#...............................A..........#
+#..............................bb..........#
+#..............................bb..........#
+#........................--....bb..........#
+#..............................bb..........#
+#..............................bb.....bbbbb#
+#..............................bb.....bbbbb#
+#..................--..........bb.....bbbbb#
+#..............................bb.....bbbbb#
+#..............................bb.....bbbbb#
+#..............................bb.....bbbbb#
+#........................--....bb.....bbbbb#
+#..............................bb.....bbbbb#
+#..............................bb.....bbbbb#
+#..............................bb.....bbbbb#
+#..................--..........bb.....bbbbb#
+#..............................bb.....bbbbb#
+#..............................bb.....bbbbb#
+#..............................bb.....bbbbb#
+#.......bbbbbbbbbb....................bbbbb#
+#.......bbbbbbbbbb....................bbbbb#
+1.......bbbbbbbbbb....................bbbbb#
+1..P..C.bbbbbbbbbb....................bbbbb#
+############################################
+############################################

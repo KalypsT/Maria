@@ -1,4 +1,11 @@
-import type { CombatParams } from '../../config/combat';
+import {
+  TRAIN_GUST_AHEAD_PX,
+  TRAIN_GUST_TILES,
+  TRAIN_LENGTH_PX,
+  trainLeft,
+  trainProgress,
+  type CombatParams,
+} from '../../config/combat';
 import { TILE_SIZE } from '../../config/display';
 import { PHYSICS_STEP_HZ, msToSteps } from '../../config/movement';
 import { EntityType, Tile, tileAt, type LevelData } from '../level/LevelData';
@@ -52,6 +59,12 @@ export class CombatWorld {
   private stingTotal = 0;
   private hurtSteps = 0;
   private invulnerableTotal = 0;
+  /** Pas écoulés depuis le chargement de la salle ou la réapparition (cycle des trains, D-66). */
+  trainSteps = 0;
+  /** Train dont le souffle a déjà repoussé Céleste pendant ce passage (un seul souffle par train). */
+  private trainGusted = -1;
+  /** Zone du souffle (réutilisée : aucune allocation). */
+  private readonly gustBox: Box = { x: 0, y: 0, width: 0, height: 0 };
   private readonly params: CombatParams;
 
   constructor(
@@ -137,6 +150,64 @@ export class CombatWorld {
     this.stingSteps = 0;
     this.events = 0;
     this.lastEnemy = -1;
+    this.trainSteps = 0;
+    this.trainGusted = -1;
+  }
+
+  /** Temps du cycle des trains (ms). */
+  get trainMs(): number {
+    return (this.trainSteps * 1000) / this.stepHz;
+  }
+
+  /** Décalage du cycle du train `index` : deux voies d'une salle ne passent pas ensemble. */
+  trainOffsetMs(index: number): number {
+    return index * (this.params.trainPeriodMs / 2);
+  }
+
+  /**
+   * Souffle d'un train qui passe (D-66) : sur la voie, là où passe le train, Céleste est repoussée
+   * dans le sens du train et vers le haut, et la peur monte, une fois par passage. Vrai si elle vient
+   * d'être repoussée.
+   */
+  private stepTrains(player: PlayerPhysics): boolean {
+    const trains = this.level.trains;
+    if (trains.length === 0) {
+      return false;
+    }
+    this.trainSteps++;
+    const ms = this.trainMs;
+    const gust = this.gustBox;
+    for (let i = 0; i < trains.length; i++) {
+      const train = trains[i];
+      if (!train) {
+        continue;
+      }
+      // Le souffle accompagne le train : là où il passe, et un peu devant lui.
+      const progress = trainProgress(ms, this.trainOffsetMs(i), this.params);
+      if (progress < 0) {
+        if (this.trainGusted === i) {
+          this.trainGusted = -1;
+        }
+        continue;
+      }
+      gust.x =
+        trainLeft(progress, this.level.width * TILE_SIZE, train.dir) -
+        (train.dir < 0 ? TRAIN_GUST_AHEAD_PX : 0);
+      gust.width = TRAIN_LENGTH_PX + TRAIN_GUST_AHEAD_PX;
+      gust.y = (train.row - TRAIN_GUST_TILES) * TILE_SIZE;
+      gust.height = TRAIN_GUST_TILES * TILE_SIZE;
+      if (this.trainGusted !== i && overlaps(player.box, gust)) {
+        this.trainGusted = i;
+        player.vx = train.dir * this.params.trainGustX;
+        player.vy = -this.params.trainGustY;
+        player.startHurt(this.hurtSteps);
+        this.invulnerableSteps = Math.max(this.invulnerableSteps, this.invulnerableTotal);
+        this.events |= CombatEvent.Hurt;
+        this.lastEnemy = -1;
+        return true;
+      }
+    }
+    return false;
   }
 
   /** Un pas, après celui de Céleste. `attackPressed` : front de pression d'Attaque. */
@@ -165,6 +236,9 @@ export class CombatWorld {
     }
     for (const enemy of enemies) {
       enemy.step(this.level, tuning);
+    }
+    if (this.stepTrains(player)) {
+      return;
     }
     // Danger du sol (orties, ronces, briques de jeu, D-51, D-56) : il pique. Céleste rebondit vers
     // le haut en gardant son élan (elle continue dans le sens où elle allait) ; la peur monte. Son

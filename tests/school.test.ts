@@ -243,8 +243,9 @@ describe('l’école et son monde étrange (D-64)', () => {
     expect(visible('site-gap', morning)).toBe(true);
     expect(bedroom && checkCondition(morning, bedroom.when)).toBe(false);
     // Des signes ramènent au chantier : la grue montrée par maman, la palissade ouverte.
-    expect(trigger('street-site-open').when.all).toContain(F.StreetMorning);
-    expect(trigger('street-site').when.none).toContain(F.StreetMorning);
+    // La palissade (porte de façade 6) s'ouvre ce matin-là : la gare (D-66).
+    const palisade = HOUSE_STORY.lockedRooms.find((l) => l.room === 'street' && l.exit === 6);
+    expect(palisade?.when.none).toEqual([F.StreetMorning]);
     expect(
       HOUSE_STORY.omens.some((o) => o.room === 'street' && o.when.all?.includes(F.StreetMorning)),
     ).toBe(true);

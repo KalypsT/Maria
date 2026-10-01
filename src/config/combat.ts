@@ -56,6 +56,17 @@ export interface CombatParams {
   hitFlashMs: number;
   /** Tremblement de caméra à l'impact (px, 0 = désactivé : §37, pas de mouvement parasite). */
   screenShakePx: number;
+  /**
+   * Trains de la gare (D-66), danger simple : un train passe toutes les `trainPeriodMs`, annoncé
+   * par le feu pendant `trainWarnMs`, puis passe pendant `trainPassMs`. Son souffle repousse
+   * Céleste si elle est sur la voie (pas de contact avec le train lui-même).
+   */
+  trainPeriodMs: number;
+  trainWarnMs: number;
+  trainPassMs: number;
+  /** Souffle du train : vitesse horizontale (sens du train) et vers le haut (px/s). */
+  trainGustX: number;
+  trainGustY: number;
 }
 
 export const DEFAULT_COMBAT: Readonly<CombatParams> = {
@@ -86,6 +97,11 @@ export const DEFAULT_COMBAT: Readonly<CombatParams> = {
   snailSpeed: 20,
   hitFlashMs: 100,
   screenShakePx: 0,
+  trainPeriodMs: 9000,
+  trainWarnMs: 2000,
+  trainPassMs: 1600,
+  trainGustX: 260,
+  trainGustY: 300,
 };
 
 export const COMBAT_PARAM_RANGES: Readonly<
@@ -118,7 +134,55 @@ export const COMBAT_PARAM_RANGES: Readonly<
   snailSpeed: { min: 2, max: 120, step: 1 },
   hitFlashMs: { min: 0, max: 400, step: 10 },
   screenShakePx: { min: 0, max: 6, step: 0.5 },
+  trainPeriodMs: { min: 3000, max: 30000, step: 500 },
+  trainWarnMs: { min: 300, max: 5000, step: 100 },
+  trainPassMs: { min: 300, max: 4000, step: 100 },
+  trainGustX: { min: 0, max: 600, step: 10 },
+  trainGustY: { min: 0, max: 600, step: 10 },
 };
+
+/** Hauteur balayée par le souffle d'un train au-dessus de ses rails (tuiles, D-66). */
+export const TRAIN_GUST_TILES = 3;
+/** Longueur d'un train (px) : trois voitures de 9 tuiles. */
+export const TRAIN_LENGTH_PX = 27 * 16;
+/** Le souffle précède le train de cette distance (px). */
+export const TRAIN_GUST_AHEAD_PX = 24;
+
+/**
+ * Bord gauche du train (px) quand il a parcouru `progress` (0 → 1) de son passage, d'un bout à
+ * l'autre d'une salle de `roomWidthPx`, dans le sens `dir`.
+ */
+export function trainLeft(progress: number, roomWidthPx: number, dir: number): number {
+  const span = roomWidthPx + TRAIN_LENGTH_PX;
+  return dir > 0 ? -TRAIN_LENGTH_PX + progress * span : roomWidthPx - progress * span;
+}
+
+/** Moment du passage d'un train (D-66). */
+export const TrainPhase = { Calm: 0, Warning: 1, Passing: 2 } as const;
+export type TrainPhase = (typeof TrainPhase)[keyof typeof TrainPhase];
+
+/**
+ * Moment du cycle d'un train, `ms` après le chargement de la salle (ou la réapparition), décalé de
+ * `offsetMs` (plusieurs voies ne passent pas ensemble). Le cycle commence par le calme.
+ */
+export function trainPhase(ms: number, offsetMs: number, p: Readonly<CombatParams>): TrainPhase {
+  const period = Math.max(p.trainPeriodMs, p.trainWarnMs + p.trainPassMs + 1);
+  const t = (((ms + offsetMs) % period) + period) % period;
+  const calm = period - p.trainWarnMs - p.trainPassMs;
+  return t < calm
+    ? TrainPhase.Calm
+    : t < calm + p.trainWarnMs
+      ? TrainPhase.Warning
+      : TrainPhase.Passing;
+}
+
+/** Avancement du train qui passe (0 → 1), ou -1 s'il ne passe pas. */
+export function trainProgress(ms: number, offsetMs: number, p: Readonly<CombatParams>): number {
+  const period = Math.max(p.trainPeriodMs, p.trainWarnMs + p.trainPassMs + 1);
+  const t = (((ms + offsetMs) % period) + period) % period;
+  const start = period - p.trainPassMs;
+  return t < start ? -1 : (t - start) / p.trainPassMs;
+}
 
 /** Hitbox du patrouilleur (px, PROVISOIRE, placeholder géométrique). */
 export const PATROLLER_HITBOX = { width: 14, height: 12 } as const;

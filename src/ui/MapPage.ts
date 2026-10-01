@@ -689,6 +689,44 @@ function drawIcon(
       ctx.arc(x, y - s * 0.2, s * 0.18, 0, Math.PI * 2);
       ctx.rect(x - s * 0.25, y + s * 0.2, s * 0.5, s * 0.5);
       break;
+    case 'train':
+      // Une locomotive sur ses rails (la gare, D-66).
+      ctx.rect(x - s * 0.8, y - s * 0.4, s * 1.4, s * 0.7);
+      ctx.moveTo(x + s * 0.6, y - s * 0.4);
+      ctx.lineTo(x + s * 0.9, y + s * 0.3);
+      ctx.moveTo(x - s, y + s * 0.6);
+      ctx.lineTo(x + s, y + s * 0.6);
+      ctx.moveTo(x - s * 0.3, y + s * 0.45);
+      ctx.arc(x - s * 0.45, y + s * 0.45, s * 0.15, 0, Math.PI * 2);
+      ctx.moveTo(x + s * 0.45, y + s * 0.45);
+      ctx.arc(x + s * 0.3, y + s * 0.45, s * 0.15, 0, Math.PI * 2);
+      break;
+    case 'clock':
+      // La grande horloge du hall (D-66).
+      ctx.moveTo(x + s * 0.7, y);
+      ctx.arc(x, y, s * 0.7, 0, Math.PI * 2);
+      ctx.moveTo(x, y);
+      ctx.lineTo(x, y - s * 0.45);
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + s * 0.35, y + s * 0.1);
+      break;
+    case 'umbrella':
+      // Un parapluie (le bureau des objets trouvés, D-66).
+      ctx.moveTo(x - s * 0.8, y);
+      ctx.quadraticCurveTo(x, y - s * 1.1, x + s * 0.8, y);
+      ctx.closePath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x, y + s * 0.6);
+      ctx.arc(x + s * 0.15, y + s * 0.6, s * 0.15, Math.PI, 0, true);
+      break;
+    case 'wagon':
+      // Un wagon de marchandises (le dépôt, D-66).
+      ctx.rect(x - s * 0.9, y - s * 0.5, s * 1.8, s * 0.9);
+      ctx.moveTo(x - s * 0.3, y + s * 0.55);
+      ctx.arc(x - s * 0.45, y + s * 0.55, s * 0.15, 0, Math.PI * 2);
+      ctx.moveTo(x + s * 0.6, y + s * 0.55);
+      ctx.arc(x + s * 0.45, y + s * 0.55, s * 0.15, 0, Math.PI * 2);
+      break;
     case 'street':
       // Un lampadaire et une petite maison au bord d'une route (D-60).
       ctx.moveTo(x - s, y + s * 0.6);

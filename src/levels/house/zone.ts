@@ -22,6 +22,11 @@ import site from '../street/site.txt?raw';
 import schoolyard from '../street/schoolyard.txt?raw';
 import school from '../street/school.txt?raw';
 import schoolStrange from '../street/school-strange.txt?raw';
+import stationTracks from '../station/tracks.txt?raw';
+import stationPlatforms from '../station/platforms.txt?raw';
+import stationHall from '../station/hall.txt?raw';
+import stationLost from '../station/lost.txt?raw';
+import stationDepot from '../station/depot.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -39,6 +44,10 @@ import schoolStrange from '../street/school-strange.txt?raw';
  * analyse), mais une autre page du cahier (« Mon quartier »). Les lieux du quartier sont derrière
  * des portes de façade (D-61), au milieu de la rue : l'aire de jeux, la supérette ; sa réserve
  * donne sur le chantier, d'où l'on revient en haut de l'échafaudage de la rue (D-63).
+ *
+ * La gare (D-66), par la porte de la palissade du chantier (porte de façade 6 de la rue, ouverte
+ * au matin d'après l'école) : les voies, les quais et leur passerelle, le hall, le bureau des objets
+ * trouvés (porte de façade du hall) et le dépôt. Une page de plus dans le cahier (« La gare »).
  */
 export const HOUSE: ZoneSource = {
   id: 'house',
@@ -73,6 +82,12 @@ export const HOUSE: ZoneSource = {
     { id: 'school', text: school },
     // Le monde étrange du quartier (D-64) : par l'histoire (l'oculus de l'école).
     { id: 'school-strange', text: schoolStrange },
+    // La gare (D-66).
+    { id: 'station-tracks', text: stationTracks },
+    { id: 'station-platforms', text: stationPlatforms },
+    { id: 'station-hall', text: stationHall },
+    { id: 'station-lost', text: stationLost },
+    { id: 'station-depot', text: stationDepot },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -104,6 +119,15 @@ export const HOUSE: ZoneSource = {
     ['playground:2', 'schoolyard:1'],
     ['schoolyard:2', 'school:2'],
     ['street:5', 'school:1'],
+    // La gare (D-66) : la porte de la palissade mène aux voies, puis aux quais ; des quais au hall
+    // par le sol ou par la passerelle (une boucle) ; le bureau des objets trouvés derrière sa porte
+    // dans le hall ; le dépôt à droite du hall.
+    ['street:6', 'station-tracks:1'],
+    ['station-tracks:2', 'station-platforms:1'],
+    ['station-platforms:2', 'station-hall:1'],
+    ['station-platforms:3', 'station-hall:3'],
+    ['station-hall:4', 'station-lost:1'],
+    ['station-hall:2', 'station-depot:1'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur
@@ -131,5 +155,12 @@ export const HOUSE: ZoneSource = {
     school: { x: 7.84, y: 1.7, w: 2.8, h: 1.0, page: 'street' },
     shop: { x: 10.9, y: 0.6, w: 2.8, h: 1.8, page: 'street' },
     site: { x: 14.2, y: -0.6, w: 2.8, h: 3, page: 'street' },
+    // La gare (D-66) : les voies, les quais, le hall et le dépôt en long ; le bureau des objets
+    // trouvés au-dessus de sa porte, dans le hall.
+    'station-tracks': { x: 0, y: 2, w: 4.6, h: 1.6, page: 'station' },
+    'station-platforms': { x: 5, y: 1.6, w: 4, h: 2, page: 'station' },
+    'station-hall': { x: 9.4, y: 1.2, w: 3.6, h: 2.4, page: 'station' },
+    'station-lost': { x: 11.3, y: -0.6, w: 1.8, h: 1.4, page: 'station' },
+    'station-depot': { x: 13.4, y: 2, w: 4.6, h: 1.6, page: 'station' },
   },
 };

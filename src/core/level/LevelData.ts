@@ -43,6 +43,18 @@ export interface LevelData {
   readonly decor: readonly LevelDecor[];
   /** Câbles (D-65) : le crochet du parapluie s'y accroche ; déclarés par `; @cable:`. */
   readonly cables: readonly LevelCable[];
+  /** Voies ferrées (D-66) : un train y passe et son souffle repousse ; déclarées par `; @train:`. */
+  readonly trains: readonly LevelTrain[];
+}
+
+/**
+ * Voie ferrée (D-66) : la ligne des rails (Céleste s'y tient debout au-dessus), d'un mur à l'autre,
+ * et le sens du train. Le souffle balaie `TRAIN_GUST_TILES` lignes au-dessus des rails.
+ */
+export interface LevelTrain {
+  readonly row: number;
+  /** 1 : le train va vers la droite. */
+  readonly dir: 1 | -1;
 }
 
 /**
