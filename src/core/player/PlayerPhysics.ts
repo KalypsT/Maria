@@ -7,7 +7,7 @@ import {
   type DerivedMovement,
   type MovementParams,
 } from '../../config/movement';
-import { Tile, tileAt, type LevelData } from '../level/LevelData';
+import { Tile, cableYAt, tileAt, type LevelData } from '../level/LevelData';
 import {
   HitY,
   isBoxFree,
@@ -77,11 +77,26 @@ export class PlayerPhysics {
   canWallJump = false;
   /** Capacité « parapluie » acquise (D-62). Sans elle, le mouvement est inchangé. */
   canGlide = false;
+  /** Crochet du parapluie acquis (D-65) : en planant, il s'accroche aux câbles. */
+  canHook = false;
   /**
-   * Parapluie ouvert (D-62) : par une pression de Saut en l'air qui ne fait ni saut ni saut mural ;
-   * refermé dès que Saut est relâché, au sol, contre un mur, suspendue ou touchée.
+   * Parapluie ouvert (D-62, D-65) : au sommet d'un saut tenu, ou par une pression de Saut en l'air
+   * qui ne fait ni saut ni saut mural ; refermé dès que Saut est relâché, au sol, contre un mur,
+   * suspendue, accrochée à un câble ou touchée.
    */
   glideOpen = false;
+  /** Câble auquel le crochet est accroché (indice dans `level.cables`), -1 sinon (D-65). */
+  cable = -1;
+  /** Sens de la glissade le long du câble (1 : vers la droite). */
+  cableDir = 1;
+  /** Vitesse le long du câble (px/s, positive). */
+  cableSpeed = 0;
+  /** Pas écoulés depuis qu'un câble a été lâché (saut depuis le câble). */
+  private stepsSinceCable = NEVER;
+  /** Saut tenu depuis l'impulsion : le parapluie s'ouvrira au sommet (D-65). */
+  private glideArmed = false;
+  /** Pas écoulés depuis le sommet d'un saut tenu. */
+  private glideApexSteps = 0;
   /** Côté du mur touché en poussant vers lui à la fin du dernier pas (1 : à droite), 0 sinon. */
   wallDir = 0;
   /** Pas écoulés depuis le dernier contact avec un mur (tolérance du saut mural). */
@@ -189,6 +204,9 @@ export class PlayerPhysics {
     this.ledgeSteps = 0;
     this.regrabSteps = 0;
     this.glideOpen = false;
+    this.glideArmed = false;
+    this.cable = -1;
+    this.stepsSinceCable = NEVER;
     this.clearWall();
     this.box.passOneWay = false;
     this.grounded = isGrounded(level, this.box);
@@ -242,6 +260,13 @@ export class PlayerPhysics {
     this.noCatchCol = other.noCatchCol;
     this.canGlide = other.canGlide;
     this.glideOpen = other.glideOpen;
+    this.canHook = other.canHook;
+    this.cable = other.cable;
+    this.cableDir = other.cableDir;
+    this.cableSpeed = other.cableSpeed;
+    this.stepsSinceCable = other.stepsSinceCable;
+    this.glideArmed = other.glideArmed;
+    this.glideApexSteps = other.glideApexSteps;
   }
 
   /** Oublie tout contact avec un mur (sol, rebord, remise à zéro, coup reçu). */
@@ -279,6 +304,9 @@ export class PlayerPhysics {
     this.clearWall();
     this.hurtSteps = steps;
     this.glideOpen = false;
+    this.glideArmed = false;
+    this.cable = -1;
+    this.stepsSinceCable = NEVER;
     this.state = PlayerState.Hurt;
     this.grounded = false;
     this.stepsSinceGrounded = NEVER;
@@ -296,6 +324,9 @@ export class PlayerPhysics {
     this.prevY = box.y;
     if (this.ledge !== Ledge.None) {
       this.stepLedge(input);
+      return;
+    }
+    if (this.cable >= 0 && this.stepCable(input)) {
       return;
     }
 
@@ -355,6 +386,7 @@ export class PlayerPhysics {
       this.stepsSinceJumpPressed = NEVER;
       this.jumpCutAvailable = true;
       this.releaseGravityActive = false;
+      this.armGlide();
     } else if (
       this.canWallJump &&
       !this.grounded &&
@@ -374,10 +406,21 @@ export class PlayerPhysics {
       this.stepsSinceJumpPressed = NEVER;
       this.jumpCutAvailable = true;
       this.releaseGravityActive = false;
+      this.armGlide();
+    } else if (jumpPressed && this.stepsSinceCable <= d.cableJumpSteps) {
+      // Saut depuis un câble (D-65) : Saut relâché puis pressé de nouveau juste après avoir lâché
+      // le câble. L'élan de la glissade est gardé.
+      this.vy = -d.cableJumpVelocity;
+      this.stepsSinceCable = NEVER;
+      this.stepsSinceJumpPressed = NEVER;
+      this.jumpCutAvailable = true;
+      this.releaseGravityActive = false;
+      this.armGlide();
     } else if (this.canGlide && jumpPressed && !this.grounded) {
       // Parapluie (D-62) : une pression en l'air qui n'est ni un saut ni un saut mural l'ouvre.
       // La pression reste mémorisée (jump buffering) : juste avant d'atterrir, elle fait sauter.
       this.glideOpen = true;
+      this.glideArmed = false;
     }
     if (this.glideOpen && (!jumpHeld || this.grounded)) {
       this.glideOpen = false;
@@ -465,6 +508,19 @@ export class PlayerPhysics {
     if (this.stepsSinceJumpPressed < NEVER) {
       this.stepsSinceJumpPressed++;
     }
+    if (this.stepsSinceCable < NEVER) {
+      this.stepsSinceCable++;
+    }
+    // Parapluie au sommet d'un saut tenu (D-65) : Saut maintenu depuis l'impulsion, il s'ouvre un
+    // court instant après le sommet. Relâcher Saut avant renonce.
+    if (this.glideArmed) {
+      if (!jumpHeld || this.grounded) {
+        this.glideArmed = false;
+      } else if (this.vy >= 0 && ++this.glideApexSteps > d.glideAutoDelaySteps) {
+        this.glideArmed = false;
+        this.glideOpen = true;
+      }
+    }
     if (this.grounded && !wasGrounded) {
       this.landStepsRemaining = d.landSteps;
     } else if (this.landStepsRemaining > 0) {
@@ -482,6 +538,9 @@ export class PlayerPhysics {
     this.updateWallContact(moveInput, hurt);
     if (this.grounded || this.wallDir !== 0) {
       this.glideOpen = false;
+    }
+    if (this.glideOpen && this.canHook && !hurt && this.vy >= 0 && this.tryHook()) {
+      return;
     }
     if (this.regrabSteps > 0) {
       this.regrabSteps--;
@@ -502,6 +561,153 @@ export class PlayerPhysics {
       // Dos au mur, tournée vers le côté où elle va rebondir.
       this.facing = -this.wallDir;
     }
+  }
+
+  /** Un saut vient de partir : avec le parapluie, il s'ouvrira au sommet si Saut reste tenu. */
+  private armGlide(): void {
+    this.glideArmed = this.canGlide;
+    this.glideApexSteps = 0;
+  }
+
+  /** Point du crochet (haut du manche, au-dessus de la tête), en x puis y, pour la hitbox (x, y). */
+  private hookX(x: number): number {
+    return x + this.box.width / 2;
+  }
+
+  private hookY(y: number): number {
+    return y - this.params.cableHookAbovePx;
+  }
+
+  /**
+   * En planant, en descente (D-65) : le crochet s'accroche au premier câble qu'il a croisé
+   * pendant ce pas (au-dessus avant, sur ou sous lui après). Sur un câble en pente, Céleste part
+   * toujours vers le bas ; sur un câble plat, dans son sens d'arrivée.
+   */
+  private tryHook(): boolean {
+    const cables = this.level.cables;
+    const box = this.box;
+    const p = this.params;
+    const fromX = this.hookX(this.prevX);
+    const fromY = this.hookY(this.prevY);
+    const toX = this.hookX(box.x);
+    const toY = this.hookY(box.y);
+    for (let i = 0; i < cables.length; i++) {
+      const c = cables[i];
+      if (!c || toX < c.x1 || toX > c.x2) {
+        continue;
+      }
+      const lineY = cableYAt(c, toX);
+      if (fromY > cableYAt(c, fromX) || toY < lineY) {
+        continue;
+      }
+      const probe = this.probe;
+      probe.x = box.x;
+      probe.y = lineY + p.cableHookAbovePx;
+      if (!isBoxFree(this.level, probe)) {
+        continue;
+      }
+      const dx = c.x2 - c.x1;
+      const dy = c.y2 - c.y1;
+      const length = Math.sqrt(dx * dx + dy * dy);
+      const ux = dx / length;
+      const uy = dy / length;
+      let dir: number;
+      if (Math.abs(uy) > p.cableFlatSlope) {
+        dir = uy > 0 ? 1 : -1;
+      } else {
+        dir = this.vx > 0 ? 1 : this.vx < 0 ? -1 : this.facing;
+      }
+      const along = (this.vx * ux + this.vy * uy) * dir;
+      this.cable = i;
+      this.cableDir = dir;
+      this.cableSpeed = Math.min(p.cableMaxSpeed, Math.max(p.cableMinSpeed, along));
+      this.facing = dir;
+      box.y = probe.y;
+      this.glideOpen = false;
+      this.glideArmed = false;
+      this.jumpCutAvailable = false;
+      this.releaseGravityActive = false;
+      this.updateCableVelocity(ux, uy);
+      this.state = PlayerState.Cable;
+      return true;
+    }
+    return false;
+  }
+
+  /** Vitesse (vx, vy) de Céleste le long du câble, d'après sa direction (ux, uy). */
+  private updateCableVelocity(ux: number, uy: number): void {
+    this.vx = this.cableDir * this.cableSpeed * ux;
+    this.vy = this.cableDir * this.cableSpeed * uy;
+  }
+
+  /**
+   * Accrochée à un câble (D-65) : glisse tant que Saut est tenu. Lâcher Saut lâche le câble, avec
+   * l'élan ; une pression juste après fait sauter (voir `step`). Au bout du câble, elle est lâchée
+   * avec l'élan, parapluie ouvert si Saut est tenu. Retourne false si le pas doit continuer comme
+   * un pas ordinaire (câble lâché ce pas-ci, saut depuis le câble).
+   */
+  private stepCable(input: PlayerInput): boolean {
+    const c = this.level.cables[this.cable];
+    if (!c) {
+      this.cable = -1;
+      return false;
+    }
+    const p = this.params;
+    const dt = this.derived.dt;
+    const box = this.box;
+    const dx = c.x2 - c.x1;
+    const dy = c.y2 - c.y1;
+    const length = Math.sqrt(dx * dx + dy * dy);
+    const ux = dx / length;
+    const uy = dy / length;
+    if (!input.jumpHeld || input.jumpPressed) {
+      // Relâché (ou relâché et repressé dans la même image : le saut part aussitôt).
+      this.releaseCable(false);
+      return false;
+    }
+    if (Math.abs(uy) > p.cableFlatSlope) {
+      this.cableSpeed += p.cableAccel * Math.abs(uy) * dt;
+    }
+    this.cableSpeed = Math.min(p.cableMaxSpeed, Math.max(p.cableMinSpeed, this.cableSpeed));
+    this.updateCableVelocity(ux, uy);
+    const hookX = this.hookX(box.x) + this.vx * dt;
+    if (hookX <= c.x1 || hookX >= c.x2) {
+      // Au bout : lâchée avec l'élan, le parapluie reste ouvert (Saut tenu).
+      this.releaseCable(true);
+      return false;
+    }
+    const probe = this.probe;
+    probe.x = hookX - box.width / 2;
+    probe.y = cableYAt(c, hookX) + p.cableHookAbovePx;
+    if (!isBoxFree(this.level, probe)) {
+      // Un obstacle sur le trajet : elle lâche, sans élan ni parapluie (sinon elle s'y
+      // raccrocherait aussitôt).
+      this.vx = 0;
+      this.vy = 0;
+      this.releaseCable(false);
+      return false;
+    }
+    box.dx = probe.x - box.x;
+    box.dy = probe.y - box.y;
+    box.x = probe.x;
+    box.y = probe.y;
+    this.facing = this.cableDir;
+    this.state = PlayerState.Cable;
+    return true;
+  }
+
+  /**
+   * Lâche le câble avec la vitesse courante ; `keepGlide` : parapluie ouvert (Saut tenu). Une
+   * pression de Saut juste après fait sauter, même lâchée au bout du câble.
+   */
+  private releaseCable(keepGlide: boolean): void {
+    this.cable = -1;
+    this.stepsSinceCable = 0;
+    this.glideOpen = keepGlide && this.canGlide;
+    this.glideArmed = false;
+    this.grounded = false;
+    this.stepsSinceGrounded = NEVER;
+    this.stepsSinceJumpPressed = NEVER;
   }
 
   /**

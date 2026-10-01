@@ -98,12 +98,31 @@ export interface MovementParams {
   /** Saut mural encore permis après avoir quitté le contact du mur (ms). */
   wallCoyoteMs: number;
   /**
-   * Parapluie (D-62) : une deuxième pression de Saut en l'air l'ouvre ; tant que Saut est tenu, la
-   * chute est ramenée à cette vitesse (px/s). Les sauts ordinaires ne changent pas.
+   * Parapluie (D-62, D-65) : il s'ouvre au sommet d'un saut tenu, ou par une nouvelle pression de
+   * Saut en l'air ; tant que Saut est tenu, la chute est ramenée à cette vitesse (px/s).
    */
   glideFallSpeed: number;
   /** Freinage de la chute à l'ouverture du parapluie (px/s²), jusqu'à `glideFallSpeed`. */
   glideBrake: number;
+  /** Délai entre le sommet d'un saut tenu et l'ouverture du parapluie (ms, D-65). */
+  glideAutoDelayMs: number;
+  /**
+   * Crochet du parapluie (D-65) : en planant, le crochet s'accroche au câble qu'il croise. Hauteur
+   * du crochet au-dessus du haut de la hitbox (px) : Céleste pend sous le câble.
+   */
+  cableHookAbovePx: number;
+  /** Vitesse minimale le long d'un câble (px/s). */
+  cableMinSpeed: number;
+  /** Vitesse maximale le long d'un câble (px/s). */
+  cableMaxSpeed: number;
+  /** Accélération le long d'un câble en pente, multipliée par sa pente (px/s²). */
+  cableAccel: number;
+  /** Pente (sinus) en dessous de laquelle un câble est plat : on y garde son sens d'arrivée. */
+  cableFlatSlope: number;
+  /** Après avoir lâché un câble, délai pendant lequel une pression de Saut fait sauter (ms). */
+  cableJumpWindowMs: number;
+  /** Hauteur d'un saut depuis un câble (tuiles), bouton maintenu. */
+  cableJumpHeightTiles: number;
 }
 
 export const DEFAULT_MOVEMENT: Readonly<MovementParams> = {
@@ -145,6 +164,14 @@ export const DEFAULT_MOVEMENT: Readonly<MovementParams> = {
   wallCoyoteMs: 80,
   glideFallSpeed: 50,
   glideBrake: 1600,
+  glideAutoDelayMs: 40,
+  cableHookAbovePx: 6,
+  cableMinSpeed: 110,
+  cableMaxSpeed: 240,
+  cableAccel: 600,
+  cableFlatSlope: 0.1,
+  cableJumpWindowMs: 120,
+  cableJumpHeightTiles: 2,
 };
 
 /** Bornes des réglages en direct de l'overlay de debug. */
@@ -189,6 +216,14 @@ export const MOVEMENT_PARAM_RANGES: Readonly<
   wallCoyoteMs: { min: 0, max: 250, step: 5 },
   glideFallSpeed: { min: 10, max: 380, step: 5 },
   glideBrake: { min: 100, max: 6000, step: 50 },
+  glideAutoDelayMs: { min: 0, max: 300, step: 5 },
+  cableHookAbovePx: { min: 0, max: 16, step: 1 },
+  cableMinSpeed: { min: 20, max: 400, step: 5 },
+  cableMaxSpeed: { min: 40, max: 600, step: 5 },
+  cableAccel: { min: 0, max: 3000, step: 25 },
+  cableFlatSlope: { min: 0, max: 0.5, step: 0.01 },
+  cableJumpWindowMs: { min: 0, max: 300, step: 5 },
+  cableJumpHeightTiles: { min: 0.5, max: 5, step: 0.1 },
 };
 
 /** Hissé sur un rebord, Céleste se tient à cette distance du bord (px), bien posée. */
@@ -225,6 +260,12 @@ export interface DerivedMovement {
   wallJumpVelocity: number;
   wallJumpLockSteps: number;
   wallCoyoteSteps: number;
+  /** Pas entre le sommet d'un saut tenu et l'ouverture du parapluie (D-65). */
+  glideAutoDelaySteps: number;
+  /** Pas après avoir lâché un câble pendant lesquels Saut fait sauter (D-65). */
+  cableJumpSteps: number;
+  /** Vitesse initiale d'un saut depuis un câble (px/s, vers le haut). */
+  cableJumpVelocity: number;
 }
 
 export function msToSteps(ms: number, stepHz: number = PHYSICS_STEP_HZ): number {
@@ -250,6 +291,9 @@ export function deriveMovement(
     wallJumpVelocity: 0,
     wallJumpLockSteps: 0,
     wallCoyoteSteps: 0,
+    glideAutoDelaySteps: 0,
+    cableJumpSteps: 0,
+    cableJumpVelocity: 0,
   },
 ): DerivedMovement {
   const heightPx = params.jumpHeightTiles * TILE_SIZE;
@@ -268,5 +312,8 @@ export function deriveMovement(
   out.wallJumpVelocity = Math.sqrt(2 * out.riseGravity * params.wallJumpHeightTiles * TILE_SIZE);
   out.wallJumpLockSteps = msToSteps(params.wallJumpLockMs, stepHz);
   out.wallCoyoteSteps = msToSteps(params.wallCoyoteMs, stepHz);
+  out.glideAutoDelaySteps = msToSteps(params.glideAutoDelayMs, stepHz);
+  out.cableJumpSteps = msToSteps(params.cableJumpWindowMs, stepHz);
+  out.cableJumpVelocity = Math.sqrt(2 * out.riseGravity * params.cableJumpHeightTiles * TILE_SIZE);
   return out;
 }

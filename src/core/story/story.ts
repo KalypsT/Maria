@@ -54,8 +54,10 @@ export const THOUGHT_ICONS = [
   'mom',
   /** Le portillon du jardin (fermé, ou montré par papa, D-60). */
   'gate',
-  /** Aide du parapluie (D-62) : Saut deux fois, puis le parapluie ouvert. */
+  /** Aide du parapluie (D-62, D-65) : Saut tenu (longue flèche), puis le parapluie ouvert. */
   'umbrella',
+  /** Aide du crochet (D-65) : le parapluie accroché à un câble, et la glissade le long. */
+  'hook',
   /** Papa (maman le montre à l'aire de jeux : il est à la supérette, D-63). */
   'dad',
   /** La grue du chantier (papa la montre à la supérette, D-63). */

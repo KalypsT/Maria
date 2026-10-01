@@ -184,6 +184,8 @@ export class GameScene extends Phaser.Scene {
   debugWallJump = false;
   /** Outil de debug : parapluie débloqué sans objet ni sauvegarde (D-62). */
   debugUmbrella = false;
+  /** Crochet du parapluie débloqué par l'overlay (D-65). */
+  debugHook = false;
   /** Aperçu du monde étrange (D-28, overlay) : mêmes formes, autre palette. */
   strangeWorld = false;
   private roomArt!: RoomArtView;
@@ -943,6 +945,7 @@ export class GameScene extends Phaser.Scene {
     this.pickups.load(level, abilities, collectibles);
     this.applyAbilities();
     this.worldView.rebuild();
+    this.worldView.setCables(level.cables);
     this.props.load(this.story.data.props, level.id, this.story.flags);
     this.storyView.rebuild();
     this.storyView.clearThought();
@@ -958,6 +961,7 @@ export class GameScene extends Phaser.Scene {
       ...(player.canClimb ? [Ability.Climb] : []),
       ...(player.canWallJump ? [Ability.WallJump] : []),
       ...(player.canGlide ? [Ability.Umbrella] : []),
+      ...(player.canHook ? [Ability.Hook] : []),
     ];
   }
 
@@ -972,6 +976,8 @@ export class GameScene extends Phaser.Scene {
     this.player.canClimb = this.debugClimb || has(Ability.Climb);
     this.player.canWallJump = this.debugWallJump || has(Ability.WallJump);
     this.player.canGlide = this.debugUmbrella || has(Ability.Umbrella);
+    // Le crochet (D-65) s'ajoute au parapluie : il ne sert qu'en planant.
+    this.player.canHook = this.debugHook || has(Ability.Hook);
   }
 
   /**

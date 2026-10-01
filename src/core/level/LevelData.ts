@@ -41,6 +41,24 @@ export interface LevelData {
   readonly doors: readonly LevelDoor[];
   /** Habillage (D-28) : meubles et éléments dessinés, déclarés par `; @decor:` (vide : tuiles). */
   readonly decor: readonly LevelDecor[];
+  /** Câbles (D-65) : le crochet du parapluie s'y accroche ; déclarés par `; @cable:`. */
+  readonly cables: readonly LevelCable[];
+}
+
+/**
+ * Câble tendu (D-65 : caténaire, fil à linge, hauban), en px : un segment de (x1, y1) à (x2, y2),
+ * toujours avec x1 < x2. Ce n'est pas une tuile : rien ne s'y pose, seul le crochet s'y accroche.
+ */
+export interface LevelCable {
+  readonly x1: number;
+  readonly y1: number;
+  readonly x2: number;
+  readonly y2: number;
+}
+
+/** Hauteur (px) d'un câble à l'abscisse x (prolongé au-delà de ses bouts). */
+export function cableYAt(cable: LevelCable, x: number): number {
+  return cable.y1 + ((cable.y2 - cable.y1) * (x - cable.x1)) / (cable.x2 - cable.x1);
 }
 
 /**

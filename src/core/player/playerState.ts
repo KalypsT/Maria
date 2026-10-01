@@ -16,6 +16,8 @@ export const PlayerState = {
   WallSlide: 'WallSlide',
   /** Plane sous le parapluie ouvert, en descente (D-62). */
   Glide: 'Glide',
+  /** Accrochée à un câble par le crochet du parapluie, glisse le long (D-65). */
+  Cable: 'Cable',
 } as const;
 export type PlayerState = (typeof PlayerState)[keyof typeof PlayerState];
 
@@ -52,6 +54,7 @@ export function nextPlayerState(
     previous === PlayerState.Jump ||
     previous === PlayerState.Fall ||
     previous === PlayerState.Glide ||
+    previous === PlayerState.Cable ||
     previous === PlayerState.Land;
   return landing && landStepsRemaining > 0 ? PlayerState.Land : PlayerState.Idle;
 }

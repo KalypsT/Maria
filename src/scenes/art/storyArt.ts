@@ -739,19 +739,20 @@ function drawIcon(
       ctx.fillRect(cx + 2, cy - 3.5, 2.2, 1);
       break;
     case 'umbrella': {
-      // Aide du parapluie (D-62) : deux pressions de Saut (flèches), puis le parapluie ouvert.
+      // Aide du parapluie (D-65) : Saut tenu (une longue flèche, un trait sous elle), puis le
+      // parapluie ouvert.
       ctx.strokeStyle = INK;
       ctx.lineWidth = 1;
       ctx.lineCap = 'round';
-      for (const x of [cx - 7.5, cx - 4]) {
-        ctx.beginPath();
-        ctx.moveTo(x, cy + 3);
-        ctx.lineTo(x, cy - 2);
-        ctx.moveTo(x - 1.3, cy - 0.6);
-        ctx.lineTo(x, cy - 2);
-        ctx.lineTo(x + 1.3, cy - 0.6);
-        ctx.stroke();
-      }
+      ctx.beginPath();
+      ctx.moveTo(cx - 6, cy + 5);
+      ctx.lineTo(cx - 6, cy - 4);
+      ctx.moveTo(cx - 7.4, cy - 2.6);
+      ctx.lineTo(cx - 6, cy - 4);
+      ctx.lineTo(cx - 4.6, cy - 2.6);
+      ctx.moveTo(cx - 8, cy + 5.5);
+      ctx.lineTo(cx - 4, cy + 5.5);
+      ctx.stroke();
       ctx.fillStyle = '#f2c14e';
       ctx.beginPath();
       ctx.moveTo(cx - 1, cy - 1);
@@ -763,6 +764,41 @@ function drawIcon(
       ctx.moveTo(cx + 3.5, cy - 3);
       ctx.lineTo(cx + 3.5, cy + 4);
       ctx.arc(cx + 4.4, cy + 4, 0.9, Math.PI, 0, true);
+      ctx.stroke();
+      break;
+    }
+    case 'hook': {
+      // Aide du crochet (D-65) : un câble en pente, le crochet du parapluie posé dessus, une
+      // flèche qui descend le long du câble.
+      ctx.strokeStyle = '#3b3640';
+      ctx.lineWidth = 0.9;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx - 8, cy - 6);
+      ctx.lineTo(cx + 8, cy);
+      ctx.stroke();
+      ctx.strokeStyle = '#8a5a44';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.arc(cx - 3, cy - 3.2, 1.3, Math.PI, 0);
+      ctx.moveTo(cx - 1.7, cy - 3.2);
+      ctx.lineTo(cx - 1.7, cy + 1);
+      ctx.stroke();
+      ctx.fillStyle = '#f2c14e';
+      ctx.beginPath();
+      ctx.moveTo(cx - 1.7, cy + 0.5);
+      ctx.lineTo(cx - 0.6, cy + 5.5);
+      ctx.lineTo(cx - 2.8, cy + 5.5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(cx + 1.5, cy - 4.5);
+      ctx.lineTo(cx + 7, cy - 2.4);
+      ctx.moveTo(cx + 5.2, cy - 4);
+      ctx.lineTo(cx + 7, cy - 2.4);
+      ctx.lineTo(cx + 5, cy - 1.4);
       ctx.stroke();
       break;
     }

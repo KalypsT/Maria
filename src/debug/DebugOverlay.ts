@@ -442,6 +442,10 @@ export function installDebugOverlay(scene: GameScene): void {
     scene.debugUmbrella = checked;
     scene.applyAbilities();
   });
+  addCheck(panel, 'Capacité : crochet du parapluie', scene.debugHook, (checked) => {
+    scene.debugHook = checked;
+    scene.applyAbilities();
+  });
 
   const refreshMovement = addSliders<MovementParams>(panel, {
     title: 'Mouvement',

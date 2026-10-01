@@ -160,4 +160,14 @@ describe('Céleste en papier découpé (D-29)', () => {
     run(poser, subject(PlayerState.Idle), 60);
     expect(poser.pose.umbrella).toBeLessThan(0.05);
   });
+
+  it('pendue à un câble (D-65), le parapluie replié au bout du bras levé ; ensuite il disparaît', () => {
+    const poser = new CelestePoser(DEFAULT_PUPPET, DT, MAX_RUN);
+    run(poser, subject(PlayerState.Cable, MAX_RUN, 30), 60);
+    expect(poser.pose.hook).toBe(1);
+    expect(poser.pose.umbrella).toBeLessThan(0.05);
+    expect(poser.pose.armFront).toBeGreaterThan(Math.PI * 0.9);
+    run(poser, subject(PlayerState.Glide, MAX_RUN, 50), 1);
+    expect(poser.pose.hook).toBe(0);
+  });
 });

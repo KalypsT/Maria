@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { PLACEHOLDER_COLORS, TILE_SIZE as T } from '../config/display';
+import type { LevelCable } from '../core/level/LevelData';
 import { PickupKind, type Pickups } from '../core/world/Pickups';
 import type { RunState } from '../core/world/RunState';
 
@@ -35,6 +36,14 @@ const STRANGE_LAMP: typeof REAL_LAMP = {
 };
 
 /**
+ * Câbles (D-65), PLACEHOLDER : un fil sombre bordé d'un liseré clair (lisible sur un ciel de jour
+ * comme sur un mur de nuit), droit comme sa collision (pilier 1), avec un petit isolateur à chaque
+ * bout ; turquoise dans le monde étrange.
+ */
+const CABLE_REAL = { line: 0x3b3640, halo: 0xe8e0cc, end: 0x8e8a92 };
+const CABLE_STRANGE = { line: 0x5ee6d2, halo: 0x12303a, end: 0x2c3e48 };
+
+/**
  * Affichage des checkpoints (placeholder neutre, design ouvert §45) : un petit repère qui s'allume
  * quand il est activé, plus vif s'il est le point de retour courant. Objets de capacité (D-26) :
  * une petite lueur qui flotte ; trouvailles (D-27) : la même, rose (placeholders, nature ouverte).
@@ -42,6 +51,9 @@ const STRANGE_LAMP: typeof REAL_LAMP = {
 export class WorldView {
   private sprites: Phaser.GameObjects.Image[] = [];
   private pickupSprites: Phaser.GameObjects.Image[] = [];
+  /** Câbles de la salle (D-65), dessinés une fois par salle. */
+  private readonly cables: Phaser.GameObjects.Graphics;
+  private cableData: readonly LevelCable[] = [];
   private artScale = 1;
   /** Monde étrange (D-34) : veilleuse turquoise. */
   private strange = false;
@@ -51,8 +63,29 @@ export class WorldView {
     private readonly run: RunState,
     private readonly pickups: Pickups,
   ) {
+    this.cables = scene.add.graphics().setDepth(4);
     this.createTextures();
     this.rebuild();
+  }
+
+  /** Câbles de la salle (D-65), redessinés aussitôt. */
+  setCables(cables: readonly LevelCable[]): void {
+    this.cableData = cables;
+    this.drawCables();
+  }
+
+  private drawCables(): void {
+    const g = this.cables.clear();
+    const c = this.strange ? CABLE_STRANGE : CABLE_REAL;
+    for (const cable of this.cableData) {
+      g.lineStyle(2.5, c.halo, 0.55);
+      g.lineBetween(cable.x1, cable.y1, cable.x2, cable.y2);
+      g.lineStyle(1.25, c.line, 1);
+      g.lineBetween(cable.x1, cable.y1, cable.x2, cable.y2);
+      g.fillStyle(c.end, 1);
+      g.fillRect(cable.x1 - 1.5, cable.y1 - 2, 3, 4);
+      g.fillRect(cable.x2 - 1.5, cable.y2 - 2, 3, 4);
+    }
   }
 
   /** Recrée les repères (changement de salle). */
@@ -120,6 +153,7 @@ export class WorldView {
     this.strange = strange;
     this.createTextures();
     this.rebuild();
+    this.drawCables();
   }
 
   /**
