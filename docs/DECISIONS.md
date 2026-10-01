@@ -739,6 +739,27 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Parcours d'essai 9 « Crochet »** (facile, prête escalade, saut mural, parapluie et crochet) : de la tour, un long câble en pente jusqu'à l'îlot ; un câble plat, puis un saut depuis son bout pour attraper le câble suivant, plus haut, jusqu'à l'arrivée. Impossible sans le crochet (testé).
 - **Sauvegarde** : aucune migration (capacité `hook` dans `progression.abilities`).
 
+## D-66 — La gare, PR 2 : la gare réelle, les trains, le crochet trouvé, les revisites
+
+- **Plan validé** (D-65) : la gare réelle derrière la palissade du chantier ; la poignée-crochet au bureau des objets trouvés ; les trains en danger simple ; papa et maman en retrait (aucun parent dans la gare).
+- **Accès** : la palissade du chantier devient la **porte de façade 6** de la rue (`street:6` ↔ `station-tracks:1`), fermée tant que ce n'est pas le lendemain de l'école étrange (`lockedRooms`, bulle « ? »). Les déclencheurs `street-site` et `street-site-open` sont retirés. Le présage de la palissade s'arrête une fois Céleste arrivée à la gare.
+- **Cinq salles** (PLACEHOLDER, `; @world: street`, musique `station`), nouvelle page du cahier **« La gare »** :
+  - **les voies** (moyen) : quais, deux voies en contrebas, abris, cagettes ; le **portique de signalisation** (trouvaille **moyenne** exactement) ; le **poste d'aiguillage sur pilotis**, au bout d'une caténaire (trouvaille, **seulement avec le crochet**) ;
+  - **les quais et la passerelle** (difficile) : la passerelle monte par un escalier, enjambe la voie et file jusqu'à la galerie du hall (une **boucle** : quai ↔ hall par le sol, passerelle ↔ galerie) ; le pilier de la marquise et le mur font une cheminée de 5 (trouvaille **difficile** exactement) ;
+  - **le hall** (facile) : verrière, grande horloge, tableau des départs (sans texte), kiosque, galerie, marches scellées au mur ; la porte du bureau des objets trouvés (porte de façade 4) ; un câble sous la verrière jusqu'à un rebord (trouvaille, **seulement avec le crochet**) ;
+  - **le bureau des objets trouvés** (moyen) : guichet, étagères de choses perdues par des inconnus (rien à Céleste dans le monde réel), haute armoire, casiers. La **poignée-crochet** en haut de l'armoire : **moyenne** exactement depuis la palissade (c'est le chemin du niveau). Tout en haut des casiers, une porte entrouverte et une lueur turquoise, avec un présage ; Agir : bulle « ? » (PLACEHOLDER, le monde étrange vient avec la PR 4) ;
+  - **le dépôt** (moyen, à ciel ouvert) : wagons garés au-dessus des fosses de gravats, puis les crochets du pont roulant (trouvaille **moyenne** exactement).
+- **Trains (danger simple, choix de l'utilisateur)** : directive `; @train: <ligne des rails> left|right`. Un train passe toutes les `trainPeriodMs` (9 s) : calme, puis le **feu** clignote (`trainWarnMs`, 2 s), puis le train traverse la salle (`trainPassMs`, 1,6 s). Son **souffle** accompagne le train : là où il passe, sur les 3 lignes au-dessus des rails, Céleste est repoussée dans le sens du train et vers le haut, perd un instant le contrôle, et la peur monte d'un cran ; **une fois par passage**. Jamais de contact avec le train lui-même. Les quais font au moins la hauteur du souffle (testé). Le cycle repart au chargement de la salle et après un évanouissement. Réglages dans `src/config/combat.ts` et l'overlay (DEBUG → Combat). Le train et les feux sont dessinés par `TrainView` (une image par train et par feu). L'analyse de faisabilité ignore les trains (comme les ennemis).
+- **Revisites avec le crochet** (pilier 3, §15) :
+  - la **terrasse** du jardin : le fil à linge à poulie, du toit de la pergola (par l'allée) à la fenêtre de la chambre ; au bout, la jardinière (trouvaille) ;
+  - la **rue** : un fil tendu de la corniche de l'école au platane ; au bout, un nid (trouvaille).
+    Toutes deux impossibles sans le crochet, faciles avec (testé). Le hauban de la grue du chantier, envisagé, est écarté : la cabine est un décor collé au mât, déjà au bord de la flèche ; il n'y avait pas de place pour un vrai trajet.
+- **Histoire** : en arrivant sur les voies, Céleste pense à Maria (étape `station.arrived`). L'histoire de la gare est dans son propre fichier (`src/levels/station/story.ts`), réunie à celle de la maison.
+- **Debug** : histoire « la gare (le crochet à trouver) ».
+- **Corrigé** : les câbles de la salle de départ (au lancement d'une partie) n'étaient pas dessinés.
+- **Tests** : `station.test.ts` analyse seulement les salles de la gare (coût) : accès, trains, difficultés exactes, trouvailles au crochet, jamais coincée avec et sans le crochet, revisites. `zoneGraph` prend le crochet en option.
+- **Sauvegarde** : aucune migration (étape `station.arrived`, capacité `hook`, trouvailles).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

@@ -8,6 +8,7 @@ import {
   type LevelDoor,
   type LevelEntity,
   type LevelExit,
+  type LevelTrain,
   type TilePos,
 } from './LevelData';
 import { TILE_SIZE } from '../../config/display';
@@ -60,6 +61,8 @@ const DECOR = /^([a-z][\w-]*)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
 const DOOR = /^([1-9])\s+(\d+)\s+(\d+)$/;
 /** Câble (D-65), répétable : `; @cable: 4 10 30 14` (colonne et ligne de chaque bout, au centre des tuiles). */
 const CABLE = /^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
+/** Voie ferrée (D-66), répétable : `; @train: 26 right` (ligne des rails, sens du train). */
+const TRAIN = /^(\d+)\s+(left|right)$/;
 
 /**
  * Convertit une carte ASCII (décision D-06) en `LevelData`.
@@ -70,7 +73,7 @@ const CABLE = /^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
  * `A` objet de capacité (au plus un, capacité nommée par `; @ability:`), `S` trouvaille (secret).
  * Les commentaires `; @clé: valeur` sont des métadonnées ; `; @decor:` (répétable) déclare
  * l'habillage (D-28), `; @door:` (répétable) une porte de façade (D-61), `; @cable:` (répétable)
- * un câble pour le crochet du parapluie (D-65).
+ * un câble pour le crochet du parapluie (D-65), `; @train:` (répétable) une voie ferrée (D-66).
  */
 export function parseAsciiLevel(id: string, text: string): LevelData {
   const rows: { text: string; line: number }[] = [];
@@ -78,6 +81,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   const decor: LevelDecor[] = [];
   const doors: LevelDoor[] = [];
   const cableTiles: number[][] = [];
+  const trains: LevelTrain[] = [];
   text.split('\n').forEach((raw, index) => {
     const line = raw.replace(/\r$/, '').trimEnd();
     if (!line.startsWith(COMMENT)) {
@@ -114,6 +118,12 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         );
       }
       cableTiles.push(c.slice(1, 5).map(Number));
+    } else if (match?.[1] === 'train' && match[2] !== undefined) {
+      const t = TRAIN.exec(match[2].trim());
+      if (!t) {
+        throw new Error(`Niveau ${id}, ligne ${index + 1} : @train attend « ligne left|right »`);
+      }
+      trains.push({ row: Number(t[1]), dir: t[2] === 'left' ? -1 : 1 });
     } else if (match?.[1] !== undefined && match[2] !== undefined) {
       meta[match[1]] = match[2];
     }
@@ -200,6 +210,11 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
       throw new Error(`Niveau ${id} : porte ${door.id} hors de la salle`);
     }
   }
+  for (const train of trains) {
+    if (train.row >= height) {
+      throw new Error(`Niveau ${id} : @train ${train.row} hors de la salle`);
+    }
+  }
   const cables: LevelCable[] = [];
   for (const [c1 = 0, r1 = 0, c2 = 0, r2 = 0] of cableTiles) {
     if (c1 === c2 || Math.max(c1, c2) >= width || Math.max(r1, r2) >= height) {
@@ -227,6 +242,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
     doors,
     decor,
     cables,
+    trains,
   };
 }
 

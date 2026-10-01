@@ -213,6 +213,66 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   /** Couvercle géant d'une boîte à formes (plein, avec son trou). */
   sorterlid: { furniture: true },
   cushions: { furniture: false },
+  // Revisites avec le crochet (D-66).
+  /** Jardinière sous la fenêtre de la chambre (planche traversable), au bout du fil à linge. */
+  windowbox: { furniture: true },
+  /** Nid dans le platane de la rue (perchoir traversable), au bout du fil tendu depuis l'école. */
+  nest: { furniture: true },
+  // La gare (D-66), dessinée par le code (PLACEHOLDER).
+  /** La gare au fond des voies (fond). */
+  stationfacade: { furniture: false },
+  /** Traverses et rails sur le ballast (fond). */
+  rails: { furniture: false },
+  /** Quai de béton et sa bande de sécurité (plein). */
+  quay: { furniture: true },
+  /** Abri de quai : toit traversable, poteaux en fond. */
+  shelter: { furniture: true },
+  /** Portique de signalisation : poutre traversable, pieds en fond. */
+  gantry: { furniture: true },
+  /** Feu de voie (fond), allumé par le train qui approche. */
+  signal: { furniture: false },
+  /** Mât de caténaire (fond) ; le câble est déclaré par `; @cable:`. */
+  catenarymast: { furniture: false },
+  /** Poste d'aiguillage sur pilotis (plein). */
+  signalbox: { furniture: true },
+  /** Marquise de verre au-dessus des quais (fond). */
+  canopyroof: { furniture: false },
+  /** Pilier de fonte de la marquise (plein). */
+  pillar: { furniture: true },
+  /** Passerelle au-dessus des voies : marches et tablier traversables. */
+  footbridge: { furniture: true },
+  /** Horloge de quai sur son mât (fond). */
+  stationclock: { furniture: false },
+  /** Verrière du hall (fond). */
+  glassroof: { furniture: false },
+  /** Grande horloge du hall (fond). */
+  bigclock: { furniture: false },
+  /** Tableau des départs, suspendu (fond). */
+  departures: { furniture: false },
+  /** Galerie du hall (traversable). */
+  gallery: { furniture: true },
+  /** Marches scellées au mur (traversables). */
+  hallsteps: { furniture: true },
+  /** Kiosque à journaux : toit traversable, comptoir plein. */
+  kiosk: { furniture: true },
+  /** Entrée du bureau des objets trouvés, autour de sa porte de façade (fond). */
+  lostoffice: { furniture: false },
+  /** Guichet des objets trouvés (plein). */
+  lostcounter: { furniture: true },
+  /** Étagères des objets perdus (planches traversables). */
+  lostshelf: { furniture: true },
+  /** Haute armoire de rangement (pleine). */
+  tallcabinet: { furniture: true },
+  /** Casiers de consigne (pleins), une lueur turquoise tout en haut. */
+  lockers: { furniture: true },
+  /** Verrières d'atelier du dépôt (fond). */
+  depotwindows: { furniture: false },
+  /** Wagon de marchandises garé (plein). */
+  wagon: { furniture: true },
+  /** Crochet du pont roulant (traversable). */
+  cranehook: { furniture: true },
+  /** Pont roulant (fond). */
+  overheadcrane: { furniture: false },
   // Derrière la haie (D-49).
   /** Tuteur géant (bois plein), paroi d'une cheminée. */
   giantstake: { furniture: true },

@@ -1,5 +1,6 @@
 import { STORY_TIMING as S, StoryFlag as F } from '../../config/story';
 import type { StoryData, StoryStep, TileArea } from '../../core/story/story';
+import { STATION_STORY } from '../station/story';
 
 /** Haut de la bibliothèque du salon, là où Maria était assise. */
 const LIVING_TOP: TileArea = { col: 46, row: 5, w: 10, h: 3 };
@@ -643,39 +644,9 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: S.lookMs + 600 },
       ],
     },
-    // La rue (D-60) : la palissade du chantier, fermée (bulle « ? », rejouable) jusqu'au lendemain
-    // de l'école étrange (D-64). L'aire de jeux, la supérette et l'école ont leur porte de façade.
-    {
-      // Le chantier.
-      id: 'street-site',
-      room: 'street',
-      on: 'interact',
-      area: { col: 165, row: 25, w: 6, h: 3 },
-      mark: { col: 167, row: 24 },
-      when: { none: [F.StreetMorning] },
-      lock: true,
-      repeat: true,
-      steps: [
-        { do: 'thought', icon: 'question', ms: S.thoughtMs },
-        { do: 'wait', ms: S.lookMs },
-      ],
-    },
-    {
-      // Le lendemain (D-64) : la palissade du chantier s'est ouverte, une lueur turquoise passe par
-      // l'ouverture. PLACEHOLDER : le niveau suivant n'existe pas encore (bulle « ? »).
-      id: 'street-site-open',
-      room: 'street',
-      on: 'interact',
-      area: { col: 165, row: 25, w: 6, h: 3 },
-      mark: { col: 167, row: 24 },
-      when: { all: [F.StreetMorning] },
-      lock: true,
-      repeat: true,
-      steps: [
-        { do: 'thought', icon: 'question', ms: S.thoughtMs },
-        { do: 'wait', ms: S.lookMs },
-      ],
-    },
+    // La rue (D-60) : la palissade du chantier est la porte de façade 6 (fermée tant que ce n'est
+    // pas le lendemain de l'école étrange, D-64), qui mène à la gare (D-66). L'aire de jeux, la
+    // supérette et l'école ont aussi leur porte de façade.
     {
       // Le lendemain matin (D-64), maman montre la grue du chantier : c'est là qu'il faut aller.
       id: 'street-mom-crane',
@@ -947,6 +918,8 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: S.lookMs + 400 },
       ],
     },
+    // La gare (D-66).
+    ...STATION_STORY.triggers,
   ],
   props: [
     // La toise de la chambre (D-43), au mur près de la porte.
@@ -1211,7 +1184,7 @@ export const HOUSE_STORY: StoryData = {
       when: { all: [F.SchoolDone], none: [F.StreetMorning] },
     },
     {
-      // Le lendemain, la palissade du chantier est ouverte (le niveau suivant, PLACEHOLDER).
+      // Le lendemain, la palissade du chantier est ouverte : la porte de la gare (D-66).
       id: 'site-gap',
       room: 'street',
       kind: 'site-gap',
@@ -1250,6 +1223,8 @@ export const HOUSE_STORY: StoryData = {
     { room: 'laundry', exit: 3, when: { none: [F.Grown] }, icon: 'handle' },
     // Le portillon (D-60) : fermé tant que la chevillette n'est pas tirée.
     { room: 'garden-alley', exit: 3, when: { none: [F.GateOpen] }, icon: 'gate' },
+    // La palissade du chantier (D-64, D-66) : ouverte le lendemain de l'école étrange (la gare).
+    { room: 'street', exit: 6, when: { none: [F.StreetMorning] }, icon: 'question' },
     // La porte de l'école (D-64) : elle ne s'ouvre que de l'intérieur.
     { room: 'street', exit: 5, when: { none: [F.SchoolOpen] }, icon: 'question' },
     { room: 'school', exit: 1, when: { none: [F.SchoolOpen] }, icon: 'question' },
@@ -1259,8 +1234,14 @@ export const HOUSE_STORY: StoryData = {
   omens: [
     // L'oculus de l'école (D-64) : en montant les étagères, tant que la fin n'est pas vécue.
     { room: 'school', when: { none: [F.SchoolDone] }, col: 46, row: 7, radius: 10 },
-    // Le lendemain, près de la palissade ouverte du chantier : la suite.
-    { room: 'street', when: { all: [F.StreetMorning] }, col: 167, row: 26, radius: 12 },
+    // Le lendemain, près de la palissade ouverte du chantier : la suite (jusqu'à la gare, D-66).
+    {
+      room: 'street',
+      when: { all: [F.StreetMorning], none: [F.StationArrived] },
+      col: 167,
+      row: 26,
+      radius: 12,
+    },
     // Derrière la haie (D-49) : en approchant du trou, une fois le saut mural trouvé.
     {
       room: 'garden-tree',
@@ -1278,5 +1259,7 @@ export const HOUSE_STORY: StoryData = {
       row: 8,
       radius: 13,
     },
+    // La gare (D-66).
+    ...STATION_STORY.omens,
   ],
 };

@@ -65,6 +65,8 @@ export const StoryFlag = {
   StreetMorning: 'street.morning',
   /** Le matin, maman montre le chantier (D-64). */
   StreetMomCrane: 'street.mom-crane',
+  /** La gare (D-66) : Céleste est arrivée sur les voies, derrière la palissade du chantier. */
+  StationArrived: 'station.arrived',
   /** Quelques mois plus tard (D-43) : Céleste a grandi (phase de croissance 2). */
   Grown: 'growth.2',
   /** Le jardin (D-46) : Céleste est sortie pour la première fois (il fait beau, et Maria ?). */

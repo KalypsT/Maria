@@ -19,6 +19,7 @@ import { gardenDrawers } from './gardenArt';
 import { playgroundDrawers } from './playgroundArt';
 import { drawPencils, schoolDrawers } from './schoolArt';
 import { drawRubble, shopSiteDrawers } from './shopSiteArt';
+import { stationDrawers } from './stationArt';
 import { streetDrawers } from './streetArt';
 import { drawMemory } from './memoryArt';
 
@@ -174,6 +175,7 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
   ...playgroundDrawers({ tileShape, rounded }),
   ...shopSiteDrawers({ tileShape, rounded }),
   ...schoolDrawers({ tileShape, rounded }),
+  ...stationDrawers({ tileShape, rounded }),
   console(a, r) {
     wood(a, r);
     if (!a.palette.silhouettes) {

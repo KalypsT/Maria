@@ -10,11 +10,30 @@
 
 **Le quartier** (D-60, D-61) : plan validé (4 PR), toutes faites : PR 1 (portes de façade, aire de jeux), PR 2 (le parapluie, D-62), PR 3 (supérette et chantier, D-63), PR 4 (l'école, son monde étrange et la fin du niveau, D-64).
 
-**La gare** (D-65) : plan validé (5 PR). PR 1 faite : le parapluie s'ouvre au sommet d'un saut tenu ; le crochet du parapluie et les câbles (parcours d'essai 9). Suivantes : PR 2 la gare réelle ; PR 3 le système de boss ; PR 4 le monde étrange de la gare, la tour, Roger et le court souvenir ; PR 5 la fin et la phase 3 (en attente de l'illustration de Céleste en phase 3).
+**La gare** (D-65, D-66) : plan validé (5 PR). PR 1 faite (le parapluie s'ouvre au sommet ; le crochet et les câbles). PR 2 faite : la gare réelle, les trains, le crochet au bureau des objets trouvés, les revisites. Suivantes : PR 3 le système de boss ; PR 4 le monde étrange de la gare, la tour, Roger et le court souvenir ; PR 5 la fin et la phase 3 (en attente de l'illustration de Céleste en phase 3).
 
-Prochaine : essai du parapluie (nouvelle ouverture) et du crochet sur téléphone ; puis la PR 2 de la gare. Intégrer les morceaux de musique.
+Prochaine : essai de la gare sur téléphone ; puis la PR 3 (système de boss). Intégrer les morceaux de musique.
 
 ## Fait
+
+### La gare, PR 2 : la gare réelle (D-66)
+
+- **Accès** : au matin d'après l'école, la porte de la palissade du chantier (rue) mène aux voies. Céleste pense à Maria en arrivant.
+- **Les voies** : quais, voies en contrebas, abris ; le portique de signalisation (trouvaille moyenne) ; le poste d'aiguillage au bout de la caténaire (trouvaille, avec le crochet).
+- **Les trains** : le feu clignote, puis le train passe. Son souffle repousse Céleste si elle est sur la voie, là où passe le train, et la peur monte d'un cran. Sur les quais, rien.
+- **Les quais et la passerelle** : l'escalier, la passerelle au-dessus des voies jusqu'à la galerie du hall (boucle) ; la cheminée du pilier de la marquise (trouvaille difficile).
+- **Le hall** : verrière, grande horloge, tableau des départs, kiosque, galerie ; un câble sous la verrière (trouvaille, avec le crochet).
+- **Le bureau des objets trouvés** (porte du hall) : étagères de choses perdues, armoire ; **la poignée-crochet** tout en haut (moyen). En haut des casiers, une lueur turquoise et un présage ; Agir : « ? » pour l'instant (le monde étrange viendra avec la PR 4).
+- **Le dépôt** : wagons au-dessus des gravats, crochets du pont roulant (trouvaille moyenne).
+- **Revisites avec le crochet** : la jardinière de la terrasse (fil à linge à poulie, depuis le toit de la pergola) ; le nid du platane de la rue (fil tendu depuis la corniche de l'école).
+- **Cahier** : nouvelle page « La gare ». Musique : nouvel emplacement `station`.
+- DEBUG → Histoire : « la gare (le crochet à trouver) » ; DEBUG → Combat : réglages des trains (`trainPeriodMs`, `trainWarnMs`, `trainPassMs`, `trainGustX`, `trainGustY`).
+- Tests : 503. Vérifié dans Chromium : la porte de la palissade, les cinq salles, le feu qui clignote, le souffle (peur 1/3), le crochet ramassé (bulle d'aide), les fils de la terrasse et de la rue, la page « La gare » du cahier.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « le lendemain de l'école (palissade ouverte) », ou « la gare ») : la porte de la palissade se remarque-t-elle ?
+- [ ] Les trains : le feu se voit-il assez tôt ? Le souffle se comprend-il (et n'est-il pas trop punitif) ? Le train passe-t-il trop vite (1,6 s) ?
+- [ ] Le bureau des objets trouvés : la montée vers le crochet (moyenne) est-elle juste ? La lueur des casiers attire-t-elle ?
+- [ ] Les trouvailles au crochet (poste d'aiguillage, hall) et les revisites (terrasse, rue) : se remarquent-elles ? Donnent-elles envie de revenir ?
+- [ ] Les décors de la gare : lisibles, pas trop chargés (marquise, passerelle, tableau des départs) ?
 
 ### La gare, PR 1 : le parapluie s'ouvre au sommet ; le crochet et les câbles (D-65)
 

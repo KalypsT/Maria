@@ -1,4 +1,6 @@
 ; Jardin : la terrasse, derrière la buanderie (D-46). Maman étend le linge ; lanterne (point de retour).
+; Revisite avec le crochet (D-66) : le fil à linge à poulie, de la pergola à la fenêtre de la
+; chambre ; au bout, la jardinière (trouvaille, seulement avec le crochet).
 ; @name: Terrasse
 ; @icon: sun
 ; @world: garden
@@ -15,6 +17,8 @@
 ; @decor: backdoor 0 16 1 6
 ; @decor: clothesline 6 14 16 2
 ; @decor: sun 12 2 3 3
+; @cable: 26 4 4 5
+; @decor: windowbox 1 9 3 1
 ; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (danger), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 #................................................v
@@ -24,8 +28,8 @@
 #................................................v
 #................................................3
 #................................................3
-#................................................3
-#...........................---------------------v
+#.S..............................................3
+#---........................---------------------v
 #................................................v
 #................................................v
 #................................................v
