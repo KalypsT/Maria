@@ -19,6 +19,9 @@ import street from '../street/street.txt?raw';
 import playground from '../street/playground.txt?raw';
 import shop from '../street/shop.txt?raw';
 import site from '../street/site.txt?raw';
+import schoolyard from '../street/schoolyard.txt?raw';
+import school from '../street/school.txt?raw';
+import schoolStrange from '../street/school-strange.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -66,6 +69,10 @@ export const HOUSE: ZoneSource = {
     { id: 'playground', text: playground },
     { id: 'shop', text: shop },
     { id: 'site', text: site },
+    { id: 'schoolyard', text: schoolyard },
+    { id: 'school', text: school },
+    // Le monde étrange du quartier (D-64) : par l'histoire (l'oculus de l'école).
+    { id: 'school-strange', text: schoolStrange },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -92,6 +99,11 @@ export const HOUSE: ZoneSource = {
     ['street:3', 'site:2'],
     ['street:4', 'shop:1'],
     ['shop:2', 'site:1'],
+    // L'école (D-64) : le trou du grillage de l'aire de jeux (en planant) mène à la cour ; la porte
+    // de la cour, à l'école ; la porte de l'école, qui s'ouvre de l'intérieur, à la rue.
+    ['playground:2', 'schoolyard:1'],
+    ['schoolyard:2', 'school:2'],
+    ['street:5', 'school:1'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur
@@ -114,7 +126,9 @@ export const HOUSE: ZoneSource = {
     // Mon quartier : la rue en long (D-60), et les lieux derrière leurs façades (D-61), au-dessus
     // de leur porte.
     street: { x: 0, y: 3, w: 16, h: 2.4, page: 'street' },
-    playground: { x: 4, y: 0.4, w: 4.2, h: 2.2, page: 'street' },
+    playground: { x: 3.6, y: 0.4, w: 3.8, h: 2.2, page: 'street' },
+    schoolyard: { x: 7.6, y: 0.1, w: 2.8, h: 1.4, page: 'street' },
+    school: { x: 7.84, y: 1.7, w: 2.8, h: 1.0, page: 'street' },
     shop: { x: 10.9, y: 0.6, w: 2.8, h: 1.8, page: 'street' },
     site: { x: 14.2, y: -0.6, w: 2.8, h: 3, page: 'street' },
   },

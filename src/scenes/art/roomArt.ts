@@ -17,6 +17,7 @@ import {
 import { floatingDecor } from '../../core/level/decor';
 import { gardenDrawers } from './gardenArt';
 import { playgroundDrawers } from './playgroundArt';
+import { drawPencils, schoolDrawers } from './schoolArt';
 import { drawRubble, shopSiteDrawers } from './shopSiteArt';
 import { streetDrawers } from './streetArt';
 import { drawMemory } from './memoryArt';
@@ -172,6 +173,7 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
   ...streetDrawers({ tileShape, rounded }),
   ...playgroundDrawers({ tileShape, rounded }),
   ...shopSiteDrawers({ tileShape, rounded }),
+  ...schoolDrawers({ tileShape, rounded }),
   console(a, r) {
     wood(a, r);
     if (!a.palette.silhouettes) {
@@ -1415,6 +1417,11 @@ function drawStructure(a: ArtContext, floorY: number): void {
         if (y >= floorY) {
           ctx.fillStyle = p.floor;
           ctx.fillRect(x, y, T, T);
+        }
+        if (level.meta.hazard === 'pencils') {
+          // Pointes de crayons de l'école étrange (D-64).
+          drawPencils(ctx, x, y, col, y >= floorY);
+          continue;
         }
         if (level.meta.hazard === 'rubble') {
           // Gravats du chantier (D-63).

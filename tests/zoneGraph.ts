@@ -178,11 +178,12 @@ export function zoneGraph(
     }
   }
   // Passages de l'histoire : le monde étrange de la maison a lieu avant que Céleste grandisse,
-  // celui du jardin après (D-49), et le trou de la haie ne s'ouvre qu'une fois le saut mural
+  // ceux du jardin (D-49) et de l'école (D-64) après, et le trou de la haie ne s'ouvre qu'une fois le saut mural
   // trouvé dans la cabane.
   for (const [from, to] of storyPassages()) {
-    const inGarden = roomOf(from).startsWith('garden-');
-    if (inGarden !== growth >= 2 || (roomOf(from) === 'garden-tree' && !wallJump)) {
+    // Le jardin (D-49) et le quartier (l'école, D-64) viennent après la croissance.
+    const late = roomOf(from).startsWith('garden-') || roomOf(from).startsWith('school');
+    if (late !== growth >= 2 || (roomOf(from) === 'garden-tree' && !wallJump)) {
       continue;
     }
     edge(from, to);

@@ -2,7 +2,7 @@ import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 import type { MapModel, MapPoint, MapRoom } from '../core/world/mapModel';
 import type { MapBox } from '../core/world/zone';
 import { ABILITY_HINTS, Ability } from '../config/abilities';
-import { MARIA_THINGS, MEMORIES, type MemoryId } from '../config/memories';
+import { MARIA_THINGS, MEMORIES, STRANGE_THINGS, type MemoryId } from '../config/memories';
 import { drawAbility } from '../scenes/art/abilityArt';
 import { drawMemory } from '../scenes/art/memoryArt';
 
@@ -33,7 +33,7 @@ function seeded(text: string): () => number {
  * qu'elle est ouverte ; un toucher ou le bouton Carte la referme. Dessinée au crayon : salles
  * visitées, salles devinées (« ? »), passages, veilleuses allumées, trouvailles, Céleste.
  */
-type NotebookPage = 'map' | 'memories' | 'maria' | 'abilities';
+type NotebookPage = 'map' | 'memories' | 'maria' | 'strange' | 'abilities';
 
 export class MapPage {
   private readonly root: HTMLElement;
@@ -41,6 +41,7 @@ export class MapPage {
   private readonly title: HTMLButtonElement;
   private readonly memoriesTab: HTMLButtonElement;
   private readonly mariaTab: HTMLButtonElement;
+  private readonly strangeTab: HTMLButtonElement;
   private readonly abilitiesTab: HTMLButtonElement;
   /** Capacités acquises (D-62), pour la page « Mes capacités ». */
   private abilities: ReadonlySet<string> = new Set();
@@ -63,8 +64,8 @@ export class MapPage {
     this.root.hidden = true;
     const panel = document.createElement('div');
     panel.className = 'map-panel';
-    // Onglets manuscrits : la carte, les souvenirs (D-38), les affaires de Maria (D-58) et les
-    // capacités acquises (D-62).
+    // Onglets manuscrits : la carte, les souvenirs (D-38), les affaires de Maria (D-58), le monde
+    // étrange (D-64) et les capacités acquises (D-62).
     const tabs = document.createElement('div');
     tabs.className = 'map-tabs';
     this.title = document.createElement('button');
@@ -75,14 +76,18 @@ export class MapPage {
     this.mariaTab = document.createElement('button');
     this.mariaTab.className = 'map-title';
     this.mariaTab.textContent = 'Les affaires de Maria';
+    this.strangeTab = document.createElement('button');
+    this.strangeTab.className = 'map-title';
+    this.strangeTab.textContent = 'Monde étrange';
     this.abilitiesTab = document.createElement('button');
     this.abilitiesTab.className = 'map-title';
     this.abilitiesTab.textContent = 'Mes capacités';
-    tabs.append(this.title, this.memoriesTab, this.mariaTab, this.abilitiesTab);
+    tabs.append(this.title, this.memoriesTab, this.mariaTab, this.strangeTab, this.abilitiesTab);
     for (const [tab, page] of [
       [this.title, 'map'],
       [this.memoriesTab, 'memories'],
       [this.mariaTab, 'maria'],
+      [this.strangeTab, 'strange'],
       [this.abilitiesTab, 'abilities'],
     ] as const) {
       tab.type = 'button';
@@ -94,7 +99,7 @@ export class MapPage {
     this.canvas = document.createElement('canvas');
     this.canvas.className = 'map-canvas';
     this.canvas.addEventListener('pointerup', (event) => {
-      if ((this.page === 'memories' || this.page === 'maria') && this.touchMemories(event)) {
+      if (this.memoryList() !== null && this.touchMemories(event)) {
         event.stopPropagation();
       }
     });
@@ -155,6 +160,7 @@ export class MapPage {
     this.title.classList.toggle('active', page === 'map');
     this.memoriesTab.classList.toggle('active', page === 'memories');
     this.mariaTab.classList.toggle('active', page === 'maria');
+    this.strangeTab.classList.toggle('active', page === 'strange');
     this.abilitiesTab.classList.toggle('active', page === 'abilities');
   }
 
@@ -198,6 +204,20 @@ export class MapPage {
         ctx.fillText(line, x, cy + (k - (lines.length - 1) / 2) * lineH);
       });
     });
+  }
+
+  /** Cases de la page affichée, si c'est une page de souvenirs (null : carte ou capacités). */
+  private memoryList(): readonly MemoryId[] | null {
+    switch (this.page) {
+      case 'memories':
+        return MEMORIES;
+      case 'maria':
+        return MARIA_THINGS;
+      case 'strange':
+        return STRANGE_THINGS;
+      default:
+        return null;
+    }
   }
 
   /** Toucher sur la page des souvenirs : ouvre ou referme un souvenir ; vrai s'il est traité. */
@@ -296,8 +316,9 @@ export class MapPage {
       this.drawAbilities(ctx, width, height);
       return;
     }
-    if (this.page !== 'map') {
-      this.drawMemories(ctx, width, height, this.page === 'maria' ? MARIA_THINGS : MEMORIES);
+    const list = this.memoryList();
+    if (list !== null) {
+      this.drawMemories(ctx, width, height, list);
       return;
     }
     const margin = 18;
@@ -655,6 +676,18 @@ function drawIcon(
       ctx.lineTo(x + s * 0.9, y - s * 0.6);
       ctx.moveTo(x + s * 0.6, y - s * 0.6);
       ctx.lineTo(x + s * 0.6, y);
+      break;
+    case 'school':
+      // Une école : un fronton, une horloge ronde, la porte (D-64).
+      ctx.moveTo(x - s * 0.9, y + s * 0.7);
+      ctx.lineTo(x - s * 0.9, y - s * 0.2);
+      ctx.lineTo(x, y - s * 0.85);
+      ctx.lineTo(x + s * 0.9, y - s * 0.2);
+      ctx.lineTo(x + s * 0.9, y + s * 0.7);
+      ctx.closePath();
+      ctx.moveTo(x + s * 0.18, y - s * 0.2);
+      ctx.arc(x, y - s * 0.2, s * 0.18, 0, Math.PI * 2);
+      ctx.rect(x - s * 0.25, y + s * 0.2, s * 0.5, s * 0.5);
       break;
     case 'street':
       // Un lampadaire et une petite maison au bord d'une route (D-60).

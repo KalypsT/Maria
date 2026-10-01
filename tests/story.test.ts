@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DIFFICULTY_MIN_WINDOW_MS } from '../src/config/levelDesign';
 import { DEFAULT_MOVEMENT, PLAYER_HITBOX } from '../src/config/movement';
 import { TILE_SIZE as T } from '../src/config/display';
-import { MARIA_THINGS, MEMORIES, MEMORIES_LATER } from '../src/config/memories';
+import { MARIA_THINGS, MEMORIES, MEMORIES_LATER, STRANGE_THINGS } from '../src/config/memories';
 import { LEGACY_STORY_FLAGS, PROP_SIZE, StoryFlag as F } from '../src/config/story';
 import { analyzeLevel } from '../src/core/analysis/analyzeLevel';
 import { surfaceUnder } from '../src/core/analysis/surfaces';
@@ -596,7 +596,7 @@ describe('souvenirs (D-38)', () => {
         }
       }
     }
-    for (const id of [...MEMORIES, ...MARIA_THINGS]) {
+    for (const id of [...MEMORIES, ...MARIA_THINGS, ...STRANGE_THINGS]) {
       expect(given.has(id), id).toBe(!MEMORIES_LATER.includes(id));
     }
   });

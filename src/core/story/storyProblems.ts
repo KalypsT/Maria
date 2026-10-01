@@ -6,6 +6,7 @@ import { propBox } from './PropStage';
 import {
   CHARACTER_KINDS,
   WALL_PROP_KINDS,
+  WINDOW_PROP_KINDS,
   type FlagCondition,
   type StoryData,
   type TileArea,
@@ -161,13 +162,18 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
       const below = tileAt(level, prop.col, prop.row + 1);
       if (tileAt(level, prop.col, prop.row) !== Tile.Empty) {
         problems.push(`${what} : dans un meuble ou un mur`);
-      } else if (below !== Tile.Solid && below !== Tile.OneWay) {
+      } else if (
+        below !== Tile.Solid &&
+        below !== Tile.OneWay &&
+        !WINDOW_PROP_KINDS.has(prop.kind)
+      ) {
         problems.push(`${what} : ne repose sur rien`);
       }
       if (
         box.height > 2 * TILE_SIZE &&
         !CHARACTER_KINDS.has(prop.kind) &&
-        !WALL_PROP_KINDS.has(prop.kind)
+        !WALL_PROP_KINDS.has(prop.kind) &&
+        !WINDOW_PROP_KINDS.has(prop.kind)
       ) {
         problems.push(`${what} : trop grand`);
       }

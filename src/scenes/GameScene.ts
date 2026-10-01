@@ -60,6 +60,7 @@ import {
   ART_IMAGES,
   DAY_PALETTE,
   GARDEN_PALETTE,
+  STREET_DUSK_PALETTE,
   STREET_PALETTE,
   MAX_ART_SCALE,
   REAL_PALETTE,
@@ -84,6 +85,7 @@ import { AttackPhase } from '../core/combat/PlayerAttack';
 import { DustPool } from './DustPool';
 import { WorldView } from './WorldView';
 import type { AudioPlayer } from '../platform/audioPlayer';
+import { isMusicTrack, type MusicTrack } from '../config/audio';
 import { chooseMusic } from '../core/audio/musicChoice';
 import { debugSwitchUrl } from '../core/platform/debugSwitch';
 
@@ -244,6 +246,7 @@ export class GameScene extends Phaser.Scene {
     garden: false,
     street: false,
     time: 'evening' as TimeOfDay,
+    room: null as MusicTrack | null,
   };
   /** Heure (ms) avant laquelle une porte fermée ne redonne pas de bulle. */
   private lockedThoughtUntil = 0;
@@ -1221,10 +1224,10 @@ export class GameScene extends Phaser.Scene {
     }
     if (isStreetRoom(this.level)) {
       // Sol propre à un lieu du quartier (`; @floor: dessus bord`), le sol souple de l'aire de jeux.
+      // Le soir de l'école (D-64) : le crépuscule.
+      const street = this.story.timeOfDay() === 'evening' ? STREET_DUSK_PALETTE : STREET_PALETTE;
       const floor = this.level.meta.floor?.split(/\s+/);
-      return floor?.[0] && floor[1]
-        ? { ...STREET_PALETTE, floor: floor[0], floorEdge: floor[1] }
-        : STREET_PALETTE;
+      return floor?.[0] && floor[1] ? { ...street, floor: floor[0], floorEdge: floor[1] } : street;
     }
     const base = this.story.timeOfDay() === 'morning' ? DAY_PALETTE : REAL_PALETTE;
     // Couleur de mur propre à une salle (`; @walls: haut bas`), la cabane en bois par exemple.
@@ -1275,6 +1278,8 @@ export class GameScene extends Phaser.Scene {
     music.garden = isGardenRoom(this.level);
     music.street = isStreetRoom(this.level);
     music.time = story.timeOfDay();
+    const roomTrack = this.level.meta.music;
+    music.room = isMusicTrack(roomTrack) ? roomTrack : null;
     this.audio.setMusic(chooseMusic(music));
   }
 

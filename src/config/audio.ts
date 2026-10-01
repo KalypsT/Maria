@@ -20,8 +20,14 @@ export const MUSIC_TRACKS = [
   'hedge',
   /** La rue du quartier (D-60). */
   'street',
+  /** L'école étrange, le monde étrange du quartier (D-64). */
+  'street-strange',
 ] as const;
 export type MusicTrack = (typeof MUSIC_TRACKS)[number];
+
+export function isMusicTrack(id: string | undefined): id is MusicTrack {
+  return id !== undefined && (MUSIC_TRACKS as readonly string[]).includes(id);
+}
 
 /** Courts jingles, joués une fois par-dessus la musique (baissée pendant ce temps). */
 export const JINGLES = [
