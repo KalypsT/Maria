@@ -137,7 +137,7 @@ describe('la gare (D-66)', () => {
       expect(trainLeft(1, width, -1) + 27 * T).toBeLessThanOrEqual(0);
     });
 
-    it('chaque voie a un feu, et les quais sont hors du souffle', () => {
+    it('chaque voie a un feu, et les quais sont hors du souffle', { timeout: TIMEOUT }, () => {
       for (const room of ['station-tracks', 'station-platforms']) {
         const data = level(room);
         expect(data.trains.length, room).toBe(1);
