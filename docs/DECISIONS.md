@@ -760,6 +760,25 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Tests** : `station.test.ts` analyse seulement les salles de la gare (coût) : accès, trains, difficultés exactes, trouvailles au crochet, jamais coincée avec et sans le crochet, revisites. `zoneGraph` prend le crochet en option.
 - **Sauvegarde** : aucune migration (étape `station.arrived`, capacité `hook`, trouvailles).
 
+## D-67 — La gare, PR 3 : le système de boss (poursuite verticale), dans un parcours d'essai
+
+- **Plan validé** (D-65) : le premier boss est un **examen de mouvement** (§19), pas un combat. Quelque chose de grand et sans visage monte derrière Céleste. Le système est d'abord essayé seul dans un parcours d'essai ; la tour des objets perdus (PR 4) l'utilisera.
+- **Données** (directives de salle) :
+  - `; @chase: <ligne>` : la ligne d'arrivée ; pieds au-dessus, la poursuite s'arrête et il redescend ;
+  - `; @chase-phase: <ligne> <tuiles/s>` (répétable, de bas en haut) : la vitesse de montée tant que Céleste est sous cette ligne ;
+  - `; @chase-trip: col ligne l h <recul>` (répétable) : un croc-en-jambe ; quand Céleste passe dedans (par exemple pendue à un câble), il recule de `recul` tuiles et s'arrête un moment (`chaseTripPauseMs`). Une fois par essai ;
+  - `; @camera: up` : la vue monte de `CHASE_CAMERA_UP_PX` (30 px) au-dessus de Céleste, pour voir où aller et garder le poursuivant en bas de l'écran.
+- **Règles** (cœur pur et testé, `src/core/boss/Chase.ts`, mené par `CombatWorld`) :
+  - au départ et après une réapparition, il repart `chaseRestartGapTiles` (7) sous les pieds de Céleste et attend `chaseStartDelayMs` (1,5 s) ;
+  - il monte à la vitesse de la phase (× `chaseSpeedScale`) ; s'il a plus de `chaseMaxGapTiles` (7) de retard, il remonte hors de la vue (présent sans être injuste) ; pas pendant un arrêt ;
+  - **le toucher** : Céleste rebondit vers le haut (`chaseContactBounceY`), perd un instant le contrôle, **la peur monte d'un cran** (choix de l'utilisateur, comme les dangers depuis D-56) ; il recule (`chaseContactRecoilTiles`) et s'arrête (`chaseContactPauseMs`). Trois contacts : évanouissement doux, retour à la lanterne de la phase (D-20, D-21), il repart sous elle ;
+  - réglages dans `src/config/combat.ts` et l'overlay (DEBUG → Combat). PROVISOIRES.
+- **Le poursuivant** (PLACEHOLDER, `ChaseView`) : un tas de valises, de manteaux et de parapluies perdus, violet sombre, un liseré turquoise sur le dessus, coiffé d'une **casquette de contrôleur**, **sans visage** ; il respire lentement. Trois images par salle. Inquiétant, jamais horreur (pilier 8).
+- **Durée des passages** (analyse de faisabilité, D-16 étendue) : chaque passage porte `durationMs`, de l'élan (course depuis le bord de la surface, placement, glissade contre un mur) jusqu'à l'atterrissage, au pire sur sa fenêtre. Pour les passages par les appuis sur les murs, c'est le plus rapide des enchaînements qui gardent la fenêtre (plus courts chemins entre appuis).
+- **Test de rythme** : pour chaque phase, le chemin le plus rapide (fenêtres de la difficulté de la salle) de la lanterne de la phase à la suivante doit prendre **entre 40 % et 80 %** du temps qu'il faut au poursuivant pour monter jusque-là (départ sous Céleste, attente, vitesse de la phase ; les crocs-en-jambe ne sont pas comptés). Il presse vraiment, sans être impossible. Limite : le chemin le plus rapide est celui d'un joueur parfait ; un vrai joueur est plus lent (d'où la marge), à juger sur téléphone.
+- **Parcours d'essai 10 « Poursuite »** (facile en statique, la pression vient du poursuivant ; prête escalade, saut mural, parapluie et crochet) : une cheminée de valises (saut mural), des valises qui flottent puis un câble au-dessus d'une pile de valises qui le fait trébucher, une dernière cheminée et des valises jusqu'en haut. Une lanterne au début de chaque phase. Vitesses : 5,1, 1,1 et 2,3 tuiles/s (le chemin le plus rapide prend environ la moitié du temps du poursuivant).
+- **Sauvegarde** : aucun changement (parcours d'essai hors partie).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
