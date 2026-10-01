@@ -20,6 +20,8 @@ export interface CelestePose {
   armReach: number;
   /** Ouverture du parapluie (D-62) : 0 fermé (invisible), 1 grand ouvert. */
   umbrella: number;
+  /** Parapluie fermé, pendu à un câble par son crochet (D-65) : 0 invisible, 1 visible. */
+  hook: number;
 }
 
 /** Ce que la marionnette lit de Céleste et du combat, à chaque pas. */
@@ -51,6 +53,7 @@ export class CelestePoser {
     pigtails: 0,
     armReach: 1,
     umbrella: 0,
+    hook: 0,
   };
   /** Phase du cycle de pas (radians). */
   runPhase = 0;
@@ -72,6 +75,7 @@ export class CelestePoser {
     pigtails: 0,
     armReach: 1,
     umbrella: 0,
+    hook: 0,
   };
 
   constructor(
@@ -95,6 +99,7 @@ export class CelestePoser {
     pose.armFront = pose.armBack = pose.legFront = pose.legBack = pose.pigtails = 0;
     pose.armReach = 1;
     pose.umbrella = 0;
+    pose.hook = 0;
     this.pigtailVel = 0;
     this.runPhase = 0;
     this.stateSteps = 0;
@@ -128,6 +133,7 @@ export class CelestePoser {
     t.headTilt = 0;
     t.armReach = 1;
     t.umbrella = 0;
+    t.hook = 0;
     const state = this.sitting ? SITTING : subject.state;
     switch (state) {
       case SITTING: {
@@ -180,6 +186,20 @@ export class CelestePoser {
         t.headTilt = -5 * DEG;
         t.umbrella = 1;
         break;
+      case PlayerState.Cable: {
+        // Pendue au câble (D-65) : le bras avant tendu vers le crochet, les jambes qui se
+        // balancent un peu, penchées vers l'arrière par la vitesse.
+        const sway = Math.sin((this.time * 1000 * Math.PI * 2) / p.hangSwingMs);
+        t.armFront = 178 * DEG;
+        t.armBack = 30 * DEG;
+        t.armReach = 1.15;
+        t.bodyTilt = -6 * DEG;
+        t.headTilt = -6 * DEG;
+        t.legFront = -10 * DEG + sway * p.hangSwingDeg * DEG * 0.6;
+        t.legBack = -22 * DEG - sway * p.hangSwingDeg * DEG * 0.4;
+        t.hook = 1;
+        break;
+      }
       case PlayerState.Hang: {
         const sway = Math.sin((this.time * 1000 * Math.PI * 2) / p.hangSwingMs);
         t.armFront = 170 * DEG;
@@ -252,6 +272,8 @@ export class CelestePoser {
     pose.armReach += (t.armReach - pose.armReach) * k;
     // Le parapluie s'ouvre et se ferme vite (on voit qu'il répond à Saut).
     pose.umbrella += (t.umbrella - pose.umbrella) * Math.max(k, 0.25);
+    // Le crochet apparaît d'un coup (le parapluie se replie en s'accrochant).
+    pose.hook = t.hook;
     // Couettes : ressort amorti, tirées vers l'arrière par la course et vers le haut par la chute.
     const max = p.pigtailMaxDeg * DEG;
     const run = Math.min(1, speed / Math.max(1, this.maxRunSpeed));

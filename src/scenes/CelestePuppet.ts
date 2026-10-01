@@ -41,6 +41,8 @@ export class CelestePuppet {
   private readonly armFront: PartImage;
   /** Parapluie (D-62), dans la main avant ; visible seulement ouvert. */
   private readonly umbrella: PartImage;
+  /** Parapluie replié, pendu à un câble par son crochet (D-65). */
+  private readonly hook: PartImage;
   /** Repère courant de `place` et échelle des textures (champs : aucune allocation par image). */
   private hipX = 0;
   private hipY = 0;
@@ -65,9 +67,11 @@ export class CelestePuppet {
     this.head = part('head');
     this.armFront = part('arm');
     this.umbrella = part('umbrella').setVisible(false);
+    this.hook = part('hook').setVisible(false);
     this.container = scene.add
       .container(0, 0, [
         this.umbrella,
+        this.hook,
         this.armBack,
         this.legBack,
         this.pigtailBack,
@@ -142,6 +146,7 @@ export class CelestePuppet {
     assign(this.skirt, 'skirt', growth.bodyScale);
     assign(this.head, 'head');
     assign(this.umbrella, 'umbrella');
+    assign(this.hook, 'hook');
     this.skirt.setVisible(growth.outfit === 'dress');
   }
 
@@ -188,6 +193,17 @@ export class CelestePuppet {
         tilt * 0.5,
       );
       this.umbrella.setScale(open / this.scale, (0.4 + 0.6 * open) / this.scale);
+    }
+    // Crochet (D-65) : le parapluie replié dans la main avant, tout droit, crochet en haut.
+    this.hook.setVisible(pose.hook > 0.5);
+    if (pose.hook > 0.5) {
+      const arm = ARM_LENGTH * pose.armReach * body;
+      this.place(
+        this.hook,
+        SHOULDER_FRONT.x + arm * Math.sin(pose.armFront),
+        SHOULDER_FRONT.y * body + arm * Math.cos(pose.armFront) + UMBRELLA_GRIP,
+        0,
+      );
     }
     this.legBack
       .setPosition(this.hipX + LEG_BACK.x, this.hipY + LEG_BACK.y)

@@ -74,6 +74,25 @@ export function drawAbility(
       ctx.stroke();
       ctx.setLineDash([]);
       break;
+    case 'hook':
+      // Un câble en pente, le parapluie fermé pendu par son crochet, et la glissade le long.
+      ctx.beginPath();
+      ctx.moveTo(-9, -8);
+      ctx.lineTo(9, -2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(-3, -5.2, 1.6, Math.PI, 0);
+      ctx.moveTo(-1.4, -5.2);
+      ctx.lineTo(-1.4, 1);
+      ctx.lineTo(0, 7);
+      ctx.lineTo(-2.8, 7);
+      ctx.lineTo(-1.4, 1);
+      ctx.stroke();
+      ctx.strokeStyle = rose;
+      ctx.setLineDash([1.5, 1.5]);
+      arrow(ctx, 1.5, -2.5, 8, 0);
+      ctx.setLineDash([]);
+      break;
   }
   ctx.restore();
 }

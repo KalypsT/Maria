@@ -10,9 +10,27 @@
 
 **Le quartier** (D-60, D-61) : plan validé (4 PR), toutes faites : PR 1 (portes de façade, aire de jeux), PR 2 (le parapluie, D-62), PR 3 (supérette et chantier, D-63), PR 4 (l'école, son monde étrange et la fin du niveau, D-64).
 
-Prochaine : essai du quartier entier sur téléphone ; puis le niveau suivant (derrière la palissade du chantier), à planifier. Intégrer les morceaux de musique.
+**La gare** (D-65) : plan validé (5 PR). PR 1 faite : le parapluie s'ouvre au sommet d'un saut tenu ; le crochet du parapluie et les câbles (parcours d'essai 9). Suivantes : PR 2 la gare réelle ; PR 3 le système de boss ; PR 4 le monde étrange de la gare, la tour, Roger et le court souvenir ; PR 5 la fin et la phase 3 (en attente de l'illustration de Céleste en phase 3).
+
+Prochaine : essai du parapluie (nouvelle ouverture) et du crochet sur téléphone ; puis la PR 2 de la gare. Intégrer les morceaux de musique.
 
 ## Fait
+
+### La gare, PR 1 : le parapluie s'ouvre au sommet ; le crochet et les câbles (D-65)
+
+- **Parapluie** : garder Saut appuyé ; en haut du saut, le parapluie s'ouvre (40 ms après le sommet). Appuyer de nouveau sur Saut en l'air l'ouvre aussi (chute d'un bord, saut court). Lâcher : il se referme. Pour un grand saut sans planer : lâcher Saut en haut du saut.
+- **Le crochet** (s'ajoute au parapluie) : en planant, passer sur un câble : le crochet s'y accroche, Céleste glisse (vers le bas sur un câble en pente, dans son sens sur un câble plat). Lâcher Saut : elle lâche, avec l'élan. Lâcher et vite rappuyer (120 ms) : elle saute depuis le câble ; Saut tenu, le parapluie se rouvre en haut, on peut attraper le câble suivant.
+- **Câbles** : directive `; @cable:` dans les salles ; dessinés droits (fil sombre, liseré clair).
+- **Aide** : bulle du parapluie redessinée (Saut tenu), bulle du crochet, ligne « crochet » dans « Mes capacités » ; texte du parapluie mis à jour.
+- **Parcours d'essai 9 « Crochet »** (menu pause, mode debug) : un long câble en pente, un câble plat, puis un saut depuis son bout vers le câble suivant. Impossible sans le crochet.
+- DEBUG : case « Capacité : crochet du parapluie » ; réglages `glideAutoDelayMs`, `cableHookAbovePx`, `cableMinSpeed`, `cableMaxSpeed`, `cableAccel`, `cableFlatSlope`, `cableJumpWindowMs`, `cableJumpHeightTiles`.
+- Analyse de faisabilité : suit les câbles (Saut tenu, lâché à la sortie, saut depuis le câble). Les difficultés de toutes les salles avec parapluie sont inchangées (testé).
+- Tests : 491. Vérifié dans Chromium : parcours 9, accroche au câble, pose pendue, glissade jusqu'à l'îlot.
+- [ ] À vérifier sur téléphone (menu pause → Parcours d'essai → « 9. Crochet », puis « 8. Parapluie ») : le parapluie qui s'ouvre au sommet en gardant Saut est-il naturel ? S'ouvre-t-il parfois sans le vouloir (grands sauts tenus) ? Le délai de 40 ms ?
+- [ ] Le crochet : s'accroche-t-on quand on le veut ? Vitesses (110 à 240 px/s) : trop lent, trop rapide ?
+- [ ] Lâcher Saut pour lâcher le câble, puis le saut depuis le câble (relâcher et vite rappuyer, 120 ms) : facile à faire au pouce ? Fenêtre trop courte ?
+- [ ] Le fil des câbles se voit-il bien ? La pose pendue (parapluie replié, crochet en haut) se lit-elle ?
+- [ ] Les bulles d'aide (parapluie, crochet) et la page « Mes capacités » (quatre lignes).
 
 ### Le quartier, PR 4 : l'école, son monde étrange et la fin du niveau (D-64)
 

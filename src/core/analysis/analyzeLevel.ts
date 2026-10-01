@@ -42,9 +42,16 @@ export interface Move {
   readonly windowMs: number;
   /** Passage par les appuis sur les murs (D-44) : type du premier élan. */
   readonly start?: MoveKind;
-  /** Parapluie ouvert en l'air (D-62) : nouvelle pression de Saut au sommet, tenue jusqu'au sol. */
+  /** Parapluie ouvert en l'air (D-62, D-65) : Saut tenu jusqu'au sol, ouvert au sommet. */
   readonly glide?: boolean;
+  /**
+   * Sortie d'un câble (D-65) : Saut relâché en quittant le câble (`drop`), ou relâché puis pressé
+   * de nouveau aussitôt (`jump`, saut depuis le câble, tenu ensuite). Absent : Saut tenu.
+   */
+  readonly cableExit?: CableExit;
 }
+
+export type CableExit = 'drop' | 'jump';
 
 /**
  * Essais bruts d'une famille de passages (saut mural, D-44) : la surface ou l'appui atteint par
@@ -87,8 +94,10 @@ interface Family {
   readonly dir: number;
   readonly holdSteps: number;
   readonly airRelease: boolean;
-  /** Parapluie ouvert au sommet (D-62). */
+  /** Parapluie ouvert au sommet (D-62, D-65). */
   readonly glide: boolean;
+  /** Sortie d'un câble (D-65) ; null : Saut tenu. */
+  readonly cableExit: CableExit | null;
   /** Surface atteinte pour chaque essai successif (-1 : aucune autre surface). */
   readonly targets: number[];
 }
@@ -127,6 +136,7 @@ class MoveExplorer {
     private readonly hitbox: Readonly<{ width: number; height: number }>,
     private readonly canWallJump = false,
     private readonly canGlide = false,
+    private readonly canHook = false,
   ) {
     this.main = new PlayerPhysics(level, params, 0, 0, hitbox);
     this.probe = new PlayerPhysics(level, params, 0, 0, hitbox);
@@ -136,6 +146,8 @@ class MoveExplorer {
     this.probe.canWallJump = canWallJump;
     this.main.canGlide = canGlide;
     this.probe.canGlide = canGlide;
+    this.main.canHook = canHook;
+    this.probe.canHook = canHook;
     const derived = deriveMovement(params);
     this.stepMs = derived.dt * 1000;
     this.coyoteSteps = derived.coyoteSteps;
@@ -144,9 +156,18 @@ class MoveExplorer {
       derived.jumpVelocity / derived.riseGravity + Math.sqrt((2 * apexPx) / derived.fallGravity);
     // Sous le parapluie (D-62), on va aussi loin que la hauteur de la salle le permet.
     const glideTime = canGlide ? (level.height * T) / params.glideFallSpeed : 0;
-    this.reachPx = 1.5 * params.maxRunSpeed * (airtime + glideTime) + 3 * T;
+    // Le long des câbles (D-65) : au plus leur longueur à la vitesse minimale, en plus du plané.
+    let cableTime = 0;
+    let cableSpan = 0;
+    if (canGlide && canHook) {
+      for (const c of level.cables) {
+        cableTime += Math.hypot(c.x2 - c.x1, c.y2 - c.y1) / params.cableMinSpeed;
+        cableSpan += c.x2 - c.x1;
+      }
+    }
+    this.reachPx = 1.5 * params.maxRunSpeed * (airtime + glideTime) + cableSpan + 3 * T;
     this.maxAirSteps = canGlide
-      ? MOVE_SEARCH.maxSteps + Math.ceil(glideTime / derived.dt)
+      ? MOVE_SEARCH.maxSteps + Math.ceil((glideTime + cableTime) / derived.dt)
       : MOVE_SEARCH.maxSteps;
     // En grimpant, les mains atteignent un bord au-dessus de la tête (D-26).
     const grabPx = canClimb ? hitbox.height + params.ledgeGrabAbovePx : 0;
@@ -180,11 +201,31 @@ class MoveExplorer {
     for (const dir of dirs) {
       for (const holdSteps of MOVE_SEARCH.jumpHoldSteps) {
         for (const airRelease of withRelease ? [false, true] : [false]) {
-          families.push({ kind, dir, holdSteps, airRelease, glide: false, targets: [] });
+          families.push({
+            kind,
+            dir,
+            holdSteps,
+            airRelease,
+            glide: false,
+            cableExit: null,
+            targets: [],
+          });
         }
       }
       if (this.canGlide) {
-        families.push({ kind, dir, holdSteps: 0, airRelease: false, glide: true, targets: [] });
+        const exits: (CableExit | null)[] =
+          this.canHook && this.level.cables.length > 0 ? [null, 'drop', 'jump'] : [null];
+        for (const cableExit of exits) {
+          families.push({
+            kind,
+            dir,
+            holdSteps: 0,
+            airRelease: false,
+            glide: true,
+            cableExit,
+            targets: [],
+          });
+        }
       }
     }
     return families;
@@ -228,6 +269,7 @@ class MoveExplorer {
           airRelease: family.airRelease,
           windowMs: count * msPerTry,
           ...(family.glide ? { glide: true } : {}),
+          ...(family.cableExit ? { cableExit: family.cableExit } : {}),
         });
       }
     }
@@ -282,7 +324,14 @@ class MoveExplorer {
       for (const family of families) {
         family.targets.push(
           worth
-            ? this.tryJump(main, dir, family.holdSteps, family.airRelease, family.glide)
+            ? this.tryJump(
+                main,
+                dir,
+                family.holdSteps,
+                family.airRelease,
+                family.glide,
+                family.cableExit,
+              )
             : surface.id,
         );
       }
@@ -342,7 +391,14 @@ class MoveExplorer {
         let target = surface.id;
         if (worth) {
           this.main.reset(x, y, this.level);
-          target = this.tryJump(this.main, family.dir, family.holdSteps, false, family.glide);
+          target = this.tryJump(
+            this.main,
+            family.dir,
+            family.holdSteps,
+            false,
+            family.glide,
+            family.cableExit,
+          );
         }
         family.targets.push(target);
       }
@@ -382,7 +438,9 @@ class MoveExplorer {
 
   /**
    * Depuis l'état de `from`, saute maintenant et retourne la surface où Céleste s'arrête. `glide` :
-   * au sommet, nouvelle pression de Saut qui ouvre le parapluie, tenue jusqu'au sol (D-62).
+   * Saut tenu jusqu'au sol, le parapluie s'ouvre au sommet (D-65) ; sinon, avec le parapluie, un
+   * saut tenu est relâché au sommet (saut complet sans plané). `cableExit` : comment quitter un
+   * câble (D-65).
    */
   private tryJump(
     from: PlayerPhysics,
@@ -390,22 +448,35 @@ class MoveExplorer {
     holdSteps: number,
     airRelease: boolean,
     glide = false,
+    cableExit: CableExit | null = null,
   ): number {
     const probe = this.probe;
     probe.copyFrom(from);
     const input = this.input;
     input.moveY = 0;
     let airborne = false;
-    let opened = false;
+    let apex = false;
+    /** Pas depuis la sortie d'un câble (-1 : pas encore quitté). */
+    let sinceCable = -1;
     for (let s = 0; s < this.maxAirSteps; s++) {
       if (airborne && probe.grounded) {
         break;
       }
-      const open: boolean = glide && !opened && airborne && probe.vy >= 0;
-      opened ||= open;
-      input.jumpPressed = s === 0 || open;
-      input.jumpHeld = opened || holdSteps === 0 || s < holdSteps;
+      apex ||= airborne && probe.vy >= 0;
+      input.jumpPressed = s === 0;
+      if (glide) {
+        input.jumpHeld = true;
+        if (cableExit && sinceCable >= 0) {
+          // Câble quitté : relâcher (drop), ou relâcher puis presser aussitôt (jump).
+          input.jumpHeld = cableExit === 'jump' && sinceCable >= 1;
+          input.jumpPressed = cableExit === 'jump' && sinceCable === 1;
+          sinceCable++;
+        }
+      } else {
+        input.jumpHeld = holdSteps === 0 ? !(this.canGlide && apex) : s < holdSteps;
+      }
       input.moveX = airRelease && s > 0 ? 0 : dir;
+      const onCable = probe.cable >= 0;
       const before = probe.state;
       probe.step(input);
       if (touchesHazard(this.level, probe.box)) {
@@ -415,8 +486,11 @@ class MoveExplorer {
         return this.wallNodeOf(probe);
       }
       airborne ||= !probe.grounded;
+      if (onCable && probe.cable < 0 && sinceCable < 0) {
+        sinceCable = 0;
+      }
     }
-    return this.finish(0, glide);
+    return this.finish(0, glide && cableExit === null);
   }
 
   /** Vrai si `probe` vient d'entrer en glissade contre un mur (appui du saut mural, D-44). */
@@ -526,9 +600,13 @@ class MoveExplorer {
     probe.copyFrom(from);
     const input = this.input;
     input.moveY = 0;
+    let apex = false;
     for (let s = 0; s < MOVE_SEARCH.maxSteps && !probe.grounded; s++) {
+      // Avec le parapluie, un rebond tenu est relâché au sommet : pas de plané après un saut mural
+      // dans l'analyse (prudente).
+      apex ||= s > 0 && probe.vy >= 0;
       input.jumpPressed = s === 0;
-      input.jumpHeld = holdSteps === 0 || s < holdSteps;
+      input.jumpHeld = holdSteps === 0 ? !(this.canGlide && apex) : s < holdSteps;
       input.moveX = dir;
       const before = probe.state;
       probe.step(input);
@@ -654,8 +732,10 @@ export interface AnalysisAbilities {
   readonly climb?: boolean;
   /** Saut mural (D-44) : glissade contre les murs et rebonds, enchaînés d'un mur à l'autre. */
   readonly wallJump?: boolean;
-  /** Parapluie (D-62) : ouvert au sommet d'un saut ou après une chute, tenu jusqu'au sol. */
+  /** Parapluie (D-62, D-65) : ouvert au sommet d'un saut ou après une chute, tenu jusqu'au sol. */
   readonly glide?: boolean;
+  /** Crochet du parapluie (D-65) : en planant, accroché aux câbles, avec ses sorties. */
+  readonly hook?: boolean;
   /** Hitbox de Céleste (croissance, D-43) ; par défaut, celle de la première phase. */
   readonly hitbox?: Readonly<{ width: number; height: number }>;
 }
@@ -679,6 +759,7 @@ export function analyzeLevel(
     hitbox,
     abilities.wallJump ?? false,
     abilities.glide ?? false,
+    abilities.hook ?? false,
   );
   const moves = exploreAll(explorer, map);
   const start = surfaceUnder(level, map, level.spawn.col, level.spawn.row);
@@ -713,6 +794,7 @@ export function movesFrom(
     abilities.hitbox ?? PLAYER_HITBOX,
     abilities.wallJump ?? false,
     abilities.glide ?? false,
+    abilities.hook ?? false,
   );
   const moves = explorer.explore(surface);
   if (explorer.wallNodes.length === 0) {
@@ -886,7 +968,11 @@ export function describeMove(move: Move, map: SurfaceMap): string {
   };
   const arrow = move.dir > 0 ? '→' : move.dir < 0 ? '←' : '↑';
   const hold = move.holdSteps === 0 ? 'maintenu' : `maintien ${move.holdSteps} pas`;
-  const air = (move.airRelease ? ', direction relâchée' : '') + (move.glide ? ', parapluie' : '');
+  const air =
+    (move.airRelease ? ', direction relâchée' : '') +
+    (move.glide ? ', parapluie' : '') +
+    (move.cableExit === 'drop' ? ', lâche le câble' : '') +
+    (move.cableExit === 'jump' ? ', saute du câble' : '');
   if (move.start) {
     const timing = Number.isFinite(move.windowMs) ? `, fenêtre ${move.windowMs.toFixed(0)} ms` : '';
     return `${where(move.from)} → ${where(move.to)} : ${KIND_LABEL[move.start]} ${arrow} puis appuis sur les murs${timing}`;

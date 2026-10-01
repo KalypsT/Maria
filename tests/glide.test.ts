@@ -41,42 +41,70 @@ function step(player: PlayerPhysics, moveX: number, jumpPressed = false, jumpHel
 }
 
 /**
- * Saut depuis le perchoir vers la droite, Saut tenu ; au sommet, `repress` : nouvelle pression
- * (tenue). Retourne la trajectoire (x, y par pas) jusqu'au sol.
+ * Saut depuis le perchoir vers la droite. `hold` : Saut tenu jusqu'au sol ; `apex` : tenu jusqu'au
+ * sommet, puis relâché (un saut complet sans parapluie) ; `repress` : relâché au sommet, puis une
+ * nouvelle pression tenue. `releaseAfterSteps` : Saut relâché ce nombre de pas après le sommet.
+ * Retourne la trajectoire (x, y par pas) jusqu'au sol.
  */
-function flight(player: PlayerPhysics, repress: boolean, releaseAfterSteps = Infinity): number[] {
+function flight(
+  player: PlayerPhysics,
+  mode: 'hold' | 'apex' | 'repress',
+  releaseAfterSteps = Infinity,
+): number[] {
   const path: number[] = [];
   step(player, 1, true, true);
-  let opened = false;
-  let openedAt = -1;
+  let apex = -1;
   for (let s = 1; s < 3000 && !player.grounded; s++) {
-    const open = repress && !opened && player.vy >= 0;
-    if (open) {
-      opened = true;
-      openedAt = s;
+    if (apex < 0 && player.vy >= 0) {
+      apex = s;
     }
-    const held = !opened || s - openedAt < releaseAfterSteps;
-    step(player, 1, open, held);
+    const after = apex < 0 ? -1 : s - apex;
+    const pressed = mode === 'repress' && after === 1;
+    const held =
+      after < 0 ||
+      (mode === 'hold' && after < releaseAfterSteps) ||
+      (mode === 'repress' && after >= 1);
+    step(player, 1, pressed, held);
     path.push(player.box.x, player.box.y);
   }
   return path;
 }
 
-describe('parapluie (D-62)', () => {
-  it('sans la capacité, une nouvelle pression en l’air ne change rien', () => {
-    const plain = flight(makePlayer(false), false);
-    const pressed = flight(makePlayer(false), true);
-    expect(pressed).toEqual(plain);
+describe('parapluie (D-62, D-65)', () => {
+  it('sans la capacité, tenir Saut ou presser de nouveau en l’air ne change rien', () => {
+    const plain = flight(makePlayer(false), 'apex');
+    expect(flight(makePlayer(false), 'hold')).toEqual(plain);
+    expect(flight(makePlayer(false), 'repress')).toEqual(plain);
   });
 
-  it('avec la capacité, un saut ordinaire (sans nouvelle pression) est inchangé', () => {
-    expect(flight(makePlayer(true), false)).toEqual(flight(makePlayer(false), false));
+  it('avec la capacité, un saut relâché au sommet est inchangé', () => {
+    expect(flight(makePlayer(true), 'apex')).toEqual(flight(makePlayer(false), 'apex'));
   });
 
-  it('une nouvelle pression au sommet ouvre le parapluie : chute lente, bien plus loin', () => {
+  it('un saut court (relâché en montée) n’ouvre jamais le parapluie', () => {
     const player = makePlayer(true);
-    const plain = flight(makePlayer(true), false);
-    const glide = flight(player, true);
+    step(player, 1, true, true);
+    for (let s = 1; s < 10; s++) {
+      step(player, 1, false, true);
+    }
+    for (let s = 0; s < 3000 && !player.grounded; s++) {
+      step(player, 1);
+      expect(player.glideOpen).toBe(false);
+    }
+  });
+
+  it('Saut tenu : le parapluie s’ouvre peu après le sommet, chute lente, bien plus loin', () => {
+    const plain = flight(makePlayer(true), 'apex');
+    const glide = flight(makePlayer(true), 'hold');
+    // Identique jusqu'au sommet et pendant le court délai (D-65 : 40 ms).
+    let same = 0;
+    while (same < plain.length && plain[same] === glide[same]) {
+      same++;
+    }
+    const apexStep = Math.round(D.jumpVelocity / D.riseGravity / D.dt);
+    expect(same / 2).toBeGreaterThanOrEqual(apexStep + D.glideAutoDelaySteps - 2);
+    expect(same / 2).toBeLessThanOrEqual(apexStep + D.glideAutoDelaySteps + 2);
+    expect(D.glideAutoDelaySteps).toBe(Math.round((P.glideAutoDelayMs / 1000) * 120));
     expect(glide.length).toBeGreaterThan(plain.length * 2);
     const far = (path: number[]) => path[path.length - 2] ?? 0;
     expect(far(glide) - far(plain)).toBeGreaterThan(20 * T);
@@ -86,11 +114,10 @@ describe('parapluie (D-62)', () => {
     let opened = -1;
     let fastest = 0;
     for (let s = 1; s < 3000 && !p2.grounded; s++) {
-      const open = opened < 0 && p2.vy >= 0;
-      if (open) {
+      step(p2, 1, false, true);
+      if (opened < 0 && p2.glideOpen) {
         opened = s;
       }
-      step(p2, 1, open, true);
       const landed = [PlayerState.Run, PlayerState.Idle, PlayerState.Land].some(
         (state) => state === p2.state,
       );
@@ -99,13 +126,29 @@ describe('parapluie (D-62)', () => {
         expect(p2.state).toBe(PlayerState.Glide);
       }
     }
+    expect(opened).toBeGreaterThan(0);
     expect(fastest).toBeLessThanOrEqual(P.glideFallSpeed + 1e-9);
+  });
+
+  it('une nouvelle pression en l’air ouvre aussi le parapluie (chute d’un bord, saut court)', () => {
+    const repressed = flight(makePlayer(true), 'repress');
+    expect(repressed.length).toBeGreaterThan(flight(makePlayer(true), 'apex').length * 2);
+    // Tomber du perchoir sans sauter, puis presser Saut : il s'ouvre aussitôt.
+    const player = makePlayer(true);
+    for (let s = 0; s < 400 && player.grounded; s++) {
+      step(player, 1);
+    }
+    for (let s = 0; s < 20; s++) {
+      step(player, 1);
+    }
+    step(player, 1, true, true);
+    expect(player.glideOpen).toBe(true);
   });
 
   it('lâcher Saut referme le parapluie : la chute reprend', () => {
     const player = makePlayer(true);
-    const held = flight(makePlayer(true), true);
-    const released = flight(player, true, 30);
+    const held = flight(makePlayer(true), 'hold');
+    const released = flight(player, 'hold', 30);
     expect(released.length).toBeLessThan(held.length / 2);
     expect(player.glideOpen).toBe(false);
   });
@@ -139,7 +182,7 @@ describe('parapluie (D-62)', () => {
 
   it('au sol, contre un mur ou touchée, le parapluie est refermé', () => {
     const player = makePlayer(true);
-    flight(player, true);
+    flight(player, 'hold');
     expect(player.grounded).toBe(true);
     expect(player.glideOpen).toBe(false);
     const hurt = makePlayer(true);

@@ -18,6 +18,11 @@ export const CELESTE_PARTS = {
   skirt: { width: 14, height: 7, originX: 0.5, originY: 1.5 / 7 },
   /** Parapluie (D-62), tenu par le manche (en bas) ; ouvert par la pose. */
   umbrella: { width: 24, height: 20, originX: 0.5, originY: 1 },
+  /**
+   * Parapluie replié, tenu par la pointe, le crochet du manche en haut (D-65) : accroché au câble.
+   * Origine : la main (en bas).
+   */
+  hook: { width: 8, height: 12, originX: 0.5, originY: 1 },
 } as const;
 export type CelestePart = keyof typeof CELESTE_PARTS;
 
@@ -66,6 +71,10 @@ export function drawCelestePart(
   const dark = palette.silhouettes;
   if (part === 'umbrella') {
     drawUmbrella(ctx, dark);
+    return;
+  }
+  if (part === 'hook') {
+    drawHook(ctx, dark);
     return;
   }
   if (outfit === 'dress' && part !== 'head' && part !== 'pigtail') {
@@ -363,4 +372,35 @@ function drawUmbrella(ctx: CanvasRenderingContext2D, dark: boolean): void {
   }
   ctx.fillStyle = UMBRELLA_EDGE;
   circle(ctx, cx, 2.2, 0.9);
+}
+
+/**
+ * Parapluie replié, pendu par son crochet (D-65) : le crochet en bois en haut (il passe sur le
+ * câble), le manche, puis la toile jaune serrée jusqu'à la main (en bas). PLACEHOLDER.
+ */
+function drawHook(ctx: CanvasRenderingContext2D, dark: boolean): void {
+  const cx = 4;
+  ctx.strokeStyle = dark ? SILHOUETTE : UMBRELLA_HANDLE;
+  ctx.lineWidth = 1.2;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.arc(cx - 1.6, 2.2, 1.6, 0, Math.PI, true);
+  ctx.moveTo(cx, 2.2);
+  ctx.lineTo(cx, 6);
+  ctx.stroke();
+  ctx.fillStyle = dark ? SILHOUETTE : UMBRELLA;
+  ctx.beginPath();
+  ctx.moveTo(cx, 5.5);
+  ctx.quadraticCurveTo(cx + 2.4, 8.5, cx + 0.6, 11.5);
+  ctx.lineTo(cx - 0.6, 11.5);
+  ctx.quadraticCurveTo(cx - 2.4, 8.5, cx, 5.5);
+  ctx.fill();
+  if (!dark) {
+    ctx.strokeStyle = UMBRELLA_EDGE;
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(cx, 6.5);
+    ctx.lineTo(cx, 11);
+    ctx.stroke();
+  }
 }

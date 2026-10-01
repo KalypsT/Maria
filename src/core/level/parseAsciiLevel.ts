@@ -3,12 +3,14 @@ import {
   type LevelDecor,
   Material,
   Tile,
+  type LevelCable,
   type LevelData,
   type LevelDoor,
   type LevelEntity,
   type LevelExit,
   type TilePos,
 } from './LevelData';
+import { TILE_SIZE } from '../../config/display';
 
 const LEGEND: Readonly<Record<string, number>> = {
   '.': Tile.Empty,
@@ -56,6 +58,8 @@ const META = /^;\s*@([\w-]+)\s*:\s*(.*)$/;
 const DECOR = /^([a-z][\w-]*)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
 /** Porte de façade (D-61), répétable : `; @door: 2 50 27` (numéro, colonne, ligne où l'on se tient). */
 const DOOR = /^([1-9])\s+(\d+)\s+(\d+)$/;
+/** Câble (D-65), répétable : `; @cable: 4 10 30 14` (colonne et ligne de chaque bout, au centre des tuiles). */
+const CABLE = /^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
 
 /**
  * Convertit une carte ASCII (décision D-06) en `LevelData`.
@@ -65,13 +69,15 @@ const DOOR = /^([1-9])\s+(\d+)\s+(\d+)$/;
  * `b` bois, `t` tissu et `v` feuillage (pleins, D-46), `-` étagère (traversable), `1`-`9` sortie dans un mur latéral,
  * `A` objet de capacité (au plus un, capacité nommée par `; @ability:`), `S` trouvaille (secret).
  * Les commentaires `; @clé: valeur` sont des métadonnées ; `; @decor:` (répétable) déclare
- * l'habillage (D-28), `; @door:` (répétable) une porte de façade (D-61).
+ * l'habillage (D-28), `; @door:` (répétable) une porte de façade (D-61), `; @cable:` (répétable)
+ * un câble pour le crochet du parapluie (D-65).
  */
 export function parseAsciiLevel(id: string, text: string): LevelData {
   const rows: { text: string; line: number }[] = [];
   const meta: Record<string, string> = {};
   const decor: LevelDecor[] = [];
   const doors: LevelDoor[] = [];
+  const cableTiles: number[][] = [];
   text.split('\n').forEach((raw, index) => {
     const line = raw.replace(/\r$/, '').trimEnd();
     if (!line.startsWith(COMMENT)) {
@@ -100,6 +106,14 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         throw new Error(`Niveau ${id}, ligne ${index + 1} : @door attend « numéro col ligne »`);
       }
       doors.push({ id: Number(d[1]), col: Number(d[2]), row: Number(d[3]) });
+    } else if (match?.[1] === 'cable' && match[2] !== undefined) {
+      const c = CABLE.exec(match[2].trim());
+      if (!c) {
+        throw new Error(
+          `Niveau ${id}, ligne ${index + 1} : @cable attend « col1 ligne1 col2 ligne2 »`,
+        );
+      }
+      cableTiles.push(c.slice(1, 5).map(Number));
     } else if (match?.[1] !== undefined && match[2] !== undefined) {
       meta[match[1]] = match[2];
     }
@@ -186,6 +200,19 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
       throw new Error(`Niveau ${id} : porte ${door.id} hors de la salle`);
     }
   }
+  const cables: LevelCable[] = [];
+  for (const [c1 = 0, r1 = 0, c2 = 0, r2 = 0] of cableTiles) {
+    if (c1 === c2 || Math.max(c1, c2) >= width || Math.max(r1, r2) >= height) {
+      throw new Error(`Niveau ${id} : @cable ${c1} ${r1} ${c2} ${r2} vertical ou hors de la salle`);
+    }
+    const left = c1 < c2;
+    cables.push({
+      x1: ((left ? c1 : c2) + 0.5) * TILE_SIZE,
+      y1: ((left ? r1 : r2) + 0.5) * TILE_SIZE,
+      x2: ((left ? c2 : c1) + 0.5) * TILE_SIZE,
+      y2: ((left ? r2 : r1) + 0.5) * TILE_SIZE,
+    });
+  }
   return {
     id,
     width,
@@ -199,6 +226,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
     exits,
     doors,
     decor,
+    cables,
   };
 }
 
