@@ -22,7 +22,8 @@ Prochaine : essai de la gare (réelle, étrange, la fin, la phase 3) sur télép
 
 - L'escalier descend de l'étage dans le coin ; une poutre au plafond.
 - Rien ne flotte : deux plantes suspendues, un lustre, une horloge comtoise (la trouvaille sur son chapeau), la tringle allongée.
-- La cheminée et son petit feu animé, qui éclaire la pièce ; un miroir au-dessus ; son manteau est une plateforme (depuis la table basse, déplacée).
+- La cheminée et son petit feu animé, qui éclaire la pièce ; un miroir au-dessus ; son manteau est une plateforme (par les étagères de la bibliothèque).
+- Retour du téléphone : rendu « beaucoup mieux » ; la table basse retirée (au-dessus des briques, elle empêchait de les sauter).
 - Le balancier de l'horloge bat.
 - La photo de famille passe au-dessus du canapé.
 - Les repères de l'histoire n'ont pas bougé (bibliothèque et Maria, canapé, chat, portes) ; le salon étrange est inchangé.
