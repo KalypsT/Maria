@@ -14,7 +14,8 @@ import {
   type Node,
 } from './zoneGraph';
 
-const TIMEOUT = 120_000;
+/** Garde-fou contre un test bloqué, pas une mesure de vitesse : large, car la CI analyse les salles en parallèle. */
+const TIMEOUT = 600_000;
 
 function trigger(id: string) {
   const t = HOUSE_STORY.triggers.find((candidate) => candidate.id === id);

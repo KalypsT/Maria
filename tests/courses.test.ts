@@ -5,7 +5,8 @@ import { analyzeLevel, describeMove, type LevelAnalysis } from '../src/core/anal
 import { parseAsciiLevel } from '../src/core/level/parseAsciiLevel';
 import { COURSE_IDS, LEVELS } from '../src/levels';
 
-const TIMEOUT = 30_000;
+/** Garde-fou contre un test bloqué, pas une mesure de vitesse : large, car la CI analyse les salles en parallèle. */
+const TIMEOUT = 300_000;
 const ORDER: readonly Difficulty[] = [Difficulty.Hard, Difficulty.Medium, Difficulty.Easy];
 
 function isDifficulty(value: string | undefined): value is Difficulty {
