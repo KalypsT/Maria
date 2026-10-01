@@ -67,6 +67,10 @@ export const StoryFlag = {
   StreetMomCrane: 'street.mom-crane',
   /** La gare (D-66) : Céleste est arrivée sur les voies, derrière la palissade du chantier. */
   StationArrived: 'station.arrived',
+  /** Le monde étrange de la gare (D-68) : Céleste y est passée par le haut des casiers. */
+  StationStrange: 'station.strange',
+  /** Fin du monde étrange de la gare (D-68) : Roger, et son court souvenir. */
+  StationDone: 'station.done',
   /** Quelques mois plus tard (D-43) : Céleste a grandi (phase de croissance 2). */
   Grown: 'growth.2',
   /** Le jardin (D-46) : Céleste est sortie pour la première fois (il fait beau, et Maria ?). */
@@ -135,6 +139,8 @@ export const STORY_TIMING = {
   /** Quelques mois plus tard (D-43) : le noir le plus long du jeu, puis le retour lent. */
   monthsBlackMs: 4200,
   monthsFadeInMs: 3200,
+  /** Court souvenir (D-68) : la vignette, apparition et disparition comprises. */
+  flashbackMs: 7000,
 } as const;
 
 /** Période du petit mouvement en boucle des personnages (ms), D-37. */
@@ -186,6 +192,8 @@ export const PROP_SIZE = {
   'shape-box': { w: 40, h: 32 },
   'far-crane': { w: 44, h: 34 },
   'site-gap': { w: 80, h: 64 },
+  // Roger, la peluche singe (D-68), tout en haut de la tour des objets perdus.
+  roger: { w: 16, h: 18 },
   'dad-garden': { w: 44 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // Le chat gris, agrandi par CAT_SCALE (D-42).
   'cat-sleep': { w: 16 * CAT_SCALE, h: 8 * CAT_SCALE },

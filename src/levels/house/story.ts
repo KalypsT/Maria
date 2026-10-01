@@ -922,6 +922,8 @@ export const HOUSE_STORY: StoryData = {
     ...STATION_STORY.triggers,
   ],
   props: [
+    // La gare (D-68).
+    ...STATION_STORY.props,
     // La toise de la chambre (D-43), au mur près de la porte.
     {
       id: 'height-chart',

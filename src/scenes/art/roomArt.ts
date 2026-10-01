@@ -19,7 +19,7 @@ import { gardenDrawers } from './gardenArt';
 import { playgroundDrawers } from './playgroundArt';
 import { drawPencils, schoolDrawers } from './schoolArt';
 import { drawRubble, shopSiteDrawers } from './shopSiteArt';
-import { stationDrawers } from './stationArt';
+import { drawUmbrellaTips, stationDrawers } from './stationArt';
 import { streetDrawers } from './streetArt';
 import { drawMemory } from './memoryArt';
 
@@ -1428,6 +1428,11 @@ function drawStructure(a: ArtContext, floorY: number): void {
         if (level.meta.hazard === 'rubble') {
           // Gravats du chantier (D-63).
           drawRubble(ctx, x, y, col, y >= floorY);
+          continue;
+        }
+        if (level.meta.hazard === 'umbrellas') {
+          // Pointes de parapluies perdus, du monde étrange de la gare (D-68).
+          drawUmbrellaTips(ctx, x, y, col, y >= floorY);
           continue;
         }
         if (p.outdoor) {

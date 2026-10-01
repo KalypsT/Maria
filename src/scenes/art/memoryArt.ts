@@ -517,6 +517,79 @@ export function shapeBox(ctx: CanvasRenderingContext2D, s: number, glow = false)
   }
 }
 
+/**
+ * Roger, la peluche singe (D-68), PLACEHOLDER : corps brun tout doux, visage et ventre beiges,
+ * grandes oreilles rondes, longs bras qui pendent, une queue enroulée. Assis, vu de face.
+ */
+export function roger(ctx: CanvasRenderingContext2D, s: number): void {
+  const fur = '#8a5a3c';
+  const furDark = '#6e4630';
+  const face = '#e8c9a0';
+  // Queue enroulée, derrière.
+  ctx.strokeStyle = furDark;
+  ctx.lineWidth = s * 0.05;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(s * 0.16, s * 0.3);
+  ctx.quadraticCurveTo(s * 0.42, s * 0.32, s * 0.36, s * 0.12);
+  ctx.arc(s * 0.3, s * 0.12, s * 0.06, 0, Math.PI * 1.4, true);
+  ctx.stroke();
+  // Jambes, corps et ventre.
+  ctx.fillStyle = fur;
+  ctx.beginPath();
+  ctx.ellipse(-s * 0.13, s * 0.36, s * 0.1, s * 0.07, -0.3, 0, Math.PI * 2);
+  ctx.ellipse(s * 0.13, s * 0.36, s * 0.1, s * 0.07, 0.3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(0, s * 0.18, s * 0.2, s * 0.22, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = face;
+  ctx.beginPath();
+  ctx.ellipse(0, s * 0.21, s * 0.12, s * 0.14, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Longs bras qui pendent jusqu'aux pieds.
+  ctx.strokeStyle = fur;
+  ctx.lineWidth = s * 0.07;
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.16, s * 0.04);
+  ctx.quadraticCurveTo(-s * 0.32, s * 0.2, -s * 0.24, s * 0.4);
+  ctx.moveTo(s * 0.16, s * 0.04);
+  ctx.quadraticCurveTo(s * 0.32, s * 0.2, s * 0.24, s * 0.4);
+  ctx.stroke();
+  // Tête, oreilles, visage.
+  ctx.fillStyle = fur;
+  ctx.beginPath();
+  ctx.arc(-s * 0.2, -s * 0.18, s * 0.08, 0, Math.PI * 2);
+  ctx.arc(s * 0.2, -s * 0.18, s * 0.08, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = face;
+  ctx.beginPath();
+  ctx.arc(-s * 0.2, -s * 0.18, s * 0.045, 0, Math.PI * 2);
+  ctx.arc(s * 0.2, -s * 0.18, s * 0.045, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = fur;
+  ctx.beginPath();
+  ctx.arc(0, -s * 0.17, s * 0.17, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = face;
+  ctx.beginPath();
+  ctx.ellipse(0, -s * 0.13, s * 0.12, s * 0.1, 0, 0, Math.PI * 2);
+  ctx.ellipse(-s * 0.055, -s * 0.21, s * 0.055, s * 0.06, 0, 0, Math.PI * 2);
+  ctx.ellipse(s * 0.055, -s * 0.21, s * 0.055, s * 0.06, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Yeux brodés, petit sourire.
+  ctx.fillStyle = '#2a1c14';
+  ctx.beginPath();
+  ctx.arc(-s * 0.055, -s * 0.2, s * 0.02, 0, Math.PI * 2);
+  ctx.arc(s * 0.055, -s * 0.2, s * 0.02, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#2a1c14';
+  ctx.lineWidth = s * 0.015;
+  ctx.beginPath();
+  ctx.arc(0, -s * 0.13, s * 0.04, 0.2, Math.PI - 0.2);
+  ctx.stroke();
+}
+
 export function drawMemory(
   ctx: CanvasRenderingContext2D,
   id: MemoryId,
@@ -559,6 +632,9 @@ export function drawMemory(
       break;
     case 'shape-box':
       shapeBox(ctx, size);
+      break;
+    case 'roger':
+      roger(ctx, size * 0.9);
       break;
   }
   ctx.restore();

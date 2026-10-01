@@ -10,11 +10,25 @@
 
 **Le quartier** (D-60, D-61) : plan validé (4 PR), toutes faites : PR 1 (portes de façade, aire de jeux), PR 2 (le parapluie, D-62), PR 3 (supérette et chantier, D-63), PR 4 (l'école, son monde étrange et la fin du niveau, D-64).
 
-**La gare** (D-65, D-66) : plan validé (5 PR). PR 1 faite (le parapluie s'ouvre au sommet ; le crochet et les câbles). PR 2 faite : la gare réelle, les trains, le crochet au bureau des objets trouvés, les revisites. PR 3 faite : le système de boss (poursuite verticale), dans le parcours d'essai 10. Suivantes : PR 4 le monde étrange de la gare, la tour, Roger et le court souvenir ; PR 5 la fin et la phase 3 (en attente de l'illustration de Céleste en phase 3).
+**La gare** (D-65, D-66) : plan validé (5 PR). PR 1 faite (le parapluie s'ouvre au sommet ; le crochet et les câbles). PR 2 faite : la gare réelle, les trains, le crochet au bureau des objets trouvés, les revisites. PR 3 faite : le système de boss (poursuite verticale), dans le parcours d'essai 10. PR 4 faite : le monde étrange de la gare, la tour, Roger et le premier court souvenir. Suivante : PR 5 la fin et la phase 3 (en attente de l'illustration de Céleste en phase 3).
 
-Prochaine : essai de la gare et du parcours 10 sur téléphone ; puis la PR 4 (le monde étrange de la gare, la tour, Roger). Intégrer les morceaux de musique.
+Prochaine : essai de la gare (réelle et étrange) sur téléphone ; puis la PR 5 (la fin du niveau, papa, la phase 3 : en attente de l'illustration). Intégrer les morceaux de musique.
 
 ## Fait
+
+### La gare, PR 4 : le monde étrange de la gare, la tour, Roger (D-68)
+
+- **Entrée** : en haut des casiers du bureau des objets trouvés, Agir près de la lueur : le monde étrange se révèle autour de Céleste. Après un évanouissement, les casiers y ramènent.
+- **Les objets perdus** : le hall à l'envers, des valises qui flottent au-dessus des pointes de parapluies, la montagne des choses perdues et sa veilleuse (moyen) ; un câble puis une cheminée de valises jusqu'à la tour (moyen, seulement avec le crochet).
+- **La tour des objets perdus** : le premier boss (la poursuite), jusqu'à Roger tout en haut.
+- **Roger** : on le regarde, on ne le prend pas ; il entre dans « Monde étrange » du cahier. **Le premier court souvenir** : Céleste toute petite serre Roger contre elle (une vignette, quelques secondes, sans texte). Dans le cahier, toucher Roger le rejoue.
+- **Fin provisoire** : Céleste assise sur un banc du hall (la suite avec la PR 5).
+- DEBUG → Histoire : « la gare étrange (les objets perdus, la tour) », « Roger trouvé (fin de la gare étrange) ».
+- Tests : 520. Vérifié dans Chromium : l'entrée par les casiers, le monde étrange, la tour et le poursuivant, Roger, la vignette, le retour au hall, le rejeu dans le cahier.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « la gare étrange ») : l'entrée par les casiers se comprend-elle ? Le monde étrange (hall à l'envers, valises, parapluies) : lisible, assez étrange, jamais effrayant ?
+- [ ] La tour et le poursuivant : la pression est-elle juste avec Céleste grandie ? Les veilleuses sont-elles bien placées ?
+- [ ] Roger se reconnaît-il (une peluche singe) ? Le court souvenir : assez lent, assez tendre ? Les lunettes roses sur Céleste toute petite : à garder ?
+- [ ] Le rejeu dans le cahier (toucher Roger).
 
 ### La gare, PR 3 : le système de boss, la poursuite verticale (D-67)
 

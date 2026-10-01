@@ -53,6 +53,7 @@ import {
   type MapBox,
   type Zone,
 } from '../core/world/zone';
+import { FlashbackView } from '../ui/FlashbackView';
 import { Hud } from '../ui/Hud';
 import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
 import { PauseMenu } from '../ui/PauseMenu';
@@ -208,6 +209,8 @@ export class GameScene extends Phaser.Scene {
   session!: SaveSession;
   private worldView!: WorldView;
   private hud!: Hud;
+  /** Courts souvenirs (D-68). */
+  private flashbackView!: FlashbackView;
   /** Heure de la dernière réapparition (fondu de retour), -1 sinon. */
   private reappearAtMs = -1;
   readonly clock = new FixedStepClock(1 / PHYSICS_STEP_HZ, MAX_STEPS_PER_FRAME);
@@ -360,6 +363,7 @@ export class GameScene extends Phaser.Scene {
       this.story.timeOfDay() === 'morning',
     );
     this.hud = new Hud();
+    this.flashbackView = new FlashbackView();
     this.applyMovement();
     this.applyAbilities();
     this.feel.reset(this.player);
@@ -461,6 +465,7 @@ export class GameScene extends Phaser.Scene {
       this.pauseMenu?.destroy();
       this.mapPage.destroy();
       this.hud.destroy();
+      this.flashbackView.destroy();
       this.scale.off(Phaser.Scale.Events.RESIZE, this.onResize);
     });
 
@@ -822,6 +827,8 @@ export class GameScene extends Phaser.Scene {
 
   /** Voile de l'évanouissement, jauge de peur, transparence de Céleste. */
   private renderRunState(): void {
+    // Court souvenir (D-68) : la vignette au-dessus du jeu.
+    this.flashbackView.update(this.story.flashback, this.story.flashbackProgress);
     const run = this.run;
     this.hud.setFear(run.fear, this.worldParams.fearMax);
     if (run.fainting) {

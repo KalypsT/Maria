@@ -27,6 +27,8 @@ import stationPlatforms from '../station/platforms.txt?raw';
 import stationHall from '../station/hall.txt?raw';
 import stationLost from '../station/lost.txt?raw';
 import stationDepot from '../station/depot.txt?raw';
+import stationStrange from '../station/strange.txt?raw';
+import stationTower from '../station/tower.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -88,6 +90,9 @@ export const HOUSE: ZoneSource = {
     { id: 'station-hall', text: stationHall },
     { id: 'station-lost', text: stationLost },
     { id: 'station-depot', text: stationDepot },
+    // Le monde étrange de la gare (D-68) : par l'histoire (le haut des casiers).
+    { id: 'station-strange', text: stationStrange },
+    { id: 'station-tower', text: stationTower },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -128,6 +133,8 @@ export const HOUSE: ZoneSource = {
     ['station-platforms:3', 'station-hall:3'],
     ['station-hall:4', 'station-lost:1'],
     ['station-hall:2', 'station-depot:1'],
+    // Le monde étrange de la gare (D-68) : les objets perdus, puis la tour.
+    ['station-strange:1', 'station-tower:1'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur

@@ -1,0 +1,140 @@
+; La gare (D-68) : la tour des objets perdus, le premier boss (D-67). Quelque chose de grand et
+; sans visage monte derrière Céleste : un tas de valises coiffé d'une casquette de contrôleur.
+; Une cheminée de valises (saut mural) ; des valises qui flottent, puis un câble au-dessus d'une
+; pile de valises qui le fait trébucher ; une dernière cheminée et des valises jusqu'en haut, où
+; Roger, la peluche singe, est assis. Une veilleuse au début de chaque phase.
+; @name: Tour des objets perdus
+; @world: strange
+; @music: station-strange
+; @difficulty: medium
+; @ambient: #1a1f2c
+; @camera: up
+; @chase: 7
+; @chase-phase: 73 5.1
+; @chase-phase: 59 1.1
+; @chase-phase: 7 2.3
+; @chase-trip: 17 53 6 6 6
+; @cable: 37 55 7 57
+; @decor: upsideclock 10 36 10 10
+; @decor: eyes 30 40 1 1
+; @decor: eyes 12 85 1 1
+; @decor: suitcasestack 5 74 2 24
+; @decor: lostpile 7 74 14 24
+; @decor: lostpile 21 76 18 22
+; @decor: floatsuitcase 23 71 4 2
+; @decor: floatsuitcase 28 68 4 2
+; @decor: floatsuitcase 23 65 4 2
+; @decor: floatsuitcase 28 62 4 2
+; @decor: floatsuitcase 32 59 7 2
+; @decor: suitcasestack 1 60 8 2
+; @decor: suitcasestack 5 30 2 28
+; @decor: suitcasestack 7 30 10 2
+; @decor: floatsuitcase 18 27 4 2
+; @decor: floatsuitcase 22 24 4 2
+; @decor: floatsuitcase 18 21 4 2
+; @decor: floatsuitcase 22 18 4 2
+; @decor: floatsuitcase 18 15 4 2
+; @decor: floatsuitcase 22 12 4 2
+; @decor: floatsuitcase 18 9 4 2
+; @decor: lostpile 22 7 9 2
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+########################################
+#......................................#
+#......................................#
+#......................................#
+#......................................#
+#......................................#
+#......................................#
+#.....................bbbbbbbbb........#
+#.....................bbbbbbbbb........#
+#.................----.................#
+#......................................#
+#......................................#
+#.....................----.............#
+#......................................#
+#......................................#
+#.................----.................#
+#......................................#
+#......................................#
+#.....................----.............#
+#......................................#
+#......................................#
+#.................----.................#
+#......................................#
+#......................................#
+#.....................----.............#
+#......................................#
+#......................................#
+#.................----.................#
+#......................................#
+#......................................#
+#....bbbbbbbbbbbb......................#
+#....bbbbbbbbbbbb......................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#....bb................................#
+#......................................#
+#...C...........................-------#
+#bbbbbbbb..............................#
+#bbbbbbbb..............................#
+#...........................----.......#
+#......................................#
+#......................................#
+#......................----............#
+#......................................#
+#......................................#
+#...........................----.......#
+#......................................#
+#......................................#
+#......................----............#
+#......................................#
+#...........C..........................#
+#....bbbbbbbbbbbbbbbb..................#
+#....bbbbbbbbbbbbbbbb..................#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+1....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+1.PC.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+########################################
+########################################

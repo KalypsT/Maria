@@ -188,7 +188,7 @@ describe('la gare (D-66)', () => {
   );
 
   it('le haut des casiers (la lueur) s’atteint depuis le crochet', { timeout: TIMEOUT }, () => {
-    const lockers = HOUSE_STORY.triggers.find((t) => t.id === 'station-lockers')?.area;
+    const lockers = HOUSE_STORY.triggers.find((t) => t.id === 'station-enter')?.area;
     if (!lockers) {
       throw new Error('casiers sans zone');
     }

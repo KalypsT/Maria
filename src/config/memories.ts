@@ -42,6 +42,8 @@ export const MARIA_THINGS = [
 export const STRANGE_THINGS = [
   /** La boîte à formes, au plafond du monde étrange de l'école. */
   'shape-box',
+  /** Roger, la peluche singe, tout en haut de la tour des objets perdus (D-68). */
+  'roger',
 ] as const;
 
 export type MemoryId =
@@ -56,4 +58,16 @@ export function isMemory(id: string): id is MemoryId {
     (MARIA_THINGS as readonly string[]).includes(id) ||
     (STRANGE_THINGS as readonly string[]).includes(id)
   );
+}
+
+/**
+ * Courts souvenirs (D-68) : une vignette de quelques secondes, non jouable, sans texte, montrée
+ * quand on trouve certains objets, et rejouée en touchant leur case dans le cahier.
+ */
+export const FLASHBACKS = ['roger'] as const;
+export type FlashbackId = (typeof FLASHBACKS)[number];
+
+/** Le court souvenir lié à un souvenir du cahier, s'il en a un. */
+export function flashbackOf(id: MemoryId): FlashbackId | null {
+  return (FLASHBACKS as readonly string[]).includes(id) ? (id as FlashbackId) : null;
 }

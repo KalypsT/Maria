@@ -2,8 +2,15 @@ import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 import type { MapModel, MapPoint, MapRoom } from '../core/world/mapModel';
 import type { MapBox } from '../core/world/zone';
 import { ABILITY_HINTS, Ability } from '../config/abilities';
-import { MARIA_THINGS, MEMORIES, STRANGE_THINGS, type MemoryId } from '../config/memories';
+import {
+  MARIA_THINGS,
+  MEMORIES,
+  STRANGE_THINGS,
+  flashbackOf,
+  type MemoryId,
+} from '../config/memories';
 import { drawAbility } from '../scenes/art/abilityArt';
+import { drawFlashback } from '../scenes/art/flashbackArt';
 import { drawMemory } from '../scenes/art/memoryArt';
 
 /** Durée du tracé d'une salle découverte depuis la dernière ouverture (ms). */
@@ -255,6 +262,12 @@ export class MapPage {
     const ink = themeColor('--ink');
     ctx.lineCap = 'round';
     if (this.selected !== null) {
+      // Un souvenir qui a son court souvenir (D-68) : la vignette se rejoue en grand.
+      const flashback = flashbackOf(this.selected);
+      if (flashback) {
+        drawFlashback(ctx, flashback, width / 2, height / 2, width * 0.86, height * 0.86);
+        return;
+      }
       const size = Math.min(width, height) * 0.82;
       ctx.strokeStyle = ink;
       ctx.lineWidth = 2;

@@ -24,6 +24,8 @@ export const MUSIC_TRACKS = [
   'street-strange',
   /** La gare (D-66), par `; @music: station`. */
   'station',
+  /** Le monde étrange de la gare et la tour des objets perdus (D-68). */
+  'station-strange',
 ] as const;
 export type MusicTrack = (typeof MUSIC_TRACKS)[number];
 

@@ -7,6 +7,7 @@ import {
   drawNotes,
   heightChart,
   momHead,
+  roger,
   shapeBox,
 } from './memoryArt';
 
@@ -394,6 +395,13 @@ export function drawProp(
       break;
     case 'far-crane':
       drawFarCrane(ctx, w, h);
+      break;
+    case 'roger':
+      // Roger (D-68), assis tout en haut de la tour : on le regarde, on ne le prend pas.
+      ctx.save();
+      ctx.translate(w / 2, h * 0.56);
+      roger(ctx, Math.min(w, h) * 1.05);
+      ctx.restore();
       break;
     case 'site-gap':
       drawSiteGap(ctx, w, h);

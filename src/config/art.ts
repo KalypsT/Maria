@@ -218,6 +218,17 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   windowbox: { furniture: true },
   /** Nid dans le platane de la rue (perchoir traversable), au bout du fil tendu depuis l'école. */
   nest: { furniture: true },
+  // Le monde étrange de la gare (D-68), en silhouettes.
+  /** Le hall à l'envers (fond). */
+  upsidehall: { furniture: false },
+  /** La grande horloge à l'envers, qui flotte (fond). */
+  upsideclock: { furniture: false },
+  /** Valise qui flotte : son dessus est une planche traversable. */
+  floatsuitcase: { furniture: true },
+  /** Pile de valises (pleine), paroi de cheminée. */
+  suitcasestack: { furniture: true },
+  /** La montagne des choses perdues (pleine, en marches). */
+  lostpile: { furniture: true },
   // La gare (D-66), dessinée par le code (PLACEHOLDER).
   /** La gare au fond des voies (fond). */
   stationfacade: { furniture: false },

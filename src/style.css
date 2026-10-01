@@ -348,6 +348,33 @@ body {
   pointer-events: none;
 }
 
+/* Court souvenir (D-68) : une vignette au-dessus du jeu, qui respire doucement. */
+#flashback {
+  position: fixed;
+  z-index: 15;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--veil);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#flashback canvas {
+  animation: flashback-breath 3.2s ease-in-out infinite alternate;
+}
+
+@keyframes flashback-breath {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.02);
+  }
+}
+
 /* Écran de départ (placeholder, D-22). */
 #title-screen {
   position: fixed;
