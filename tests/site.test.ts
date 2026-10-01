@@ -18,8 +18,9 @@ import {
   zoneGraph,
   type Node,
 } from './zoneGraph';
+import { ANALYSIS_TIMEOUT_MS } from './timeouts';
 
-const TIMEOUT = 600_000;
+const TIMEOUT = ANALYSIS_TIMEOUT_MS;
 const F = StoryFlag;
 /** Le portillon du jardin ; la porte de l'école, qui s'ouvre de l'intérieur (D-64). */
 const OPEN = [F.GateOpen, F.SchoolOpen];

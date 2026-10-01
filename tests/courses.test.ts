@@ -4,9 +4,9 @@ import { DEFAULT_MOVEMENT } from '../src/config/movement';
 import { analyzeLevel, describeMove, type LevelAnalysis } from '../src/core/analysis/analyzeLevel';
 import { parseAsciiLevel } from '../src/core/level/parseAsciiLevel';
 import { COURSE_IDS, LEVELS } from '../src/levels';
+import { ANALYSIS_TIMEOUT_MS } from './timeouts';
 
-/** Garde-fou contre un test bloqué, pas une mesure de vitesse : large, car la CI analyse les salles en parallèle. */
-const TIMEOUT = 300_000;
+const TIMEOUT = ANALYSIS_TIMEOUT_MS;
 const ORDER: readonly Difficulty[] = [Difficulty.Hard, Difficulty.Medium, Difficulty.Easy];
 
 function isDifficulty(value: string | undefined): value is Difficulty {

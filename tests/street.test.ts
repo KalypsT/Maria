@@ -24,8 +24,9 @@ import {
   zoneGraph,
   type Node,
 } from './zoneGraph';
+import { ANALYSIS_TIMEOUT_MS } from './timeouts';
 
-const TIMEOUT = 300_000;
+const TIMEOUT = ANALYSIS_TIMEOUT_MS;
 const F = StoryFlag;
 const easy = byDifficulty('easy');
 const medium = byDifficulty('medium');
