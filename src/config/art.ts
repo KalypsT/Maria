@@ -10,9 +10,10 @@ import type { CelesteOutfit } from './growth';
  * Éléments d'habillage connus. `furniture` : meuble posé sur des tuiles pleines ou traversables
  * (vérifié) ; sinon élément de fond (fenêtre, cadre…), sans contrainte. `far` : élément de fond
  * lointain, voilé par la perspective atmosphérique (D-70) ; jamais une porte ni un repère de jeu.
+ * `sky` : dessiné dans le plan du ciel, qui défile à peine (D-71).
  */
 export const DECOR_KINDS: Readonly<
-  Record<string, { readonly furniture: boolean; readonly far?: boolean }>
+  Record<string, { readonly furniture: boolean; readonly far?: boolean; readonly sky?: boolean }>
 > = {
   // Chambre.
   wardrobe: { furniture: true },
@@ -116,7 +117,7 @@ export const DECOR_KINDS: Readonly<
   facade: { furniture: false },
   /** Porte de derrière (buanderie, terrasse), autour de la sortie. */
   backdoor: { furniture: false },
-  sun: { furniture: false },
+  sun: { furniture: false, sky: true },
   /** Trou sombre dans la haie, au fond du jardin (pour plus tard, §25.3). */
   hedgehole: { furniture: false },
   /** Passage sous une haie (fond), allée des toits. */
@@ -597,6 +598,51 @@ export const ART_FINISH_RANGES: Readonly<
   veil: { min: 0, max: 3, step: 0.1 },
   vignette: { min: 0, max: 2, step: 0.1 },
 };
+
+/**
+ * Profondeur (D-71) : vitesse de défilement des plans lointains par rapport à la salle (0 : fixes à
+ * l'écran, 1 : avec la salle) et de l'avant-plan (> 1 : plus vite). PROVISOIRE, à juger sur
+ * téléphone.
+ */
+export const PARALLAX = {
+  sky: 0.06,
+  farHills: 0.16,
+  midHills: 0.3,
+  nearHills: 0.48,
+  farRoofs: 0.28,
+  nearRoofs: 0.45,
+  /** Vue par les fenêtres : juste derrière la vitre (le ciel uni ne bouge pas, les toits un peu). */
+  outside: 0.75,
+  /** Avant-plan : silhouettes posées au bas de l'écran. */
+  foreground: 1.35,
+  /** Échelle maximale des textures des plans lointains : flous, ils n'ont pas besoin de plus. */
+  maxScale: 1.5,
+  /** Marge autour de la vue (tremblements, arrondis), px logiques. */
+  marginPx: 48,
+} as const;
+
+/**
+ * Avant-plan (D-71) : herbes et fleurs posées au bas de l'écran, dehors seulement (dedans, des
+ * jouets flous se lisaient comme des taches). PROVISOIRE.
+ */
+export const FOREGROUND = {
+  /** Écart entre deux pièces (px du plan) et largeur d'une pièce. */
+  spacing: { min: 90, max: 280, width: [26, 64] as [number, number] },
+  /** Hauteur au-dessus du sol (px) : basse, et effacée près de ce qui compte. */
+  minRisePx: 8,
+  maxRisePx: 22,
+  /** Flou (px logiques) : ce qui est trop près de l'objectif. */
+  blurPx: 2,
+  /** Opacité normale, et effacée près de Céleste, d'un ennemi, d'un danger ou d'un objet. */
+  alpha: 0.78,
+  fadedAlpha: 0.12,
+  /** Marge autour de Céleste où une pièce s'efface (px). */
+  fadeMarginPx: 44,
+  /** Marge autour des dangers et objets de jeu au sol (px). */
+  protectMarginPx: 8,
+  /** Constante de temps de l'effacement (ms). */
+  fadeTimeMs: 120,
+} as const;
 
 /** Rayon du halo d'une veilleuse (px logiques). */
 export const LAMP_LIGHT_RADIUS = 110;

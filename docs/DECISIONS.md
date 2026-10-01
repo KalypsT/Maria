@@ -831,6 +831,19 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Résolution** : le mode « Écran » (D-18) rend nettement mieux le dessin par le code ; le passer par défaut attend la mesure des images/s sur le téléphone de l'utilisateur.
 - **Sauvegarde** : aucune migration.
 
+## D-71 — Passe graphique, étape 2 : la profondeur
+
+- **Plans lointains** (`BackdropView`, `src/scenes/art/backdropArt.ts`) : textures dessinées une fois par salle, qui défilent moins vite que la salle (parallaxe : à l'écran, `x − vue × facteur`). Positionnées à chaque image d'après la vue réelle (zoom compris), recadrées sur la salle (au-delà de ses murs, la couleur d'ambiance comme avant), sous le fond de la salle.
+  - **Dehors** : le ciel (nuages, soleil : `sky` dans `DECOR_KINDS`) ne bouge presque pas ; collines lointaines ; puis, au jardin, deux rangées de collines arborées, et dans le quartier et à la gare, deux rangées de **toits de la ville** (fenêtres allumées le soir). Le fond de la salle devient transparent là où était le ciel.
+  - **Dedans** : les **vitres sont transparentes** (fenêtres, lucarnes, monde réel seulement) ; derrière, un plan juste au-delà de la vitre : le ciel de la palette, les étoiles, la lune (placée dans la plus grande fenêtre quand la vue est centrée sur elle) et les toits de la ville, fenêtres allumées la nuit. En marchant, la lune et les toits glissent un peu dans la fenêtre. Le monde étrange garde ses fenêtres peintes.
+  - Facteurs dans `PARALLAX` (`src/config/art.ts`), PROVISOIRES. Textures plafonnées à l'échelle 1,5 (plans lointains, flous) et à 4096 px.
+- **Avant-plan** (`ForegroundView`, logique pure testée `src/core/fx/foreground.ts`) : silhouettes sombres et floues au bas de l'écran (herbes, fleurs au jardin ; herbes folles dans la rue et à la gare), qui défilent plus vite (× 1,35). Elles dépassent du sol de 8 à 22 px au plus et **s'effacent** près de Céleste, des ennemis au sol, des dangers du sol, des objets de jeu et des sorties (pilier 1).
+  - **Écart avec le plan** : pas d'avant-plan dans la maison. Les jouets et livres flous essayés se lisaient comme des taches, pas comme des objets. Les pavés flous de la rue aussi, retirés.
+- **Corrections au passage** (étape 1) : la découpe d'une vitre prenait l'opacité du dernier remplissage (vitre à moitié découpée) ; les ombres de contact suivent maintenant les colonnes où le meuble touche vraiment une surface (la passerelle de la gare faisait une ombre de toute la largeur de la salle) ; le voile et le grain ne touchent plus le transparent.
+- **Rien ne touche à la collision ni au mouvement.**
+- **Coût mesuré** (Chromium sans GPU, échelle 3) : construction des plans 30 à 45 ms dans le salon, 100 à 200 ms dehors, pendant le fondu du changement de salle ; avant-plan < 20 ms. **Mémoire graphique** : jusqu'à environ 25 Mo de plus dans la rue (quatre plans). À surveiller sur téléphone ; levier : `PARALLAX.maxScale` à 1.
+- **Sauvegarde** : aucune migration.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

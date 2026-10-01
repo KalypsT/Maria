@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Passe graphique** (D-70) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étape 1 faite** (finition « papier découpé ») sur `ccr-8742f994-82xjq9`. Prochaine : étape 2, la profondeur (parallaxe dehors, vues par les fenêtres, avant-plan). Pas de nouveau niveau d'ici là.
+**Passe graphique** (D-70) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étapes 1 et 2 faites** (finition « papier découpé », D-70 ; profondeur, D-71) sur `ccr-8742f994-82xjq9`. Prochaine : étape 3, la vie du monde réel (vent, nuages, oiseaux, poussière dans la lumière). Pas de nouveau niveau d'ici là.
 
 **Le jardin (2a) et derrière la haie (2b)** (§7.2, §6, D-46 à D-49) : fusionnés (PR #29), **essai sur téléphone en cours** (début du jardin testé ; jardin adouci (D-51) sur `ccr-53d22df4-9euiqo`). Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
 
@@ -17,6 +17,17 @@
 Prochaine : essai de la gare (réelle, étrange, la fin, la phase 3) sur téléphone. Le niveau suivant (le train ?) reste à décider. Intégrer les morceaux de musique.
 
 ## Fait
+
+### Passe graphique, étape 2 : la profondeur (D-71)
+
+- Dehors : ciel, collines et toits de la ville en plans qui défilent moins vite que la salle (parallaxe).
+- Dedans : les vitres laissent voir la nuit (ou le matin), la lune et les toits de la ville, fenêtres allumées ; ils glissent un peu en marchant.
+- Avant-plan dehors : herbes et fleurs floues au bas de l'écran, qui s'effacent près de Céleste, des ennemis, des dangers et des objets. Pas d'avant-plan dans la maison (des taches plutôt que des objets).
+- Corrigé : vitres à moitié découpées, ombre de contact géante sous la passerelle de la gare.
+- Tests : 534. Vérifié dans Chromium : salon, chambre, grenier, école, hall et quais de la gare, potager, grand arbre, cabane, derrière la haie, rue.
+- [ ] À vérifier sur téléphone : la parallaxe est-elle agréable ou donne-t-elle le tournis ? (facteurs dans `PARALLAX`)
+- [ ] La mémoire : la rue et la gare se chargent-elles sans ralentir ? Le changement de salle dehors est-il plus long ?
+- [ ] L'avant-plan : gêne-t-il la lecture du sol ou des ennemis ?
 
 ### Passe graphique, étape 1 : finition « papier découpé » (D-70)
 

@@ -171,6 +171,35 @@ const fabric = (a: ArtContext, r: Rect) => {
   tileShape(a, r, a.palette.fabric, a.palette.fabricLight);
 };
 
+/** Vue peinte dans une fenêtre (monde étrange) : ciel, lune, étoiles, spirale. */
+function windowView(ctx: CanvasRenderingContext2D, p: Readonly<ArtPalette>, r: Rect): void {
+  const sky = ctx.createLinearGradient(0, r.y, 0, r.y + r.h);
+  sky.addColorStop(0, p.night);
+  sky.addColorStop(1, p.nightLow);
+  ctx.fillStyle = sky;
+  rounded(ctx, r, 3);
+  ctx.fill();
+  ctx.fillStyle = p.moon;
+  ctx.beginPath();
+  ctx.arc(r.x + r.w * 0.72, r.y + r.h * 0.3, 9, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  for (let i = 0; i < (p.stars ? 12 : 0); i++) {
+    ctx.fillRect(r.x + ((i * 37) % r.w), r.y + ((i * 23) % (r.h - 6)) + 3, 1, 1);
+  }
+  if (p.silhouettes) {
+    ctx.strokeStyle = p.moon;
+    ctx.globalAlpha = 0.6;
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    for (let t = 0; t < 12; t += 0.2) {
+      ctx.lineTo(r.x + r.w * 0.3 + Math.cos(t) * t * 1.5, r.y + r.h * 0.65 + Math.sin(t) * t * 1.5);
+    }
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+}
+
 const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
   ...gardenDrawers({ tileShape, rounded }),
   ...streetDrawers({ tileShape, rounded }),
@@ -300,18 +329,23 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
   beam: wood,
   skylight(a, r) {
     const { ctx, palette: p } = a;
-    const sky = ctx.createLinearGradient(0, r.y - 6, 0, r.y + T);
-    sky.addColorStop(0, p.night);
-    sky.addColorStop(1, p.nightLow);
     ctx.fillStyle = p.wood;
     rounded(ctx, { x: r.x - 3, y: r.y - 9, w: r.w + 6, h: T + 9 }, 3);
     ctx.fill();
-    ctx.fillStyle = sky;
-    ctx.fillRect(r.x, r.y - 6, r.w, T + 2);
-    ctx.fillStyle = p.moon;
-    ctx.beginPath();
-    ctx.arc(r.x + r.w * 0.7, r.y - 1, 3, 0, Math.PI * 2);
-    ctx.fill();
+    if (seesOutside(p)) {
+      // Vitre transparente : la vue du dehors est un plan lointain (D-71).
+      ctx.clearRect(r.x, r.y - 6, r.w, T + 2);
+    } else {
+      const sky = ctx.createLinearGradient(0, r.y - 6, 0, r.y + T);
+      sky.addColorStop(0, p.night);
+      sky.addColorStop(1, p.nightLow);
+      ctx.fillStyle = sky;
+      ctx.fillRect(r.x, r.y - 6, r.w, T + 2);
+      ctx.fillStyle = p.moon;
+      ctx.beginPath();
+      ctx.arc(r.x + r.w * 0.7, r.y - 1, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.fillStyle = p.wood;
     ctx.fillRect(r.x + r.w / 2 - 1, r.y - 6, 2, T + 2);
   },
@@ -772,33 +806,15 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     ctx.fillStyle = p.silhouettes ? p.structure : p.linen;
     rounded(ctx, { x: r.x - 4, y: r.y - 4, w: r.w + 8, h: r.h + 8 }, 5);
     ctx.fill();
-    const sky = ctx.createLinearGradient(0, r.y, 0, r.y + r.h);
-    sky.addColorStop(0, p.night);
-    sky.addColorStop(1, p.nightLow);
-    ctx.fillStyle = sky;
-    rounded(ctx, r, 3);
-    ctx.fill();
-    ctx.fillStyle = p.moon;
-    ctx.beginPath();
-    ctx.arc(r.x + r.w * 0.72, r.y + r.h * 0.3, 9, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    for (let i = 0; i < (p.stars ? 12 : 0); i++) {
-      ctx.fillRect(r.x + ((i * 37) % r.w), r.y + ((i * 23) % (r.h - 6)) + 3, 1, 1);
-    }
-    if (p.silhouettes) {
-      ctx.strokeStyle = p.moon;
-      ctx.globalAlpha = 0.6;
-      ctx.lineWidth = 0.8;
-      ctx.beginPath();
-      for (let t = 0; t < 12; t += 0.2) {
-        ctx.lineTo(
-          r.x + r.w * 0.3 + Math.cos(t) * t * 1.5,
-          r.y + r.h * 0.65 + Math.sin(t) * t * 1.5,
-        );
-      }
-      ctx.stroke();
-      ctx.globalAlpha = 1;
+    if (seesOutside(p)) {
+      // Vitre transparente : la vue du dehors est un plan lointain (D-71).
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillStyle = '#000';
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+      ctx.restore();
+    } else {
+      windowView(ctx, p, r);
     }
     ctx.fillStyle = p.silhouettes ? p.structure : p.linen;
     ctx.fillRect(r.x + r.w / 2 - 1.5, r.y, 3, r.h);
@@ -1158,15 +1174,26 @@ function drawWallpaper(
   }
 }
 
-/** Plans du décor (D-70) : fond lointain (voilé), fond proche, meubles (couche jouable). */
-type DecorPlane = 'far' | 'back' | 'furniture';
+/**
+ * Plans du décor (D-70) : ciel (plan lointain, D-71), fond lointain (voilé), fond proche, meubles
+ * (couche jouable).
+ */
+type DecorPlane = 'sky' | 'far' | 'back' | 'furniture';
 
 function decorPlane(kind: string): DecorPlane {
   const known = DECOR_KINDS[kind];
   if (known?.furniture) {
     return 'furniture';
   }
+  if (known?.sky) {
+    return 'sky';
+  }
   return known?.far ? 'far' : 'back';
+}
+
+/** Éléments du ciel (le soleil), dessinés dans le plan du ciel (D-71). */
+export function drawSkyDecor(a: ArtContext): void {
+  drawDecor(a, 'sky');
 }
 
 /** Éléments de décor d'un plan, dans l'ordre de déclaration ; une image fournie les remplace. */
@@ -1203,13 +1230,23 @@ export function drawRoomBackground(
   const height = level.height * T;
   const floorY = floorRow(level) * T;
   const wainscotY = floorY - 5 * T;
-  if (p.outdoor) {
-    drawSky(a, width, height, floorY);
-  } else {
+  // Dehors, le ciel et les collines sont des plans lointains (D-71) : le fond reste transparent.
+  if (!p.outdoor) {
     drawWall(a, width, height, floorY, wainscotY);
   }
   drawDecor(a, 'far');
   drawVeil(a, floorY, p.veil * finish.veil);
+  // Vitres transparentes (D-71) : la vue du dehors est un plan lointain, derrière.
+  if (seesOutside(p)) {
+    a.ctx.save();
+    a.ctx.globalCompositeOperation = 'destination-out';
+    // Opaque : la découpe efface tout (sinon elle prendrait l'opacité du dernier remplissage).
+    a.ctx.fillStyle = '#000';
+    for (const pane of windowPanes(level)) {
+      a.ctx.fillRect(pane.x, pane.y, pane.w, pane.h);
+    }
+    a.ctx.restore();
+  }
   // Le fond proche (fenêtres, façades) se pose à peine sur le mur ; la couche jouable, nettement.
   drawSheet(
     a,
@@ -1238,7 +1275,29 @@ export function drawRoomBackground(
       drawDecor(s, 'furniture');
     },
   );
-  drawPaperGrain(a, finish.grain);
+  drawPaperGrain(a, sheet, finish.grain);
+}
+
+/**
+ * Vitres et ciel transparents (D-71) : dans le monde réel, ou dehors (le ciel). Le monde étrange
+ * garde ses fenêtres peintes (silhouettes).
+ */
+export function seesOutside(p: Readonly<ArtPalette>): boolean {
+  return p.outdoor || !p.silhouettes;
+}
+
+/** Vitres des fenêtres et des lucarnes de la salle (px logiques). */
+export function windowPanes(level: LevelData): Rect[] {
+  const panes: Rect[] = [];
+  for (const d of level.decor) {
+    const r = rect(d);
+    if (d.kind === 'window') {
+      panes.push(r);
+    } else if (d.kind === 'skylight') {
+      panes.push({ x: r.x, y: r.y - 6, w: r.w, h: T + 2 });
+    }
+  }
+  return panes;
 }
 
 /**
@@ -1255,6 +1314,8 @@ function drawVeil(a: ArtContext, floorY: number, alpha: number): void {
   veil.addColorStop(1, p.wallBottom);
   ctx.save();
   ctx.globalAlpha = Math.min(1, alpha);
+  // Seulement sur ce qui est déjà dessiné : jamais sur le ciel transparent (D-71).
+  ctx.globalCompositeOperation = 'source-atop';
   ctx.fillStyle = veil;
   const clip = a.clip ?? { x: 0, y: 0, w: level.width * T, h: level.height * T };
   ctx.fillRect(clip.x, clip.y, clip.w, clip.h);
@@ -1329,126 +1390,117 @@ function prepareSheet(
 }
 
 /**
- * Ombres de contact (D-70) : sous chaque meuble posé sur une surface (tuile pleine ou
- * traversable juste dessous), une ombre douce qui l'ancre au sol.
+ * Ombres de contact (D-70) : sous chaque meuble, là où il touche vraiment une surface (sa tuile du
+ * bas pleine ou traversable, et une tuile pleine ou traversable dessous), une ombre douce qui
+ * l'ancre au sol : sous les pieds d'une table, sous tout le canapé.
  */
 function drawContactShadows(a: ArtContext, alpha: number): void {
   if (alpha <= 0) {
     return;
   }
   const { ctx, level } = a;
+  const solid = (col: number, row: number) => {
+    const tile = tileAt(level, col, row);
+    return tile === Tile.Solid || tile === Tile.OneWay;
+  };
   for (const d of level.decor) {
-    if (!(DECOR_KINDS[d.kind]?.furniture ?? false)) {
+    if (!(DECOR_KINDS[d.kind]?.furniture ?? false) || !decorVisible(rect(d), a.clip)) {
       continue;
     }
-    const below = d.row + d.height;
-    let resting = false;
-    for (let col = d.col; col < d.col + d.width && !resting; col++) {
-      const tile = tileAt(level, col, below);
-      resting = below < level.height && (tile === Tile.Solid || tile === Tile.OneWay);
-    }
-    const r = rect(d);
-    if (!resting || !decorVisible(r, a.clip)) {
+    const bottom = d.row + d.height - 1;
+    if (bottom + 1 >= level.height) {
       continue;
     }
-    const cx = r.x + r.w / 2;
-    const cy = r.y + r.h;
-    const rx = r.w / 2 + 8;
-    const ry = 6;
-    const shadow = ctx.createRadialGradient(cx, cy, 0, cx, cy, rx);
-    shadow.addColorStop(0, `rgba(20,14,24,${String(Math.min(1, alpha))})`);
-    shadow.addColorStop(0.7, `rgba(20,14,24,${String(Math.min(1, alpha) * 0.6)})`);
-    shadow.addColorStop(1, 'rgba(20,14,24,0)');
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.scale(1, ry / rx);
-    ctx.translate(-cx, -cy);
-    ctx.fillStyle = shadow;
-    ctx.beginPath();
-    ctx.arc(cx, cy, rx, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+    // Suites de colonnes posées.
+    let start = -1;
+    for (let col = d.col; col <= d.col + d.width; col++) {
+      const resting = col < d.col + d.width && solid(col, bottom) && solid(col, bottom + 1);
+      if (resting && start < 0) {
+        start = col;
+      } else if (!resting && start >= 0) {
+        contactShadow(ctx, start * T, col * T, (bottom + 1) * T, alpha);
+        start = -1;
+      }
+    }
   }
 }
 
-/** Grain de papier (D-70) sur tout le bloc, en lumière douce : ni teinte ni contraste changés. */
-function drawPaperGrain(a: ArtContext, alpha: number): void {
+/** Ombre douce sous [x0, x1[, centrée sur la surface `y`. */
+function contactShadow(
+  ctx: CanvasRenderingContext2D,
+  x0: number,
+  x1: number,
+  y: number,
+  alpha: number,
+): void {
+  const cx = (x0 + x1) / 2;
+  const rx = (x1 - x0) / 2 + 6;
+  const ry = 5;
+  const a = Math.min(1, alpha);
+  const shadow = ctx.createRadialGradient(cx, y, 0, cx, y, rx);
+  shadow.addColorStop(0, `rgba(20,14,24,${String(a)})`);
+  shadow.addColorStop(0.7, `rgba(20,14,24,${String(a * 0.6)})`);
+  shadow.addColorStop(1, 'rgba(20,14,24,0)');
+  ctx.save();
+  ctx.translate(cx, y);
+  ctx.scale(1, ry / rx);
+  ctx.translate(-cx, -y);
+  ctx.fillStyle = shadow;
+  ctx.beginPath();
+  ctx.arc(cx, y, rx, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+/**
+ * Grain de papier (D-70) sur tout le bloc, en lumière douce : ni teinte ni contraste changés.
+ * S'il reste du transparent (ciel, vitres, D-71), le grain est d'abord découpé à la forme du
+ * décor sur la toile de travail : la lumière douce sur du transparent laisserait un voile gris.
+ */
+function drawPaperGrain(a: ArtContext, sheet: HTMLCanvasElement, alpha: number): void {
   if (alpha <= 0) {
     return;
   }
-  const { ctx, level } = a;
-  const scale = ctx.getTransform().a;
-  const pattern = paperGrainPattern(ctx, scale);
+  const { ctx, level, palette: p } = a;
+  const transform = ctx.getTransform();
+  const pattern = paperGrainPattern(ctx, transform.a);
   if (!pattern) {
     return;
   }
   const clip = a.clip ?? { x: 0, y: 0, w: level.width * T, h: level.height * T };
+  const holes = p.outdoor || (seesOutside(p) && windowPanes(level).length > 0);
+  if (!holes) {
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, alpha);
+    ctx.globalCompositeOperation = 'soft-light';
+    ctx.fillStyle = pattern;
+    ctx.fillRect(clip.x, clip.y, clip.w, clip.h);
+    ctx.restore();
+    return;
+  }
+  const { width, height } = ctx.canvas;
+  if (sheet.width !== width || sheet.height !== height) {
+    sheet.width = width;
+    sheet.height = height;
+  }
+  const sctx = sheet.getContext('2d');
+  if (!sctx) {
+    return;
+  }
+  sctx.setTransform(1, 0, 0, 1, 0, 0);
+  sctx.globalAlpha = 1;
+  sctx.globalCompositeOperation = 'copy';
+  sctx.drawImage(ctx.canvas, 0, 0);
+  sctx.globalCompositeOperation = 'source-in';
+  sctx.setTransform(transform);
+  sctx.fillStyle = pattern;
+  sctx.fillRect(clip.x, clip.y, clip.w, clip.h);
   ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalAlpha = Math.min(1, alpha);
   ctx.globalCompositeOperation = 'soft-light';
-  ctx.fillStyle = pattern;
-  ctx.fillRect(clip.x, clip.y, clip.w, clip.h);
+  ctx.drawImage(sheet, 0, 0);
   ctx.restore();
-}
-
-/** Dehors (jardin, D-46) : ciel, nuages, deux plans de collines, arbres lointains. */
-function drawSky(a: ArtContext, width: number, height: number, floorY: number): void {
-  const { ctx, palette: p } = a;
-  const sky = ctx.createLinearGradient(0, 0, 0, floorY);
-  sky.addColorStop(0, p.wallTop);
-  sky.addColorStop(1, p.wallBottom);
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, width, height);
-  // Nuages en coussins : ombre dessous, lumière dessus.
-  for (let x = 20; x < width; x += 110) {
-    const y = 26 + ((x * 7) % 60);
-    const puffs = [
-      [0, 0, 14, 6],
-      [12, -5, 12, 8],
-      [25, -2, 13, 7],
-      [37, 1, 11, 5],
-    ] as const;
-    ctx.fillStyle = p.silhouettes ? p.wallpaper : 'rgba(205,220,235,0.7)';
-    for (const [dx, dy, rx, ry] of puffs) {
-      ctx.beginPath();
-      ctx.ellipse(x + dx, y + dy + 2, rx, ry, 0, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.fillStyle = p.wallpaper;
-    for (const [dx, dy, rx, ry] of puffs) {
-      ctx.beginPath();
-      ctx.ellipse(x + dx, y + dy, rx, ry, 0, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-  // Collines lointaines (pâles), puis plus proches avec une rangée d'arbres ronds : de la
-  // profondeur, jamais pris pour une surface (pâles et sans liseré).
-  const hills = (base: number, amp: number, alpha: number, seed: number) => {
-    ctx.fillStyle = p.wainscot;
-    ctx.globalAlpha = alpha;
-    ctx.beginPath();
-    ctx.moveTo(0, floorY);
-    for (let x = 0; x <= width; x += 10) {
-      ctx.lineTo(x, floorY - base - Math.sin(x / (40 + seed) + seed) * amp - Math.sin(x / 13) * 3);
-    }
-    ctx.lineTo(width, floorY);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-  };
-  hills(5 * T, 14, 0.3, 7);
-  hills(3 * T, 10, 0.45, 2);
-  ctx.fillStyle = p.wainscot;
-  ctx.globalAlpha = 0.55;
-  for (let x = 30; x < width; x += 70 + ((x * 13) % 40)) {
-    const base = floorY - 3 * T - Math.sin(x / 42 + 2) * 10;
-    ctx.fillRect(x - 1.5, base - 10, 3, 12);
-    ctx.beginPath();
-    ctx.arc(x, base - 16, 9, 0, Math.PI * 2);
-    ctx.arc(x - 6, base - 11, 6, 0, Math.PI * 2);
-    ctx.arc(x + 6, base - 11, 6, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.globalAlpha = 1;
 }
 
 /** Dedans : mur en dégradé, papier peint, lambris. */

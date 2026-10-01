@@ -81,6 +81,8 @@ import { CombatView } from './CombatView';
 import { CelestePuppet } from './CelestePuppet';
 import { RoomArtView } from './RoomArtView';
 import { FinishView } from './FinishView';
+import { BackdropView } from './BackdropView';
+import { ForegroundView } from './ForegroundView';
 import { MapPage } from '../ui/MapPage';
 import { buildMapModel } from '../core/world/mapModel';
 import { DEFAULT_PUPPET, type PuppetParams } from '../config/puppet';
@@ -204,6 +206,10 @@ export class GameScene extends Phaser.Scene {
   readonly artFinish: ArtFinish = { ...DEFAULT_ART_FINISH };
   /** Ombre de Céleste au sol et vignettage (D-70). */
   private finishView!: FinishView;
+  /** Plans lointains : ciel, collines, toits, vue par les fenêtres (D-71). */
+  private backdrop!: BackdropView;
+  /** Avant-plan : silhouettes au bas de l'écran (D-71). */
+  private foreground!: ForegroundView;
   /** Échelle des textures dessinées (habillage, Céleste) : celle de l'écran, plafonnée. */
   private artScale = 1;
   /** Carte (§24) et salles déjà dessinées lors d'une ouverture précédente (tracé animé). */
@@ -331,6 +337,8 @@ export class GameScene extends Phaser.Scene {
     this.drawnTime = this.story.timeOfDay();
     this.roomArt = new RoomArtView(this);
     this.finishView = new FinishView(this);
+    this.backdrop = new BackdropView(this);
+    this.foreground = new ForegroundView(this);
     this.artScale = this.computeArtScale();
     const save = this.session.data;
     const { room, checkpointId } = savedReturn(this.session);
@@ -651,6 +659,18 @@ export class GameScene extends Phaser.Scene {
     this.roomArt.update(artView, Math.max(this.story.veil, this.transition.veil) >= 1);
     main.scrollX += fx.offsetX;
     main.scrollY += fx.offsetY;
+    // Coin haut gauche de la vue (px du monde) : la caméra Phaser zoome autour de son centre.
+    const unzoom = 1 - 1 / main.zoom;
+    const viewLeft = main.scrollX + (main.width / 2) * unzoom;
+    this.backdrop.update(viewLeft, main.scrollY + (main.height / 2) * unzoom);
+    this.foreground.update(
+      viewLeft,
+      camera.viewWidth,
+      this.puppet.x,
+      this.puppet.y,
+      this.combat.enemies,
+      this.game.loop.delta,
+    );
     this.renderRunState();
   }
 
@@ -1148,9 +1168,14 @@ export class GameScene extends Phaser.Scene {
     const palette = this.palette();
     this.finishView.setPalette(palette, this.artFinish);
     // Salle habillée (D-28) : dessinée par l'habillage, pas tuile par tuile.
-    if (this.roomArt.build(level, palette, this.artFinish, this.artScale, this.artImages())) {
+    const images = this.artImages();
+    if (this.roomArt.build(level, palette, this.artFinish, this.artScale, images)) {
+      this.backdrop.build(level, palette, this.artScale, images);
+      this.foreground.build(level, palette, this.artScale);
       return;
     }
+    this.backdrop.clear();
+    this.foreground.clear();
     const chunkPx = LEVEL_CHUNK_TILES * TILE_SIZE;
     const g = this.make.graphics({}, false);
     for (let chunkRow = 0; chunkRow * LEVEL_CHUNK_TILES < level.height; chunkRow++) {
