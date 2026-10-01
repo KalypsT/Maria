@@ -939,7 +939,16 @@ export const HOUSE_STORY: StoryData = {
       kind: 'height-chart-grown',
       col: 42,
       row: 19,
-      when: { all: [F.Grown] },
+      when: { all: [F.Grown], none: [F.GrownOlder] },
+    },
+    {
+      // Après la gare (D-69) : un troisième trait.
+      id: 'height-chart-older',
+      room: 'bedroom',
+      kind: 'height-chart-older',
+      col: 42,
+      row: 19,
+      when: { all: [F.GrownOlder] },
     },
     {
       id: 'maria-rug',
@@ -1214,6 +1223,8 @@ export const HOUSE_STORY: StoryData = {
   ],
   // La nuit après le câlin de maman (D-58), puis le matin quelques mois plus tard.
   times: [
+    // La nuit après la gare (D-69), jusqu'au matin, quelques mois plus tard.
+    ...STATION_STORY.times,
     // Le crépuscule puis la nuit, après l'école étrange (D-64), jusqu'au lendemain matin.
     { when: { all: [F.SchoolDone], none: [F.StreetMorning] }, time: 'evening' },
     { when: { all: [F.MomHug], none: [F.Grown] }, time: 'evening' },
@@ -1232,6 +1243,8 @@ export const HOUSE_STORY: StoryData = {
     { room: 'school', exit: 1, when: { none: [F.SchoolOpen] }, icon: 'question' },
     // La nuit après l'école étrange (D-64) : c'est l'heure de dormir.
     { room: 'bedroom', when: { all: [F.SchoolDone], none: [F.StreetMorning] }, icon: 'bed' },
+    // La gare (D-69).
+    ...STATION_STORY.lockedRooms,
   ],
   omens: [
     // L'oculus de l'école (D-64) : en montant les étagères, tant que la fin n'est pas vécue.

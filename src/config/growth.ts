@@ -21,13 +21,16 @@ export interface GrowthPhase {
   readonly movementScale: Readonly<Partial<Record<keyof MovementParams, number>>>;
   /** Marionnette : allongement du corps (torse, jambes, bras) ; la tête ne grandit pas. */
   readonly bodyScale: number;
-  /** Allongement des couettes (même coiffure, un peu plus longue). */
+  /** Allongement des cheveux (couettes ou queue de cheval). */
   readonly hairScale: number;
+  /** Coiffure (spec §2) : couettes, puis queue de cheval (D-69). */
+  readonly hair: CelesteHair;
   /** Tenue (PLACEHOLDER d'après les illustrations de l'utilisateur, D-41, D-43). */
   readonly outfit: CelesteOutfit;
 }
 
-export type CelesteOutfit = 'pyjama' | 'dress';
+export type CelesteOutfit = 'pyjama' | 'dress' | 'jacket';
+export type CelesteHair = 'pigtails' | 'ponytail';
 
 const FIRST_PHASE: GrowthPhase = {
   id: 1,
@@ -36,6 +39,7 @@ const FIRST_PHASE: GrowthPhase = {
   movementScale: {},
   bodyScale: 1,
   hairScale: 1,
+  hair: 'pigtails',
   outfit: 'pyjama',
 };
 
@@ -50,7 +54,22 @@ export const GROWTH_PHASES: readonly GrowthPhase[] = [
     movementScale: { jumpHeightTiles: 1.2, maxRunSpeed: 1.03 },
     bodyScale: 1.25,
     hairScale: 1.3,
+    hair: 'pigtails',
     outfit: 'dress',
+  },
+  {
+    // Après la gare, encore quelques mois (D-69) : un peu plus grande, une course un peu plus
+    // rapide ; queue de cheval, veste en jean. Toujours moins de 2 tuiles. Le saut reste celui de
+    // la phase 2 : plus haut, il rendait plus difficiles la cheminée du pilier des quais et le
+    // nichoir de l'aire de jeux (vérifié par les tests : rien ne se ferme en grandissant).
+    id: 3,
+    flag: StoryFlag.GrownOlder,
+    hitbox: { width: 12, height: 28 },
+    movementScale: { jumpHeightTiles: 1.2, maxRunSpeed: 1.06 },
+    bodyScale: 1.4,
+    hairScale: 1.5,
+    hair: 'ponytail',
+    outfit: 'jacket',
   },
 ];
 

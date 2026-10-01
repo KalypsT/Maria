@@ -1265,11 +1265,13 @@ export class GameScene extends Phaser.Scene {
       return GARDEN_PALETTE;
     }
     if (isStreetRoom(this.level) && this.level.meta.indoor) {
-      // Un lieu fermé du quartier (la supérette, D-63) : dedans, de jour, ses propres murs.
-      const walls = this.level.meta.walls?.split(/\s+/);
-      return walls?.[0] && walls[1]
-        ? { ...DAY_PALETTE, wallTop: walls[0], wallBottom: walls[1] }
-        : DAY_PALETTE;
+      // Un lieu fermé du quartier (la supérette, D-63) : dedans, de jour, ses propres murs. La nuit
+      // (le hall de la gare, D-69) : la nuit de la maison, avec ses murs de nuit
+      // (`; @nightwalls: haut bas`).
+      const night = this.story.timeOfDay() === 'evening' && this.level.meta.nightwalls;
+      const walls = (night || this.level.meta.walls)?.split(/\s+/);
+      const base = night ? REAL_PALETTE : DAY_PALETTE;
+      return walls?.[0] && walls[1] ? { ...base, wallTop: walls[0], wallBottom: walls[1] } : base;
     }
     if (isStreetRoom(this.level)) {
       // Sol propre à un lieu du quartier (`; @floor: dessus bord`), le sol souple de l'aire de jeux.

@@ -10,11 +10,26 @@
 
 **Le quartier** (D-60, D-61) : plan validé (4 PR), toutes faites : PR 1 (portes de façade, aire de jeux), PR 2 (le parapluie, D-62), PR 3 (supérette et chantier, D-63), PR 4 (l'école, son monde étrange et la fin du niveau, D-64).
 
-**La gare** (D-65, D-66) : plan validé (5 PR). PR 1 faite (le parapluie s'ouvre au sommet ; le crochet et les câbles). PR 2 faite : la gare réelle, les trains, le crochet au bureau des objets trouvés, les revisites. PR 3 faite : le système de boss (poursuite verticale), dans le parcours d'essai 10. PR 4 faite : le monde étrange de la gare, la tour, Roger et le premier court souvenir. Suivante : PR 5 la fin et la phase 3 (en attente de l'illustration de Céleste en phase 3).
+**La gare** (D-65, D-66) : plan validé (5 PR). PR 1 faite (le parapluie s'ouvre au sommet ; le crochet et les câbles). PR 2 faite : la gare réelle, les trains, le crochet au bureau des objets trouvés, les revisites. PR 3 faite : le système de boss (poursuite verticale), dans le parcours d'essai 10. PR 4 faite : le monde étrange de la gare, la tour, Roger et le premier court souvenir. PR 5 faite : la fin du niveau (papa sous l'horloge, la nuit), la phase 3, le train à quai (D-69). **Le niveau de la gare est complet.**
 
-Prochaine : essai de la gare (réelle et étrange) sur téléphone ; puis la PR 5 (la fin du niveau, papa, la phase 3 : en attente de l'illustration). Intégrer les morceaux de musique.
+Prochaine : essai de la gare (réelle, étrange, la fin, la phase 3) sur téléphone. Le niveau suivant (le train ?) reste à décider. Intégrer les morceaux de musique.
 
 ## Fait
+
+### La gare, PR 5 : la fin du niveau, la phase 3, le train à quai (D-69)
+
+- **La fin** : après Roger, Céleste est assise sous la grande horloge du hall, la nuit. Papa vient la chercher (un cœur). Puis la nuit dans sa chambre ; au lit, des mois passent.
+- **Phase 3** : Céleste un peu plus grande (hitbox 12 × 28), un peu plus rapide (× 1,06). **Queue de cheval, veste en jean, short rose, baskets**, d'après ton illustration (écran titre aussi). Le saut reste celui de la phase 2 : plus haut, il rendait deux trouvailles plus difficiles (la cheminée du pilier des quais, le nichoir de l'aire de jeux).
+- **La toise** : un troisième trait.
+- **Le train à quai** : sur les quais, une voiture arrêtée, porte grande ouverte, lueur turquoise ; en passant devant, une bulle « ? ». On n'y monte pas encore.
+- **Roger** : ton image en jeu (dans la tour) ; le dessin du cahier et du court souvenir refait d'après elle.
+- Le hall a maintenant une version de nuit ; l'horloge est descendue pour être visible.
+- DEBUG → Histoire : « Roger trouvé, la nuit après la gare (au lit) », « quelques mois après la gare (phase 3, le train à quai) » ; case « Croissance : phase 3 ».
+- Tests : 527. Rien d'atteignable en phase 2 ne se ferme en phase 3 (toute la zone). Vérifié dans Chromium : la fin, papa, la chambre, le coucher, la phase 3, la toise, le train à quai.
+- [ ] À vérifier sur téléphone : la scène sous l'horloge (papa, la nuit) est-elle assez lente et tendre ?
+- [ ] Céleste en phase 3 se reconnaît-elle (queue de cheval, veste) ? La taille et la vitesse : une différence sensible mais douce ? Faut-il un saut plus haut (en surveillant la cheminée des quais) ?
+- [ ] Le train à quai : la porte et sa lueur se remarquent-elles ? La bulle « ? » donne-t-elle envie de revenir ?
+- [ ] Les baskets de l'illustration (écran titre) portent un logo de marque : à garder ?
 
 ### La gare, PR 4 : le monde étrange de la gare, la tour, Roger (D-68)
 

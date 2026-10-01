@@ -372,15 +372,15 @@ export function dadHead(ctx: CanvasRenderingContext2D, x: number, y: number, r: 
 }
 
 /**
- * Toise (D-43) : une bande graduée, des traits au crayon aux tailles de Céleste ; `grown` : un
- * nouveau trait plus haut, avec un petit cœur (quelques mois ont passé). Hauteur `h`, centrée
- * horizontalement en 0, le bas en `h / 2`.
+ * Toise (D-43) : une bande graduée, des traits au crayon aux tailles de Céleste ; `grown` : les
+ * nouveaux traits roses, plus haut (un par croissance, D-69), le dernier avec un petit cœur
+ * (quelques mois ont passé). Hauteur `h`, centrée horizontalement en 0, le bas en `h / 2`.
  */
 export function heightChart(
   ctx: CanvasRenderingContext2D,
   w: number,
   h: number,
-  grown: boolean,
+  grown: number,
 ): void {
   const top = -h / 2;
   roundRect(ctx, -w / 2, top, w, h, w * 0.15, '#f6e7c8');
@@ -400,12 +400,14 @@ export function heightChart(
   mark(0.5, INK, h * 0.018 + 0.3);
   mark(0.6, INK, h * 0.018 + 0.3);
   mark(0.7, PINK, h * 0.02 + 0.4);
-  if (grown) {
-    mark(0.8, PINK, h * 0.022 + 0.45);
+  for (let k = 1; k <= grown; k++) {
+    mark(0.7 + 0.08 * k, PINK, h * 0.022 + 0.45);
+  }
+  if (grown > 0) {
     ctx.fillStyle = PINK;
     const r = w * 0.13;
     const x = w * 0.28;
-    const y = h / 2 - 0.86 * h;
+    const y = h / 2 - (0.76 + 0.08 * grown) * h;
     ctx.beginPath();
     ctx.arc(x - r * 0.55, y, r * 0.6, Math.PI, 0);
     ctx.arc(x + r * 0.55, y, r * 0.6, Math.PI, 0);
@@ -518,75 +520,89 @@ export function shapeBox(ctx: CanvasRenderingContext2D, s: number, glow = false)
 }
 
 /**
- * Roger, la peluche singe (D-68), PLACEHOLDER : corps brun tout doux, visage et ventre beiges,
- * grandes oreilles rondes, longs bras qui pendent, une queue enroulée. Assis, vu de face.
+ * Roger, la peluche singe (D-68), d'après l'image de l'utilisateur (D-69) : pelage roux tout doux,
+ * masque crème (deux lobes sur les yeux, un grand museau), oreilles rondes crème dedans, nez brun,
+ * grand sourire ; longs bras et longues jambes qui pendent, bouts des mains crème, longue queue
+ * posée sur le côté, petit nombril. Assis, vu de face. En jeu, l'image fournie le remplace.
  */
 export function roger(ctx: CanvasRenderingContext2D, s: number): void {
-  const fur = '#8a5a3c';
-  const furDark = '#6e4630';
-  const face = '#e8c9a0';
-  // Queue enroulée, derrière.
-  ctx.strokeStyle = furDark;
-  ctx.lineWidth = s * 0.05;
+  const fur = '#c9592a';
+  const furDark = '#a8451f';
+  const cream = '#f8e7d4';
+  const ink = '#3a2318';
+  const limb = (x0: number, y0: number, cx: number, cy: number, x1: number, y1: number) => {
+    ctx.beginPath();
+    ctx.moveTo(s * x0, s * y0);
+    ctx.quadraticCurveTo(s * cx, s * cy, s * x1, s * y1);
+    ctx.stroke();
+  };
   ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.moveTo(s * 0.16, s * 0.3);
-  ctx.quadraticCurveTo(s * 0.42, s * 0.32, s * 0.36, s * 0.12);
-  ctx.arc(s * 0.3, s * 0.12, s * 0.06, 0, Math.PI * 1.4, true);
-  ctx.stroke();
-  // Jambes, corps et ventre.
+  // La longue queue, posée sur le côté gauche.
+  ctx.strokeStyle = furDark;
+  ctx.lineWidth = s * 0.09;
+  limb(-0.1, 0.22, -0.3, 0.2, -0.42, 0.26);
+  // Le corps, en poire.
   ctx.fillStyle = fur;
   ctx.beginPath();
-  ctx.ellipse(-s * 0.13, s * 0.36, s * 0.1, s * 0.07, -0.3, 0, Math.PI * 2);
-  ctx.ellipse(s * 0.13, s * 0.36, s * 0.1, s * 0.07, 0.3, 0, Math.PI * 2);
+  ctx.ellipse(0, s * 0.14, s * 0.17, s * 0.21, 0, 0, Math.PI * 2);
   ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(0, s * 0.18, s * 0.2, s * 0.22, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = face;
-  ctx.beginPath();
-  ctx.ellipse(0, s * 0.21, s * 0.12, s * 0.14, 0, 0, Math.PI * 2);
-  ctx.fill();
-  // Longs bras qui pendent jusqu'aux pieds.
+  // Longues jambes, vers l'avant, pieds arrondis.
   ctx.strokeStyle = fur;
-  ctx.lineWidth = s * 0.07;
+  ctx.lineWidth = s * 0.11;
+  limb(-0.08, 0.28, -0.13, 0.38, -0.12, 0.44);
+  limb(0.08, 0.28, 0.16, 0.36, 0.2, 0.42);
+  // Le petit nombril.
+  ctx.fillStyle = ink;
   ctx.beginPath();
-  ctx.moveTo(-s * 0.16, s * 0.04);
-  ctx.quadraticCurveTo(-s * 0.32, s * 0.2, -s * 0.24, s * 0.4);
-  ctx.moveTo(s * 0.16, s * 0.04);
-  ctx.quadraticCurveTo(s * 0.32, s * 0.2, s * 0.24, s * 0.4);
-  ctx.stroke();
-  // Tête, oreilles, visage.
+  ctx.arc(s * 0.03, s * 0.2, s * 0.012, 0, Math.PI * 2);
+  ctx.fill();
+  // Longs bras qui pendent, bouts des mains crème.
+  ctx.strokeStyle = fur;
+  ctx.lineWidth = s * 0.08;
+  limb(-0.13, 0.0, -0.24, 0.16, -0.22, 0.32);
+  limb(0.13, 0.0, 0.26, 0.14, 0.28, 0.3);
+  ctx.fillStyle = cream;
+  ctx.beginPath();
+  ctx.arc(-s * 0.22, s * 0.33, s * 0.035, 0, Math.PI * 2);
+  ctx.arc(s * 0.28, s * 0.31, s * 0.035, 0, Math.PI * 2);
+  ctx.fill();
+  // Oreilles rondes, crème dedans.
   ctx.fillStyle = fur;
   ctx.beginPath();
-  ctx.arc(-s * 0.2, -s * 0.18, s * 0.08, 0, Math.PI * 2);
-  ctx.arc(s * 0.2, -s * 0.18, s * 0.08, 0, Math.PI * 2);
+  ctx.arc(-s * 0.2, -s * 0.2, s * 0.075, 0, Math.PI * 2);
+  ctx.arc(s * 0.2, -s * 0.2, s * 0.075, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = face;
+  ctx.fillStyle = cream;
   ctx.beginPath();
-  ctx.arc(-s * 0.2, -s * 0.18, s * 0.045, 0, Math.PI * 2);
-  ctx.arc(s * 0.2, -s * 0.18, s * 0.045, 0, Math.PI * 2);
+  ctx.arc(-s * 0.2, -s * 0.2, s * 0.042, 0, Math.PI * 2);
+  ctx.arc(s * 0.2, -s * 0.2, s * 0.042, 0, Math.PI * 2);
   ctx.fill();
+  // La tête, le masque crème (deux lobes sur les yeux, le museau).
   ctx.fillStyle = fur;
   ctx.beginPath();
-  ctx.arc(0, -s * 0.17, s * 0.17, 0, Math.PI * 2);
+  ctx.arc(0, -s * 0.2, s * 0.18, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = face;
+  ctx.fillStyle = cream;
   ctx.beginPath();
-  ctx.ellipse(0, -s * 0.13, s * 0.12, s * 0.1, 0, 0, Math.PI * 2);
-  ctx.ellipse(-s * 0.055, -s * 0.21, s * 0.055, s * 0.06, 0, 0, Math.PI * 2);
-  ctx.ellipse(s * 0.055, -s * 0.21, s * 0.055, s * 0.06, 0, 0, Math.PI * 2);
+  ctx.ellipse(-s * 0.06, -s * 0.24, s * 0.065, s * 0.07, 0, 0, Math.PI * 2);
+  ctx.ellipse(s * 0.06, -s * 0.24, s * 0.065, s * 0.07, 0, 0, Math.PI * 2);
   ctx.fill();
-  // Yeux brodés, petit sourire.
-  ctx.fillStyle = '#2a1c14';
   ctx.beginPath();
-  ctx.arc(-s * 0.055, -s * 0.2, s * 0.02, 0, Math.PI * 2);
-  ctx.arc(s * 0.055, -s * 0.2, s * 0.02, 0, Math.PI * 2);
+  ctx.ellipse(0, -s * 0.13, s * 0.13, s * 0.085, 0, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = '#2a1c14';
-  ctx.lineWidth = s * 0.015;
+  // Yeux brodés, nez brun, grand sourire.
+  ctx.fillStyle = ink;
   ctx.beginPath();
-  ctx.arc(0, -s * 0.13, s * 0.04, 0.2, Math.PI - 0.2);
+  ctx.ellipse(-s * 0.055, -s * 0.23, s * 0.016, s * 0.022, 0, 0, Math.PI * 2);
+  ctx.ellipse(s * 0.055, -s * 0.23, s * 0.016, s * 0.022, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(0, -s * 0.16, s * 0.03, s * 0.02, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = s * 0.013;
+  ctx.beginPath();
+  ctx.arc(0, -s * 0.15, s * 0.06, 0.35, Math.PI - 0.35);
   ctx.stroke();
 }
 
@@ -619,7 +635,7 @@ export function drawMemory(
       babyPhoto(ctx, size);
       break;
     case 'height':
-      heightChart(ctx, size * 0.34, size * 0.95, true);
+      heightChart(ctx, size * 0.34, size * 0.95, 1);
       break;
     case 'bonnet':
       bonnet(ctx, size);
