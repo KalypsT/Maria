@@ -63,6 +63,10 @@ const DOOR = /^([1-9])\s+(\d+)\s+(\d+)$/;
 const CABLE = /^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
 /** Voie ferrée (D-66), répétable : `; @train: 26 right` (ligne des rails, sens du train). */
 const TRAIN = /^(\d+)\s+(left|right)$/;
+/** Poursuite (D-67) : `; @chase: 4` (ligne d'arrivée), `; @chase-phase: 40 1.5` (jusqu'à la ligne, tuiles/s), `; @chase-trip: col ligne l h recul`. */
+const CHASE_END = /^(\d+)$/;
+const CHASE_PHASE = /^(\d+)\s+(\d+(?:\.\d+)?)$/;
+const CHASE_TRIP = /^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+(?:\.\d+)?)$/;
 
 /**
  * Convertit une carte ASCII (décision D-06) en `LevelData`.
@@ -82,6 +86,10 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   const doors: LevelDoor[] = [];
   const cableTiles: number[][] = [];
   const trains: LevelTrain[] = [];
+  let chaseEnd = -1;
+  const chasePhases: { untilRow: number; speed: number }[] = [];
+  const chaseTrips: { col: number; row: number; width: number; height: number; recoil: number }[] =
+    [];
   text.split('\n').forEach((raw, index) => {
     const line = raw.replace(/\r$/, '').trimEnd();
     if (!line.startsWith(COMMENT)) {
@@ -124,6 +132,38 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         throw new Error(`Niveau ${id}, ligne ${index + 1} : @train attend « ligne left|right »`);
       }
       trains.push({ row: Number(t[1]), dir: t[2] === 'left' ? -1 : 1 });
+    } else if (match?.[1]?.startsWith('chase') && match[2] !== undefined) {
+      const value = match[2].trim();
+      const bad = () =>
+        new Error(`Niveau ${id}, ligne ${index + 1} : @${match[1] ?? ''} mal formé (« ${value} »)`);
+      if (match[1] === 'chase') {
+        const c = CHASE_END.exec(value);
+        if (!c) {
+          throw bad();
+        }
+        chaseEnd = Number(c[1]);
+      } else if (match[1] === 'chase-phase') {
+        const c = CHASE_PHASE.exec(value);
+        if (!c) {
+          throw bad();
+        }
+        chasePhases.push({ untilRow: Number(c[1]), speed: Number(c[2]) });
+      } else if (match[1] === 'chase-trip') {
+        const c = CHASE_TRIP.exec(value);
+        if (!c) {
+          throw bad();
+        }
+        const [col, row, width, height, recoil] = c.slice(1, 6).map(Number);
+        chaseTrips.push({
+          col: col ?? 0,
+          row: row ?? 0,
+          width: width ?? 0,
+          height: height ?? 0,
+          recoil: recoil ?? 0,
+        });
+      } else {
+        throw bad();
+      }
     } else if (match?.[1] !== undefined && match[2] !== undefined) {
       meta[match[1]] = match[2];
     }
@@ -210,6 +250,14 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
       throw new Error(`Niveau ${id} : porte ${door.id} hors de la salle`);
     }
   }
+  if (chaseEnd >= 0 !== chasePhases.length > 0 || (chaseEnd < 0 && chaseTrips.length > 0)) {
+    throw new Error(`Niveau ${id} : @chase va de pair avec au moins une @chase-phase`);
+  }
+  for (let k = 1; k < chasePhases.length; k++) {
+    if ((chasePhases[k]?.untilRow ?? 0) >= (chasePhases[k - 1]?.untilRow ?? 0)) {
+      throw new Error(`Niveau ${id} : les @chase-phase vont de bas en haut`);
+    }
+  }
   for (const train of trains) {
     if (train.row >= height) {
       throw new Error(`Niveau ${id} : @train ${train.row} hors de la salle`);
@@ -243,6 +291,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
     decor,
     cables,
     trains,
+    chase: chaseEnd >= 0 ? { endRow: chaseEnd, phases: chasePhases, trips: chaseTrips } : null,
   };
 }
 

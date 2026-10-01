@@ -67,6 +67,23 @@ export interface CombatParams {
   /** Souffle du train : vitesse horizontale (sens du train) et vers le haut (px/s). */
   trainGustX: number;
   trainGustY: number;
+  /**
+   * Poursuite verticale (boss, D-67). Au départ et après une réapparition, il attend
+   * `chaseStartDelayMs` puis monte, à la vitesse de la phase (× `chaseSpeedScale`).
+   */
+  chaseStartDelayMs: number;
+  /** Facteur sur les vitesses de montée des phases (réglage en direct). */
+  chaseSpeedScale: number;
+  /** Il ne reste jamais plus loin que ça sous les pieds de Céleste (tuiles) : il rattrape. */
+  chaseMaxGapTiles: number;
+  /** À la réapparition, il repart à cette distance sous les pieds de Céleste (tuiles). */
+  chaseRestartGapTiles: number;
+  /** Contact : Céleste rebondit vers le haut (px/s), il recule (tuiles) et s'arrête (ms). */
+  chaseContactBounceY: number;
+  chaseContactRecoilTiles: number;
+  chaseContactPauseMs: number;
+  /** Croc-en-jambe (passage qui le fait trébucher) : il s'arrête ce temps-là (ms). */
+  chaseTripPauseMs: number;
 }
 
 export const DEFAULT_COMBAT: Readonly<CombatParams> = {
@@ -102,6 +119,14 @@ export const DEFAULT_COMBAT: Readonly<CombatParams> = {
   trainPassMs: 1600,
   trainGustX: 260,
   trainGustY: 300,
+  chaseStartDelayMs: 1500,
+  chaseSpeedScale: 1,
+  chaseMaxGapTiles: 7,
+  chaseRestartGapTiles: 7,
+  chaseContactBounceY: 420,
+  chaseContactRecoilTiles: 3,
+  chaseContactPauseMs: 1200,
+  chaseTripPauseMs: 2500,
 };
 
 export const COMBAT_PARAM_RANGES: Readonly<
@@ -139,6 +164,14 @@ export const COMBAT_PARAM_RANGES: Readonly<
   trainPassMs: { min: 300, max: 4000, step: 100 },
   trainGustX: { min: 0, max: 600, step: 10 },
   trainGustY: { min: 0, max: 600, step: 10 },
+  chaseStartDelayMs: { min: 0, max: 6000, step: 100 },
+  chaseSpeedScale: { min: 0, max: 3, step: 0.05 },
+  chaseMaxGapTiles: { min: 4, max: 30, step: 1 },
+  chaseRestartGapTiles: { min: 2, max: 30, step: 1 },
+  chaseContactBounceY: { min: 100, max: 800, step: 10 },
+  chaseContactRecoilTiles: { min: 0, max: 10, step: 0.5 },
+  chaseContactPauseMs: { min: 0, max: 5000, step: 100 },
+  chaseTripPauseMs: { min: 0, max: 8000, step: 100 },
 };
 
 /** Hauteur balayée par le souffle d'un train au-dessus de ses rails (tuiles, D-66). */

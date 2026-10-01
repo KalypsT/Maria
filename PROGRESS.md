@@ -10,11 +10,26 @@
 
 **Le quartier** (D-60, D-61) : plan validé (4 PR), toutes faites : PR 1 (portes de façade, aire de jeux), PR 2 (le parapluie, D-62), PR 3 (supérette et chantier, D-63), PR 4 (l'école, son monde étrange et la fin du niveau, D-64).
 
-**La gare** (D-65, D-66) : plan validé (5 PR). PR 1 faite (le parapluie s'ouvre au sommet ; le crochet et les câbles). PR 2 faite : la gare réelle, les trains, le crochet au bureau des objets trouvés, les revisites. Suivantes : PR 3 le système de boss ; PR 4 le monde étrange de la gare, la tour, Roger et le court souvenir ; PR 5 la fin et la phase 3 (en attente de l'illustration de Céleste en phase 3).
+**La gare** (D-65, D-66) : plan validé (5 PR). PR 1 faite (le parapluie s'ouvre au sommet ; le crochet et les câbles). PR 2 faite : la gare réelle, les trains, le crochet au bureau des objets trouvés, les revisites. PR 3 faite : le système de boss (poursuite verticale), dans le parcours d'essai 10. Suivantes : PR 4 le monde étrange de la gare, la tour, Roger et le court souvenir ; PR 5 la fin et la phase 3 (en attente de l'illustration de Céleste en phase 3).
 
-Prochaine : essai de la gare sur téléphone ; puis la PR 3 (système de boss). Intégrer les morceaux de musique.
+Prochaine : essai de la gare et du parcours 10 sur téléphone ; puis la PR 4 (le monde étrange de la gare, la tour, Roger). Intégrer les morceaux de musique.
 
 ## Fait
+
+### La gare, PR 3 : le système de boss, la poursuite verticale (D-67)
+
+- **Le poursuivant** : un tas de valises et de manteaux perdus, coiffé d'une casquette de contrôleur, sans visage, qui monte derrière Céleste. Il attend un peu, puis monte à la vitesse de la phase ; s'il est trop loin, il remonte hors de la vue.
+- **Le toucher** : Céleste rebondit vers le haut, la peur monte d'un cran ; il recule et s'arrête un instant. Trois fois : évanouissement, retour à la lanterne de la phase.
+- **Croc-en-jambe** : passer par certains endroits (une pile de valises sous un câble) le fait reculer et s'arrêter.
+- **Caméra** : la vue montre un peu plus le haut pendant une poursuite.
+- **Parcours d'essai 10 « Poursuite »** (menu pause, mode debug) : cheminée de valises, valises qui flottent et câble (croc-en-jambe), dernière cheminée jusqu'en haut.
+- **Analyse** : les passages ont une durée ; un test vérifie que chaque phase laisse le temps de passer, sans être trop lâche.
+- DEBUG → Combat : `chaseStartDelayMs`, `chaseSpeedScale`, `chaseMaxGapTiles`, `chaseRestartGapTiles`, `chaseContactBounceY`, `chaseContactRecoilTiles`, `chaseContactPauseMs`, `chaseTripPauseMs`.
+- Tests : 514. Vérifié dans Chromium : le poursuivant monte, se voit en bas de l'écran, le contact fait monter la peur.
+- [ ] À vérifier sur téléphone (menu pause → Parcours d'essai → « 10. Poursuite ») : la pression est-elle juste (`chaseSpeedScale`) ? Trop lent, trop rapide, selon les phases ?
+- [ ] Le poursuivant se lit-il comme menaçant mais pas effrayant (pas d'horreur) ? Le liseré turquoise montre-t-il bien où il commence ?
+- [ ] Le croc-en-jambe sous le câble se comprend-il ? Le recul se voit-il ?
+- [ ] La caméra (un peu plus haut) : voit-on assez le chemin au-dessus, et le poursuivant en dessous ?
 
 ### La gare, PR 2 : la gare réelle (D-66)
 

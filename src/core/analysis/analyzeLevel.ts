@@ -49,6 +49,12 @@ export interface Move {
    * de nouveau aussitôt (`jump`, saut depuis le câble, tenu ensuite). Absent : Saut tenu.
    */
   readonly cableExit?: CableExit;
+  /**
+   * Durée du passage (ms, D-67) : de l'élan (course ou placement depuis le bord de la surface, ou
+   * glissade contre un mur) jusqu'à l'atterrissage, au pire sur sa fenêtre. Sert à vérifier qu'une
+   * poursuite laisse le temps de passer. `Infinity` si inconnue.
+   */
+  readonly durationMs: number;
 }
 
 export type CableExit = 'drop' | 'jump';
@@ -65,6 +71,8 @@ interface TryRecord {
   readonly airRelease: boolean;
   readonly targets: readonly number[];
   readonly msPerTry: number;
+  /** Durée de chaque essai (ms) : élan (`i × msPerTry`) puis vol jusqu'à la surface ou l'appui. */
+  readonly times: readonly number[];
 }
 
 /** Appui sur un mur (D-44) : Céleste vient d'entrer en glissade ; état complet de la simulation. */
@@ -100,6 +108,8 @@ interface Family {
   readonly cableExit: CableExit | null;
   /** Surface atteinte pour chaque essai successif (-1 : aucune autre surface). */
   readonly targets: number[];
+  /** Pas en l'air de chaque essai (jusqu'à l'atterrissage ou l'appui). */
+  readonly steps: number[];
 }
 
 /**
@@ -127,6 +137,8 @@ class MoveExplorer {
   private readonly wallQueue: WallNode[] = [];
   /** Essais bruts, gardés seulement avec le saut mural (fenêtres à travers les appuis). */
   readonly records: TryRecord[] = [];
+  /** Pas en l'air du dernier essai (`tryJump`, `tryKick`, `finish`), pour sa durée (D-67). */
+  airSteps = 0;
 
   constructor(
     private readonly level: LevelData,
@@ -209,6 +221,7 @@ class MoveExplorer {
             glide: false,
             cableExit: null,
             targets: [],
+            steps: [],
           });
         }
       }
@@ -224,6 +237,7 @@ class MoveExplorer {
             glide: true,
             cableExit,
             targets: [],
+            steps: [],
           });
         }
       }
@@ -234,7 +248,12 @@ class MoveExplorer {
   /** Garde un passage sans timing comme un essai brut (saut mural seulement). */
   private recordSingle(move: Move): void {
     if (this.canWallJump && !Number.isFinite(move.windowMs)) {
-      this.records.push({ ...move, targets: [move.to], msPerTry: move.windowMs });
+      this.records.push({
+        ...move,
+        targets: [move.to],
+        msPerTry: move.windowMs,
+        times: [move.durationMs],
+      });
     }
   }
 
@@ -246,20 +265,25 @@ class MoveExplorer {
     offer: (move: Move) => void,
   ): void {
     for (const family of families) {
+      const times = family.steps.map((steps, i) => i * msPerTry + steps * this.stepMs);
       if (this.canWallJump) {
-        this.records.push({ ...family, from, msPerTry });
+        this.records.push({ ...family, from, msPerTry, times });
       }
-      const bestRun = new Map<number, number>();
+      const bestRun = new Map<number, { count: number; end: number }>();
       let runTarget = -2;
       let run = 0;
-      for (const target of family.targets) {
+      family.targets.forEach((target, i) => {
         run = target === runTarget ? run + 1 : 1;
         runTarget = target;
-        if (run > (bestRun.get(target) ?? 0)) {
-          bestRun.set(target, run);
+        if (run > (bestRun.get(target)?.count ?? 0)) {
+          bestRun.set(target, { count: run, end: i });
         }
-      }
-      for (const [to, count] of bestRun) {
+      });
+      for (const [to, { count, end }] of bestRun) {
+        let durationMs = 0;
+        for (let i = end - count + 1; i <= end; i++) {
+          durationMs = Math.max(durationMs, times[i] ?? Number.POSITIVE_INFINITY);
+        }
         offer({
           from,
           to,
@@ -268,6 +292,7 @@ class MoveExplorer {
           holdSteps: family.holdSteps,
           airRelease: family.airRelease,
           windowMs: count * msPerTry,
+          durationMs,
           ...(family.glide ? { glide: true } : {}),
           ...(family.cableExit ? { cableExit: family.cableExit } : {}),
         });
@@ -310,6 +335,8 @@ class MoveExplorer {
     const dirs = [dir];
     let lastX = Number.NaN;
     let stuck = 0;
+    /** Pas de course depuis le bord de la surface (durée d'une chute par le bord, D-67). */
+    let ran = 0;
     for (let k = 0; k < MOVE_SEARCH.maxSteps * 4; k++) {
       if (!main.grounded && main.stepsSinceGrounded > this.coyoteSteps) {
         break;
@@ -334,7 +361,9 @@ class MoveExplorer {
               )
             : surface.id,
         );
+        family.steps.push(worth ? this.airSteps : 0);
       }
+      ran++;
       input.moveX = dir;
       input.moveY = 0;
       input.jumpPressed = false;
@@ -352,26 +381,32 @@ class MoveExplorer {
     if (stuck <= 4) {
       this.probe.copyFrom(main);
       input.moveX = dir;
+      this.airSteps = 0;
+      const to = this.finish(dir);
       offer({
         from: surface.id,
-        to: this.finish(dir),
+        to,
         kind: MoveKind.WalkOff,
         dir,
         holdSteps: 0,
         airRelease: false,
         windowMs: Number.POSITIVE_INFINITY,
+        durationMs: (ran + this.airSteps) * this.stepMs,
       });
       if (this.canGlide) {
         // Tomber du bord, puis ouvrir le parapluie (D-62).
         this.probe.copyFrom(main);
+        this.airSteps = 0;
+        const glideTo = this.finish(dir, true);
         offer({
           from: surface.id,
-          to: this.finish(dir, true),
+          to: glideTo,
           kind: MoveKind.WalkOff,
           dir,
           holdSteps: 0,
           airRelease: false,
           windowMs: Number.POSITIVE_INFINITY,
+          durationMs: (ran + this.airSteps) * this.stepMs,
           glide: true,
         });
       }
@@ -389,6 +424,7 @@ class MoveExplorer {
       const worth = this.worthTrying(surface, x, airDirs);
       for (const family of families) {
         let target = surface.id;
+        this.airSteps = 0;
         if (worth) {
           this.main.reset(x, y, this.level);
           target = this.tryJump(
@@ -401,6 +437,7 @@ class MoveExplorer {
           );
         }
         family.targets.push(target);
+        family.steps.push(this.airSteps);
       }
     }
     // Précision de placement demandée, exprimée en temps de course.
@@ -424,14 +461,17 @@ class MoveExplorer {
       input.moveY = 0;
       input.jumpPressed = false;
       input.jumpHeld = false;
+      this.airSteps = 1;
+      const to = this.finish(0);
       offer({
         from: surface.id,
-        to: this.finish(0),
+        to,
         kind: MoveKind.Drop,
         dir: 0,
         holdSteps: 0,
         airRelease: false,
         windowMs: Number.POSITIVE_INFINITY,
+        durationMs: this.airSteps * this.stepMs,
       });
     }
   }
@@ -456,6 +496,7 @@ class MoveExplorer {
     input.moveY = 0;
     let airborne = false;
     let apex = false;
+    this.airSteps = 0;
     /** Pas depuis la sortie d'un câble (-1 : pas encore quitté). */
     let sinceCable = -1;
     for (let s = 0; s < this.maxAirSteps; s++) {
@@ -479,6 +520,7 @@ class MoveExplorer {
       const onCable = probe.cable >= 0;
       const before = probe.state;
       probe.step(input);
+      this.airSteps++;
       if (touchesHazard(this.level, probe.box)) {
         return -1;
       }
@@ -567,6 +609,7 @@ class MoveExplorer {
       if (k % WALL_SEARCH.sampleSteps === 0) {
         for (const family of families) {
           family.targets.push(this.tryKick(main, family.dir, family.holdSteps));
+          family.steps.push(this.airSteps);
         }
       }
       input.moveX = w;
@@ -581,14 +624,17 @@ class MoveExplorer {
     this.offerWindows(node.id, families, WALL_SEARCH.sampleSteps * this.stepMs, offer);
     for (const dir of [w, 0, -w]) {
       this.probe.copyFrom(node.snapshot);
+      this.airSteps = 0;
+      const to = this.finish(dir);
       offer({
         from: node.id,
-        to: this.finish(dir),
+        to,
         kind: MoveKind.WallLetGo,
         dir,
         holdSteps: 0,
         airRelease: false,
         windowMs: Number.POSITIVE_INFINITY,
+        durationMs: this.airSteps * this.stepMs,
       });
     }
     return [...best.values()];
@@ -601,6 +647,7 @@ class MoveExplorer {
     const input = this.input;
     input.moveY = 0;
     let apex = false;
+    this.airSteps = 0;
     for (let s = 0; s < MOVE_SEARCH.maxSteps && !probe.grounded; s++) {
       // Avec le parapluie, un rebond tenu est relâché au sommet : pas de plané après un saut mural
       // dans l'analyse (prudente).
@@ -610,6 +657,7 @@ class MoveExplorer {
       input.moveX = dir;
       const before = probe.state;
       probe.step(input);
+      this.airSteps++;
       if (touchesHazard(this.level, probe.box)) {
         return -1;
       }
@@ -636,6 +684,7 @@ class MoveExplorer {
       input.jumpPressed = glide && s === 0 && !probe.glideOpen;
       const before = probe.state;
       probe.step(input);
+      this.airSteps++;
       if (touchesHazard(this.level, probe.box)) {
         return -1;
       }
@@ -899,6 +948,7 @@ function wallWindows(
   }
   const moves: Move[] = [];
   const nodeValue = new Float64Array(nodeCount);
+  const nodeTime = new Float64Array(nodeCount);
   for (const goal of goals) {
     nodeValue.fill(0);
     const value = (target: number) =>
@@ -926,6 +976,44 @@ function wallWindows(
         }
       }
     }
+    // Durée (D-67) : depuis chaque appui, le plus rapide des essais qui gardent au moins la
+    // fenêtre de l'appui, jusqu'à la surface visée (plus courts chemins, relaxation bornée).
+    nodeTime.fill(Number.POSITIVE_INFINITY);
+    const timeOf = (target: number) =>
+      target === goal
+        ? 0
+        : target >= surfaceCount
+          ? (nodeTime[target - surfaceCount] ?? Number.POSITIVE_INFINITY)
+          : Number.POSITIVE_INFINITY;
+    const fastest = (record: TryRecord, min: number) => {
+      let best = Number.POSITIVE_INFINITY;
+      record.targets.forEach((target, i) => {
+        if (value(target) >= min) {
+          best = Math.min(best, (record.times[i] ?? Number.POSITIVE_INFINITY) + timeOf(target));
+        }
+      });
+      return best;
+    };
+    for (let pass = 0; pass < nodeCount; pass++) {
+      let changed = false;
+      for (let n = 0; n < nodeCount; n++) {
+        const v = nodeValue[n] ?? 0;
+        if (v <= 0) {
+          continue;
+        }
+        let best = nodeTime[n] ?? Number.POSITIVE_INFINITY;
+        for (const record of byNode[n] ?? []) {
+          best = Math.min(best, fastest(record, v));
+        }
+        if (best < (nodeTime[n] ?? Number.POSITIVE_INFINITY)) {
+          nodeTime[n] = best;
+          changed = true;
+        }
+      }
+      if (!changed) {
+        break;
+      }
+    }
     const bestFrom = new Map<number, Move>();
     for (const record of fromSurfaces) {
       if (record.from === goal) {
@@ -942,6 +1030,7 @@ function wallWindows(
           holdSteps: record.holdSteps,
           airRelease: record.airRelease,
           windowMs,
+          durationMs: fastest(record, windowMs),
           start: record.kind,
         });
       }

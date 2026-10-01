@@ -11,6 +11,7 @@ import { PHYSICS_STEP_HZ, msToSteps } from '../../config/movement';
 import { EntityType, Tile, tileAt, type LevelData } from '../level/LevelData';
 import { touchesHazard, type Box } from '../physics/gridCollision';
 import type { PlayerPhysics } from '../player/PlayerPhysics';
+import { Chase } from '../boss/Chase';
 import { PlayerAttack } from './PlayerAttack';
 import { EnemyKind, Patroller, type PatrollerTuning } from './Patroller';
 
@@ -63,6 +64,8 @@ export class CombatWorld {
   trainSteps = 0;
   /** Train dont le souffle a déjà repoussé Céleste pendant ce passage (un seul souffle par train). */
   private trainGusted = -1;
+  /** Poursuite verticale de la salle (boss, D-67), null sans poursuite. */
+  chase: Chase | null = null;
   /** Zone du souffle (réutilisée : aucune allocation). */
   private readonly gustBox: Box = { x: 0, y: 0, width: 0, height: 0 };
   private readonly params: CombatParams;
@@ -95,6 +98,7 @@ export class CombatWorld {
     this.hurtSteps = msToSteps(p.hurtControlMs, hz);
     this.invulnerableTotal = msToSteps(p.invulnerabilityMs, hz);
     this.stingTotal = msToSteps(p.stingCooldownMs, hz);
+    this.chase?.setParams(p);
     const t = this.tuning;
     t.dt = 1 / hz;
     t.speed = p.patrollerSpeed;
@@ -113,6 +117,7 @@ export class CombatWorld {
   /** Nouvelle salle : ennemis créés depuis ses marqueurs (allocation au chargement seulement). */
   load(level: LevelData): void {
     this.level = level;
+    this.chase = level.chase ? new Chase(level.chase, this.params, this.stepHz) : null;
     this.enemies = level.entities
       .filter(
         (e) =>
@@ -152,6 +157,7 @@ export class CombatWorld {
     this.lastEnemy = -1;
     this.trainSteps = 0;
     this.trainGusted = -1;
+    this.chase?.restart();
   }
 
   /** Temps du cycle des trains (ms). */
@@ -238,6 +244,15 @@ export class CombatWorld {
       enemy.step(this.level, tuning);
     }
     if (this.stepTrains(player)) {
+      return;
+    }
+    // Poursuite (D-67) : le toucher fait rebondir Céleste vers le haut, la peur monte.
+    if (this.chase?.step(player.box, this.invulnerableSteps > 0)) {
+      player.vy = -this.params.chaseContactBounceY;
+      player.startHurt(this.hurtSteps);
+      this.invulnerableSteps = Math.max(this.invulnerableSteps, this.invulnerableTotal);
+      this.events |= CombatEvent.Hurt;
+      this.lastEnemy = -1;
       return;
     }
     // Danger du sol (orties, ronces, briques de jeu, D-51, D-56) : il pique. Céleste rebondit vers

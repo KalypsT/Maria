@@ -103,3 +103,9 @@ export const CAMERA_PARAM_RANGES: Readonly<
   lookTimeMs: { min: 0, max: 1000, step: 10 },
   lookInputThreshold: { min: 0.3, max: 0.95, step: 0.05 },
 };
+
+/**
+ * Poursuite vers le haut (boss, D-67, `; @camera: up`) : le centre de la vue monte d'autant au-dessus
+ * de Céleste, pour voir où aller et garder le poursuivant en bas de l'écran. PROVISOIRE.
+ */
+export const CHASE_CAMERA_UP_PX = 30;
