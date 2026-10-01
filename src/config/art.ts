@@ -83,6 +83,21 @@ export const DECOR_KINDS: Readonly<
   'narrow-right': { furniture: false },
   /** Yeux dans l'ombre : rien de dessiné dans le décor, animés par les effets (D-35). */
   eyes: { furniture: false },
+  // Le salon refait en salle témoin (D-73).
+  /** Dessous de l'escalier qui monte à l'étage (bois plein, en marches). */
+  understairs: { furniture: true },
+  /** Plante en pot suspendue : le bord du pot est une planche traversable. */
+  hangingplant: { furniture: true },
+  /** Lustre : le dessus de l'abat-jour est une planche traversable. */
+  ceilinglamp: { furniture: true },
+  /** Cheminée contre le mur (fond) : miroir, âtre, bûches ; le feu est animé. */
+  fireplace: { furniture: false },
+  /** Manteau de la cheminée (planche traversable). */
+  mantel: { furniture: true },
+  /** Corps de l'horloge comtoise (fond) ; le balancier est animé. */
+  grandclock: { furniture: false },
+  /** Chapeau de l'horloge comtoise (plein). */
+  clocktop: { furniture: true },
   // Le jardin (D-46), dessiné par le code (PLACEHOLDER, pas d'image clé pour l'instant).
   /** Frondaison des arbres en haut des salles (feuillage plein). */
   canopy: { furniture: true },
@@ -682,6 +697,10 @@ export const WORLD_LIFE = {
     swayRad: 0.22,
     periodMs: 1300,
   },
+  /** Le petit feu de la cheminée du salon (D-73) : une image toutes les ~ms, lueur. */
+  fire: { frameMs: 110, glowMin: 0.28, glowMax: 0.5 },
+  /** Le balancier de l'horloge comtoise (D-73) : angle maximal, aller-retour (ms). */
+  pendulum: { swingRad: 0.085, periodMs: 2000 },
 } as const;
 
 /** Rayon du halo d'une veilleuse (px logiques). */

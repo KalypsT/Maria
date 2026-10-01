@@ -211,7 +211,7 @@ export class GameScene extends Phaser.Scene {
   private backdrop!: BackdropView;
   /** Avant-plan : silhouettes au bas de l'écran (D-71). */
   private foreground!: ForegroundView;
-  /** Vie du monde réel dehors : feuilles et linge au vent (D-72). */
+  /** Vie du monde réel : feuilles et linge au vent (D-72), feu et balancier (D-73). */
   private worldLife!: WorldLifeView;
   /** Échelle des textures dessinées (habillage, Céleste) : celle de l'écran, plafonnée. */
   private artScale = 1;

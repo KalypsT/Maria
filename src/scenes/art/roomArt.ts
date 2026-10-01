@@ -23,6 +23,7 @@ import { drawRubble, shopSiteDrawers } from './shopSiteArt';
 import { drawUmbrellaTips, stationDrawers } from './stationArt';
 import { streetDrawers } from './streetArt';
 import { drawMemory } from './memoryArt';
+import { livingDrawers } from './livingArt';
 import { paperGrainPattern } from './paperGrain';
 
 /**
@@ -251,6 +252,7 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
   ...shopSiteDrawers({ tileShape, rounded }),
   ...schoolDrawers({ tileShape, rounded }),
   ...stationDrawers({ tileShape, rounded }),
+  ...livingDrawers({ tileShape, rounded }),
   console(a, r) {
     wood(a, r);
     if (!a.palette.silhouettes) {
@@ -1852,7 +1854,20 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
   const height = level.height * T;
   const lamps = level.entities.filter((e) => e.type === EntityType.Checkpoint);
   const windows = level.decor.filter((d) => d.kind === 'window').map(rect);
-  const lights = level.decor.filter((d) => d.kind === 'lamp').map(rect);
+  // Sources de lumière du décor : lampes, lustre (sous l'abat-jour), feu de la cheminée (D-73).
+  const lights = level.decor.flatMap((d) => {
+    const r = rect(d);
+    if (d.kind === 'lamp') {
+      return [{ x: r.x + r.w / 2, y: r.y + 4, k: 1 }];
+    }
+    if (d.kind === 'ceilinglamp') {
+      return [{ x: r.x + r.w / 2, y: r.y + r.h + 8, k: 1.1 }];
+    }
+    if (d.kind === 'fireplace') {
+      return [{ x: r.x + r.w / 2, y: r.y + r.h - 12, k: 1.25 }];
+    }
+    return [];
+  });
   const skylights = level.decor.filter((d) => d.kind === 'skylight').map(rect);
   // Calque d'obscurité, percé hors écran (destination-out), puis posé sur la salle.
   const transform = ctx.getTransform();
@@ -1877,7 +1892,7 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
     hole((lamp.col + 0.5) * T, (lamp.row + 0.5) * T, LAMP_LIGHT_RADIUS, 1);
   }
   for (const light of lights) {
-    hole(light.x + light.w / 2, light.y + 4, LAMP_LIGHT_RADIUS * 0.8, 0.9);
+    hole(light.x, light.y, LAMP_LIGHT_RADIUS * 0.8 * light.k, 0.9);
   }
   for (const sky of skylights) {
     hole(sky.x + sky.w / 2, sky.y, MOON_LIGHT_RADIUS * 0.8, 0.8);
@@ -1922,7 +1937,7 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
     );
   }
   for (const light of lights) {
-    glow(light.x + light.w / 2, light.y + 4, LAMP_LIGHT_RADIUS * 0.6, p.lamp, 0.22 * p.glow);
+    glow(light.x, light.y, LAMP_LIGHT_RADIUS * 0.6 * light.k, p.lamp, 0.22 * p.glow);
   }
   for (const exit of level.exits.filter(
     (e) => e.side === 'left' && e.rowMax < floorRow(level) - 4,

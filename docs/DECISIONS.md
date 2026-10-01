@@ -857,6 +857,19 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Rien ne touche à la collision ni au mouvement** ; aucune allocation par image.
 - **Sauvegarde** : aucune migration.
 
+## D-73 — Passe graphique, étape 5 : le salon, salle témoin
+
+- **Plan validé** par l'utilisateur, choix « petit feu allumé ». Les repères de l'histoire restent en place : la bibliothèque et Maria (le salon étrange s'y appuie), le canapé de maman, la place du chat, les deux portes ; le salon reste facile, son sommet réservé à l'escalade.
+- **Une pièce, pas une boîte** : le dessous de l'escalier qui monte à l'étage descend dans le coin haut gauche (bois, en marches) ; une poutre au plafond à droite.
+- **Rien ne flotte** : les étagères murales de la route haute deviennent **deux plantes en pot suspendues** (cordes en macramé) et **un lustre** pendu à son fil ; l'étagère de la trouvaille devient **une horloge comtoise** posée au sol (la trouvaille sur son chapeau) ; la tringle du rideau est allongée vers la gauche. Les écarts de saut de la route haute sont ceux d'avant (déjà validés).
+- **Repères** : la **cheminée** au centre, contre le mur (on passe devant), son **petit feu** animé qui éclaire la pièce (source de lumière), un miroir au-dessus ; son **manteau** est une planche, atteignable sans grimper depuis la **table basse** (déplacée entre le canapé et la cheminée, les briques de jeu dessous) ; de là, les étagères de la bibliothèque. L'horloge comtoise et son **balancier**. Le lustre éclaire aussi.
+- **Parcours** : en bas, sans escalade, on traverse et on peut monter table, manteau, étagères, d'où l'on voit Maria et la trouvaille, hors d'atteinte. En haut, avec l'escalade : placard mural, deux plantes, tringle (au-dessus de la fenêtre), on se laisse tomber sur le lustre, saut jusqu'au sommet de la bibliothèque, puis saut vers l'horloge pour la trouvaille (l'étagère rattrape un raté).
+- **Ailleurs** : la photo de famille passe au-dessus du canapé (zone d'interaction déplacée) ; l'applique de gauche passe sous l'escalier ; l'horloge murale et l'applique de droite sont retirées (l'horloge comtoise et le lustre les remplacent). Le salon étrange n'est pas touché.
+- **Rendu** : `src/scenes/art/livingArt.ts` (dessins), animations dans `WorldLifeView` (feu : 6 images qui alternent et une lueur qui palpite ; balancier : 9 inclinaisons dessinées d'avance), réglages `WORLD_LIFE.fire` et `WORLD_LIFE.pendulum`.
+- **Vérifié par les tests** : la maison reste facile et ne coince jamais (un premier placement de la table laissait un trou d'une tuile entre le pouf et un pied : corrigé) ; route haute en grimpant ; sommet et trouvaille seulement en grimpant, trouvaille au plus moyenne ; monde étrange inchangé.
+- **Sauvegarde** : la trouvaille du salon a changé de place ; si elle était ramassée, elle redevient à trouver (identifiants par position, étape 4 écartée, D-70). Aucune migration.
+- **Grille pour les autres salles** (à appliquer aux futurs niveaux, et aux salles existantes après tri) : une silhouette de salle, pas une boîte ; rien ne flotte (chaque appui pend ou tient au sol, ou fait partie d'un meuble) ; un repère fort qui guide le regard ; des sauts au rythme varié ; ce qu'on ne peut pas encore atteindre se voit ; une source de lumière qui compose la pièce ; un peu de vie.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

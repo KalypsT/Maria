@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Passe graphique** (D-70) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étapes 1 à 3 faites** (finition « papier découpé », D-70 ; profondeur, D-71 ; vie du monde réel, D-72) sur `ccr-8742f994-82xjq9`. Prochaine : étape 5, **le salon** refait en salle témoin (géométrie sculptée, un repère fort, des sauts au rythme varié, rien qui flotte). Pas de nouveau niveau d'ici là.
+**Passe graphique** (D-70) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étapes 1, 2, 3 et 5 faites** (finition « papier découpé », D-70 ; profondeur, D-71 ; vie du monde réel, D-72 ; **le salon, salle témoin**, D-73) sur `ccr-8742f994-82xjq9` ; l'étape 4 (identifiants fixes de la sauvegarde) est écartée jusqu'à la sortie. Prochaine : essai sur téléphone, puis tri des autres salles (à refaire, à retoucher, à laisser) selon la grille de D-73. Pas de nouveau niveau d'ici là.
 
 **Le jardin (2a) et derrière la haie (2b)** (§7.2, §6, D-46 à D-49) : fusionnés (PR #29), **essai sur téléphone en cours** (début du jardin testé ; jardin adouci (D-51) sur `ccr-53d22df4-9euiqo`). Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
 
@@ -17,6 +17,19 @@
 Prochaine : essai de la gare (réelle, étrange, la fin, la phase 3) sur téléphone. Le niveau suivant (le train ?) reste à décider. Intégrer les morceaux de musique.
 
 ## Fait
+
+### Passe graphique, étape 5 : le salon, salle témoin (D-73)
+
+- L'escalier descend de l'étage dans le coin ; une poutre au plafond.
+- Rien ne flotte : deux plantes suspendues, un lustre, une horloge comtoise (la trouvaille sur son chapeau), la tringle allongée.
+- La cheminée et son petit feu animé, qui éclaire la pièce ; un miroir au-dessus ; son manteau est une plateforme (depuis la table basse, déplacée).
+- Le balancier de l'horloge bat.
+- La photo de famille passe au-dessus du canapé.
+- Les repères de l'histoire n'ont pas bougé (bibliothèque et Maria, canapé, chat, portes) ; le salon étrange est inchangé.
+- Tests : 537. Vérifié dans Chromium : le salon de nuit, en marchant, et son aperçu en monde étrange.
+- [ ] À vérifier sur téléphone : le salon est-il plus beau, plus lisible, plus agréable à traverser ? La route haute (plantes, tringle, lustre) se lit-elle ?
+- [ ] Le feu : assez vivant, pas trop vif ? Le balancier se remarque-t-il ?
+- [ ] La trouvaille sur l'horloge : le saut depuis la bibliothèque est-il juste (moyen) ?
 
 ### Passe graphique, étape 3 : la vie du monde réel (D-72)
 
