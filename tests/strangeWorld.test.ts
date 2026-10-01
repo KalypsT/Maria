@@ -63,6 +63,8 @@ describe('monde étrange (D-34)', () => {
       'garden-upside',
       'garden-thorns',
       'school-strange',
+      'station-strange',
+      'station-tower',
     ]);
     for (const id of strange) {
       expect(zone.map[id], id).toBeUndefined();

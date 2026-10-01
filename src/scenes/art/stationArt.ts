@@ -537,6 +537,109 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
       }
       ctx.stroke();
     },
+    // ——— Le monde étrange de la gare (D-68) : silhouettes, lueurs turquoise ———
+    upsidehall(a, r) {
+      const { ctx, palette: p } = a;
+      // Le hall à l'envers : la verrière en bas, ses arcs tournés vers le sol, des bancs au
+      // plafond (fond, jamais de collision).
+      ctx.strokeStyle = p.rim;
+      ctx.globalAlpha = 0.25;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(r.x, r.y);
+      ctx.quadraticCurveTo(r.x + r.w / 2, r.y + r.h * 1.6, r.x + r.w, r.y);
+      for (let x = r.x + 16; x < r.x + r.w; x += 16) {
+        ctx.moveTo(x, r.y);
+        ctx.lineTo(r.x + r.w / 2 + (x - r.x - r.w / 2) * 0.4, r.y + r.h);
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = p.structure;
+      for (let x = r.x + 30; x < r.x + r.w - 30; x += 90) {
+        ctx.fillRect(x, 4, 40, 4);
+        ctx.fillRect(x + 4, 8, 3, 8);
+        ctx.fillRect(x + 33, 8, 3, 8);
+      }
+    },
+    upsideclock(a, r) {
+      const { ctx, palette: p } = a;
+      // La grande horloge, à l'envers, qui flotte ; ses aiguilles reculent (immobiles ici).
+      const cx = r.x + r.w / 2;
+      const cy = r.y + r.h / 2;
+      const radius = Math.min(r.w, r.h) / 2 - 2;
+      ctx.fillStyle = p.structure;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius + 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = p.rim;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let k = 0; k < 12; k++) {
+        const angle = (k * Math.PI) / 6;
+        ctx.moveTo(cx + Math.cos(angle) * (radius - 6), cy + Math.sin(angle) * (radius - 6));
+        ctx.lineTo(cx + Math.cos(angle) * (radius - 2), cy + Math.sin(angle) * (radius - 2));
+      }
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx - radius * 0.35, cy + radius * 0.45);
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + radius * 0.1, cy - radius * 0.7);
+      ctx.stroke();
+    },
+    floatsuitcase(a, r) {
+      const { ctx, palette: p } = a;
+      // Une valise qui flotte (son dessus est une planche traversable), poignée et sangles.
+      tileShape(a, { x: r.x, y: r.y, w: r.w, h: T }, p.wood, p.woodLight);
+      ctx.fillStyle = p.wood;
+      ctx.beginPath();
+      ctx.roundRect(r.x + 1, r.y + 3, r.w - 2, r.h - 3, 3);
+      ctx.fill();
+      ctx.strokeStyle = p.rim;
+      ctx.globalAlpha = 0.5;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(r.x + r.w / 2 - 4, r.y - 3, 8, 3);
+      ctx.beginPath();
+      ctx.moveTo(r.x + 5, r.y + 4);
+      ctx.lineTo(r.x + 5, r.y + r.h - 1);
+      ctx.moveTo(r.x + r.w - 5, r.y + 4);
+      ctx.lineTo(r.x + r.w - 5, r.y + r.h - 1);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    },
+    suitcasestack(a, r) {
+      const { ctx, palette: p } = a;
+      // Une pile de valises (pleine) : des bords de valises, des poignées.
+      tileShape(a, r, p.wood, p.woodLight);
+      ctx.strokeStyle = p.rim;
+      ctx.globalAlpha = 0.25;
+      ctx.lineWidth = 1;
+      for (let y = r.y + 10; y < r.y + r.h - 4; y += 9 + hash(r.x, y) * 8) {
+        ctx.beginPath();
+        ctx.moveTo(r.x + 1, y);
+        ctx.lineTo(r.x + r.w - 1, y);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    },
+    lostpile(a, r) {
+      const { ctx, palette: p } = a;
+      // La montagne des choses perdues (pleine, en marches) : parapluies, chapeaux, valises,
+      // gants, en silhouettes, des bords turquoise.
+      tileShape(a, r, p.wood, p.woodLight);
+      ctx.globalAlpha = 0.35;
+      for (let x = r.x + 3; x < r.x + r.w - 8; x += 9) {
+        for (let y = r.y + 10; y < r.y + r.h; y += 12) {
+          if (tileAt(a.level, Math.floor(x / T), Math.floor(y / T)) !== Tile.Solid) {
+            continue;
+          }
+          ctx.strokeStyle = p.rim;
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.roundRect(x, y, 6 + hash(x, y) * 4, 4 + hash(y, x) * 3, 1.5);
+          ctx.stroke();
+        }
+      }
+      ctx.globalAlpha = 1;
+    },
     // ——— Le dépôt ———
     depotwindows(a, r) {
       const { ctx } = a;
@@ -609,4 +712,28 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
       ctx.fillRect(r.x + r.w / 2 - 10, r.y + r.h / 2 - 7, 20, 12);
     },
   };
+}
+
+/** Pointes de parapluies perdus (danger du monde étrange de la gare, D-68). */
+export function drawUmbrellaTips(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  col: number,
+  inFloor: boolean,
+): void {
+  const base = inFloor ? y + 4 : y + T;
+  for (let i = 0; i < 2; i++) {
+    const px = x + 3 + i * 7;
+    const h = 8 + ((col * 3 + i * 5) % 4);
+    ctx.fillStyle = '#16112a';
+    ctx.beginPath();
+    ctx.moveTo(px - 2.5, base);
+    ctx.quadraticCurveTo(px - 1, base - h * 0.6, px, base - h);
+    ctx.quadraticCurveTo(px + 1, base - h * 0.6, px + 2.5, base);
+    ctx.fill();
+    ctx.strokeStyle = TEAL;
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+  }
 }

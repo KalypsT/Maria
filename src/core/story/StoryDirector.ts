@@ -1,4 +1,5 @@
 import { TILE_SIZE } from '../../config/display';
+import type { FlashbackId } from '../../config/memories';
 import { PHYSICS_STEP_HZ, msToSteps } from '../../config/movement';
 import type { Box } from '../physics/gridCollision';
 import {
@@ -44,6 +45,9 @@ export class StoryDirector {
   veil = 0;
   /** Forme du voile : uniforme, ou en cercle autour de Céleste (D-35). */
   veilShape: FadeShape = 'plain';
+  /** Court souvenir affiché (D-68), null sinon ; `flashbackProgress` de 0 à 1. */
+  flashback: FlashbackId | null = null;
+  flashbackProgress = 0;
   /** Déclencheur Agir disponible là où se tient Céleste (-1 : aucun). */
   interactable = -1;
   private running: StoryTrigger | null = null;
@@ -149,6 +153,7 @@ export class StoryDirector {
     this.veil = 0;
     this.veilShape = 'plain';
     this.interactable = -1;
+    this.flashback = null;
   }
 
   /**
@@ -232,6 +237,11 @@ export class StoryDirector {
           this.stepTotal = msToSteps(step.ms, this.stepHz);
           this.veilFrom = this.veil;
           return;
+        case 'flashback':
+          this.stepTotal = msToSteps(step.ms, this.stepHz);
+          this.flashback = step.id;
+          this.flashbackProgress = 0;
+          return;
         default:
           this.apply(step);
       }
@@ -290,6 +300,11 @@ export class StoryDirector {
       this.veil = this.veilFrom + (1 - this.veilFrom) * k;
     } else if (step.do === 'fadeIn') {
       this.veil = this.veilFrom * (1 - k);
+    } else if (step.do === 'flashback') {
+      this.flashbackProgress = k;
+      if (k >= 1) {
+        this.flashback = null;
+      }
     }
     if (k >= 1) {
       this.next();

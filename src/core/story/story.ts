@@ -1,3 +1,4 @@
+import type { FlashbackId } from '../../config/memories';
 import type { Box } from '../physics/gridCollision';
 
 /**
@@ -117,7 +118,12 @@ export type StoryStep =
    * Maria apparaît (non bloquant, D-57) : la musique se tait pendant `ms` (jingle étrange s'il
    * existe), puis revient lentement.
    */
-  | { readonly do: 'hush'; readonly ms: number };
+  | { readonly do: 'hush'; readonly ms: number }
+  /**
+   * Court souvenir (D-68, bloquant) : une vignette plein écran pendant `ms`, qui apparaît et
+   * disparaît lentement. Non jouable, sans texte.
+   */
+  | { readonly do: 'flashback'; readonly id: FlashbackId; readonly ms: number };
 
 export interface StoryTrigger {
   readonly id: string;
@@ -187,6 +193,8 @@ export const PROP_KINDS = [
   /** Le portillon au bout de l'allée (D-60), fermé puis ouvert. */
   'gate',
   'gate-open',
+  /** Roger, la peluche singe, tout en haut de la tour des objets perdus (D-68). */
+  'roger',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 

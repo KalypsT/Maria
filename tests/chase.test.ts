@@ -3,7 +3,7 @@ import { DEFAULT_COMBAT } from '../src/config/combat';
 import { TILE_SIZE as T } from '../src/config/display';
 import { DIFFICULTY_MIN_WINDOW_MS } from '../src/config/levelDesign';
 import { DEFAULT_MOVEMENT } from '../src/config/movement';
-import { analyzeLevel, type LevelAnalysis } from '../src/core/analysis/analyzeLevel';
+import { analyzeLevel } from '../src/core/analysis/analyzeLevel';
 import { surfaceUnder } from '../src/core/analysis/surfaces';
 import { Chase, ChaseEvent } from '../src/core/boss/Chase';
 import { CombatEvent, CombatWorld } from '../src/core/combat/CombatWorld';
@@ -11,6 +11,7 @@ import { EntityType, type LevelData } from '../src/core/level/LevelData';
 import { parseAsciiLevel } from '../src/core/level/parseAsciiLevel';
 import { PlayerPhysics } from '../src/core/player/PlayerPhysics';
 import { LEVELS } from '../src/levels';
+import { fastest } from './pace';
 
 const P = DEFAULT_COMBAT;
 
@@ -30,33 +31,6 @@ function course(): LevelData {
     throw new Error('parcours 10 absent');
   }
   return parseAsciiLevel('poursuite', source.text);
-}
-
-/** Chemin le plus rapide (durées des passages) dont chaque passage a au moins `minWindow`. */
-function fastest(a: LevelAnalysis, from: number, to: number, minWindow: number): number {
-  const best = new Map<number, number>([[from, 0]]);
-  const done = new Set<number>();
-  for (;;) {
-    let u = -1;
-    for (const [n, t] of best) {
-      if (!done.has(n) && (u < 0 || t < (best.get(u) ?? Infinity))) {
-        u = n;
-      }
-    }
-    if (u < 0 || u === to) {
-      break;
-    }
-    done.add(u);
-    for (const m of a.moves) {
-      if (m.from === u && m.windowMs >= minWindow) {
-        const t = (best.get(u) ?? Infinity) + m.durationMs;
-        if (t < (best.get(m.to) ?? Infinity)) {
-          best.set(m.to, t);
-        }
-      }
-    }
-  }
-  return best.get(to) ?? Infinity;
 }
 
 describe('poursuite verticale (boss, D-67)', () => {

@@ -53,7 +53,8 @@ describe.each([false, true])('maison (D-25), escalade %s', (climb) => {
     () => {
       // Le jardin (D-46) reste fermé tant que Céleste n'a pas grandi : voir garden.test.ts ; le
       // quartier (D-60, D-61), derrière le portillon du jardin : voir street.test.ts ; l'école et
-      // son monde étrange (D-64) : voir school.test.ts ; la gare (D-66) : voir station.test.ts.
+      // son monde étrange (D-64) : voir school.test.ts ; la gare (D-66, D-68) : voir station.test.ts
+      // et stationStrange.test.ts.
       const seen = reachable(zoneGraph(climb, roomDifficulty), home());
       const rooms = new Set([...seen].map((n) => n.split('#')[0]));
       const missing = [...zone.rooms.keys()].filter(
@@ -62,7 +63,8 @@ describe.each([false, true])('maison (D-25), escalade %s', (climb) => {
           !room.startsWith('garden-') &&
           !room.startsWith('school') &&
           mapPage(zone, room) !== 'street' &&
-          mapPage(zone, room) !== 'station',
+          mapPage(zone, room) !== 'station' &&
+          !room.startsWith('station-'),
       );
       expect(missing).toEqual(climb ? [] : ['attic', 'living-strange', 'shadows']);
       expect([...seen].filter((n) => roomOf(n).startsWith('garden-'))).toEqual([]);
