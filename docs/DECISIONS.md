@@ -810,6 +810,27 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Tests** (`stationEnd.test.ts`) : la fin (hall sous l'horloge puis chambre, papa), la nuit (soir, chambre fermée, un seul déclencheur au lit), la toise, la phase 3 (< 2 tuiles, influence modérée, jamais moins que la phase 2), le train (après les mois seulement, pas de changement de salle) et, sur le graphe de toute la zone (portes ouvertes, toutes les capacités, difficulté de chaque salle) : **rien d'atteignable en phase 2 ne se ferme en phase 3**, et la porte du train est atteignable. Ce test prend environ 4 minutes.
 - **Sauvegarde** : aucune migration (étapes `growth.3`, `station.train`).
 
+## D-70 — Passe graphique, étape 1 : finition « papier découpé »
+
+- **Contexte** (retour de l'utilisateur après analyse de l'existant) : le jeu manque de beauté, de lisibilité, et un peu d'intérêt à parcourir. Plan validé en 5 étapes, tout en dessin par le code (images IA éventuellement plus tard) : (1) fondations du rendu, (2) profondeur (parallaxe, avant-plan), (3) vie du monde réel, (4) ~~identifiants fixes des trouvailles~~, (5) une salle témoin refaite, **le salon**, puis propagation.
+- **Étape 4 abandonnée (décision de l'utilisateur)** : les trouvailles et les lanternes restent identifiées par leur position (`secretId`, `checkpointId`). Le jeu est encore en essai : refaire une partie après une modification de salle est accepté. **À revoir avant la sortie** (pilier 10).
+- **Décision (étape 1)** : le décor adopte le langage de Céleste (papier découpé, D-29). Chaque plan est une feuille posée sur la précédente, avec son ombre douce :
+  - **fond lointain** (`far` dans `DECOR_KINDS` : cadres, dessins, horloge murale, platane, verrières, façade de la gare…), voilé par le dégradé du mur ou du ciel (**perspective atmosphérique**, `veil` de la palette ; 0 dans le monde étrange, déjà en silhouettes). Jamais une porte ni un repère de jeu ; les façades de la rue restent nettes (voilées, elles devenaient ternes) ;
+  - **fond proche** (fenêtres, dossier du canapé, façades) : une ombre légère sur le mur ;
+  - **couche jouable** (murs, sol, meubles, dangers) : une ombre nette, décalée vers le bas à droite (lumière d'en haut à gauche). C'est ce qui la détache du fond (lisibilité) ;
+  - **ombres de contact** sous chaque meuble posé sur une surface ;
+  - **grain de papier** (bruit déterministe, en lumière douce) sur tout le décor ;
+  - **ombre de Céleste au sol**, d'autant plus petite et pâle qu'elle est haut (on voit où elle va retomber), fonction pure testée (`groundBelow`) ;
+  - **vignettage** léger, selon la palette (plus présent la nuit et dans le monde étrange).
+- **Mise en œuvre** :
+  - réglages dans `src/config/art.ts` (`DEFAULT_ART_FINISH`, PROVISOIRES), réglables dans l'overlay (« Habillage (finition) ») ; case **« Comparer : sans finition »** pour l'avant/après ; les réglages sont dans l'export JSON ;
+  - les feuilles sont dessinées sur une toile de travail avec une **marge de 24 px** autour du bloc : sans elle, l'ombre était coupée net entre deux blocs ;
+  - `FinishView` : deux images (ombre, vignettage), aucune allocation par image.
+- **Rien ne touche à la collision ni au mouvement** (pilier 1) : purement visuel.
+- **Coût mesuré** (Chromium sans GPU, échelle 3, salon entier) : environ 225 ms sans finition, 400 ms avec. En jeu, un bloc est dessiné par image en approchant : la saccade possible est plus longue qu'avant. **À mesurer sur téléphone** ; leviers : moins de flou, pas d'ombre du fond proche, dessin à l'échelle 2.
+- **Résolution** : le mode « Écran » (D-18) rend nettement mieux le dessin par le code ; le passer par défaut attend la mesure des images/s sur le téléphone de l'utilisateur.
+- **Sauvegarde** : aucune migration.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

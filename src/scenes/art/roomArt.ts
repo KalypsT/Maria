@@ -5,6 +5,7 @@ import {
   type WallStyle,
   MOON_LIGHT_RADIUS,
   type ArtPalette,
+  type ArtFinish,
 } from '../../config/art';
 import { TILE_SIZE as T } from '../../config/display';
 import {
@@ -22,6 +23,7 @@ import { drawRubble, shopSiteDrawers } from './shopSiteArt';
 import { drawUmbrellaTips, stationDrawers } from './stationArt';
 import { streetDrawers } from './streetArt';
 import { drawMemory } from './memoryArt';
+import { paperGrainPattern } from './paperGrain';
 
 /**
  * Dessin d'une salle habillée (D-28) avec l'API Canvas : fond et meubles sous les personnages,
@@ -1156,9 +1158,47 @@ function drawWallpaper(
   }
 }
 
-/** Fond, structure, sol et meubles (sous les personnages). */
-export function drawRoomBackground(a: ArtContext): void {
-  const { ctx, level, palette: p } = a;
+/** Plans du décor (D-70) : fond lointain (voilé), fond proche, meubles (couche jouable). */
+type DecorPlane = 'far' | 'back' | 'furniture';
+
+function decorPlane(kind: string): DecorPlane {
+  const known = DECOR_KINDS[kind];
+  if (known?.furniture) {
+    return 'furniture';
+  }
+  return known?.far ? 'far' : 'back';
+}
+
+/** Éléments de décor d'un plan, dans l'ordre de déclaration ; une image fournie les remplace. */
+function drawDecor(a: ArtContext, plane: DecorPlane): void {
+  for (const d of a.level.decor) {
+    if (decorPlane(d.kind) !== plane) {
+      continue;
+    }
+    const r = rect(d);
+    if (!decorVisible(r, a.clip)) {
+      continue;
+    }
+    const image = a.images.get(d.kind);
+    if (image) {
+      a.ctx.drawImage(image, r.x, r.y, r.w, r.h);
+    } else {
+      DRAWERS[d.kind]?.(a, r);
+    }
+  }
+}
+
+/**
+ * Fond, structure, sol et meubles (sous les personnages). Finition « papier découpé » (D-70) :
+ * le fond lointain est voilé ; le fond proche puis la couche jouable sont chacun dessinés sur une
+ * feuille à part (`sheet`), posée avec son ombre douce ; ombres de contact ; grain de papier.
+ */
+export function drawRoomBackground(
+  a: ArtContext,
+  sheet: HTMLCanvasElement,
+  finish: Readonly<ArtFinish>,
+): void {
+  const { level, palette: p } = a;
   const width = level.width * T;
   const height = level.height * T;
   const floorY = floorRow(level) * T;
@@ -1168,32 +1208,187 @@ export function drawRoomBackground(a: ArtContext): void {
   } else {
     drawWall(a, width, height, floorY, wainscotY);
   }
-  // Éléments de fond, puis structure (murs, plafond, sol), puis meubles.
-  const images = a.images;
-  const drawDecor = (furniture: boolean) => {
-    for (const d of level.decor) {
-      const isFurniture = DECOR_KINDS[d.kind]?.furniture ?? false;
-      if (isFurniture !== furniture) {
-        continue;
-      }
-      const r = rect(d);
-      if (!decorVisible(r, a.clip)) {
-        continue;
-      }
-      const image = images.get(d.kind);
-      if (image) {
-        ctx.drawImage(image, r.x, r.y, r.w, r.h);
-      } else {
-        DRAWERS[d.kind]?.(a, r);
-      }
-    }
-  };
-  drawDecor(false);
-  drawStructure(a, floorY);
+  drawDecor(a, 'far');
+  drawVeil(a, floorY, p.veil * finish.veil);
+  // Le fond proche (fenêtres, façades) se pose à peine sur le mur ; la couche jouable, nettement.
+  drawSheet(
+    a,
+    sheet,
+    finish.backShadow,
+    finish.playShadowX / 2,
+    finish.playShadowY / 2,
+    finish.playShadowBlur * 0.7,
+    (s) => {
+      drawDecor(s, 'back');
+    },
+  );
   if (p.silhouettes) {
     drawFloatingGlow(a);
   }
-  drawDecor(true);
+  drawSheet(
+    a,
+    sheet,
+    finish.playShadow,
+    finish.playShadowX,
+    finish.playShadowY,
+    finish.playShadowBlur,
+    (s) => {
+      drawStructure(s, floorY);
+      drawContactShadows(s, finish.contactShadow);
+      drawDecor(s, 'furniture');
+    },
+  );
+  drawPaperGrain(a, finish.grain);
+}
+
+/**
+ * Perspective atmosphérique (D-70) : le dégradé du mur ou du ciel, posé en transparence sur le
+ * fond lointain déjà dessiné.
+ */
+function drawVeil(a: ArtContext, floorY: number, alpha: number): void {
+  if (alpha <= 0) {
+    return;
+  }
+  const { ctx, level, palette: p } = a;
+  const veil = ctx.createLinearGradient(0, 0, 0, floorY);
+  veil.addColorStop(0, p.wallTop);
+  veil.addColorStop(1, p.wallBottom);
+  ctx.save();
+  ctx.globalAlpha = Math.min(1, alpha);
+  ctx.fillStyle = veil;
+  const clip = a.clip ?? { x: 0, y: 0, w: level.width * T, h: level.height * T };
+  ctx.fillRect(clip.x, clip.y, clip.w, clip.h);
+  ctx.restore();
+}
+
+/**
+ * Marge d'une feuille autour du bloc (px logiques) : ce qui dépasse du bloc y projette encore son
+ * ombre (pas de coupure nette entre deux blocs). Plus grande que décalage + flou des ombres.
+ */
+const SHEET_MARGIN = 24;
+
+/**
+ * Feuille de papier découpé (D-70) : `draw` dessine sur une toile à part (même transformation,
+ * avec une marge), qui est ensuite posée sur le bloc avec une ombre douce (décalage et flou en px
+ * logiques). Sans ombre, `draw` dessine directement.
+ */
+function drawSheet(
+  a: ArtContext,
+  sheet: HTMLCanvasElement,
+  alpha: number,
+  dx: number,
+  dy: number,
+  blur: number,
+  draw: (s: ArtContext) => void,
+): void {
+  const { ctx } = a;
+  const sctx = alpha > 0 ? prepareSheet(ctx, sheet) : null;
+  if (!sctx) {
+    draw(a);
+    return;
+  }
+  draw({ ...a, ctx: sctx });
+  const scale = ctx.getTransform().a;
+  const margin = Math.round(SHEET_MARGIN * scale);
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.shadowColor = `rgba(20,14,24,${String(Math.min(1, alpha))})`;
+  ctx.shadowBlur = blur * scale;
+  ctx.shadowOffsetX = dx * scale;
+  ctx.shadowOffsetY = dy * scale;
+  ctx.drawImage(sheet, -margin, -margin);
+  ctx.restore();
+}
+
+/** Toile vide de la taille du bloc et de sa marge, avec la transformation du bloc. */
+function prepareSheet(
+  ctx: CanvasRenderingContext2D,
+  sheet: HTMLCanvasElement,
+): CanvasRenderingContext2D | null {
+  const t = ctx.getTransform();
+  const margin = Math.round(SHEET_MARGIN * t.a);
+  const width = ctx.canvas.width + 2 * margin;
+  const height = ctx.canvas.height + 2 * margin;
+  if (sheet.width !== width || sheet.height !== height) {
+    // Réaffecter la taille vide la toile et remet son état à zéro.
+    sheet.width = width;
+    sheet.height = height;
+  }
+  const sctx = sheet.getContext('2d');
+  if (!sctx) {
+    return null;
+  }
+  // Toile réutilisée (seconde feuille du bloc) : vidée, état d'origine (`reset()` manque sur
+  // d'anciens Safari).
+  sctx.setTransform(1, 0, 0, 1, 0, 0);
+  sctx.clearRect(0, 0, width, height);
+  sctx.globalAlpha = 1;
+  sctx.globalCompositeOperation = 'source-over';
+  sctx.setTransform(t.a, t.b, t.c, t.d, t.e + margin, t.f + margin);
+  return sctx;
+}
+
+/**
+ * Ombres de contact (D-70) : sous chaque meuble posé sur une surface (tuile pleine ou
+ * traversable juste dessous), une ombre douce qui l'ancre au sol.
+ */
+function drawContactShadows(a: ArtContext, alpha: number): void {
+  if (alpha <= 0) {
+    return;
+  }
+  const { ctx, level } = a;
+  for (const d of level.decor) {
+    if (!(DECOR_KINDS[d.kind]?.furniture ?? false)) {
+      continue;
+    }
+    const below = d.row + d.height;
+    let resting = false;
+    for (let col = d.col; col < d.col + d.width && !resting; col++) {
+      const tile = tileAt(level, col, below);
+      resting = below < level.height && (tile === Tile.Solid || tile === Tile.OneWay);
+    }
+    const r = rect(d);
+    if (!resting || !decorVisible(r, a.clip)) {
+      continue;
+    }
+    const cx = r.x + r.w / 2;
+    const cy = r.y + r.h;
+    const rx = r.w / 2 + 8;
+    const ry = 6;
+    const shadow = ctx.createRadialGradient(cx, cy, 0, cx, cy, rx);
+    shadow.addColorStop(0, `rgba(20,14,24,${String(Math.min(1, alpha))})`);
+    shadow.addColorStop(0.7, `rgba(20,14,24,${String(Math.min(1, alpha) * 0.6)})`);
+    shadow.addColorStop(1, 'rgba(20,14,24,0)');
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(1, ry / rx);
+    ctx.translate(-cx, -cy);
+    ctx.fillStyle = shadow;
+    ctx.beginPath();
+    ctx.arc(cx, cy, rx, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+/** Grain de papier (D-70) sur tout le bloc, en lumière douce : ni teinte ni contraste changés. */
+function drawPaperGrain(a: ArtContext, alpha: number): void {
+  if (alpha <= 0) {
+    return;
+  }
+  const { ctx, level } = a;
+  const scale = ctx.getTransform().a;
+  const pattern = paperGrainPattern(ctx, scale);
+  if (!pattern) {
+    return;
+  }
+  const clip = a.clip ?? { x: 0, y: 0, w: level.width * T, h: level.height * T };
+  ctx.save();
+  ctx.globalAlpha = Math.min(1, alpha);
+  ctx.globalCompositeOperation = 'soft-light';
+  ctx.fillStyle = pattern;
+  ctx.fillRect(clip.x, clip.y, clip.w, clip.h);
+  ctx.restore();
 }
 
 /** Dehors (jardin, D-46) : ciel, nuages, deux plans de collines, arbres lointains. */

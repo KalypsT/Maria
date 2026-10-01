@@ -2,6 +2,8 @@
 
 ## Phase en cours
 
+**Passe graphique** (D-70) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étape 1 faite** (finition « papier découpé ») sur `ccr-8742f994-82xjq9`. Prochaine : étape 2, la profondeur (parallaxe dehors, vues par les fenêtres, avant-plan). Pas de nouveau niveau d'ici là.
+
 **Le jardin (2a) et derrière la haie (2b)** (§7.2, §6, D-46 à D-49) : fusionnés (PR #29), **essai sur téléphone en cours** (début du jardin testé ; jardin adouci (D-51) sur `ccr-53d22df4-9euiqo`). Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
 
 **Mouvement et difficulté validés** par l'utilisateur pour l'instant (réglages du DEBUG conservés pour une passe plus poussée plus tard).
@@ -15,6 +17,17 @@
 Prochaine : essai de la gare (réelle, étrange, la fin, la phase 3) sur téléphone. Le niveau suivant (le train ?) reste à décider. Intégrer les morceaux de musique.
 
 ## Fait
+
+### Passe graphique, étape 1 : finition « papier découpé » (D-70)
+
+- Le décor en feuilles superposées, chacune avec son ombre douce : fond lointain voilé, fond proche, couche jouable (murs, sol, meubles) nettement détachée du fond.
+- Ombres de contact sous les meubles, grain de papier, vignettage selon la palette.
+- Ombre de Céleste au sol, plus petite et pâle quand elle est haut.
+- DEBUG : « Habillage (finition) » (curseurs), case « Comparer : sans finition », valeurs dans l'export JSON.
+- Tests : 531. Vérifié dans Chromium : salon, chambre, cuisine, passage d'ombres, grand arbre, rue, aire de jeux, hall de la gare.
+- [ ] À vérifier sur téléphone : le mode « Écran » (menu pause → Affichage) tient-il 55–60 images/s ? Si oui, il passera par défaut.
+- [ ] Les changements de bloc en marchant (la rue, la gare) saccadent-ils plus qu'avant ?
+- [ ] Les ombres et le grain : trop, pas assez ? (DEBUG → « Comparer : sans finition », curseurs « Habillage (finition) », puis Exporter JSON.)
 
 ### La gare, PR 5 : la fin du niveau, la phase 3, le train à quai (D-69)
 

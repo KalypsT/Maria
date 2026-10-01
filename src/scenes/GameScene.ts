@@ -60,6 +60,8 @@ import { PauseMenu } from '../ui/PauseMenu';
 import {
   ART_IMAGES,
   DAY_PALETTE,
+  DEFAULT_ART_FINISH,
+  type ArtFinish,
   GARDEN_PALETTE,
   STREET_DUSK_PALETTE,
   STREET_PALETTE,
@@ -78,6 +80,7 @@ import { StrangeFxView } from './StrangeFxView';
 import { CombatView } from './CombatView';
 import { CelestePuppet } from './CelestePuppet';
 import { RoomArtView } from './RoomArtView';
+import { FinishView } from './FinishView';
 import { MapPage } from '../ui/MapPage';
 import { buildMapModel } from '../core/world/mapModel';
 import { DEFAULT_PUPPET, type PuppetParams } from '../config/puppet';
@@ -197,6 +200,10 @@ export class GameScene extends Phaser.Scene {
   /** Aperçu du monde étrange (D-28, overlay) : mêmes formes, autre palette. */
   strangeWorld = false;
   private roomArt!: RoomArtView;
+  /** Finition « papier découpé » (D-70), modifiable par l'overlay. */
+  readonly artFinish: ArtFinish = { ...DEFAULT_ART_FINISH };
+  /** Ombre de Céleste au sol et vignettage (D-70). */
+  private finishView!: FinishView;
   /** Échelle des textures dessinées (habillage, Céleste) : celle de l'écran, plafonnée. */
   private artScale = 1;
   /** Carte (§24) et salles déjà dessinées lors d'une ouverture précédente (tracé animé). */
@@ -323,6 +330,7 @@ export class GameScene extends Phaser.Scene {
     this.growth = growthPhase(this.story.flags);
     this.drawnTime = this.story.timeOfDay();
     this.roomArt = new RoomArtView(this);
+    this.finishView = new FinishView(this);
     this.artScale = this.computeArtScale();
     const save = this.session.data;
     const { room, checkpointId } = savedReturn(this.session);
@@ -603,6 +611,14 @@ export class GameScene extends Phaser.Scene {
       feel.scaleY,
       feel.lean,
       this.poser.pose,
+    );
+    this.finishView.render(
+      this.level,
+      this.artFinish,
+      this.puppet.x,
+      this.puppet.y,
+      box.width,
+      this.puppet.alpha,
     );
     this.combatView.render(alpha, player, this.puppet);
     this.trainView.render();
@@ -1129,8 +1145,10 @@ export class GameScene extends Phaser.Scene {
     }
     this.levelImages.length = 0;
     const level = this.level;
+    const palette = this.palette();
+    this.finishView.setPalette(palette, this.artFinish);
     // Salle habillée (D-28) : dessinée par l'habillage, pas tuile par tuile.
-    if (this.roomArt.build(level, this.palette(), this.artScale, this.artImages())) {
+    if (this.roomArt.build(level, palette, this.artFinish, this.artScale, this.artImages())) {
       return;
     }
     const chunkPx = LEVEL_CHUNK_TILES * TILE_SIZE;
@@ -1248,6 +1266,11 @@ export class GameScene extends Phaser.Scene {
       phase = PoseAttack.Recovery;
     }
     this.poser.step(this.player, phase, progress);
+  }
+
+  /** Applique les réglages de finition (overlay) : la salle est redessinée. */
+  applyFinish(): void {
+    this.redrawArt();
   }
 
   /** Applique les réglages de la marionnette (overlay). */

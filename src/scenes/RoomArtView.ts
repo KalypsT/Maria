@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import type { ArtPalette } from '../config/art';
+import type { ArtFinish, ArtPalette } from '../config/art';
 import { LEVEL_CHUNK_TILES, TILE_SIZE as T } from '../config/display';
 import type { LevelData } from '../core/level/LevelData';
 import { drawRoomBackground, drawRoomLight, type ArtContext, type Rect } from './art/roomArt';
@@ -33,6 +33,7 @@ export class RoomArtView {
   private readonly scratch = document.createElement('canvas');
   private level: LevelData | null = null;
   private palette: Readonly<ArtPalette> | null = null;
+  private finish: Readonly<ArtFinish> | null = null;
   private images: ReadonlyMap<string, CanvasImageSource> = new Map();
   private scale = 1;
   /** Vrai juste après `build` : la première mise à jour dessine tout ce qui est visible. */
@@ -61,6 +62,7 @@ export class RoomArtView {
   build(
     level: LevelData,
     palette: Readonly<ArtPalette>,
+    finish: Readonly<ArtFinish>,
     scale: number,
     images: ReadonlyMap<string, CanvasImageSource>,
   ): boolean {
@@ -70,6 +72,7 @@ export class RoomArtView {
     }
     this.level = level;
     this.palette = palette;
+    this.finish = finish;
     this.scale = scale;
     this.images = images;
     this.fresh = true;
@@ -133,7 +136,8 @@ export class RoomArtView {
   private bake(chunk: ArtChunk): void {
     const level = this.level;
     const palette = this.palette;
-    if (!level || !palette) {
+    const finish = this.finish;
+    if (!level || !palette || !finish) {
       return;
     }
     const scale = this.scale;
@@ -154,11 +158,12 @@ export class RoomArtView {
       clip: { x: x0, y: y0, w, h },
     };
     if (chunk.layer === 'bg') {
-      drawRoomBackground(context);
+      drawRoomBackground(context, this.scratch, finish);
     } else {
       drawRoomLight(context, this.scratch);
-      this.scratch.width = this.scratch.height = 1;
     }
+    // Toile de travail libérée (mémoire graphique) jusqu'au bloc suivant.
+    this.scratch.width = this.scratch.height = 1;
     const key = `art-${level.id}-${chunk.layer}-${String(x0)}-${String(y0)}`;
     const textures = this.scene.textures;
     if (textures.exists(key)) {
