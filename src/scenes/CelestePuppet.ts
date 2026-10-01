@@ -15,6 +15,8 @@ const LEG_FRONT = { x: 1.5, y: 0 };
 /** Couettes, par rapport au cou (suivent la tête). */
 const PIGTAIL_BACK = { x: -6.2, y: -6.5 };
 const PIGTAIL_FRONT = { x: 5.8, y: -7 };
+/** Queue de cheval (D-69), haut derrière la tête, par rapport au cou. */
+const PONYTAIL = { x: -5.6, y: -10.2 };
 /** Longueur du bras (px, de l'épaule à la main) et prise du manche du parapluie (D-62). */
 const ARM_LENGTH = 7.2;
 const UMBRELLA_GRIP = 2;
@@ -34,6 +36,8 @@ export class CelestePuppet {
   private readonly legBack: PartImage;
   private readonly pigtailBack: PartImage;
   private readonly pigtailFront: PartImage;
+  /** Queue de cheval (D-69) : remplace les couettes à partir de la phase 3. */
+  private readonly ponytail: PartImage;
   private readonly torso: PartImage;
   private readonly legFront: PartImage;
   private readonly skirt: PartImage;
@@ -60,6 +64,7 @@ export class CelestePuppet {
     this.armBack = part('arm').setTint(BACK_TINT);
     this.legBack = part('leg').setTint(BACK_TINT);
     this.pigtailBack = part('pigtail').setTint(BACK_TINT);
+    this.ponytail = part('ponytail').setVisible(false);
     this.torso = part('torso');
     this.legFront = part('leg');
     this.skirt = part('skirt');
@@ -75,6 +80,7 @@ export class CelestePuppet {
         this.armBack,
         this.legBack,
         this.pigtailBack,
+        this.ponytail,
         this.torso,
         this.legFront,
         this.skirt,
@@ -142,6 +148,11 @@ export class CelestePuppet {
     assign(this.legFront, 'leg', growth.bodyScale);
     assign(this.pigtailBack, 'pigtail', growth.hairScale);
     assign(this.pigtailFront, 'pigtail', growth.hairScale);
+    assign(this.ponytail, 'ponytail', growth.hairScale);
+    const ponytail = growth.hair === 'ponytail';
+    this.ponytail.setVisible(ponytail);
+    this.pigtailBack.setVisible(!ponytail);
+    this.pigtailFront.setVisible(!ponytail);
     assign(this.torso, 'torso', growth.bodyScale);
     assign(this.skirt, 'skirt', growth.bodyScale);
     assign(this.head, 'head');
@@ -211,7 +222,7 @@ export class CelestePuppet {
     this.legFront
       .setPosition(this.hipX + LEG_FRONT.x, this.hipY + LEG_FRONT.y)
       .setRotation(-pose.legFront);
-    // Couettes : attachées à la tête, tirées vers l'arrière par la pose.
+    // Couettes (ou queue de cheval) : attachées à la tête, tirées vers l'arrière par la pose.
     const headRotation = tilt + pose.headTilt;
     this.cos = Math.cos(headRotation);
     this.sin = Math.sin(headRotation);
@@ -224,6 +235,7 @@ export class CelestePuppet {
       PIGTAIL_FRONT.y,
       headRotation + pose.pigtails * 0.8,
     );
+    this.place(this.ponytail, PONYTAIL.x, PONYTAIL.y, headRotation + pose.pigtails);
   }
 
   /** Place une pièce à un point (dx, dy) du repère courant (origine, rotation), sans allocation. */

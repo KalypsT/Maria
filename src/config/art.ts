@@ -302,6 +302,8 @@ export type WallStyle = (typeof WALL_STYLES)[number];
 export const ART_IMAGES: Readonly<Record<string, string>> = {
   /** Maria (D-31) : image fournie par l'utilisateur, détourée. */
   maria: 'maria.png',
+  /** Roger, la peluche singe de Céleste (D-68, D-69) : image fournie par l'utilisateur, détourée. */
+  roger: 'roger.png',
 };
 
 /**
@@ -312,6 +314,7 @@ export const ART_IMAGES: Readonly<Record<string, string>> = {
 export const TITLE_IMAGES: Readonly<Record<CelesteOutfit, string>> = {
   pyjama: 'art/celeste.png',
   dress: 'art/celeste-dress.png',
+  jacket: 'art/celeste-jacket.png',
 };
 
 /** Palette d'une salle habillée ; le monde étrange en est une variante (§6.2). */

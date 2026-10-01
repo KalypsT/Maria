@@ -71,6 +71,13 @@ export const StoryFlag = {
   StationStrange: 'station.strange',
   /** Fin du monde étrange de la gare (D-68) : Roger, et son court souvenir. */
   StationDone: 'station.done',
+  /**
+   * Quelques mois plus tard, après la gare (D-69) : papa est venu chercher Céleste sous l'horloge du
+   * hall, la nuit est passée, puis des mois ; elle a encore grandi (phase de croissance 3).
+   */
+  GrownOlder: 'growth.3',
+  /** Le train à quai (D-69) : Céleste a vu sa porte ouverte et sa lueur turquoise. */
+  StationTrain: 'station.train',
   /** Quelques mois plus tard (D-43) : Céleste a grandi (phase de croissance 2). */
   Grown: 'growth.2',
   /** Le jardin (D-46) : Céleste est sortie pour la première fois (il fait beau, et Maria ?). */
@@ -187,11 +194,15 @@ export const PROP_SIZE = {
   'dad-shop': { w: 44 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // Dans la cour de l'école au crépuscule (D-64), maman vient chercher Céleste.
   'mom-yard': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  // Sous l'horloge du hall de la gare, la nuit (D-69), papa vient chercher Céleste.
+  'dad-hall': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // La boîte à formes (D-64), dans le monde étrange ; la grue au loin par la fenêtre de la chambre ;
   // la palissade du chantier ouverte, le lendemain.
   'shape-box': { w: 40, h: 32 },
   'far-crane': { w: 44, h: 34 },
   'site-gap': { w: 80, h: 64 },
+  // Le train à quai (D-69), quelques mois après la gare : une voiture et le nez de la suivante.
+  'quay-train': { w: 200, h: 66 },
   // Roger, la peluche singe (D-68), tout en haut de la tour des objets perdus.
   roger: { w: 16, h: 18 },
   'dad-garden': { w: 44 * PARENT_SCALE, h: 62 * PARENT_SCALE },
@@ -204,6 +215,7 @@ export const PROP_SIZE = {
   'baby-photo': { w: 11, h: 10 },
   'height-chart': { w: 7, h: 40 },
   'height-chart-grown': { w: 7, h: 40 },
+  'height-chart-older': { w: 7, h: 40 },
   bonnet: { w: 14, h: 12 },
   // Le portillon au bout du passage sous le vieux mur (D-60), fermé puis ouvert.
   gate: { w: 14, h: 46 },

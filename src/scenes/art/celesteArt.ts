@@ -11,6 +11,8 @@ import type { CelesteOutfit } from '../../config/growth';
 export const CELESTE_PARTS = {
   head: { width: 16, height: 14, originX: 7.5 / 16, originY: 13.5 / 14 },
   pigtail: { width: 5, height: 7, originX: 0.5, originY: 0.5 / 7 },
+  /** Queue de cheval (D-69), attachée haut derrière la tête par son chouchou rose. */
+  ponytail: { width: 7, height: 11, originX: 3.5 / 7, originY: 1 / 11 },
   torso: { width: 11, height: 9, originX: 0.5, originY: 1 },
   arm: { width: 4, height: 8, originX: 0.5, originY: 0.1 },
   leg: { width: 6, height: 9, originX: 2.5 / 6, originY: 0.05 },
@@ -49,6 +51,21 @@ const COLLAR = '#fffaf4';
 const CLOG = '#f39ab2';
 const CLOG_HOLE = '#c9607e';
 const SKIN_EDGE = 'rgba(150,80,60,0.45)';
+/**
+ * Tenue de la phase 3 (D-69), d'après l'illustration de l'utilisateur : veste en jean ouverte
+ * (manches retroussées, boutons dorés) sur un t-shirt blanc à fleurs roses, short rose à revers,
+ * chaussettes blanches, baskets roses et blanches.
+ */
+const DENIM = '#5f8cc8';
+const DENIM_LIGHT = '#8fb2df';
+const DENIM_EDGE = 'rgba(24,44,92,0.6)';
+const BUTTON = '#c9a25a';
+const TEE = '#fbf7f2';
+const SHORTS = '#f2a7b6';
+const SHORTS_EDGE = 'rgba(130,50,70,0.5)';
+const SOCK = '#fdfbf6';
+const SNEAKER = '#f4a6b8';
+const SNEAKER_WHITE = '#fffaf6';
 const SKIN = '#f0c19e';
 const HAIR = '#6b4329';
 const RIBBON = '#f08aa6';
@@ -77,8 +94,16 @@ export function drawCelestePart(
     drawHook(ctx, dark);
     return;
   }
+  if (part === 'ponytail') {
+    drawPonytail(ctx, dark);
+    return;
+  }
   if (outfit === 'dress' && part !== 'head' && part !== 'pigtail') {
     drawDressPart(ctx, part, dark);
+    return;
+  }
+  if (outfit === 'jacket' && part !== 'head' && part !== 'pigtail') {
+    drawJacketPart(ctx, part, dark);
     return;
   }
   switch (part) {
@@ -319,6 +344,145 @@ function drawDressPart(ctx: CanvasRenderingContext2D, part: CelestePart, dark: b
       }
       break;
     default:
+      break;
+  }
+}
+
+/** Queue de cheval (D-69) : le chouchou rose en haut, puis la mèche qui s'évase et ondule. */
+function drawPonytail(ctx: CanvasRenderingContext2D, dark: boolean): void {
+  ctx.fillStyle = dark ? SILHOUETTE : HAIR;
+  ctx.beginPath();
+  ctx.moveTo(2.4, 1);
+  ctx.quadraticCurveTo(0, 4.5, 0.6, 8.5);
+  ctx.quadraticCurveTo(1.6, 10.2, 2.6, 10.8);
+  ctx.quadraticCurveTo(3.4, 9.6, 4.4, 10.6);
+  ctx.quadraticCurveTo(6.6, 8.2, 5.6, 4.6);
+  ctx.quadraticCurveTo(5, 2.4, 4.6, 1);
+  ctx.closePath();
+  ctx.fill();
+  if (!dark) {
+    // Quelques mèches plus sombres.
+    ctx.strokeStyle = 'rgba(60,34,20,0.5)';
+    ctx.lineWidth = 0.4;
+    ctx.beginPath();
+    ctx.moveTo(3.2, 2.5);
+    ctx.quadraticCurveTo(2, 6, 2.4, 9.6);
+    ctx.moveTo(4.2, 2.5);
+    ctx.quadraticCurveTo(4.8, 6, 4.2, 9.4);
+    ctx.stroke();
+  }
+  // Chouchou rose : trois petits plis.
+  ctx.fillStyle = dark ? SILHOUETTE : RIBBON;
+  for (const x of [2.5, 3.5, 4.5]) {
+    circle(ctx, x, 1.2, 0.9);
+  }
+}
+
+/**
+ * Tenue de la phase 3 (D-69) : veste en jean ouverte sur le t-shirt à fleurs (devant, à droite),
+ * manches retroussées ; le short rose sur le haut des jambes ; chaussettes et baskets.
+ */
+function drawJacketPart(ctx: CanvasRenderingContext2D, part: CelestePart, dark: boolean): void {
+  switch (part) {
+    case 'torso':
+      ctx.fillStyle = dark ? SILHOUETTE : DENIM;
+      ctx.beginPath();
+      ctx.roundRect(0.5, 0, 10, 9, [3.5, 3.5, 1, 1]);
+      ctx.fill();
+      if (dark) {
+        break;
+      }
+      ctx.strokeStyle = DENIM_EDGE;
+      ctx.lineWidth = 0.6;
+      ctx.stroke();
+      // Le t-shirt blanc à fleurs, entre les pans ouverts de la veste.
+      ctx.fillStyle = TEE;
+      ctx.beginPath();
+      ctx.moveTo(6.6, 0.4);
+      ctx.lineTo(9.6, 0.8);
+      ctx.lineTo(9.9, 8.2);
+      ctx.lineTo(8, 8.2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = FLOWER_PINK;
+      circle(ctx, 8.8, 3, 0.55);
+      circle(ctx, 9.1, 5.8, 0.55);
+      // Col, poche de poitrine, boutons dorés, couture de la taille.
+      ctx.fillStyle = DENIM_LIGHT;
+      ctx.beginPath();
+      ctx.moveTo(4.6, 0.2);
+      ctx.lineTo(7, 0.4);
+      ctx.lineTo(6.2, 2.6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = DENIM_EDGE;
+      ctx.lineWidth = 0.4;
+      ctx.strokeRect(5, 3, 2.4, 1.8);
+      ctx.fillStyle = BUTTON;
+      circle(ctx, 7.6, 3.4, 0.45);
+      circle(ctx, 7.8, 6.2, 0.45);
+      ctx.fillStyle = DENIM_LIGHT;
+      ctx.fillRect(0.8, 7.6, 7.2, 0.9);
+      break;
+    case 'arm':
+      // Manche en jean retroussée au coude, puis l'avant-bras nu.
+      ctx.fillStyle = dark ? SILHOUETTE : SKIN;
+      ctx.beginPath();
+      ctx.roundRect(0.9, 3, 2.2, 3.6, 1.1);
+      ctx.fill();
+      circle(ctx, 2, 6.6, 1.3);
+      ctx.fillStyle = dark ? SILHOUETTE : DENIM;
+      ctx.beginPath();
+      ctx.roundRect(0.5, 0, 3, 4.2, 1.4);
+      ctx.fill();
+      if (!dark) {
+        ctx.strokeStyle = DENIM_EDGE;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+        ctx.fillStyle = DENIM_LIGHT;
+        ctx.fillRect(0.5, 3, 3, 1.2);
+      }
+      break;
+    case 'leg':
+      // Jambe nue, short rose à revers en haut, chaussette blanche, basket rose et blanche.
+      ctx.fillStyle = dark ? SILHOUETTE : SKIN;
+      ctx.beginPath();
+      ctx.roundRect(1.3, 0, 2.4, 7.4, 1.1);
+      ctx.fill();
+      if (!dark) {
+        ctx.strokeStyle = SKIN_EDGE;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+      ctx.fillStyle = dark ? SILHOUETTE : SHORTS;
+      ctx.beginPath();
+      ctx.roundRect(0.6, 0, 3.8, 3, [0, 0, 0.6, 0.6]);
+      ctx.fill();
+      if (!dark) {
+        ctx.strokeStyle = SHORTS_EDGE;
+        ctx.lineWidth = 0.4;
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        ctx.fillRect(0.6, 2.1, 3.8, 0.8);
+        ctx.fillStyle = SOCK;
+        ctx.fillRect(1.3, 5.6, 2.4, 1.4);
+      }
+      ctx.fillStyle = dark ? SILHOUETTE : SNEAKER_WHITE;
+      ctx.beginPath();
+      ctx.roundRect(0.6, 6.6, 5.2, 2.4, [1, 1.4, 1, 1]);
+      ctx.fill();
+      if (!dark) {
+        ctx.fillStyle = SNEAKER;
+        ctx.fillRect(0.6, 6.6, 2, 2.4);
+        ctx.beginPath();
+        ctx.ellipse(4, 7.8, 1.3, 0.6, -0.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(150,80,95,0.45)';
+        ctx.fillRect(0.6, 8.5, 5.2, 0.5);
+      }
+      break;
+    default:
+      // Pas de jupe : le short est dessiné sur les jambes.
       break;
   }
 }

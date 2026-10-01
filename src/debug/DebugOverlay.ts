@@ -447,7 +447,7 @@ export function installDebugOverlay(scene: GameScene): void {
       ],
     ],
     [
-      'Histoire : Roger trouvé (fin de la gare étrange)',
+      'Histoire : Roger trouvé, la nuit après la gare (au lit)',
       [
         F.EveningPlayed,
         F.EveningBlanket,
@@ -473,6 +473,36 @@ export function installDebugOverlay(scene: GameScene): void {
         F.StationArrived,
         F.StationStrange,
         F.StationDone,
+      ],
+    ],
+    [
+      'Histoire : quelques mois après la gare (phase 3, le train à quai)',
+      [
+        F.EveningPlayed,
+        F.EveningBlanket,
+        F.EveningTucked,
+        F.Slept,
+        F.MariaSeen,
+        F.MariaVanished,
+        F.StrangeDone,
+        F.DadVisit,
+        F.MomHug,
+        F.Grown,
+        F.GardenTreehouse,
+        F.HedgeEntered,
+        F.HedgeDone,
+        F.GateOpen,
+        F.StreetMom,
+        F.StreetDad,
+        F.SchoolOpen,
+        F.SchoolStrange,
+        F.SchoolDone,
+        F.StreetMorning,
+        F.StreetMomCrane,
+        F.StationArrived,
+        F.StationStrange,
+        F.StationDone,
+        F.GrownOlder,
       ],
     ],
     [
@@ -513,6 +543,21 @@ export function installDebugOverlay(scene: GameScene): void {
     }
     scene.setStoryFlags([...flags]);
   });
+  addCheck(
+    panel,
+    'Croissance : phase 3 (après la gare)',
+    scene.story.flags.has(F.GrownOlder),
+    (checked) => {
+      const flags = new Set(scene.story.flags);
+      if (checked) {
+        flags.add(F.Grown);
+        flags.add(F.GrownOlder);
+      } else {
+        flags.delete(F.GrownOlder);
+      }
+      scene.setStoryFlags([...flags]);
+    },
+  );
   // Déblocage des capacités (D-26) : pour la partie en cours seulement, sans sauvegarde.
   addCheck(panel, 'Capacité : grimper aux rebords', scene.debugClimb, (checked) => {
     scene.debugClimb = checked;

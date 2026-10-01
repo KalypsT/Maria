@@ -338,6 +338,94 @@ function drawSiteGap(ctx: CanvasRenderingContext2D, w: number, h: number): void 
   ctx.fillRect(door - 1, 0, 2, h);
 }
 
+/**
+ * Quelques mois après la gare (D-69) : un train arrêté le long du quai, sur la voie du fond. Une
+ * voiture entière, le bout des voisines ; au milieu, la porte grande ouverte, l'intérieur dans
+ * l'ombre et une lueur turquoise qui déborde sur le quai. Le bas est au niveau du quai.
+ */
+function drawQuayTrain(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  const top = 6;
+  const car = (x: number, cw: number, radius: number | number[]) => {
+    ctx.fillStyle = '#3d5f8f';
+    ctx.beginPath();
+    ctx.roundRect(x, top, cw, h - top, radius);
+    ctx.fill();
+    ctx.fillStyle = '#2f4b73';
+    ctx.fillRect(x, top, cw, 3);
+    ctx.fillStyle = '#efe6d2';
+    ctx.fillRect(x, h - 14, cw, 4);
+  };
+  car(0, 24, [0, 4, 0, 0]);
+  car(w - 24, 24, [4, 0, 0, 0]);
+  const x0 = 28;
+  const cw = w - 56;
+  car(x0, cw, 5);
+  // Soufflets entre les voitures.
+  ctx.fillStyle = '#26324a';
+  ctx.fillRect(24, top + 8, 4, h - top - 12);
+  ctx.fillRect(w - 28, top + 8, 4, h - top - 12);
+  // Fenêtres éteintes, de part et d'autre de la porte.
+  const door = { x: w / 2 - 10, w: 20, top: top + 10 };
+  ctx.fillStyle = '#9fb7cf';
+  for (let x = x0 + 8; x < x0 + cw - 16; x += 18) {
+    if (x + 12 > door.x - 4 && x < door.x + door.w + 4) {
+      continue;
+    }
+    ctx.fillRect(x, top + 12, 12, 14);
+  }
+  ctx.fillStyle = '#9fb7cf';
+  ctx.fillRect(4, top + 12, 14, 14);
+  ctx.fillRect(w - 18, top + 12, 14, 14);
+  // La porte ouverte : l'ombre dedans, la lueur turquoise.
+  ctx.fillStyle = '#141a26';
+  ctx.fillRect(door.x, door.top, door.w, h - door.top);
+  const glow = ctx.createRadialGradient(w / 2, h - 18, 0, w / 2, h - 18, 26);
+  glow.addColorStop(0, 'rgba(150, 245, 230, 0.95)');
+  glow.addColorStop(0.45, 'rgba(110, 228, 214, 0.55)');
+  glow.addColorStop(1, 'rgba(110, 228, 214, 0)');
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(door.x, door.top, door.w, h - door.top);
+  ctx.clip();
+  ctx.fillStyle = glow;
+  ctx.fillRect(door.x, door.top, door.w, h - door.top);
+  ctx.restore();
+  // Le battant replié contre la caisse, et la lumière qui déborde au pied de la porte.
+  ctx.fillStyle = '#5a7db0';
+  ctx.fillRect(door.x + door.w, door.top, 4, h - door.top);
+  const spill = ctx.createLinearGradient(0, h - 10, 0, h);
+  spill.addColorStop(0, 'rgba(120, 236, 220, 0)');
+  spill.addColorStop(1, 'rgba(120, 236, 220, 0.6)');
+  ctx.fillStyle = spill;
+  ctx.beginPath();
+  ctx.moveTo(door.x, h - 10);
+  ctx.lineTo(door.x + door.w, h - 10);
+  ctx.lineTo(door.x + door.w + 10, h);
+  ctx.lineTo(door.x - 10, h);
+  ctx.closePath();
+  ctx.fill();
+}
+
+/** Traits roses de la toise, un par croissance (D-43, D-69). */
+const HEIGHT_MARKS = {
+  'height-chart': 0,
+  'height-chart-grown': 1,
+  'height-chart-older': 2,
+} as const;
+
+/** Image fournie, entière, centrée en bas dans le cadre (w, h), sans déformation. */
+function drawContained(
+  ctx: CanvasRenderingContext2D,
+  image: CanvasImageSource,
+  w: number,
+  h: number,
+): void {
+  const iw = image instanceof HTMLImageElement ? image.naturalWidth : w;
+  const ih = image instanceof HTMLImageElement ? image.naturalHeight : h;
+  const k = Math.min(w / iw, h / ih);
+  ctx.drawImage(image, (w - iw * k) / 2, h - ih * k, iw * k, ih * k);
+}
+
 export function drawProp(
   ctx: CanvasRenderingContext2D,
   kind: PropKind,
@@ -396,21 +484,32 @@ export function drawProp(
     case 'far-crane':
       drawFarCrane(ctx, w, h);
       break;
-    case 'roger':
-      // Roger (D-68), assis tout en haut de la tour : on le regarde, on ne le prend pas.
+    case 'roger': {
+      // Roger (D-68), assis tout en haut de la tour : on le regarde, on ne le prend pas. L'image
+      // fournie (D-69) remplace le dessin.
+      const image = images.get('roger');
+      if (image) {
+        drawContained(ctx, image, w, h);
+        break;
+      }
       ctx.save();
       ctx.translate(w / 2, h * 0.56);
       roger(ctx, Math.min(w, h) * 1.05);
       ctx.restore();
       break;
+    }
     case 'site-gap':
       drawSiteGap(ctx, w, h);
       break;
+    case 'quay-train':
+      drawQuayTrain(ctx, w, h);
+      break;
     case 'height-chart':
     case 'height-chart-grown':
+    case 'height-chart-older':
       ctx.save();
       ctx.translate(w / 2, h / 2);
-      heightChart(ctx, w, h, kind === 'height-chart-grown');
+      heightChart(ctx, w, h, HEIGHT_MARKS[kind]);
       ctx.restore();
       break;
     default:
@@ -652,6 +751,30 @@ function drawIcon(
       ctx.arc(cx - 7, cy - 5.5, 1.4, 0, Math.PI * 2);
       ctx.fill();
       break;
+    case 'train': {
+      // Un train (D-69) : une voiture bleue, sa porte ouverte et la lueur turquoise.
+      ctx.fillStyle = '#3d5f8f';
+      ctx.beginPath();
+      ctx.roundRect(cx - 9, cy - 5, 18, 10, 2);
+      ctx.fill();
+      ctx.fillStyle = '#efe6d2';
+      ctx.fillRect(cx - 9, cy + 2, 18, 1.2);
+      ctx.fillStyle = '#bcd0e4';
+      ctx.fillRect(cx - 7, cy - 3, 3.5, 3);
+      ctx.fillRect(cx + 3.5, cy - 3, 3.5, 3);
+      const glow = ctx.createRadialGradient(cx, cy + 1, 0, cx, cy + 1, 4);
+      glow.addColorStop(0, 'rgba(150, 245, 230, 1)');
+      glow.addColorStop(1, 'rgba(90, 210, 196, 0.9)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(cx - 1.8, cy - 3.5, 3.6, 8.5);
+      ctx.fillStyle = INK;
+      for (const x of [cx - 5.5, cx + 5.5]) {
+        ctx.beginPath();
+        ctx.arc(x, cy + 6, 1.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    }
     case 'search': {
       // Une loupe : « cherche bien » (D-50).
       ctx.strokeStyle = WOOD_DARK;

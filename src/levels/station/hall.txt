@@ -9,12 +9,13 @@
 ; @music: station
 ; @wall: tiles
 ; @walls: #e9dcc2 #d2c2a2
+; @nightwalls: #5f6280 #4a4c68
 ; @difficulty: easy
 ; @door: 4 52 37
 ; @cable: 15 10 62 15
 ; @decor: glassroof 1 1 70 9
-; @decor: bigclock 30 8 11 9
-; @decor: departures 20 20 12 5
+; @decor: bigclock 31 20 9 8
+; @decor: departures 19 21 10 4
 ; @decor: gallery 1 13 14 1
 ; @decor: hallsteps 12 16 7 19
 ; @decor: bench 10 36 4 2

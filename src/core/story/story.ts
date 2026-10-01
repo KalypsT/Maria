@@ -63,6 +63,8 @@ export const THOUGHT_ICONS = [
   'dad',
   /** La grue du chantier (papa la montre à la supérette, D-63). */
   'crane',
+  /** Un train, sa porte ouverte et sa lueur turquoise (au réveil, après la gare, D-69). */
+  'train',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
@@ -174,12 +176,19 @@ export const PROP_KINDS = [
   'dad-shop',
   // L'école (D-64).
   'mom-yard',
+  // La gare (D-69) : papa vient chercher Céleste sous l'horloge du hall, la nuit.
+  'dad-hall',
   /** La boîte à formes (objet d'enfance, seulement dans le monde étrange) ; un trou en forme de Maria. */
   'shape-box',
   /** La grue au loin, une lueur turquoise au bout de la flèche, par la fenêtre de la chambre. */
   'far-crane',
   /** La palissade du chantier, ouverte le lendemain (le niveau suivant). */
   'site-gap',
+  /**
+   * Quelques mois après la gare (D-69) : un train arrêté à quai, sa porte ouverte, une lueur
+   * turquoise (la suite, sans figer le niveau suivant).
+   */
+  'quay-train',
   // Objets à regarder (D-38), avec un petit mouvement en boucle.
   'music-box',
   'plant',
@@ -188,6 +197,8 @@ export const PROP_KINDS = [
   /** Toise au mur de la chambre (D-43) ; un trait de plus quand Céleste a grandi. */
   'height-chart',
   'height-chart-grown',
+  /** La toise, un troisième trait (D-69). */
+  'height-chart-older',
   /** Le bonnet de Maria (D-49) : au bout de la ronce, puis dans l'herbe au pied du grand arbre. */
   'bonnet',
   /** Le portillon au bout de l'allée (D-60), fermé puis ouvert. */
@@ -208,9 +219,11 @@ export const LOOP_OBJECT_KINDS: ReadonlySet<PropKind> = new Set<PropKind>(['musi
 export const WALL_PROP_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'height-chart',
   'height-chart-grown',
+  'height-chart-older',
   'gate',
   'gate-open',
   'site-gap',
+  'quay-train',
 ]);
 
 /** Vus par une fenêtre (D-64) : posés sur le mur, sans surface sous eux. */
@@ -229,6 +242,7 @@ export const CHARACTER_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'mom-bench',
   'dad-shop',
   'mom-yard',
+  'dad-hall',
 ]);
 
 export interface StoryProp {
