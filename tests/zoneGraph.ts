@@ -34,7 +34,7 @@ export function phase(id: number): GrowthPhase {
 }
 
 /**
- * Analyse de chaque salle, sans puis avec l'escalade (et le saut mural, D-44), à une phase de croissance (les surfaces
+ * Analyse de chaque salle, sans puis avec l'escalade (et le saut mural, D-44, le parapluie, D-62), à une phase de croissance (les surfaces
  * sont les mêmes : toute hauteur de hitbox < 2 tuiles demande les mêmes 2 tuiles libres).
  */
 const analyses = new Map<string, LevelAnalysis>();
@@ -43,14 +43,16 @@ export function analysis(
   climb: boolean,
   growth = 1,
   wallJump = false,
+  glide = false,
 ): LevelAnalysis {
-  const key = `${room}:${String(climb)}:${String(growth)}:${String(wallJump)}`;
+  const key = `${room}:${String(climb)}:${String(growth)}:${String(wallJump)}:${String(glide)}`;
   let result = analyses.get(key);
   if (!result) {
     const p = phase(growth);
     result = analyzeLevel(level(room), phaseMovement(DEFAULT_MOVEMENT, p), {
       climb,
       wallJump,
+      glide,
       hitbox: p.hitbox,
     });
     analyses.set(key, result);
@@ -140,6 +142,8 @@ export function zoneGraph(
   wallJump = false,
   /** Étapes vécues qui ouvrent des portes fermées (le portillon, D-60). */
   flags: readonly string[] = [],
+  /** Parapluie (D-62). */
+  glide = false,
 ): Map<Node, Set<Node>> {
   const graph = new Map<Node, Set<Node>>();
   const edge = (from: Node, to: Node) => {
@@ -161,7 +165,7 @@ export function zoneGraph(
   }
   for (const [room, data] of zone.rooms) {
     const min = rule ? rule(room) : 0;
-    for (const move of analysis(room, climb, growth, wallJump).moves) {
+    for (const move of analysis(room, climb, growth, wallJump, glide).moves) {
       if (move.windowMs >= min) {
         edge(node(room, move.from), node(room, move.to));
       }

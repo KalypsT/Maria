@@ -8,11 +8,25 @@
 
 **Musique** (D-57) : lecteur en place, en attente des morceaux.
 
-**Le quartier** (D-60, D-61) : plan validé (4 PR). PR 1 faite : portes de façade et aire de jeux (maman). PR 2 faite : le parapluie (D-62), dans un parcours d'essai.
+**Le quartier** (D-60, D-61) : plan validé (4 PR). Faites : PR 1 (portes de façade, aire de jeux), PR 2 (le parapluie, D-62), PR 3 (supérette et chantier, D-63).
 
-Prochaine : PR 3, supérette et chantier (le parapluie s'y obtient) ; puis l'école et son monde étrange. Intégrer les morceaux de musique.
+Prochaine : PR 4, l'école et son monde étrange (boîte à formes, rubrique « Monde étrange »), la fin du niveau et les indices vers le chantier. Intégrer les morceaux de musique.
 
 ## Fait
+
+### Le quartier, PR 3 : la supérette et le chantier (D-63)
+
+- **La supérette** (porte de la rue) : papa fait les courses ; caisse, rayonnages, frigos ; au fond la réserve, une pile de cartons puis un saut (moyen) jusqu'à la porte qui donne sur le chantier.
+- **Le chantier** : cheminée entre une banche pendue à la grue et un mur de béton (saut mural), l'échafaudage et sa lanterne (moyen), puis des planches au-dessus des gravats jusqu'à la flèche de la grue (difficile), avec deux araignées. **Le parapluie** est au bout de la flèche (bulle d'aide, page « Mes capacités »).
+- **Boucle** : avec le parapluie, on plane jusqu'à la sortie haute du chantier, qui ramène en haut de l'échafaudage de la rue. Trouvaille sur la lampe de chantier (difficile, en planant).
+- **Histoire** : maman montre papa ; papa montre la grue. Papa a quitté le potager.
+- **Revisites avec le parapluie** : l'antenne du toit de la supérette (rue) et un nichoir au fond du potager, toutes deux moyennes.
+- Tests : 464. Vérifié dans Chromium : porte de la supérette, papa et sa bulle (grue), réserve, chantier en entier (banche, mur, échafaudage, flèche, araignées), antenne, nichoir, carte « Mon quartier ».
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « portillon ouvert (la rue) ») : la porte de la supérette se remarque-t-elle ? Les bulles de maman (papa) et de papa (la grue) se comprennent-elles ?
+- [ ] La réserve : le saut vers la porte est-il moyen ? On voit où aller ?
+- [ ] Le chantier : la cheminée, puis les planches après la lanterne (difficile) : juste ? Les araignées gênent-elles trop ? Les gravats se lisent-ils comme un danger ?
+- [ ] Le parapluie : le trouve-t-on, et la bulle d'aide suffit-elle pour planer jusqu'à la sortie haute ?
+- [ ] Les revisites (antenne, nichoir) : se remarquent-elles, donnent-elles envie ?
 
 ### Le quartier, PR 2 : le parapluie (D-62)
 

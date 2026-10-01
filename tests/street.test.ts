@@ -30,6 +30,8 @@ const F = StoryFlag;
 const easy = byDifficulty('easy');
 const medium = byDifficulty('medium');
 const OPEN = [F.GateOpen];
+/** Colonne de la trouvaille sur l'antenne de la supérette (revisite avec le parapluie, D-63). */
+const ANTENNA_COL = 133;
 /** Arrivée dans la rue par le portillon. */
 const arrival = () => node('street', exitSurface('street', 1));
 const home = () => node(zone.start, analysis(zone.start, false).start);
@@ -141,7 +143,9 @@ describe('la rue (D-60)', () => {
       expect(seen.has(nodeAt('street', 197, 27)), 'bout de la rue').toBe(true);
       const door = level('street').doors.find((d) => d.id === 2);
       expect(door && seen.has(nodeAt('street', door.col, door.row)), 'aire de jeux').toBe(true);
-      for (const id of ['street-school', 'street-shop', 'street-site']) {
+      const shop = level('street').doors.find((d) => d.id === 4);
+      expect(shop && seen.has(nodeAt('street', shop.col, shop.row)), 'supérette').toBe(true);
+      for (const id of ['street-school', 'street-site']) {
         const area = trigger(id).area;
         if (!area) {
           throw new Error(`${id} sans zone`);
@@ -155,7 +159,10 @@ describe('la rue (D-60)', () => {
     'les trouvailles, sur les toits et l’échafaudage : jamais faciles, au plus moyennes',
     { timeout: TIMEOUT },
     () => {
-      const secrets = level('street').entities.filter((e) => e.type === EntityType.Secret);
+      // L'antenne de la supérette (D-63) ne s'atteint qu'avec le parapluie : voir site.test.ts.
+      const secrets = level('street').entities.filter(
+        (e) => e.type === EntityType.Secret && e.col !== ANTENNA_COL,
+      );
       expect(secrets).toHaveLength(2);
       const byEasy = reachable(zoneGraph(true, easy, 2, true, OPEN), arrival());
       const byMedium = reachable(zoneGraph(true, medium, 2, true, OPEN), arrival());

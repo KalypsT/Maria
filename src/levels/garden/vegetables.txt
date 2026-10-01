@@ -13,6 +13,7 @@
 ; @decor: planter 40 17 4 5
 ; @decor: planter 50 19 5 3
 ; @decor: beanpoles 20 4 23 12
+; @decor: birdhouse 60 8 2 14
 ; @decor: sun 48 2 3 3
 ; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
@@ -22,8 +23,8 @@ v................................................................v
 v................................................................v
 v........................................S.......................v
 v........................................=.......................v
-v................................................................v
-v................................................................v
+v...........................................................S....v
+v...........................................................--...v
 v..................................=.............................v
 v................................................................v
 v................................................................v

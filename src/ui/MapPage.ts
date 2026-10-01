@@ -637,6 +637,25 @@ function drawIcon(
       ctx.moveTo(x - s * 0.35, y + s * 0.2);
       ctx.lineTo(x + s * 0.35, y + s * 0.2);
       break;
+    case 'basket':
+      // Un panier de courses (la supérette, D-63).
+      ctx.moveTo(x - s * 0.8, y - s * 0.1);
+      ctx.lineTo(x + s * 0.8, y - s * 0.1);
+      ctx.lineTo(x + s * 0.55, y + s * 0.7);
+      ctx.lineTo(x - s * 0.55, y + s * 0.7);
+      ctx.closePath();
+      ctx.moveTo(x - s * 0.5, y - s * 0.1);
+      ctx.quadraticCurveTo(x, y - s * 1.1, x + s * 0.5, y - s * 0.1);
+      break;
+    case 'crane':
+      // Une grue (le chantier, D-63).
+      ctx.moveTo(x - s * 0.3, y + s * 0.8);
+      ctx.lineTo(x - s * 0.3, y - s * 0.8);
+      ctx.moveTo(x - s * 1, y - s * 0.6);
+      ctx.lineTo(x + s * 0.9, y - s * 0.6);
+      ctx.moveTo(x + s * 0.6, y - s * 0.6);
+      ctx.lineTo(x + s * 0.6, y);
+      break;
     case 'street':
       // Un lampadaire et une petite maison au bord d'une route (D-60).
       ctx.moveTo(x - s, y + s * 0.6);

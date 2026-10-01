@@ -418,6 +418,7 @@ const DRAWN_SIZE: Readonly<Partial<Record<PropKind, { w: number; h: number; pad:
   'mom-garden': { w: 40, h: 62, pad: 6 },
   'dad-garden': { w: 44, h: 62, pad: 8 },
   'mom-bench': { w: 38, h: 44, pad: 4 },
+  'dad-shop': { w: 44, h: 62, pad: 8 },
 };
 
 export function drawCharacter(ctx: CanvasRenderingContext2D, kind: PropKind, frame: number): void {
@@ -505,6 +506,22 @@ function drawAt(
       // À l'aire de jeux (D-61), maman sur un banc, au soleil (lunettes) ; elle respire.
       sitting(ctx, MOM, h, frame === 0 ? 0.35 : 0.45, true);
       break;
+    case 'dad-shop': {
+      // À la supérette (D-63), papa tient un panier de courses ; dedans, pas de lunettes de soleil.
+      const hand = standing(ctx, DAD, w, h, frame === 0 ? 0.35 : 0.42, 0);
+      ctx.strokeStyle = '#c0392b';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(hand.handX, hand.handY + 2, 3, Math.PI, 0);
+      ctx.stroke();
+      ctx.fillStyle = '#e2574c';
+      round(ctx, hand.handX - 4.5, hand.handY + 2, 9, 6, 1.2);
+      ctx.fillStyle = '#8cc26f';
+      ctx.fillRect(hand.handX - 3, hand.handY + 0.5, 2.5, 2);
+      ctx.fillStyle = '#f2c14e';
+      ctx.fillRect(hand.handX + 0.5, hand.handY, 2.5, 2.5);
+      break;
+    }
     case 'cat-sleep':
       catSleep(ctx, w, h, frame);
       break;
