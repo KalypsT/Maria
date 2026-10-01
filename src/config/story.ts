@@ -52,6 +52,19 @@ export const StoryFlag = {
   StreetMom: 'street.mom',
   /** À la supérette (D-63), Céleste a parlé de Maria à papa, qui fait les courses. */
   StreetDad: 'street.dad',
+  /** La porte de l'école, poussée de l'intérieur (D-64) : un raccourci vers la rue. */
+  SchoolOpen: 'school.open',
+  /** L'école étrange (D-64) : Céleste y est passée par l'oculus (première fois). */
+  SchoolStrange: 'school.strange',
+  /**
+   * Fin de l'école étrange (D-64) : la boîte à formes ; Céleste dans la cour au crépuscule, maman
+   * vient la chercher ; la nuit, une lueur au loin par la fenêtre.
+   */
+  SchoolDone: 'school.done',
+  /** Le lendemain matin (D-64) : la palissade du chantier s'est ouverte. */
+  StreetMorning: 'street.morning',
+  /** Le matin, maman montre le chantier (D-64). */
+  StreetMomCrane: 'street.mom-crane',
   /** Quelques mois plus tard (D-43) : Céleste a grandi (phase de croissance 2). */
   Grown: 'growth.2',
   /** Le jardin (D-46) : Céleste est sortie pour la première fois (il fait beau, et Maria ?). */
@@ -164,6 +177,13 @@ export const PROP_SIZE = {
   'mom-bench': { w: 38 * PARENT_SCALE, h: 44 * PARENT_SCALE },
   // À la supérette (D-63), un panier à la main.
   'dad-shop': { w: 44 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  // Dans la cour de l'école au crépuscule (D-64), maman vient chercher Céleste.
+  'mom-yard': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  // La boîte à formes (D-64), dans le monde étrange ; la grue au loin par la fenêtre de la chambre ;
+  // la palissade du chantier ouverte, le lendemain.
+  'shape-box': { w: 40, h: 32 },
+  'far-crane': { w: 44, h: 34 },
+  'site-gap': { w: 80, h: 64 },
   'dad-garden': { w: 44 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // Le chat gris, agrandi par CAT_SCALE (D-42).
   'cat-sleep': { w: 16 * CAT_SCALE, h: 8 * CAT_SCALE },

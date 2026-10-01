@@ -189,6 +189,29 @@ export const DECOR_KINDS: Readonly<Record<string, { readonly furniture: boolean 
   antenna: { furniture: true },
   /** Lampe de chantier sur son poteau : le chapeau est un perchoir traversable. */
   floodlight: { furniture: true },
+  // L'école et son monde étrange (D-64), dessinés par le code (PLACEHOLDER).
+  /** L'arrière de l'école, vu de la cour, avec sa porte (fond). */
+  schoolfacade: { furniture: false },
+  /** Local à vélos (plein) : on arrive sur son toit. */
+  bikeshed: { furniture: true },
+  /** Préau : toit traversable, poteaux en fond. */
+  preau: { furniture: true },
+  /** Panier de basket : le haut du panneau est un perchoir traversable. */
+  basketball: { furniture: true },
+  /** Petite table de la classe des petits (pleine). */
+  kidtable: { furniture: true },
+  /** Tableau noir (fond) : dessins à la craie, ou des formes dans le monde étrange. */
+  chalkboard: { furniture: false },
+  /** Oculus où passe une lueur turquoise (fond). */
+  oculus: { furniture: false },
+  /** Table géante qui flotte (plateau traversable). */
+  tabletop: { furniture: true },
+  /** Pile de livres géants (pleine). */
+  bookstack: { furniture: true },
+  /** Chaise d'écolier qui flotte (assise pleine). */
+  floatchair: { furniture: true },
+  /** Couvercle géant d'une boîte à formes (plein, avec son trou). */
+  sorterlid: { furniture: true },
   cushions: { furniture: false },
   // Derrière la haie (D-49).
   /** Tuteur géant (bois plein), paroi d'une cheminée. */
@@ -391,6 +414,27 @@ export const STREET_PALETTE: Readonly<ArtPalette> = {
   floorEdge: '#cfc8bb',
   structure: '#b8a98f',
   paved: true,
+};
+
+/**
+ * La rue au crépuscule (D-64), quand maman vient chercher Céleste à l'école : ciel orangé qui
+ * vire au violet, feuillage et murs assombris, lampes allumées. PROVISOIRE, à juger sur téléphone.
+ */
+export const STREET_DUSK_PALETTE: Readonly<ArtPalette> = {
+  ...STREET_PALETTE,
+  wallTop: '#5b4f88',
+  wallBottom: '#ec9f72',
+  wallpaper: 'rgba(255,214,180,0.3)',
+  wainscot: '#5f6d63',
+  structure: '#8a7c70',
+  night: '#5b4f88',
+  nightLow: '#ec9f72',
+  rim: 'rgba(255,226,180,0.7)',
+  darkness: 0.2,
+  glow: 0.8,
+  leaf: '#3e5e48',
+  leafLight: '#5c7f5c',
+  leafDark: '#2c4536',
 };
 
 /** Rayon du halo d'une veilleuse (px logiques). */

@@ -164,6 +164,14 @@ export const PROP_KINDS = [
   // À l'aire de jeux du quartier (D-61).
   'mom-bench',
   'dad-shop',
+  // L'école (D-64).
+  'mom-yard',
+  /** La boîte à formes (objet d'enfance, seulement dans le monde étrange) ; un trou en forme de Maria. */
+  'shape-box',
+  /** La grue au loin, une lueur turquoise au bout de la flèche, par la fenêtre de la chambre. */
+  'far-crane',
+  /** La palissade du chantier, ouverte le lendemain (le niveau suivant). */
+  'site-gap',
   // Objets à regarder (D-38), avec un petit mouvement en boucle.
   'music-box',
   'plant',
@@ -192,7 +200,11 @@ export const WALL_PROP_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'height-chart-grown',
   'gate',
   'gate-open',
+  'site-gap',
 ]);
+
+/** Vus par une fenêtre (D-64) : posés sur le mur, sans surface sous eux. */
+export const WINDOW_PROP_KINDS: ReadonlySet<PropKind> = new Set<PropKind>(['far-crane']);
 
 /** Personnages : grands (les adultes), animés en boucle, ils peuvent avoir une bulle. */
 export const CHARACTER_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
@@ -206,6 +218,7 @@ export const CHARACTER_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'dad-garden',
   'mom-bench',
   'dad-shop',
+  'mom-yard',
 ]);
 
 export interface StoryProp {

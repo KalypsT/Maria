@@ -12,10 +12,15 @@ export interface MusicContext {
   /** La rue du quartier (`; @world: street`, D-60). */
   readonly street: boolean;
   readonly time: TimeOfDay;
+  /** Thème imposé par la salle (`; @music:`, D-64), s'il existe. */
+  readonly room?: MusicTrack | null;
 }
 
 /** Thème d'une salle (D-57). Les parcours d'essai suivent les mêmes règles que la maison. */
 export function chooseMusic(context: MusicContext): MusicTrack {
+  if (context.room) {
+    return context.room;
+  }
   if (context.strange) {
     return context.outdoor ? 'hedge' : 'strange';
   }

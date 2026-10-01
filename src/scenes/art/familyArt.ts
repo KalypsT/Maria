@@ -419,6 +419,7 @@ const DRAWN_SIZE: Readonly<Partial<Record<PropKind, { w: number; h: number; pad:
   'dad-garden': { w: 44, h: 62, pad: 8 },
   'mom-bench': { w: 38, h: 44, pad: 4 },
   'dad-shop': { w: 44, h: 62, pad: 8 },
+  'mom-yard': { w: 42, h: 62, pad: 8 },
 };
 
 export function drawCharacter(ctx: CanvasRenderingContext2D, kind: PropKind, frame: number): void {
@@ -522,6 +523,10 @@ function drawAt(
       ctx.fillRect(hand.handX + 0.5, hand.handY, 2.5, 2.5);
       break;
     }
+    case 'mom-yard':
+      // Au crépuscule (D-64), maman vient chercher Céleste dans la cour : la main tendue vers elle.
+      standing(ctx, MOM, w, h, frame === 0 ? 1.15 : 1.25, frame === 0 ? 0 : 0.5);
+      break;
     case 'cat-sleep':
       catSleep(ctx, w, h, frame);
       break;

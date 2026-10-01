@@ -1,0 +1,44 @@
+; Le quartier (D-64) : la cour de l'école. On y arrive en planant par le trou du grillage de l'aire
+; de jeux (le parapluie), sur le toit du local à vélos. Le préau, le panier de basket (trouvaille
+; moyenne, en planant), un banc, une lanterne ; la porte de l'école (porte de façade 2). Au
+; crépuscule, maman vient y chercher Céleste (fin du niveau).
+; @name: Cour de l'école
+; @icon: school
+; @world: street
+; @difficulty: easy
+; @floor: #b9b2a6 #d6d0c4
+; @door: 2 52 23
+; @decor: canopy 0 0 60 1
+; @decor: schoolfacade 44 2 15 22
+; @decor: bikeshed 1 10 4 14
+; @decor: preau 14 16 13 8
+; @decor: basketball 34 13 2 11
+; @decor: bench 38 23 4 1
+; @decor: planetree 27 1 4 23
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+#..........................................................#
+#..........................................................#
+#..........................................................#
+#..........................................................#
+#..........................................................#
+#..........................................................#
+1..........................................................#
+1..........................................................#
+1.P........................................................#
+#bbbb......................................................#
+#bbbb......................................................#
+#bbbb.............................S........................#
+#bbbb.............................--.......................#
+#bbbb......................................................#
+#bbbb......................................................#
+#bbbb.........-------------................................#
+#bbbb......................................................#
+#bbbb......................................................#
+#bbbb......................................................#
+#bbbb......................................................#
+#bbbb......................................................#
+#bbbb......................................................#
+#bbbb.....C...........................bbbb.................#
+############################################################
+############################################################

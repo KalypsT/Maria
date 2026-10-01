@@ -8,11 +8,27 @@
 
 **Musique** (D-57) : lecteur en place, en attente des morceaux.
 
-**Le quartier** (D-60, D-61) : plan validé (4 PR). Faites : PR 1 (portes de façade, aire de jeux), PR 2 (le parapluie, D-62), PR 3 (supérette et chantier, D-63).
+**Le quartier** (D-60, D-61) : plan validé (4 PR), toutes faites : PR 1 (portes de façade, aire de jeux), PR 2 (le parapluie, D-62), PR 3 (supérette et chantier, D-63), PR 4 (l'école, son monde étrange et la fin du niveau, D-64).
 
-Prochaine : PR 4, l'école et son monde étrange (boîte à formes, rubrique « Monde étrange »), la fin du niveau et les indices vers le chantier. Intégrer les morceaux de musique.
+Prochaine : essai du quartier entier sur téléphone ; puis le niveau suivant (derrière la palissade du chantier), à planifier. Intégrer les morceaux de musique.
 
 ## Fait
+
+### Le quartier, PR 4 : l'école, son monde étrange et la fin du niveau (D-64)
+
+- **La cour de l'école** : on y entre en planant par le trou du grillage de l'aire de jeux (seulement avec le parapluie). Préau, platane, banc, lanterne ; trouvaille sur le panier de basket (moyenne, en planant).
+- **L'école** : portemanteaux, tableau, petites tables, étagères jusqu'à l'oculus. La porte de la rue s'ouvre de l'intérieur (Agir sur la poignée) : un raccourci.
+- **Le monde étrange de l'école** (par l'oculus) : sol de crayons, tables géantes (moyen jusqu'à la lanterne), piles de livres et chaises qui flottent (difficile), jusqu'au couvercle de la trieuse de formes. Impossible sans le parapluie.
+- **La boîte à formes** : on la regarde, on ne la prend pas ; un trou a la forme de Maria. Nouvel onglet du cahier **« Monde étrange »**.
+- **Fin du niveau** : la cour au crépuscule, maman vient chercher Céleste ; la nuit, la grue au loin par la fenêtre, une lueur au bout de la flèche ; se coucher ; au matin, la porte de la palissade du chantier est ouverte (lueur, présage). Maman montre aussi la grue.
+- DEBUG → Histoire : « l'école ouverte (monde étrange à faire) » et « le lendemain de l'école (palissade ouverte) » ; cocher « Capacité : parapluie ».
+- Tests : 473. Vérifié dans Chromium : la cour, le panier, la porte de l'école, la classe, les étagères, le monde étrange, la boîte, le crépuscule et maman, la chambre la nuit (grue et lueur), le matin, la palissade ouverte, l'onglet « Monde étrange », les cinq onglets à 740 px de large.
+- [ ] À vérifier sur téléphone : le trou du grillage se comprend-il comme le chemin, une fois le parapluie trouvé ? Planer jusqu'à la cour : facile ?
+- [ ] La porte de l'école qu'on ouvre de l'intérieur : se remarque-t-elle (étincelle) ?
+- [ ] Le monde étrange : moyen puis difficile, juste ? Les crayons se lisent-ils comme un danger ?
+- [ ] La boîte : le trou à la forme de Maria se reconnaît-il ? Sinon, on l'enlève (option C).
+- [ ] La fin : le crépuscule, maman, la grue par la fenêtre, le matin : assez lent, compréhensible ? Donne-t-elle envie de retourner au chantier ?
+- [ ] Le cahier : les cinq onglets se lisent-ils et se touchent-ils bien ?
 
 ### Le quartier, PR 3 : la supérette et le chantier (D-63)
 

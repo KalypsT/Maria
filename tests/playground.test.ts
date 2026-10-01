@@ -31,9 +31,9 @@ const hard = byDifficulty('hard');
 const arrival = () => node('playground', exitSurface('playground', 1));
 const home = () => node(zone.start, analysis(zone.start, false).start);
 /** Graphe restreint à l'aire de jeux : ce qu'on y fait depuis le portillon. */
-function inPlayground(rule: Parameters<typeof zoneGraph>[1]): Map<Node, Set<Node>> {
+function inPlayground(rule: Parameters<typeof zoneGraph>[1], glide = false): Map<Node, Set<Node>> {
   const result = new Map<Node, Set<Node>>();
-  for (const [from, next] of zoneGraph(true, rule, 2, true, OPEN)) {
+  for (const [from, next] of zoneGraph(true, rule, 2, true, OPEN, glide)) {
     if (roomOf(from) === 'playground') {
       result.set(from, new Set([...next].filter((n) => roomOf(n) === 'playground')));
     }
@@ -42,7 +42,7 @@ function inPlayground(rule: Parameters<typeof zoneGraph>[1]): Map<Node, Set<Node
 }
 /** Plateforme de la tour du toboggan : là d'où l'on voit l'école. */
 const deck = () => nodeAt('playground', 60, 15);
-/** Trou du grillage de l'école (plus tard, avec le parapluie). */
+/** Trou du grillage de l'école : la sortie vers la cour, avec le parapluie (D-64). */
 const fenceHole = () => nodeAt('playground', 77, 12);
 
 describe('l’aire de jeux (D-61)', () => {
@@ -86,10 +86,12 @@ describe('l’aire de jeux (D-61)', () => {
   );
 
   it(
-    'le trou du grillage de l’école reste hors d’atteinte (même en difficile)',
+    'le trou du grillage de l’école : hors d’atteinte sans le parapluie, facile avec',
     { timeout: TIMEOUT },
     () => {
-      expect(reachable(inPlayground(null), arrival()).has(fenceHole())).toBe(false);
+      expect(fenceHole()).toBe(node('playground', exitSurface('playground', 2)));
+      expect(reachable(inPlayground(null), arrival()).has(fenceHole()), 'sans').toBe(false);
+      expect(reachable(inPlayground(easy, true), arrival()).has(fenceHole()), 'avec').toBe(true);
     },
   );
 

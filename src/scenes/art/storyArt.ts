@@ -1,6 +1,14 @@
 import { PROP_SIZE } from '../../config/story';
 import type { PropKind, ThoughtIcon } from '../../core/story/story';
-import { bonnet, dadHead, drawMemory, drawNotes, heightChart, momHead } from './memoryArt';
+import {
+  bonnet,
+  dadHead,
+  drawMemory,
+  drawNotes,
+  heightChart,
+  momHead,
+  shapeBox,
+} from './memoryArt';
 
 /**
  * Dessins de l'histoire (D-31), PLACEHOLDERS du style D-28 : objets de mise en scène (berceau,
@@ -258,6 +266,77 @@ function drawHeadband(ctx: CanvasRenderingContext2D, w: number, h: number): void
   ctx.fill();
 }
 
+/**
+ * La grue du chantier vue de loin par la fenêtre de la chambre, la nuit (D-64) : une silhouette
+ * sombre et, au bout de la flèche, une lueur turquoise.
+ */
+function drawFarCrane(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  const mast = w * 0.3;
+  const jib = 4;
+  ctx.fillStyle = '#141827';
+  // Toits lointains au pied de la grue.
+  ctx.fillRect(0, h - 5, w, 5);
+  ctx.fillRect(w * 0.55, h - 9, w * 0.2, 4);
+  ctx.strokeStyle = '#141827';
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(mast, h - 5);
+  ctx.lineTo(mast, jib);
+  ctx.moveTo(mast + 2.5, h - 5);
+  ctx.lineTo(mast + 2.5, jib);
+  ctx.moveTo(2, jib);
+  ctx.lineTo(w - 3, jib);
+  ctx.moveTo(mast + 1.25, 0.5);
+  ctx.lineTo(w - 3, jib);
+  ctx.moveTo(mast + 1.25, 0.5);
+  ctx.lineTo(2, jib);
+  ctx.stroke();
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  for (let y = jib; y < h - 6; y += 3) {
+    ctx.moveTo(mast, y);
+    ctx.lineTo(mast + 2.5, y + 3);
+  }
+  ctx.stroke();
+  // La lueur au bout de la flèche.
+  const tipX = w - 4;
+  const glow = ctx.createRadialGradient(tipX, jib, 0, tipX, jib, 7);
+  glow.addColorStop(0, 'rgba(150, 245, 230, 0.95)');
+  glow.addColorStop(0.4, 'rgba(110, 228, 214, 0.5)');
+  glow.addColorStop(1, 'rgba(110, 228, 214, 0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(tipX - 7, jib - 7, 14, 14);
+}
+
+/**
+ * Le lendemain matin (D-64) : la porte de la palissade du chantier est ouverte ; dedans, l'ombre
+ * et un reflet turquoise. Le battant (à gauche) est rabattu contre la palissade.
+ */
+function drawSiteGap(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  const door = 16;
+  const inside = ctx.createLinearGradient(door, 0, w, 0);
+  inside.addColorStop(0, '#20262f');
+  inside.addColorStop(1, '#2c3440');
+  ctx.fillStyle = inside;
+  ctx.fillRect(door, 0, w - door, h);
+  const glimmer = ctx.createRadialGradient(door + 36, h * 0.55, 0, door + 36, h * 0.55, 30);
+  glimmer.addColorStop(0, 'rgba(120, 236, 220, 0.55)');
+  glimmer.addColorStop(1, 'rgba(120, 236, 220, 0)');
+  ctx.fillStyle = glimmer;
+  ctx.fillRect(door, 0, w - door, h);
+  // Le battant ouvert, vu par la tranche.
+  ctx.fillStyle = '#9a7352';
+  ctx.beginPath();
+  ctx.moveTo(door, 0);
+  ctx.lineTo(door - 12, 4);
+  ctx.lineTo(door - 12, h - 2);
+  ctx.lineTo(door, h);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = WOOD_DARK;
+  ctx.fillRect(door - 1, 0, 2, h);
+}
+
 export function drawProp(
   ctx: CanvasRenderingContext2D,
   kind: PropKind,
@@ -305,6 +384,19 @@ export function drawProp(
     case 'baby-photo':
       // Photo encadrée posée debout, en haut de la bibliothèque.
       drawMemory(ctx, 'bookcase', w / 2, h / 2, Math.min(w / 0.8, h / 0.88));
+      break;
+    case 'shape-box':
+      // Au monde étrange : la boîte à formes, une lueur sort du trou à la forme de Maria (D-64).
+      ctx.save();
+      ctx.translate(w / 2, h - Math.min(w, h / 0.72) * 0.36);
+      shapeBox(ctx, Math.min(w, h / 0.72), true);
+      ctx.restore();
+      break;
+    case 'far-crane':
+      drawFarCrane(ctx, w, h);
+      break;
+    case 'site-gap':
+      drawSiteGap(ctx, w, h);
       break;
     case 'height-chart':
     case 'height-chart-grown':

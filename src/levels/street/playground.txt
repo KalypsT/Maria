@@ -1,13 +1,14 @@
 ; Le quartier (D-61) : l'aire de jeux, derrière le portillon de la rue (porte de façade). Maman est
 ; assise sur un banc. Cage à écureuil, portique des balançoires, puis la tour du toboggan (moyen) ;
 ; le nichoir en haut de son mât (trouvaille difficile, depuis le toit de la tour). Au fond, le
-; grillage de l'école et son trou, trop loin de la tour : plus tard, avec le parapluie (PLACEHOLDER).
+; grillage de l'école et son trou, trop loin de la tour sans le parapluie : en planant depuis le toit
+; de la tour, on passe dans la cour de l'école (sortie 2, D-64).
 ; @name: Aire de jeux
 ; @icon: swing
 ; @world: street
 ; @difficulty: medium
 ; @floor: #c98a6b #e3a585
-; @note: trou du grillage (en haut à droite) : jamais atteignable pour l'instant (testé).
+; @note: trou du grillage (en haut à droite) : seulement avec le parapluie (testé).
 ; @decor: canopy 0 0 80 1
 ; @decor: hedge 0 1 1 24
 ; @decor: planetree 18 1 4 27
@@ -32,8 +33,8 @@ v...........................................................................bbbb
 v...........................................................................bbbb
 v....................................................S......................bbbb
 v...................................................--......................bbbb
-v..............................................................................b
-v...........................................................bbb................b
+v..............................................................................2
+v...........................................................bbb................2
 v...........................................................................bbbb
 v...........................................................................bbbb
 v...........................................................................bbbb

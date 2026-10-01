@@ -136,16 +136,21 @@ describe('la rue (D-60)', () => {
   });
 
   it(
-    'le trottoir se parcourt facilement jusqu’au bout, et aux quatre portes (D-61 : l’aire de jeux)',
+    'le trottoir se parcourt facilement jusqu’au bout, et à ses portes (aire de jeux, supérette, école)',
     { timeout: TIMEOUT },
     () => {
       const seen = reachable(zoneGraph(true, easy, 2, true, OPEN), arrival());
       expect(seen.has(nodeAt('street', 197, 27)), 'bout de la rue').toBe(true);
       const door = level('street').doors.find((d) => d.id === 2);
       expect(door && seen.has(nodeAt('street', door.col, door.row)), 'aire de jeux').toBe(true);
-      const shop = level('street').doors.find((d) => d.id === 4);
-      expect(shop && seen.has(nodeAt('street', shop.col, shop.row)), 'supérette').toBe(true);
-      for (const id of ['street-school', 'street-site']) {
+      for (const [id, name] of [
+        [4, 'supérette'],
+        [5, 'école'],
+      ] as const) {
+        const d = level('street').doors.find((candidate) => candidate.id === id);
+        expect(d && seen.has(nodeAt('street', d.col, d.row)), name).toBe(true);
+      }
+      for (const id of ['street-site', 'street-site-open']) {
         const area = trigger(id).area;
         if (!area) {
           throw new Error(`${id} sans zone`);

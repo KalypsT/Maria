@@ -461,6 +461,62 @@ function babyPhoto(ctx: CanvasRenderingContext2D, s: number): void {
   ctx.fill();
 }
 
+/**
+ * La boîte à formes (D-64), vue de face : un cercle, un carré, un triangle et, au milieu, un trou à
+ * la forme de Maria (tête ronde, bras, jambes). Le couvercle est bleu, la face jaune ; les trous
+ * sont sombres. Sert au souvenir et à l'objet posé dans le monde étrange (`glow` : teinte turquoise).
+ */
+export function shapeBox(ctx: CanvasRenderingContext2D, s: number, glow = false): void {
+  roundRect(ctx, -s * 0.46, -s * 0.24, s * 0.92, s * 0.6, s * 0.05, glow ? '#e8c45a' : '#f2cf5f');
+  roundRect(ctx, -s * 0.5, -s * 0.36, s, s * 0.16, s * 0.04, glow ? '#4d7fc0' : '#5b8fd4');
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+  ctx.fillRect(-s * 0.46, s * 0.28, s * 0.92, s * 0.08);
+  const hole = glow ? '#1c3b45' : '#3b3330';
+  ctx.fillStyle = hole;
+  // Cercle, carré, triangle sur les côtés.
+  ctx.beginPath();
+  ctx.arc(-s * 0.32, -s * 0.06, s * 0.075, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillRect(s * 0.24, -s * 0.13, s * 0.14, s * 0.14);
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.32, s * 0.08);
+  ctx.lineTo(-s * 0.4, s * 0.22);
+  ctx.lineTo(-s * 0.24, s * 0.22);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(s * 0.31, s * 0.15, s * 0.08, s * 0.05, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Le trou à la forme de Maria : tête, corps rond, bras écartés, jambes courtes.
+  ctx.beginPath();
+  ctx.arc(0, -s * 0.09, s * 0.075, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(0, s * 0.07, s * 0.075, s * 0.1, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = hole;
+  ctx.lineWidth = s * 0.045;
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.12, -s * 0.02);
+  ctx.lineTo(-s * 0.05, s * 0.03);
+  ctx.moveTo(s * 0.12, -s * 0.02);
+  ctx.lineTo(s * 0.05, s * 0.03);
+  ctx.moveTo(-s * 0.04, s * 0.14);
+  ctx.lineTo(-s * 0.05, s * 0.22);
+  ctx.moveTo(s * 0.04, s * 0.14);
+  ctx.lineTo(s * 0.05, s * 0.22);
+  ctx.stroke();
+  if (glow) {
+    // Une lueur turquoise sort du trou de Maria.
+    const light = ctx.createRadialGradient(0, s * 0.02, 0, 0, s * 0.02, s * 0.3);
+    light.addColorStop(0, 'rgba(120, 236, 220, 0.55)');
+    light.addColorStop(1, 'rgba(120, 236, 220, 0)');
+    ctx.fillStyle = light;
+    ctx.fillRect(-s * 0.3, -s * 0.28, s * 0.6, s * 0.6);
+  }
+}
+
 export function drawMemory(
   ctx: CanvasRenderingContext2D,
   id: MemoryId,
@@ -500,6 +556,9 @@ export function drawMemory(
       break;
     case 'bottle':
       bottle(ctx, size);
+      break;
+    case 'shape-box':
+      shapeBox(ctx, size);
       break;
   }
   ctx.restore();

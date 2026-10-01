@@ -21,7 +21,8 @@ import {
 
 const TIMEOUT = 600_000;
 const F = StoryFlag;
-const OPEN = [F.GateOpen];
+/** Le portillon du jardin ; la porte de l'école, qui s'ouvre de l'intérieur (D-64). */
+const OPEN = [F.GateOpen, F.SchoolOpen];
 const easy = byDifficulty('easy');
 const medium = byDifficulty('medium');
 const hard = byDifficulty('hard');
@@ -123,8 +124,10 @@ describe('la supérette et le chantier (D-63)', () => {
     { timeout: TIMEOUT },
     () => {
       for (const glide of [false, true]) {
-        const safe = zoneGraph(true, roomDifficulty, 2, true, OPEN, glide);
-        const all = reachable(zoneGraph(true, null, 2, true, OPEN, glide), at('street', 4));
+        // La porte de l'école ne s'ouvre que de l'intérieur, où l'on n'entre qu'en planant.
+        const flags = glide ? OPEN : [F.GateOpen];
+        const safe = zoneGraph(true, roomDifficulty, 2, true, flags, glide);
+        const all = reachable(zoneGraph(true, null, 2, true, flags, glide), at('street', 4));
         const stuck = [...all].filter((n) => !reachable(safe, n).has(home()));
         expect(where(stuck, true), `sans retour (parapluie : ${String(glide)})`).toEqual([]);
       }

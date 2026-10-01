@@ -153,6 +153,7 @@ describe('silences de Maria dans l’histoire (D-57)', () => {
         'hedge-enter',
         'living-see',
         'living-vanish',
+        'school-box',
         'shadows-cradle',
         'thorns-bonnet',
       ].sort(),

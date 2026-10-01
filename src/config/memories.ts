@@ -35,13 +35,25 @@ export const MARIA_THINGS = [
   'bonnet',
 ] as const;
 
-export type MemoryId = (typeof MEMORIES)[number] | (typeof MARIA_THINGS)[number];
+/**
+ * Le monde étrange (D-64), un autre onglet du cahier : des souvenirs de choses vues là-bas, qu'on
+ * regarde (Agir) sans les prendre ; elles y restent. L'ordre est celui des cases.
+ */
+export const STRANGE_THINGS = [
+  /** La boîte à formes, au plafond du monde étrange de l'école. */
+  'shape-box',
+] as const;
+
+export type MemoryId =
+  (typeof MEMORIES)[number] | (typeof MARIA_THINGS)[number] | (typeof STRANGE_THINGS)[number];
 
 /** Souvenirs dont l'obtention n'est pas encore en jeu (la case reste vide). */
 export const MEMORIES_LATER: readonly MemoryId[] = [];
 
 export function isMemory(id: string): id is MemoryId {
   return (
-    (MEMORIES as readonly string[]).includes(id) || (MARIA_THINGS as readonly string[]).includes(id)
+    (MEMORIES as readonly string[]).includes(id) ||
+    (MARIA_THINGS as readonly string[]).includes(id) ||
+    (STRANGE_THINGS as readonly string[]).includes(id)
   );
 }

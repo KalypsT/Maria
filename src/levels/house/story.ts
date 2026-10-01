@@ -14,6 +14,17 @@ const STRANGE_ARRIVAL: StoryStep = {
   facing: -1,
 };
 
+/** L'étagère haute de la classe, sous l'oculus (D-64) : là où l'on passe dans l'école étrange. */
+const SCHOOL_SHELF: TileArea = { col: 44, row: 8, w: 5, h: 3 };
+/** Arrivée dans l'école étrange (dans le noir). */
+const SCHOOL_ARRIVAL: StoryStep = {
+  do: 'room',
+  room: 'school-strange',
+  col: 3,
+  row: 43,
+  facing: 1,
+};
+
 /** Le trou de la haie, au fond du jardin (D-49) : là où l'on passe derrière la haie. */
 const HEDGE_HOLE: TileArea = { col: 38, row: 36, w: 7, h: 4 };
 /** Arrivée dans le jardin renversé (dans le noir). */
@@ -632,17 +643,16 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: S.lookMs + 600 },
       ],
     },
-    // La rue (D-60) : deux lieux encore fermés, l'école et le chantier (PLACEHOLDER). Agir devant la
-    // porte : une bulle « ? », rejouable. L'aire de jeux et la supérette ont leur porte de façade
-    // (D-61, D-63).
+    // La rue (D-60) : la palissade du chantier, fermée (bulle « ? », rejouable) jusqu'au lendemain
+    // de l'école étrange (D-64). L'aire de jeux, la supérette et l'école ont leur porte de façade.
     {
-      // L'école.
-      id: 'street-school',
+      // Le chantier.
+      id: 'street-site',
       room: 'street',
       on: 'interact',
-      area: { col: 95, row: 25, w: 6, h: 3 },
-      mark: { col: 97, row: 24 },
-      when: {},
+      area: { col: 165, row: 25, w: 6, h: 3 },
+      mark: { col: 167, row: 24 },
+      when: { none: [F.StreetMorning] },
       lock: true,
       repeat: true,
       steps: [
@@ -651,17 +661,171 @@ export const HOUSE_STORY: StoryData = {
       ],
     },
     {
-      // Le chantier.
-      id: 'street-site',
+      // Le lendemain (D-64) : la palissade du chantier s'est ouverte, une lueur turquoise passe par
+      // l'ouverture. PLACEHOLDER : le niveau suivant n'existe pas encore (bulle « ? »).
+      id: 'street-site-open',
       room: 'street',
       on: 'interact',
       area: { col: 165, row: 25, w: 6, h: 3 },
       mark: { col: 167, row: 24 },
-      when: {},
+      when: { all: [F.StreetMorning] },
       lock: true,
       repeat: true,
       steps: [
         { do: 'thought', icon: 'question', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // Le lendemain matin (D-64), maman montre la grue du chantier : c'est là qu'il faut aller.
+      id: 'street-mom-crane',
+      room: 'playground',
+      on: 'interact',
+      area: { col: 6, row: 22, w: 8, h: 6 },
+      mark: { col: 10, row: 20 },
+      when: { all: [F.StreetMorning], none: [F.StreetMomCrane] },
+      lock: true,
+      steps: [
+        { do: 'flag', id: F.StreetMomCrane },
+        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
+        { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'crane', ms: S.thoughtMs, by: 'mom-bench' },
+        { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'mom-bench' },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // L'école (D-64) : la porte qui donne sur la rue se pousse de l'intérieur (un raccourci).
+      id: 'school-door',
+      room: 'school',
+      on: 'interact',
+      area: { col: 1, row: 18, w: 4, h: 4 },
+      mark: { col: 2, row: 17 },
+      when: { none: [F.SchoolOpen] },
+      lock: true,
+      steps: [
+        { do: 'flag', id: F.SchoolOpen },
+        { do: 'sparkle', area: { col: 0, row: 18, w: 2, h: 4 }, ms: S.lookMs },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // L'école étrange (D-64) : en haut des étagères de la classe, sous l'oculus, l'air scintille.
+      // Agir : un clignement dans le noir, et la classe se révèle en silhouettes, autour de Céleste.
+      id: 'school-enter',
+      room: 'school',
+      on: 'interact',
+      area: SCHOOL_SHELF,
+      mark: { col: 46, row: 9 },
+      when: { none: [F.SchoolStrange] },
+      lock: true,
+      steps: [
+        { do: 'sparkle', area: { col: 44, row: 5, w: 5, h: 5 }, ms: S.omenPeakMs + 400 },
+        { do: 'shake', ms: S.omenPeakMs, strength: 1 },
+        { do: 'wait', ms: S.omenPeakMs },
+        { do: 'fadeOut', ms: S.blinkOutMs },
+        { do: 'flag', id: F.SchoolStrange },
+        SCHOOL_ARRIVAL,
+        { do: 'wait', ms: S.blinkBlackMs },
+        { do: 'fadeIn', ms: S.blinkInMs, shape: 'iris' },
+        { do: 'wait', ms: 500 },
+        // Pas de Maria ici : seulement la question (D-61, option B).
+        { do: 'thought', icon: 'question', ms: S.thoughtMs + 800 },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // Après un évanouissement (avant la première veilleuse) : l'oculus y ramène, plus vite.
+      id: 'school-reenter',
+      room: 'school',
+      on: 'interact',
+      area: SCHOOL_SHELF,
+      mark: { col: 46, row: 9 },
+      when: { all: [F.SchoolStrange], none: [F.SchoolDone] },
+      lock: true,
+      steps: [
+        { do: 'sparkle', area: { col: 44, row: 5, w: 5, h: 5 }, ms: S.reomenPeakMs + 300 },
+        { do: 'shake', ms: S.reomenPeakMs, strength: 0.6 },
+        { do: 'wait', ms: S.reomenPeakMs },
+        { do: 'fadeOut', ms: S.blinkOutMs },
+        SCHOOL_ARRIVAL,
+        { do: 'wait', ms: S.blinkBlackMs },
+        { do: 'fadeIn', ms: S.reblinkInMs, shape: 'iris' },
+      ],
+    },
+    {
+      // Fin de l'école étrange (D-64) : la boîte à formes, sur le couvercle géant. Céleste la
+      // regarde (un trou a la forme de Maria) : elle devient un souvenir de la rubrique « Monde
+      // étrange » ; on ne la ramasse pas. Le cercle se referme ; Céleste est assise dans la cour, au
+      // crépuscule ; maman vient la chercher. La nuit, dans sa chambre, une lueur au loin.
+      id: 'school-box',
+      room: 'school-strange',
+      on: 'interact',
+      area: { col: 10, row: 5, w: 7, h: 3 },
+      mark: { col: 13, row: 4 },
+      when: { all: [F.SchoolStrange], none: [F.SchoolDone] },
+      lock: true,
+      steps: [
+        {
+          do: 'hush',
+          ms: S.cradleSparkleMs + S.holdMs + S.nightFadeOutMs + S.nightBlackMs + S.nightFadeInMs,
+        },
+        { do: 'memory', id: 'shape-box' },
+        { do: 'sparkle', area: { col: 11, row: 5, w: 5, h: 3 }, ms: S.cradleSparkleMs + 600 },
+        { do: 'wait', ms: S.cradleSparkleMs },
+        { do: 'thought', icon: 'maria', ms: S.holdMs },
+        { do: 'wait', ms: S.holdMs },
+        { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
+        { do: 'flag', id: F.SchoolDone },
+        { do: 'room', room: 'schoolyard', col: 12, row: 23, facing: 1, returnPoint: true },
+        { do: 'pose', pose: 'sit' },
+        { do: 'wait', ms: S.nightBlackMs },
+        { do: 'fadeIn', ms: S.nightFadeInMs },
+        { do: 'wait', ms: 1200 },
+        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+        { do: 'wait', ms: S.thoughtMs + 300 },
+        // Maman est venue la chercher, à hauteur d'enfant : un cœur.
+        { do: 'thought', icon: 'heart', ms: S.holdMs, by: 'mom-yard' },
+        { do: 'wait', ms: S.holdMs },
+        { do: 'thought', icon: 'heart', ms: S.holdMs },
+        { do: 'wait', ms: S.holdMs },
+        // La nuit, dans sa chambre : par la fenêtre, au loin, une lueur au bout de la grue.
+        { do: 'fadeOut', ms: S.nightFadeOutMs },
+        { do: 'room', room: 'bedroom', col: 12, row: 15, facing: 1, returnPoint: true },
+        { do: 'pose', pose: 'sit' },
+        { do: 'wait', ms: S.nightBlackMs },
+        { do: 'fadeIn', ms: S.nightFadeInMs },
+        { do: 'wait', ms: 900 },
+        { do: 'sparkle', area: { col: 28, row: 5, w: 3, h: 3 }, ms: S.cradleSparkleMs + 1000 },
+        { do: 'wait', ms: S.cradleSparkleMs },
+        { do: 'thought', icon: 'crane', ms: S.thoughtMs + 800 },
+        { do: 'wait', ms: S.thoughtMs + 800 },
+        { do: 'thought', icon: 'bed', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
+      // Le lendemain (D-64) : se coucher fait passer la nuit. Au réveil, Céleste pense à la grue.
+      id: 'street-night',
+      room: 'bedroom',
+      on: 'interact',
+      area: { col: 7, row: 13, w: 11, h: 3 },
+      mark: { col: 9, row: 14 },
+      when: { all: [F.SchoolDone], none: [F.StreetMorning] },
+      lock: true,
+      steps: [
+        { do: 'pose', pose: 'sit' },
+        { do: 'thought', icon: 'maria', ms: S.holdMs },
+        { do: 'wait', ms: S.holdMs },
+        { do: 'fadeOut', ms: S.nightFadeOutMs },
+        { do: 'flag', id: F.StreetMorning },
+        { do: 'place', col: 12, row: 15, facing: 1 },
+        { do: 'pose', pose: 'sit' },
+        { do: 'wait', ms: S.nightBlackMs },
+        { do: 'fadeIn', ms: S.nightFadeInMs },
+        { do: 'wait', ms: 1400 },
+        { do: 'thought', icon: 'crane', ms: S.thoughtMs + 800 },
         { do: 'wait', ms: S.lookMs },
       ],
     },
@@ -673,7 +837,7 @@ export const HOUSE_STORY: StoryData = {
       on: 'interact',
       area: { col: 6, row: 22, w: 8, h: 6 },
       mark: { col: 10, row: 20 },
-      when: { all: [F.GateOpen], none: [F.StreetMom] },
+      when: { all: [F.GateOpen], none: [F.StreetMom, F.StreetMorning] },
       lock: true,
       steps: [
         { do: 'flag', id: F.StreetMom },
@@ -1026,6 +1190,36 @@ export const HOUSE_STORY: StoryData = {
       when: { all: [F.Grown], none: [F.GateOpen] },
     },
     {
+      // Maman vient chercher Céleste dans la cour, au crépuscule (D-64).
+      id: 'mom-yard',
+      room: 'schoolyard',
+      kind: 'mom-yard',
+      col: 16,
+      row: 23,
+      flip: true,
+      when: { all: [F.SchoolDone], none: [F.StreetMorning] },
+    },
+    // La boîte à formes reste dans le monde étrange (D-64) : on ne la ramasse pas.
+    { id: 'shape-box', room: 'school-strange', kind: 'shape-box', col: 13, row: 7, when: {} },
+    {
+      // La nuit, par la fenêtre de la chambre : la grue au loin, une lueur au bout de la flèche.
+      id: 'far-crane',
+      room: 'bedroom',
+      kind: 'far-crane',
+      col: 28,
+      row: 8,
+      when: { all: [F.SchoolDone], none: [F.StreetMorning] },
+    },
+    {
+      // Le lendemain, la palissade du chantier est ouverte (le niveau suivant, PLACEHOLDER).
+      id: 'site-gap',
+      room: 'street',
+      kind: 'site-gap',
+      col: 167,
+      row: 27,
+      when: { all: [F.StreetMorning] },
+    },
+    {
       id: 'dad-shop',
       room: 'shop',
       kind: 'dad-shop',
@@ -1045,6 +1239,8 @@ export const HOUSE_STORY: StoryData = {
   ],
   // La nuit après le câlin de maman (D-58), puis le matin quelques mois plus tard.
   times: [
+    // Le crépuscule puis la nuit, après l'école étrange (D-64), jusqu'au lendemain matin.
+    { when: { all: [F.SchoolDone], none: [F.StreetMorning] }, time: 'evening' },
     { when: { all: [F.MomHug], none: [F.Grown] }, time: 'evening' },
     { when: { all: [F.Slept] }, time: 'morning' },
   ],
@@ -1054,8 +1250,17 @@ export const HOUSE_STORY: StoryData = {
     { room: 'laundry', exit: 3, when: { none: [F.Grown] }, icon: 'handle' },
     // Le portillon (D-60) : fermé tant que la chevillette n'est pas tirée.
     { room: 'garden-alley', exit: 3, when: { none: [F.GateOpen] }, icon: 'gate' },
+    // La porte de l'école (D-64) : elle ne s'ouvre que de l'intérieur.
+    { room: 'street', exit: 5, when: { none: [F.SchoolOpen] }, icon: 'question' },
+    { room: 'school', exit: 1, when: { none: [F.SchoolOpen] }, icon: 'question' },
+    // La nuit après l'école étrange (D-64) : c'est l'heure de dormir.
+    { room: 'bedroom', when: { all: [F.SchoolDone], none: [F.StreetMorning] }, icon: 'bed' },
   ],
   omens: [
+    // L'oculus de l'école (D-64) : en montant les étagères, tant que la fin n'est pas vécue.
+    { room: 'school', when: { none: [F.SchoolDone] }, col: 46, row: 7, radius: 10 },
+    // Le lendemain, près de la palissade ouverte du chantier : la suite.
+    { room: 'street', when: { all: [F.StreetMorning] }, col: 167, row: 26, radius: 12 },
     // Derrière la haie (D-49) : en approchant du trou, une fois le saut mural trouvé.
     {
       room: 'garden-tree',

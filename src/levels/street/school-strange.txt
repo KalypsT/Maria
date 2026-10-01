@@ -1,0 +1,70 @@
+; Le quartier (D-64) : l'école étrange, le monde étrange du quartier. La classe en silhouettes :
+; des tables qui flottent au-dessus des pointes de crayons (moyen) jusqu'à une veilleuse turquoise ;
+; une cheminée entre deux piles de livres géants (difficile) ; une veilleuse ; deux chaises
+; flottantes, puis le couvercle géant d'une boîte à formes et son trou (difficile). Sur le couvercle,
+; la boîte à formes. On y arrive par l'histoire (l'oculus de l'école), jamais par une porte.
+; @name: École étrange
+; @world: strange
+; @music: street-strange
+; @hazard: pencils
+; @difficulty: hard
+; @ambient: #1a1f2c
+; @decor: chalkboard 4 14 10 8
+; @decor: tabletop 9 40 5 4
+; @decor: tabletop 21 37 5 7
+; @decor: tabletop 33 34 5 10
+; @decor: bookstack 31 16 2 15
+; @decor: bookstack 38 12 2 22
+; @decor: floatchair 26 13 4 1
+; @decor: floatchair 17 13 4 1
+; @decor: sorterlid 1 8 44 2
+; @decor: giant-pencil 40 36 4 7
+; @decor: eyes 20 25 1 1
+; @decor: eyes 7 30 1 1
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+##############################################
+#............................................#
+#............................................#
+#............................................#
+#............................................#
+#............................................#
+#............................................#
+#............................................#
+#bbbbbbbbbbbbbbbbbbbbbb..bbbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbbbbbbbb..bbbbbbbbbbbbbbbbbbbb#
+#............................................#
+#.....................................C......#
+#.....................................bb.....#
+#................bbbb.....bbbb........bb.....#
+#.....................................bb.....#
+#.....................................bb.....#
+#..............................bb.....bb.....#
+#..............................bb.....bb.....#
+#..............................bb.....bb.....#
+#..............................bb.....bb.....#
+#..............................bb.....bb.....#
+#..............................bb.....bb.....#
+#..............................bb.....bb.....#
+#..............................bb.....bb.....#
+#..............................bb.....bb.....#
+#..............................bb.....bb.....#
+#..............................bb.....bb.....#
+#..............................bb.....bb.....#
+#..............................bb.....bb.....#
+#..............................bb.....bb.....#
+#..............................bb.....bb.....#
+#.....................................bb.....#
+#.....................................bb.....#
+#..................................C..bb.....#
+#................................-----.......#
+#............................................#
+#............................................#
+#....................-----...................#
+#............................................#
+#............................................#
+#........-----...............................#
+#............................................#
+#............................................#
+#..P.........................................#
+#######^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
+##############################################
