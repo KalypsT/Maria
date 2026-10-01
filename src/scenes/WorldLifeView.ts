@@ -17,7 +17,7 @@ const LEAF_TEXTURE = 'life-leaf';
  */
 const LAUNDRY_FRAMES = 9;
 const LEAF_FRAMES = 8;
-/** Images du feu (D-73), qui alternent ; inclinaisons du balancier. */
+/** Images du feu (D-74), qui alternent ; inclinaisons du balancier. */
 const FIRE_FRAMES = 6;
 const PENDULUM_FRAMES = 9;
 /** Feu : au-dessus de la pénombre (il éclaire), derrière les personnages. */
@@ -104,9 +104,9 @@ interface Fire {
 }
 
 /**
- * Vie du monde réel (D-72) : dehors, feuilles qui tombent au vent (là où il y a des arbres ou des
+ * Vie du monde réel (D-73) : dehors, feuilles qui tombent au vent (là où il y a des arbres ou des
  * haies), linge qui se balance sur le fil ; dedans, le feu de la cheminée et le balancier de
- * l'horloge comtoise (D-73). Le vent est commun (`wind`) : rafales et calmes
+ * l'horloge comtoise (D-74). Le vent est commun (`wind`) : rafales et calmes
  * ensemble. Purement visuel, aucune allocation par image.
  */
 export class WorldLifeView {
@@ -167,7 +167,7 @@ export class WorldLifeView {
     });
   }
 
-  /** Le petit feu de la cheminée (D-73) : des flammes qui changent, une lueur qui palpite. */
+  /** Le petit feu de la cheminée (D-74) : des flammes qui changent, une lueur qui palpite. */
   private makeFire(
     id: string,
     r: { x: number; y: number; w: number; h: number },
@@ -226,7 +226,7 @@ export class WorldLifeView {
     this.fires.push({ flames, glow, frame: 0, nextMs: 0 });
   }
 
-  /** Le balancier de l'horloge comtoise (D-73) : une tige, un disque de laiton. */
+  /** Le balancier de l'horloge comtoise (D-74) : une tige, un disque de laiton. */
   private makePendulum(
     id: string,
     r: { x: number; y: number; w: number; h: number },
@@ -342,7 +342,7 @@ export class WorldLifeView {
         artScale,
         (k) => -sway + (2 * sway * k) / (LAUNDRY_FRAMES - 1),
         (ctx) => {
-          // Petite ombre sur ce qui est derrière (papier découpé, D-70).
+          // Petite ombre sur ce qui est derrière (papier découpé, D-71).
           ctx.save();
           ctx.translate(1, 1.5);
           ctx.globalAlpha = 0.22;

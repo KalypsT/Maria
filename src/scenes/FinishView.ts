@@ -17,7 +17,7 @@ const VIGNETTE_H = 180;
 const SHADOW_WIDTH = 1.8;
 
 /**
- * Finition en jeu (D-70) : l'ombre de Céleste au sol (on voit où elle va retomber) et le
+ * Finition en jeu (D-71) : l'ombre de Céleste au sol (on voit où elle va retomber) et le
  * vignettage de l'écran. Deux images, aucune allocation par image.
  */
 export class FinishView {

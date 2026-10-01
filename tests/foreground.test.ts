@@ -5,7 +5,7 @@ import { parseAsciiLevel } from '../src/core/level/parseAsciiLevel';
 
 const SPACING = { min: 60, max: 200, width: [30, 70] as [number, number] };
 
-describe('avant-plan (D-71)', () => {
+describe('avant-plan (D-72)', () => {
   it('couvre tout ce que la vue peut montrer, pour toute position de la caméra', () => {
     const pieces = foregroundPieces(0, 2000, 800, 1.35, SPACING, 3);
     const first = pieces[0];

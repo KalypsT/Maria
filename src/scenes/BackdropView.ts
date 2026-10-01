@@ -22,7 +22,7 @@ const BIRD_TEXTURE = 'backdrop-bird';
 const BIRD_W = 12;
 const BIRD_H = 6;
 
-/** Nuages qui dérivent devant un plan (D-72). */
+/** Nuages qui dérivent devant un plan (D-73). */
 interface CloudSpec {
   readonly light: string;
   readonly shadow: string;
@@ -38,7 +38,7 @@ interface PlaneSpec {
   readonly ref?: { x: number; y: number };
   readonly draw: (ctx: CanvasRenderingContext2D, e: Extent) => void;
   readonly clouds?: CloudSpec;
-  /** Des oiseaux traversent ce plan de temps en temps (D-72). */
+  /** Des oiseaux traversent ce plan de temps en temps (D-73). */
   readonly birds?: boolean;
 }
 
@@ -73,7 +73,7 @@ function viewRange(size: number, minView: number, maxView: number): [number, num
 }
 
 /**
- * Plans lointains (D-71) : ciel, collines et toits dehors, vue par les fenêtres dedans. Chaque
+ * Plans lointains (D-72) : ciel, collines et toits dehors, vue par les fenêtres dedans. Chaque
  * plan est une texture dessinée une fois par salle, qui défile à sa vitesse (parallaxe) : le
  * point du plan à l'écran est `x - vue × facteur`. Rien ne touche à la collision.
  */
@@ -82,7 +82,7 @@ export class BackdropView {
   /** Taille de la salle (px) : les plans n'en débordent pas (salle plus petite que l'écran). */
   private roomW = 0;
   private roomH = 0;
-  /** Vol d'oiseaux (D-72) : images réutilisées, plan traversé, départ, prochain vol. */
+  /** Vol d'oiseaux (D-73) : images réutilisées, plan traversé, départ, prochain vol. */
   private readonly birds: Phaser.GameObjects.Image[] = [];
   private flockPlane: Plane | null = null;
   private flockStartMs = 0;

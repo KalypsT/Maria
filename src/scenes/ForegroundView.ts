@@ -44,7 +44,7 @@ function hash(n: number): number {
 }
 
 /**
- * Avant-plan (D-71) : silhouettes sombres et floues posées au bas de l'écran (herbes et fleurs au
+ * Avant-plan (D-72) : silhouettes sombres et floues posées au bas de l'écran (herbes et fleurs au
  * jardin, herbes folles dans la rue ; rien dedans), qui défilent plus vite que la salle. Elles ne dépassent du sol que de quelques pixels et s'effacent près de Céleste
  * et des dangers ou objets de jeu (pilier 1). Aucune allocation par image.
  */

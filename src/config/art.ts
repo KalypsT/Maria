@@ -9,8 +9,8 @@ import type { CelesteOutfit } from './growth';
 /**
  * Éléments d'habillage connus. `furniture` : meuble posé sur des tuiles pleines ou traversables
  * (vérifié) ; sinon élément de fond (fenêtre, cadre…), sans contrainte. `far` : élément de fond
- * lointain, voilé par la perspective atmosphérique (D-70) ; jamais une porte ni un repère de jeu.
- * `sky` : dessiné dans le plan du ciel, qui défile à peine (D-71).
+ * lointain, voilé par la perspective atmosphérique (D-71) ; jamais une porte ni un repère de jeu.
+ * `sky` : dessiné dans le plan du ciel, qui défile à peine (D-72).
  */
 export const DECOR_KINDS: Readonly<
   Record<string, { readonly furniture: boolean; readonly far?: boolean; readonly sky?: boolean }>
@@ -83,7 +83,7 @@ export const DECOR_KINDS: Readonly<
   'narrow-right': { furniture: false },
   /** Yeux dans l'ombre : rien de dessiné dans le décor, animés par les effets (D-35). */
   eyes: { furniture: false },
-  // Le salon refait en salle témoin (D-73).
+  // Le salon refait en salle témoin (D-74).
   /** Dessous de l'escalier qui monte à l'étage (bois plein, en marches). */
   understairs: { furniture: true },
   /** Plante en pot suspendue : le bord du pot est une planche traversable. */
@@ -378,11 +378,11 @@ export interface ArtPalette {
   leafLight: string;
   leafDark: string;
   /**
-   * Perspective atmosphérique (D-70) : opacité du voile (couleur du mur ou du ciel) posé sur le
+   * Perspective atmosphérique (D-71) : opacité du voile (couleur du mur ou du ciel) posé sur le
    * fond lointain (`far`), pour que la couche jouable ressorte.
    */
   veil: number;
-  /** Vignettage (D-70) : opacité dans les coins de l'écran (0 : aucun). */
+  /** Vignettage (D-71) : opacité dans les coins de l'écran (0 : aucun). */
   vignette: number;
   /** Couleur du vignettage (« r,g,b »). */
   vignetteColor: string;
@@ -554,7 +554,7 @@ export const STREET_DUSK_PALETTE: Readonly<ArtPalette> = {
 };
 
 /**
- * Finition de l'habillage (D-70), « papier découpé » : chaque plan est une feuille posée sur la
+ * Finition de l'habillage (D-71), « papier découpé » : chaque plan est une feuille posée sur la
  * précédente, avec son ombre douce ; grain de papier ; ombres de contact ; ombre de Céleste au sol.
  * PROVISOIRE : à régler sur téléphone (overlay → « Habillage (finition) »). Distances en px
  * logiques ; 0 désactive un effet.
@@ -615,7 +615,7 @@ export const ART_FINISH_RANGES: Readonly<
 };
 
 /**
- * Profondeur (D-71) : vitesse de défilement des plans lointains par rapport à la salle (0 : fixes à
+ * Profondeur (D-72) : vitesse de défilement des plans lointains par rapport à la salle (0 : fixes à
  * l'écran, 1 : avec la salle) et de l'avant-plan (> 1 : plus vite). PROVISOIRE, à juger sur
  * téléphone.
  */
@@ -637,7 +637,7 @@ export const PARALLAX = {
 } as const;
 
 /**
- * Avant-plan (D-71) : herbes et fleurs posées au bas de l'écran, dehors seulement (dedans, des
+ * Avant-plan (D-72) : herbes et fleurs posées au bas de l'écran, dehors seulement (dedans, des
  * jouets flous se lisaient comme des taches). PROVISOIRE.
  */
 export const FOREGROUND = {
@@ -660,7 +660,7 @@ export const FOREGROUND = {
 } as const;
 
 /**
- * Vie du monde réel (D-72) : nuages qui dérivent, oiseaux, feuilles et linge au vent. Doux, jamais
+ * Vie du monde réel (D-73) : nuages qui dérivent, oiseaux, feuilles et linge au vent. Doux, jamais
  * devant Céleste, jamais pris pour une surface. PROVISOIRE, à juger sur téléphone.
  */
 export const WORLD_LIFE = {
@@ -697,9 +697,9 @@ export const WORLD_LIFE = {
     swayRad: 0.22,
     periodMs: 1300,
   },
-  /** Le petit feu de la cheminée du salon (D-73) : une image toutes les ~ms, lueur. */
+  /** Le petit feu de la cheminée du salon (D-74) : une image toutes les ~ms, lueur. */
   fire: { frameMs: 110, glowMin: 0.28, glowMax: 0.5 },
-  /** Le balancier de l'horloge comtoise (D-73) : angle maximal, aller-retour (ms). */
+  /** Le balancier de l'horloge comtoise (D-74) : angle maximal, aller-retour (ms). */
   pendulum: { swingRad: 0.085, periodMs: 2000 },
 } as const;
 

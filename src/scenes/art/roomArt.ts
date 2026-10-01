@@ -201,7 +201,7 @@ function windowView(ctx: CanvasRenderingContext2D, p: Readonly<ArtPalette>, r: R
   }
 }
 
-/** Linge d'un fil (D-72) : pince en (`x`, `y`), couleur, grand (pyjama) ou chaussette. */
+/** Linge d'un fil (D-73) : pince en (`x`, `y`), couleur, grand (pyjama) ou chaussette. */
 export interface LaundryItem {
   readonly x: number;
   readonly y: number;
@@ -379,7 +379,7 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     rounded(ctx, { x: r.x - 3, y: r.y - 9, w: r.w + 6, h: T + 9 }, 3);
     ctx.fill();
     if (seesOutside(p)) {
-      // Vitre transparente : la vue du dehors est un plan lointain (D-71).
+      // Vitre transparente : la vue du dehors est un plan lointain (D-72).
       ctx.clearRect(r.x, r.y - 6, r.w, T + 2);
     } else {
       const sky = ctx.createLinearGradient(0, r.y - 6, 0, r.y + T);
@@ -496,7 +496,7 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     ctx.moveTo(r.x, r.y + 2);
     ctx.quadraticCurveTo(r.x + r.w / 2, r.y + 7, r.x + r.w, r.y + 2);
     ctx.stroke();
-    // Dehors, le linge se balance au vent (D-72) : il est dessiné à part.
+    // Dehors, le linge se balance au vent (D-73) : il est dessiné à part.
     if (p.outdoor && !p.silhouettes) {
       return;
     }
@@ -845,7 +845,7 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     rounded(ctx, { x: r.x - 4, y: r.y - 4, w: r.w + 8, h: r.h + 8 }, 5);
     ctx.fill();
     if (seesOutside(p)) {
-      // Vitre transparente : la vue du dehors est un plan lointain (D-71).
+      // Vitre transparente : la vue du dehors est un plan lointain (D-72).
       ctx.save();
       ctx.globalCompositeOperation = 'destination-out';
       ctx.fillStyle = '#000';
@@ -1213,7 +1213,7 @@ function drawWallpaper(
 }
 
 /**
- * Plans du décor (D-70) : ciel (plan lointain, D-71), fond lointain (voilé), fond proche, meubles
+ * Plans du décor (D-71) : ciel (plan lointain, D-72), fond lointain (voilé), fond proche, meubles
  * (couche jouable).
  */
 type DecorPlane = 'sky' | 'far' | 'back' | 'furniture';
@@ -1229,7 +1229,7 @@ function decorPlane(kind: string): DecorPlane {
   return known?.far ? 'far' : 'back';
 }
 
-/** Éléments du ciel (le soleil), dessinés dans le plan du ciel (D-71). */
+/** Éléments du ciel (le soleil), dessinés dans le plan du ciel (D-72). */
 export function drawSkyDecor(a: ArtContext): void {
   drawDecor(a, 'sky');
 }
@@ -1254,7 +1254,7 @@ function drawDecor(a: ArtContext, plane: DecorPlane): void {
 }
 
 /**
- * Fond, structure, sol et meubles (sous les personnages). Finition « papier découpé » (D-70) :
+ * Fond, structure, sol et meubles (sous les personnages). Finition « papier découpé » (D-71) :
  * le fond lointain est voilé ; le fond proche puis la couche jouable sont chacun dessinés sur une
  * feuille à part (`sheet`), posée avec son ombre douce ; ombres de contact ; grain de papier.
  */
@@ -1268,13 +1268,13 @@ export function drawRoomBackground(
   const height = level.height * T;
   const floorY = floorRow(level) * T;
   const wainscotY = floorY - 5 * T;
-  // Dehors, le ciel et les collines sont des plans lointains (D-71) : le fond reste transparent.
+  // Dehors, le ciel et les collines sont des plans lointains (D-72) : le fond reste transparent.
   if (!p.outdoor) {
     drawWall(a, width, height, floorY, wainscotY);
   }
   drawDecor(a, 'far');
   drawVeil(a, floorY, p.veil * finish.veil);
-  // Vitres transparentes (D-71) : la vue du dehors est un plan lointain, derrière.
+  // Vitres transparentes (D-72) : la vue du dehors est un plan lointain, derrière.
   if (seesOutside(p)) {
     a.ctx.save();
     a.ctx.globalCompositeOperation = 'destination-out';
@@ -1317,7 +1317,7 @@ export function drawRoomBackground(
 }
 
 /**
- * Vitres et ciel transparents (D-71) : dans le monde réel, ou dehors (le ciel). Le monde étrange
+ * Vitres et ciel transparents (D-72) : dans le monde réel, ou dehors (le ciel). Le monde étrange
  * garde ses fenêtres peintes (silhouettes).
  */
 export function seesOutside(p: Readonly<ArtPalette>): boolean {
@@ -1339,7 +1339,7 @@ export function windowPanes(level: LevelData): Rect[] {
 }
 
 /**
- * Perspective atmosphérique (D-70) : le dégradé du mur ou du ciel, posé en transparence sur le
+ * Perspective atmosphérique (D-71) : le dégradé du mur ou du ciel, posé en transparence sur le
  * fond lointain déjà dessiné.
  */
 function drawVeil(a: ArtContext, floorY: number, alpha: number): void {
@@ -1352,7 +1352,7 @@ function drawVeil(a: ArtContext, floorY: number, alpha: number): void {
   veil.addColorStop(1, p.wallBottom);
   ctx.save();
   ctx.globalAlpha = Math.min(1, alpha);
-  // Seulement sur ce qui est déjà dessiné : jamais sur le ciel transparent (D-71).
+  // Seulement sur ce qui est déjà dessiné : jamais sur le ciel transparent (D-72).
   ctx.globalCompositeOperation = 'source-atop';
   ctx.fillStyle = veil;
   const clip = a.clip ?? { x: 0, y: 0, w: level.width * T, h: level.height * T };
@@ -1367,7 +1367,7 @@ function drawVeil(a: ArtContext, floorY: number, alpha: number): void {
 const SHEET_MARGIN = 24;
 
 /**
- * Feuille de papier découpé (D-70) : `draw` dessine sur une toile à part (même transformation,
+ * Feuille de papier découpé (D-71) : `draw` dessine sur une toile à part (même transformation,
  * avec une marge), qui est ensuite posée sur le bloc avec une ombre douce (décalage et flou en px
  * logiques). Sans ombre, `draw` dessine directement.
  */
@@ -1428,7 +1428,7 @@ function prepareSheet(
 }
 
 /**
- * Ombres de contact (D-70) : sous chaque meuble, là où il touche vraiment une surface (sa tuile du
+ * Ombres de contact (D-71) : sous chaque meuble, là où il touche vraiment une surface (sa tuile du
  * bas pleine ou traversable, et une tuile pleine ou traversable dessous), une ombre douce qui
  * l'ancre au sol : sous les pieds d'une table, sous tout le canapé.
  */
@@ -1491,8 +1491,8 @@ function contactShadow(
 }
 
 /**
- * Grain de papier (D-70) sur tout le bloc, en lumière douce : ni teinte ni contraste changés.
- * S'il reste du transparent (ciel, vitres, D-71), le grain est d'abord découpé à la forme du
+ * Grain de papier (D-71) sur tout le bloc, en lumière douce : ni teinte ni contraste changés.
+ * S'il reste du transparent (ciel, vitres, D-72), le grain est d'abord découpé à la forme du
  * décor sur la toile de travail : la lumière douce sur du transparent laisserait un voile gris.
  */
 function drawPaperGrain(a: ArtContext, sheet: HTMLCanvasElement, alpha: number): void {
@@ -1854,7 +1854,7 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
   const height = level.height * T;
   const lamps = level.entities.filter((e) => e.type === EntityType.Checkpoint);
   const windows = level.decor.filter((d) => d.kind === 'window').map(rect);
-  // Sources de lumière du décor : lampes, lustre (sous l'abat-jour), feu de la cheminée (D-73).
+  // Sources de lumière du décor : lampes, lustre (sous l'abat-jour), feu de la cheminée (D-74).
   const lights = level.decor.flatMap((d) => {
     const r = rect(d);
     if (d.kind === 'lamp') {

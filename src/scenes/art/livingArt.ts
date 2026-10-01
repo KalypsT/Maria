@@ -4,7 +4,7 @@ import type { ShapeTools } from './gardenArt';
 import type { ArtContext, Rect } from './roomArt';
 
 /**
- * Le salon refait en salle témoin (D-73), dessiné par le code. Ce qu'on foule (pots des
+ * Le salon refait en salle témoin (D-74), dessiné par le code. Ce qu'on foule (pots des
  * suspensions, abat-jour du lustre, manteau de la cheminée, dessus de l'horloge) suit exactement
  * ses tuiles ; cordes, corps de la cheminée et de l'horloge sont du fond, devant lequel on passe.
  * Le feu et le balancier bougent à part (`WorldLifeView`).
@@ -274,7 +274,7 @@ export function pendulum(r: Rect): { x: number; y: number; length: number } {
 }
 
 /**
- * Une image du feu (D-73), dans un cadre `w` × `h` dont le bas est posé sur les bûches : des
+ * Une image du feu (D-74), dans un cadre `w` × `h` dont le bas est posé sur les bûches : des
  * langues de flamme orangées, un cœur jaune. `seed` change la forme d'une image à l'autre.
  */
 export function drawFlames(

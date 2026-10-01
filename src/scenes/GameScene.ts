@@ -203,15 +203,15 @@ export class GameScene extends Phaser.Scene {
   /** Aperçu du monde étrange (D-28, overlay) : mêmes formes, autre palette. */
   strangeWorld = false;
   private roomArt!: RoomArtView;
-  /** Finition « papier découpé » (D-70), modifiable par l'overlay. */
+  /** Finition « papier découpé » (D-71), modifiable par l'overlay. */
   readonly artFinish: ArtFinish = { ...DEFAULT_ART_FINISH };
-  /** Ombre de Céleste au sol et vignettage (D-70). */
+  /** Ombre de Céleste au sol et vignettage (D-71). */
   private finishView!: FinishView;
-  /** Plans lointains : ciel, collines, toits, vue par les fenêtres (D-71). */
+  /** Plans lointains : ciel, collines, toits, vue par les fenêtres (D-72). */
   private backdrop!: BackdropView;
-  /** Avant-plan : silhouettes au bas de l'écran (D-71). */
+  /** Avant-plan : silhouettes au bas de l'écran (D-72). */
   private foreground!: ForegroundView;
-  /** Vie du monde réel : feuilles et linge au vent (D-72), feu et balancier (D-73). */
+  /** Vie du monde réel : feuilles et linge au vent (D-73), feu et balancier (D-74). */
   private worldLife!: WorldLifeView;
   /** Échelle des textures dessinées (habillage, Céleste) : celle de l'écran, plafonnée. */
   private artScale = 1;

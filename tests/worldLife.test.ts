@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { nextDelay, wind, wrap } from '../src/core/fx/worldLife';
 
-describe('vie du monde réel (D-72)', () => {
+describe('vie du monde réel (D-73)', () => {
   it('fait souffler un vent doux, jamais nul ni au-delà de la rafale', () => {
     let min = Infinity;
     let max = -Infinity;

@@ -478,9 +478,8 @@ class MoveExplorer {
 
   /**
    * Depuis l'état de `from`, saute maintenant et retourne la surface où Céleste s'arrête. `glide` :
-   * Saut tenu jusqu'au sol, le parapluie s'ouvre au sommet (D-65) ; sinon, avec le parapluie, un
-   * saut tenu est relâché au sommet (saut complet sans plané). `cableExit` : comment quitter un
-   * câble (D-65).
+   * au sommet, une nouvelle pression de Saut ouvre le parapluie, tenu jusqu'au sol (D-62, D-70).
+   * `cableExit` : comment quitter un câble (D-65).
    */
   private tryJump(
     from: PlayerPhysics,
@@ -499,6 +498,8 @@ class MoveExplorer {
     this.airSteps = 0;
     /** Pas depuis la sortie d'un câble (-1 : pas encore quitté). */
     let sinceCable = -1;
+    /** Ouverture du parapluie au sommet : 0 pas encore, 1 Saut relâché, 2 pressé de nouveau. */
+    let opened = 0;
     for (let s = 0; s < this.maxAirSteps; s++) {
       if (airborne && probe.grounded) {
         break;
@@ -507,6 +508,12 @@ class MoveExplorer {
       input.jumpPressed = s === 0;
       if (glide) {
         input.jumpHeld = true;
+        if (apex && opened < 2) {
+          // Parapluie (D-62, D-70) : au sommet, Saut relâché un pas puis pressé de nouveau.
+          input.jumpHeld = opened === 1;
+          input.jumpPressed = opened === 1;
+          opened++;
+        }
         if (cableExit && sinceCable >= 0) {
           // Câble quitté : relâcher (drop), ou relâcher puis presser aussitôt (jump).
           input.jumpHeld = cableExit === 'jump' && sinceCable >= 1;
@@ -514,7 +521,7 @@ class MoveExplorer {
           sinceCable++;
         }
       } else {
-        input.jumpHeld = holdSteps === 0 ? !(this.canGlide && apex) : s < holdSteps;
+        input.jumpHeld = holdSteps === 0 || s < holdSteps;
       }
       input.moveX = airRelease && s > 0 ? 0 : dir;
       const onCable = probe.cable >= 0;
@@ -646,14 +653,11 @@ class MoveExplorer {
     probe.copyFrom(from);
     const input = this.input;
     input.moveY = 0;
-    let apex = false;
     this.airSteps = 0;
     for (let s = 0; s < MOVE_SEARCH.maxSteps && !probe.grounded; s++) {
-      // Avec le parapluie, un rebond tenu est relâché au sommet : pas de plané après un saut mural
-      // dans l'analyse (prudente).
-      apex ||= s > 0 && probe.vy >= 0;
+      // Pas de plané après un saut mural dans l'analyse (prudente).
       input.jumpPressed = s === 0;
-      input.jumpHeld = holdSteps === 0 ? !(this.canGlide && apex) : s < holdSteps;
+      input.jumpHeld = holdSteps === 0 || s < holdSteps;
       input.moveX = dir;
       const before = probe.state;
       probe.step(input);

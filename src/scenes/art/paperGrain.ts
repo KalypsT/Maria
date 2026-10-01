@@ -1,5 +1,5 @@
 /**
- * Grain de papier (D-70) : motif de bruit répétable, gris autour du gris moyen (sans effet en
+ * Grain de papier (D-71) : motif de bruit répétable, gris autour du gris moyen (sans effet en
  * lumière douce), calculé une fois par échelle de rendu. Déterministe : les blocs d'une salle se
  * raccordent, et la salle est identique d'un dessin à l'autre.
  */

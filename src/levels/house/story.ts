@@ -21,9 +21,9 @@ const SCHOOL_SHELF: TileArea = { col: 44, row: 8, w: 5, h: 3 };
 const SCHOOL_ARRIVAL: StoryStep = {
   do: 'room',
   room: 'school-strange',
-  col: 3,
+  col: 68,
   row: 43,
-  facing: 1,
+  facing: -1,
 };
 
 /** Le trou de la haie, au fond du jardin (D-49) : là où l'on passe derrière la haie. */
@@ -154,7 +154,7 @@ export const HOUSE_STORY: StoryData = {
         { do: 'flag', id: F.TraceHall },
         { do: 'flag', id: F.SlipperTaken },
         { do: 'memory', id: 'slipper' },
-        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+        { do: 'thought', icon: 'heart', ms: S.thoughtMs },
         { do: 'wait', ms: S.lookMs },
       ],
     },
@@ -170,7 +170,7 @@ export const HOUSE_STORY: StoryData = {
         { do: 'flag', id: F.TraceStairs },
         { do: 'flag', id: F.BottleTaken },
         { do: 'memory', id: 'bottle' },
-        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+        { do: 'thought', icon: 'heart', ms: S.thoughtMs },
         { do: 'wait', ms: S.lookMs },
       ],
     },
@@ -186,7 +186,7 @@ export const HOUSE_STORY: StoryData = {
       steps: [
         { do: 'flag', id: F.HeadbandTaken },
         { do: 'memory', id: 'headband' },
-        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+        { do: 'thought', icon: 'heart', ms: S.thoughtMs },
         { do: 'wait', ms: S.lookMs },
       ],
     },
@@ -202,7 +202,7 @@ export const HOUSE_STORY: StoryData = {
       steps: [
         { do: 'flag', id: F.BonnetTaken },
         { do: 'memory', id: 'bonnet' },
-        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+        { do: 'thought', icon: 'heart', ms: S.thoughtMs },
         { do: 'wait', ms: S.lookMs },
       ],
     },
@@ -397,7 +397,6 @@ export const HOUSE_STORY: StoryData = {
       lock: true,
       steps: [
         { do: 'pose', pose: 'sit' },
-        { do: 'thought', icon: 'maria', ms: S.holdMs },
         { do: 'wait', ms: S.holdMs },
         { do: 'fadeOut', ms: S.nightFadeOutMs },
         { do: 'flag', id: F.Grown },
@@ -442,8 +441,6 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: 600 },
         { do: 'thought', icon: 'sun', ms: S.thoughtMs },
         { do: 'wait', ms: S.thoughtMs },
-        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
-        { do: 'wait', ms: S.lookMs },
       ],
     },
     {
@@ -477,7 +474,7 @@ export const HOUSE_STORY: StoryData = {
       lock: true,
       steps: [
         { do: 'flag', id: F.GardenDad },
-        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
+        { do: 'thought', icon: 'question', ms: S.thoughtMs },
         { do: 'wait', ms: S.thoughtMs },
         // Papa montre, sans rien savoir, la cabane dans l'arbre : un indice (D-50).
         { do: 'thought', icon: 'treehouse', ms: S.thoughtMs, by: 'dad-garden' },
@@ -497,8 +494,6 @@ export const HOUSE_STORY: StoryData = {
       lock: true,
       steps: [
         { do: 'flag', id: F.GardenDadGate },
-        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
-        { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'gate', ms: S.thoughtMs, by: 'dad-garden' },
         { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'dad-garden' },
@@ -533,8 +528,6 @@ export const HOUSE_STORY: StoryData = {
       lock: true,
       steps: [
         { do: 'flag', id: F.GardenDadHedge },
-        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
-        { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'hedge', ms: S.thoughtMs, by: 'dad-garden' },
         { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'dad-garden' },
@@ -559,17 +552,14 @@ export const HOUSE_STORY: StoryData = {
       ],
     },
     {
-      // La cabane dans l'arbre (D-46) : Céleste y trouve le saut mural, et pense à Maria.
+      // La cabane dans l'arbre (D-46) : Céleste y trouve le saut mural.
       id: 'treehouse-find',
       room: 'garden-treehouse',
       on: 'touch',
       area: { col: 12, row: 9, w: 4, h: 3 },
       when: { none: [F.GardenTreehouse] },
       lock: false,
-      steps: [
-        { do: 'flag', id: F.GardenTreehouse },
-        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
-      ],
+      steps: [{ do: 'flag', id: F.GardenTreehouse }],
     },
     {
       // Derrière la haie (D-49) : une fois le saut mural trouvé, le trou de la haie scintille et
@@ -592,7 +582,7 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: S.blinkBlackMs },
         { do: 'fadeIn', ms: S.blinkInMs, shape: 'iris' },
         { do: 'wait', ms: 500 },
-        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs + 800 },
+        { do: 'thought', icon: 'question', ms: S.thoughtMs + 800 },
         { do: 'wait', ms: S.lookMs },
       ],
     },
@@ -658,8 +648,6 @@ export const HOUSE_STORY: StoryData = {
       lock: true,
       steps: [
         { do: 'flag', id: F.StreetMomCrane },
-        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
-        { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'crane', ms: S.thoughtMs, by: 'mom-bench' },
         { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'mom-bench' },
@@ -754,8 +742,6 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: S.nightBlackMs },
         { do: 'fadeIn', ms: S.nightFadeInMs },
         { do: 'wait', ms: 1200 },
-        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
-        { do: 'wait', ms: S.thoughtMs + 300 },
         // Maman est venue la chercher, à hauteur d'enfant : un cœur.
         { do: 'thought', icon: 'heart', ms: S.holdMs, by: 'mom-yard' },
         { do: 'wait', ms: S.holdMs },
@@ -787,7 +773,6 @@ export const HOUSE_STORY: StoryData = {
       lock: true,
       steps: [
         { do: 'pose', pose: 'sit' },
-        { do: 'thought', icon: 'maria', ms: S.holdMs },
         { do: 'wait', ms: S.holdMs },
         { do: 'fadeOut', ms: S.nightFadeOutMs },
         { do: 'flag', id: F.StreetMorning },
@@ -832,7 +817,7 @@ export const HOUSE_STORY: StoryData = {
       lock: true,
       steps: [
         { do: 'flag', id: F.StreetDad },
-        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
+        { do: 'thought', icon: 'question', ms: S.thoughtMs },
         { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'crane', ms: S.thoughtMs, by: 'dad-shop' },
         { do: 'wait', ms: S.thoughtMs },
@@ -846,7 +831,7 @@ export const HOUSE_STORY: StoryData = {
       id: 'look-photo',
       room: 'living',
       on: 'interact',
-      // Au-dessus du canapé (D-73).
+      // Au-dessus du canapé (D-74).
       area: { col: 15, row: 10, w: 5, h: 12 },
       mark: { col: 17, row: 10 },
       when: {},

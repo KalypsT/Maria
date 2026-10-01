@@ -10,7 +10,7 @@ function level(rows: string[]) {
 // Une planche en ligne 3 (colonnes 2 et 3), le sol en ligne 6.
 const ROOM = level(['#######', '#P....#', '#.....#', '#.--..#', '#.....#', '#.....#', '#######']);
 
-describe('ombre de Céleste au sol (D-70)', () => {
+describe('ombre de Céleste au sol (D-71)', () => {
   it('trouve la surface juste sous des pieds posés', () => {
     expect(groundBelow(ROOM, 2 * T, 3 * T, 3 * T, 96)).toBe(3 * T);
     // Interpolation : une fraction de pixel sous le dessus compte encore.

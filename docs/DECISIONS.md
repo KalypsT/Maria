@@ -810,7 +810,22 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Tests** (`stationEnd.test.ts`) : la fin (hall sous l'horloge puis chambre, papa), la nuit (soir, chambre fermée, un seul déclencheur au lit), la toise, la phase 3 (< 2 tuiles, influence modérée, jamais moins que la phase 2), le train (après les mois seulement, pas de changement de salle) et, sur le graphe de toute la zone (portes ouvertes, toutes les capacités, difficulté de chaque salle) : **rien d'atteignable en phase 2 ne se ferme en phase 3**, et la porte du train est atteignable. Ce test prend environ 4 minutes.
 - **Sauvegarde** : aucune migration (étapes `growth.3`, `station.train`).
 
-## D-70 — Passe graphique, étape 1 : finition « papier découpé »
+## D-70 — Retours du téléphone : parapluie, poursuite, plateformes basses, école étrange, bulles Maria
+
+- **Parapluie** (changement de mouvement demandé par l'utilisateur, revient sur D-65) : retour au geste de D-62. En l'air, **une nouvelle pression de Saut** l'ouvre ; tenu, Céleste plane ; lâché, il se referme. Un saut tenu jusqu'au sol ne l'ouvre plus. **Exception gardée** (choix de l'utilisateur) : après un **saut depuis un câble**, Saut tenu le rouvre seul au sommet (`glideAutoDelayMs`), pour enchaîner les câbles. Aide (bulle à deux flèches, texte de « Mes capacités ») remise à jour.
+  - Analyse de faisabilité : le saut « plané » relâche Saut au sommet puis le presse de nouveau ; les sauts ordinaires sont tenus jusqu'au sol (comme le joueur). Difficultés de toutes les salles inchangées (tests).
+- **Poursuite** (tour des objets perdus, parcours d'essai 10) : les trois vitesses selon la hauteur de Céleste (5,1 / 1,1 / 2,3 tuiles/s) et le saut du poursuivant quand il avait plus de 7 tuiles de retard donnaient un comportement bizarre. Maintenant :
+  - **une seule vitesse constante, 2,8 tuiles/s** (`; @chase-phase: 7 2.8`) ;
+  - **rattrapage doux** : au-delà de `chaseCatchUpGapTiles` (12) tuiles de retard, il accélère de `chaseCatchUpRate` (0,4 tuile/s par tuile en plus), sans dépasser `chaseCatchUpMaxSpeed` (6 tuiles/s) ; jamais de saut ;
+  - au départ et à la réapparition : 9 tuiles sous les pieds, 2,5 s d'attente (la section des valises flottantes, lente, reste passable après une réapparition).
+  - **Test de rythme refait** : le vrai `Chase` est rejoué le long du chemin le plus rapide (les pieds vont d'une surface à l'autre pendant chaque passage). Depuis le départ et chaque veilleuse, le joueur parfait n'est **jamais touché** (plus de 3 tuiles d'avance dans la tour) ; **50 % plus lent, il est touché** (un peu difficile). À 2,8 tuiles/s, 25 % plus lent passe de justesse. PROVISOIRE, réglable en direct (DEBUG → Combat).
+- **Plateformes basses** au-dessus des longues fosses de dangers (plus de 6 cases) : des planches de 3 cases, 3 cases au-dessus du fond, espacées de 3, pour qu'une chute ne fasse pas retomber plusieurs fois dans les orties, les ronces, les gravats, les crayons ou les parapluies. Salles : jardin renversé et ronces (branches), chantier, dépôt (planches d'échafaudage), école étrange (tables), monde étrange de la gare (valises flottantes, avec trois marches pour remonter sur le tas des objets perdus). Au chantier, **un passage bas sous le mur de béton** ramène à la lanterne du départ (une échelle de planches créait un raccourci, détecté par les tests).
+  - Test (`lowPlatforms.test.ts`) : chaque case du fond d'une longue fosse a une plateforme sûre à 3 tuiles de haut et 4 colonnes au plus, d'où l'on rejoint le départ ou une lanterne (escalade et saut mural, sans parapluie, fenêtres de la difficulté de la salle). Toutes les difficultés « exactement » des salles sont inchangées.
+- **École étrange allongée** (+25 colonnes, choix de l'utilisateur : une section avec le parapluie) : on arrive maintenant en bas à droite ; des tables en escalier, puis **un long plané** au-dessus des crayons jusqu'à une règle et sa veilleuse (facile avec le parapluie, impossible sans) ; une ouverture dans le mur ramène dans la classe ; des tables basses mènent à l'ancien départ (une lanterne y est ajoutée), puis le parcours d'avant (moyen jusqu'à la lanterne des tables, difficile jusqu'à la boîte). Arrivée de l'histoire déplacée.
+- **Bulles « Maria »** (32 → 15) : gardées au prologue de la maison, au début de chaque niveau (réveil au jardin, première question à maman au jardin et à l'aire de jeux, arrivée à la gare, réveil après la gare) et à la fin de chaque monde étrange (le bonnet, le trou en forme de Maria de la boîte, Roger sous l'horloge). Ailleurs : un cœur pour les affaires de Maria ramassées, un « ? » pour les questions suivantes aux parents et l'entrée derrière la haie, ou rien (avant de dormir, la cabane, quand papa ou maman montrent la suite).
+- **Sauvegarde** : aucune migration.
+
+## D-71 — Passe graphique, étape 1 : finition « papier découpé »
 
 - **Contexte** (retour de l'utilisateur après analyse de l'existant) : le jeu manque de beauté, de lisibilité, et un peu d'intérêt à parcourir. Plan validé en 5 étapes, tout en dessin par le code (images IA éventuellement plus tard) : (1) fondations du rendu, (2) profondeur (parallaxe, avant-plan), (3) vie du monde réel, (4) ~~identifiants fixes des trouvailles~~, (5) une salle témoin refaite, **le salon**, puis propagation.
 - **Étape 4 abandonnée (décision de l'utilisateur)** : les trouvailles et les lanternes restent identifiées par leur position (`secretId`, `checkpointId`). Le jeu est encore en essai : refaire une partie après une modification de salle est accepté. **À revoir avant la sortie** (pilier 10).
@@ -831,7 +846,7 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Résolution** : le mode « Écran » (D-18) rend nettement mieux le dessin par le code ; le passer par défaut attend la mesure des images/s sur le téléphone de l'utilisateur.
 - **Sauvegarde** : aucune migration.
 
-## D-71 — Passe graphique, étape 2 : la profondeur
+## D-72 — Passe graphique, étape 2 : la profondeur
 
 - **Plans lointains** (`BackdropView`, `src/scenes/art/backdropArt.ts`) : textures dessinées une fois par salle, qui défilent moins vite que la salle (parallaxe : à l'écran, `x − vue × facteur`). Positionnées à chaque image d'après la vue réelle (zoom compris), recadrées sur la salle (au-delà de ses murs, la couleur d'ambiance comme avant), sous le fond de la salle.
   - **Dehors** : le ciel (nuages, soleil : `sky` dans `DECOR_KINDS`) ne bouge presque pas ; collines lointaines ; puis, au jardin, deux rangées de collines arborées, et dans le quartier et à la gare, deux rangées de **toits de la ville** (fenêtres allumées le soir). Le fond de la salle devient transparent là où était le ciel.
@@ -844,7 +859,7 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Coût mesuré** (Chromium sans GPU, échelle 3) : construction des plans 30 à 45 ms dans le salon, 100 à 200 ms dehors, pendant le fondu du changement de salle ; avant-plan < 20 ms. **Mémoire graphique** : jusqu'à environ 25 Mo de plus dans la rue (quatre plans). À surveiller sur téléphone ; levier : `PARALLAX.maxScale` à 1.
 - **Sauvegarde** : aucune migration.
 
-## D-72 — Passe graphique, étape 3 : la vie du monde réel
+## D-73 — Passe graphique, étape 3 : la vie du monde réel
 
 - **Un vent commun** (`wind`, logique pure testée, `src/core/fx/worldLife.ts`) : calmes et rafales lentes ; le linge, les feuilles et les nuages le suivent ensemble.
 - **Nuages qui dérivent** : sortis du ciel peint, ils deviennent des images accrochées aux plans lointains (`BackdropView`), qui avancent au vent et reviennent de l'autre côté. Dehors, dans le ciel ; **dedans, devant la lune**, dans la vue par les fenêtres (sombres la nuit, blancs le matin). Recadrés sur la salle.
@@ -857,7 +872,7 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Rien ne touche à la collision ni au mouvement** ; aucune allocation par image.
 - **Sauvegarde** : aucune migration.
 
-## D-73 — Passe graphique, étape 5 : le salon, salle témoin
+## D-74 — Passe graphique, étape 5 : le salon, salle témoin
 
 - **Plan validé** par l'utilisateur, choix « petit feu allumé ». Les repères de l'histoire restent en place : la bibliothèque et Maria (le salon étrange s'y appuie), le canapé de maman, la place du chat, les deux portes ; le salon reste facile, son sommet réservé à l'escalade.
 - **Une pièce, pas une boîte** : le dessous de l'escalier qui monte à l'étage descend dans le coin haut gauche (bois, en marches) ; une poutre au plafond à droite.
@@ -867,7 +882,7 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Ailleurs** : la photo de famille passe au-dessus du canapé (zone d'interaction déplacée) ; l'applique de gauche passe sous l'escalier ; l'horloge murale et l'applique de droite sont retirées (l'horloge comtoise et le lustre les remplacent). Le salon étrange n'est pas touché.
 - **Rendu** : `src/scenes/art/livingArt.ts` (dessins), animations dans `WorldLifeView` (feu : 6 images qui alternent et une lueur qui palpite ; balancier : 9 inclinaisons dessinées d'avance), réglages `WORLD_LIFE.fire` et `WORLD_LIFE.pendulum`.
 - **Vérifié par les tests** : la maison reste facile et ne coince jamais (un premier placement de la table laissait un trou d'une tuile entre le pouf et un pied : corrigé) ; route haute en grimpant ; sommet et trouvaille seulement en grimpant, trouvaille au plus moyenne ; monde étrange inchangé.
-- **Sauvegarde** : la trouvaille du salon a changé de place ; si elle était ramassée, elle redevient à trouver (identifiants par position, étape 4 écartée, D-70). Aucune migration.
+- **Sauvegarde** : la trouvaille du salon a changé de place ; si elle était ramassée, elle redevient à trouver (identifiants par position, étape 4 écartée, D-71). Aucune migration.
 - **Grille pour les autres salles** (à appliquer aux futurs niveaux, et aux salles existantes après tri) : une silhouette de salle, pas une boîte ; rien ne flotte (chaque appui pend ou tient au sol, ou fait partie d'un meuble) ; un repère fort qui guide le regard ; des sauts au rythme varié ; ce qu'on ne peut pas encore atteindre se voit ; une source de lumière qui compose la pièce ; un peu de vie.
 
 ## Risques identifiés à suivre

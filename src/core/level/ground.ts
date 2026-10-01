@@ -2,7 +2,7 @@ import { TILE_SIZE as T } from '../../config/display';
 import { Tile, tileAt, type LevelData } from './LevelData';
 
 /**
- * Surface sous les pieds (ombre de Céleste au sol, D-70) : hauteur (px) du dessus de la première
+ * Surface sous les pieds (ombre de Céleste au sol, D-71) : hauteur (px) du dessus de la première
  * tuile non vide sous `feetY`, sur la largeur [left, right[, à au plus `maxPx` ; null sinon. Une
  * tuile que les pieds ont déjà dépassée (plateforme traversée par le dessous) est ignorée.
  */

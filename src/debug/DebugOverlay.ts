@@ -243,7 +243,7 @@ export function installDebugOverlay(scene: GameScene): void {
   addCheck(panel, 'Monde étrange (aperçu)', scene.strangeWorld, (checked) => {
     scene.setStrangeWorld(checked);
   });
-  // Finition (D-70) : avant / après, sans toucher aux réglages.
+  // Finition (D-71) : avant / après, sans toucher aux réglages.
   let finishBackup: ArtFinish | null = null;
   addCheck(panel, 'Comparer : sans finition', false, (checked) => {
     if (checked) {

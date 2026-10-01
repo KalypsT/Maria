@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Passe graphique** (D-70) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étapes 1, 2, 3 et 5 faites** (finition « papier découpé », D-70 ; profondeur, D-71 ; vie du monde réel, D-72 ; **le salon, salle témoin**, D-73) sur `ccr-8742f994-82xjq9` ; l'étape 4 (identifiants fixes de la sauvegarde) est écartée jusqu'à la sortie. Prochaine : essai sur téléphone, puis tri des autres salles (à refaire, à retoucher, à laisser) selon la grille de D-73. Pas de nouveau niveau d'ici là.
+**Passe graphique** (D-71) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étapes 1, 2, 3 et 5 faites** (finition « papier découpé », D-71 ; profondeur, D-72 ; vie du monde réel, D-73 ; **le salon, salle témoin**, D-74) sur `ccr-8742f994-82xjq9` ; l'étape 4 (identifiants fixes de la sauvegarde) est écartée jusqu'à la sortie. Prochaine : essai sur téléphone, puis tri des autres salles (à refaire, à retoucher, à laisser) selon la grille de D-74. Pas de nouveau niveau d'ici là.
 
 **Le jardin (2a) et derrière la haie (2b)** (§7.2, §6, D-46 à D-49) : fusionnés (PR #29), **essai sur téléphone en cours** (début du jardin testé ; jardin adouci (D-51) sur `ccr-53d22df4-9euiqo`). Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
 
@@ -18,7 +18,7 @@ Prochaine : essai de la gare (réelle, étrange, la fin, la phase 3) sur télép
 
 ## Fait
 
-### Passe graphique, étape 5 : le salon, salle témoin (D-73)
+### Passe graphique, étape 5 : le salon, salle témoin (D-74)
 
 - L'escalier descend de l'étage dans le coin ; une poutre au plafond.
 - Rien ne flotte : deux plantes suspendues, un lustre, une horloge comtoise (la trouvaille sur son chapeau), la tringle allongée.
@@ -31,7 +31,7 @@ Prochaine : essai de la gare (réelle, étrange, la fin, la phase 3) sur télép
 - [ ] Le feu : assez vivant, pas trop vif ? Le balancier se remarque-t-il ?
 - [ ] La trouvaille sur l'horloge : le saut depuis la bibliothèque est-il juste (moyen) ?
 
-### Passe graphique, étape 3 : la vie du monde réel (D-72)
+### Passe graphique, étape 3 : la vie du monde réel (D-73)
 
 - Un vent commun, par rafales douces.
 - Les nuages dérivent dans le ciel, et la nuit devant la lune, dans les fenêtres.
@@ -42,7 +42,7 @@ Prochaine : essai de la gare (réelle, étrange, la fin, la phase 3) sur télép
 - [ ] À vérifier sur téléphone : le vent et les feuilles, assez doux ? Les oiseaux, trop fréquents ?
 - [ ] La trotteuse des horloges s'affiche-t-elle en pointillés ? (défaut vu dans Chromium sans GPU)
 
-### Passe graphique, étape 2 : la profondeur (D-71)
+### Passe graphique, étape 2 : la profondeur (D-72)
 
 - Dehors : ciel, collines et toits de la ville en plans qui défilent moins vite que la salle (parallaxe).
 - Dedans : les vitres laissent voir la nuit (ou le matin), la lune et les toits de la ville, fenêtres allumées ; ils glissent un peu en marchant.
@@ -53,7 +53,7 @@ Prochaine : essai de la gare (réelle, étrange, la fin, la phase 3) sur télép
 - [ ] La mémoire : la rue et la gare se chargent-elles sans ralentir ? Le changement de salle dehors est-il plus long ?
 - [ ] L'avant-plan : gêne-t-il la lecture du sol ou des ennemis ?
 
-### Passe graphique, étape 1 : finition « papier découpé » (D-70)
+### Passe graphique, étape 1 : finition « papier découpé » (D-71)
 
 - Le décor en feuilles superposées, chacune avec son ombre douce : fond lointain voilé, fond proche, couche jouable (murs, sol, meubles) nettement détachée du fond.
 - Ombres de contact sous les meubles, grain de papier, vignettage selon la palette.
@@ -63,6 +63,20 @@ Prochaine : essai de la gare (réelle, étrange, la fin, la phase 3) sur télép
 - [ ] À vérifier sur téléphone : le mode « Écran » (menu pause → Affichage) tient-il 55–60 images/s ? Si oui, il passera par défaut.
 - [ ] Les changements de bloc en marchant (la rue, la gare) saccadent-ils plus qu'avant ?
 - [ ] Les ombres et le grain : trop, pas assez ? (DEBUG → « Comparer : sans finition », curseurs « Habillage (finition) », puis Exporter JSON.)
+
+### Retours du téléphone (D-70)
+
+- **Parapluie** : de nouveau une nouvelle pression de Saut en l'air (tenir pour planer) ; il ne s'ouvre plus tout seul au sommet, sauf après un saut depuis un câble.
+- **Poursuite de la tour** : une seule vitesse (2,8 tuiles/s), et s'il est loin, il accélère doucement au lieu de sauter. Le chemin parfait ne se fait jamais toucher ; 50 % plus lent, on se fait toucher.
+- **Plateformes basses** au-dessus des longues fosses (jardin renversé, ronces, chantier, dépôt, école étrange, gare étrange) ; au chantier, un passage sous le mur de béton ramène au départ.
+- **École étrange allongée** : nouvelle arrivée en bas à droite, une section avec un long plané au parapluie, une veilleuse de plus, puis la classe d'avant.
+- **Moins de bulles Maria** (32 → 15) : prologue, début de chaque niveau, fin de chaque monde étrange.
+- Tests : 535. Vérifié dans Chromium : les salles modifiées.
+- [ ] À vérifier sur téléphone : le parapluie (nouvelle pression) et l'enchaînement des câbles.
+- [ ] La poursuite : assez pressante, assez régulière ?
+- [ ] Les plateformes basses : se remarquent-elles, gâchent-elles le danger ?
+- [ ] La nouvelle section de l'école étrange : trop facile ? Le retour par la classe se comprend-il ?
+- [ ] Les bulles Maria : le bon dosage ?
 
 ### La gare, PR 5 : la fin du niveau, la phase 3, le train à quai (D-69)
 

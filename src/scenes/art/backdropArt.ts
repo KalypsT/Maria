@@ -2,7 +2,7 @@ import type { ArtPalette } from '../../config/art';
 import { TILE_SIZE as T } from '../../config/display';
 
 /**
- * Plans lointains (D-71) : ciel, collines, toits de la ville, vue par les fenêtres. Chacun est
+ * Plans lointains (D-72) : ciel, collines, toits de la ville, vue par les fenêtres. Chacun est
  * dessiné une fois par salle sur sa propre texture, qui défile moins vite que la salle
  * (parallaxe, `BackdropView`). Coordonnées du monde (px logiques) ; `Extent` est la partie du plan
  * qui peut apparaître à l'écran.
@@ -25,7 +25,7 @@ function startAt(x: number, step: number, offset = 0): number {
   return Math.floor((x - offset) / step) * step + offset;
 }
 
-/** Ciel du dehors : dégradé jusqu'à l'horizon (le sol). Les nuages dérivent à part (D-72). */
+/** Ciel du dehors : dégradé jusqu'à l'horizon (le sol). Les nuages dérivent à part (D-73). */
 export function drawSkyPlane(
   ctx: CanvasRenderingContext2D,
   p: Readonly<ArtPalette>,
@@ -43,7 +43,7 @@ export function drawSkyPlane(
 export const CLOUD_SIZE = { w: 64, h: 24 } as const;
 
 /**
- * Un nuage en coussins (D-72), dans un cadre de `CLOUD_SIZE` : ombre dessous, lumière dessus.
+ * Un nuage en coussins (D-73), dans un cadre de `CLOUD_SIZE` : ombre dessous, lumière dessus.
  * `seed` fait varier les coussins.
  */
 export function drawCloud(

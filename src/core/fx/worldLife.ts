@@ -1,10 +1,10 @@
 /**
- * Vie du monde réel (D-72) : logique pure, déterministe. Rien ici ne touche à la collision ni au
+ * Vie du monde réel (D-73) : logique pure, déterministe. Rien ici ne touche à la collision ni au
  * mouvement (pilier 1).
  */
 
 /**
- * Vent commun (D-72) : de 0 (calme) à 1 (rafale), lent et doux. Le linge, les feuilles et les
+ * Vent commun (D-73) : de 0 (calme) à 1 (rafale), lent et doux. Le linge, les feuilles et les
  * nuages le suivent ensemble.
  */
 export function wind(nowMs: number): number {

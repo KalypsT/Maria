@@ -24,7 +24,7 @@ export const ABILITY_HINTS: Readonly<Record<Ability, string>> = {
   'wall-jump':
     'En l’air, pousser vers un mur : Céleste glisse contre lui. Sauter : elle rebondit de l’autre côté.',
   umbrella:
-    'Garder Saut appuyé : en haut du saut, le parapluie s’ouvre et Céleste plane (ou appuyer encore sur Saut en l’air). Lâcher : il se referme.',
+    'En l’air, appuyer encore sur Saut : le parapluie s’ouvre et Céleste plane tant que Saut reste appuyé. Lâcher : il se referme.',
   hook: 'En planant, passer sur un câble : le crochet du parapluie s’y accroche et Céleste glisse. Lâcher Saut : elle lâche. Lâcher et vite rappuyer : elle saute.',
 };
 

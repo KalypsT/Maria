@@ -1,11 +1,22 @@
-import { DEFAULT_COMBAT } from '../src/config/combat';
-import type { LevelAnalysis } from '../src/core/analysis/analyzeLevel';
+import { DEFAULT_COMBAT, type CombatParams } from '../src/config/combat';
+import { TILE_SIZE as T } from '../src/config/display';
+import type { LevelAnalysis, Move } from '../src/core/analysis/analyzeLevel';
+import { Chase } from '../src/core/boss/Chase';
 import { surfaceUnder } from '../src/core/analysis/surfaces';
-import { EntityType, type LevelData, type TilePos } from '../src/core/level/LevelData';
+import type { LevelData, TilePos } from '../src/core/level/LevelData';
 
-/** Chemin le plus rapide (durées des passages, D-67) dont chaque passage a au moins `minWindow`. */
-export function fastest(a: LevelAnalysis, from: number, to: number, minWindow: number): number {
+/**
+ * Chemin le plus rapide (durées des passages, D-67) dont chaque passage a au moins `minWindow` :
+ * les passages, dans l'ordre ; null si impossible.
+ */
+export function fastestPath(
+  a: LevelAnalysis,
+  from: number,
+  to: number,
+  minWindow: number,
+): Move[] | null {
   const best = new Map<number, number>([[from, 0]]);
+  const via = new Map<number, Move>();
   const done = new Set<number>();
   for (;;) {
     let u = -1;
@@ -23,47 +34,94 @@ export function fastest(a: LevelAnalysis, from: number, to: number, minWindow: n
         const t = (best.get(u) ?? Infinity) + m.durationMs;
         if (t < (best.get(m.to) ?? Infinity)) {
           best.set(m.to, t);
+          via.set(m.to, m);
         }
       }
     }
   }
-  return best.get(to) ?? Infinity;
+  if (!best.has(to)) {
+    return null;
+  }
+  const path: Move[] = [];
+  for (let n = to; n !== from;) {
+    const m = via.get(n);
+    if (!m) {
+      return null;
+    }
+    path.unshift(m);
+    n = m.from;
+  }
+  return path;
+}
+
+/** Durée du chemin le plus rapide (ms), `Infinity` si impossible. */
+export function fastest(a: LevelAnalysis, from: number, to: number, minWindow: number): number {
+  const path = fastestPath(a, from, to, minWindow);
+  return path ? path.reduce((t, m) => t + m.durationMs, 0) : Infinity;
 }
 
 /**
- * Rythme d'une poursuite (D-67) : pour chaque phase, le temps du chemin le plus rapide de son
- * départ (le départ de la salle, puis les veilleuses de bas en haut) au départ suivant (l'arrivée
- * `end` pour la dernière), et le temps qu'il faut au poursuivant pour y monter (départ sous
- * Céleste, attente, vitesse de la phase ; les crocs-en-jambe ne sont pas comptés).
+ * Poursuite rejouée (D-70) : le vrai `Chase` mené par une Céleste qui suit le chemin le plus rapide
+ * de `start` à `end`, chaque passage `slow` fois plus lent (1 : joueur parfait). Ses pieds vont en
+ * ligne droite d'une surface à l'autre pendant le passage (prudent : un saut monte plus haut).
+ * Retourne le nombre de contacts et la plus petite avance sur le front (tuiles).
  */
-export function chasePace(
+export function chaseRun(
   level: LevelData,
   a: LevelAnalysis,
   start: TilePos,
   end: TilePos,
   minWindow: number,
-): { time: number; front: number }[] {
+  slow = 1,
+  params: Readonly<CombatParams> = DEFAULT_COMBAT,
+): { contacts: number; margin: number; done: boolean } {
   const chase = level.chase;
   if (!chase) {
     throw new Error(`${level.id} : pas de poursuite`);
   }
-  const P = DEFAULT_COMBAT;
-  const lamps = level.entities
-    .filter((e) => e.type === EntityType.Checkpoint && e.row < start.row)
-    .sort((x, y) => y.row - x.row);
-  const stops: TilePos[] = [start, ...lamps, end];
-  return chase.phases.map((phase, i) => {
-    const from = stops[i] ?? start;
-    const to = stops[i + 1] ?? end;
-    const time = fastest(
-      a,
-      surfaceUnder(level, a.map, from.col, from.row),
-      surfaceUnder(level, a.map, to.col, to.row),
-      minWindow,
-    );
-    const front =
-      P.chaseStartDelayMs +
-      ((P.chaseRestartGapTiles + from.row - to.row) / (phase.speed * P.chaseSpeedScale)) * 1000;
-    return { time, front };
-  });
+  const path = fastestPath(
+    a,
+    surfaceUnder(level, a.map, start.col, start.row),
+    surfaceUnder(level, a.map, end.col, end.row),
+    minWindow,
+  );
+  if (!path) {
+    throw new Error(`${level.id} : aucun chemin`);
+  }
+  const HZ = 120;
+  const run = new Chase(chase, params, HZ);
+  const box = { x: 0, y: 0, width: 12, height: 26 };
+  let contacts = 0;
+  let margin = Infinity;
+  const place = (k: number, m: Move) => {
+    const f = a.map.surfaces[m.from];
+    const t = a.map.surfaces[m.to];
+    if (!f || !t) {
+      throw new Error('surface inconnue');
+    }
+    const cx = (sur: typeof f) => ((sur.colStart + sur.colEnd + 1) / 2) * T;
+    box.x = cx(f) + (cx(t) - cx(f)) * k - box.width / 2;
+    box.y = (f.row + (t.row - f.row) * k) * T - box.height;
+  };
+  // Départ : debout sur la première surface pendant l'attente du poursuivant.
+  const first = path[0];
+  if (!first) {
+    return { contacts: 0, margin: Infinity, done: true };
+  }
+  place(0, first);
+  run.restart();
+  for (const m of path) {
+    const steps = Math.max(1, Math.round(((m.durationMs * slow) / 1000) * HZ));
+    for (let s = 1; s <= steps; s++) {
+      place(s / steps, m);
+      if (run.step(box, false)) {
+        contacts++;
+      }
+      if (run.done) {
+        return { contacts, margin, done: true };
+      }
+      margin = Math.min(margin, (run.frontY - box.y - box.height) / T);
+    }
+  }
+  return { contacts, margin, done: run.done };
 }

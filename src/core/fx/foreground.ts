@@ -2,7 +2,7 @@ import { TILE_SIZE as T } from '../../config/display';
 import { EntityType, Tile, tileAt, type LevelData } from '../level/LevelData';
 
 /**
- * Avant-plan (D-71) : silhouettes posées au bas de l'écran, qui défilent plus vite que la salle.
+ * Avant-plan (D-72) : silhouettes posées au bas de l'écran, qui défilent plus vite que la salle.
  * Logique pure : placement des pièces et zones où elles doivent s'effacer (jamais de danger ni
  * d'objet de jeu caché).
  */

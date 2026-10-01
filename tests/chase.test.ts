@@ -4,14 +4,13 @@ import { TILE_SIZE as T } from '../src/config/display';
 import { DIFFICULTY_MIN_WINDOW_MS } from '../src/config/levelDesign';
 import { DEFAULT_MOVEMENT } from '../src/config/movement';
 import { analyzeLevel } from '../src/core/analysis/analyzeLevel';
-import { surfaceUnder } from '../src/core/analysis/surfaces';
 import { Chase, ChaseEvent } from '../src/core/boss/Chase';
 import { CombatEvent, CombatWorld } from '../src/core/combat/CombatWorld';
 import { EntityType, type LevelData } from '../src/core/level/LevelData';
 import { parseAsciiLevel } from '../src/core/level/parseAsciiLevel';
 import { PlayerPhysics } from '../src/core/player/PlayerPhysics';
 import { LEVELS } from '../src/levels';
-import { fastest } from './pace';
+import { chaseRun } from './pace';
 
 const P = DEFAULT_COMBAT;
 
@@ -33,11 +32,12 @@ function course(): LevelData {
   return parseAsciiLevel('poursuite', source.text);
 }
 
-describe('poursuite verticale (boss, D-67)', () => {
+describe('poursuite verticale (boss, D-67, D-70)', () => {
   it('@chase : ligne d’arrivée, phases de bas en haut, crocs-en-jambe', () => {
     const level = course();
     expect(level.chase?.endRow).toBe(7);
-    expect(level.chase?.phases.map((p) => p.untilRow)).toEqual([73, 59, 7]);
+    // Une seule vitesse, constante (D-70).
+    expect(level.chase?.phases).toEqual([{ untilRow: 7, speed: 2.8 }]);
     expect(level.chase?.trips).toHaveLength(1);
     expect(level.meta.camera).toBe('up');
     const bad = (extra: string) => () => parseAsciiLevel('c', `${extra}\n####\n#P.#\n####`);
@@ -46,7 +46,7 @@ describe('poursuite verticale (boss, D-67)', () => {
     expect(bad('; @chase: x')).toThrow(/mal formé/);
   });
 
-  it('il attend un peu, puis monte à la vitesse de la phase', () => {
+  it('il attend un peu, puis monte à vitesse constante', () => {
     const level = course();
     const chase = new Chase(need(level.chase, 'poursuite'), P, HZ);
     const feet = 98 * T;
@@ -61,17 +61,26 @@ describe('poursuite verticale (boss, D-67)', () => {
     for (let s = 0; s < HZ; s++) {
       chase.step(box(40, feet), false);
     }
-    // Une seconde de montée à la vitesse de la phase 1 (le contact l'arrête avant les pieds).
-    expect(y0 - chase.frontY).toBeCloseTo(5.1 * T, 3);
+    // Une seconde de montée à la vitesse de la salle (pas de rattrapage : il est assez près).
+    expect(y0 - chase.frontY).toBeCloseTo(2.8 * T, 3);
   });
 
-  it('il ne reste jamais trop loin : il remonte hors de la vue', () => {
+  it('trop loin, il accélère peu à peu, sans jamais sauter (rattrapage doux)', () => {
     const chase = new Chase(need(course().chase, 'poursuite'), P, HZ);
     for (let s = 0; s <= (P.chaseStartDelayMs / 1000) * HZ; s++) {
       chase.step(box(40, 98 * T), false);
     }
-    chase.step(box(40, 70 * T), false);
-    expect(chase.frontY).toBeLessThanOrEqual(70 * T + P.chaseMaxGapTiles * T);
+    // Céleste loin au-dessus : chaque pas le fait monter un peu plus vite, au plus à la vitesse max.
+    let previous = 0;
+    for (let s = 0; s < HZ * 3; s++) {
+      const y = chase.frontY;
+      chase.step(box(40, 60 * T), false);
+      const moved = y - chase.frontY;
+      expect(moved).toBeLessThanOrEqual((P.chaseCatchUpMaxSpeed * T) / HZ + 1e-9);
+      expect(moved).toBeGreaterThanOrEqual(previous - 1e-9);
+      expect(moved).toBeGreaterThan((2.8 * T) / HZ);
+      previous = moved;
+    }
   });
 
   it('le toucher : contact une fois, il recule et s’arrête ; invulnérable, rien', () => {
@@ -129,7 +138,7 @@ describe('poursuite verticale (boss, D-67)', () => {
   });
 
   it(
-    'chaque phase laisse le temps de passer : le chemin le plus rapide devance le poursuivant',
+    'linéaire et pressant : le chemin le plus rapide le devance toujours, un joueur bien plus lent est rattrapé',
     { timeout: 120_000 },
     () => {
       const level = course();
@@ -139,44 +148,18 @@ describe('poursuite verticale (boss, D-67)', () => {
         glide: true,
         hook: true,
       });
-      const lamps = level.entities
-        .filter((e) => e.type === EntityType.Checkpoint)
-        .sort((x, y) => y.row - x.row);
       const goal = need(level.goal, 'arrivée');
-      const stops = [
-        { col: level.spawn.col, row: level.spawn.row },
-        ...lamps.map((l) => ({ col: l.col, row: l.row })),
-        goal,
+      const starts = [
+        level.spawn,
+        ...level.entities.filter((e) => e.type === EntityType.Checkpoint),
       ];
-      const phases = need(level.chase, 'poursuite').phases;
-      const report: string[] = [];
-      const checks: [number, number][] = [];
-      for (let i = 0; i < phases.length; i++) {
-        const from = need(stops[i], 'étape');
-        const to = need(stops[i + 1], 'étape');
-        const time = fastest(
-          a,
-          surfaceUnder(level, a.map, from.col, from.row),
-          surfaceUnder(level, a.map, to.col, to.row),
-          DIFFICULTY_MIN_WINDOW_MS.easy,
-        );
-        // Le poursuivant repart sous les pieds de Céleste, attend, puis monte jusqu'à l'arrivée de
-        // la phase (les crocs-en-jambe, en plus, ne sont pas comptés).
-        const rise = from.row - to.row;
-        const front =
-          P.chaseStartDelayMs +
-          ((P.chaseRestartGapTiles + rise) / ((phases[i]?.speed ?? 1) * P.chaseSpeedScale)) * 1000;
-        report.push(
-          `phase ${String(i + 1)} : ${time.toFixed(0)} ms, poursuivant ${front.toFixed(0)} ms`,
-        );
-        checks.push([time, front]);
+      for (const start of starts) {
+        const run = chaseRun(level, a, start, goal, DIFFICULTY_MIN_WINDOW_MS.easy);
+        expect(run.contacts, `depuis la ligne ${String(start.row)}`).toBe(0);
+        expect(run.margin, `depuis la ligne ${String(start.row)}`).toBeGreaterThan(2);
       }
-      console.info(report.join('\n'));
-      for (const [time, front] of checks) {
-        expect(time, report.join(' ; ')).toBeLessThan(front * 0.8);
-        // Pas trop lent non plus : il presse vraiment (au moins 40 % du temps disponible).
-        expect(time, report.join(' ; ')).toBeGreaterThan(front * 0.4);
-      }
+      const slow = chaseRun(level, a, level.spawn, goal, DIFFICULTY_MIN_WINDOW_MS.easy, 1.5);
+      expect(slow.contacts).toBeGreaterThan(0);
     },
   );
 });

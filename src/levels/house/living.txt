@@ -1,4 +1,4 @@
-; Salon (D-73, salle témoin de la passe graphique) : l'escalier descend de l'étage dans le coin,
+; Salon (D-74, salle témoin de la passe graphique) : l'escalier descend de l'étage dans le coin,
 ; la cheminée et son feu au milieu, la grande bibliothèque où Maria est assise, l'horloge comtoise.
 ; Rien ne flotte : les appuis de la route haute pendent (plantes, lustre) ou tiennent au sol.
 ; @name: Salon
