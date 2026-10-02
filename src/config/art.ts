@@ -187,6 +187,13 @@ export const DECOR_KINDS: Readonly<
   drawings: { furniture: false },
   /** Girouette sur un toit (fond, animée : elle tourne au vent). */
   weathervane: { furniture: false },
+  // La rue refaite (D-77).
+  /** Fil à linge tendu entre deux fenêtres : le linge se balance au vent. */
+  washline: { furniture: false },
+  /** Drapeau sur le toit de l'école (animé : il flotte au vent). */
+  flag: { furniture: false },
+  /** Chat roux du voisinage, assis sur un rebord de fenêtre (fond ; la queue bouge). */
+  cat: { furniture: false },
   // Le jardin (D-46), dessiné par le code (PLACEHOLDER, pas d'image clé pour l'instant).
   /** Frondaison des arbres en haut des salles (feuillage plein). */
   canopy: { furniture: true },
@@ -235,7 +242,7 @@ export const DECOR_KINDS: Readonly<
   /** Maisons de ville mitoyennes (fond). */
   houses: { furniture: false },
   /** Platane du trottoir (fond). */
-  planetree: { furniture: false, far: true },
+  planetree: { furniture: false },
   /** Les quatre lieux, fermés pour l'instant (fond, avec leur porte). */
   playground: { furniture: false },
   school: { furniture: false },
@@ -808,6 +815,11 @@ export const WORLD_LIFE = {
   butterfly: { count: 2, periodMs: 9000, flapMs: 140 },
   /** Ampoules de la guirlande (D-76) : balancement (px par vent fort). */
   garland: { swayPx: 2.5 },
+  /** Fumée des cheminées de la rue (D-77) : volutes par cheminée, montée (px/s), dérive au vent. */
+  smoke: { count: 5, risePxPerS: 7, windPx: 14, alpha: 0.6 },
+  /** Drapeau de l'école (D-77) : une vague (ms). Queue du chat : un aller-retour (ms). */
+  flag: { periodMs: 900 },
+  catTail: { periodMs: 2600, swingRad: 0.35 },
 } as const;
 
 /** Rayon du halo d'une veilleuse (px logiques). */

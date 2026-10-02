@@ -21,7 +21,7 @@ import { playgroundDrawers } from './playgroundArt';
 import { drawPencils, schoolDrawers } from './schoolArt';
 import { drawRubble, shopSiteDrawers } from './shopSiteArt';
 import { drawUmbrellaTips, stationDrawers } from './stationArt';
-import { streetDrawers } from './streetArt';
+import { houseLayout, streetDrawers } from './streetArt';
 import { drawMemory } from './memoryArt';
 import { livingDrawers } from './livingArt';
 import { houseDrawers } from './houseArt';
@@ -1910,6 +1910,17 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
     }
     if (d.kind === 'pendant') {
       return [{ x: r.x + r.w / 2, y: r.y + r.h + 4, k: 1 }];
+    }
+    // Au crépuscule (D-77) : les lampadaires s'allument, quelques fenêtres aussi.
+    if (d.kind === 'lamppost' && p.darkness > 0) {
+      return [{ x: r.x + r.w / 2, y: r.y + 10, k: 0.8 }];
+    }
+    if (d.kind === 'houses' && p.darkness > 0) {
+      return houseLayout(r).flatMap((house) =>
+        house.windows
+          .filter((pane) => pane.lit)
+          .map((pane) => ({ x: pane.x + pane.w / 2, y: pane.y + pane.h / 2, k: 0.25 })),
+      );
     }
     return [];
   });

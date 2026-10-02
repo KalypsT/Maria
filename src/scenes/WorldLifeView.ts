@@ -6,6 +6,7 @@ import type { LevelData } from '../core/level/LevelData';
 import { clotheslineItems, drawLaundryItem } from './art/roomArt';
 import { drawFlames, hearth, pendulum } from './art/livingArt';
 import { garlandPoints, swingPivot } from './art/gardenArt';
+import { houseLayout } from './art/streetArt';
 
 /** Linge : avec le fond proche, sous les meubles (dessinés avec le fond, -5) on passe devant. */
 const LAUNDRY_DEPTH = -4.6;
@@ -37,6 +38,9 @@ const BUTTERFLY_TEXTURE = 'life-butterfly';
 /** Balançoire, girouette (D-76) : inclinaisons et orientations dessinées d'avance. */
 const SWING_FRAMES = 9;
 const VANE_FRAMES = 8;
+/** Drapeau de l'école, queue du chat (D-77). */
+const FLAG_FRAMES = 6;
+const TAIL_FRAMES = 7;
 const FRAME_NAMES = Array.from({ length: Math.max(LAUNDRY_FRAMES, LEAF_FRAMES) }, (_, i) =>
   String(i),
 );
@@ -134,7 +138,7 @@ interface Spark {
 }
 
 interface SparkField {
-  readonly kind: 'stars' | 'dust' | 'steam';
+  readonly kind: 'stars' | 'dust' | 'steam' | 'smoke';
   readonly x: number;
   readonly y: number;
   readonly w: number;
@@ -154,7 +158,7 @@ interface Drum {
 /** Un objet animé par images (balançoire, girouette) : son image et sa phase. */
 interface Framed {
   readonly image: Phaser.GameObjects.Image;
-  readonly kind: 'swing' | 'vane';
+  readonly kind: 'swing' | 'vane' | 'flag' | 'tail';
 }
 
 /** Une ampoule de la guirlande, à sa place sur le fil. */
@@ -281,8 +285,20 @@ export class WorldLifeView {
     }
     level.decor.forEach((d, i) => {
       const r = { x: d.col * T, y: d.row * T, w: d.width * T, h: d.height * T };
-      if (d.kind === 'clothesline' && palette.outdoor) {
-        this.makeLaundry(level.id, r, palette, artScale);
+      if ((d.kind === 'clothesline' || d.kind === 'washline') && palette.outdoor) {
+        this.makeLaundry(`${level.id}-${String(i)}`, r, palette, artScale);
+      } else if (d.kind === 'houses' && palette.outdoor) {
+        // Fumée des cheminées (D-77).
+        for (const house of houseLayout(r)) {
+          if (house.chimney) {
+            const { x, y } = house.chimney;
+            this.makeSparks('smoke', { x: x - 8, y: y - 56, w: 16, h: 56 }, WORLD_LIFE.smoke.alpha);
+          }
+        }
+      } else if (d.kind === 'flag') {
+        this.makeFlag(`${level.id}-${String(i)}`, r, artScale);
+      } else if (d.kind === 'cat') {
+        this.makeCatTail(`${level.id}-${String(i)}`, r, artScale);
       } else if (d.kind === 'fireplace') {
         this.makeFire(`${level.id}-${String(i)}`, r, artScale);
       } else if (d.kind === 'grandclock') {
@@ -529,7 +545,7 @@ export class WorldLifeView {
    * de son centre (projetées sur le mur, aplaties) ; la poussière monte et dérive dans la lumière.
    */
   private makeSparks(
-    kind: 'stars' | 'dust' | 'steam',
+    kind: 'stars' | 'dust' | 'steam' | 'smoke',
     r: { x: number; y: number; w: number; h: number },
     alpha: number,
   ): void {
@@ -539,17 +555,20 @@ export class WorldLifeView {
         ? WORLD_LIFE.nightStars.count
         : kind === 'steam'
           ? WORLD_LIFE.steam.count
-          : WORLD_LIFE.dust.count;
+          : kind === 'smoke'
+            ? WORLD_LIFE.smoke.count
+            : WORLD_LIFE.dust.count;
     const sparks: Spark[] = [];
     for (let i = 0; i < count; i++) {
       // Répartition régulière (angle d'or) : jamais deux points l'un sur l'autre.
       const t = (i + 0.5) / count;
       const phase = i * 2.39996;
+      // La fumée, dehors sur le ciel : un mélange normal (en addition, elle disparaîtrait).
       const image = this.scene.add
         .image(0, 0, kind === 'stars' ? STAR_TEXTURE : DOT_TEXTURE)
-        .setDepth(SPARK_DEPTH)
-        .setBlendMode(Phaser.BlendModes.ADD)
-        .setTint(kind === 'stars' ? 0xfff0c0 : 0xfff3d6);
+        .setDepth(kind === 'smoke' ? LAUNDRY_DEPTH : SPARK_DEPTH)
+        .setBlendMode(kind === 'smoke' ? Phaser.BlendModes.NORMAL : Phaser.BlendModes.ADD)
+        .setTint(kind === 'stars' ? 0xfff0c0 : kind === 'smoke' ? 0xe9e5e1 : 0xfff3d6);
       const size =
         kind === 'stars' ? 4 + (i % 3) * 1.5 : kind === 'steam' ? 5 + (i % 3) : 1.6 + (i % 2) * 0.8;
       image.setDisplaySize(size, size);
@@ -681,6 +700,104 @@ export class WorldLifeView {
     this.framed.push({ image, kind: 'vane' });
   }
 
+  /** Le drapeau de l'école (D-77) : une vague qui court le long du tissu, images d'avance. */
+  private makeFlag(
+    id: string,
+    r: { x: number; y: number; w: number; h: number },
+    artScale: number,
+  ): void {
+    const key = `life-flag-${id}`;
+    let frame = 0;
+    const w = r.w - 1;
+    const made = framedTexture(
+      this.scene,
+      key,
+      FLAG_FRAMES,
+      w + 2,
+      14,
+      0,
+      1,
+      artScale,
+      () => 0,
+      (ctx) => {
+        const phase = (frame / FLAG_FRAMES) * Math.PI * 2;
+        frame++;
+        const band = (color: string, y0: number, y1: number) => {
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          for (let x = 0; x <= w; x += 2) {
+            const dy = Math.sin(x / 6 - phase) * (x / w) * 2;
+            ctx.lineTo(x, y0 + dy);
+          }
+          for (let x = w; x >= 0; x -= 2) {
+            const dy = Math.sin(x / 6 - phase) * (x / w) * 2;
+            ctx.lineTo(x, y1 + dy);
+          }
+          ctx.fill();
+        };
+        band('#6d86c2', 0, 4);
+        band('#f3ead7', 4, 7);
+        band('#e2574c', 7, 11);
+      },
+    );
+    if (!made) {
+      return;
+    }
+    this.roomTextures.push(key);
+    const image = this.scene.add
+      .image(r.x + 2.5, r.y + 1, key, FRAME_NAMES[0])
+      .setOrigin(0, 1 / 14)
+      .setScale(1 / artScale)
+      .setDepth(LAUNDRY_DEPTH);
+    this.framed.push({ image, kind: 'flag' });
+  }
+
+  /** La queue du chat roux (D-77) : elle pend du rebord et balance doucement. */
+  private makeCatTail(
+    id: string,
+    r: { x: number; y: number; w: number; h: number },
+    artScale: number,
+  ): void {
+    const swing = WORLD_LIFE.catTail.swingRad;
+    const key = `life-cat-tail-${id}`;
+    const made = framedTexture(
+      this.scene,
+      key,
+      TAIL_FRAMES,
+      20,
+      18,
+      10,
+      1,
+      artScale,
+      (k) => -swing + (2 * swing * k) / (TAIL_FRAMES - 1),
+      (ctx) => {
+        ctx.strokeStyle = '#d98a4a';
+        ctx.lineWidth = 2.4;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(-1, 9, 3, 15);
+        ctx.stroke();
+        ctx.strokeStyle = '#b86a33';
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.moveTo(1.5, 11);
+        ctx.lineTo(2.5, 13);
+        ctx.stroke();
+      },
+    );
+    if (!made) {
+      return;
+    }
+    this.roomTextures.push(key);
+    const image = this.scene.add
+      .image(r.x + r.w / 2 + 4, r.y + r.h - 3, key, FRAME_NAMES[(TAIL_FRAMES - 1) / 2])
+      .setOrigin(0.5, 1 / 18)
+      .setScale(1 / artScale)
+      .setDepth(LAUNDRY_DEPTH);
+    this.framed.push({ image, kind: 'tail' });
+  }
+
   /** Les ampoules de la guirlande de la pergola (D-76) : de petites boules qui se balancent. */
   private makeGarland(r: { x: number; y: number; w: number; h: number }): void {
     this.ensureSprites();
@@ -743,6 +860,13 @@ export class WorldLifeView {
       if (item.kind === 'swing') {
         const k = gust * Math.sin((nowMs / cfg.swing.periodMs) * Math.PI * 2);
         const frame = Math.round(((k + 1) / 2) * (SWING_FRAMES - 1));
+        item.image.setFrame(FRAME_NAMES[frame] ?? '0', false, false);
+      } else if (item.kind === 'flag') {
+        const wave = Math.floor(nowMs / (cfg.flag.periodMs / FLAG_FRAMES)) % FLAG_FRAMES;
+        item.image.setFrame(FRAME_NAMES[wave] ?? '0', false, false);
+      } else if (item.kind === 'tail') {
+        const k = Math.sin((nowMs / cfg.catTail.periodMs) * Math.PI * 2);
+        const frame = Math.round(((k + 1) / 2) * (TAIL_FRAMES - 1));
         item.image.setFrame(FRAME_NAMES[frame] ?? '0', false, false);
       } else {
         // La girouette se tourne lentement, plus vite quand le vent forcit.
@@ -814,6 +938,20 @@ export class WorldLifeView {
               cy + (field.h / 2) * spark.a * Math.sin(angle),
             )
             .setAlpha(field.alpha * twinkle);
+        }
+      } else if (field.kind === 'smoke') {
+        // Fumée d'une cheminée : monte, s'élargit, s'en va avec le vent, s'efface.
+        const rise = (nowMs / 1000) * cfg.smoke.risePxPerS;
+        const gust = wind(nowMs);
+        for (const spark of field.sparks) {
+          const y = (spark.b * field.h + rise) % field.h;
+          const k = y / field.h;
+          const x =
+            field.w / 2 + cfg.smoke.windPx * gust * k * k + 2 * Math.sin(nowMs / 900 + spark.phase);
+          spark.image
+            .setPosition(field.x + x, field.y + field.h - y)
+            .setScale((5 + 12 * k) / 16)
+            .setAlpha(field.alpha * Math.sin(Math.PI * Math.min(1, k * 1.3 + 0.05)) * (1 - k));
         }
       } else if (field.kind === 'steam') {
         // Des volutes qui montent de la cafetière, s'élargissent et s'effacent en haut.
