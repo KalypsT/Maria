@@ -16,7 +16,7 @@ export interface DisplaySettings {
   renderMode: RenderMode;
 }
 
-export const DEFAULT_DISPLAY_SETTINGS: Readonly<DisplaySettings> = { renderMode: 'logical' };
+export const DEFAULT_DISPLAY_SETTINGS: Readonly<DisplaySettings> = { renderMode: 'screen' };
 
 /** Échelle maximale du rendu à la résolution de l'écran (coût GPU : ≈ échelle² pixels). */
 export const MAX_RENDER_SCALE = 3;

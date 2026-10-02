@@ -112,7 +112,7 @@ Chaque entrée : décision, raison, conséquences. Une décision ne se modifie q
 
 ## D-18 — Résolution de rendu réglable
 
-- **Décision** : le canvas peut être rendu à la **résolution logique** (640–800 × 360, agrandi par le CSS ; **par défaut**) ou à la **résolution de l'écran** (taille logique × échelle, plafonnée à 3×), avec un zoom de caméra égal à l'échelle. Réglage dans l'overlay de debug et le menu pause, conservé en `localStorage`.
+- **Décision** : le canvas peut être rendu à la **résolution logique** (640–800 × 360, agrandi par le CSS ; par défaut jusqu'à D-93) ou à la **résolution de l'écran** (taille logique × échelle, plafonnée à 3×), avec un zoom de caméra égal à l'échelle. Réglage dans l'overlay de debug et le menu pause, conservé en `localStorage`.
 - **Raison** : à la résolution logique, un déplacement se fait par pixel logique (≈ 3 pixels physiques), même sans arrondi ; seul un canvas plus grand permet des positions au pixel physique, tout en gardant le pixel art net (filtrage au plus proche).
 - **Conséquences** : environ 9 fois plus de pixels à dessiner en mode écran, à mesurer sur téléphone (FPS de l'overlay) ; la taille logique (D-01), les tuiles (D-02), la physique et les commandes en DOM ne changent pas. À revoir avec la direction artistique (un compromis à 2× reste possible).
 
@@ -1124,7 +1124,13 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Préparation** (`npm run audio:prepare -- <fichiers ou dossier>`, ffmpeg requis) : silences du début et de la fin coupés (la boucle en fondu enchaîné de 4 s porte sur la musique, pas sur un silence) ; **même sonie pour tous**, −18 LUFS intégrés, crête vraie ≤ −1,5 dBTP, normalisation linéaire (sans compression ; les fichiers bruts allaient de −14,5 à −23 LUFS et touchaient 0 dBFS) ; pochette et métadonnées retirées. Les fichiers bruts ne sont pas commités.
 - **Format : AAC 96 kbit/s en `.m4a`** plutôt qu'Opus/Ogg (D-57) : lu par tous les navigateurs, y compris Safari sur les iPhone plus anciens, qui ne lisent pas toujours l'Ogg ; à débit égal, meilleur que le MP3. Environ 1,2 Mo par minute.
 - **Conflit de nom corrigé** : le thème des souvenirs jouables s'appelait `memory`, comme le jingle ; un fichier `memory.*` aurait servi aux deux (le jingle de 9 s en boucle dans la cuisine du souvenir). Le thème devient `memory-play` ; un test interdit qu'un thème et un jingle partagent un nom.
-- **Poids** : 7,2 Mo pour ces 7 fichiers, sur un budget de 12 Mo (`AUDIO_BUDGET_BYTES`). Les 9 thèmes restants ne tiendront pas dans ce budget : décision à prendre avant d'en ajouter (voir PROGRESS).
+- **Poids** : 7,2 Mo pour ces 7 fichiers. **Budget porté de 12 à 25 Mo** (`AUDIO_BUDGET_BYTES`, choix de l'utilisateur) pour les 9 thèmes restants, tous précachés (téléchargés une fois, à l'installation).
+- **Le jingle `memory`** (9 s) reste entier pour l'instant (choix de l'utilisateur), à raccourcir si besoin.
+
+## D-93 — Rendu à la résolution de l'écran par défaut
+
+- **Décision** (demande de l'utilisateur) : le mode « écran » de D-18 devient le réglage par défaut, à la place du mode « logique ». Toujours réglable dans le menu pause.
+- **Conséquences** : une nouvelle partie démarre en mode écran ; une sauvegarde existante garde le mode qu'elle a enregistré (le défaut et un choix ne se distinguent pas), il suffit de le changer une fois dans le menu pause. Coût GPU plus élevé (≈ 9 fois plus de pixels), à surveiller au FPS de l'overlay.
 
 ## Risques identifiés à suivre
 

@@ -61,9 +61,9 @@ export const AUDIO_EXTENSIONS = ['ogg', 'opus', 'm4a', 'mp3'] as const;
 
 /**
  * Poids maximal de l'ensemble des fichiers audio (précachés pour le hors ligne, D-23) : vérifié
- * par `check:pwa`. Environ 5 thèmes de 2 à 3 minutes en Opus ou MP3 à 96 kbit/s.
+ * par `check:pwa`. Les 13 thèmes et les jingles en AAC 96 kbit/s (D-92).
  */
-export const AUDIO_BUDGET_BYTES = 12 * 1024 * 1024;
+export const AUDIO_BUDGET_BYTES = 25 * 1024 * 1024;
 
 export const AUDIO_MIX = {
   /** Fondu enchaîné entre deux thèmes. */

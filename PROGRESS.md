@@ -13,7 +13,7 @@ Suite : le niveau 6 (la station balnéaire), à planifier le moment venu.
 **En attente** :
 
 - essais sur téléphone de l'utilisateur (gare, passe graphique, glissade) ; les listes « À vérifier sur téléphone » ci-dessous restent ouvertes ;
-- **musique** (D-57, D-92) : 7 premiers fichiers intégrés ; les autres morceaux arrivent. **Budget à décider** avant d'en ajouter (12 Mo, 7,2 Mo déjà pris : les 9 thèmes restants n'y tiennent pas) ;
+- **musique** (D-57, D-92) : 7 premiers fichiers intégrés ; les autres morceaux arrivent (à préparer avec `npm run audio:prepare`, budget 25 Mo, 7,2 Mo pris) ;
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
@@ -26,7 +26,9 @@ Suite : le niveau 6 (la station balnéaire), à planifier le moment venu.
 - Tests : 629. Build et précache vérifiés (`check:pwa`). Le Chromium de l'environnement ne lit pas l'AAC (codec absent des versions libres) : l'écoute dans le jeu reste à faire sur téléphone.
 - [ ] À vérifier sur téléphone : les morceaux jouent-ils (iPhone et Android) ? Volumes équilibrés entre thèmes et jingles ? Le jingle `maria` assez étrange ?
 - [ ] Les boucles (fondu de 4 s sur la fin) : se remarquent-elles ?
-- [ ] Le jingle `memory` (9 s) : trop long par-dessus la musique baissée ?
+- [ ] Le jingle `memory` (9 s, gardé tel quel) : trop long par-dessus la musique baissée ?
+- **Rendu en mode écran par défaut** (D-93) : nouvelle partie en mode écran ; une sauvegarde existante garde son mode (le changer une fois dans le menu pause).
+- [ ] À vérifier sur téléphone : fluidité en mode écran (FPS de l'overlay).
 
 ### Le train, PR 6b : les revisites avec la glissade (D-91)
 
