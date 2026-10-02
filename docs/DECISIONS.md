@@ -918,6 +918,22 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Vérifié par les tests** : la porte de derrière reste fermée avant la croissance ; le chemin jusqu'au saut mural reste moyen exactement ; le vieux mur et l'allée seulement avec le saut mural ; la boucle de l'allée ; ne coince jamais ; trouvailles du potager, de la cabane, de la terrasse (crochet) et du nichoir (parapluie) au même niveau ; le trou de la haie et la fin du monde étrange inchangés.
 - **Sauvegarde** : aucune migration.
 
+## D-77 — La rue refaite d'après la grille du salon (le quartier, phase 1)
+
+- **Plan validé** : le quartier en **trois phases**, une PR chacune : (1) la rue ; (2) l'aire de jeux, la supérette, le chantier ; (3) la cour, l'école, puis l'école étrange (lisibilité seulement). Choix de l'utilisateur : un chat roux sur un rebord ; au crépuscule, quelques fenêtres allumées.
+- **Diagnostic** : un bandeau de feuillage plein courait en haut de toute la rue (un plafond vert) ; plusieurs appuis flottaient (le nid devant une façade, le platane étant dessiné derrière les immeubles ; le chapeau des lampadaires une tuile au-dessus de la lanterne ; l'enseigne posée sur le mur ; la corniche de l'école trois tuiles sous le haut de la façade ; les planches de l'échafaudage). Ce qui marchait : la ligne des toits, l'école, la grue, le crépuscule.
+- **Géométrie** : seule la ligne du haut change (le feuillage seulement en haut du platane, colonnes 14 à 26). Hors de la salle, tout compte comme plein : rien ne s'ouvre par le haut. Difficultés inchangées (testé).
+- **Rien ne flotte** :
+  - le **platane passe devant les façades** (il n'est plus dans le fond lointain), avec une couronne pleine et deux branches ; sa branche porte le nid ;
+  - le **chapeau des lampadaires** se pose sur la lanterne ;
+  - l'**enseigne** est un panneau fixé à la façade (la planche en est le haut) ;
+  - la **façade de l'école s'arrête à la corniche**, le toit de tuiles au-dessus, une lucarne et son horloge : on marche au pied du toit ;
+  - les **planches de l'échafaudage** reposent sur des lisses.
+- **Vie** : de la **fumée** sort des cheminées (une maison sur deux environ, dessinées avec la rangée de maisons) et part avec le vent ; du **linge tendu entre deux fenêtres** au début de la rue ; le **drapeau** de l'école flotte ; un **chat roux** du voisinage (pas celui de la famille) sur un rebord, sa queue balance.
+- **Lumière** : au crépuscule, les **lampadaires s'allument** et environ un quart des **fenêtres** (pseudo-hasard stable) ; elles percent la pénombre (`drawRoomLight`).
+- **Rendu** : `houseLayout` (fenêtres, fenêtres allumées, cheminées) est partagé par le dessin, la lumière et la fumée. Réglages `WORLD_LIFE.smoke`, `flag`, `catTail`. Le platane, aussi utilisé à l'aire de jeux, y passe également devant.
+- **Ce qui ne bouge pas** : portes de façade, sortie haute vers le chantier, câble, les quatre trouvailles, lanternes, palissade et son présage. **Aucune sauvegarde touchée.**
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

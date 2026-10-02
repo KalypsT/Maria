@@ -6,6 +6,9 @@
 ; le passage vers le chantier (sortie 3, D-63).
 ; Revisite avec le crochet (D-66) : le fil tendu de l'école au platane ; au bout, un nid dans
 ; le platane (trouvaille, seulement avec le crochet).
+; Refaite (D-77) : du ciel au-dessus des toits (le feuillage seulement en haut du platane, devant les
+; façades) ; lampadaires, enseigne, toit de l'école et échafaudage tiennent ; cheminées qui fument, linge,
+; drapeau, chat roux ; au crépuscule, lampadaires et quelques fenêtres allumés.
 ; @name: La rue
 ; @icon: street
 ; @world: street
@@ -14,7 +17,7 @@
 ; @door: 4 136 27
 ; @door: 5 98 27
 ; @door: 6 167 27
-; @decor: canopy 0 0 200 1
+; @decor: canopy 14 0 13 1
 ; @decor: houses 1 6 34 22
 ; @decor: planetree 18 1 4 27
 ; @decor: playground 36 14 28 14
@@ -47,8 +50,11 @@
 ; @decor: scaffold 175 4 24 24
 ; @cable: 94 4 22 6
 ; @decor: nest 18 10 4 1
+; @decor: washline 3 14 9 2
+; @decor: flag 84 1 3 5
+; @decor: cat 69 13 2 2
 ; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
-vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+#.............vvvvvvvvvvvvv............................................................................................................................................................................#
 #......................................................................................................................................................................................................3
 #......................................................................................................................................................................................................3
 #................................................................................................................................................................................................S.....3

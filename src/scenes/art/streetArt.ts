@@ -26,18 +26,75 @@ const STONE = '#d9ccb4';
 const STONE_DARK = '#b8a98f';
 const METAL = '#6f7f8a';
 const INK = '#5b4a44';
+/** Fenêtre allumée au crépuscule (D-77). */
+const LIT = '#ffd98a';
+const LIT_DARK = '#f2b866';
+
+/** Une maison de la rangée : position, hauteur du toit, fenêtres, cheminée éventuelle. */
+export interface House {
+  readonly x: number;
+  readonly w: number;
+  readonly top: number;
+  readonly i: number;
+  readonly windows: readonly { x: number; y: number; w: number; h: number; lit: boolean }[];
+  /** Haut de la cheminée (px logiques), une maison sur deux environ. */
+  readonly chimney: { x: number; y: number } | null;
+}
+
+/**
+ * Rangée de maisons mitoyennes d'un élément `houses` (pseudo-hasard stable) : partagée par le
+ * dessin, la lumière (fenêtres allumées au crépuscule) et la fumée des cheminées (D-77).
+ */
+export function houseLayout(r: Rect): House[] {
+  const houses: House[] = [];
+  let x = r.x;
+  let i = Math.floor(hash(r.x, r.y) * FACADES.length);
+  while (x < r.x + r.w - 2) {
+    const w = Math.min(r.x + r.w - x, (6 + Math.floor(hash(x, 3) * 4)) * T);
+    const top = r.y + Math.floor(hash(x, 5) * 4) * T;
+    const windows: { x: number; y: number; w: number; h: number; lit: boolean }[] = [];
+    for (let wy = top + 3 * T; wy < r.y + r.h - 4 * T; wy += 4 * T) {
+      for (let wx = x + T; wx < x + w - 2 * T; wx += 3 * T) {
+        windows.push({ x: wx, y: wy, w: 1.4 * T, h: 1.8 * T, lit: hash(wx, wy) > 0.72 });
+      }
+    }
+    const chimney =
+      w >= 6 * T && hash(x, 9) > 0.4
+        ? { x: x + w * (0.25 + hash(x, 11) * 0.5), y: top - 10 }
+        : null;
+    houses.push({ x, w, top, i, windows, chimney });
+    x += w;
+    i++;
+  }
+  return houses;
+}
 
 /** Fenêtre à volets (maisons, école). */
-function window(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number): void {
+function window(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  lit = false,
+): void {
   ctx.fillStyle = STONE_DARK;
   ctx.fillRect(x - 1, y - 1, w + 2, h + 3);
-  ctx.fillStyle = GLASS;
+  ctx.fillStyle = lit ? LIT : GLASS;
   ctx.fillRect(x, y, w, h);
-  ctx.fillStyle = GLASS_DARK;
+  ctx.fillStyle = lit ? LIT_DARK : GLASS_DARK;
   ctx.fillRect(x, y + h / 2, w, h / 2);
   ctx.fillStyle = 'rgba(255,255,255,0.8)';
   ctx.fillRect(x + w / 2 - 0.5, y, 1, h);
   ctx.fillRect(x, y + h / 2 - 0.5, w, 1);
+}
+
+/** Petit rebord de pierre (sous le chat). */
+function ledgeDraw(ctx: CanvasRenderingContext2D, x: number, y: number, w: number): void {
+  ctx.fillStyle = STONE_DARK;
+  ctx.fillRect(x, y, w, 3);
+  ctx.fillStyle = STONE;
+  ctx.fillRect(x, y, w, 1.2);
 }
 
 /** Porte fermée (un lieu pour plus tard) : bois, poignée, marche. */
@@ -72,15 +129,20 @@ export function streetDrawers({ tileShape, rounded }: ShapeTools): Record<string
 
   return {
     houses(a, r) {
-      const { ctx } = a;
-      // Maisons de ville mitoyennes, de largeurs variées : façade, toit, fenêtres, porte.
-      let x = r.x;
-      let i = Math.floor(hash(r.x, r.y) * FACADES.length);
-      while (x < r.x + r.w - 2) {
-        const w = Math.min(r.x + r.w - x, (6 + Math.floor(hash(x, 3) * 4)) * T);
-        const top = r.y + Math.floor(hash(x, 5) * 4) * T;
+      const { ctx, palette: p } = a;
+      // Maisons de ville mitoyennes, de largeurs variées : façade, toit, cheminée, fenêtres (au
+      // crépuscule, quelques-unes allumées, D-77), porte.
+      const dusk = p.darkness > 0;
+      for (const house of houseLayout(r)) {
+        const { x, w, top, i } = house;
         ctx.fillStyle = FACADES[i % FACADES.length] ?? FACADES[0];
         ctx.fillRect(x, top + 2 * T, w, r.y + r.h - top - 2 * T);
+        if (house.chimney) {
+          ctx.fillStyle = '#9a5a46';
+          ctx.fillRect(house.chimney.x - 4, house.chimney.y, 8, top + T - house.chimney.y);
+          ctx.fillStyle = '#7a4536';
+          ctx.fillRect(house.chimney.x - 5, house.chimney.y - 2, 10, 3);
+        }
         ctx.fillStyle = ROOF;
         ctx.beginPath();
         ctx.moveTo(x - 2, top + 2 * T);
@@ -90,23 +152,20 @@ export function streetDrawers({ tileShape, rounded }: ShapeTools): Record<string
         ctx.fill();
         ctx.fillStyle = ROOF_DARK;
         ctx.fillRect(x - 2, top + 2 * T - 2, w + 4, 2);
-        for (let wy = top + 3 * T; wy < r.y + r.h - 4 * T; wy += 4 * T) {
-          for (let wx = x + T; wx < x + w - 2 * T; wx += 3 * T) {
-            window(ctx, wx, wy, 1.4 * T, 1.8 * T);
-          }
+        for (const pane of house.windows) {
+          window(ctx, pane.x, pane.y, pane.w, pane.h, dusk && pane.lit);
         }
         const doorX = x + w / 2 - T * 0.7;
         ctx.fillStyle = ['#6d86c2', '#8a5a44', '#5d9152'][i % 3] ?? '#8a5a44';
         ctx.fillRect(doorX, r.y + r.h - 2.4 * T, 1.4 * T, 2.4 * T);
         ctx.fillStyle = 'rgba(0,0,0,0.12)';
         ctx.fillRect(x + w - 1, top + 2 * T, 1, r.y + r.h - top - 2 * T);
-        x += w;
-        i++;
       }
     },
     planetree(a, r) {
       const { ctx, palette: p } = a;
-      // Platane : tronc clair tacheté, qui monte jusqu'aux feuilles du haut de la salle.
+      // Platane, devant les façades (D-77 : avant, caché derrière elles) : tronc clair tacheté,
+      // couronne en haut de la salle, une branche vers le nid, des touffes autour.
       const cx = r.x + r.w / 2;
       ctx.fillStyle = '#b7a58c';
       ctx.fillRect(cx - 6, r.y, 12, r.h);
@@ -116,12 +175,38 @@ export function streetDrawers({ tileShape, rounded }: ShapeTools): Record<string
         ctx.ellipse(cx - 3 + hash(y, cx) * 6, y, 3, 2, 0, 0, Math.PI * 2);
         ctx.fill();
       }
-      ctx.fillStyle = p.leaf;
-      for (let k = 0; k < 7; k++) {
-        ctx.beginPath();
-        ctx.arc(cx - 26 + k * 9, r.y + 10 + hash(k, cx) * 10, 12, 0, Math.PI * 2);
-        ctx.fill();
+      // Deux branches qui montent vers la couronne.
+      ctx.strokeStyle = '#a8977e';
+      ctx.lineWidth = 5;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx, r.y + 7 * T);
+      ctx.lineTo(cx - 3.5 * T, r.y + 2 * T);
+      ctx.moveTo(cx, r.y + 6 * T);
+      ctx.lineTo(cx + 3.5 * T, r.y + 2 * T);
+      ctx.stroke();
+      // Une couronne pleine : des touffes serrées sur une ellipse, trois tons, plus claires en haut.
+      const crown = { x: cx, y: r.y + 2.6 * T, rx: 6.5 * T, ry: 3 * T };
+      for (const [tone, alpha] of [
+        [p.leafDark, 1],
+        [p.leaf, 1],
+        [p.leafLight, 0.7],
+      ] as const) {
+        ctx.fillStyle = tone;
+        ctx.globalAlpha = alpha;
+        for (let k = 0; k < 22; k++) {
+          const t = (k / 22) * Math.PI * 2;
+          const d = 0.35 + 0.6 * hash(k, cx);
+          const lift = tone === p.leafLight ? -6 : tone === p.leaf ? -2 : 3;
+          const x = crown.x + Math.cos(t) * crown.rx * d;
+          const y = crown.y + Math.sin(t) * crown.ry * d + lift;
+          const radius = (tone === p.leafLight ? 7 : 13) + hash(cx, k) * 7;
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
+      ctx.globalAlpha = 1;
       // Grille au pied de l'arbre.
       ctx.fillStyle = METAL;
       ctx.fillRect(cx - 14, r.y + r.h - 2, 28, 2);
@@ -189,30 +274,47 @@ export function streetDrawers({ tileShape, rounded }: ShapeTools): Record<string
     },
     school(a, r) {
       const { ctx } = a;
-      // L'école : grand bâtiment clair, rangées de fenêtres, fronton avec horloge, drapeau.
-      rounded(ctx, { x: r.x, y: r.y + 2 * T, w: r.w, h: r.h - 2 * T }, 2);
-      ctx.fillStyle = '#efe4cc';
-      ctx.fill();
-      ctx.fillStyle = STONE;
-      ctx.fillRect(r.x, r.y + r.h - 2 * T, r.w, 2 * T);
+      // L'école : grand bâtiment clair dont la façade s'arrête à la corniche (D-77 : on marche au
+      // pied du toit) ; le toit de tuiles au-dessus, une lucarne et son horloge, rangées de fenêtres.
+      const eave = r.y + 5 * T;
       ctx.fillStyle = ROOF;
       ctx.beginPath();
-      ctx.moveTo(r.x + r.w / 2 - 6 * T, r.y + 2 * T);
-      ctx.lineTo(r.x + r.w / 2, r.y);
-      ctx.lineTo(r.x + r.w / 2 + 6 * T, r.y + 2 * T);
+      ctx.moveTo(r.x + T, eave);
+      ctx.lineTo(r.x + 3 * T, eave - 3 * T);
+      ctx.lineTo(r.x + r.w - 3 * T, eave - 3 * T);
+      ctx.lineTo(r.x + r.w - T, eave);
+      ctx.fill();
+      ctx.fillStyle = ROOF_DARK;
+      for (let y = eave - 3 * T + 6; y < eave; y += 7) {
+        ctx.fillRect(r.x + 2 * T, y, r.w - 4 * T, 1);
+      }
+      // Lucarne de l'horloge, au milieu du toit.
+      const cx = r.x + r.w / 2;
+      ctx.fillStyle = '#efe4cc';
+      ctx.fillRect(cx - 1.4 * T, eave - 4 * T, 2.8 * T, 3 * T);
+      ctx.fillStyle = ROOF;
+      ctx.beginPath();
+      ctx.moveTo(cx - 1.9 * T, eave - 4 * T);
+      ctx.lineTo(cx, eave - 5 * T);
+      ctx.lineTo(cx + 1.9 * T, eave - 4 * T);
       ctx.fill();
       ctx.fillStyle = '#fff8e6';
       ctx.beginPath();
-      ctx.arc(r.x + r.w / 2, r.y + 1.3 * T, 7, 0, Math.PI * 2);
+      ctx.arc(cx, eave - 2.5 * T, 7, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = INK;
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(r.x + r.w / 2, r.y + 1.3 * T);
-      ctx.lineTo(r.x + r.w / 2, r.y + 1.3 * T - 5);
-      ctx.moveTo(r.x + r.w / 2, r.y + 1.3 * T);
-      ctx.lineTo(r.x + r.w / 2 + 3.5, r.y + 1.3 * T);
+      ctx.moveTo(cx, eave - 2.5 * T);
+      ctx.lineTo(cx, eave - 2.5 * T - 5);
+      ctx.moveTo(cx, eave - 2.5 * T);
+      ctx.lineTo(cx + 3.5, eave - 2.5 * T);
       ctx.stroke();
+      rounded(ctx, { x: r.x, y: eave, w: r.w, h: r.y + r.h - eave }, 2);
+      ctx.fillStyle = '#efe4cc';
+      ctx.fill();
+      ctx.fillStyle = STONE;
+      ctx.fillRect(r.x, r.y + r.h - 2 * T, r.w, 2 * T);
       for (let wy = r.y + 7 * T; wy < r.y + r.h - 5 * T; wy += 4 * T) {
         for (let wx = r.x + 2 * T; wx < r.x + r.w - 2 * T; wx += 4 * T) {
           window(ctx, wx, wy, 2 * T, 2.4 * T);
@@ -344,16 +446,17 @@ export function streetDrawers({ tileShape, rounded }: ShapeTools): Record<string
     lamppost(a, r) {
       const { ctx } = a;
       // Lampadaire : le chapeau (en haut) est la plateforme ; le mât descend jusqu'au trottoir.
+      // La lanterne est juste sous le chapeau (D-77 : avant, le chapeau flottait au-dessus).
       const cx = r.x + r.w / 2;
       ctx.fillStyle = METAL;
-      ctx.fillRect(cx - 1.5, r.y + T, 3, r.h - T);
+      ctx.fillRect(cx - 1.5, r.y + 11, 3, r.h - 11);
       ctx.fillRect(cx - 4, r.y + r.h - 3, 8, 3);
-      ctx.fillStyle = '#fff1b8';
+      ctx.fillStyle = a.palette.darkness > 0 ? '#ffe9a8' : '#fff1b8';
       ctx.beginPath();
-      ctx.moveTo(cx - 5, r.y + T);
-      ctx.lineTo(cx + 5, r.y + T);
-      ctx.lineTo(cx + 3, r.y + T + 6);
-      ctx.lineTo(cx - 3, r.y + T + 6);
+      ctx.moveTo(cx - 6, r.y + 4);
+      ctx.lineTo(cx + 6, r.y + 4);
+      ctx.lineTo(cx + 3, r.y + 11);
+      ctx.lineTo(cx - 3, r.y + 11);
       ctx.fill();
       ledge(a, { x: r.x, y: r.y, w: r.w, h: T }, '#4d5a63', '#8a9aa5');
     },
@@ -429,15 +532,76 @@ export function streetDrawers({ tileShape, rounded }: ShapeTools): Record<string
     },
     shopsign(a, r) {
       const { ctx } = a;
-      // Enseigne suspendue : un panier dessiné, pas de texte (pilier 6).
+      // Enseigne : un panneau fixé à la façade (son dessus est la planche), un panier dessiné,
+      // pas de texte (pilier 6). D-77 : avant, une planche posée sur le mur, sans attache.
+      ctx.fillStyle = '#3f6a3c';
+      rounded(ctx, { x: r.x + 1, y: r.y + 2, w: r.w - 2, h: T + 8 }, [0, 0, 3, 3]);
+      ctx.fill();
+      ctx.fillStyle = METAL;
+      for (const x of [r.x + 4, r.x + r.w - 6]) {
+        ctx.fillRect(x, r.y + T + 4, 2, 2);
+      }
       ledge(a, r, '#4f7a4a', '#8cc26f');
       ctx.strokeStyle = '#fff6f0';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.arc(r.x + r.w / 2, r.y + T + 6, 5, Math.PI, 0);
+      ctx.arc(r.x + r.w / 2, r.y + 10, 4, Math.PI, 0);
       ctx.stroke();
       ctx.fillStyle = '#fff6f0';
-      ctx.fillRect(r.x + r.w / 2 - 6, r.y + T + 6, 12, 5);
+      ctx.fillRect(r.x + r.w / 2 - 5, r.y + 10, 10, 5);
+    },
+    washline(a, r) {
+      // Fil à linge tendu d'une fenêtre à l'autre, deux poulies ; le linge est animé au vent.
+      const { ctx } = a;
+      ctx.strokeStyle = '#8a7b6c';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(r.x, r.y + 2);
+      ctx.quadraticCurveTo(r.x + r.w / 2, r.y + 7, r.x + r.w, r.y + 2);
+      ctx.stroke();
+      ctx.fillStyle = METAL;
+      for (const x of [r.x, r.x + r.w]) {
+        ctx.beginPath();
+        ctx.arc(x, r.y + 2, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    },
+    flag(a, r) {
+      // Le mât du drapeau, planté dans le toit ; le drapeau flotte (animé).
+      const { ctx } = a;
+      ctx.fillStyle = METAL;
+      ctx.fillRect(r.x + 1, r.y, 1.5, r.h);
+      ctx.beginPath();
+      ctx.arc(r.x + 1.75, r.y, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+    },
+    cat(a, r) {
+      // Chat roux du voisinage, assis sur un rebord de fenêtre (pas celui de la famille, gris).
+      const { ctx } = a;
+      const base = r.y + r.h;
+      ledgeDraw(ctx, r.x - 2, base - 3, r.w + 4);
+      const cx = r.x + r.w / 2;
+      ctx.fillStyle = '#d98a4a';
+      ctx.beginPath();
+      ctx.ellipse(cx, base - 9, 6, 6.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx + 1, base - 17, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(cx - 2.5, base - 20);
+      ctx.lineTo(cx - 1.5, base - 24);
+      ctx.lineTo(cx + 0.5, base - 20.5);
+      ctx.moveTo(cx + 2, base - 20.5);
+      ctx.lineTo(cx + 4, base - 24);
+      ctx.lineTo(cx + 5, base - 19.5);
+      ctx.fill();
+      ctx.fillStyle = '#b86a33';
+      ctx.fillRect(cx - 4, base - 11, 8, 1.2);
+      ctx.fillRect(cx - 3.5, base - 7, 7, 1.2);
+      ctx.fillStyle = '#3a3330';
+      ctx.fillRect(cx - 0.5, base - 18, 1, 1);
+      ctx.fillRect(cx + 2.5, base - 18, 1, 1);
     },
     scaffold(a, r) {
       const { ctx, level } = a;
@@ -466,6 +630,11 @@ export function streetDrawers({ tileShape, rounded }: ShapeTools): Record<string
           if (plank && start < 0) {
             start = col;
           } else if (!plank && start >= 0) {
+            // Une lisse sous la planche, d'un montant à l'autre : elle repose dessus (D-77).
+            const bay = Math.floor((start * T - r.x - 2) / (7 * T));
+            const x0 = r.x + 2 + bay * 7 * T;
+            ctx.fillStyle = '#8a9aa5';
+            ctx.fillRect(x0, row * T + 4, Math.min(7 * T, r.x + r.w - x0), 2);
             ledge(
               a,
               { x: start * T, y: row * T, w: (col - start) * T, h: T },
