@@ -2,9 +2,9 @@
 
 ## Phase en cours
 
-**Le train** (niveau 5, D-82, D-83) : plan validé en 6 PR. **PR 1 faite : la glissade** (D-84, fusionnée). **PR 2 faite : le départ et la voiture-couchettes** (D-85, fusionnée). **PR 3 faite : le reste du train réel** (D-86, fusionnée). **PR 4 faite : la poursuite horizontale** (D-87), sur `ccr-6ca08fb4-rwfcx0`. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
+**Le train** (niveau 5, D-82, D-83) : plan validé en 6 PR. **PR 1 faite : la glissade** (D-84, fusionnée). **PR 2 faite : le départ et la voiture-couchettes** (D-85, fusionnée). **PR 3 faite : le reste du train réel** (D-86, fusionnée). **PR 4 faite : la poursuite horizontale** (D-87, fusionnée). **PR 5a faite : le monde étrange du train et la cuisine rose** (D-88), sur `ccr-6ca08fb4-rwfcx0`. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
-Suite du train : PR 5 le monde étrange, la cuisine rose et le souvenir jouable ; PR 6 la fin, la gare de la mer, la revisite du train et les revisites avec la glissade.
+Suite du train : PR 5b le souvenir jouable (nouveau système, réutilisé pour Eden) ; PR 6 la fin, la gare de la mer, la revisite du train et les revisites avec la glissade.
 
 **Structure de la fin du jeu** (D-82) : 8 niveaux (maison, jardin, quartier, gare, train, station balnéaire, avant-dernier, monde de Maria). Niveau 6 et niveau 7 : pistes retenues, détails décidés le moment venu.
 
@@ -17,6 +17,21 @@ Suite du train : PR 5 le monde étrange, la cuisine rose et le souvenir jouable 
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le train, PR 5a : le monde étrange du train, la cuisine rose (D-88)
+
+- **L'entrée** : la nuit, Agir à la porte de la cuisine du wagon-restaurant ; la lueur scintille dessous, un clignement, la cuisine étrange se révèle. Après un évanouissement, la porte y ramène.
+- **La cuisine étrange** (moyenne) : plaques chaudes sous une hotte basse, une étagère basse (glisser), une cheminée d'étagères (saut mural), la veilleuse ; le rail des louches (crochet) jusqu'à la sortie. La glissade et le crochet sont exigés.
+- **Le train de la vaisselle** : la poursuite horizontale dans le niveau (6,8 tuiles/s), une veilleuse à chaque tronçon ; au bout, **la cuisine rose**, la dînette d'enfance de Céleste.
+- **La fin** (provisoire) : sur sa couchette, la nuit ; une bulle Maria, puis lit. Le souvenir jouable vient avec la PR 5b, le matin avec la PR 6.
+- DEBUG → Histoire : « le train étrange (la cuisine, la vaisselle) », « la cuisine rose trouvée ».
+- Tests : TESTCOUNT. Vérifié dans Chromium : la porte de la cuisine, la cuisine étrange (hotte, plaques, cheminée, rail), le train de la vaisselle (chariot, filets), la cuisine rose.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « le train, la nuit (la lueur) », puis la porte de la cuisine) : l'entrée se comprend-elle ?
+- [ ] La cuisine étrange : les plaques chaudes se voient-elles ? La hotte basse rend-elle les sauts justes, sans frustration (moyen) ? Le rail des louches se remarque-t-il ?
+- [ ] Le train de la vaisselle : le chariot (`; @chase-phase` 6,8, `chaseSpeedScale`) presse-t-il sans être injuste ? La poutre basse le fait-elle trébucher de façon lisible ?
+- [ ] La cuisine rose : se reconnaît-elle comme un jouet d'enfance ? Est-elle assez visible au bout du train ?
+- [ ] La fin sur la couchette : trop brusque en attendant le souvenir jouable et le matin ?
+- [ ] Fluidité dans les deux salles (le chariot, la cuisine immense).
 
 ### Le train, PR 4 : la poursuite horizontale, parcours d'essai 12 (D-87)
 

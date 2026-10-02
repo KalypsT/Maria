@@ -28,6 +28,8 @@ export const MUSIC_TRACKS = [
   'station-strange',
   /** Le train de nuit (D-85), par `; @music: train`. */
   'train',
+  /** Le monde étrange du train : la cuisine étrange et le train de la vaisselle (D-88). */
+  'train-strange',
 ] as const;
 export type MusicTrack = (typeof MUSIC_TRACKS)[number];
 

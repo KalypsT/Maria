@@ -93,6 +93,10 @@ export const StoryFlag = {
   TrainConductor: 'train.conductor',
   /** La porte du wagon-restaurant, poussée de l'intérieur (D-86) : une boucle avec le fourgon. */
   TrainRestaurantOpen: 'train.restaurant-open',
+  /** Le monde étrange du train (D-88) : Céleste y est passée par la porte de la cuisine. */
+  TrainStrange: 'train.strange',
+  /** Fin du monde étrange du train (D-88) : la cuisine rose, au bout du train de la vaisselle. */
+  TrainStrangeDone: 'train.strange-done',
   /** Quelques mois plus tard (D-43) : Céleste a grandi (phase de croissance 2). */
   Grown: 'growth.2',
   /** Le jardin (D-46) : Céleste est sortie pour la première fois (il fait beau, et Maria ?). */
@@ -220,6 +224,8 @@ export const PROP_SIZE = {
   'quay-train': { w: 200, h: 66 },
   // Roger, la peluche singe (D-68), tout en haut de la tour des objets perdus.
   roger: { w: 16, h: 18 },
+  // La cuisine rose (D-88), la dînette d'enfance, à peu près à hauteur de Céleste.
+  'pink-kitchen': { w: 32, h: 32 },
   'dad-garden': { w: 44 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // Le train (D-85) : sur le quai, la maîtresse et les parents (à hauteur d'enfant), les enfants
   // et leurs sacs ; dans la voiture-couchettes, des enfants de la taille de Céleste.

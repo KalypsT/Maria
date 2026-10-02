@@ -367,6 +367,15 @@ export const DECOR_KINDS: Readonly<
   windowbox: { furniture: true },
   /** Nid dans le platane de la rue (perchoir traversable), au bout du fil tendu depuis l'école. */
   nest: { furniture: true },
+  // Le monde étrange du train (D-88), en silhouettes.
+  /** Fourneau géant ou hotte (plein). */
+  strangestove: { furniture: true },
+  /** Étagère de vaisselle (pleine), paroi de cheminée. */
+  dishshelf: { furniture: true },
+  /** Pile d'assiettes (pleine). */
+  dishstack: { furniture: true },
+  /** Le wagon-restaurant de travers : tables et chaises au plafond (fond). */
+  upsidedining: { furniture: false },
   // Le monde étrange de la gare (D-68), en silhouettes.
   /** Le hall à l'envers (fond). */
   upsidehall: { furniture: false },

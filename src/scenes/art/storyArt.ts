@@ -7,6 +7,7 @@ import {
   drawNotes,
   heightChart,
   momHead,
+  pinkKitchen,
   roger,
   shapeBox,
 } from './memoryArt';
@@ -498,6 +499,14 @@ export function drawProp(
       ctx.restore();
       break;
     }
+    case 'pink-kitchen':
+      // La cuisine rose (D-88), au bout du train de la vaisselle : on la regarde, on ne la prend
+      // pas. La lueur turquoise du monde étrange autour d'elle.
+      ctx.save();
+      ctx.translate(w / 2, h / 2);
+      pinkKitchen(ctx, Math.min(w, h), true);
+      ctx.restore();
+      break;
     case 'site-gap':
       drawSiteGap(ctx, w, h);
       break;

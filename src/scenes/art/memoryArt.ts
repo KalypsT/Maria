@@ -520,6 +520,99 @@ export function shapeBox(ctx: CanvasRenderingContext2D, s: number, glow = false)
 }
 
 /**
+ * La cuisine rose (D-88, D-82) : la dînette d'enfance de Céleste, un meuble-jouet rose aux coins
+ * arrondis. Sur le dessus, deux plaques rondes, une petite casserole et une théière ; derrière, un
+ * dosseret et ses boutons ; dessous, la porte du four (un hublot) et un petit placard. Vue de face.
+ * `glow` : la lueur turquoise du monde étrange autour d'elle. PLACEHOLDER.
+ */
+export function pinkKitchen(ctx: CanvasRenderingContext2D, s: number, glow = false): void {
+  const pink = '#f2a2bf';
+  const pinkDark = '#d9779c';
+  const top = '#fbe9ef';
+  const white = '#fdf7f2';
+  const steel = '#b8b2bd';
+  if (glow) {
+    const halo = ctx.createRadialGradient(0, 0, s * 0.1, 0, 0, s * 0.62);
+    halo.addColorStop(0, 'rgba(94,230,210,0.35)');
+    halo.addColorStop(1, 'rgba(94,230,210,0)');
+    ctx.fillStyle = halo;
+    ctx.fillRect(-s * 0.62, -s * 0.62, s * 1.24, s * 1.24);
+  }
+  // Le dosseret, ses deux boutons et sa petite horloge.
+  roundRect(ctx, -s * 0.36, -s * 0.42, s * 0.72, s * 0.2, s * 0.05, pinkDark);
+  ctx.fillStyle = white;
+  for (const x of [-0.24, -0.12]) {
+    ctx.beginPath();
+    ctx.arc(s * x, -s * 0.32, s * 0.035, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.beginPath();
+  ctx.arc(s * 0.2, -s * 0.32, s * 0.06, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = s * 0.012;
+  ctx.beginPath();
+  ctx.moveTo(s * 0.2, -s * 0.32);
+  ctx.lineTo(s * 0.2, -s * 0.36);
+  ctx.moveTo(s * 0.2, -s * 0.32);
+  ctx.lineTo(s * 0.23, -s * 0.31);
+  ctx.stroke();
+  // Le meuble.
+  roundRect(ctx, -s * 0.4, -s * 0.22, s * 0.8, s * 0.64, s * 0.07, pink);
+  roundRect(ctx, -s * 0.42, -s * 0.24, s * 0.84, s * 0.07, s * 0.03, top);
+  // Les deux plaques.
+  ctx.fillStyle = steel;
+  for (const x of [-0.2, 0.06]) {
+    ctx.beginPath();
+    ctx.ellipse(s * x, -s * 0.215, s * 0.09, s * 0.025, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // La petite casserole sur la plaque de gauche, son manche vers l'extérieur.
+  roundRect(ctx, -s * 0.28, -s * 0.31, s * 0.16, s * 0.09, s * 0.02, '#e7e2ea');
+  ctx.strokeStyle = '#9c95a3';
+  ctx.lineWidth = s * 0.025;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(s * -0.28, -s * 0.29);
+  ctx.lineTo(s * -0.38, -s * 0.31);
+  ctx.stroke();
+  // La théière sur la plaque de droite : ventre rond, couvercle, bec et anse.
+  ctx.fillStyle = white;
+  ctx.beginPath();
+  ctx.ellipse(s * 0.1, -s * 0.29, s * 0.08, s * 0.065, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = PINK;
+  ctx.beginPath();
+  ctx.arc(s * 0.1, -s * 0.355, s * 0.02, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = white;
+  ctx.lineWidth = s * 0.022;
+  ctx.beginPath();
+  ctx.moveTo(s * 0.17, -s * 0.29);
+  ctx.lineTo(s * 0.23, -s * 0.34);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(s * 0.02, -s * 0.29, s * 0.03, Math.PI / 2, (3 * Math.PI) / 2);
+  ctx.stroke();
+  // La porte du four et son hublot, sa poignée ; le petit placard à droite.
+  roundRect(ctx, -s * 0.34, -s * 0.1, s * 0.4, s * 0.44, s * 0.04, pinkDark);
+  ctx.fillStyle = 'rgba(255,240,230,0.85)';
+  ctx.beginPath();
+  ctx.arc(-s * 0.14, s * 0.13, s * 0.11, 0, Math.PI * 2);
+  ctx.fill();
+  roundRect(ctx, -s * 0.24, -s * 0.07, s * 0.2, s * 0.03, s * 0.015, white);
+  roundRect(ctx, s * 0.1, -s * 0.1, s * 0.24, s * 0.44, s * 0.04, pinkDark);
+  ctx.fillStyle = white;
+  ctx.beginPath();
+  ctx.arc(s * 0.15, s * 0.12, s * 0.02, 0, Math.PI * 2);
+  ctx.fill();
+  // Le socle et ses petits pieds.
+  ctx.fillStyle = pinkDark;
+  ctx.fillRect(-s * 0.36, s * 0.42, s * 0.08, s * 0.05);
+  ctx.fillRect(s * 0.28, s * 0.42, s * 0.08, s * 0.05);
+}
+
+/**
  * Roger, la peluche singe (D-68), d'après l'image de l'utilisateur (D-69) : pelage roux tout doux,
  * masque crème (deux lobes sur les yeux, un grand museau), oreilles rondes crème dedans, nez brun,
  * grand sourire ; longs bras et longues jambes qui pendent, bouts des mains crème, longue queue
@@ -651,6 +744,9 @@ export function drawMemory(
       break;
     case 'roger':
       roger(ctx, size * 0.9);
+      break;
+    case 'pink-kitchen':
+      pinkKitchen(ctx, size * 0.95);
       break;
   }
   ctx.restore();

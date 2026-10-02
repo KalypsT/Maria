@@ -1,5 +1,11 @@
 import { STORY_TIMING as S, StoryFlag as F } from '../../config/story';
-import type { StoryData, StoryOmen, StoryProp, StoryTrigger } from '../../core/story/story';
+import type {
+  StoryData,
+  StoryOmen,
+  StoryProp,
+  StoryStep,
+  StoryTrigger,
+} from '../../core/story/story';
 
 /**
  * Histoire du train (D-83, D-85), PLACEHOLDER, réunie à celle de la maison (une seule zone). Le soir
@@ -17,8 +23,22 @@ const BUNK = { col: 11, row: 11, w: 5, h: 3 };
 /** La grille en accordéon entre les deux compartiments : on glisse dessous (D-84). */
 const GATE_SIDE = { col: 32, row: 16, w: 6, h: 3 };
 
-/** La porte de la cuisine du wagon-restaurant : la lueur passe dessous (le monde étrange, PR 5). */
+/** La porte de la cuisine du wagon-restaurant : la lueur passe dessous (le monde étrange, D-88). */
 const KITCHEN_DOOR = { col: 57, row: 16, w: 6, h: 3 };
+/** La lueur sous la porte de la cuisine, qui scintille quand on y entre. */
+const KITCHEN_GLOW = { col: 58, row: 15, w: 4, h: 4 };
+/** Assise sur sa couchette, la nuit (comme au coucher, D-85). */
+const BUNK_SEAT = { col: 13, row: 12 };
+/** La cuisine rose (D-88), au bout du train de la vaisselle, après la ligne d'arrivée du chariot. */
+const PINK_KITCHEN = { col: 120, row: 11 };
+/** Arrivée dans la cuisine étrange (dans le noir). */
+const STRANGE_ARRIVAL: StoryStep = {
+  do: 'room',
+  room: 'train-strange-kitchen',
+  col: 3,
+  row: 23,
+  facing: 1,
+};
 
 const TRIGGERS: StoryTrigger[] = [
   {
@@ -191,25 +211,92 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // La porte de la cuisine (PLACEHOLDER) : la lueur passe dessous ; le monde étrange vient avec
-    // la PR 5.
-    id: 'train-kitchen',
+    // Le monde étrange du train (D-88), comme les casiers de la gare (D-68) : la nuit, Agir à la
+    // porte de la cuisine ; la lueur scintille dessous, l'image tremble ; un clignement dans le noir,
+    // et la cuisine devenue immense se révèle autour de Céleste.
+    id: 'train-strange-enter',
     room: 'train-restaurant',
     on: 'interact',
     area: KITCHEN_DOOR,
     mark: { col: 59, row: 15 },
-    when: { all: [F.TrainNight] },
+    when: { all: [F.TrainNight], none: [F.TrainStrange] },
     lock: true,
-    repeat: true,
     steps: [
-      { do: 'thought', icon: 'question', ms: S.thoughtMs },
+      { do: 'sparkle', area: KITCHEN_GLOW, ms: S.omenPeakMs + 400 },
+      { do: 'shake', ms: S.omenPeakMs, strength: 1 },
+      { do: 'wait', ms: S.omenPeakMs },
+      { do: 'fadeOut', ms: S.blinkOutMs },
+      { do: 'flag', id: F.TrainStrange },
+      STRANGE_ARRIVAL,
+      { do: 'wait', ms: S.blinkBlackMs },
+      { do: 'fadeIn', ms: S.blinkInMs, shape: 'iris' },
+      { do: 'wait', ms: 500 },
+      { do: 'thought', icon: 'question', ms: S.thoughtMs + 800 },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
+  {
+    // Après un évanouissement (avant la première veilleuse) : la porte y ramène, plus vite.
+    id: 'train-strange-reenter',
+    room: 'train-restaurant',
+    on: 'interact',
+    area: KITCHEN_DOOR,
+    mark: { col: 59, row: 15 },
+    when: { all: [F.TrainStrange], none: [F.TrainStrangeDone] },
+    lock: true,
+    steps: [
+      { do: 'sparkle', area: KITCHEN_GLOW, ms: S.reomenPeakMs + 300 },
+      { do: 'shake', ms: S.reomenPeakMs, strength: 0.6 },
+      { do: 'wait', ms: S.reomenPeakMs },
+      { do: 'fadeOut', ms: S.blinkOutMs },
+      STRANGE_ARRIVAL,
+      { do: 'wait', ms: S.blinkBlackMs },
+      { do: 'fadeIn', ms: S.reblinkInMs, shape: 'iris' },
+    ],
+  },
+  {
+    // Fin du monde étrange du train (D-88) : au bout du train de la vaisselle, la cuisine rose, la
+    // dînette d'enfance de Céleste. On la regarde, on ne la prend pas : un souvenir de la rubrique
+    // « Monde étrange ». (Le souvenir jouable vient avec la PR 5b.) Le cercle se referme ; Céleste
+    // est assise sur sa couchette, la nuit ; elle pense à Maria, puis à son lit. PLACEHOLDER : le
+    // matin vient avec la PR 6.
+    id: 'train-pink-kitchen',
+    room: 'train-strange-dishes',
+    on: 'interact',
+    area: { col: PINK_KITCHEN.col - 3, row: PINK_KITCHEN.row - 2, w: 6, h: 3 },
+    mark: { col: PINK_KITCHEN.col, row: PINK_KITCHEN.row - 3 },
+    when: { all: [F.TrainStrange], none: [F.TrainStrangeDone] },
+    lock: true,
+    steps: [
+      { do: 'memory', id: 'pink-kitchen' },
+      {
+        do: 'sparkle',
+        area: { col: PINK_KITCHEN.col - 2, row: PINK_KITCHEN.row - 2, w: 4, h: 3 },
+        ms: S.cradleSparkleMs + 600,
+      },
+      { do: 'wait', ms: S.cradleSparkleMs },
+      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs + S.lookMs },
+      { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
+      { do: 'flag', id: F.TrainStrangeDone },
+      { do: 'room', room: 'train-couchettes', ...BUNK_SEAT, facing: 1, returnPoint: true },
+      { do: 'pose', pose: 'sit' },
+      { do: 'wait', ms: S.nightBlackMs },
+      { do: 'fadeIn', ms: S.nightFadeInMs },
+      { do: 'wait', ms: 1200 },
+      { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs + 300 },
+      { do: 'thought', icon: 'bed', ms: S.thoughtMs },
       { do: 'wait', ms: S.lookMs },
     ],
   },
 ];
 
-/** La nuit, la lueur guide Céleste d'une voiture à l'autre : la lumière vacille en approchant. */
-const NIGHT_OMEN = { all: [F.TrainNight] };
+/**
+ * La nuit, la lueur guide Céleste d'une voiture à l'autre : la lumière vacille en approchant. Elle
+ * s'arrête une fois la cuisine rose trouvée (D-88).
+ */
+const NIGHT_OMEN = { all: [F.TrainNight], none: [F.TrainStrangeDone] };
 const OMENS: StoryOmen[] = [
   // Le passage vers les compartiments, au bout de la voiture-couchettes.
   { room: 'train-couchettes', when: NIGHT_OMEN, col: 83, row: 17, radius: 12 },
@@ -368,6 +455,14 @@ const PROPS: StoryProp[] = [
     when: NIGHT,
   },
   { id: 'dog', room: 'train-baggage', kind: 'dog-sleep', col: 40, row: 18, when: NIGHT },
+  // La cuisine rose reste dans le monde étrange (D-88) : on la regarde, on ne la prend pas.
+  {
+    id: 'pink-kitchen',
+    room: 'train-strange-dishes',
+    kind: 'pink-kitchen',
+    ...PINK_KITCHEN,
+    when: {},
+  },
 ];
 
 /** Le soir du départ et la nuit dans le train (jusqu'à l'arrivée, PR 6). */

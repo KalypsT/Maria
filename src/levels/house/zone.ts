@@ -34,6 +34,8 @@ import trainCompartments from '../train/compartments.txt?raw';
 import trainBaggage from '../train/baggage.txt?raw';
 import trainRoof from '../train/roof.txt?raw';
 import trainRestaurant from '../train/restaurant.txt?raw';
+import trainStrangeKitchen from '../train/strange-kitchen.txt?raw';
+import trainStrangeDishes from '../train/strange-dishes.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -105,6 +107,9 @@ export const HOUSE: ZoneSource = {
     { id: 'train-baggage', text: trainBaggage },
     { id: 'train-roof', text: trainRoof },
     { id: 'train-restaurant', text: trainRestaurant },
+    // Le monde étrange du train (D-88) : par l'histoire (la porte de la cuisine du wagon-restaurant).
+    { id: 'train-strange-kitchen', text: trainStrangeKitchen },
+    { id: 'train-strange-dishes', text: trainStrangeDishes },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -155,6 +160,8 @@ export const HOUSE: ZoneSource = {
     ['train-baggage:3', 'train-roof:1'],
     ['train-roof:2', 'train-restaurant:2'],
     ['train-baggage:2', 'train-restaurant:1'],
+    // Le monde étrange du train (D-88) : la cuisine étrange, puis le train de la vaisselle.
+    ['train-strange-kitchen:1', 'train-strange-dishes:1'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur
