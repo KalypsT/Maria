@@ -2,9 +2,9 @@
 
 ## Phase en cours
 
-**Le train** (niveau 5, D-82, D-83) : plan validé en 6 PR. **PR 1 faite : la glissade** (D-84, fusionnée). **PR 2 faite : le départ et la voiture-couchettes** (D-85, fusionnée). **PR 3 faite : le reste du train réel** (D-86, fusionnée). **PR 4 faite : la poursuite horizontale** (D-87, fusionnée). **PR 5 faite : le monde étrange, la cuisine rose et le souvenir jouable** (D-88, D-89, fusionnée). **PR 6a faite : le matin, la gare de la mer, le train à quai** (D-90), sur `ccr-6ca08fb4-rwfcx0`. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
+**Le train** (niveau 5, D-82, D-83) : plan validé en 6 PR. **PR 1 faite : la glissade** (D-84, fusionnée). **PR 2 faite : le départ et la voiture-couchettes** (D-85, fusionnée). **PR 3 faite : le reste du train réel** (D-86, fusionnée). **PR 4 faite : la poursuite horizontale** (D-87, fusionnée). **PR 5 faite : le monde étrange, la cuisine rose et le souvenir jouable** (D-88, D-89, fusionnée). **PR 6a faite : le matin, la gare de la mer, le train à quai** (D-90) et **PR 6b faite : les revisites avec la glissade** (D-91), sur `ccr-6ca08fb4-rwfcx0`. **Le niveau 5 (le train) est complet** ; le niveau 6 (la station balnéaire) reste à concevoir (D-82). La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
-Suite du train : PR 6b les revisites avec la glissade (le salon sous le canapé, la terrasse du jardin, le chantier sous la palissade, sous le quai de la gare).
+Suite : le niveau 6 (la station balnéaire), à planifier le moment venu.
 
 **Structure de la fin du jeu** (D-82) : 8 niveaux (maison, jardin, quartier, gare, train, station balnéaire, avant-dernier, monde de Maria). Niveau 6 et niveau 7 : pistes retenues, détails décidés le moment venu.
 
@@ -17,6 +17,15 @@ Suite du train : PR 6b les revisites avec la glissade (le salon sous le canapé,
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le train, PR 6b : les revisites avec la glissade (D-91)
+
+- **Quatre trouvailles** qu'on n'atteint qu'en glissant : sous le canapé du salon, sous la table de jardin de la terrasse, sous la palissade dans la rue (une cachette derrière les planches), sous le kiosque du hall de la gare.
+- Ajustements de la liste de départ (acceptés) : pas de planches sur la terrasse, pas de raccourci propre vers le chantier, et le souffle des trains sous le quai (voir D-91).
+- Aucune trouvaille ni lanterne existante déplacée : les parties en cours ne sont pas touchées.
+- Tests : TESTCOUNT. Vérifié dans Chromium : les quatre trouvailles ramassées en glissant (la terrasse jusqu'au potager).
+- [ ] À vérifier sur téléphone : voit-on qu'on peut passer sous le canapé, la table, la palissade, le kiosque ? Faut-il un indice (une étincelle, la trouvaille visible) ?
+- [ ] Le canapé et la table creusés en dessous : se lisent-ils toujours comme des meubles ?
 
 ### Le train, PR 6a : le matin, la gare de la mer, le train à quai (D-90)
 

@@ -1102,6 +1102,21 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Tests** (`trainArrival.test.ts`) : le script du matin (ordre : le matin dans le noir, la maîtresse, l'arrêt, Maria, la gare de la mer), le jour et l'arrêt, sans passagers, la gare de la mer (pas de sortie, ses liaisons), les portes cachées avant l'arrivée, le train arrêté sans danger, le voyage d'une gare à l'autre (glissade comprise) et rien avant l'arrivée.
 - **Sauvegarde** : aucune migration (étapes `train.morning`, `train.arrived`).
 
+## D-91 — Le train, PR 6b : les revisites avec la glissade
+
+- **Plan validé** (D-83), avec des **ajustements acceptés par l'utilisateur** : la liste de départ (le salon sous le canapé, la terrasse sous les planches, un raccourci sous la palissade du chantier, un long passage sous le quai de la gare) ne tenait pas partout :
+  - **la terrasse** n'a pas de planches ; un plancher surélevé aurait recouvert la lanterne et la porte de la maison (une lanterne ne bouge jamais : son identifiant dépend de sa position, pilier 10) → **sous la table de jardin** ;
+  - **un raccourci rue ↔ chantier** ne tombait nulle part de propre (le bas droit du chantier est en gravats, le bas gauche porte déjà la sortie vers la supérette) → **une cachette sous la palissade**, dans la rue ;
+  - **sous le quai** de la gare : le souffle du train qui passe couvre exactement l'épaisseur du quai sur toute la longueur ; dans un passage, Céleste serait poussée et effrayée sans abri (injuste, pilier 1) → **sous le kiosque** du hall.
+- **Quatre trouvailles**, chacune dans un passage bas d'une tuile (ou juste derrière), qu'on n'atteint qu'en glissant :
+  1. **le salon** : sous l'assise du canapé (vidée sur une rangée, entrée par la gauche), la trouvaille au fond ;
+  2. **la terrasse du jardin** : sous la table de jardin (le plateau reste à la même hauteur, on monte toujours dessus) ;
+  3. **la rue** : sous les planches vertes de la palissade (nouveau décor `sitehoarding`), une petite cachette entre l'échafaudage et le mur du fond ;
+  4. **le hall de la gare** : sous le kiosque à journaux (7 cases couché).
+- Aucune nouvelle route : seulement des tuiles retirées ou ajoutées et quatre nouvelles trouvailles. **Aucune trouvaille ni lanterne existante n'a bougé** (leurs identifiants restent valables : une partie existante n'est pas touchée).
+- **Tests** (`slideRevisits.test.ts`) : la vraie Céleste (phase 3) simulée devant chaque passage ramasse la trouvaille en glissant, jamais sans (en marchant et en sautant) ; puis elle ressort toujours, debout (jamais coincée). Les tests des salles (maison, jardin, rue, gare, « rien ne se ferme » en grandissant) restent verts.
+- **Sauvegarde** : aucune migration (quatre nouvelles trouvailles, identifiants neufs).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
