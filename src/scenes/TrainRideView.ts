@@ -100,6 +100,14 @@ export class TrainRideView {
       }
       const state = this.state;
       luggageState(ms, i, combat.luggage.length, drop.dropPx, p, state);
+      if (combat.still) {
+        // Le train arrêté (D-90) : la valise reste posée sur son filet.
+        image
+          .setPosition(drop.x + LUGGAGE_BOX.width / 2, drop.y)
+          .setAlpha(1)
+          .setAngle(0);
+        continue;
+      }
       let dx = 0;
       if (state.phase === LuggagePhase.Shake) {
         dx = Math.sin(nowMs / 35) * SHAKE_PX;
@@ -109,7 +117,11 @@ export class TrainRideView {
         .setAlpha(state.phase === LuggagePhase.Lie ? 0.75 : 1)
         .setAngle(state.phase === LuggagePhase.Lie ? 8 : 0);
     }
-    if (combat.tunnelRow < 0) {
+    if (combat.tunnelRow < 0 || combat.still) {
+      this.veil.setVisible(false);
+      for (const arch of this.arches) {
+        arch.setVisible(false);
+      }
       return;
     }
     // Le voile couvre l'écran (coordonnées de l'écran : zoom compris).

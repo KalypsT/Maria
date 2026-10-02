@@ -817,6 +817,21 @@ export const TRAIN_NIGHT_PALETTE: Readonly<ArtPalette> = {
 };
 
 /**
+ * Le toit du train de jour (D-90), à quai au bord de la mer : un ciel clair, une lumière douce.
+ * PLACEHOLDER.
+ */
+export const TRAIN_DAY_PALETTE: Readonly<ArtPalette> = {
+  ...STREET_PALETTE,
+  wallTop: '#8fc3ea',
+  wallBottom: '#d6ecf5',
+  night: '#8fc3ea',
+  nightLow: '#f6e2c0',
+  stars: false,
+  darkness: 0,
+  glow: 0.3,
+};
+
+/**
  * Finition de l'habillage (D-71), « papier découpé » : chaque plan est une feuille posée sur la
  * précédente, avec son ombre douce ; grain de papier ; ombres de contact ; ombre de Céleste au sol.
  * PROVISOIRE : à régler sur téléphone (overlay → « Habillage (finition) »). Distances en px

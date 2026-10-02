@@ -365,3 +365,86 @@ export function drawTrainNearPlane(
   }
   ctx.restore();
 }
+
+/**
+ * La mer à la fenêtre du train (D-90), au matin : l'eau jusqu'à l'horizon, des reflets, une voile au
+ * loin, le sable au pied. Elle ne défile pas (trop loin). PLACEHOLDER.
+ */
+export function drawTrainSeaPlane(
+  ctx: CanvasRenderingContext2D,
+  e: Extent,
+  horizonY: number,
+): void {
+  const seaTop = horizonY - 3.4 * T;
+  const water = ctx.createLinearGradient(0, seaTop, 0, horizonY);
+  water.addColorStop(0, '#6fa9cf');
+  water.addColorStop(1, '#4d87b4');
+  ctx.fillStyle = water;
+  ctx.fillRect(e.x0, seaTop, e.x1 - e.x0, horizonY - seaTop);
+  // Reflets du soleil, en petits traits clairs.
+  ctx.fillStyle = 'rgba(255,248,226,0.55)';
+  for (let x = startAt(e.x0, 23); x < e.x1; x += 23) {
+    const k = Math.round(x / 23);
+    const y = seaTop + 4 + hash(k + 0.3) * (horizonY - seaTop - 10);
+    ctx.fillRect(x + hash(k) * 10, y, 4 + hash(k + 0.7) * 6, 1);
+  }
+  // Une voile au loin.
+  const sail = e.x0 + (e.x1 - e.x0) * 0.62;
+  ctx.fillStyle = '#f7f1e6';
+  ctx.beginPath();
+  ctx.moveTo(sail, seaTop + 2);
+  ctx.lineTo(sail, seaTop - 9);
+  ctx.lineTo(sail + 6, seaTop + 2);
+  ctx.fill();
+  ctx.fillStyle = '#3f5a76';
+  ctx.fillRect(sail - 3, seaTop + 2, 10, 2);
+  // Le sable, au pied de l'eau.
+  ctx.fillStyle = '#ead6ac';
+  ctx.fillRect(e.x0, horizonY - 0.9 * T, e.x1 - e.x0, e.y1 - horizonY + 0.9 * T);
+}
+
+/**
+ * La plage tout près de la vitre (D-90) : des dunes, des touffes d'oyats, des piquets de ganivelle.
+ * Période de `period` px (multiple de 80) : elle défile tant que le train roule, puis s'arrête.
+ */
+export function drawTrainBeachPlane(
+  ctx: CanvasRenderingContext2D,
+  e: Extent,
+  horizonY: number,
+  period: number,
+): void {
+  const w = (2 * Math.PI) / period;
+  const dune = (x: number) => horizonY - 0.3 * T - Math.sin(x * w * 2 + 0.5) * 5;
+  ctx.save();
+  ctx.fillStyle = '#d9c08f';
+  ctx.beginPath();
+  ctx.moveTo(e.x0, e.y1);
+  for (let x = startAt(e.x0, 8); x <= e.x1 + 8; x += 8) {
+    ctx.lineTo(x, dune(x));
+  }
+  ctx.lineTo(e.x1 + 8, e.y1);
+  ctx.fill();
+  const step = 40;
+  for (let x = startAt(e.x0 - step, step); x < e.x1 + step; x += step) {
+    const k = cycle(Math.round(x / step), period / step);
+    const base = dune(x) + 1;
+    // Piquets de ganivelle, reliés par un fil.
+    ctx.fillStyle = '#9b7b55';
+    ctx.fillRect(x, base - 9, 2, 9);
+    ctx.fillRect(x + 6, base - 8, 2, 8);
+    ctx.fillRect(x - 2, base - 6, 14, 1);
+    // Une touffe d'oyats de temps en temps.
+    if (hash(k + 0.21) < 0.6) {
+      ctx.strokeStyle = '#8fa66a';
+      ctx.lineWidth = 1;
+      const gx = x + 20 + hash(k + 0.5) * 10;
+      ctx.beginPath();
+      for (let i = -2; i <= 2; i++) {
+        ctx.moveTo(gx, base);
+        ctx.lineTo(gx + i * 2, base - 7 - Math.abs(i));
+      }
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}

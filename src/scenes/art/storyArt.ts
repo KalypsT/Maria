@@ -347,7 +347,7 @@ function drawSiteGap(ctx: CanvasRenderingContext2D, w: number, h: number): void 
  * voiture entière, le bout des voisines ; au milieu, la porte grande ouverte, l'intérieur dans
  * l'ombre et une lueur turquoise qui déborde sur le quai. Le bas est au niveau du quai.
  */
-function drawQuayTrain(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+function drawQuayTrain(ctx: CanvasRenderingContext2D, w: number, h: number, day = false): void {
   const top = 6;
   const car = (x: number, cw: number, radius: number | number[]) => {
     ctx.fillStyle = '#3d5f8f';
@@ -380,9 +380,16 @@ function drawQuayTrain(ctx: CanvasRenderingContext2D, w: number, h: number): voi
   ctx.fillStyle = '#9fb7cf';
   ctx.fillRect(4, top + 12, 14, 14);
   ctx.fillRect(w - 18, top + 12, 14, 14);
-  // La porte ouverte : l'ombre dedans, la lueur turquoise.
-  ctx.fillStyle = '#141a26';
+  // La porte ouverte : l'ombre dedans, la lueur turquoise ; de jour (D-90), l'intérieur éclairé.
+  ctx.fillStyle = day ? '#5b5f73' : '#141a26';
   ctx.fillRect(door.x, door.top, door.w, h - door.top);
+  if (day) {
+    ctx.fillStyle = 'rgba(255,240,210,0.35)';
+    ctx.fillRect(door.x + 2, door.top + 3, door.w - 4, (h - door.top) * 0.45);
+    ctx.fillStyle = '#5a7db0';
+    ctx.fillRect(door.x + door.w, door.top, 4, h - door.top);
+    return;
+  }
   const glow = ctx.createRadialGradient(w / 2, h - 18, 0, w / 2, h - 18, 26);
   glow.addColorStop(0, 'rgba(150, 245, 230, 0.95)');
   glow.addColorStop(0.45, 'rgba(110, 228, 214, 0.55)');
@@ -531,6 +538,9 @@ export function drawProp(
       break;
     case 'quay-train':
       drawQuayTrain(ctx, w, h);
+      break;
+    case 'quay-train-day':
+      drawQuayTrain(ctx, w, h, true);
       break;
     case 'height-chart':
     case 'height-chart-grown':

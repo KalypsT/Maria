@@ -202,6 +202,8 @@ export const PROP_KINDS = [
    * turquoise (la suite, sans figer le niveau suivant).
    */
   'quay-train',
+  /** Le train à quai, de jour (D-90) : la porte ouverte, sans lueur ; il relie les deux gares. */
+  'quay-train-day',
   // Objets à regarder (D-38), avec un petit mouvement en boucle.
   'music-box',
   'plant',
@@ -262,6 +264,7 @@ export const WALL_PROP_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'gate-open',
   'site-gap',
   'quay-train',
+  'quay-train-day',
 ]);
 
 /** Vus par une fenêtre (D-64) : posés sur le mur, sans surface sous eux. */
@@ -347,6 +350,11 @@ export interface StoryData {
     readonly when: FlagCondition;
     readonly speaker?: string;
     readonly icon?: ThoughtIcon;
+    /**
+     * Porte de façade fermée qu'on ne voit pas comme une porte (D-90) : ni étincelle, ni Agir,
+     * tant qu'elle est fermée (la porte du train à quai, quand le train n'est pas là).
+     */
+    readonly hidden?: boolean;
   }[];
   readonly omens: readonly StoryOmen[];
   /**

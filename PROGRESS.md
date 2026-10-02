@@ -2,9 +2,9 @@
 
 ## Phase en cours
 
-**Le train** (niveau 5, D-82, D-83) : plan validé en 6 PR. **PR 1 faite : la glissade** (D-84, fusionnée). **PR 2 faite : le départ et la voiture-couchettes** (D-85, fusionnée). **PR 3 faite : le reste du train réel** (D-86, fusionnée). **PR 4 faite : la poursuite horizontale** (D-87, fusionnée). **PR 5a faite : le monde étrange du train et la cuisine rose** (D-88), et **PR 5b faite : le souvenir jouable** (D-89), toutes deux sur `ccr-6ca08fb4-rwfcx0` (5b empilée sur 5a, non fusionnée). La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
+**Le train** (niveau 5, D-82, D-83) : plan validé en 6 PR. **PR 1 faite : la glissade** (D-84, fusionnée). **PR 2 faite : le départ et la voiture-couchettes** (D-85, fusionnée). **PR 3 faite : le reste du train réel** (D-86, fusionnée). **PR 4 faite : la poursuite horizontale** (D-87, fusionnée). **PR 5 faite : le monde étrange, la cuisine rose et le souvenir jouable** (D-88, D-89, fusionnée). **PR 6a faite : le matin, la gare de la mer, le train à quai** (D-90), sur `ccr-6ca08fb4-rwfcx0`. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
-Suite du train : PR 6 la fin, la gare de la mer, la revisite du train et les revisites avec la glissade.
+Suite du train : PR 6b les revisites avec la glissade (le salon sous le canapé, la terrasse du jardin, le chantier sous la palissade, sous le quai de la gare).
 
 **Structure de la fin du jeu** (D-82) : 8 niveaux (maison, jardin, quartier, gare, train, station balnéaire, avant-dernier, monde de Maria). Niveau 6 et niveau 7 : pistes retenues, détails décidés le moment venu.
 
@@ -17,6 +17,19 @@ Suite du train : PR 6 la fin, la gare de la mer, la revisite du train et les rev
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le train, PR 6a : le matin, la gare de la mer, le train à quai (D-90)
+
+- **Au matin** : après la cuisine rose, Agir sur sa couchette ; la maîtresse réveille Céleste, les lumières reviennent, **la mer à la fenêtre** ; le train s'arrête ; Céleste pense à Maria.
+- **La gare de la mer** (PLACEHOLDER) : un quai, la mer derrière, le train à quai, la classe et la maîtresse qui attendent ; pas de sortie (le niveau 6 viendra).
+- **Le train à quai, de jour** : immobile, sans passagers, sans tunnel ni valise qui tombe ; il se revisite.
+- **Le voyage** : la porte de la voiture-couchettes donne sur la gare de la mer, une porte du fourgon sur les quais de la gare de la ville. Avant l'arrivée, ces portes n'existent pas.
+- DEBUG → Histoire : « le train arrivé, la gare de la mer ».
+- Tests : TESTCOUNT. Vérifié dans Chromium : le matin (la mer, la maîtresse, l'arrêt), la gare de la mer, de la gare de la mer à la voiture-couchettes puis du fourgon aux quais de la ville ; le toit et les compartiments de jour, sans danger.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « la cuisine rose trouvée », puis la couchette) : le matin est-il assez doux ? La mer à la fenêtre se voit-elle ? L'arrêt du train se sent-il (`trainStopMs`, `TRAIN_RIDE.accelPerS`) ?
+- [ ] La gare de la mer : comprend-on qu'on ne va pas plus loin pour l'instant (la maîtresse) ?
+- [ ] Le voyage par les deux bouts du train : se comprend-il, ou trouble-t-il ? Trouve-t-on la porte du fourgon ?
+- [ ] Le train vide de jour : trop vide ? Le toit de jour se lit-il ?
 
 ### Le train, PR 5b : le souvenir jouable de la cuisine (D-89)
 

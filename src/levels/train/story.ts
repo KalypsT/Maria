@@ -29,6 +29,8 @@ const KITCHEN_DOOR = { col: 57, row: 16, w: 6, h: 3 };
 const KITCHEN_GLOW = { col: 58, row: 15, w: 4, h: 4 };
 /** Assise sur sa couchette, la nuit (comme au coucher, D-85). */
 const BUNK_SEAT = { col: 13, row: 12 };
+/** Arrivée sur le quai de la gare de la mer (D-90), près du train. */
+const SEA_ARRIVAL = { col: 30, row: 17 };
 /** La cuisine rose (D-88), au bout du train de la vaisselle, après la ligne d'arrivée du chariot. */
 const PINK_KITCHEN = { col: 120, row: 11 };
 /** Arrivée dans la cuisine étrange (dans le noir). */
@@ -293,6 +295,63 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.lookMs },
     ],
   },
+  {
+    // Au matin (D-90) : après la cuisine rose, Agir sur sa couchette. La nuit passe ; la maîtresse
+    // réveille Céleste, la mer est à la fenêtre ; le train ralentit et s'arrête. Céleste pense à
+    // Maria (l'arrivée). Puis le quai de la gare de la mer.
+    id: 'train-morning',
+    room: 'train-couchettes',
+    on: 'interact',
+    area: BUNK,
+    mark: { col: 13, row: 11 },
+    when: { all: [F.TrainStrangeDone], none: [F.TrainMorning] },
+    lock: true,
+    steps: [
+      { do: 'pose', pose: 'sit' },
+      { do: 'wait', ms: S.holdMs },
+      { do: 'fadeOut', ms: S.nightFadeOutMs },
+      { do: 'flag', id: F.TrainMorning },
+      { do: 'place', ...BUNK_SEAT, facing: 1 },
+      { do: 'pose', pose: 'sit' },
+      { do: 'wait', ms: S.monthsBlackMs },
+      { do: 'fadeIn', ms: S.nightFadeInMs },
+      { do: 'wait', ms: 1200 },
+      { do: 'thought', icon: 'sun', ms: S.thoughtMs, by: 'teacher-morning' },
+      { do: 'wait', ms: S.thoughtMs },
+      // La mer à la fenêtre.
+      { do: 'wait', ms: S.seaLookMs },
+      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs },
+      // Le train ralentit et s'arrête : le paysage ne défile plus.
+      { do: 'flag', id: F.TrainArrived },
+      { do: 'wait', ms: S.trainStopMs },
+      { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs + 300 },
+      { do: 'fadeOut', ms: S.nightFadeOutMs },
+      { do: 'room', room: 'sea-station', ...SEA_ARRIVAL, facing: -1, returnPoint: true },
+      { do: 'wait', ms: S.nightBlackMs },
+      { do: 'fadeIn', ms: S.nightFadeInMs },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
+  {
+    // La gare de la mer (D-90, PLACEHOLDER) : la classe attend avec la maîtresse ; on ne va pas
+    // plus loin pour l'instant (le niveau 6). Céleste demande ; la maîtresse sourit au soleil.
+    id: 'sea-teacher',
+    room: 'sea-station',
+    on: 'interact',
+    area: { col: 5, row: 15, w: 11, h: 3 },
+    mark: { col: 8, row: 12 },
+    when: { all: [F.TrainArrived] },
+    lock: true,
+    repeat: true,
+    steps: [
+      { do: 'thought', icon: 'question', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs },
+      { do: 'thought', icon: 'sun', ms: S.thoughtMs, by: 'teacher-sea' },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
 ];
 
 /**
@@ -317,7 +376,12 @@ const OMENS: StoryOmen[] = [
 const ON_QUAY = { all: [F.TrainBoarding], none: [F.TrainDeparted] };
 /** Dans la voiture-couchettes, avant la nuit. */
 const EVENING = { all: [F.TrainDeparted], none: [F.TrainNight] };
-const NIGHT = { all: [F.TrainNight] };
+/** La nuit, jusqu'au matin (D-90). */
+const NIGHT = { all: [F.TrainNight], none: [F.TrainMorning] };
+/** Le matin dans le train, avant l'arrivée : ensuite, la classe est descendue (sans passagers). */
+const MORNING = { all: [F.TrainMorning], none: [F.TrainArrived] };
+/** Le train arrivé (D-90) : à quai, de jour ; la classe sur le quai de la gare de la mer. */
+const ARRIVED = { all: [F.TrainArrived] };
 
 const PROPS: StoryProp[] = [
   // Le quai, le soir du départ : la maîtresse, les enfants, maman et papa.
@@ -458,6 +522,54 @@ const PROPS: StoryProp[] = [
     when: NIGHT,
   },
   { id: 'dog', room: 'train-baggage', kind: 'dog-sleep', col: 40, row: 18, when: NIGHT },
+  // Au matin (D-90) : la maîtresse réveille Céleste, les enfants sont assis, la camarade debout.
+  {
+    id: 'teacher-morning',
+    room: 'train-couchettes',
+    kind: 'teacher',
+    col: 18,
+    row: 18,
+    flip: true,
+    when: MORNING,
+  },
+  {
+    id: 'kid-cap-morning',
+    room: 'train-couchettes',
+    kind: 'kid-cap-sit',
+    col: 13,
+    row: 15,
+    when: MORNING,
+  },
+  {
+    id: 'kid-bob-morning',
+    room: 'train-couchettes',
+    kind: 'kid-bob-sit',
+    col: 35,
+    row: 12,
+    flip: true,
+    when: MORNING,
+  },
+  {
+    id: 'classmate-morning',
+    room: 'train-couchettes',
+    kind: 'classmate',
+    col: 33,
+    row: 18,
+    flip: true,
+    when: MORNING,
+  },
+  // La gare de la mer (D-90) : la maîtresse et la classe attendent, le train à quai.
+  { id: 'teacher-sea', room: 'sea-station', kind: 'teacher', col: 8, row: 17, when: ARRIVED },
+  { id: 'kids-sea', room: 'sea-station', kind: 'kids-quay', col: 13, row: 17, when: ARRIVED },
+  { id: 'train-sea', room: 'sea-station', kind: 'quay-train-day', col: 42, row: 17, when: ARRIVED },
+  // Le même train, à quai à la gare de la ville : il relie les deux gares.
+  {
+    id: 'train-city',
+    room: 'station-platforms',
+    kind: 'quay-train-day',
+    ...TRAIN_DOOR,
+    when: ARRIVED,
+  },
   // La cuisine rose reste dans le monde étrange (D-88) : on la regarde, on ne la prend pas.
   {
     id: 'pink-kitchen',
@@ -469,7 +581,11 @@ const PROPS: StoryProp[] = [
 ];
 
 /** Le soir du départ et la nuit dans le train (jusqu'à l'arrivée, PR 6). */
-const TIMES: StoryData['times'] = [{ when: { all: [F.TrainBoarding] }, time: 'evening' }];
+const TIMES: StoryData['times'] = [
+  // Au matin (D-90), puis de jour, à quai.
+  { when: { all: [F.TrainMorning] }, time: 'morning' },
+  { when: { all: [F.TrainBoarding] }, time: 'evening' },
+];
 
 /** Le train roule une fois parti (l'arrivée vient avec la PR 6). */
 const TRAIN_ROOMS = [
@@ -481,12 +597,12 @@ const TRAIN_ROOMS = [
 ];
 const MOVING: NonNullable<StoryData['moving']> = TRAIN_ROOMS.map((room) => ({
   room,
-  when: { all: [F.TrainDeparted] },
+  when: { all: [F.TrainDeparted], none: [F.TrainArrived] },
 }));
 
 /** La nuit, les lumières de la voiture-couchettes s'éteignent : seules les veilleuses restent. */
 const DIM: NonNullable<StoryData['dim']> = TRAIN_ROOMS.filter((room) => room !== 'train-roof').map(
-  (room) => ({ room, when: { all: [F.TrainNight] } }),
+  (room) => ({ room, when: NIGHT }),
 );
 
 /**
@@ -498,6 +614,11 @@ const LOCKED: StoryData['lockedRooms'] = [
   { room: 'train-couchettes', exit: 1, when: { none: [F.TrainNight] }, icon: 'bed' },
   { room: 'train-baggage', exit: 2, when: { none: [F.TrainRestaurantOpen] }, icon: 'question' },
   { room: 'train-restaurant', exit: 1, when: { none: [F.TrainRestaurantOpen] }, icon: 'question' },
+  // Les portes du train à quai (D-90) : elles n'existent qu'une fois le train arrivé ; avant, rien
+  // ne les montre (le quai vide de la gare de la ville, le train en route).
+  { room: 'train-couchettes', exit: 2, when: { none: [F.TrainArrived] }, hidden: true },
+  { room: 'train-baggage', exit: 4, when: { none: [F.TrainArrived] }, hidden: true },
+  { room: 'station-platforms', exit: 4, when: { none: [F.TrainArrived] }, hidden: true },
 ];
 
 /** Morceaux de l'histoire du train, ajoutés à ceux de la maison (`HOUSE_STORY`). */

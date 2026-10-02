@@ -97,6 +97,13 @@ export const StoryFlag = {
   TrainStrange: 'train.strange',
   /** Fin du monde étrange du train (D-88) : la cuisine rose, au bout du train de la vaisselle. */
   TrainStrangeDone: 'train.strange-done',
+  /** Le matin dans le train (D-90) : la maîtresse réveille Céleste ; la mer à la fenêtre. */
+  TrainMorning: 'train.morning',
+  /**
+   * Le train est arrivé à la gare de la mer (D-90) : à quai, de jour, immobile, sans passagers ; il
+   * relie la gare de la mer et la gare de la ville.
+   */
+  TrainArrived: 'train.arrived',
   /** Quelques mois plus tard (D-43) : Céleste a grandi (phase de croissance 2). */
   Grown: 'growth.2',
   /** Le jardin (D-46) : Céleste est sortie pour la première fois (il fait beau, et Maria ?). */
@@ -164,6 +171,10 @@ export const STORY_TIMING = {
   cradleSparkleMs: 1400,
   /** Quelques mois plus tard (D-43) : le noir le plus long du jeu, puis le retour lent. */
   monthsBlackMs: 4200,
+  /** Au matin dans le train (D-90) : Céleste regarde la mer à la fenêtre. */
+  seaLookMs: 2400,
+  /** Le train ralentit jusqu'à l'arrêt (à `TRAIN_RIDE.accelPerS`, 0,25 par seconde : 4 s). */
+  trainStopMs: 4400,
   monthsFadeInMs: 3200,
   /** Court souvenir (D-68) : la vignette, apparition et disparition comprises. */
   flashbackMs: 7000,
@@ -222,6 +233,7 @@ export const PROP_SIZE = {
   'site-gap': { w: 80, h: 64 },
   // Le train à quai (D-69), quelques mois après la gare : une voiture et le nez de la suivante.
   'quay-train': { w: 200, h: 66 },
+  'quay-train-day': { w: 200, h: 66 },
   // Roger, la peluche singe (D-68), tout en haut de la tour des objets perdus.
   roger: { w: 16, h: 18 },
   // La cuisine rose (D-88), la dînette d'enfance, à peu près à hauteur de Céleste.

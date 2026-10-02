@@ -12,6 +12,8 @@ import {
   drawSkyPlane,
   drawTrainHillsPlane,
   drawTrainNearPlane,
+  drawTrainBeachPlane,
+  drawTrainSeaPlane,
   drawTrainSkyPlane,
   type Extent,
 } from './art/backdropArt';
@@ -422,7 +424,15 @@ function planeSpecs(
       },
     },
   ];
-  if (level.meta.world === 'street') {
+  if (level.meta.backdrop === 'sea') {
+    // La gare de la mer (D-90) : la mer et la plage derrière le quai, au lieu des toits.
+    specs.push({
+      factor: PARALLAX.farRoofs,
+      draw: (ctx, e) => {
+        drawTrainSeaPlane(ctx, e, floorY);
+      },
+    });
+  } else if (level.meta.world === 'street') {
     specs.push(
       {
         factor: PARALLAX.farRoofs,
@@ -549,14 +559,36 @@ function trainSpecs(level: LevelData, p: Readonly<ArtPalette>): PlaneSpec[] {
   const ref = { x: minX, y: Math.max(minY, Math.min(maxY, top - GAME_HEIGHT / 3)) };
   const moon = { x: first.x + first.w * 0.7, y: top + (bottom - top) * 0.28 };
   const r = TRAIN_RIDE;
-  return [
-    {
-      factor: r.parallax.sky,
-      ref,
-      draw: (ctx, e) => {
-        drawTrainSkyPlane(ctx, p, e, horizonY, moon);
-      },
+  const sky: PlaneSpec = {
+    factor: r.parallax.sky,
+    ref,
+    draw: (ctx, e) => {
+      drawTrainSkyPlane(ctx, p, e, horizonY, moon);
     },
+  };
+  if (!p.stars) {
+    // Le matin (D-90) : la mer à la fenêtre, la plage qui défile puis s'arrête à quai.
+    return [
+      sky,
+      {
+        factor: r.parallax.hills,
+        ref,
+        draw: (ctx, e) => {
+          drawTrainSeaPlane(ctx, e, horizonY);
+        },
+      },
+      {
+        factor: r.parallax.near,
+        ref,
+        scroll: { pxPerS: r.nearScrollPxPerS, period: r.nearPeriodPx },
+        draw: (ctx, e) => {
+          drawTrainBeachPlane(ctx, e, horizonY, r.nearPeriodPx);
+        },
+      },
+    ];
+  }
+  return [
+    sky,
     {
       factor: r.parallax.hills,
       ref,

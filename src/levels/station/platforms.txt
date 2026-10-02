@@ -7,6 +7,7 @@
 ; @world: street
 ; @music: station
 ; @difficulty: hard
+; @door: 4 55 26
 ; @floor: #8f857a #b3a796
 ; @train: 30 right
 ; @decor: canopyroof 1 1 78 7

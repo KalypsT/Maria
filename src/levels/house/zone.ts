@@ -36,6 +36,7 @@ import trainRoof from '../train/roof.txt?raw';
 import trainRestaurant from '../train/restaurant.txt?raw';
 import trainStrangeKitchen from '../train/strange-kitchen.txt?raw';
 import trainStrangeDishes from '../train/strange-dishes.txt?raw';
+import seaStation from '../sea/station.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -110,6 +111,8 @@ export const HOUSE: ZoneSource = {
     // Le monde étrange du train (D-88) : par l'histoire (la porte de la cuisine du wagon-restaurant).
     { id: 'train-strange-kitchen', text: trainStrangeKitchen },
     { id: 'train-strange-dishes', text: trainStrangeDishes },
+    // La gare de la mer (D-90) : au bout du voyage, le train y reste à quai.
+    { id: 'sea-station', text: seaStation },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -162,6 +165,10 @@ export const HOUSE: ZoneSource = {
     ['train-baggage:2', 'train-restaurant:1'],
     // Le monde étrange du train (D-88) : la cuisine étrange, puis le train de la vaisselle.
     ['train-strange-kitchen:1', 'train-strange-dishes:1'],
+    // Le train à quai relie les deux gares (D-90) : la porte de la voiture-couchettes donne sur la
+    // gare de la mer, celle du fourgon sur les quais de la gare de la ville.
+    ['train-couchettes:2', 'sea-station:1'],
+    ['train-baggage:4', 'station-platforms:4'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur
@@ -203,5 +210,7 @@ export const HOUSE: ZoneSource = {
     'train-restaurant': { x: 18.6, y: 1, w: 5, h: 1.4, page: 'train' },
     // Le toit, au-dessus du fourgon et du wagon-restaurant.
     'train-roof': { x: 13.2, y: -0.4, w: 10.4, h: 1, page: 'train' },
+    // La gare de la mer (D-90), au bout du train, du côté de la voiture-couchettes.
+    'sea-station': { x: -4.4, y: 0.8, w: 4, h: 1.8, page: 'train' },
   },
 };
