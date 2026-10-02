@@ -23,7 +23,7 @@ Suite : le niveau 6 (la station balnéaire), à planifier le moment venu.
 - **Quatre trouvailles** qu'on n'atteint qu'en glissant : sous le canapé du salon, sous la table de jardin de la terrasse, sous la palissade dans la rue (une cachette derrière les planches), sous le kiosque du hall de la gare.
 - Ajustements de la liste de départ (acceptés) : pas de planches sur la terrasse, pas de raccourci propre vers le chantier, et le souffle des trains sous le quai (voir D-91).
 - Aucune trouvaille ni lanterne existante déplacée : les parties en cours ne sont pas touchées.
-- Tests : TESTCOUNT. Vérifié dans Chromium : les quatre trouvailles ramassées en glissant (la terrasse jusqu'au potager).
+- Tests : 628. Vérifié dans Chromium : les quatre trouvailles ramassées en glissant (la terrasse jusqu'au potager).
 - [ ] À vérifier sur téléphone : voit-on qu'on peut passer sous le canapé, la table, la palissade, le kiosque ? Faut-il un indice (une étincelle, la trouvaille visible) ?
 - [ ] Le canapé et la table creusés en dessous : se lisent-ils toujours comme des meubles ?
 
