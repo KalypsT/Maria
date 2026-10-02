@@ -478,6 +478,22 @@ export function streetDrawers({ tileShape, rounded }: ShapeTools): Record<string
       ctx.fillRect(r.x + r.w - 2 * T - 2.5, r.y + 2 * T - 1, 5, 2);
       ledge(a, { x: r.x, y: r.y, w: r.w, h: T }, '#5f8a5a', '#8cc26f');
     },
+    sitehoarding(a, r) {
+      // Les planches de la palissade du chantier (D-91), pleines, peintes en vert passé : un jour
+      // reste en bas, juste assez pour s'y glisser.
+      const { ctx } = a;
+      tileShape(a, r, '#6f8f6a', '#89a882');
+      ctx.fillStyle = 'rgba(0,0,0,0.18)';
+      for (let row = r.y / T; row < (r.y + r.h) / T; row++) {
+        for (let col = r.x / T; col < (r.x + r.w) / T; col++) {
+          if (tileAt(a.level, col, row) !== Tile.Solid) {
+            continue;
+          }
+          ctx.fillRect(col * T + 5, row * T, 1, T);
+          ctx.fillRect(col * T + 11, row * T, 1, T);
+        }
+      }
+    },
     crates(a, r) {
       const { ctx } = a;
       // Cagettes de fruits empilées.

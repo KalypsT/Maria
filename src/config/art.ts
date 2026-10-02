@@ -289,6 +289,8 @@ export const DECOR_KINDS: Readonly<
   /** Abribus : le toit est une plateforme traversable. */
   busstop: { furniture: true },
   crates: { furniture: true },
+  /** Planches de la palissade du chantier (pleines, D-91) : on glisse dessous. */
+  sitehoarding: { furniture: true },
   /** Rebord de fenêtre, corniche, store, enseigne : plateformes traversables. */
   sill: { furniture: true },
   cornice: { furniture: true },
