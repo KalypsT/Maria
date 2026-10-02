@@ -1,12 +1,18 @@
-; Cuisine : chaises, table, plan de travail ; la porte de la buanderie est au-dessus du plan.
+; Cuisine (D-75) : la salle à manger haute à gauche (suspension basse au-dessus de la table, barre à
+; casseroles), le coin cuisine bas à droite (retombée de plafond, hotte et son conduit, cafetière).
 ; @name: Cuisine
 ; @icon: pot
 ; @ambient: #2f3036
-; @note: dessus des placards hauts (colonnes 39-51) : en grimpant par la hotte, ou par les étagères à bocaux depuis la table (D-26, D-39) ; une trouvaille y attend.
+; @note: dessus des placards hauts (colonnes 39-51) : en grimpant par la hotte, ou depuis la table par la suspension, la barre à casseroles, le rebord de la fenêtre et le frigo (D-26, D-39) ; une trouvaille y attend.
+; @note-2: rien ne flotte : la suspension et la barre pendent du plafond, le rebord fait partie de la fenêtre, le frigo tient au sol.
 ; @wall: tiles
-; @decor: window 23 5 7 6
-; @decor: clock 12 7 2 2
-; @decor: lamp 13 12 1 2
+; @decor: soffit 37 1 20 4
+; @decor: clock 4 7 2 2
+; @decor: window 24 6 6 6
+; @decor: hoodduct 53 5 3 8
+; @decor: fridgebody 32 13 4 9
+; @decor: kettle 54 15 2 2
+; @decor: steam 54 10 2 5
 ; @decor: chair 4 19 3 3
 ; @decor: table 7 18 14 4
 ; @decor: chair 21 19 3 3
@@ -14,16 +20,16 @@
 ; @decor: counter 36 17 21 5
 ; @decor: cupboard 38 9 13 3
 ; @decor: hood 53 13 3 1
-; @decor: jarshelf 9 15 6 1
-; @decor: jarshelf 16 12 6 1
-; @decor: jarshelf 24 12 6 1
-; @decor: jarshelf 32 13 4 1
+; @decor: ceilinglamp 9 1 6 15
+; @decor: potrack 16 1 6 12
+; @decor: windowsill 24 12 6 1
+; @decor: fridgetop 32 13 4 1
 ; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), ^ briques de jeu (danger), e jouet mécanique, C veilleuse (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 ##########################################################
-#........................................................#
-#........................................................#
-#........................................................#
-#........................................................#
+#....................................#####################
+#....................................#####################
+#....................................#####################
+#....................................#####################
 #........................................................#
 #........................................................#
 #........................................................#

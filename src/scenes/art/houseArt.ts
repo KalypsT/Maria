@@ -90,11 +90,11 @@ function post(ctx: CanvasRenderingContext2D, x: number, y0: number, y1: number, 
 export function houseDrawers({ tileShape, rounded }: ShapeTools): Record<string, Drawer> {
   return {
     mansard(a, r) {
-      // Le toit vu de dessous : une pente droite par les coins des marches de la collision (on ne
-      // l'atteint jamais d'un saut), lambris dans le sens de la pente, chevrons, poutre au bord.
+      // Un pan du toit vu de dessous : une pente droite qui passe sous toutes les tuiles pleines
+      // (par les coins des marches de la collision ; on ne l'atteint jamais d'un saut), lambris
+      // dans le sens de la pente, chevrons, poutre au bord.
       const { ctx, level, palette: p } = a;
-      const corners: { x: number; y: number }[] = [];
-      let last = -1;
+      const runs: { x0: number; x1: number; y: number }[] = [];
       for (let col = r.x / T; col < (r.x + r.w) / T; col++) {
         let bottom = -1;
         for (let row = r.y / T; row < (r.y + r.h) / T; row++) {
@@ -102,49 +102,59 @@ export function houseDrawers({ tileShape, rounded }: ShapeTools): Record<string,
             bottom = row + 1;
           }
         }
-        if (bottom > 0 && bottom !== last) {
-          corners.push({ x: col * T, y: bottom * T });
+        const run = runs[runs.length - 1];
+        if (bottom < 0) {
+          continue;
         }
-        last = bottom;
+        if (run && run.y === bottom * T && run.x1 === col * T) {
+          run.x1 = (col + 1) * T;
+        } else {
+          runs.push({ x0: col * T, x1: (col + 1) * T, y: bottom * T });
+        }
       }
-      const first = corners[0];
-      const end = corners[corners.length - 1];
-      if (!first || !end || end.x === first.x) {
+      const first = runs[0];
+      const end = runs[runs.length - 1];
+      if (!first || !end || first === end) {
         return;
       }
-      const slope = (end.y - first.y) / (end.x - first.x);
-      const at = (x: number) => first.y + (x - first.x) * slope;
-      const x0 = first.x - (first.y - r.y) / slope;
+      // Pente qui descend vers la droite : coins gauches des marches ; qui monte : coins droits.
+      const down = end.y > first.y;
+      const a0 = down ? { x: first.x0, y: first.y } : { x: first.x1, y: first.y };
+      const a1 = down ? { x: end.x0, y: end.y } : { x: end.x1, y: end.y };
+      const slope = (a1.y - a0.y) / (a1.x - a0.x);
+      const at = (x: number) => a0.y + (x - a0.x) * slope;
+      const left = r.x;
+      const right = r.x + r.w;
       ctx.save();
       ctx.beginPath();
-      ctx.moveTo(x0, r.y);
-      ctx.lineTo(r.x + r.w, r.y);
-      ctx.lineTo(r.x + r.w, at(r.x + r.w));
+      ctx.rect(r.x, r.y, r.w, r.h);
+      ctx.clip();
+      ctx.beginPath();
+      ctx.moveTo(left, r.y);
+      ctx.lineTo(right, r.y);
+      ctx.lineTo(right, at(right));
+      ctx.lineTo(left, at(left));
       ctx.closePath();
+      ctx.save();
       ctx.clip();
       ctx.fillStyle = p.structure;
       ctx.fillRect(r.x, r.y, r.w, r.h);
       if (!p.silhouettes) {
         ctx.fillStyle = 'rgba(255,230,190,0.06)';
         ctx.fillRect(r.x, r.y, r.w, r.h);
-        // Lambris : des lignes parallèles à la pente (une ligne pour deux colonnes).
+        // Lambris : des lignes parallèles à la pente.
         ctx.strokeStyle = 'rgba(0,0,0,0.25)';
         ctx.lineWidth = 1;
-        for (let k = -r.w; k < r.w + r.h; k += 7) {
+        for (let k = -r.h * 4; k < r.h; k += 5) {
           ctx.beginPath();
-          ctx.moveTo(r.x + k, r.y);
-          ctx.lineTo(r.x + k + 2 * r.h, r.y + r.h);
+          ctx.moveTo(left, at(left) + k);
+          ctx.lineTo(right, at(right) + k);
           ctx.stroke();
         }
-        // Chevrons : de plus larges bandes, à intervalles réguliers.
+        // Chevrons : des bandes claires, perpendiculaires au bord, à intervalles réguliers.
         ctx.fillStyle = 'rgba(255,230,190,0.08)';
-        for (let x = r.x + 10; x < r.x + r.w; x += 3 * T) {
-          ctx.beginPath();
-          ctx.moveTo(x, r.y);
-          ctx.lineTo(x + 6, r.y);
-          ctx.lineTo(x + 6 + 2 * r.h, r.y + r.h);
-          ctx.lineTo(x + 2 * r.h, r.y + r.h);
-          ctx.fill();
+        for (let x = r.x + 10; x < right; x += 3 * T) {
+          ctx.fillRect(x, r.y, 6, at(x) - r.y);
         }
       }
       ctx.restore();
@@ -152,17 +162,18 @@ export function houseDrawers({ tileShape, rounded }: ShapeTools): Record<string,
       ctx.strokeStyle = p.woodDark;
       ctx.lineWidth = 6;
       ctx.beginPath();
-      ctx.moveTo(x0, r.y - 3);
-      ctx.lineTo(r.x + r.w, at(r.x + r.w) - 3);
+      ctx.moveTo(left, at(left) - 3);
+      ctx.lineTo(right, at(right) - 3);
       ctx.stroke();
       if (!p.silhouettes) {
         ctx.strokeStyle = p.wood;
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.moveTo(x0, r.y - 0.5);
-        ctx.lineTo(r.x + r.w, at(r.x + r.w) - 0.5);
+        ctx.moveTo(left, at(left) - 0.5);
+        ctx.lineTo(right, at(right) - 0.5);
         ctx.stroke();
       }
+      ctx.restore();
     },
     soffit(a, r) {
       // Plafond bas : plâtre un peu plus clair que la structure, poutre au bord.
@@ -620,7 +631,299 @@ export function houseDrawers({ tileShape, rounded }: ShapeTools): Record<string,
         }
       }
     },
+    hoodduct(a, r) {
+      // Conduit de la hotte : du plafond (la retombée) jusqu'au-dessus de la hotte.
+      const { ctx, palette: p } = a;
+      ctx.fillStyle = p.silhouettes ? p.structure : '#8a939d';
+      ctx.fillRect(r.x + 6, r.y, r.w - 12, r.h);
+      if (p.silhouettes) {
+        return;
+      }
+      ctx.fillStyle = 'rgba(255,255,255,0.18)';
+      ctx.fillRect(r.x + 8, r.y, 2, r.h);
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      for (let y = r.y + 10; y < r.y + r.h; y += 18) {
+        ctx.fillRect(r.x + 6, y, r.w - 12, 1.5);
+      }
+    },
+    fridgebody(a, r) {
+      // Corps du frigo, posé au sol (fond : on passe devant) : portes, poignées, aimants, le
+      // dessin de la maison.
+      const { ctx, level, palette: p } = a;
+      const floor = groundBelow(level, r.x / T, (r.y + r.h) / T - 1) * T;
+      // Sous le dessus du frigo (sa planche fait 4 px).
+      const body = { x: r.x + 1, y: r.y + 4, w: r.w - 2, h: floor - r.y - 4 };
+      ctx.fillStyle = p.silhouettes ? p.structure : '#dfe4e8';
+      rounded(ctx, body, [2, 2, 3, 3]);
+      ctx.fill();
+      if (p.silhouettes) {
+        return;
+      }
+      ctx.fillStyle = 'rgba(0,0,0,0.12)';
+      ctx.fillRect(body.x + 2, body.y + body.h * 0.36, body.w - 4, 1.5);
+      ctx.fillStyle = '#9aa3ad';
+      ctx.fillRect(body.x + body.w - 6, body.y + 6, 2, 12);
+      ctx.fillRect(body.x + body.w - 6, body.y + body.h * 0.36 + 6, 2, 22);
+      for (const [dx, dy, color] of [
+        [8, 30, '#d9788f'],
+        [22, 40, '#e6c27a'],
+        [13, 56, '#4f6f8f'],
+      ] as const) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(body.x + dx, body.y + body.h * 0.36 + dy, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = p.linen;
+      ctx.fillRect(body.x + 6, body.y + body.h * 0.36 + 8, 16, 13);
+      ctx.strokeStyle = '#d9788f';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(body.x + 10, body.y + body.h * 0.36 + 14, 7, 5);
+      ctx.beginPath();
+      ctx.moveTo(body.x + 9, body.y + body.h * 0.36 + 14);
+      ctx.lineTo(body.x + 13.5, body.y + body.h * 0.36 + 10.5);
+      ctx.lineTo(body.x + 18, body.y + body.h * 0.36 + 14);
+      ctx.stroke();
+    },
+    fridgetop(a, r) {
+      // Le dessus du frigo, où l'on se pose.
+      const p = a.palette;
+      tileShape(a, r, p.silhouettes ? p.wood : '#eef1f3', p.silhouettes ? p.wood : '#ffffff');
+    },
+    kettle(a, r) {
+      // Cafetière italienne posée sur la cuisinière.
+      const { ctx, palette: p } = a;
+      const base = r.y + r.h;
+      const cx = r.x + r.w / 2;
+      ctx.fillStyle = p.silhouettes ? p.structure : '#9aa3ad';
+      ctx.beginPath();
+      ctx.moveTo(cx - 6, base);
+      ctx.lineTo(cx - 4, base - 9);
+      ctx.lineTo(cx - 6, base - 18);
+      ctx.lineTo(cx + 6, base - 18);
+      ctx.lineTo(cx + 4, base - 9);
+      ctx.lineTo(cx + 6, base);
+      ctx.fill();
+      ctx.fillStyle = p.silhouettes ? p.structure : '#3a3330';
+      ctx.fillRect(cx - 4, base - 21, 8, 3);
+      ctx.fillRect(cx + 6, base - 15, 4, 2);
+      if (!p.silhouettes) {
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        ctx.fillRect(cx - 4, base - 16, 1.5, 6);
+      }
+    },
+    potrack(a, r) {
+      // Barre à casseroles pendue à deux chaînes ; des louches et une petite casserole dessous.
+      const { ctx, level, palette: p } = a;
+      let barRow = r.y / T;
+      for (let row = r.y / T; row < (r.y + r.h) / T; row++) {
+        if (tileAt(level, r.x / T, row) === Tile.OneWay) {
+          barRow = row;
+        }
+      }
+      const bar = barRow * T;
+      ctx.strokeStyle = p.silhouettes ? p.structure : '#6e6a66';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 1.5]);
+      ctx.beginPath();
+      for (const x of [r.x + 6, r.x + r.w - 6]) {
+        ctx.moveTo(x, r.y);
+        ctx.lineTo(x, bar);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = p.silhouettes ? p.wood : '#8a7b6c';
+      rounded(ctx, { x: r.x, y: bar, w: r.w, h: 4 }, 2);
+      ctx.fill();
+      if (p.silhouettes) {
+        return;
+      }
+      ctx.fillStyle = '#b8bec6';
+      ctx.fillRect(r.x, bar, r.w, 1.5);
+      // Ustensiles accrochés sous la barre (petits : jamais un appui).
+      ctx.fillStyle = '#9aa3ad';
+      for (const dx of [14, 30, 62]) {
+        ctx.fillRect(r.x + dx, bar + 4, 1.2, 9);
+        ctx.beginPath();
+        ctx.ellipse(r.x + dx + 0.6, bar + 14, 3, 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#c46f4a';
+      rounded(ctx, { x: r.x + 42, y: bar + 6, w: 12, h: 7 }, [1, 1, 4, 4]);
+      ctx.fill();
+      ctx.fillRect(r.x + 47, bar + 4, 2, 3);
+    },
+    ironingboard(a, r) {
+      // Planche à repasser : pieds en X sous la planche de la salle, le fer posé dessus.
+      const { ctx, level, palette: p } = a;
+      const top = r.y + 3;
+      const floor = groundBelow(level, r.x / T, (r.y + r.h) / T - 1) * T;
+      ctx.strokeStyle = p.silhouettes ? p.structure : '#8a939d';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(r.x + r.w * 0.25, top);
+      ctx.lineTo(r.x + r.w * 0.7, floor);
+      ctx.moveTo(r.x + r.w * 0.7, top);
+      ctx.lineTo(r.x + r.w * 0.25, floor);
+      ctx.stroke();
+      ctx.fillStyle = p.silhouettes ? p.fabric : '#9fc0e8';
+      rounded(ctx, { x: r.x - 2, y: r.y - 1, w: r.w + 4, h: 5 }, [3, 6, 6, 3]);
+      ctx.fill();
+      if (p.silhouettes) {
+        return;
+      }
+      ctx.fillStyle = '#d9788f';
+      ctx.beginPath();
+      ctx.moveTo(r.x + r.w - 26, r.y - 1);
+      ctx.lineTo(r.x + r.w - 10, r.y - 1);
+      ctx.lineTo(r.x + r.w - 14, r.y - 7);
+      ctx.lineTo(r.x + r.w - 24, r.y - 7);
+      ctx.fill();
+      ctx.fillStyle = '#3a3330';
+      ctx.fillRect(r.x + r.w - 22, r.y - 10, 7, 2);
+    },
+    loft(a, r) {
+      // Soupente sous la trappe à linge : un plateau plein, une poutre, un poteau jusqu'au sol.
+      const { ctx, level, palette: p } = a;
+      const x = r.x + r.w - 4;
+      const floor = groundBelow(level, x / T, r.y / T + 1) * T;
+      ctx.fillStyle = p.woodDark;
+      post(ctx, x, r.y + T, floor, 4);
+      ctx.strokeStyle = p.woodDark;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(x, r.y + T + 20);
+      ctx.lineTo(x - 20, r.y + T);
+      ctx.stroke();
+      tileShape(a, r, p.wood, p.woodLight);
+      if (!p.silhouettes) {
+        // Un panier de linge sale sous la trappe.
+        ctx.fillStyle = '#b99a6b';
+        rounded(ctx, { x: r.x + 6, y: r.y - 9, w: 18, h: 9 }, [1, 1, 3, 3]);
+        ctx.fill();
+        ctx.fillStyle = '#f1a9bd';
+        rounded(ctx, { x: r.x + 8, y: r.y - 12, w: 9, h: 5 }, 3);
+        ctx.fill();
+      }
+    },
+    utilityshelf(a, r) {
+      // Étagère de rangement : le dessus plein, quatre pieds fins jusqu'au sol (on passe entre),
+      // des bidons de lessive dessus.
+      const { ctx, level, palette: p } = a;
+      const floor = groundBelow(level, r.x / T, r.y / T + 1) * T;
+      ctx.fillStyle = p.silhouettes ? p.structure : '#8a939d';
+      for (const x of [r.x + 2, r.x + r.w - 4]) {
+        ctx.fillRect(x, r.y + T - 2, 2, floor - r.y - T + 2);
+      }
+      tileShape(a, r, p.silhouettes ? p.wood : '#a8b2bc', p.silhouettes ? p.wood : '#cfd6dd');
+      if (p.silhouettes) {
+        return;
+      }
+      for (const [dx, color, h] of [
+        [8, '#7fa37a', 12],
+        [20, '#9fc0e8', 10],
+        [r.w - 18, '#f1a9bd', 11],
+      ] as const) {
+        ctx.fillStyle = color;
+        rounded(ctx, { x: r.x + dx, y: r.y - h, w: 9, h }, [3, 3, 1, 1]);
+        ctx.fill();
+      }
+    },
+    roofwindow(a, r) {
+      // Fenêtre de toit dans le pan du toit : la vitre est découpée (on voit la nuit), cadre.
+      const { ctx, palette: p } = a;
+      const pane = { x: r.x + 4, y: r.y + 6, w: r.w - 8, h: r.h - 12 };
+      ctx.fillStyle = p.silhouettes ? p.structure : p.woodDark;
+      rounded(ctx, { x: pane.x - 4, y: pane.y - 4, w: pane.w + 8, h: pane.h + 8 }, 3);
+      ctx.fill();
+      ctx.save();
+      if (p.silhouettes) {
+        ctx.fillStyle = p.night;
+      } else {
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.fillStyle = '#000';
+      }
+      ctx.fillRect(pane.x, pane.y, pane.w, pane.h);
+      ctx.restore();
+      ctx.fillStyle = p.silhouettes ? p.structure : p.woodDark;
+      ctx.fillRect(pane.x + pane.w / 2 - 1, pane.y, 2, pane.h);
+    },
+    dressform(a, r) {
+      // Mannequin de couture oublié, en ombre : un buste sur un pied (un peu inquiétant).
+      const { ctx, level, palette: p } = a;
+      const cx = r.x + r.w / 2;
+      const floor = groundBelow(level, cx / T, r.y / T) * T;
+      ctx.fillStyle = p.silhouettes ? p.structure : 'rgba(40,32,44,0.75)';
+      ctx.fillRect(cx - 1, r.y + 34, 2, floor - r.y - 34);
+      ctx.fillRect(cx - 8, floor - 2, 16, 2);
+      ctx.beginPath();
+      ctx.moveTo(cx - 3, r.y);
+      ctx.lineTo(cx + 3, r.y);
+      ctx.quadraticCurveTo(cx + 12, r.y + 6, cx + 9, r.y + 16);
+      ctx.quadraticCurveTo(cx + 6, r.y + 22, cx + 10, r.y + 34);
+      ctx.lineTo(cx - 10, r.y + 34);
+      ctx.quadraticCurveTo(cx - 6, r.y + 22, cx - 9, r.y + 16);
+      ctx.quadraticCurveTo(cx - 12, r.y + 6, cx - 3, r.y);
+      ctx.fill();
+      if (!p.silhouettes) {
+        // Un ruban de mesure qui pend.
+        ctx.strokeStyle = '#e6c27a';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(cx - 5, r.y + 4);
+        ctx.quadraticCurveTo(cx - 2, r.y + 16, cx + 6, r.y + 28);
+        ctx.stroke();
+      }
+    },
+    atticbeam(a, r) {
+      // Poutre de la charpente (la planche de la salle), sur un poteau posé au sol, deux liens.
+      const { ctx, level, palette: p } = a;
+      const cx = r.x + r.w / 2;
+      const floor = groundBelow(level, cx / T, r.y / T + 1) * T;
+      ctx.fillStyle = p.woodDark;
+      post(ctx, cx, r.y + 4, floor, 4);
+      ctx.strokeStyle = p.woodDark;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(cx, r.y + 18);
+      ctx.lineTo(r.x + 3, r.y + 4);
+      ctx.moveTo(cx, r.y + 18);
+      ctx.lineTo(r.x + r.w - 3, r.y + 4);
+      ctx.stroke();
+      ctx.fillStyle = p.wood;
+      rounded(ctx, { x: r.x, y: r.y, w: r.w, h: 6 }, 2);
+      ctx.fill();
+      if (!p.silhouettes) {
+        ctx.fillStyle = p.woodLight;
+        ctx.fillRect(r.x + 1, r.y, r.w - 2, 1.5);
+      }
+    },
+    collartie(a, r) {
+      // Entrait sous le faîte (plein, on s'y pose) : un poinçon jusqu'au faîte au bout gauche,
+      // une jambe de force jusqu'au toit au bout droit.
+      const { ctx, level, palette: p } = a;
+      let beamRow = r.y / T;
+      for (let row = r.y / T; row < (r.y + r.h) / T; row++) {
+        if (solid(level, r.x / T, row) && !solid(level, r.x / T, row - 1)) {
+          beamRow = row;
+        }
+      }
+      const beam = beamRow * T;
+      const ceilingAbove = (col: number) => {
+        let row = beamRow - 1;
+        while (row > 0 && !solid(level, col, row)) {
+          row--;
+        }
+        return (row + 1) * T;
+      };
+      ctx.fillStyle = p.woodDark;
+      post(ctx, r.x + 3, ceilingAbove(r.x / T), beam, 5);
+      const endCol = (r.x + r.w) / T - 1;
+      post(ctx, r.x + r.w - 4, ceilingAbove(endCol), beam, 4);
+      tileShape(a, { x: r.x, y: beam, w: r.w, h: T }, p.wood, p.woodLight);
+    },
     // Animés (WorldLifeView) : rien de dessiné dans le décor.
+    steam() {},
     nightstars() {},
     dust() {},
     moth() {},

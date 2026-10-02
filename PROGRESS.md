@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Passe graphique** (D-71) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étapes 1, 2, 3 et 5 faites** (finition « papier découpé », D-71 ; profondeur, D-72 ; vie du monde réel, D-73 ; **le salon, salle témoin**, D-74) sur `ccr-8742f994-82xjq9` ; l'étape 4 (identifiants fixes de la sauvegarde) est écartée jusqu'à la sortie. Ensuite : **toutes les salles du monde réel refaites en profondeur** selon la grille de D-74, dans l'ordre de l'histoire, une PR par zone (les mondes étranges : lisibilité seulement). **La maison (D-75)** : PR A (l'étage : chambre, couloir, escalier) faite sur `ccr-126f1100-llmv5d` ; PR B (cuisine, buanderie, grenier, lisibilité du salon étrange et du passage d'ombres) à suivre. Puis le jardin, le quartier, la gare. Pas de nouveau niveau d'ici là.
+**Passe graphique** (D-71) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étapes 1, 2, 3 et 5 faites** (finition « papier découpé », D-71 ; profondeur, D-72 ; vie du monde réel, D-73 ; **le salon, salle témoin**, D-74) sur `ccr-8742f994-82xjq9` ; l'étape 4 (identifiants fixes de la sauvegarde) est écartée jusqu'à la sortie. Ensuite : **toutes les salles du monde réel refaites en profondeur** selon la grille de D-74, dans l'ordre de l'histoire, une PR par zone (les mondes étranges : lisibilité seulement). **La maison (D-75)** : faite sur `ccr-126f1100-llmv5d` (PR #54), en deux parties (l'étage ; le rez-de-chaussée, le grenier et la lisibilité des mondes étranges). Puis le jardin, le quartier, la gare. Pas de nouveau niveau d'ici là.
 
 **Le jardin (2a) et derrière la haie (2b)** (§7.2, §6, D-46 à D-49) : fusionnés (PR #29), **essai sur téléphone en cours** (début du jardin testé ; jardin adouci (D-51) sur `ccr-53d22df4-9euiqo`). Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
 
@@ -17,6 +17,21 @@
 Prochaine : essai de la gare (réelle, étrange, la fin, la phase 3) sur téléphone. Le niveau suivant (le train ?) reste à décider. Intégrer les morceaux de musique.
 
 ## Fait
+
+### La maison refaite, partie B : rez-de-chaussée, grenier, mondes étranges (D-75)
+
+- **Cuisine** : une retombée de plafond au-dessus du coin cuisine ; une suspension basse au-dessus de la table, une barre à casseroles pendue, le rebord de la fenêtre, le dessus du frigo (les mêmes appuis qu'avant) ; le conduit de la hotte ; une cafetière qui fume.
+- **Buanderie** : un plafond bas ; la soupente sous la trappe sur son poteau ; une étagère sur pieds ; une planche à repasser ; une ampoule au-dessus de la machine ; le linge tourne dans le hublot.
+- **Grenier** : un toit à deux pans ; chaque poutre sur son poteau ; la trouvaille sur un entrait sous le faîte ; une fenêtre de toit dans le pan (hors d'atteinte) ; de la poussière dans sa lumière ; un mannequin de couture.
+- **Salon** : vérifié, inchangé.
+- **Mondes étranges** (lisibilité seulement) : fauteuil, escalier peint et grand crayon plus pâles ; le portemanteau du passage d'ombres sans sa barre.
+- Aucune trouvaille ni lanterne déplacée ; difficultés inchangées.
+- Tests : 545. Vérifié dans Chromium : les trois salles le soir et le matin, et les deux mondes étranges.
+- [ ] À vérifier sur téléphone : la cuisine (suspension, barre, frigo) se lit-elle comme un chemin ? Le frigo, dont on passe devant, trompe-t-il ?
+- [ ] Le grenier : le toit en pente est-il plus beau ? Les poteaux gênent-ils la lecture des poutres ?
+- [ ] La buanderie : la soupente et l'étagère sur pieds se comprennent-elles comme le chemin de la trappe ?
+- [ ] Le linge dans le hublot, la vapeur, la poussière : assez discrets ?
+- [ ] Monde étrange : le fauteuil, l'escalier peint, le crayon ne trompent-ils plus ?
 
 ### La maison refaite, PR A : l'étage (D-75)
 
