@@ -45,6 +45,9 @@ const TAIL_FRAMES = 7;
 /** Ventilateur, bâche (D-78). */
 const FAN_FRAMES = 4;
 const TARP_FRAMES = 6;
+/** Pigeon de la cour (D-79) : debout, tête baissée, ailes ouvertes. */
+const PIGEON_TEXTURE = 'life-pigeon';
+const PIGEON_FRAMES = 3;
 const FRAME_NAMES = Array.from({ length: Math.max(LAUNDRY_FRAMES, LEAF_FRAMES) }, (_, i) =>
   String(i),
 );
@@ -189,6 +192,24 @@ interface Flicker {
   nextMs: number;
 }
 
+/** Le pigeon de la cour (D-79). */
+interface Pigeon {
+  readonly image: Phaser.GameObjects.Image;
+  readonly homeX: number;
+  readonly homeY: number;
+  x: number;
+  y: number;
+  state: 'idle' | 'flying' | 'gone';
+  goneAtMs: number;
+}
+
+/** Le poisson rouge de la classe (D-79), dans son bocal. */
+interface Fish {
+  readonly image: Phaser.GameObjects.Image;
+  readonly x: number;
+  readonly y: number;
+}
+
 interface Moth {
   readonly image: Phaser.GameObjects.Image;
   readonly x: number;
@@ -221,6 +242,8 @@ export class WorldLifeView {
   private readonly bulbs: Bulb[] = [];
   private readonly butterflies: Butterfly[] = [];
   private readonly flickers: Flicker[] = [];
+  private readonly pigeons: Pigeon[] = [];
+  private readonly fishes: Fish[] = [];
   /** Textures propres à la salle, retirées avec elle. */
   private readonly roomTextures: string[] = [];
   private readonly rand = Math.random;
@@ -286,6 +309,12 @@ export class WorldLifeView {
       flicker.off.destroy();
     }
     this.flickers.length = 0;
+    for (const list of [this.pigeons, this.fishes]) {
+      for (const item of list) {
+        item.image.destroy();
+      }
+      list.length = 0;
+    }
     for (const key of this.roomTextures) {
       this.scene.textures.remove(key);
     }
@@ -316,6 +345,16 @@ export class WorldLifeView {
         swingsetSeats(level, r).forEach((seat, k) => {
           this.makeSwing(`${level.id}-${String(i)}-${String(k)}`, seat, palette, artScale);
         });
+      } else if (d.kind === 'pigeon') {
+        this.makePigeon(r);
+      } else if (d.kind === 'fishbowl') {
+        this.ensureSprites();
+        const image = this.scene.add
+          .image(r.x + r.w / 2, r.y + r.h - 8, DOT_TEXTURE)
+          .setDisplaySize(5, 3)
+          .setTint(0xf07a2a)
+          .setDepth(LAUNDRY_DEPTH);
+        this.fishes.push({ image, x: r.x + r.w / 2, y: r.y + r.h - 8 });
       } else if (d.kind === 'tubeflicker') {
         this.makeFlicker(r);
       } else if (d.kind === 'fan') {
@@ -825,6 +864,112 @@ export class WorldLifeView {
     this.framed.push({ image, kind: 'tail' });
   }
 
+  /** Le pigeon de la cour (D-79) : trois images dessinées d'avance (debout, il picore, il vole). */
+  private makePigeon(r: { x: number; y: number; w: number; h: number }): void {
+    if (!this.scene.textures.exists(PIGEON_TEXTURE)) {
+      let frame = 0;
+      framedTexture(
+        this.scene,
+        PIGEON_TEXTURE,
+        PIGEON_FRAMES,
+        16,
+        12,
+        8,
+        11,
+        4,
+        () => 0,
+        (ctx) => {
+          const pose = frame++;
+          ctx.fillStyle = '#8a8f9a';
+          ctx.beginPath();
+          ctx.ellipse(0, -4, 5, 3.2, 0, 0, Math.PI * 2);
+          ctx.fill();
+          const head = pose === 1 ? { x: 5, y: -1.5 } : { x: 4.5, y: -7.5 };
+          ctx.fillStyle = '#6f7480';
+          ctx.beginPath();
+          ctx.arc(head.x, head.y, 2.2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#e8b23a';
+          ctx.fillRect(head.x + 1.8, head.y - 0.3, 1.6, 0.9);
+          ctx.fillStyle = '#5b6070';
+          if (pose === 2) {
+            ctx.beginPath();
+            ctx.moveTo(-2, -5);
+            ctx.lineTo(-6, -10.5);
+            ctx.lineTo(1, -6);
+            ctx.moveTo(-1, -5);
+            ctx.lineTo(2, -10.5);
+            ctx.lineTo(3, -5);
+            ctx.fill();
+          } else {
+            ctx.fillRect(-5, -5, 6, 2);
+            ctx.fillStyle = '#d0674f';
+            ctx.fillRect(-1, -1, 0.8, 1.5);
+            ctx.fillRect(1, -1, 0.8, 1.5);
+          }
+        },
+      );
+    }
+    const homeX = r.x + r.w / 2;
+    const homeY = r.y + r.h;
+    const image = this.scene.add
+      .image(homeX, homeY, PIGEON_TEXTURE, FRAME_NAMES[0])
+      .setOrigin(0.5, 11 / 12)
+      .setScale(1 / 4)
+      .setDepth(LEAF_DEPTH);
+    this.pigeons.push({ image, homeX, homeY, x: homeX, y: homeY, state: 'idle', goneAtMs: 0 });
+  }
+
+  /** Pigeon (il s'envole quand Céleste approche, revient quand elle est loin) et poisson rouge. */
+  private updateCritters(
+    nowMs: number,
+    dtMs: number,
+    view: Readonly<{ x: number; y: number; w: number; h: number }>,
+    playerX: number,
+    playerY: number,
+  ): void {
+    const cfg = WORLD_LIFE.pigeon;
+    const dt = Math.min(dtMs, 100) / 1000;
+    for (const pigeon of this.pigeons) {
+      const near = Math.hypot(playerX - pigeon.x, playerY - pigeon.y);
+      if (pigeon.state === 'idle') {
+        if (near < cfg.scareDistancePx) {
+          pigeon.state = 'flying';
+        } else {
+          // Il picore de temps en temps.
+          const peck = Math.sin(nowMs / 430) + Math.sin(nowMs / 1170) > 1.2;
+          pigeon.image.setFrame(FRAME_NAMES[peck ? 1 : 0] ?? '0', false, false);
+        }
+      }
+      if (pigeon.state === 'flying') {
+        pigeon.x += cfg.flyPxPerS * 0.7 * dt;
+        pigeon.y -= cfg.flyPxPerS * dt;
+        pigeon.image
+          .setPosition(pigeon.x, pigeon.y)
+          .setFrame(FRAME_NAMES[Math.floor(nowMs / 90) % 2 === 0 ? 2 : 0] ?? '0', false, false);
+        if (pigeon.y < view.y - 20) {
+          pigeon.state = 'gone';
+          pigeon.goneAtMs = nowMs;
+          pigeon.image.setVisible(false);
+        }
+      } else if (pigeon.state === 'gone') {
+        const far = Math.hypot(playerX - pigeon.homeX, playerY - pigeon.homeY);
+        if (nowMs - pigeon.goneAtMs > cfg.returnMs && !(far < cfg.returnDistancePx)) {
+          pigeon.state = 'idle';
+          pigeon.x = pigeon.homeX;
+          pigeon.y = pigeon.homeY;
+          pigeon.image.setPosition(pigeon.x, pigeon.y).setVisible(true);
+        }
+      }
+    }
+    const swim = (nowMs / WORLD_LIFE.fish.periodMs) * Math.PI * 2;
+    for (const fish of this.fishes) {
+      fish.image
+        .setPosition(fish.x + 4 * Math.sin(swim), fish.y + 1.5 * Math.sin(2 * swim + 0.6))
+        .setFlipX(Math.cos(swim) < 0);
+    }
+  }
+
   /** Le tube de la réserve (D-78) : une lueur blanche ; éteint, un tube gris par-dessus. */
   private makeFlicker(r: { x: number; y: number; w: number; h: number }): void {
     this.ensureSprites();
@@ -1261,7 +1406,10 @@ export class WorldLifeView {
     nowMs: number,
     dtMs: number,
     view: Readonly<{ x: number; y: number; w: number; h: number }>,
+    playerX = Number.NaN,
+    playerY = Number.NaN,
   ): void {
+    this.updateCritters(nowMs, dtMs, view, playerX, playerY);
     const gust = wind(nowMs);
     const cfg = WORLD_LIFE;
     const swing = (nowMs / cfg.laundry.periodMs) * Math.PI * 2;

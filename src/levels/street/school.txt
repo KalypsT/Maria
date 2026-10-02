@@ -1,6 +1,8 @@
 ; Le quartier (D-64) : l'école, dedans. On y entre par la cour (sortie 2) ; la porte de l'école
 ; (sortie 1, sur la rue) se pousse de l'intérieur : un raccourci. Couloir et portemanteaux, la classe
 ; des petits, ses étagères murales jusqu'à l'oculus où l'air scintille : le monde étrange.
+; Refaite (D-79) : les étagères vers l'oculus deviennent des casiers posés au sol ; poutres, suspensions,
+; frise de formes, dessins ; un poisson rouge sous l'oculus.
 ; @name: École
 ; @icon: school
 ; @world: street
@@ -8,14 +10,24 @@
 ; @wall: stripes
 ; @walls: #f1e6cf #dccfb4
 ; @difficulty: easy
+; @decor: ceilingbeams 1 1 62 2
+; @decor: frieze 2 4 38 1
+; @decor: pendant 17 1 3 6
+; @decor: pendant 33 1 3 5
+; @decor: drawings 3 8 6 3
+; @decor: dust 47 9 9 12
 ; @decor: coatrack 12 15 6 4
 ; @decor: bench 8 21 3 1
 ; @decor: chalkboard 22 8 12 7
 ; @decor: kidtable 22 20 4 2
 ; @decor: kidtable 30 20 4 2
-; @decor: wallshelf 36 18 3 1
-; @decor: wallshelf 40 15 3 1
-; @decor: wallshelf 44 11 5 1
+; @decor: cubbybody 36 18 3 4
+; @decor: cubbybody 40 15 3 7
+; @decor: cubbybody 44 11 5 11
+; @decor: cubbytop 36 18 3 1
+; @decor: cubbytop 40 15 3 1
+; @decor: cubbytop 44 11 5 1
+; @decor: fishbowl 47 9 2 2
 ; @decor: oculus 45 6 3 3
 ; @decor: window 52 7 5 6
 ; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).

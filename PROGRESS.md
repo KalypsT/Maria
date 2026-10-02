@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Passe graphique** (D-71) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étapes 1, 2, 3 et 5 faites** (finition « papier découpé », D-71 ; profondeur, D-72 ; vie du monde réel, D-73 ; **le salon, salle témoin**, D-74) sur `ccr-8742f994-82xjq9` ; l'étape 4 (identifiants fixes de la sauvegarde) est écartée jusqu'à la sortie. Ensuite : **toutes les salles du monde réel refaites en profondeur** selon la grille de D-74, dans l'ordre de l'histoire, une PR par zone (les mondes étranges : lisibilité seulement). **La maison (D-75)** : faite sur `ccr-126f1100-llmv5d` (PR #54), en deux parties (l'étage ; le rez-de-chaussée, le grenier et la lisibilité des mondes étranges). **Le jardin (D-76)** : fait sur la même branche, à la demande de l'utilisateur. Les deux sont fusionnés. **Le quartier**, en trois phases : (1) la rue (D-77), faite ; (2) aire de jeux, supérette, chantier (D-78), faite ; (3) cour, école, école étrange (lisibilité). Puis le jardin, le quartier, la gare. Pas de nouveau niveau d'ici là.
+**Passe graphique** (D-71) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étapes 1, 2, 3 et 5 faites** (finition « papier découpé », D-71 ; profondeur, D-72 ; vie du monde réel, D-73 ; **le salon, salle témoin**, D-74) sur `ccr-8742f994-82xjq9` ; l'étape 4 (identifiants fixes de la sauvegarde) est écartée jusqu'à la sortie. Ensuite : **toutes les salles du monde réel refaites en profondeur** selon la grille de D-74, dans l'ordre de l'histoire, une PR par zone (les mondes étranges : lisibilité seulement). **La maison (D-75)** : faite sur `ccr-126f1100-llmv5d` (PR #54), en deux parties (l'étage ; le rez-de-chaussée, le grenier et la lisibilité des mondes étranges). **Le jardin (D-76)** : fait sur la même branche, à la demande de l'utilisateur. Les deux sont fusionnés. **Le quartier**, en trois phases : (1) la rue (D-77), faite ; (2) aire de jeux, supérette, chantier (D-78), faite ; (3) cour, école, école étrange (D-79), faite. Ensuite : la gare. Puis le jardin, le quartier, la gare. Pas de nouveau niveau d'ici là.
 
 **Le jardin (2a) et derrière la haie (2b)** (§7.2, §6, D-46 à D-49) : fusionnés (PR #29), **essai sur téléphone en cours** (début du jardin testé ; jardin adouci (D-51) sur `ccr-53d22df4-9euiqo`). Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
 
@@ -17,6 +17,17 @@
 Prochaine : essai de la gare (réelle, étrange, la fin, la phase 3) sur téléphone. Le niveau suivant (le train ?) reste à décider. Intégrer les morceaux de musique.
 
 ## Fait
+
+### Le quartier, phase 3 : la cour, l'école, l'école étrange (D-79)
+
+- **Cour** : du ciel au-dessus ; une marelle, un ballon, un pigeon qui s'envole quand Céleste approche ; au crépuscule, quelques fenêtres de l'école allumées.
+- **École** : des casiers posés au sol à la place des étagères qui flottaient (mêmes sauts) ; poutres, suspensions, frise de formes, dessins ; un poisson rouge sous l'oculus.
+- **École étrange** : les tableaux tracés en violet pâle (leur cadre se lisait comme une plateforme).
+- Aucune trouvaille ni lanterne déplacée ; difficultés inchangées.
+- Tests : 545. Vérifié dans Chromium : les trois salles, et la cour au crépuscule.
+- [ ] À vérifier sur téléphone : les casiers de la classe, dont on passe devant, trompent-ils (on croit qu'ils bloquent) ?
+- [ ] Le pigeon : s'envole-t-il au bon moment ? Revient-il trop vite ?
+- [ ] L'école étrange : les tableaux ne se lisent-ils plus comme des appuis ?
 
 ### Le quartier, phase 2 : aire de jeux, supérette, chantier (D-78)
 

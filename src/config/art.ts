@@ -211,6 +211,23 @@ export const DECOR_KINDS: Readonly<
   backfacade: { furniture: false },
   /** Bâche tendue sur l'échafaudage, qui claque au vent (animée). */
   tarp: { furniture: false },
+  // La cour et l'école refaites (D-79).
+  /** Marelle à la craie, dessinée sur le haut du sol sous son rectangle (aucune tuile). */
+  hopscotch: { furniture: true },
+  /** Ballon oublié (sans collision). */
+  ball: { furniture: false },
+  /** Pigeon qui picore, puis s'envole quand Céleste approche (animé). */
+  pigeon: { furniture: false },
+  /** Casiers de la classe posés au sol (fond) ; leur dessus est `cubbytop`. */
+  cubbybody: { furniture: false },
+  /** Dessus des casiers (planche traversable). */
+  cubbytop: { furniture: true },
+  /** Poutres du plafond de la classe (fond). */
+  ceilingbeams: { furniture: false },
+  /** Frise de formes au mur (fond). */
+  frieze: { furniture: false },
+  /** Bocal du poisson rouge (fond ; le poisson nage, animé). */
+  fishbowl: { furniture: false },
   // Le jardin (D-46), dessiné par le code (PLACEHOLDER, pas d'image clé pour l'instant).
   /** Frondaison des arbres en haut des salles (feuillage plein). */
   canopy: { furniture: true },
@@ -842,6 +859,10 @@ export const WORLD_LIFE = {
   tubeFlicker: { everyMs: [4000, 9000] as [number, number], blinkMs: 90, blinks: 3 },
   /** Bâche du chantier (D-78) : une vague (ms). */
   tarp: { periodMs: 1100 },
+  /** Pigeon de la cour (D-79) : distance d'envol (px), vol (px/s), retour (ms, Céleste loin). */
+  pigeon: { scareDistancePx: 48, flyPxPerS: 90, returnMs: 15000, returnDistancePx: 160 },
+  /** Poisson rouge (D-79) : un aller-retour dans le bocal (ms). */
+  fish: { periodMs: 5200 },
 } as const;
 
 /** Rayon du halo d'une veilleuse (px logiques). */

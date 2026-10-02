@@ -18,6 +18,30 @@ const WOOD_LIGHT = '#d8b183';
 const RED = '#d0674f';
 const METAL = '#8a9aa5';
 const TURQUOISE = 'rgba(140,240,225,0.9)';
+/** Craie et cadre des tableaux du monde étrange (D-79). */
+const CHALK_STRANGE = 'rgba(170,150,215,0.55)';
+
+/** Pseudo-hasard stable (même dessin à chaque chargement). */
+function hashS(x: number, y: number): number {
+  const n = Math.sin(x * 57.3 + y * 191.9) * 43758.5453;
+  return n - Math.floor(n);
+}
+
+/**
+ * Fenêtres de la façade de l'école (cour), partagées par le dessin et la lumière : un quart
+ * environ s'allume au crépuscule (D-79).
+ */
+export function schoolFacadeWindows(
+  r: Rect,
+): { x: number; y: number; w: number; h: number; lit: boolean }[] {
+  const panes: { x: number; y: number; w: number; h: number; lit: boolean }[] = [];
+  for (let y = r.y + 4 * T; y < r.y + r.h - 7 * T; y += 4 * T) {
+    for (let x = r.x + 2 * T; x < r.x + r.w - 2 * T; x += 4 * T) {
+      panes.push({ x, y, w: 2 * T, h: 2.4 * T, lit: hashS(x, y) > 0.6 });
+    }
+  }
+  return panes;
+}
 
 /** Tuiles traversables d'un rectangle, en segments (col0, col1, ligne). */
 function oneWayRuns(a: ArtContext, r: Rect): [number, number, number][] {
@@ -51,6 +75,123 @@ export function schoolDrawers({ tileShape }: ShapeTools): Record<string, Drawer>
 
   return {
     // ——— La cour ———
+    hopscotch(a, r) {
+      // Marelle tracée à la craie sur le sol de la cour, sans chiffres (D-79) : posée sur le haut
+      // du sol, sous le rectangle (qui reste vide).
+      const { ctx } = a;
+      const y = r.y + r.h + 1;
+      ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+      ctx.lineWidth = 1;
+      const cell = r.w / 6;
+      ctx.beginPath();
+      for (let k = 0; k < 6; k++) {
+        ctx.rect(r.x + k * cell, y, cell, 3);
+      }
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(242,193,78,0.55)';
+      ctx.beginPath();
+      ctx.arc(r.x + r.w + 4, y + 1.5, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    },
+    ball(a, r) {
+      // Un ballon oublié près du banc (sans collision).
+      const { ctx } = a;
+      const cx = r.x + r.w / 2;
+      const cy = r.y + r.h - 5;
+      ctx.fillStyle = '#e2574c';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff6f0';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 5, -0.6, 0.9);
+      ctx.moveTo(cx - 5, cy);
+      ctx.lineTo(cx + 5, cy);
+      ctx.stroke();
+    },
+    pigeon() {
+      // Animé (WorldLifeView) : il picore, puis s'envole quand Céleste approche.
+    },
+    cubbybody(a, r) {
+      // Casiers de la classe, posés au sol (fond : on passe devant) ; leur dessus est
+      // \`cubbytop\` (D-79 : avant, des étagères murales qui flottaient).
+      const { ctx } = a;
+      let floor = r.y / T + 1;
+      while (floor < a.level.height && tileAt(a.level, r.x / T, floor) !== Tile.Solid) {
+        floor++;
+      }
+      const bottom = floor * T;
+      ctx.fillStyle = WOOD;
+      ctx.fillRect(r.x, r.y + 3, r.w, bottom - r.y - 3);
+      ctx.fillStyle = 'rgba(0,0,0,0.12)';
+      ctx.fillRect(r.x + r.w - 2, r.y + 3, 2, bottom - r.y - 3);
+      const colors = ['#e2574c', '#6d86c2', '#f2c14e', '#8cc26f'];
+      let k = 0;
+      for (let y = r.y + 7; y < bottom - 10; y += 13) {
+        for (let x = r.x + 3; x < r.x + r.w - 10; x += 14) {
+          ctx.fillStyle = 'rgba(70,48,36,0.35)';
+          ctx.fillRect(x, y, 12, 10);
+          ctx.fillStyle = colors[k % colors.length] ?? '#e2574c';
+          ctx.fillRect(x + 1, y + 4, 10, 6);
+          k++;
+        }
+      }
+    },
+    cubbytop(a, r) {
+      tileShape(a, r, WOOD, WOOD_LIGHT);
+    },
+    ceilingbeams(a, r) {
+      // Poutres au plafond de la classe, tous les huit pas (D-79).
+      const { ctx } = a;
+      for (let x = r.x + 2 * T; x < r.x + r.w - T; x += 8 * T) {
+        ctx.fillStyle = '#b58a5f';
+        ctx.fillRect(x, r.y, 12, r.h);
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        ctx.fillRect(x, r.y + r.h - 3, 12, 3);
+      }
+    },
+    frieze(a, r) {
+      // Frise de formes au mur (rond, carré, triangle), l'écho de la boîte à formes (D-79).
+      const { ctx } = a;
+      const colors = ['#e2574c', '#6d86c2', '#f2c14e', '#8cc26f'];
+      let k = 0;
+      for (let x = r.x + 6; x < r.x + r.w - 6; x += 18) {
+        ctx.fillStyle = colors[k % colors.length] ?? '#e2574c';
+        const cy = r.y + T / 2;
+        ctx.beginPath();
+        if (k % 3 === 0) {
+          ctx.arc(x, cy, 4, 0, Math.PI * 2);
+        } else if (k % 3 === 1) {
+          ctx.rect(x - 4, cy - 4, 8, 8);
+        } else {
+          ctx.moveTo(x - 5, cy + 4);
+          ctx.lineTo(x, cy - 5);
+          ctx.lineTo(x + 5, cy + 4);
+        }
+        ctx.fill();
+        k++;
+      }
+    },
+    fishbowl(a, r) {
+      // Bocal rond du poisson rouge, sur le haut de l'armoire ; le poisson nage (animé).
+      const { ctx } = a;
+      const cx = r.x + r.w / 2;
+      const cy = r.y + r.h - 8;
+      ctx.fillStyle = 'rgba(188,220,238,0.6)';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.fillRect(cx - 5, cy - 6, 2, 3);
+      ctx.fillStyle = '#d9c19a';
+      ctx.fillRect(cx - 6, cy + 5, 12, 2);
+    },
     schoolfacade(a, r) {
       const { ctx } = a;
       // L'arrière de l'école : mur clair, fenêtres, toit, et la porte de la cour (fond).
@@ -63,13 +204,13 @@ export function schoolDrawers({ tileShape }: ShapeTools): Record<string, Drawer>
       ctx.lineTo(r.x + r.w, r.y);
       ctx.lineTo(r.x + r.w, r.y + 2 * T);
       ctx.fill();
-      for (let y = r.y + 4 * T; y < r.y + r.h - 7 * T; y += 4 * T) {
-        for (let x = r.x + 2 * T; x < r.x + r.w - 2 * T; x += 4 * T) {
-          ctx.fillStyle = STONE_DARK;
-          ctx.fillRect(x - 1, y - 1, 2 * T + 2, 2.4 * T + 2);
-          ctx.fillStyle = GLASS;
-          ctx.fillRect(x, y, 2 * T, 2.4 * T);
-        }
+      // Au crépuscule (D-79), quand maman vient chercher Céleste, quelques fenêtres s'allument.
+      const dusk = a.palette.darkness > 0;
+      for (const pane of schoolFacadeWindows(r)) {
+        ctx.fillStyle = STONE_DARK;
+        ctx.fillRect(pane.x - 1, pane.y - 1, pane.w + 2, pane.h + 2);
+        ctx.fillStyle = dusk && pane.lit ? '#ffd98a' : GLASS;
+        ctx.fillRect(pane.x, pane.y, pane.w, pane.h);
       }
       // Porte de la cour, centrée sur la tuile de la porte de façade (col. 52).
       const doorX = 51 * T;
@@ -151,10 +292,12 @@ export function schoolDrawers({ tileShape }: ShapeTools): Record<string, Drawer>
       // monde étrange, la craie dessine des formes.
       ctx.fillStyle = p.silhouettes ? '#16112a' : '#3d5a4a';
       ctx.fillRect(r.x, r.y, r.w, r.h);
-      ctx.strokeStyle = p.silhouettes ? TURQUOISE : WOOD;
+      // Monde étrange : un violet pâle, pas le turquoise (D-79) : le haut du cadre se lisait comme
+      // une plateforme ; le turquoise reste réservé à ce qui porte.
+      ctx.strokeStyle = p.silhouettes ? CHALK_STRANGE : WOOD;
       ctx.lineWidth = 3;
       ctx.strokeRect(r.x, r.y, r.w, r.h);
-      ctx.strokeStyle = p.silhouettes ? TURQUOISE : 'rgba(255,255,255,0.8)';
+      ctx.strokeStyle = p.silhouettes ? CHALK_STRANGE : 'rgba(255,255,255,0.8)';
       ctx.lineWidth = 1.2;
       const cx = r.x + r.w * 0.3;
       const cy = r.y + r.h * 0.4;

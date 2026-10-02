@@ -661,7 +661,13 @@ export class GameScene extends Phaser.Scene {
     artView.w = view.width;
     artView.h = view.height;
     this.roomArt.update(artView, Math.max(this.story.veil, this.transition.veil) >= 1);
-    this.worldLife.update(this.time.now, this.game.loop.delta, artView);
+    this.worldLife.update(
+      this.time.now,
+      this.game.loop.delta,
+      artView,
+      this.puppet.x,
+      this.puppet.y - box.height / 2,
+    );
     main.scrollX += fx.offsetX;
     main.scrollY += fx.offsetY;
     // Coin haut gauche de la vue (px du monde) : la caméra Phaser zoome autour de son centre.
