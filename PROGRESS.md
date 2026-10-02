@@ -25,7 +25,7 @@ Suite du train : PR 5 le monde étrange, la cuisine rose et le souvenir jouable 
 - **Parcours d'essai 12 « Poursuite horizontale »** (menu pause, mode debug) : barrière basse, caisses et filets ; poutre basse et passage couché (le chariot s'y cogne et s'arrête) ; fosse de vaisselle cassée (saut long), pile de valises, dernière barrière. 6,5 tuiles/s. Impossible sans la glissade.
 - **Rythme** (phase 3) : chaque tronçon prend 45 à 68 % du temps du chariot ; parfait, jamais touché ; 50 % plus lent, touché. Le rejeu suit maintenant Céleste le long des planchers (point d'atterrissage des passages).
 - Nouveaux réglages (DEBUG → Combat) : `chaseContactPushX`, `chaseContactHopY`, `chaseSideStartDelayMs`, `chaseSideRestartGapTiles`. PROVISOIRES.
-- Tests : TESTCOUNT. Vérifié dans Chromium : le chariot derrière Céleste, la glissade sous la barrière, le contact (la peur monte).
+- Tests : 599. Vérifié dans Chromium : le chariot derrière Céleste, la glissade sous la barrière, le contact (la peur monte).
 - [ ] À vérifier sur téléphone (menu pause → Parcours d'essai → « 12. Poursuite horizontale ») : le chariot presse-t-il sans être injuste ? Vitesse (`; @chase-phase`, `chaseSpeedScale`), attente et écart au départ (`chaseSideStartDelayMs`, `chaseSideRestartGapTiles`).
 - [ ] Le contact : la poussée en avant (`chaseContactPushX`, `chaseContactHopY`) se comprend-elle ? Ne relance-t-elle pas Céleste dans un obstacle ?
 - [ ] La poutre basse : voit-on que le chariot s'y cogne et s'arrête (`chaseTripPauseMs`) ?
