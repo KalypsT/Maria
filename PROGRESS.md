@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Passe graphique** (D-71) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étapes 1, 2, 3 et 5 faites** (finition « papier découpé », D-71 ; profondeur, D-72 ; vie du monde réel, D-73 ; **le salon, salle témoin**, D-74) sur `ccr-8742f994-82xjq9` ; l'étape 4 (identifiants fixes de la sauvegarde) est écartée jusqu'à la sortie. Ensuite : **toutes les salles du monde réel refaites en profondeur** selon la grille de D-74, dans l'ordre de l'histoire, une PR par zone (les mondes étranges : lisibilité seulement). **La maison (D-75)** : faite sur `ccr-126f1100-llmv5d` (PR #54), en deux parties (l'étage ; le rez-de-chaussée, le grenier et la lisibilité des mondes étranges). **Le jardin (D-76)** : fait sur la même branche, à la demande de l'utilisateur. Les deux sont fusionnés. **Le quartier**, en trois phases : (1) la rue (D-77), faite ; (2) aire de jeux, supérette, chantier ; (3) cour, école, école étrange (lisibilité). Puis le jardin, le quartier, la gare. Pas de nouveau niveau d'ici là.
+**Passe graphique** (D-71) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étapes 1, 2, 3 et 5 faites** (finition « papier découpé », D-71 ; profondeur, D-72 ; vie du monde réel, D-73 ; **le salon, salle témoin**, D-74) sur `ccr-8742f994-82xjq9` ; l'étape 4 (identifiants fixes de la sauvegarde) est écartée jusqu'à la sortie. Ensuite : **toutes les salles du monde réel refaites en profondeur** selon la grille de D-74, dans l'ordre de l'histoire, une PR par zone (les mondes étranges : lisibilité seulement). **La maison (D-75)** : faite sur `ccr-126f1100-llmv5d` (PR #54), en deux parties (l'étage ; le rez-de-chaussée, le grenier et la lisibilité des mondes étranges). **Le jardin (D-76)** : fait sur la même branche, à la demande de l'utilisateur. Les deux sont fusionnés. **Le quartier**, en trois phases : (1) la rue (D-77), faite ; (2) aire de jeux, supérette, chantier (D-78), faite ; (3) cour, école, école étrange (lisibilité). Puis le jardin, le quartier, la gare. Pas de nouveau niveau d'ici là.
 
 **Le jardin (2a) et derrière la haie (2b)** (§7.2, §6, D-46 à D-49) : fusionnés (PR #29), **essai sur téléphone en cours** (début du jardin testé ; jardin adouci (D-51) sur `ccr-53d22df4-9euiqo`). Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
 
@@ -17,6 +17,17 @@
 Prochaine : essai de la gare (réelle, étrange, la fin, la phase 3) sur téléphone. Le niveau suivant (le train ?) reste à décider. Intégrer les morceaux de musique.
 
 ## Fait
+
+### Le quartier, phase 2 : aire de jeux, supérette, chantier (D-78)
+
+- **Aire de jeux** : du ciel au-dessus ; les balançoires oscillent au vent ; des papillons.
+- **Supérette** : un faux plafond et ses tubes (celui de la réserve clignote parfois), un ventilateur, une affiche ; la mezzanine de la réserve sur pilotis.
+- **Chantier** : le haut dessiné comme du ciel ; l'arrière de la supérette (le rebord en est le parapet) ; la lampe de chantier sous son chapeau ; une bâche qui claque au vent.
+- Aucune trouvaille ni lanterne déplacée ; difficultés inchangées.
+- Tests : 545. Vérifié dans Chromium : les trois salles.
+- [ ] À vérifier sur téléphone : les balançoires, le ventilateur, la bâche : assez discrets ?
+- [ ] Le tube qui clignote : inquiétant juste ce qu'il faut ? Pas fatigant ?
+- [ ] Le haut du chantier en ciel : trompe-t-il (on s'y cogne la tête comme avant) ?
 
 ### Le quartier, phase 1 : la rue refaite (D-77)
 

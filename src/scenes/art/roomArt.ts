@@ -1908,6 +1908,9 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
     if (d.kind === 'fireplace') {
       return [{ x: r.x + r.w / 2, y: r.y + r.h - 12, k: 1.25 }];
     }
+    if (d.kind === 'tube' || d.kind === 'tubeflicker') {
+      return [{ x: r.x + r.w / 2, y: r.y + 12, k: 1 }];
+    }
     if (d.kind === 'pendant') {
       return [{ x: r.x + r.w / 2, y: r.y + r.h + 4, k: 1 }];
     }

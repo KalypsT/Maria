@@ -3,6 +3,8 @@
 ; planches au-dessus des gravats jusqu'à la flèche de la grue (difficile), où le parapluie est coincé.
 ; Avec lui, on plane jusqu'à la sortie haute (le haut de l'échafaudage de la rue) et jusqu'à la lampe
 ; de chantier (trouvaille difficile).
+; Refait (D-78) : la rangée du haut dessinée comme du ciel ; l'arrière de la supérette (le rebord en est le
+; parapet) ; une bâche qui claque au vent ; la lampe de chantier sous son chapeau.
 ; @name: Chantier
 ; @icon: crane
 ; @world: street
@@ -16,7 +18,10 @@
 ; @decor: concretewall 19 14 3 28
 ; @decor: scaffold 27 6 27 36
 ; @decor: floodlight 7 6 2 36
+; @decor: backfacade 0 12 6 30
 ; @decor: sill 1 12 4 1
+; @decor: tarp 34 20 6 8
+; @decor: opensky 1 0 62 1
 ; @decor: scaffold 23 40 3 1
 ; @decor: scaffold 29 40 3 1
 ; @decor: scaffold 35 40 3 1

@@ -934,6 +934,15 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Rendu** : `houseLayout` (fenêtres, fenêtres allumées, cheminées) est partagé par le dessin, la lumière et la fumée. Réglages `WORLD_LIFE.smoke`, `flag`, `catTail`. Le platane, aussi utilisé à l'aire de jeux, y passe également devant.
 - **Ce qui ne bouge pas** : portes de façade, sortie haute vers le chantier, câble, les quatre trouvailles, lanternes, palissade et son présage. **Aucune sauvegarde touchée.**
 
+## D-78 — L'aire de jeux, la supérette et le chantier refaits (le quartier, phase 2)
+
+- **Plan validé** ; choix de l'utilisateur : le tube de la réserve qui clignote (une touche un peu inquiétante) ; la rangée du haut du chantier dessinée comme du ciel.
+- **Aire de jeux** : le bandeau de feuillage du haut retiré (seulement la couronne du platane, comme dans la rue) ; les deux **balançoires oscillent au vent** (images dessinées d'avance, comme celle du grand arbre) ; des papillons. Le reste tenait déjà au sol.
+- **Supérette** : un **faux plafond** (3 rangées, magasin et réserve) et ses **tubes fluorescents**, sources de lumière ; celui de la réserve **clignote** de temps en temps ; un **ventilateur** de plafond ; une affiche dessinée (sans texte). L'étagère devant la porte de la réserve devient une **mezzanine métallique sur pilotis**. Un premier essai de plafond plus bas dans la réserve coupait l'arc du saut moyen vers la porte (testé) : le faux plafond a la même hauteur partout.
+- **Chantier** : ouvrir la rangée du haut rendait la sortie haute atteignable **sans le parapluie** (testé) ; elle reste pleine et se **dessine comme du ciel** (`opensky` : découpée, le ciel des plans lointains se voit), comme le bord de la salle juste au-dessus. L'**arrière de la supérette** (crépi, fenêtre) fait du rebord de gauche un parapet ; la **lampe de chantier** est sous son chapeau (il flottait, comme les lampadaires de la rue) ; une **bâche** claque au vent sur l'échafaudage.
+- **Ce qui ne bouge pas** : portes, sorties, trouvailles (nichoir, lampe de chantier), lanternes, araignées, le parapluie sur la flèche, le trou du grillage, maman et papa. **Aucune sauvegarde touchée.**
+- Réglages `WORLD_LIFE.fan`, `tubeFlicker`, `tarp`.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

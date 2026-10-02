@@ -1,5 +1,5 @@
 import { TILE_SIZE as T } from '../../config/display';
-import { Tile, tileAt } from '../../core/level/LevelData';
+import { Tile, tileAt, type LevelData } from '../../core/level/LevelData';
 import type { ShapeTools } from './gardenArt';
 import type { ArtContext, Rect } from './roomArt';
 
@@ -46,6 +46,25 @@ function groundBelow(a: ArtContext, r: Rect): number {
     row++;
   }
   return row * T;
+}
+
+/**
+ * Les deux balançoires d'un portique (D-78) : pour chacune, le rectangle de sa balançoire (pivot
+ * au milieu du haut, les cordes jusqu'à la planche), comme celle du grand arbre (`swingPivot`).
+ */
+export function swingsetSeats(level: LevelData, r: Rect): Rect[] {
+  const col = Math.floor((r.x + r.w / 2) / T);
+  let row = Math.floor((r.y + r.h) / T);
+  while (row < level.height && tileAt(level, col, row) !== Tile.Solid) {
+    row++;
+  }
+  const seat = row * T - 2.5 * T;
+  return [r.x + 3 * T, r.x + r.w - 3 * T].map((sx) => ({
+    x: sx - 7,
+    y: r.y + 4,
+    w: 14,
+    h: seat - r.y - 4 + 10,
+  }));
 }
 
 export function playgroundDrawers({ tileShape }: ShapeTools): Record<string, Drawer> {
@@ -138,18 +157,7 @@ export function playgroundDrawers({ tileShape }: ShapeTools): Record<string, Dra
         ctx.lineTo(x + 1.5 * T, ground);
       }
       ctx.stroke();
-      ctx.strokeStyle = METAL;
-      ctx.lineWidth = 1;
-      for (const sx of [r.x + 3 * T, r.x + r.w - 3 * T]) {
-        ctx.beginPath();
-        ctx.moveTo(sx - 5, r.y + 4);
-        ctx.lineTo(sx - 5, ground - 2.5 * T);
-        ctx.moveTo(sx + 5, r.y + 4);
-        ctx.lineTo(sx + 5, ground - 2.5 * T);
-        ctx.stroke();
-        ctx.fillStyle = BLUE;
-        ctx.fillRect(sx - 7, ground - 2.5 * T, 14, 3);
-      }
+      // Les deux balançoires oscillent au vent (D-78) : dessinées à part (WorldLifeView).
       for (const [c0, c1] of oneWayRuns(a, r, r.y / T)) {
         bar(a, c0, c1, r.y / T, '#a8503d', '#e08a74');
       }
