@@ -8,6 +8,9 @@ import {
   heightChart,
   momHead,
   pinkKitchen,
+  rabbit,
+  redPanda,
+  teaCup,
   roger,
   shapeBox,
 } from './memoryArt';
@@ -505,6 +508,22 @@ export function drawProp(
       ctx.save();
       ctx.translate(w / 2, h / 2);
       pinkKitchen(ctx, Math.min(w, h), true);
+      ctx.restore();
+      break;
+    case 'toy-kitchen':
+      // Le souvenir jouable (D-89) : la dînette, telle qu'elle était, sans la lueur.
+      ctx.save();
+      ctx.translate(w / 2, h / 2);
+      pinkKitchen(ctx, Math.min(w, h));
+      ctx.restore();
+      break;
+    case 'tea-table':
+      drawTeaTable(ctx, w, h, images.get('roger') ?? null);
+      break;
+    case 'tea-cup':
+      ctx.save();
+      ctx.translate(w / 2, h / 2);
+      teaCup(ctx, Math.min(w, h));
       ctx.restore();
       break;
     case 'site-gap':
@@ -1023,4 +1042,48 @@ export function drawSparkle(ctx: CanvasRenderingContext2D): void {
     ctx.lineTo(c + Math.cos(angle) * r, c + Math.sin(angle) * r);
   }
   ctx.fill();
+}
+
+/**
+ * La petite table du thé (D-89) : un plateau rond et bas sur un pied ; Roger assis à gauche (l'image
+ * fournie, sinon le dessin), le lapin derrière, le panda roux à droite. La tasse posée par Céleste
+ * est un objet à part (`tea-cup`).
+ */
+function drawTeaTable(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  rogerImage: CanvasImageSource | null,
+): void {
+  const plush = h * 0.62;
+  // Le lapin, derrière la table.
+  ctx.save();
+  ctx.translate(w * 0.5, h * 0.3);
+  rabbit(ctx, plush);
+  ctx.restore();
+  // La table : le plateau, le pied, son ombre.
+  ctx.fillStyle = 'rgba(80,40,30,0.18)';
+  ctx.beginPath();
+  ctx.ellipse(w * 0.5, h - 1, w * 0.2, 1.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#c98f6b';
+  // Le plateau arrive au bas de la tuile du dessus : la tasse posée (`tea-cup`) repose dessus.
+  ctx.fillRect(w * 0.5 - 1.5, h * 0.47, 3, h * 0.53);
+  ctx.fillStyle = '#e8b998';
+  ctx.beginPath();
+  ctx.ellipse(w * 0.5, h * 0.47, w * 0.2, 2.6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Roger, à gauche, et le panda roux, à droite, assis par terre.
+  if (rogerImage) {
+    ctx.drawImage(rogerImage, w * 0.06, h - plush * 1.05, plush * 0.9, plush * 1.05);
+  } else {
+    ctx.save();
+    ctx.translate(w * 0.17, h - plush * 0.5);
+    roger(ctx, plush);
+    ctx.restore();
+  }
+  ctx.save();
+  ctx.translate(w * 0.83, h - plush * 0.55);
+  redPanda(ctx, plush);
+  ctx.restore();
 }

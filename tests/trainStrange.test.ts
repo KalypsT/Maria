@@ -197,8 +197,11 @@ describe('le monde étrange du train (D-88)', () => {
     expect(t.when).toEqual({ all: [F.TrainStrange], none: [F.TrainStrangeDone] });
     expect(t.steps.some((s) => s.do === 'memory' && s.id === 'pink-kitchen')).toBe(true);
     expect(STRANGE_THINGS).toContain('pink-kitchen');
-    // Pas de court souvenir : le souvenir jouable vient avec la PR 5b.
+    // Pas de court souvenir : le souvenir jouable (D-89), joué dans le noir, avant la fin.
     expect(flashbackOf('pink-kitchen')).toBeNull();
+    const play = t.steps.findIndex((s) => s.do === 'play');
+    expect(play).toBeGreaterThan(-1);
+    expect(t.steps[play - 1]).toMatchObject({ do: 'fadeOut' });
     const prop = HOUSE_STORY.props.find((p) => p.id === 'pink-kitchen');
     expect(prop).toMatchObject({ room: DISHES, kind: 'pink-kitchen', ...PINK });
     // Maria n'est pas dans ce monde étrange (pilier 5).
@@ -213,7 +216,7 @@ describe('le monde étrange du train (D-88)', () => {
     expect(t.steps.some((s) => s.do === 'thought' && s.icon === 'maria' && !s.by)).toBe(true);
     const done = t.steps.findIndex((s) => s.do === 'flag' && s.id === F.TrainStrangeDone);
     const moved = t.steps.findIndex((s) => s.do === 'room');
-    expect(done).toBeGreaterThan(-1);
+    expect(done).toBeGreaterThan(play);
     expect(done).toBeLessThan(moved);
   });
 

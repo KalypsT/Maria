@@ -1,5 +1,6 @@
 import { TILE_SIZE } from '../../config/display';
 import type { FlashbackId } from '../../config/memories';
+import type { PlayableMemoryId } from '../../config/playableMemories';
 import { PHYSICS_STEP_HZ, msToSteps } from '../../config/movement';
 import type { Box } from '../physics/gridCollision';
 import {
@@ -35,6 +36,8 @@ export interface StoryHost {
   hush(ms: number): void;
   /** Capacité apprise (D-85). */
   ability(id: string): void;
+  /** Souvenir jouable (D-89) : la scène le joue, puis appelle `endPlay`. */
+  play(id: PlayableMemoryId): void;
 }
 
 /**
@@ -52,6 +55,8 @@ export class StoryDirector {
   flashbackProgress = 0;
   /** Déclencheur Agir disponible là où se tient Céleste (-1 : aucun). */
   interactable = -1;
+  /** Un souvenir jouable est en cours (D-89) : le script attend `endPlay`. */
+  playing = false;
   private running: StoryTrigger | null = null;
   private stepIndex = 0;
   private stepElapsed = 0;
@@ -176,6 +181,12 @@ export class StoryDirector {
     this.veilShape = 'plain';
     this.interactable = -1;
     this.flashback = null;
+    this.playing = false;
+  }
+
+  /** Fin du souvenir jouable (D-89) : le script reprend au pas suivant. */
+  endPlay(): void {
+    this.playing = false;
   }
 
   /**
@@ -264,6 +275,10 @@ export class StoryDirector {
           this.flashback = step.id;
           this.flashbackProgress = 0;
           return;
+        case 'play':
+          this.playing = true;
+          this.host.play(step.id);
+          return;
         default:
           this.apply(step);
       }
@@ -317,6 +332,12 @@ export class StoryDirector {
     const step = trigger?.steps[this.stepIndex];
     if (!step) {
       this.running = null;
+      return;
+    }
+    if (step.do === 'play') {
+      if (!this.playing) {
+        this.next();
+      }
       return;
     }
     this.stepElapsed++;

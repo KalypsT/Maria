@@ -2,9 +2,9 @@
 
 ## Phase en cours
 
-**Le train** (niveau 5, D-82, D-83) : plan validé en 6 PR. **PR 1 faite : la glissade** (D-84, fusionnée). **PR 2 faite : le départ et la voiture-couchettes** (D-85, fusionnée). **PR 3 faite : le reste du train réel** (D-86, fusionnée). **PR 4 faite : la poursuite horizontale** (D-87, fusionnée). **PR 5a faite : le monde étrange du train et la cuisine rose** (D-88), sur `ccr-6ca08fb4-rwfcx0`. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
+**Le train** (niveau 5, D-82, D-83) : plan validé en 6 PR. **PR 1 faite : la glissade** (D-84, fusionnée). **PR 2 faite : le départ et la voiture-couchettes** (D-85, fusionnée). **PR 3 faite : le reste du train réel** (D-86, fusionnée). **PR 4 faite : la poursuite horizontale** (D-87, fusionnée). **PR 5a faite : le monde étrange du train et la cuisine rose** (D-88), et **PR 5b faite : le souvenir jouable** (D-89), toutes deux sur `ccr-6ca08fb4-rwfcx0` (5b empilée sur 5a, non fusionnée). La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
-Suite du train : PR 5b le souvenir jouable (nouveau système, réutilisé pour Eden) ; PR 6 la fin, la gare de la mer, la revisite du train et les revisites avec la glissade.
+Suite du train : PR 6 la fin, la gare de la mer, la revisite du train et les revisites avec la glissade.
 
 **Structure de la fin du jeu** (D-82) : 8 niveaux (maison, jardin, quartier, gare, train, station balnéaire, avant-dernier, monde de Maria). Niveau 6 et niveau 7 : pistes retenues, détails décidés le moment venu.
 
@@ -17,6 +17,20 @@ Suite du train : PR 5b le souvenir jouable (nouveau système, réutilisé pour E
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le train, PR 5b : le souvenir jouable de la cuisine (D-89)
+
+- **Nouveau système** (réutilisable pour Eden) : une petite salle et une liste d'actions à faire dans l'ordre avec Agir ; hors de la partie (rien n'est sauvegardé), puis retour exact où était Céleste.
+- **Le souvenir de la cuisine** : Céleste toute petite, sa dînette rose ; elle remue la casserole, verse le thé, l'apporte à Roger, au panda roux et au lapin ; un cœur ; la petite cuisine reste seule. Sans texte, couleurs chaudes, la caméra plus près. Maria n'y est pas.
+- Il se joue **après la cuisine rose** (avant la couchette) et se **rejoue depuis le cahier** (toucher la cuisine rose, puis encore).
+- DEBUG : bouton « Jouer le souvenir de la cuisine ».
+- Tests : TESTCOUNT. Vérifié dans Chromium : de la cuisine rose au souvenir, puis la couchette ; depuis le debug, retour dans la salle de départ.
+- [ ] À vérifier sur téléphone (DEBUG → « Jouer le souvenir de la cuisine », ou la cuisine rose) : trouve-t-on quoi faire sans texte (l'étincelle, le bouton Agir) ?
+- [ ] Céleste toute petite : son pas (`TODDLER_LOOK`, × 0,55) trop lent ? Sa taille (corps × 0,78) se lit-elle comme « toute petite » ?
+- [ ] Les gestes (remuer, verser, poser) et la tasse tenue se comprennent-ils ? Durées (`PLAYABLE_MEMORY_TIMING`) : trop longues, trop courtes ?
+- [ ] La fin (le cœur, la petite cuisine seule, `aloneMs`) : assez douce, assez longue ?
+- [ ] La caméra rapprochée (`MEMORY_CAMERA_ZOOM`) : agréable ?
+- [ ] Le cahier : rejouer en touchant deux fois la cuisine rose, est-ce naturel ?
 
 ### Le train, PR 5a : le monde étrange du train, la cuisine rose (D-88)
 

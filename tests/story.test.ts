@@ -34,6 +34,7 @@ function recorder() {
     memory: (id) => log.push(`memory ${id}`),
     hush: (ms) => log.push(`hush ${String(ms)}`),
     ability: (id) => log.push(`ability ${id}`),
+    play: (id) => log.push(`play ${id}`),
   };
   return { log, host };
 }

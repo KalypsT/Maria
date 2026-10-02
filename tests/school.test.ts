@@ -228,6 +228,7 @@ describe('l’école et son monde étrange (D-64)', () => {
         memory: noop,
         hush: noop,
         ability: noop,
+        play: noop,
       },
       100,
     );

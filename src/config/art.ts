@@ -672,6 +672,26 @@ export const DAY_PALETTE: Readonly<ArtPalette> = {
 };
 
 /**
+ * Souvenirs jouables (D-89) : couleurs chaudes et passées, comme une vieille photo ; une lumière
+ * douce, un voile clair sur les bords. PLACEHOLDER.
+ */
+export const MEMORY_PALETTE: Readonly<ArtPalette> = {
+  ...DAY_PALETTE,
+  wallTop: '#e3bf9c',
+  wallBottom: '#d3a985',
+  wallpaper: 'rgba(255,236,214,0.22)',
+  wainscot: '#c49572',
+  floor: '#a87855',
+  floorEdge: '#c0916b',
+  structure: '#7a5646',
+  rim: 'rgba(255,240,215,0.6)',
+  darkness: 0,
+  glow: 0.5,
+  vignette: 0.45,
+  vignetteColor: '120,70,40',
+};
+
+/**
  * Monde étrange (D-28, D-36 : palette « crépuscule » choisie par l'utilisateur) : fonds violets et
  * bleu nuit, halos roses, bords des surfaces praticables en turquoise (lisibilité, pilier 1).
  */

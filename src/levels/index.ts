@@ -11,6 +11,7 @@ import poursuite from './courses/10-poursuite.txt?raw';
 import glissade from './courses/11-glissade.txt?raw';
 import poursuiteHorizontale from './courses/12-poursuite-horizontale.txt?raw';
 import testRoomText from './test-room.txt?raw';
+import memoryKitchen from './memories/kitchen.txt?raw';
 import type { LevelData } from '../core/level/LevelData';
 import { buildZone, type Zone } from '../core/world/zone';
 import { HOUSE } from './house/zone';
@@ -40,6 +41,12 @@ export const LEVELS: readonly LevelSource[] = [
   { id: 'poursuite-horizontale', text: poursuiteHorizontale },
   { id: 'test-room', text: testRoomText },
 ];
+
+/**
+ * Salles des souvenirs jouables (D-89) : hors de la zone et des parcours, chargées le temps d'un
+ * souvenir (la sauvegarde n'est jamais modifiée).
+ */
+export const MEMORY_ROOMS: readonly LevelSource[] = [{ id: 'memory-kitchen', text: memoryKitchen }];
 
 /** Parcours d'essai de la Phase 2 : salles avec une arrivée et une difficulté déclarée. */
 export const COURSE_IDS: readonly string[] = [

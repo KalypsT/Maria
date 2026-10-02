@@ -257,9 +257,9 @@ const TRIGGERS: StoryTrigger[] = [
   {
     // Fin du monde étrange du train (D-88) : au bout du train de la vaisselle, la cuisine rose, la
     // dînette d'enfance de Céleste. On la regarde, on ne la prend pas : un souvenir de la rubrique
-    // « Monde étrange ». (Le souvenir jouable vient avec la PR 5b.) Le cercle se referme ; Céleste
-    // est assise sur sa couchette, la nuit ; elle pense à Maria, puis à son lit. PLACEHOLDER : le
-    // matin vient avec la PR 6.
+    // « Monde étrange ». Le cercle se referme sur le souvenir jouable de la cuisine (D-89) ; puis
+    // Céleste est assise sur sa couchette, la nuit ; elle pense à Maria, puis à son lit.
+    // PLACEHOLDER : le matin vient avec la PR 6.
     id: 'train-pink-kitchen',
     room: 'train-strange-dishes',
     on: 'interact',
@@ -278,6 +278,9 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'thought', icon: 'heart', ms: S.thoughtMs },
       { do: 'wait', ms: S.thoughtMs + S.lookMs },
       { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
+      // Le souvenir jouable (D-89) : Céleste toute petite, sa dînette, le thé pour Roger et ses
+      // peluches ; puis, toujours dans le noir, la suite.
+      { do: 'play', id: 'kitchen' },
       { do: 'flag', id: F.TrainStrangeDone },
       { do: 'room', room: 'train-couchettes', ...BUNK_SEAT, facing: 1, returnPoint: true },
       { do: 'pose', pose: 'sit' },

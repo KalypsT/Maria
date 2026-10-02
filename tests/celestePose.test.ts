@@ -171,3 +171,25 @@ describe('Céleste en papier découpé (D-29)', () => {
     expect(poser.pose.hook).toBe(0);
   });
 });
+
+describe('souvenir jouable (D-89) : les mains devant', () => {
+  it('un geste lève les deux bras devant, puis finit ; tenir la tasse garde les mains devant', () => {
+    const poser = new CelestePoser(DEFAULT_PUPPET, DT, MAX_RUN);
+    run(poser, subject(PlayerState.Idle), 120);
+    const rest = poser.pose.armFront;
+    poser.gesture = 'pour';
+    poser.gestureSteps = 120;
+    run(poser, subject(PlayerState.Idle), 60);
+    expect(poser.pose.armFront).toBeGreaterThan(rest + 1);
+    expect(poser.pose.armBack).toBeGreaterThan(0.5);
+    run(poser, subject(PlayerState.Idle), 60);
+    expect(poser.gestureSteps).toBe(0);
+    poser.carrying = true;
+    run(poser, subject(PlayerState.Run, MAX_RUN), 120);
+    expect(poser.pose.armFront).toBeGreaterThan(1);
+    expect(poser.pose.armBack).toBeGreaterThan(0.8);
+    poser.reset();
+    expect(poser.carrying).toBe(false);
+    expect(poser.gesture).toBeNull();
+  });
+});

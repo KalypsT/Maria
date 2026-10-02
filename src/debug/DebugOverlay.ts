@@ -700,6 +700,14 @@ export function installDebugOverlay(scene: GameScene): void {
     scene.setStoryFlags(storySelect.value ? storySelect.value.split(',') : []);
     storySelect.blur();
   });
+  // Souvenir jouable (D-89) : comme depuis le cahier (hors partie, retour ici à la fin).
+  element('button', panel, undefined, 'Jouer le souvenir de la cuisine').addEventListener(
+    'click',
+    (event) => {
+      scene.playMemory('kitchen', false);
+      (event.currentTarget as HTMLElement).blur();
+    },
+  );
   // Phase de croissance (D-43) : le drapeau de l'histoire, sans sauvegarde.
   addCheck(panel, 'Croissance : Céleste a grandi', scene.story.flags.has(F.Grown), (checked) => {
     const flags = new Set(scene.story.flags);

@@ -30,6 +30,8 @@ export const MUSIC_TRACKS = [
   'train',
   /** Le monde étrange du train : la cuisine étrange et le train de la vaisselle (D-88). */
   'train-strange',
+  /** Les souvenirs jouables (D-89), par `; @music: memory`. */
+  'memory',
 ] as const;
 export type MusicTrack = (typeof MUSIC_TRACKS)[number];
 

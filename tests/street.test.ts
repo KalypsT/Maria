@@ -104,6 +104,7 @@ describe('la rue (D-60)', () => {
           memory: noop,
           hush: noop,
           ability: noop,
+          play: noop,
         },
         100,
       );

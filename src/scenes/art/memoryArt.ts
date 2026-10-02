@@ -613,6 +613,163 @@ export function pinkKitchen(ctx: CanvasRenderingContext2D, s: number, glow = fal
 }
 
 /**
+ * Une peluche panda roux (D-89), assise, vue de face : pelage roux, masque blanc (joues, sourcils),
+ * oreilles pointues bordées de blanc, pattes brun sombre, grosse queue annelée posée sur le côté.
+ * Même échelle que `roger`. PLACEHOLDER.
+ */
+export function redPanda(ctx: CanvasRenderingContext2D, s: number): void {
+  const fur = '#c4552a';
+  const dark = '#4a2a20';
+  const white = '#fbf1e6';
+  // La queue annelée, sur le côté droit.
+  for (let i = 0; i < 4; i++) {
+    ctx.fillStyle = i % 2 ? '#e0a170' : fur;
+    ctx.beginPath();
+    ctx.ellipse(
+      s * (0.24 + i * 0.06),
+      s * (0.3 - i * 0.05),
+      s * 0.07,
+      s * 0.05,
+      -0.6,
+      0,
+      Math.PI * 2,
+    );
+    ctx.fill();
+  }
+  // Le corps et les pattes sombres.
+  ctx.fillStyle = dark;
+  ctx.beginPath();
+  ctx.ellipse(0, s * 0.18, s * 0.17, s * 0.2, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = fur;
+  ctx.beginPath();
+  ctx.ellipse(0, s * 0.12, s * 0.14, s * 0.13, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // La tête ronde, les oreilles pointues.
+  for (const x of [-0.15, 0.15]) {
+    ctx.fillStyle = white;
+    ctx.beginPath();
+    ctx.moveTo(s * (x - 0.07), -s * 0.14);
+    ctx.lineTo(s * x, -s * 0.28);
+    ctx.lineTo(s * (x + 0.07), -s * 0.14);
+    ctx.fill();
+    ctx.fillStyle = fur;
+    ctx.beginPath();
+    ctx.moveTo(s * (x - 0.04), -s * 0.15);
+    ctx.lineTo(s * x, -s * 0.24);
+    ctx.lineTo(s * (x + 0.04), -s * 0.15);
+    ctx.fill();
+  }
+  ctx.fillStyle = fur;
+  ctx.beginPath();
+  ctx.ellipse(0, -s * 0.08, s * 0.19, s * 0.15, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Le masque blanc : les joues, le museau, deux petits sourcils.
+  ctx.fillStyle = white;
+  ctx.beginPath();
+  ctx.ellipse(0, -s * 0.02, s * 0.12, s * 0.07, 0, 0, Math.PI * 2);
+  ctx.fill();
+  for (const x of [-0.07, 0.07]) {
+    ctx.beginPath();
+    ctx.ellipse(s * x, -s * 0.14, s * 0.03, s * 0.015, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.fillStyle = dark;
+  for (const x of [-0.07, 0.07]) {
+    ctx.beginPath();
+    ctx.arc(s * x, -s * 0.09, s * 0.022, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.beginPath();
+  ctx.arc(0, -s * 0.025, s * 0.02, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/**
+ * Une peluche lapin (D-89), assise, vue de face : pelage gris-beige très doux, longues oreilles
+ * roses dedans, une petite houppe en guise de queue, un nœud rose. Même échelle que `roger`.
+ * PLACEHOLDER.
+ */
+export function rabbit(ctx: CanvasRenderingContext2D, s: number): void {
+  const fur = '#d9cfc4';
+  const shade = '#bcb0a3';
+  const ear = '#f2b3c4';
+  const ink = '#4a3c38';
+  // Les longues oreilles.
+  for (const [x, tilt] of [
+    [-0.08, -0.15],
+    [0.08, 0.2],
+  ] as const) {
+    ctx.save();
+    ctx.translate(s * x, -s * 0.2);
+    ctx.rotate(tilt);
+    ctx.fillStyle = fur;
+    ctx.beginPath();
+    ctx.ellipse(0, -s * 0.14, s * 0.05, s * 0.15, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = ear;
+    ctx.beginPath();
+    ctx.ellipse(0, -s * 0.13, s * 0.025, s * 0.11, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+  // Le corps, les pattes devant.
+  ctx.fillStyle = shade;
+  ctx.beginPath();
+  ctx.ellipse(0, s * 0.2, s * 0.17, s * 0.18, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = fur;
+  ctx.beginPath();
+  ctx.ellipse(0, s * 0.17, s * 0.14, s * 0.15, 0, 0, Math.PI * 2);
+  ctx.fill();
+  for (const x of [-0.09, 0.09]) {
+    ctx.beginPath();
+    ctx.ellipse(s * x, s * 0.36, s * 0.06, s * 0.04, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // La tête ronde, les yeux, le nez rose, le nœud.
+  ctx.beginPath();
+  ctx.ellipse(0, -s * 0.07, s * 0.15, s * 0.13, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = ink;
+  for (const x of [-0.06, 0.06]) {
+    ctx.beginPath();
+    ctx.arc(s * x, -s * 0.08, s * 0.018, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.fillStyle = ear;
+  ctx.beginPath();
+  ctx.arc(0, -s * 0.035, s * 0.02, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = PINK;
+  ctx.beginPath();
+  ctx.moveTo(0, s * 0.04);
+  ctx.lineTo(-s * 0.06, s * 0.01);
+  ctx.lineTo(-s * 0.06, s * 0.07);
+  ctx.closePath();
+  ctx.moveTo(0, s * 0.04);
+  ctx.lineTo(s * 0.06, s * 0.01);
+  ctx.lineTo(s * 0.06, s * 0.07);
+  ctx.closePath();
+  ctx.fill();
+}
+
+/** Une petite tasse de dînette (D-89), rose, son anse ; vue de côté, centrée. */
+export function teaCup(ctx: CanvasRenderingContext2D, s: number): void {
+  ctx.fillStyle = '#fdf7f2';
+  ctx.beginPath();
+  ctx.roundRect(-s * 0.32, -s * 0.3, s * 0.56, s * 0.55, [s * 0.04, s * 0.04, s * 0.18, s * 0.18]);
+  ctx.fill();
+  ctx.fillStyle = ROSE;
+  ctx.fillRect(-s * 0.32, -s * 0.12, s * 0.56, s * 0.1);
+  ctx.strokeStyle = '#fdf7f2';
+  ctx.lineWidth = s * 0.1;
+  ctx.beginPath();
+  ctx.arc(s * 0.3, -s * 0.03, s * 0.13, -Math.PI / 2, Math.PI / 2);
+  ctx.stroke();
+}
+
+/**
  * Roger, la peluche singe (D-68), d'après l'image de l'utilisateur (D-69) : pelage roux tout doux,
  * masque crème (deux lobes sur les yeux, un grand museau), oreilles rondes crème dedans, nez brun,
  * grand sourire ; longs bras et longues jambes qui pendent, bouts des mains crème, longue queue
