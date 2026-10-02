@@ -25,7 +25,7 @@
 - **L'histoire** : étape réversible `toggle` (le banc des marées), seulement dans le noir ; la sauvegarde sait retirer ce drapeau, sans migration. La salle change sous Céleste dans le noir, elle garde sa place.
 - **Outils de test** : les tronçons `; @leg:` (difficulté exacte et capacités exigées d'un trajet, vérifiés pour toutes les salles) ; le graphe de la marée (un nœud par surface et par marée, les bancs passent de l'une à l'autre ; « jamais coincée »).
 - Aucune salle du jeu ne change : tout est essayé sur une salle d'essai des tests.
-- Tests : TESTCOUNT. Vérifié dans Chromium : la salle d'essai à marée basse puis haute (l'eau monte, le ponton flotte, la trouvaille du sable n'y est plus), Céleste à la même place.
+- Tests : 643. Vérifié dans Chromium : la salle d'essai à marée basse puis haute (l'eau monte, le ponton flotte, la trouvaille du sable n'y est plus), Céleste à la même place.
 - [ ] Rien à essayer sur téléphone pour l'instant : le parcours d'essai 13 « Marée » viendra avec la PR 1b.
 
 ### Musique : retours d'écoute (D-94)
