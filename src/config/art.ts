@@ -139,6 +139,33 @@ export const DECOR_KINDS: Readonly<
   dust: { furniture: false },
   /** Papillon de nuit autour d'une lampe, le soir (animé). */
   moth: { furniture: false },
+  // Le rez-de-chaussée et le grenier (D-75).
+  /** Conduit de la hotte, du plafond à la hotte (fond). */
+  hoodduct: { furniture: false },
+  /** Corps du frigo, posé au sol (fond : on passe devant) ; son dessus est `fridgetop`. */
+  fridgebody: { furniture: false },
+  /** Dessus du frigo (planche traversable). */
+  fridgetop: { furniture: true },
+  /** Cafetière sur la cuisinière (fond) ; la vapeur est animée (`steam`). */
+  kettle: { furniture: false },
+  /** Vapeur qui monte (animée). */
+  steam: { furniture: false },
+  /** Barre à casseroles pendue à deux chaînes ; la barre est traversable. */
+  potrack: { furniture: true },
+  /** Planche à repasser (fond) : pieds en X sous la planche de la salle, le fer dessus. */
+  ironingboard: { furniture: false },
+  /** Soupente sous la trappe à linge (plein), sur son poteau. */
+  loft: { furniture: true },
+  /** Étagère de rangement sur pieds : le dessus est plein, on passe entre les pieds. */
+  utilityshelf: { furniture: true },
+  /** Fenêtre de toit dans le pan du toit (vitre transparente, hors d'atteinte). */
+  roofwindow: { furniture: true },
+  /** Mannequin de couture, en ombre (fond). */
+  dressform: { furniture: false },
+  /** Poutre de la charpente sur son poteau (la poutre est la planche de la salle). */
+  atticbeam: { furniture: true },
+  /** Entrait sous le faîte (plein), tenu au toit par un poinçon et une jambe de force. */
+  collartie: { furniture: true },
   // Le jardin (D-46), dessiné par le code (PLACEHOLDER, pas d'image clé pour l'instant).
   /** Frondaison des arbres en haut des salles (feuillage plein). */
   canopy: { furniture: true },
@@ -750,6 +777,10 @@ export const WORLD_LIFE = {
   dust: { count: 12, driftPxPerS: 3, alpha: 0.55 },
   /** Papillon de nuit (D-75) : un tour de la lampe (ms), rayon (px), battement (ms). */
   moth: { periodMs: 5200, radiusPx: 14, flapMs: 90 },
+  /** Vapeur de la cafetière (D-75) : volutes, montée (px/s), opacité. */
+  steam: { count: 6, risePxPerS: 9, alpha: 0.32 },
+  /** Linge dans le hublot de la machine (D-75) : un tour du tambour (ms). */
+  drum: { periodMs: 2600 },
 } as const;
 
 /** Rayon du halo d'une veilleuse (px logiques). */

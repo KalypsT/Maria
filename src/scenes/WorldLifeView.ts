@@ -129,13 +129,21 @@ interface Spark {
 }
 
 interface SparkField {
-  readonly kind: 'stars' | 'dust';
+  readonly kind: 'stars' | 'dust' | 'steam';
   readonly x: number;
   readonly y: number;
   readonly w: number;
   readonly h: number;
   readonly alpha: number;
   readonly sparks: readonly Spark[];
+}
+
+/** Le linge qui tourne dans le hublot d'une machine à laver. */
+interface Drum {
+  readonly x: number;
+  readonly y: number;
+  readonly radius: number;
+  readonly clothes: readonly Phaser.GameObjects.Image[];
 }
 
 interface Moth {
@@ -165,6 +173,7 @@ export class WorldLifeView {
   private readonly mobiles: Mobile[] = [];
   private readonly fields: SparkField[] = [];
   private readonly moths: Moth[] = [];
+  private readonly drums: Drum[] = [];
   /** Textures propres à la salle, retirées avec elle. */
   private readonly roomTextures: string[] = [];
   private readonly rand = Math.random;
@@ -213,6 +222,12 @@ export class WorldLifeView {
       moth.image.destroy();
     }
     this.moths.length = 0;
+    for (const drum of this.drums) {
+      for (const image of drum.clothes) {
+        image.destroy();
+      }
+    }
+    this.drums.length = 0;
     for (const key of this.roomTextures) {
       this.scene.textures.remove(key);
     }
@@ -242,6 +257,10 @@ export class WorldLifeView {
         this.makeSparks('stars', r, WORLD_LIFE.nightStars.alpha * (palette.stars ? 1 : 0.3));
       } else if (d.kind === 'dust') {
         this.makeSparks('dust', r, WORLD_LIFE.dust.alpha);
+      } else if (d.kind === 'steam') {
+        this.makeSparks('steam', r, WORLD_LIFE.steam.alpha);
+      } else if (d.kind === 'machine' && !palette.outdoor) {
+        this.makeDrum(r);
       } else if (d.kind === 'moth' && palette.stars) {
         this.makeMoth(r);
       }
@@ -465,12 +484,17 @@ export class WorldLifeView {
    * de son centre (projetées sur le mur, aplaties) ; la poussière monte et dérive dans la lumière.
    */
   private makeSparks(
-    kind: 'stars' | 'dust',
+    kind: 'stars' | 'dust' | 'steam',
     r: { x: number; y: number; w: number; h: number },
     alpha: number,
   ): void {
     this.ensureSprites();
-    const count = kind === 'stars' ? WORLD_LIFE.nightStars.count : WORLD_LIFE.dust.count;
+    const count =
+      kind === 'stars'
+        ? WORLD_LIFE.nightStars.count
+        : kind === 'steam'
+          ? WORLD_LIFE.steam.count
+          : WORLD_LIFE.dust.count;
     const sparks: Spark[] = [];
     for (let i = 0; i < count; i++) {
       // Répartition régulière (angle d'or) : jamais deux points l'un sur l'autre.
@@ -481,7 +505,8 @@ export class WorldLifeView {
         .setDepth(SPARK_DEPTH)
         .setBlendMode(Phaser.BlendModes.ADD)
         .setTint(kind === 'stars' ? 0xfff0c0 : 0xfff3d6);
-      const size = kind === 'stars' ? 4 + (i % 3) * 1.5 : 1.6 + (i % 2) * 0.8;
+      const size =
+        kind === 'stars' ? 4 + (i % 3) * 1.5 : kind === 'steam' ? 5 + (i % 3) : 1.6 + (i % 2) * 0.8;
       image.setDisplaySize(size, size);
       sparks.push({
         image,
@@ -491,6 +516,21 @@ export class WorldLifeView {
       });
     }
     this.fields.push({ kind, ...r, alpha, sparks });
+  }
+
+  /** Le linge dans le hublot de la machine (D-75) : trois pièces qui tournent avec le tambour. */
+  private makeDrum(r: { x: number; y: number; w: number; h: number }): void {
+    this.ensureSprites();
+    // Même hublot que le dessin de la machine (roomArt).
+    const radius = Math.min(r.w, r.h) * 0.22;
+    const clothes = [0xf19bb5, 0xe6c27a, 0xf3ead7].map((tint) =>
+      this.scene.add
+        .image(0, 0, DOT_TEXTURE)
+        .setDepth(MOBILE_DEPTH)
+        .setTint(tint)
+        .setDisplaySize(radius * 0.9, radius * 0.6),
+    );
+    this.drums.push({ x: r.x + r.w / 2, y: r.y + r.h / 2 + 4, radius: radius * 0.5, clothes });
   }
 
   /** Le papillon de nuit autour d'une lampe (D-75), le soir. */
@@ -538,6 +578,18 @@ export class WorldLifeView {
             )
             .setAlpha(field.alpha * twinkle);
         }
+      } else if (field.kind === 'steam') {
+        // Des volutes qui montent de la cafetière, s'élargissent et s'effacent en haut.
+        const rise = (nowMs / 1000) * cfg.steam.risePxPerS;
+        for (const spark of field.sparks) {
+          const y = (spark.b * field.h + rise) % field.h;
+          const k = y / field.h;
+          const x = field.w / 2 + (2 + 5 * k) * Math.sin(nowMs / 700 + spark.phase);
+          spark.image
+            .setPosition(field.x + x, field.y + field.h - y)
+            .setScale((3 + 7 * k) / 16)
+            .setAlpha(field.alpha * Math.sin(Math.PI * k));
+        }
       } else {
         const rise = (nowMs / 1000) * cfg.dust.driftPxPerS;
         for (const spark of field.sparks) {
@@ -550,6 +602,17 @@ export class WorldLifeView {
           spark.image.setPosition(field.x + x, field.y + y).setAlpha(field.alpha * twinkle * edge);
         }
       }
+    }
+    const spin = (nowMs / cfg.drum.periodMs) * Math.PI * 2;
+    for (const drum of this.drums) {
+      drum.clothes.forEach((image, i) => {
+        // Le linge retombe un peu en bas du tambour : un tour pas tout à fait rond.
+        const angle = spin + (i * Math.PI * 2) / 3;
+        image.setPosition(
+          drum.x + drum.radius * Math.cos(angle),
+          drum.y + drum.radius * (0.8 * Math.sin(angle) + 0.25),
+        );
+      });
     }
     const fly = (nowMs / cfg.moth.periodMs) * Math.PI * 2;
     const wing = FRAME_NAMES[Math.floor(nowMs / cfg.moth.flapMs) % 2] ?? '0';

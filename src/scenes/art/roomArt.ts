@@ -659,11 +659,17 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
   },
   coatrack(a, r) {
     const { ctx, palette: p } = a;
-    ctx.fillStyle = p.silhouettes ? p.structure : p.woodDark;
-    ctx.fillRect(r.x, r.y + 4, r.w, 3);
     if (p.silhouettes) {
+      // Monde étrange : seulement les patères, pâles (D-75) ; la barre se lisait comme un rebord.
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      for (let x = r.x + 4; x < r.x + r.w - 2; x += 9) {
+        rounded(ctx, { x, y: r.y + 3, w: 3, h: 6 }, 1.5);
+        ctx.fill();
+      }
       return;
     }
+    ctx.fillStyle = p.woodDark;
+    ctx.fillRect(r.x, r.y + 4, r.w, 3);
     const colors = ['#b85f75', '#4f6f8f', '#e6c27a'];
     colors.forEach((color, i) => {
       ctx.fillStyle = color;
@@ -934,8 +940,9 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     const steps = Math.max(3, Math.round(r.h / 8));
     const sw = r.w / steps;
     const sh = r.h / steps;
-    // Pâle, sans liseré : ce n'est jamais une surface praticable (pilier 1).
-    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    // Pâle, sans liseré : ce n'est jamais une surface praticable (pilier 1). Plus pâle encore
+    // depuis D-75 : il se lisait comme des marches.
+    ctx.fillStyle = 'rgba(0,0,0,0.14)';
     ctx.beginPath();
     ctx.moveTo(r.x, r.y + r.h);
     for (let i = 0; i < steps; i++) {
@@ -972,9 +979,10 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     }
   },
   'giant-chair'(a, r) {
-    // Chaise démesurée, en arrière-plan : dossier, assise, pieds.
+    // Chaise démesurée, en arrière-plan : dossier, assise, pieds. Pâle (D-75) : son assise se
+    // lisait comme une plateforme.
     const { ctx } = a;
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
     const leg = Math.max(3, r.w * 0.08);
     const seat = r.y + r.h * 0.55;
     ctx.fillRect(r.x, r.y, leg, r.h);
@@ -985,9 +993,10 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     ctx.fillRect(r.x + r.w - leg, seat, leg, r.y + r.h - seat);
   },
   'giant-pencil'(a, r) {
-    const { ctx, palette: p } = a;
+    const { ctx } = a;
     tilted(ctx, r, -0.5);
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    // Pâle et sans contour (D-75) : il se lisait comme une rampe.
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
     ctx.beginPath();
     ctx.moveTo(r.x, r.y + r.h * 0.3);
     ctx.lineTo(r.x + r.w * 0.82, r.y + r.h * 0.3);
@@ -996,9 +1005,6 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     ctx.lineTo(r.x, r.y + r.h * 0.7);
     ctx.closePath();
     ctx.fill();
-    ctx.strokeStyle = p.silhouettes ? p.wallpaper : 'rgba(0,0,0,0.3)';
-    ctx.lineWidth = 0.8;
-    ctx.stroke();
     ctx.restore();
   },
   'bedroom-window'(a, r) {
@@ -1340,6 +1346,9 @@ export function windowPanes(level: LevelData): Pane[] {
       panes.push({ ...r, shape: 'round' });
     } else if (d.kind === 'tallwindow') {
       panes.push({ ...r, shape: 'arch' });
+    } else if (d.kind === 'roofwindow') {
+      // Dans le pan du toit (D-75) : la vitre, au milieu de son cadre.
+      panes.push({ x: r.x + 4, y: r.y + 6, w: r.w - 8, h: r.h - 12, shape: 'rect' });
     } else if (d.kind === 'skylight') {
       panes.push({ x: r.x, y: r.y - 6, w: r.w, h: T + 2, shape: 'rect' });
     }
@@ -1902,7 +1911,9 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
     }
     return [];
   });
-  const skylights = level.decor.filter((d) => d.kind === 'skylight').map(rect);
+  const skylights = level.decor
+    .filter((d) => d.kind === 'skylight' || d.kind === 'roofwindow')
+    .map(rect);
   // Calque d'obscurité, percé hors écran (destination-out), puis posé sur la salle.
   const transform = ctx.getTransform();
   scratch.width = ctx.canvas.width;
