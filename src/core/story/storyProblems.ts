@@ -42,7 +42,7 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
   const set = new Set<string>();
   for (const t of story.triggers) {
     for (const step of t.steps) {
-      if (step.do === 'flag') {
+      if (step.do === 'flag' || step.do === 'toggle') {
         set.add(step.id);
       }
     }
@@ -96,8 +96,19 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
         (step.do === 'room' && step.room !== t.room),
     );
     if (t.repeat) {
+      // Le banc des marées (D-95) se rejoue : une étape réversible, dans le noir, Céleste replacée.
+      const reversible = t.steps.some((step) => step.do === 'toggle');
       const harmless = t.steps.every(
-        (step) => step.do === 'thought' || step.do === 'wait' || step.do === 'memory',
+        (step) =>
+          step.do === 'thought' ||
+          step.do === 'wait' ||
+          step.do === 'memory' ||
+          (reversible &&
+            (step.do === 'toggle' ||
+              step.do === 'fadeOut' ||
+              step.do === 'fadeIn' ||
+              step.do === 'place' ||
+              step.do === 'pose')),
       );
       if (t.on !== 'interact' || !harmless) {
         problems.push(`${what} : rejouable seulement avec Agir, sans effet sur l'histoire`);
@@ -119,6 +130,8 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
         if (!story.props.some((p) => p.id === by && p.room === room)) {
           problems.push(`${what} : bulle d'un personnage absent de ${room} (${by})`);
         }
+      } else if (step.do === 'toggle' && !dark) {
+        problems.push(`${what} : étape réversible ${step.id} sous les yeux du joueur`);
       } else if (step.do === 'fadeOut') {
         dark = true;
       } else if (step.do === 'fadeIn') {

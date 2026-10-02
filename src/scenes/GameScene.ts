@@ -29,6 +29,7 @@ import { KeyboardSource } from '../core/input/KeyboardSource';
 import { TouchSource } from '../core/input/TouchSource';
 import { EntityType, Material, Tile, tileAt, type LevelData } from '../core/level/LevelData';
 import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
+import { atTide } from '../core/level/tide';
 import { PlayerPhysics, type PlayerInput } from '../core/player/PlayerPhysics';
 import { PlayerFeel } from '../core/player/playerFeel';
 import { growthPhase, phaseMovement, type GrowthPhase } from '../config/growth';
@@ -94,7 +95,7 @@ import {
   STRANGE_PALETTE,
   TRAIN_RIDE,
 } from '../config/art';
-import { STORY_TIMING } from '../config/story';
+import { STORY_TIMING, StoryFlag } from '../config/story';
 import { PropStage } from '../core/story/PropStage';
 import { StoryDirector } from '../core/story/StoryDirector';
 import type { TimeOfDay } from '../core/story/story';
@@ -359,6 +360,9 @@ export class GameScene extends Phaser.Scene {
     this.session = this.registry.get(SESSION_KEY) as SaveSession;
     this.audio = this.registry.get(AUDIO_KEY) as AudioPlayer;
     this.story = new StoryDirector(HOUSE_STORY, {
+      flagCleared: (id) => {
+        void this.session.removeStoryFlag(id);
+      },
       flagSet: (id) => {
         void this.session.addStoryFlag(id);
         // Croissance : posée dans le noir d'un fondu, avant que le script ne replace Céleste.
@@ -410,7 +414,7 @@ export class GameScene extends Phaser.Scene {
     this.worldLife = new WorldLifeView(this);
     const save = this.session.data;
     const { room, checkpointId } = savedReturn(this.session);
-    this.level = room.level;
+    this.level = this.atTide(room.level);
     this.zone = room.zone;
     this.artScale = this.computeArtScale();
     // Partie reprise dans le monde étrange (veilleuse du passage d'ombres, D-34).
@@ -1074,7 +1078,7 @@ export class GameScene extends Phaser.Scene {
   returnToSaved(): void {
     this.abortMemory();
     const { room, checkpointId } = savedReturn(this.session);
-    if (room.level !== this.level) {
+    if (this.atTide(room.level) !== this.level) {
       this.setRoom(room.level, room.zone, checkpointId);
     }
     this.respawn();
@@ -1094,7 +1098,7 @@ export class GameScene extends Phaser.Scene {
     this.player.reset(
       (spawn.col + 0.5) * TILE_SIZE - this.growth.hitbox.width / 2,
       (spawn.row + 1) * TILE_SIZE - this.growth.hitbox.height,
-      room.level,
+      this.level,
     );
     this.feel.reset(this.player);
     this.poser.reset();
@@ -1155,7 +1159,7 @@ export class GameScene extends Phaser.Scene {
       this.growth.hitbox.width,
       this.growth.hitbox.height,
     );
-    this.player.reset(x, y, room.level);
+    this.player.reset(x, y, this.level);
     // Devant une porte de façade (D-61), Céleste arrive arrêtée, face à la rue.
     this.player.vx = room.level.doors.some((d) => d.id === target.exit) ? 0 : vx;
     this.feel.reset(this.player);
@@ -1163,11 +1167,30 @@ export class GameScene extends Phaser.Scene {
     this.resetCamera();
   }
 
+  /** La variante d'une salle à la marée du moment (D-95) ; une salle sans marée est inchangée. */
+  private atTide(level: LevelData): LevelData {
+    return atTide(level, this.story.flags.has(StoryFlag.TideHigh));
+  }
+
+  /** Change la salle de marée sous Céleste, qui garde sa place, sa peur et son point de retour. */
+  private swapTide(): void {
+    const { x, y } = this.player.box;
+    const facing = this.player.facing;
+    const fear = this.run.fear;
+    const { checkpointId, levelId } = this.session.data.checkpoint;
+    this.setRoom(this.level, this.zone, levelId === this.level.id ? checkpointId : null);
+    this.run.fear = fear;
+    this.player.reset(x, y, this.level);
+    this.player.facing = facing;
+    this.feel.reset(this.player);
+  }
+
   /**
    * Remplace la salle : dessin, ennemis, checkpoints, ambiance ; une salle de zone est ajoutée à la
    * carte révélée. Céleste est replacée ensuite.
    */
-  private setRoom(level: LevelData, zone: Zone | null, checkpointId: string | null): void {
+  private setRoom(source: LevelData, zone: Zone | null, checkpointId: string | null): void {
+    const level = this.atTide(source);
     this.level = level;
     this.zone = zone;
     if (zone && !isStrangeRoom(level)) {
@@ -1442,6 +1465,11 @@ export class GameScene extends Phaser.Scene {
       }
       return true;
     }
+    if (tile === Tile.Water) {
+      g.fillStyle(PLACEHOLDER_COLORS.water, 0.8);
+      g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+      return true;
+    }
     if (tile === Tile.OneWay) {
       const color =
         material === Material.Wood ? PLACEHOLDER_COLORS.woodEdge : PLACEHOLDER_COLORS.oneWay;
@@ -1577,6 +1605,11 @@ export class GameScene extends Phaser.Scene {
     }
     if (veil >= 1 && (story.timeOfDay() !== this.drawnTime || this.isDim() !== this.drawnDim)) {
       this.redrawArt();
+    }
+    // La marée a tourné (D-95) : dans le noir d'un fondu (le banc), ou tout de suite hors script
+    // (outil de debug). Céleste reste où elle est (le banc est au sec aux deux marées).
+    if ((veil >= 1 || !story.busy) && this.atTide(this.level) !== this.level) {
+      this.swapTide();
     }
     const near = memory
       ? memory.interactable >= 0

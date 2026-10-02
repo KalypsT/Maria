@@ -9,9 +9,13 @@ import {
   type LevelDoor,
   type LevelEntity,
   type LevelExit,
+  type LevelLeg,
+  type LevelTide,
   type LevelTrain,
   type TilePos,
+  type TileRect,
 } from './LevelData';
+import { buildTide, checkTide } from './tide';
 import { TILE_SIZE } from '../../config/display';
 
 const LEGEND: Readonly<Record<string, number>> = {
@@ -32,6 +36,7 @@ const LEGEND: Readonly<Record<string, number>> = {
   S: Tile.Empty,
   '^': Tile.Hazard,
   '!': Tile.Thorns,
+  '~': Tile.Water,
 };
 /** Marqueurs d'entités (la tuile elle-même est vide). */
 const ENTITIES: Readonly<Record<string, EntityType>> = {
@@ -72,6 +77,19 @@ const TRAIN = /^(\d+)\s+(left|right)$/;
 const CHASE_END = /^(?:(up|right|left)\s+)?(\d+)$/;
 const CHASE_PHASE = /^(\d+)\s+(\d+(?:\.\d+)?)$/;
 const CHASE_TRIP = /^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+(?:\.\d+)?)$/;
+/**
+ * Marée (D-95) : `; @tide: 26 18` (première ligne d'eau à marée basse, puis à marée haute) ;
+ * `; @sea: col ligne l h` (répétable) : là où monte la mer ; `; @rise: col ligne l h` (répétable) :
+ * ce qui flotte (bateau, ponton), tout son contenu monte avec la marée.
+ */
+const TIDE = /^(\d+)\s+(\d+)$/;
+const RECT = /^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
+/**
+ * Tronçon (D-96), répétable : `; @leg: 3,20 40,12 medium hook slide high` (tuile de départ et
+ * d'arrivée, difficulté exacte, capacités exigées, marée haute ; basse par défaut).
+ */
+const LEG = /^(\d+),(\d+)\s+(\d+),(\d+)\s+(easy|medium|hard)((?:\s+[a-z-]+)*)$/;
+const LEG_NEEDS: ReadonlySet<string> = new Set(['climb', 'wall-jump', 'umbrella', 'hook', 'slide']);
 
 /**
  * Convertit une carte ASCII (décision D-06) en `LevelData`.
@@ -79,7 +97,8 @@ const CHASE_TRIP = /^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+(?:\.\d+)?)$/;
  * Légende : `#` plein, `=` traversable par le dessous, `.` vide, `P` départ (une seule fois),
  * `G` arrivée d'un parcours (au plus une fois), `e` patrouilleur, `a` araignée (D-46), `o` escargot (D-49), `C` checkpoint, `^` danger qui pique, `!` ronces, qui piquent aussi (D-51, D-56),
  * `b` bois, `t` tissu et `v` feuillage (pleins, D-46), `-` étagère (traversable), `1`-`9` sortie dans un mur latéral,
- * `A` objet de capacité (au plus un, capacité nommée par `; @ability:`), `S` trouvaille (secret).
+ * `A` objet de capacité (au plus un, capacité nommée par `; @ability:`), `S` trouvaille (secret),
+ * `~` eau (une flaque, la mer qui ne se retire jamais, D-95).
  * Les commentaires `; @clé: valeur` sont des métadonnées ; `; @decor:` (répétable) déclare
  * l'habillage (D-28), `; @door:` (répétable) une porte de façade (D-61), `; @cable:` (répétable)
  * un câble pour le crochet du parapluie (D-65), `; @train:` (répétable) une voie ferrée (D-66).
@@ -96,6 +115,10 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   const chasePhases: { until: number; speed: number }[] = [];
   const chaseTrips: { col: number; row: number; width: number; height: number; recoil: number }[] =
     [];
+  let tideRows = null as { low: number; high: number } | null;
+  const seas: TileRect[] = [];
+  const rises: TileRect[] = [];
+  const legs: LevelLeg[] = [];
   text.split('\n').forEach((raw, index) => {
     const line = raw.replace(/\r$/, '').trimEnd();
     if (!line.startsWith(COMMENT)) {
@@ -138,6 +161,41 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         throw new Error(`Niveau ${id}, ligne ${index + 1} : @train attend « ligne left|right »`);
       }
       trains.push({ row: Number(t[1]), dir: t[2] === 'left' ? -1 : 1 });
+    } else if (match?.[1] === 'tide' && match[2] !== undefined) {
+      const t = TIDE.exec(match[2].trim());
+      if (!t || tideRows) {
+        throw new Error(
+          `Niveau ${id}, ligne ${index + 1} : @tide attend « basse haute » (une fois)`,
+        );
+      }
+      tideRows = { low: Number(t[1]), high: Number(t[2]) };
+    } else if ((match?.[1] === 'sea' || match?.[1] === 'rise') && match[2] !== undefined) {
+      const r = RECT.exec(match[2].trim());
+      if (!r) {
+        throw new Error(`Niveau ${id}, ligne ${index + 1} : @${match[1]} attend « col ligne l h »`);
+      }
+      const [col = 0, row = 0, w = 0, h = 0] = r.slice(1, 5).map(Number);
+      (match[1] === 'sea' ? seas : rises).push({ col, row, width: w, height: h });
+    } else if (match?.[1] === 'leg' && match[2] !== undefined) {
+      const l = LEG.exec(match[2].trim());
+      const words = (l?.[6] ?? '')
+        .trim()
+        .split(/\s+/)
+        .filter((w) => w !== '');
+      const needs = words.filter((w) => w !== 'high' && w !== 'low');
+      if (!l || needs.some((w) => !LEG_NEEDS.has(w)) || words.length - needs.length > 1) {
+        throw new Error(
+          `Niveau ${id}, ligne ${index + 1} : @leg attend « col,ligne col,ligne difficulté [capacités] [high] »`,
+        );
+      }
+      const [c1 = 0, r1 = 0, c2 = 0, r2 = 0] = l.slice(1, 5).map(Number);
+      legs.push({
+        from: { col: c1, row: r1 },
+        to: { col: c2, row: r2 },
+        difficulty: l[5] as LevelLeg['difficulty'],
+        needs,
+        tide: words.includes('high') ? 'high' : 'low',
+      });
     } else if (match?.[1]?.startsWith('chase') && match[2] !== undefined) {
       const value = match[2].trim();
       const bad = () =>
@@ -187,7 +245,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   }
   const width = first.text.length;
   const height = rows.length;
-  const tiles = new Uint8Array(width * height);
+  const drawn = new Uint8Array(width * height);
   const materials = new Uint8Array(width * height);
   let spawn: TilePos | undefined;
   let goal: TilePos | null = null;
@@ -205,7 +263,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
       if (EXIT.test(char)) {
         const id = Number(char);
         exitTiles.set(id, [...(exitTiles.get(id) ?? []), { col, row }]);
-        tiles[row * width + col] = Tile.Empty;
+        drawn[row * width + col] = Tile.Empty;
         continue;
       }
       const tile = LEGEND[char];
@@ -229,13 +287,35 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
       if (entity) {
         entities.push({ type: entity, col, row });
       }
-      tiles[row * width + col] = tile;
+      drawn[row * width + col] = tile;
       materials[row * width + col] = MATERIALS[char] ?? Material.Default;
     }
   });
 
   if (!spawn) {
     throw new Error(`Niveau ${id} : point de départ « ${SPAWN} » manquant`);
+  }
+  if (!tideRows && (seas.length > 0 || rises.length > 0)) {
+    throw new Error(`Niveau ${id} : @sea et @rise vont de pair avec @tide`);
+  }
+  let tide: LevelTide | null = null;
+  let tiles: Uint8Array = drawn;
+  if (tideRows) {
+    const built = buildTide(id, width, height, drawn, materials, {
+      lowRow: tideRows.low,
+      highRow: tideRows.high,
+      seas,
+      rises,
+    });
+    tide = built.tide;
+    tiles = built.tiles;
+  }
+  for (const leg of legs) {
+    for (const p of [leg.from, leg.to]) {
+      if (p.col >= width || p.row >= height) {
+        throw new Error(`Niveau ${id} : @leg ${String(p.col)},${String(p.row)} hors de la salle`);
+      }
+    }
   }
   const abilities = entities.filter((entity) => entity.type === EntityType.Ability).length;
   if (abilities > 1 || (abilities === 1) !== (meta.ability !== undefined)) {
@@ -293,7 +373,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
       y2: ((left ? r2 : r1) + 0.5) * TILE_SIZE,
     });
   }
-  return {
+  const level: LevelData = {
     id,
     width,
     height,
@@ -312,7 +392,11 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
       chaseEnd >= 0
         ? { dir: chaseDir, end: chaseEnd, phases: chasePhases, trips: chaseTrips }
         : null,
+    tide,
+    legs,
   };
+  checkTide(level);
+  return level;
 }
 
 /** Une sortie : tuiles d'une même colonne de mur latéral, contiguës, au moins 2 de haut. */

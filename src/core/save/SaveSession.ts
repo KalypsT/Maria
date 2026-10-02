@@ -84,6 +84,17 @@ export class SaveSession {
     return this.persist();
   }
 
+  /** Étape réversible retirée (la marée, D-95), enregistrée aussitôt ; sans effet si absente. */
+  removeStoryFlag(flag: string): Promise<void> {
+    const flags = this.current.story.flags;
+    const index = flags.indexOf(flag);
+    if (index < 0) {
+      return Promise.resolve();
+    }
+    flags.splice(index, 1);
+    return this.persist();
+  }
+
   setControls(controls: Readonly<ControlSettings>): Promise<void> {
     this.current.settings.controls = { ...controls };
     return this.persist();

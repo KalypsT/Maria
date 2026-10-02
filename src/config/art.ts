@@ -1043,6 +1043,17 @@ export const WORLD_LIFE = {
 } as const;
 
 /** Rayon du halo d'une veilleuse (px logiques). */
+/**
+ * L'eau (D-95), PLACEHOLDER jusqu'à son dessin (la marée, PR 1b) : un bleu-vert profond, la ligne
+ * de surface plus claire. En silhouettes (monde étrange), plus sombre.
+ */
+export const WATER_COLORS = {
+  body: 'rgba(52,112,138,0.82)',
+  surface: 'rgba(170,220,225,0.9)',
+  strangeBody: 'rgba(20,44,62,0.9)',
+  strangeSurface: 'rgba(110,230,215,0.8)',
+} as const;
+
 export const LAMP_LIGHT_RADIUS = 110;
 /** Rayon de la lumière de la lune autour d'une fenêtre (px logiques). */
 export const MOON_LIGHT_RADIUS = 90;

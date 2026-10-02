@@ -70,6 +70,23 @@ describe('SaveSession', () => {
     expect(reloaded?.story.flags).toEqual(['evening.played']);
   });
 
+  it('retire une étape réversible (la marée, D-95), relue après « fermeture »', async () => {
+    const storage = new MemorySaveStorage();
+    let clock = 0;
+    const session = new SaveSession(
+      new SaveManager(storage),
+      createNewSave('bedroom', 0),
+      () => ++clock,
+    );
+    await session.addStoryFlag('evening.played');
+    await session.addStoryFlag('sea.tide-high');
+    await session.removeStoryFlag('sea.tide-high');
+    await session.removeStoryFlag('sea.tide-high');
+    expect(clock).toBe(3);
+    const reloaded = (await new SaveManager(storage).load()).data;
+    expect(reloaded?.story.flags).toEqual(['evening.played']);
+  });
+
   it('garde un souvenir une seule fois, relu après « fermeture » (D-38)', async () => {
     const storage = new MemorySaveStorage();
     let clock = 0;

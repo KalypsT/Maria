@@ -104,6 +104,11 @@ export const StoryFlag = {
    * relie la gare de la mer et la gare de la ville.
    */
   TrainArrived: 'train.arrived',
+  /**
+   * La marée est haute (D-95), à la station balnéaire : la seule étape réversible (les bancs des
+   * marées la posent et la retirent). Les salles de marée prennent leur variante haute.
+   */
+  TideHigh: 'sea.tide-high',
   /** Quelques mois plus tard (D-43) : Céleste a grandi (phase de croissance 2). */
   Grown: 'growth.2',
   /** Le jardin (D-46) : Céleste est sortie pour la première fois (il fait beau, et Maria ?). */

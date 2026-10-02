@@ -151,10 +151,14 @@ export function isGrounded(level: LevelData, box: Box, includeOneWay = true): bo
 /** Vrai si le rectangle ne chevauche aucune tuile pleine (les traversables sont ignorées). */
 /**
  * Vrai si la hitbox, réduite de `HAZARD_INSET_PX` de chaque côté, touche une tuile de danger (D-21),
- * orties ou ronces (l'analyse de faisabilité et l'escalade évitent les deux).
+ * orties ou ronces, ou l'eau (D-95) : l'analyse de faisabilité et l'escalade évitent les trois.
  */
 export function touchesHazard(level: LevelData, box: Box): boolean {
-  return touchesTile(level, box, Tile.Hazard) || touchesTile(level, box, Tile.Thorns);
+  return (
+    touchesTile(level, box, Tile.Hazard) ||
+    touchesTile(level, box, Tile.Thorns) ||
+    touchesTile(level, box, Tile.Water)
+  );
 }
 
 /** Même contact, avec une seule sorte de danger (orties ou ronces, D-51). */

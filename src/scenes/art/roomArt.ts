@@ -4,6 +4,7 @@ import {
   WALL_STYLES,
   type WallStyle,
   MOON_LIGHT_RADIUS,
+  WATER_COLORS,
   type ArtPalette,
   type ArtFinish,
 } from '../../config/art';
@@ -1737,6 +1738,15 @@ function drawStructure(a: ArtContext, floorY: number): void {
           ctx.fillRect(x, y, T, 1.5);
           ctx.fillStyle = 'rgba(0,0,0,0.18)';
           ctx.fillRect(x, y + 4, T, 3);
+        }
+      } else if (tile === Tile.Water) {
+        // L'eau (D-95), PLACEHOLDER : le corps, et la ligne de surface où rien n'est au-dessus.
+        const surface = tileAt(level, col, row - 1) !== Tile.Water;
+        ctx.fillStyle = p.silhouettes ? WATER_COLORS.strangeBody : WATER_COLORS.body;
+        ctx.fillRect(x, y, T, T);
+        if (surface) {
+          ctx.fillStyle = p.silhouettes ? WATER_COLORS.strangeSurface : WATER_COLORS.surface;
+          ctx.fillRect(x, y + 2, T, 1.5);
         }
       } else if (tile === Tile.Thorns) {
         if (y >= floorY) {
