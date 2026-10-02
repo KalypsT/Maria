@@ -26,7 +26,7 @@ Suite du train : PR 2 le départ (la classe sur le quai le soir, la voiture-couc
 - **Bouton** : n'apparaît qu'avec la glissade, à gauche de Saut. **Pose** couchée, pieds devant. Ligne et pictogramme dans « Mes capacités ».
 - **Parcours d'essai 11 « Glissade »** (menu pause, mode debug) : barrière basse, long passage bas, fosse de briques à franchir en saut long, dernière barrière. Case « Capacité : glissade » dans DEBUG ; réglages `slide*`.
 - Analyse de faisabilité étendue à la glissade (option) ; rien ne change sans elle.
-- Tests : 562. Vérifié dans Chromium : la barrière, le passage bas, le saut long, le bouton.
+- Tests : 563. Vérifié dans Chromium : la barrière, le passage bas, le saut long, le bouton.
 - [ ] À vérifier sur téléphone (menu pause → Parcours d'essai → « 11. Glissade ») : le bouton Glisser se trouve-t-il sous le pouce sans gêner Saut ? Un troisième bouton, est-ce trop ?
 - [ ] La glissade : distance (`slideDurationMs`), vitesse (`slideSpeed`) : trop courte, trop longue ? Part-elle quand on le veut ?
 - [ ] Le saut long (`slideJumpSpeedX`) : se sent-il nettement plus long, sans être incontrôlable ? Glisser puis sauter vient-il naturellement au pouce ?
