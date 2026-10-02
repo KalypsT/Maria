@@ -25,7 +25,7 @@ Suite du train : PR 6b les revisites avec la glissade (le salon sous le canapé,
 - **Le train à quai, de jour** : immobile, sans passagers, sans tunnel ni valise qui tombe ; il se revisite.
 - **Le voyage** : la porte de la voiture-couchettes donne sur la gare de la mer, une porte du fourgon sur les quais de la gare de la ville. Avant l'arrivée, ces portes n'existent pas.
 - DEBUG → Histoire : « le train arrivé, la gare de la mer ».
-- Tests : TESTCOUNT. Vérifié dans Chromium : le matin (la mer, la maîtresse, l'arrêt), la gare de la mer, de la gare de la mer à la voiture-couchettes puis du fourgon aux quais de la ville ; le toit et les compartiments de jour, sans danger.
+- Tests : 620. Vérifié dans Chromium : le matin (la mer, la maîtresse, l'arrêt), la gare de la mer, de la gare de la mer à la voiture-couchettes puis du fourgon aux quais de la ville ; le toit et les compartiments de jour, sans danger.
 - [ ] À vérifier sur téléphone (DEBUG → Histoire → « la cuisine rose trouvée », puis la couchette) : le matin est-il assez doux ? La mer à la fenêtre se voit-elle ? L'arrêt du train se sent-il (`trainStopMs`, `TRAIN_RIDE.accelPerS`) ?
 - [ ] La gare de la mer : comprend-on qu'on ne va pas plus loin pour l'instant (la maîtresse) ?
 - [ ] Le voyage par les deux bouts du train : se comprend-il, ou trouble-t-il ? Trouve-t-on la porte du fourgon ?
