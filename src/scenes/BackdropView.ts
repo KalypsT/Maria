@@ -530,7 +530,11 @@ function outsideSpecs(level: LevelData, p: Readonly<ArtPalette>): PlaneSpec[] {
  * le bord de la voie, qui défilent quand le train roule. L'horizon est sous le bas des fenêtres.
  */
 function trainSpecs(level: LevelData, p: Readonly<ArtPalette>): PlaneSpec[] {
-  const panes = windowPanes(level);
+  // Dehors (le toit, D-86) : tout le ciel, l'horizon un peu sous le toit. Dedans : les vitres.
+  const roof = Number(level.meta.tunnel ?? floorRow(level));
+  const panes = p.outdoor
+    ? [{ x: 0, y: 2 * T, w: level.width * T, h: (roof - 1) * T, shape: 'rect' as const }]
+    : windowPanes(level);
   const first = panes[0];
   if (!first) {
     return [];

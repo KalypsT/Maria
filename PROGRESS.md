@@ -2,9 +2,9 @@
 
 ## Phase en cours
 
-**Le train** (niveau 5, D-82, D-83) : plan validé en 6 PR. **PR 1 faite : la glissade** (D-84, fusionnée). **PR 2 faite : le départ et la voiture-couchettes** (D-85), sur `ccr-982d9f94-2fndno`. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
+**Le train** (niveau 5, D-82, D-83) : plan validé en 6 PR. **PR 1 faite : la glissade** (D-84, fusionnée). **PR 2 faite : le départ et la voiture-couchettes** (D-85, fusionnée). **PR 3 faite : le reste du train réel** (D-86), sur `ccr-982d9f94-2fndno`. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
-Suite du train : PR 3 le reste du train réel (compartiments, fourgon, toit et tunnels, wagon-restaurant) ; PR 4 la poursuite horizontale (parcours d'essai 12) ; PR 5 le monde étrange, la cuisine rose et le souvenir jouable ; PR 6 la fin, la gare de la mer, la revisite du train et les revisites avec la glissade.
+Suite du train : PR 4 la poursuite horizontale (parcours d'essai 12) ; PR 5 le monde étrange, la cuisine rose et le souvenir jouable ; PR 6 la fin, la gare de la mer, la revisite du train et les revisites avec la glissade.
 
 **Structure de la fin du jeu** (D-82) : 8 niveaux (maison, jardin, quartier, gare, train, station balnéaire, avant-dernier, monde de Maria). Niveau 6 et niveau 7 : pistes retenues, détails décidés le moment venu.
 
@@ -17,6 +17,23 @@ Suite du train : PR 3 le reste du train réel (compartiments, fourgon, toit et t
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le train, PR 3 : les compartiments, le fourgon, le toit, le wagon-restaurant (D-86)
+
+- **L'ordre des voitures** : couchettes → compartiments → fourgon → (toit) → wagon-restaurant. La nuit tombée, la porte du bout de la voiture-couchettes s'ouvre ; la lueur guide de voiture en voiture.
+- **Les compartiments** : des voyageurs qui dorment, une maman et son bébé (qui serre son propre poupon ; Agir), le contrôleur (une bulle quand on passe près de lui), un chien couché (Agir). Des valises tremblent sur les filets puis tombent dans les virages (cycles décalés ; recul et peur si elles touchent Céleste). Au bout, une grille à passer en glissade. Une trouvaille en haut d’un filet, une lanterne.
+- **Le fourgon** : malles, caisses, vélo, cage du chien, colis, un câble pour le crochet ; une trappe mène au toit. Le passage direct vers le restaurant est fermé (« ? »).
+- **Le toit** : dehors, la nuit étoilée ; des tunnels passent régulièrement. L'image s'assombrit à l'approche, puis des arches défilent : debout sur le toit, Céleste est repoussée vers l'arrière (une peur) ; à l'abri dans un creux entre deux voitures, ou couchée en glissade, rien. Trouvaille sur la cheminée de la cuisine. Au bout, une trappe redescend dans le restaurant.
+- **Le wagon-restaurant** : tables, comptoir, verres ; arrivée par le haut, il s'ouvre de l'intérieur (la porte vers le fourgon devient un raccourci). La porte de la cuisine : « ? » (PLACEHOLDER, la suite avec la PR 5).
+- Écartés : portes qui se referment, colis qui glissent (collisions mobiles, coût) ; voir D-86.
+- Tests : 586. Vérifié dans Chromium : les quatre voitures, le tunnel qui repousse Céleste debout.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « le train, la nuit (la lueur) ») : les valises qui tremblent se remarquent-elles assez tôt ? Les chutes sont-elles justes ?
+- [ ] Le toit : l'annonce du tunnel (assombrissement, `tunnelWarnMs`) laisse-t-elle le temps de rejoindre un creux ou de glisser ? Trop souvent, pas assez (`tunnelPeriodMs`) ?
+- [ ] Le recul du tunnel (`tunnelPushX`, `tunnelPushY`) : lisible sans être injuste ?
+- [ ] La grille des compartiments et la trappe du fourgon : trouve-t-on le chemin ? La lueur guide-t-elle bien ?
+- [ ] Le restaurant fermé depuis le fourgon puis ouvert de l'intérieur : comprend-on la boucle ?
+- [ ] Les personnages (maman et bébé, contrôleur, chien) : se reconnaissent-ils ?
+- [ ] Fluidité sur le toit (plans qui défilent, voile du tunnel).
 
 ### Le train, PR 2 : le départ, la voiture-couchettes, la nuit (D-85)
 

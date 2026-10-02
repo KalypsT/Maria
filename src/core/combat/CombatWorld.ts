@@ -1,4 +1,10 @@
 import {
+  LUGGAGE_BOX,
+  LuggagePhase,
+  TUNNEL_CLEAR_PX,
+  TrainPhase,
+  cyclePhase,
+  luggageState,
   TRAIN_GUST_AHEAD_PX,
   TRAIN_GUST_TILES,
   TRAIN_LENGTH_PX,
@@ -14,6 +20,25 @@ import type { PlayerPhysics } from '../player/PlayerPhysics';
 import { Chase } from '../boss/Chase';
 import { PlayerAttack } from './PlayerAttack';
 import { EnemyKind, Patroller, type PatrollerTuning } from './Patroller';
+
+/** Valise qui peut tomber d'un filet (D-86) : où elle repose, et la hauteur de sa chute (px). */
+export interface LuggageDrop {
+  /** Bord gauche et bas de la valise sur son filet (px). */
+  readonly x: number;
+  readonly y: number;
+  readonly dropPx: number;
+}
+
+/** Ligne (tuiles) du premier sol (plein ou traversable) sous la tuile (col, row), ou la hauteur. */
+function groundBelow(level: LevelData, col: number, row: number): number {
+  for (let r = row; r < level.height; r++) {
+    const tile = tileAt(level, col, r);
+    if (tile === Tile.Solid || tile === Tile.OneWay) {
+      return r;
+    }
+  }
+  return level.height;
+}
 
 /** Événements du dernier pas (masque de bits), pour le feedback. */
 export const CombatEvent = { None: 0, Hit: 1, Disperse: 2, Hurt: 4 } as const;
@@ -64,6 +89,17 @@ export class CombatWorld {
   trainSteps = 0;
   /** Train dont le souffle a déjà repoussé Céleste pendant ce passage (un seul souffle par train). */
   private trainGusted = -1;
+  /** Pas écoulés depuis le chargement ou la réapparition (tunnels, valises, D-86). */
+  hazardSteps = 0;
+  /** Le tunnel en cours a déjà repoussé Céleste (une fois par tunnel). */
+  private tunnelHit = false;
+  /** Ligne du toit sous les tunnels (`; @tunnel:`), -1 sans tunnel. */
+  tunnelRow = -1;
+  /** Valises qui tombent des filets (`; @decor: fallingcase`). */
+  luggage: LuggageDrop[] = [];
+  /** État d'une valise (réutilisé : aucune allocation). */
+  private readonly luggageScratch = { phase: LuggagePhase.Rack as LuggagePhase, fallen: 0 };
+  private readonly luggageBox: Box = { x: 0, y: 0, width: LUGGAGE_BOX.width, height: 0 };
   /** Poursuite verticale de la salle (boss, D-67), null sans poursuite. */
   chase: Chase | null = null;
   /** Zone du souffle (réutilisée : aucune allocation). */
@@ -118,6 +154,20 @@ export class CombatWorld {
   load(level: LevelData): void {
     this.level = level;
     this.chase = level.chase ? new Chase(level.chase, this.params, this.stepHz) : null;
+    const tunnel = Number(level.meta.tunnel);
+    this.tunnelRow = level.meta.tunnel !== undefined && Number.isFinite(tunnel) ? tunnel : -1;
+    // Une valise par `fallingcase` : posée sur le filet (sa tuile), elle tombe jusqu'au sol dessous.
+    this.luggage = level.decor
+      .filter((d) => d.kind === 'fallingcase')
+      .map((d) => {
+        const bottom = (d.row + 1) * TILE_SIZE;
+        const ground = groundBelow(level, d.col, d.row + 2) * TILE_SIZE;
+        return {
+          x: (d.col + 0.5) * TILE_SIZE - LUGGAGE_BOX.width / 2,
+          y: bottom,
+          dropPx: ground - bottom,
+        };
+      });
     this.enemies = level.entities
       .filter(
         (e) =>
@@ -157,6 +207,8 @@ export class CombatWorld {
     this.lastEnemy = -1;
     this.trainSteps = 0;
     this.trainGusted = -1;
+    this.hazardSteps = 0;
+    this.tunnelHit = false;
     this.chase?.restart();
   }
 
@@ -216,6 +268,83 @@ export class CombatWorld {
     return false;
   }
 
+  /** Temps du cycle des tunnels et des valises (ms). */
+  get hazardMs(): number {
+    return (this.hazardSteps * 1000) / this.stepHz;
+  }
+
+  /** Moment du tunnel (D-86) : calme, annonce, dedans. */
+  get tunnelPhase(): TrainPhase {
+    const p = this.params;
+    return cyclePhase(this.hazardMs, p.tunnelPeriodMs, p.tunnelWarnMs, p.tunnelPassMs);
+  }
+
+  /**
+   * Tunnel (D-86) : dans le tunnel, tout ce qui dépasse au-dessus de la ligne du toit (moins
+   * `TUNNEL_CLEAR_PX`) est balayé : Céleste debout est repoussée vers l'arrière, la peur monte, une
+   * fois par tunnel. Vrai si elle vient d'être repoussée.
+   */
+  private stepTunnel(player: PlayerPhysics): boolean {
+    if (this.tunnelRow < 0) {
+      return false;
+    }
+    if (this.tunnelPhase !== TrainPhase.Passing) {
+      this.tunnelHit = false;
+      return false;
+    }
+    if (this.tunnelHit || player.box.y >= this.tunnelRow * TILE_SIZE - TUNNEL_CLEAR_PX) {
+      return false;
+    }
+    this.tunnelHit = true;
+    player.vx = -this.params.tunnelPushX;
+    player.vy = this.params.tunnelPushY;
+    player.startHurt(this.hurtSteps);
+    this.invulnerableSteps = Math.max(this.invulnerableSteps, this.invulnerableTotal);
+    this.events |= CombatEvent.Hurt;
+    this.lastEnemy = -1;
+    return true;
+  }
+
+  /** Boîte de la valise `index` en ce moment (px), ou null si elle n'est pas en train de tomber. */
+  fallingBox(index: number): Box | null {
+    const drop = this.luggage[index];
+    if (!drop) {
+      return null;
+    }
+    const state = this.luggageScratch;
+    luggageState(this.hazardMs, index, this.luggage.length, drop.dropPx, this.params, state);
+    if (state.phase !== LuggagePhase.Fall) {
+      return null;
+    }
+    const box = this.luggageBox;
+    box.x = drop.x;
+    box.height = LUGGAGE_BOX.height;
+    box.y = drop.y - LUGGAGE_BOX.height + state.fallen;
+    return box;
+  }
+
+  /** Valise qui tombe (D-86) : touchée, Céleste recule et la peur monte. */
+  private stepLuggage(player: PlayerPhysics): boolean {
+    if (this.luggage.length === 0 || this.invulnerableSteps > 0) {
+      return false;
+    }
+    const box = player.box;
+    for (let i = 0; i < this.luggage.length; i++) {
+      const falling = this.fallingBox(i);
+      if (falling && overlaps(box, falling)) {
+        const away = box.x + box.width / 2 < falling.x + falling.width / 2 ? -1 : 1;
+        player.vx = away * this.params.hurtKnockbackX;
+        player.vy = -this.params.hurtKnockbackY;
+        player.startHurt(this.hurtSteps);
+        this.invulnerableSteps = this.invulnerableTotal;
+        this.events |= CombatEvent.Hurt;
+        this.lastEnemy = -1;
+        return true;
+      }
+    }
+    return false;
+  }
+
   /** Un pas, après celui de Céleste. `attackPressed` : front de pression d'Attaque. */
   step(player: PlayerPhysics, attackPressed: boolean): void {
     this.events = 0;
@@ -243,7 +372,8 @@ export class CombatWorld {
     for (const enemy of enemies) {
       enemy.step(this.level, tuning);
     }
-    if (this.stepTrains(player)) {
+    this.hazardSteps++;
+    if (this.stepTrains(player) || this.stepTunnel(player) || this.stepLuggage(player)) {
       return;
     }
     // Poursuite (D-67) : le toucher fait rebondir Céleste vers le haut, la peur monte.

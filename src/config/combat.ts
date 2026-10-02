@@ -90,6 +90,27 @@ export interface CombatParams {
   chaseContactPauseMs: number;
   /** Croc-en-jambe (passage qui le fait trébucher) : il s'arrête ce temps-là (ms). */
   chaseTripPauseMs: number;
+  /**
+   * Tunnels sur le toit du train (D-86), danger simple : un tunnel arrive toutes les
+   * `tunnelPeriodMs`, annoncé pendant `tunnelWarnMs` (sa bouche approche, l'image s'assombrit),
+   * puis le train est dedans pendant `tunnelPassMs`. Debout sur le toit, Céleste est repoussée vers
+   * l'arrière et la peur monte ; couchée (glissade) ou à l'abri entre deux voitures, rien.
+   */
+  tunnelPeriodMs: number;
+  tunnelWarnMs: number;
+  tunnelPassMs: number;
+  /** Poussée du tunnel : vers l'arrière (px/s) et vers le bas (px/s). */
+  tunnelPushX: number;
+  tunnelPushY: number;
+  /**
+   * Valises qui tombent des filets dans les virages (D-86) : toutes les `luggagePeriodMs`, la
+   * valise tremble sur son filet pendant `luggageWarnMs`, puis tombe (gravité `luggageGravity`),
+   * reste un instant au sol (`luggageLieMs`) et disparaît. Touchée en tombant : recul, la peur monte.
+   */
+  luggagePeriodMs: number;
+  luggageWarnMs: number;
+  luggageGravity: number;
+  luggageLieMs: number;
 }
 
 export const DEFAULT_COMBAT: Readonly<CombatParams> = {
@@ -135,6 +156,15 @@ export const DEFAULT_COMBAT: Readonly<CombatParams> = {
   chaseContactRecoilTiles: 3,
   chaseContactPauseMs: 1200,
   chaseTripPauseMs: 2500,
+  tunnelPeriodMs: 10000,
+  tunnelWarnMs: 2600,
+  tunnelPassMs: 2400,
+  tunnelPushX: 220,
+  tunnelPushY: 60,
+  luggagePeriodMs: 6500,
+  luggageWarnMs: 1400,
+  luggageGravity: 1100,
+  luggageLieMs: 700,
 };
 
 export const COMBAT_PARAM_RANGES: Readonly<
@@ -182,6 +212,15 @@ export const COMBAT_PARAM_RANGES: Readonly<
   chaseContactRecoilTiles: { min: 0, max: 10, step: 0.5 },
   chaseContactPauseMs: { min: 0, max: 5000, step: 100 },
   chaseTripPauseMs: { min: 0, max: 8000, step: 100 },
+  tunnelPeriodMs: { min: 3000, max: 30000, step: 500 },
+  tunnelWarnMs: { min: 500, max: 6000, step: 100 },
+  tunnelPassMs: { min: 300, max: 6000, step: 100 },
+  tunnelPushX: { min: 0, max: 600, step: 10 },
+  tunnelPushY: { min: 0, max: 400, step: 10 },
+  luggagePeriodMs: { min: 2000, max: 20000, step: 250 },
+  luggageWarnMs: { min: 200, max: 4000, step: 100 },
+  luggageGravity: { min: 300, max: 3000, step: 50 },
+  luggageLieMs: { min: 0, max: 3000, step: 100 },
 };
 
 /** Hauteur balayée par le souffle d'un train au-dessus de ses rails (tuiles, D-66). */
@@ -233,3 +272,65 @@ export const PATROLLER_HITBOX = { width: 14, height: 12 } as const;
 export const SPIDER_HITBOX = { width: 12, height: 10 } as const;
 /** Hitbox de l'escargot, collé à son mur (px, PROVISOIRE). */
 export const SNAIL_HITBOX = { width: 10, height: 12 } as const;
+
+/**
+ * Tunnels (D-86) : au-dessus de la ligne du toit (`; @tunnel: ligne`), moins cette marge, tout est
+ * balayé. Debout (28 px), la tête dépasse ; couchée (12 px), non ; entre deux voitures, plus bas,
+ * non plus.
+ */
+export const TUNNEL_CLEAR_PX = 18;
+
+/** Moment d'un danger à cycle (tunnel), comme les trains : calme, annonce, passage. */
+export function cyclePhase(ms: number, period: number, warn: number, pass: number): TrainPhase {
+  const span = Math.max(period, warn + pass + 1);
+  const t = ((ms % span) + span) % span;
+  const calm = span - warn - pass;
+  return t < calm ? TrainPhase.Calm : t < calm + warn ? TrainPhase.Warning : TrainPhase.Passing;
+}
+
+/** Avancement de l'annonce (0 → 1) d'un danger à cycle, ou -1 hors de l'annonce. */
+export function cycleWarnProgress(ms: number, period: number, warn: number, pass: number): number {
+  const span = Math.max(period, warn + pass + 1);
+  const t = ((ms % span) + span) % span;
+  const start = span - warn - pass;
+  return t < start || t >= start + warn ? -1 : (t - start) / warn;
+}
+
+/** Taille d'une valise qui tombe (px). */
+export const LUGGAGE_BOX = { width: 14, height: 10 } as const;
+
+/** Moment d'une valise (D-86) : sur son filet, qui tremble, qui tombe, au sol, partie. */
+export const LuggagePhase = { Rack: 0, Shake: 1, Fall: 2, Lie: 3 } as const;
+export type LuggagePhase = (typeof LuggagePhase)[keyof typeof LuggagePhase];
+
+/**
+ * Valise `index` d'une salle, `ms` après le chargement : sa phase et la distance déjà tombée (px),
+ * pour une chute de `dropPx`. Les valises d'une salle sont décalées dans le cycle.
+ */
+export function luggageState(
+  ms: number,
+  index: number,
+  count: number,
+  dropPx: number,
+  p: Readonly<CombatParams>,
+  out: { phase: LuggagePhase; fallen: number },
+): void {
+  const fallMs = Math.sqrt((2 * Math.max(0, dropPx)) / p.luggageGravity) * 1000;
+  const span = Math.max(p.luggagePeriodMs, p.luggageWarnMs + fallMs + p.luggageLieMs + 1);
+  const offset = (index * span) / Math.max(1, count);
+  const t = (((ms + offset) % span) + span) % span;
+  const calm = span - p.luggageWarnMs - fallMs - p.luggageLieMs;
+  out.fallen = 0;
+  if (t < calm) {
+    out.phase = LuggagePhase.Rack;
+  } else if (t < calm + p.luggageWarnMs) {
+    out.phase = LuggagePhase.Shake;
+  } else if (t < calm + p.luggageWarnMs + fallMs) {
+    const s = (t - calm - p.luggageWarnMs) / 1000;
+    out.phase = LuggagePhase.Fall;
+    out.fallen = Math.min(dropPx, 0.5 * p.luggageGravity * s * s);
+  } else {
+    out.phase = LuggagePhase.Lie;
+    out.fallen = dropPx;
+  }
+}

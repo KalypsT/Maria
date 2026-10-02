@@ -65,6 +65,7 @@ import {
   GARDEN_PALETTE,
   STREET_DUSK_PALETTE,
   STREET_PALETTE,
+  TRAIN_NIGHT_PALETTE,
   MAX_ART_SCALE,
   REAL_PALETTE,
   STRANGE_PALETTE,
@@ -93,6 +94,7 @@ import { AttackPhase } from '../core/combat/PlayerAttack';
 import { DustPool } from './DustPool';
 import { ChaseView } from './ChaseView';
 import { TrainView } from './TrainView';
+import { TrainRideView } from './TrainRideView';
 import { WorldView } from './WorldView';
 import type { AudioPlayer } from '../platform/audioPlayer';
 import { isMusicTrack, type MusicTrack } from '../config/audio';
@@ -187,6 +189,8 @@ export class GameScene extends Phaser.Scene {
   private combatView!: CombatView;
   /** Trains de la gare et leurs feux (D-66). */
   private trainView!: TrainView;
+  /** Valises qui tombent et tunnels du toit du train (D-86). */
+  private rideView!: TrainRideView;
   /** Le poursuivant d'une poursuite verticale (boss, D-67). */
   private chaseView!: ChaseView;
   /** Échec, jauge de peur et checkpoints (D-21), modifiables par l'overlay. */
@@ -386,6 +390,9 @@ export class GameScene extends Phaser.Scene {
     this.trainView = new TrainView(this, this.combat);
     this.trainView.setArt(this.artScale);
     this.trainView.rebuild();
+    this.rideView = new TrainRideView(this, this.combat);
+    this.rideView.setArt(this.artScale);
+    this.rideView.rebuild();
     this.chaseView = new ChaseView(this, this.combat);
     this.chaseView.setArt(this.artScale);
     this.props.load(this.story.data.props, this.level.id, this.story.flags);
@@ -656,6 +663,12 @@ export class GameScene extends Phaser.Scene {
     );
     this.combatView.render(alpha, player, this.puppet);
     this.trainView.render();
+    this.rideView.render(
+      this.time.now,
+      camera.viewWidth,
+      camera.viewHeight,
+      this.cameras.main.zoom,
+    );
     this.chaseView.render();
     this.storyView.render(this.puppet.x, this.puppet.y, box.height);
     this.worldView.render();
@@ -1091,6 +1104,7 @@ export class GameScene extends Phaser.Scene {
     this.combat.load(level);
     this.combatView.rebuild();
     this.trainView.rebuild();
+    this.rideView.rebuild();
     this.chaseView.rebuild();
     this.applyRoomCamera();
     this.run.load(level, this.session.data.activatedCheckpoints, checkpointId);
@@ -1219,6 +1233,7 @@ export class GameScene extends Phaser.Scene {
     this.storyView.setArt(this.artScale, this.artImages());
     this.combatView.setArt(this.artScale, this.palette());
     this.trainView.setArt(this.artScale);
+    this.rideView.setArt(this.artScale);
     this.chaseView.setArt(this.artScale);
     this.drawLevel();
     this.puppet.redraw(this.artScale, this.celestePalette(), this.artImages(), this.growth);
@@ -1424,6 +1439,10 @@ export class GameScene extends Phaser.Scene {
     }
     if (isGardenRoom(this.level)) {
       return GARDEN_PALETTE;
+    }
+    if (this.level.meta.vehicle === 'train' && this.level.meta.outdoor) {
+      // Le toit du train (D-86) : dehors, la nuit.
+      return TRAIN_NIGHT_PALETTE;
     }
     if (isStreetRoom(this.level) && this.level.meta.indoor) {
       // Un lieu fermé du quartier (la supérette, D-63) : dedans, de jour, ses propres murs. La nuit

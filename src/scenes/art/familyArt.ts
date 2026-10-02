@@ -75,6 +75,49 @@ const TEACHER: Person = {
   cuffs: false,
   bun: true,
 };
+/** Dans le train (D-86) : une maman qui berce son bébé ; le contrôleur ; un voyageur endormi. */
+const MOTHER: Person = {
+  hair: '#2a1d16',
+  hairDark: '#160f0b',
+  skin: '#b98260',
+  skinDark: '#9d6c4e',
+  top: '#d9a441',
+  topDark: '#bf8d33',
+  jeans: '#5a4a6b',
+  jeansDark: '#4a3d59',
+  seam: '#73628a',
+  curly: true,
+  beard: false,
+  cuffs: false,
+};
+const CONDUCTOR: Person = {
+  hair: '#9a9a9a',
+  hairDark: '#777',
+  skin: '#e2a881',
+  skinDark: '#c9906c',
+  top: '#2f3f5f',
+  topDark: '#25324c',
+  jeans: '#2b344a',
+  jeansDark: '#222a3c',
+  seam: '#3c4762',
+  curly: false,
+  beard: true,
+  cuffs: false,
+};
+const TRAVELLER: Person = {
+  hair: '#5b3d26',
+  hairDark: '#402a19',
+  skin: '#e8b48f',
+  skinDark: '#cf9a74',
+  top: '#7a8f6a',
+  topDark: '#657758',
+  jeans: '#4d5568',
+  jeansDark: '#3f4657',
+  seam: '#626b80',
+  curly: false,
+  beard: false,
+  cuffs: false,
+};
 const SHOE = { body: '#e6ddcb', stripe: '#3f5d8f', sole: '#fbf8f1' };
 const GLASSES = '#1f1c22';
 const CAT = { fur: '#8c919c', dark: '#6f7480', light: '#b4b8c2', nose: '#e39aa8' };
@@ -452,6 +495,10 @@ const DRAWN_SIZE: Readonly<Partial<Record<PropKind, { w: number; h: number; pad:
   'mom-yard': { w: 42, h: 62, pad: 8 },
   'dad-hall': { w: 42, h: 62, pad: 8 },
   teacher: { w: 42, h: 62, pad: 8 },
+  'mother-baby': { w: 38, h: 44, pad: 4 },
+  conductor: { w: 42, h: 62, pad: 8 },
+  'sleeper-seat': { w: 38, h: 44, pad: 4 },
+  'dog-sleep': { w: 30, h: 16, pad: 0 },
   'mom-quay': { w: 42, h: 62, pad: 8 },
   'dad-quay': { w: 42, h: 62, pad: 8 },
 };
@@ -578,6 +625,63 @@ function drawAt(
       round(ctx, hand.handX - 4, hand.handY - 9, 7, 10, 1);
       ctx.fillStyle = '#fdf8ee';
       ctx.fillRect(hand.handX - 3, hand.handY - 8, 5, 8);
+      break;
+    }
+    case 'mother-baby': {
+      // Dans un compartiment (D-86) : une maman berce son bébé, qui serre son propre poupon (un
+      // écho silencieux à Maria). Elle se balance doucement.
+      const hand = sitting(ctx, MOTHER, h, frame === 0 ? 1.2 : 1.32);
+      ctx.fillStyle = '#f3ead7';
+      ctx.beginPath();
+      ctx.ellipse(hand.handX - 1, hand.handY - 3, 6, 4, -0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#e8b48f';
+      disc(ctx, hand.handX + 3.5, hand.handY - 6, 2.6);
+      ctx.fillStyle = '#e38aa0';
+      round(ctx, hand.handX - 4, hand.handY - 6, 3, 4, 1.2);
+      ctx.fillStyle = '#6b4a2e';
+      disc(ctx, hand.handX - 2.5, hand.handY - 7, 1.3);
+      break;
+    }
+    case 'conductor': {
+      // Le contrôleur (D-86) : casquette, veste bleu nuit, sa pince à la main ; bienveillant.
+      const hand = standing(ctx, CONDUCTOR, w, h, frame === 0 ? 0.6 : 0.7, frame === 0 ? 0 : 0.4);
+      ctx.fillStyle = '#25324c';
+      round(ctx, w / 2 - 6, h - 61, 13, 4, 1.5);
+      ctx.fillRect(w / 2 + 4, h - 58, 6, 1.5);
+      ctx.fillStyle = '#e6c27a';
+      ctx.fillRect(w / 2 - 2, h - 60, 3, 2);
+      ctx.fillStyle = '#8a95a3';
+      ctx.fillRect(hand.handX - 1, hand.handY - 4, 2, 5);
+      break;
+    }
+    case 'sleeper-seat': {
+      // Un voyageur endormi sur la banquette, la tête penchée, les bras croisés.
+      ctx.save();
+      ctx.translate(0, frame === 0 ? 0 : 0.6);
+      sitting(ctx, TRAVELLER, h, 0.15);
+      ctx.restore();
+      ctx.fillStyle = '#2b1d18';
+      ctx.fillRect(16, h - 32, 2, 0.6);
+      break;
+    }
+    case 'dog-sleep': {
+      // Le chien du fourgon (D-86), roulé en boule dans sa caisse ; il respire.
+      const lift = frame === 0 ? 0 : 0.6;
+      ctx.fillStyle = '#b07a4a';
+      ctx.beginPath();
+      ctx.ellipse(w / 2, h - 5, 11, 5 + lift, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(w / 2 + 9, h - 6, 4.5, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#7e5432';
+      ctx.beginPath();
+      ctx.ellipse(w / 2 + 7, h - 9, 2, 3.5, -0.6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#2b1d18';
+      ctx.fillRect(w / 2 + 11, h - 6, 1.5, 0.6);
+      ctx.fillRect(w / 2 + 13, h - 5, 1, 1);
       break;
     }
     case 'mom-quay':

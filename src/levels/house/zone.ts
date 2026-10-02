@@ -30,6 +30,10 @@ import stationDepot from '../station/depot.txt?raw';
 import stationStrange from '../station/strange.txt?raw';
 import stationTower from '../station/tower.txt?raw';
 import trainCouchettes from '../train/couchettes.txt?raw';
+import trainCompartments from '../train/compartments.txt?raw';
+import trainBaggage from '../train/baggage.txt?raw';
+import trainRoof from '../train/roof.txt?raw';
+import trainRestaurant from '../train/restaurant.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -96,6 +100,11 @@ export const HOUSE: ZoneSource = {
     { id: 'station-tower', text: stationTower },
     // Le train (D-83, D-85) : on y monte par l'histoire (la porte du train à quai), en route.
     { id: 'train-couchettes', text: trainCouchettes },
+    // Le reste du train (D-86) : les compartiments, le fourgon, le toit, le wagon-restaurant.
+    { id: 'train-compartments', text: trainCompartments },
+    { id: 'train-baggage', text: trainBaggage },
+    { id: 'train-roof', text: trainRoof },
+    { id: 'train-restaurant', text: trainRestaurant },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -138,6 +147,14 @@ export const HOUSE: ZoneSource = {
     ['station-hall:2', 'station-depot:1'],
     // Le monde étrange de la gare (D-68) : les objets perdus, puis la tour.
     ['station-strange:1', 'station-tower:1'],
+    // Le train (D-86) : de la voiture-couchettes aux compartiments, puis au fourgon ; du fourgon,
+    // l'échelle du toit (porte 3), et la trappe du toit (porte 2) descend dans le wagon-restaurant,
+    // dont la porte (sortie 1) s'ouvre de l'intérieur vers le fourgon (une boucle).
+    ['train-couchettes:1', 'train-compartments:1'],
+    ['train-compartments:2', 'train-baggage:1'],
+    ['train-baggage:3', 'train-roof:1'],
+    ['train-roof:2', 'train-restaurant:2'],
+    ['train-baggage:2', 'train-restaurant:1'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur
@@ -174,5 +191,10 @@ export const HOUSE: ZoneSource = {
     'station-depot': { x: 13.4, y: 2, w: 4.6, h: 1.6, page: 'station' },
     // Le train (D-85) : les voitures en long, sur leur propre page du cahier.
     'train-couchettes': { x: 0, y: 1, w: 6, h: 1.4, page: 'train' },
+    'train-compartments': { x: 6.4, y: 1, w: 6.4, h: 1.4, page: 'train' },
+    'train-baggage': { x: 13.2, y: 1, w: 5, h: 1.4, page: 'train' },
+    'train-restaurant': { x: 18.6, y: 1, w: 5, h: 1.4, page: 'train' },
+    // Le toit, au-dessus du fourgon et du wagon-restaurant.
+    'train-roof': { x: 13.2, y: -0.4, w: 10.4, h: 1, page: 'train' },
   },
 };

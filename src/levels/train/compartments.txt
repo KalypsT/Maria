@@ -1,0 +1,63 @@
+; Le train (D-86), PR 3 : les voitures à compartiments, la nuit, en route. Trois compartiments : la
+; maman qui berce son bébé (et le poupon du bébé), le contrôleur dans le couloir, des voyageurs
+; endormis. Dans les virages, des valises tombent des filets (elles tremblent d'abord). Au bout, une
+; grille en accordéon à moitié fermée (on glisse dessous) avant le fourgon.
+; @name: Les compartiments
+; @icon: train
+; @vehicle: train
+; @music: train
+; @ambient: #1d2133
+; @wall: stripes
+; @walls: #d9cdb4 #9c8466
+; @difficulty: medium
+; @decor: carceiling 1 2 88 1
+; @decor: trainwindow 12 8 10 5
+; @decor: trainwindow 35 8 12 5
+; @decor: trainwindow 59 8 10 4
+; @decor: partition 7 2 1 11
+; @decor: partition 28 2 1 11
+; @decor: partition 53 2 1 11
+; @decor: partition 78 2 1 11
+; @decor: accordiongate 85 2 2 16
+; @decor: carbench 8 14 4 5
+; @decor: carbench 24 14 4 5
+; @decor: carbench 29 14 4 5
+; @decor: carbench 49 14 4 5
+; @decor: carbench 54 14 4 5
+; @decor: foldtable 15 15 6 4
+; @decor: foldtable 37 15 8 4
+; @decor: foldtable 60 15 6 4
+; @decor: rack 9 6 18 1
+; @decor: rack 30 6 22 1
+; @decor: rack 56 8 9 1
+; @decor: hatshelf 68 12 4 1
+; @decor: suitcases 73 15 5 4
+; @decor: trainlamp 23 8 1 2
+; @decor: trainlamp 47 8 1 2
+; @decor: fallingcase 18 5 1 1
+; @decor: fallingcase 34 5 1 1
+; @decor: fallingcase 44 5 1 1
+; @decor: fallingcase 62 7 1 1
+; Légende : # paroi, plancher ou toit, b bois, t tissu (pleins), - filet, tablette, étagère ou crochet (traversables), C veilleuse (checkpoint), P repère de départ, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+##########################################################################################
+##########################################################################################
+#......b....................b........................b........................b......bb..#
+#......b....................b........................b........................b......bb..#
+#......b....................b........................b........................b......bb..#
+#......b....................b........................b........................b......bb..#
+#......b.------------------.b.----------------------.b........................b......bb..#
+#......b....................b........................b......S.................b......bb..#
+#......b....................b........................b..---------.............b......bb..#
+#......b....................b........................b........................b......bb..#
+#......b....................b........................b........................b......bb..#
+#......b....................b........................b........................b......bb..#
+#......b....................b........................b..............----......b......bb..#
+#....................................................................................bb..#
+1....................................................................................bb..2
+1..............------................--------...............------.......bbbbb.......bb..2
+1........................................................................bbbbb.......bb..2
+1.......tttt............tttt.tttt................tttt.tttt...............bbbbb.......bb..2
+1...P...tttt..C.........tttt.tttt................tttt.tttt...............bbbbb...........2
+##########################################################################################
+##########################################################################################
+##########################################################################################

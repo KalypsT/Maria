@@ -475,6 +475,53 @@ export const DECOR_KINDS: Readonly<
   rack: { furniture: true },
   /** Chariot du vendeur, garé (plein), une tuile libre sous la caisse. */
   trolley: { furniture: true },
+  // Le reste du train (D-86).
+  /** Banquette de compartiment : l'assise est pleine, le dossier dessiné (on passe devant). */
+  carbench: { furniture: true },
+  /** Étagère à chapeaux au-dessus des banquettes (traversable). */
+  hatshelf: { furniture: true },
+  /** Pile de valises (pleine), qu'on escalade. */
+  suitcases: { furniture: true },
+  /** Valise posée sur un filet, qui tombe dans les virages (dessinée à part, `TrainRideView`). */
+  fallingcase: { furniture: false },
+  /** Malles du fourgon (pleines). */
+  trunks: { furniture: true },
+  /** Haute pile de caisses du fourgon (pleine). */
+  cargocrates: { furniture: true },
+  /** Vélo pendu à son crochet : le cadre est une planche (traversable). */
+  bike: { furniture: true },
+  /** Rail des crochets sous le plafond (traversable). */
+  hookrail: { furniture: true },
+  /** Caisse du chien, ouverte devant (fond). */
+  dogcrate: { furniture: false },
+  /** Colis empilés (pleins). */
+  parcels: { furniture: true },
+  /** Étagère haute du fourgon (traversable). */
+  highshelf: { furniture: true },
+  /** Échelle vers la trappe du toit (fond). */
+  roofladder: { furniture: false },
+  /** Toit et caisse d'une voiture, vus de dehors (pleins). */
+  carroof: { furniture: true },
+  /** Soufflet entre deux voitures, plus bas que les toits (plein). */
+  gangway: { furniture: true },
+  /** Aérateur sur le toit (plein). */
+  roofvent: { furniture: true },
+  /** Cheminée de la cuisine du wagon-restaurant (pleine). */
+  kitchenchimney: { furniture: true },
+  /** Trappe ouverte au bout du toit (fond). */
+  roofhatch: { furniture: false },
+  /** Table du wagon-restaurant, chaises retournées dessus (le plateau est traversable). */
+  diningtable: { furniture: true },
+  /** Comptoir du bar et ses tabourets (plein). */
+  barcounter: { furniture: true },
+  /** Porte-verres pendu au-dessus du comptoir (traversable). */
+  glassrack: { furniture: true },
+  /** Étagère des bouteilles (traversable). */
+  bottleshelf: { furniture: true },
+  /** Porte de la cuisine, une lueur turquoise dessous (fond). */
+  kitchendoor: { furniture: false },
+  /** Échelle sous la trappe du toit (fond). */
+  hatchladder: { furniture: false },
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */
@@ -718,6 +765,26 @@ export const STREET_DUSK_PALETTE: Readonly<ArtPalette> = {
   leafDark: '#2c4536',
   vignette: 0.3,
   vignetteColor: '30,20,40',
+};
+
+/**
+ * Le toit du train la nuit (D-86) : dehors, sous les étoiles ; le ciel du crépuscule devenu nuit.
+ * PROVISOIRE.
+ */
+export const TRAIN_NIGHT_PALETTE: Readonly<ArtPalette> = {
+  ...STREET_DUSK_PALETTE,
+  wallTop: '#0e1330',
+  wallBottom: '#2b356a',
+  wallpaper: 'rgba(200,210,255,0.18)',
+  night: '#16204c',
+  nightLow: '#2b356a',
+  structure: '#3a4058',
+  rim: 'rgba(255,226,180,0.75)',
+  stars: true,
+  darkness: 0.3,
+  glow: 1,
+  vignette: 0.4,
+  vignetteColor: '8,10,24',
 };
 
 /**
