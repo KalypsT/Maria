@@ -737,6 +737,17 @@ function drawIcon(
       ctx.moveTo(x + s * 0.45, y + s * 0.45);
       ctx.arc(x + s * 0.3, y + s * 0.45, s * 0.15, 0, Math.PI * 2);
       break;
+    case 'sea':
+      // Deux vagues et le soleil (la station balnéaire, D-98).
+      ctx.moveTo(x - s, y + s * 0.2);
+      ctx.quadraticCurveTo(x - s * 0.5, y - s * 0.2, x, y + s * 0.2);
+      ctx.quadraticCurveTo(x + s * 0.5, y + s * 0.6, x + s, y + s * 0.2);
+      ctx.moveTo(x - s, y + s * 0.6);
+      ctx.quadraticCurveTo(x - s * 0.5, y + s * 0.2, x, y + s * 0.6);
+      ctx.quadraticCurveTo(x + s * 0.5, y + s, x + s, y + s * 0.6);
+      ctx.moveTo(x + s * 0.7, y - s * 0.45);
+      ctx.arc(x + s * 0.45, y - s * 0.45, s * 0.25, 0, Math.PI * 2);
+      break;
     case 'clock':
       // La grande horloge du hall (D-66).
       ctx.moveTo(x + s * 0.7, y);
