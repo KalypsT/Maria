@@ -391,12 +391,20 @@ export const DECOR_KINDS: Readonly<
   gantry: { furniture: true },
   /** Feu de voie (fond), allumé par le train qui approche. */
   signal: { furniture: false },
-  /** Mât de caténaire (fond) ; le câble est déclaré par `; @cable:`. */
-  catenarymast: { furniture: false, far: true },
+  /** Mât de caténaire (fond), posé au sol ; un bras tient le bout de câble voisin (D-80). */
+  catenarymast: { furniture: false },
+  /** Chariot à bagages chargé de valises (plein, D-80). */
+  luggagecart: { furniture: true },
+  /** Lampadaire de quai (fond), allumé au crépuscule (D-80). */
+  quaylamp: { furniture: false },
   /** Poste d'aiguillage sur pilotis (plein). */
   signalbox: { furniture: true },
   /** Marquise de verre au-dessus des quais (fond). */
-  canopyroof: { furniture: false, far: true },
+  canopyroof: { furniture: false },
+  /** Colonne de fonte qui porte la marquise (fond, D-80). */
+  canopycolumn: { furniture: false },
+  /** Lampe-globe suspendue à sa tige (fond, D-80). */
+  globelamp: { furniture: false },
   /** Pilier de fonte de la marquise (plein). */
   pillar: { furniture: true },
   /** Passerelle au-dessus des voies : marches et tablier traversables. */
@@ -411,8 +419,12 @@ export const DECOR_KINDS: Readonly<
   departures: { furniture: false },
   /** Galerie du hall (traversable). */
   gallery: { furniture: true },
-  /** Marches scellées au mur (traversables). */
-  hallsteps: { furniture: true },
+  /** Voûte du hall : les coins pleins du haut sous une courbe (D-80). */
+  vault: { furniture: true },
+  /** Escalier en colimaçon : fût central, marches traversables, rampe (D-80). */
+  spiralstair: { furniture: true },
+  /** Balcon de pierre sur consoles, porte close, réverbère du câble (plein, D-80). */
+  balcony: { furniture: true },
   /** Kiosque à journaux : toit traversable, comptoir plein. */
   kiosk: { furniture: true },
   /** Entrée du bureau des objets trouvés, autour de sa porte de façade (fond). */
@@ -857,6 +869,8 @@ export const WORLD_LIFE = {
   /** Supérette (D-78) : tour du ventilateur (ms) ; clignotement du tube de la réserve. */
   fan: { periodMs: 700 },
   tubeFlicker: { everyMs: [4000, 9000] as [number, number], blinkMs: 90, blinks: 3 },
+  /** Volets du tableau des départs du hall (D-80) : combien, et l'écart entre deux bascules (ms). */
+  flaps: { count: 7, everyMs: [1200, 5000] as [number, number] },
   /** Bâche du chantier (D-78) : une vague (ms). */
   tarp: { periodMs: 1100 },
   /** Pigeon de la cour (D-79) : distance d'envol (px), vol (px/s), retour (ms, Céleste loin). */

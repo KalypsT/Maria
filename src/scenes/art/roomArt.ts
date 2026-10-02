@@ -20,7 +20,7 @@ import { gardenDrawers } from './gardenArt';
 import { playgroundDrawers } from './playgroundArt';
 import { drawPencils, schoolDrawers, schoolFacadeWindows } from './schoolArt';
 import { drawRubble, shopSiteDrawers } from './shopSiteArt';
-import { drawUmbrellaTips, stationDrawers } from './stationArt';
+import { balconyLamp, drawUmbrellaTips, stationDrawers } from './stationArt';
 import { houseLayout, streetDrawers } from './streetArt';
 import { drawMemory } from './memoryArt';
 import { livingDrawers } from './livingArt';
@@ -1917,6 +1917,26 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
     // Au crépuscule (D-77) : les lampadaires s'allument, quelques fenêtres aussi.
     if (d.kind === 'lamppost' && p.darkness > 0) {
       return [{ x: r.x + r.w / 2, y: r.y + 10, k: 0.8 }];
+    }
+    // La gare (D-80) : lampadaires et globes au crépuscule, vitres du poste, kiosque, devanture ;
+    // le réverbère du balcon du hall.
+    if ((d.kind === 'quaylamp' || d.kind === 'globelamp') && p.darkness > 0) {
+      return d.kind === 'quaylamp'
+        ? [{ x: r.x + T / 2 + 6, y: r.y + 8, k: 0.8 }]
+        : [{ x: r.x + T / 2, y: r.y + r.h - 6, k: 0.7 }];
+    }
+    if (d.kind === 'signalbox' && p.darkness > 0) {
+      return [{ x: r.x + r.w / 2, y: r.y + 20, k: 0.5 }];
+    }
+    if (d.kind === 'kiosk' && p.darkness > 0) {
+      return [{ x: r.x + r.w / 2, y: r.y + T + 12, k: 0.8 }];
+    }
+    if (d.kind === 'lostoffice' && p.darkness > 0) {
+      return [{ x: r.x + r.w / 2, y: r.y + r.h - 48, k: 0.6 }];
+    }
+    if (d.kind === 'balcony') {
+      const lamp = balconyLamp(level, r);
+      return lamp ? [{ x: lamp.x, y: lamp.y - 4, k: 0.6 }] : [];
     }
     if (d.kind === 'schoolfacade' && p.darkness > 0) {
       return schoolFacadeWindows(r)
