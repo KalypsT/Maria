@@ -29,6 +29,8 @@ export interface PlayerInput {
   /** Front de pression du saut depuis le pas précédent. */
   jumpPressed: boolean;
   jumpHeld: boolean;
+  /** Front de pression du bouton Capacité (glissade, D-84). Absent : non pressé. */
+  abilityPressed?: boolean;
 }
 
 /** Compteur « jamais » : grand entier, pour ne pas dépasser en incrémentant. */
@@ -79,6 +81,21 @@ export class PlayerPhysics {
   canGlide = false;
   /** Crochet du parapluie acquis (D-65) : en planant, il s'accroche aux câbles. */
   canHook = false;
+  /** Capacité « glissade » acquise (D-84). Sans elle, le mouvement est inchangé. */
+  canSlide = false;
+  /** Pas restants de la poussée d'une glissade (D-84), 0 hors glissade. */
+  slideSteps = 0;
+  /**
+   * Couchée (D-84) : la hitbox fait `slideHeightPx` de haut. Pendant la poussée, puis tant qu'un
+   * plafond empêche de se relever (Céleste avance alors couchée, elle ne se coince jamais).
+   */
+  low = false;
+  /** Élan d'un saut depuis la glissade (ou d'une glissade quittant un bord), gardé jusqu'au sol. */
+  private slideCarry = false;
+  private stepsSinceSlidePressed = NEVER;
+  private slideCooldownSteps = 0;
+  /** Hauteur de la hitbox debout (px). */
+  private standHeight: number;
   /**
    * Parapluie ouvert (D-62, D-65) : au sommet d'un saut tenu, ou par une pression de Saut en l'air
    * qui ne fait ni saut ni saut mural ; refermé dès que Saut est relâché, au sol, contre un mur,
@@ -152,6 +169,7 @@ export class PlayerPhysics {
     };
     this.probe.width = hitbox.width;
     this.probe.height = hitbox.height;
+    this.standHeight = hitbox.height;
     this.prevX = x;
     this.prevY = y;
     this.grounded = isGrounded(level, this.box);
@@ -179,11 +197,12 @@ export class PlayerPhysics {
    * seulement là où la place suffit (pendant un noir, avant `reset` à un point sûr).
    */
   setHitbox(hitbox: Readonly<{ width: number; height: number }>): void {
+    this.clearSlide();
     const box = this.box;
     box.x += (box.width - hitbox.width) / 2;
     box.y += box.height - hitbox.height;
     box.width = this.probe.width = hitbox.width;
-    box.height = this.probe.height = hitbox.height;
+    box.height = this.probe.height = this.standHeight = hitbox.height;
     this.prevX = box.x;
     this.prevY = box.y;
   }
@@ -191,6 +210,7 @@ export class PlayerPhysics {
   /** Replace le joueur, immobile, à une position. */
   reset(x: number, y: number, level: LevelData = this.level): void {
     this.level = level;
+    this.clearSlide();
     this.box.x = this.prevX = x;
     this.box.y = this.prevY = y;
     this.vx = this.vy = 0;
@@ -226,6 +246,8 @@ export class PlayerPhysics {
     box.dx = from.dx;
     box.dy = from.dy;
     box.passOneWay = from.passOneWay;
+    box.height = from.height;
+    this.standHeight = other.standHeight;
     this.level = other.level;
     this.vx = other.vx;
     this.vy = other.vy;
@@ -267,6 +289,55 @@ export class PlayerPhysics {
     this.stepsSinceCable = other.stepsSinceCable;
     this.glideArmed = other.glideArmed;
     this.glideApexSteps = other.glideApexSteps;
+    this.canSlide = other.canSlide;
+    this.slideSteps = other.slideSteps;
+    this.low = other.low;
+    this.slideCarry = other.slideCarry;
+    this.stepsSinceSlidePressed = other.stepsSinceSlidePressed;
+    this.slideCooldownSteps = other.slideCooldownSteps;
+  }
+
+  /** Debout tout de suite, sans glissade en cours (la hitbox reprend sa hauteur, pieds en place). */
+  private clearSlide(): void {
+    const box = this.box;
+    if (this.low) {
+      box.y -= this.standHeight - box.height;
+      box.height = this.standHeight;
+    }
+    this.low = false;
+    this.slideSteps = 0;
+    this.slideCarry = false;
+    this.stepsSinceSlidePressed = NEVER;
+    this.slideCooldownSteps = 0;
+  }
+
+  /** Couchée : hitbox basse, pieds en place (l'interpolation d'affichage suit les pieds). */
+  private lieDown(): void {
+    const box = this.box;
+    const delta = box.height - this.params.slideHeightPx;
+    box.y += delta;
+    this.prevY += delta;
+    box.height = this.params.slideHeightPx;
+    this.low = true;
+  }
+
+  /** Se relève si la place le permet ; retourne true si Céleste est debout. */
+  private tryStand(): boolean {
+    if (!this.low) {
+      return true;
+    }
+    const box = this.box;
+    const probe = this.probe;
+    probe.x = box.x;
+    probe.y = box.y + box.height - this.standHeight;
+    if (!isBoxFree(this.level, probe)) {
+      return false;
+    }
+    this.prevY += probe.y - box.y;
+    box.y = probe.y;
+    box.height = this.standHeight;
+    this.low = false;
+    return true;
   }
 
   /** Oublie tout contact avec un mur (sol, rebord, remise à zéro, coup reçu). */
@@ -307,6 +378,8 @@ export class PlayerPhysics {
     this.glideArmed = false;
     this.cable = -1;
     this.stepsSinceCable = NEVER;
+    this.slideSteps = 0;
+    this.slideCarry = false;
     this.state = PlayerState.Hurt;
     this.grounded = false;
     this.stepsSinceGrounded = NEVER;
@@ -335,13 +408,58 @@ export class PlayerPhysics {
     const jumpPressed = input.jumpPressed && !hurt;
     const jumpHeld = input.jumpHeld && !hurt;
 
+    // Glissade (D-84) : au sol, debout, le bouton Capacité (mémorisé un court instant avant
+    // d'atterrir) lance Céleste couchée, dans le sens où l'on pousse, sinon où elle regarde.
+    if (this.canSlide && input.abilityPressed === true && !hurt) {
+      this.stepsSinceSlidePressed = 0;
+    }
+    if (
+      this.stepsSinceSlidePressed <= d.slideBufferSteps &&
+      this.grounded &&
+      !this.low &&
+      !hurt &&
+      this.slideCooldownSteps === 0 &&
+      this.dropStepsRemaining === 0
+    ) {
+      if (input.moveX !== 0) {
+        this.facing = input.moveX > 0 ? 1 : -1;
+      }
+      this.stepsSinceSlidePressed = NEVER;
+      this.slideSteps = d.slideSteps;
+      this.slideCarry = false;
+      this.lieDown();
+    }
+
     // Horizontal : accélération vers la vitesse visée, demi-tour plus vif, décélération sans entrée.
     // Juste après un saut mural, la direction est ignorée et l'élan conservé (D-44).
     const locked = this.wallLockSteps > 0;
     const moveInput = hurt || locked ? 0 : input.moveX;
     let accel: number;
-    if (locked) {
+    if (this.slideSteps > 0) {
+      // Poussée de la glissade : vitesse imposée, la direction est ignorée.
       accel = 0;
+      this.vx = this.facing * p.slideSpeed;
+    } else if (this.low && !hurt && this.grounded) {
+      // Couchée sous un plafond trop bas : elle avance couchée (vers où l'on pousse, sinon tout
+      // droit), jusqu'à pouvoir se relever.
+      accel = 0;
+      if (moveInput !== 0) {
+        this.facing = moveInput > 0 ? 1 : -1;
+      }
+      this.vx = this.facing * p.slideCrawlSpeed;
+    } else if (locked) {
+      accel = 0;
+    } else if (
+      this.slideCarry &&
+      !this.grounded &&
+      moveInput * this.vx >= 0 &&
+      Math.abs(this.vx) > p.maxRunSpeed
+    ) {
+      // Saut long (D-84) : l'élan de la glissade est gardé tant qu'on ne pousse pas à l'opposé.
+      accel = 0;
+      if (moveInput !== 0) {
+        this.facing = moveInput > 0 ? 1 : -1;
+      }
     } else if (moveInput !== 0) {
       const turning = this.vx !== 0 && Math.sign(this.vx) !== Math.sign(moveInput);
       if (this.grounded) {
@@ -353,18 +471,21 @@ export class PlayerPhysics {
     } else {
       accel = this.grounded ? p.groundDeceleration : p.airDeceleration;
     }
-    const targetVx = moveInput * p.maxRunSpeed;
-    const maxDelta = accel * dt;
-    this.vx =
-      this.vx < targetVx
-        ? Math.min(this.vx + maxDelta, targetVx)
-        : Math.max(this.vx - maxDelta, targetVx);
+    if (accel !== 0) {
+      const targetVx = moveInput * p.maxRunSpeed;
+      const maxDelta = accel * dt;
+      this.vx =
+        this.vx < targetVx
+          ? Math.min(this.vx + maxDelta, targetVx)
+          : Math.max(this.vx - maxDelta, targetVx);
+    }
 
     // Bas + Saut sur une plateforme traversable : on la traverse au lieu de sauter.
     if (
       jumpPressed &&
       input.moveY > p.dropInputThreshold &&
       this.grounded &&
+      !this.low &&
       !isGrounded(this.level, box, false)
     ) {
       this.dropStepsRemaining = d.dropSteps;
@@ -378,8 +499,18 @@ export class PlayerPhysics {
     // Saut : buffer (pression récente) × coyote (sol récent).
     if (
       this.stepsSinceJumpPressed <= d.jumpBufferSteps &&
-      this.stepsSinceGrounded <= d.coyoteSteps
+      this.stepsSinceGrounded <= d.coyoteSteps &&
+      (!this.low || this.tryStand())
     ) {
+      // Depuis la glissade (D-84), Céleste se relève et saute loin : l'élan est gardé jusqu'au sol.
+      if (this.slideSteps > 0 || this.slideCarry) {
+        this.vx = this.facing * p.slideJumpSpeedX;
+        this.slideCarry = true;
+        if (this.slideSteps > 0) {
+          this.slideSteps = 0;
+          this.slideCooldownSteps = d.slideCooldownSteps;
+        }
+      }
       this.vy = -d.jumpVelocity;
       this.grounded = false;
       this.stepsSinceGrounded = NEVER;
@@ -415,7 +546,7 @@ export class PlayerPhysics {
       this.jumpCutAvailable = true;
       this.releaseGravityActive = false;
       this.armGlide();
-    } else if (this.canGlide && jumpPressed && !this.grounded) {
+    } else if (this.canGlide && jumpPressed && !this.grounded && !this.low) {
       // Parapluie (D-62) : une pression en l'air qui n'est ni un saut ni un saut mural l'ouvre.
       // La pression reste mémorisée (jump buffering) : juste avant d'atterrir, elle fait sauter.
       this.glideOpen = true;
@@ -479,6 +610,10 @@ export class PlayerPhysics {
 
     if (moveX(this.level, box)) {
       this.vx = 0;
+      if (this.low && this.slideSteps === 0) {
+        // Couchée contre un mur, sous un plafond bas : elle repart dans l'autre sens.
+        this.facing = -this.facing;
+      }
     }
     box.passOneWay = this.dropStepsRemaining > 0;
     const hit = moveY(this.level, box);
@@ -510,6 +645,7 @@ export class PlayerPhysics {
     if (this.stepsSinceCable < NEVER) {
       this.stepsSinceCable++;
     }
+    this.stepSlide();
     // Parapluie au sommet d'un saut depuis un câble (D-65, D-70) : Saut maintenu depuis
     // l'impulsion, il s'ouvre un court instant après le sommet. Relâcher Saut avant renonce.
     if (this.glideArmed) {
@@ -538,12 +674,24 @@ export class PlayerPhysics {
     if (this.grounded || this.wallDir !== 0) {
       this.glideOpen = false;
     }
+    if (this.wallDir !== 0) {
+      this.slideCarry = false;
+    }
     if (this.glideOpen && this.canHook && !hurt && this.vy >= 0 && this.tryHook()) {
+      this.slideCarry = false;
       return;
     }
     if (this.regrabSteps > 0) {
       this.regrabSteps--;
-    } else if (this.canClimb && !hurt && !this.grounded && this.vy >= 0 && this.tryGrab(input)) {
+    } else if (
+      this.canClimb &&
+      !hurt &&
+      !this.grounded &&
+      !this.low &&
+      this.vy >= 0 &&
+      this.tryGrab(input)
+    ) {
+      this.slideCarry = false;
       return;
     }
     this.state = nextPlayerState(
@@ -555,10 +703,38 @@ export class PlayerPhysics {
       this.hurtSteps > 0,
       this.wallDir !== 0,
       this.glideOpen,
+      this.low,
     );
     if (this.state === PlayerState.WallSlide) {
       // Dos au mur, tournée vers le côté où elle va rebondir.
       this.facing = -this.wallDir;
+    }
+  }
+
+  /**
+   * Après le déplacement (D-84) : fin de la poussée, ou glissade qui quitte un bord (l'élan est
+   * gardé, borné à celui du saut long) ; couchée, Céleste se relève dès que la place le permet.
+   */
+  private stepSlide(): void {
+    if (this.slideCooldownSteps > 0) {
+      this.slideCooldownSteps--;
+    }
+    if (this.slideSteps > 0) {
+      if (!this.grounded) {
+        this.slideSteps = 0;
+        this.slideCooldownSteps = this.derived.slideCooldownSteps;
+        const max = this.params.slideJumpSpeedX;
+        this.vx = Math.max(-max, Math.min(max, this.vx));
+        this.slideCarry = true;
+      } else if (--this.slideSteps === 0) {
+        this.slideCooldownSteps = this.derived.slideCooldownSteps;
+      }
+    }
+    if (this.low && this.slideSteps === 0) {
+      this.tryStand();
+    }
+    if (this.grounded && this.vy >= 0) {
+      this.slideCarry = false;
     }
   }
 

@@ -969,6 +969,46 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Ce qui ne bouge pas** : le crochet, le passage des casiers, les crochets du dépôt, toutes les trouvailles et lanternes, la poursuite de la tour. **Aucune sauvegarde touchée.** Difficultés inchangées.
 - **La gare est refaite** (D-80, D-81) : tout le monde réel est passé à la grille du salon.
 
+## D-82 — Structure de la fin du jeu : 8 niveaux, capacités et objets
+
+- **Décision de l'utilisateur** : **8 niveaux** (le coût n'est pas un critère) : 1 maison, 2 jardin, 3 quartier, 4 gare (faits), **5 le train**, **6 la station balnéaire**, **7 l'avant-dernier** (presque entièrement étrange), **8 le monde de Maria**.
+- **Objets du monde étrange** (document d'histoire, §5 à §8) : **5 : la cuisine rose**, avec le **premier souvenir jouable** (court) ; **6 : le livre musical** (court souvenir) ; **7 : le torchon blanc**, le retour des objets déjà vus, puis **Eden** (souvenir jouable plus long) ; **8 : aucun objet**. Le portique de bébé reste de côté (D-61).
+- **Capacités** (spec §15) : **5 : la glissade** (le « dash » de la spec, au sol) ; **6 : aucune** (la mécanique propre du niveau, la marée, et la maîtrise des cinq capacités) ; **7 : la capacité finale, liée au monde étrange**, utilisable ensuite dans le niveau 8.
+- **Niveau 6** (piste retenue, détails décidés le moment venu) : la station balnéaire de la classe de mer : plage, port, phare, fête foraine sur la jetée ; la marée ; le livre musical au carrousel. La question de l'eau (nage ou non) est remise à ce moment.
+- **Niveau 7** : piste « chez la nounou », mêlé à des morceaux des lieux précédents, à confirmer.
+- **Croissance** : la phase 4 viendra plus tard (pas dans le train).
+
+## D-83 — Le train : plan du niveau validé (6 PR)
+
+- **Cadre** : une **classe de mer** par un **train de nuit**. Pas de parents dans le train ; ils disent au revoir sur le quai et restent dehors quand le train part. La maîtresse, des camarades ; **une camarade** (une fille, pour qu'Eden reste le seul garçon important) apprend la glissade à Céleste. La nuit, tout le monde dort ; une lueur turquoise passe dans le couloir, Céleste la suit. Au matin, la mer à la fenêtre.
+- **Salles** (5 réelles, 2 étranges, grille du salon dès le départ, D-74) :
+  - le **quai** (existant), le soir : la classe attend ; Agir à la porte du train à quai ;
+  - **la voiture-couchettes** (facile) : couchettes sur trois étages, filets, couloir ; la camarade glisse sous une barrière, Céleste l'imite (**la glissade s'apprend**, elle ne se ramasse pas) ; le chariot du vendeur, le soir ; la veilleuse du compartiment est la lanterne ;
+  - **les voitures à compartiments** (moyen) : passagers endormis, filets traversables par dessous, portes qui se referment (on glisse dessous), valises qui tombent dans les virages (annoncées par les lampes qui se balancent) ; la maman qui berce son bébé et son poupon ; le contrôleur, bienveillant ;
+  - **le fourgon à bagages** (moyen) : malles, vélos pendus, colis qui glissent dans les virages, un chien dans sa caisse, un rail pour le crochet ; une trappe vers le toit ;
+  - **le toit** (difficile) : la nuit, le paysage qui défile ; les **tunnels**, annoncés, obligent à se coucher en glissade ou à s'abriter entre deux voitures (touchée : repoussée, la peur monte d'un cran, comme le souffle des trains de la gare) ; il redescend au wagon-restaurant (boucle avec l'intérieur). On n'y monte qu'en suivant la lueur (un peu irréel) ;
+  - **le wagon-restaurant fermé** (facile) : la lueur sous la porte de la cuisine, entrée du monde étrange ;
+  - **la cuisine étrange** (moyen) et **le train de la vaisselle** (la poursuite, horizontale) : un chariot de service géant chargé d'une tour de vaisselle, sans visage ; au bout, **la cuisine rose**.
+- **Règle** : le train ne modifie jamais la physique de Céleste (pas d'inertie dans les virages ni au freinage) ; les secousses font bouger les objets, jamais elle (pilier 1).
+- **Le souvenir jouable court** (nouveau système, réutilisé pour Eden) : Céleste toute petite dans un coin de cuisine ; elle remue la casserole, verse le thé et l'apporte à **Roger et ses peluches** ; un cœur ; fondu, la petite cuisine reste seule. Sans texte, couleurs chaudes, rejouable depuis le cahier. Maria n'y est pas.
+- **Fin** : au matin, la maîtresse réveille Céleste dans sa couchette ; la mer à la fenêtre ; une petite salle « la gare de la mer » (PLACEHOLDER jusqu'au niveau 6). Le train relie la gare de la mer et la gare de la ville ; à quai, de jour, il est immobile, sans pièges ni passagers, et se revisite. Revisites avec la glissade dans les anciennes zones (3 ou 4, choisies à la conception).
+- **Découpage** : PR 1 la glissade (parcours d'essai 11, analyse), **essai sur téléphone avant de continuer** ; PR 2 le départ et la voiture-couchettes (salles « en route » et « à quai », paysage qui défile, secousses) ; PR 3 le reste du train réel ; PR 4 la poursuite horizontale (parcours d'essai 12) ; PR 5 le monde étrange, la cuisine rose et le souvenir jouable ; PR 6 la fin, la gare de la mer, la revisite du train et les revisites avec la glissade.
+
+## D-84 — Le train, PR 1 : la glissade (cinquième capacité)
+
+- **Choix de l'utilisateur** (D-83) : bouton **Capacité** (« Glisser »), qui n'apparaît qu'une fois la glissade obtenue (à gauche de Saut, sous le même pouce) ; clavier **L** ou **Maj gauche**. Glissade **au sol seulement**, avec un **saut long** ; pas de dash en l'air.
+- **Geste** : au sol, debout, une pression lance Céleste **couchée**, dans le sens où l'on pousse (sinon où elle regarde), à `slideSpeed` (230 px/s) pendant `slideDurationMs` (240 ms) : environ 3,5 tuiles. La direction est ignorée pendant la poussée. Une pression juste avant d'atterrir (`slideBufferMs`, 100 ms) glisse à l'atterrissage. Délai `slideCooldownMs` (250 ms) entre deux glissades.
+- **Couchée** : la hitbox fait `slideHeightPx` (12 px, moins d'une tuile), pieds en place : elle passe sous un obstacle à une tuile du sol. Après la poussée, elle se relève **seulement si la place le permet** ; sinon elle **avance couchée** (`slideCrawlSpeed`, 70 px/s, vers où l'on pousse, sinon tout droit) et repart dans l'autre sens contre un mur : **jamais coincée** (testé, cul-de-sac compris).
+- **Saut long** : sauter pendant la glissade (place pour se relever exigée) donne une vitesse horizontale `slideJumpSpeedX` (190 px/s, contre 136 en course), **gardée jusqu'au sol** tant qu'on ne pousse pas à l'opposé (pousser à l'opposé rend le contrôle aérien normal). Une glissade qui quitte un bord garde son élan, borné au saut long (le coyote time permet encore le saut). L'élan se perd au sol, contre un mur, suspendue, au crochet ou touchée.
+- **Interdit couchée** : l'attaque, l'escalade, le parapluie, Bas + Saut. Touchée : la poussée s'arrête.
+- **État** `Slide` ; **pose** : les pieds devant, le buste couché en arrière, la tête tournée vers l'avant, un bras le long du corps, l'autre vers les pieds ; la hanche descend au tiers de la longueur des jambes quelle que soit la phase (champ `lie` de la pose). PLACEHOLDER.
+- **Aide** : pictogramme et ligne « glissade » dans « Mes capacités » (cinq lignes). L'acquisition dans le jeu (la camarade, D-83) vient avec la PR 2 ; d'ici là : case « Capacité : glissade » du DEBUG et parcours d'essai 11.
+- **Réglages** `slide*` dans `src/config/movement.ts`, l'overlay et l'export JSON. PROVISOIRES.
+- **Analyse de faisabilité** (D-16 étendue, option `slide`) : depuis chaque instant de la course, une glissade seule, ou suivie d'un saut long après 2, 8, 14, 20 ou 26 pas (Saut tenu jusqu'au sol, ou 8 pas) ; et, contre un obstacle bas, s'arrêter puis glisser dessous (sans timing). Limites (prudentes) : pas de parapluie après un saut long ; pas de glissade lancée depuis l'arrêt ailleurs que contre un obstacle. Sans l'option, rien ne change ; avec, un parcours existant n'est jamais plus dur (testé).
+- **Parcours d'essai 11 « Glissade »** (facile, prête escalade, saut mural et glissade) : une barrière basse, un long passage bas (couchée), une fosse de briques trop large pour un saut en courant (saut long), une dernière barrière. Impossible sans la glissade (testé).
+- **Vérifié dans Chromium** : glissade sous la barrière, reptation dans le passage bas, saut long au-dessus de la fosse, bouton « Glisser » affiché.
+- **Sauvegarde** : aucune migration (capacité `slide` dans `progression.abilities`).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

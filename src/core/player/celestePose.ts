@@ -22,6 +22,11 @@ export interface CelestePose {
   umbrella: number;
   /** Parapluie fermé, pendu à un câble par son crochet (D-65) : 0 invisible, 1 visible. */
   hook: number;
+  /**
+   * Couchée en glissade (D-84) : 0 debout, 1 la hanche presque au sol (en part de la longueur des
+   * jambes, quelle que soit la taille de Céleste).
+   */
+  lie: number;
 }
 
 /** Ce que la marionnette lit de Céleste et du combat, à chaque pas. */
@@ -54,6 +59,7 @@ export class CelestePoser {
     armReach: 1,
     umbrella: 0,
     hook: 0,
+    lie: 0,
   };
   /** Phase du cycle de pas (radians). */
   runPhase = 0;
@@ -76,6 +82,7 @@ export class CelestePoser {
     armReach: 1,
     umbrella: 0,
     hook: 0,
+    lie: 0,
   };
 
   constructor(
@@ -100,6 +107,7 @@ export class CelestePoser {
     pose.armReach = 1;
     pose.umbrella = 0;
     pose.hook = 0;
+    pose.lie = 0;
     this.pigtailVel = 0;
     this.runPhase = 0;
     this.stateSteps = 0;
@@ -134,6 +142,7 @@ export class CelestePoser {
     t.armReach = 1;
     t.umbrella = 0;
     t.hook = 0;
+    t.lie = 0;
     const state = this.sitting ? SITTING : subject.state;
     switch (state) {
       case SITTING: {
@@ -230,6 +239,18 @@ export class CelestePoser {
         t.legBack = -35 * DEG;
         t.legFront = 18 * DEG;
         break;
+      case PlayerState.Slide:
+        // Glissade (D-84) : les pieds devant, le buste couché en arrière, la tête qui regarde où
+        // elle va ; un bras le long du corps, l'autre tendu vers les pieds.
+        t.lie = 1;
+        t.bodyTilt = -78 * DEG;
+        t.headTilt = 52 * DEG;
+        t.legFront = 86 * DEG;
+        t.legBack = 74 * DEG;
+        t.armFront = -140 * DEG;
+        t.armBack = 12 * DEG;
+        this.runPhase = 0;
+        break;
       case PlayerState.Hurt:
         t.bodyTilt = -14 * DEG;
         t.headTilt = -10 * DEG;
@@ -270,6 +291,8 @@ export class CelestePoser {
     pose.legFront += (t.legFront - pose.legFront) * limbK;
     pose.legBack += (t.legBack - pose.legBack) * limbK;
     pose.armReach += (t.armReach - pose.armReach) * k;
+    // On se couche vite : la glissade part tout de suite.
+    pose.lie += (t.lie - pose.lie) * Math.max(k, 0.5);
     // Le parapluie s'ouvre et se ferme vite (on voit qu'il répond à Saut).
     pose.umbrella += (t.umbrella - pose.umbrella) * Math.max(k, 0.25);
     // Le crochet apparaît d'un coup (le parapluie se replie en s'accrochant).

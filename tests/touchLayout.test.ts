@@ -18,10 +18,14 @@ describe('computeTouchLayout', () => {
         it(`garde les boutons dans l’écran et les zones sûres : ${name}, échelle ${scale}, ${
           insets === NOTCH ? 'encoche' : 'sans encoche'
         }`, () => {
-          const layout = computeTouchLayout(w, h, insets, {
-            ...DEFAULT_CONTROL_SETTINGS,
-            buttonScale: scale,
-          });
+          // Avec le bouton Capacité (la glissade, D-84) : la disposition la plus chargée.
+          const layout = computeTouchLayout(
+            w,
+            h,
+            insets,
+            { ...DEFAULT_CONTROL_SETTINGS, buttonScale: scale },
+            true,
+          );
           for (const b of layout.buttons) {
             expect(b.x - b.r, b.action).toBeGreaterThanOrEqual(insets.left);
             expect(b.x + b.r, b.action).toBeLessThanOrEqual(w - insets.right);
@@ -36,10 +40,13 @@ describe('computeTouchLayout', () => {
   it('ne fait se chevaucher aucun bouton', () => {
     for (const { w, h } of SCREENS) {
       for (const scale of [0.7, 1, 1.5]) {
-        const { buttons } = computeTouchLayout(w, h, NOTCH, {
-          ...DEFAULT_CONTROL_SETTINGS,
-          buttonScale: scale,
-        });
+        const { buttons } = computeTouchLayout(
+          w,
+          h,
+          NOTCH,
+          { ...DEFAULT_CONTROL_SETTINGS, buttonScale: scale },
+          true,
+        );
         for (const a of buttons) {
           for (const b of buttons) {
             if (a !== b) {
@@ -49,6 +56,19 @@ describe('computeTouchLayout', () => {
         }
       }
     }
+  });
+
+  it('n’affiche le bouton Capacité qu’une fois la glissade obtenue (D-84)', () => {
+    const without = computeTouchLayout(844, 390, NO_INSETS, DEFAULT_CONTROL_SETTINGS);
+    const withIt = computeTouchLayout(844, 390, NO_INSETS, DEFAULT_CONTROL_SETTINGS, true);
+    expect(without.buttons.some((b) => b.action === 'Ability')).toBe(false);
+    const ability = withIt.buttons.find((b) => b.action === 'Ability');
+    const jump = withIt.buttons.find((b) => b.action === 'Jump');
+    if (!ability || !jump) {
+      throw new Error('boutons manquants');
+    }
+    // À gauche de Saut, à portée du même pouce.
+    expect(ability.x).toBeLessThan(jump.x);
   });
 
   it('place Action dans le coin bas droit, Saut au-dessus, Pause en haut à gauche', () => {

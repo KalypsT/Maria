@@ -2,21 +2,36 @@
 
 ## Phase en cours
 
-**Passe graphique** (D-71) : plan validé en étapes (fondations du rendu, profondeur, vie du monde réel, salle témoin : **le salon**, puis propagation). **Étapes 1, 2, 3 et 5 faites** (finition « papier découpé », D-71 ; profondeur, D-72 ; vie du monde réel, D-73 ; **le salon, salle témoin**, D-74) sur `ccr-8742f994-82xjq9` ; l'étape 4 (identifiants fixes de la sauvegarde) est écartée jusqu'à la sortie. Ensuite : **toutes les salles du monde réel refaites en profondeur** selon la grille de D-74, dans l'ordre de l'histoire, une PR par zone (les mondes étranges : lisibilité seulement). **La maison (D-75)** : faite sur `ccr-126f1100-llmv5d` (PR #54), en deux parties (l'étage ; le rez-de-chaussée, le grenier et la lisibilité des mondes étranges). **Le jardin (D-76)** : fait sur la même branche, à la demande de l'utilisateur. Les deux sont fusionnés. **Le quartier**, en trois phases : (1) la rue (D-77), faite ; (2) aire de jeux, supérette, chantier (D-78), faite ; (3) cour, école, école étrange (D-79), faite. **La gare**, en deux phases : (1) voies, quais, hall (D-80), faite ; (2) objets trouvés, dépôt, gare étrange et tour (lisibilité, D-81), faite. **Tout le monde réel est refait.** Puis le jardin, le quartier, la gare. Pas de nouveau niveau d'ici là.
+**Le train** (niveau 5, D-82, D-83) : plan validé en 6 PR. **PR 1 faite : la glissade** (D-84), dans le parcours d'essai 11, sur `ccr-982d9f94-2fndno`. **À essayer sur téléphone avant la PR 2** (c'est une modification du mouvement).
 
-**Le jardin (2a) et derrière la haie (2b)** (§7.2, §6, D-46 à D-49) : fusionnés (PR #29), **essai sur téléphone en cours** (début du jardin testé ; jardin adouci (D-51) sur `ccr-53d22df4-9euiqo`). Le saut mural (D-44, D-45) est fusionné ; ses valeurs n'ont pas encore été réglées au téléphone.
+Suite du train : PR 2 le départ (la classe sur le quai le soir, la voiture-couchettes, la camarade qui apprend la glissade, le paysage qui défile, la nuit et la lueur) ; PR 3 le reste du train réel (compartiments, fourgon, toit et tunnels, wagon-restaurant) ; PR 4 la poursuite horizontale (parcours d'essai 12) ; PR 5 le monde étrange, la cuisine rose et le souvenir jouable ; PR 6 la fin, la gare de la mer, la revisite du train et les revisites avec la glissade.
 
-**Mouvement et difficulté validés** par l'utilisateur pour l'instant (réglages du DEBUG conservés pour une passe plus poussée plus tard).
+**Structure de la fin du jeu** (D-82) : 8 niveaux (maison, jardin, quartier, gare, train, station balnéaire, avant-dernier, monde de Maria). Niveau 6 et niveau 7 : pistes retenues, détails décidés le moment venu.
 
-**Musique** (D-57) : lecteur en place, en attente des morceaux.
+**Passe graphique** (D-71 à D-81) : terminée, tout le monde réel est refait d'après la grille du salon. L'étape 4 (identifiants fixes des trouvailles et lanternes) est écartée jusqu'à la sortie (**à reprendre avant de diffuser le jeu**, pilier 10).
 
-**Le quartier** (D-60, D-61) : plan validé (4 PR), toutes faites : PR 1 (portes de façade, aire de jeux), PR 2 (le parapluie, D-62), PR 3 (supérette et chantier, D-63), PR 4 (l'école, son monde étrange et la fin du niveau, D-64).
+**En attente** :
 
-**La gare** (D-65, D-66) : plan validé (5 PR). PR 1 faite (le parapluie s'ouvre au sommet ; le crochet et les câbles). PR 2 faite : la gare réelle, les trains, le crochet au bureau des objets trouvés, les revisites. PR 3 faite : le système de boss (poursuite verticale), dans le parcours d'essai 10. PR 4 faite : le monde étrange de la gare, la tour, Roger et le premier court souvenir. PR 5 faite : la fin du niveau (papa sous l'horloge, la nuit), la phase 3, le train à quai (D-69). **Le niveau de la gare est complet.**
-
-Prochaine : essai de la gare (réelle, étrange, la fin, la phase 3) sur téléphone. Le niveau suivant (le train ?) reste à décider. Intégrer les morceaux de musique.
+- essais sur téléphone de l'utilisateur (gare, passe graphique, glissade) ; les listes « À vérifier sur téléphone » ci-dessous restent ouvertes ;
+- **musique** (D-57) : lecteur en place, morceaux en cours de création par l'utilisateur ;
+- mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le train, PR 1 : la glissade (D-84)
+
+- **Geste** : au sol, le bouton **Glisser** (clavier : L ou Maj gauche) lance Céleste couchée, environ 3,5 tuiles, dans le sens où l'on pousse. Elle passe sous ce qui est à une tuile du sol.
+- **Sous un plafond bas**, elle avance couchée jusqu'à pouvoir se relever ; contre un mur, elle repart dans l'autre sens (jamais coincée).
+- **Saut long** : sauter en glissant va plus loin (190 px/s au lieu de 136), l'élan est gardé jusqu'au sol (pousser à l'opposé le casse).
+- **Bouton** : n'apparaît qu'avec la glissade, à gauche de Saut. **Pose** couchée, pieds devant. Ligne et pictogramme dans « Mes capacités ».
+- **Parcours d'essai 11 « Glissade »** (menu pause, mode debug) : barrière basse, long passage bas, fosse de briques à franchir en saut long, dernière barrière. Case « Capacité : glissade » dans DEBUG ; réglages `slide*`.
+- Analyse de faisabilité étendue à la glissade (option) ; rien ne change sans elle.
+- Tests : 562. Vérifié dans Chromium : la barrière, le passage bas, le saut long, le bouton.
+- [ ] À vérifier sur téléphone (menu pause → Parcours d'essai → « 11. Glissade ») : le bouton Glisser se trouve-t-il sous le pouce sans gêner Saut ? Un troisième bouton, est-ce trop ?
+- [ ] La glissade : distance (`slideDurationMs`), vitesse (`slideSpeed`) : trop courte, trop longue ? Part-elle quand on le veut ?
+- [ ] Le saut long (`slideJumpSpeedX`) : se sent-il nettement plus long, sans être incontrôlable ? Glisser puis sauter vient-il naturellement au pouce ?
+- [ ] Couchée sous le plafond (`slideCrawlSpeed`) : trop lent ?
+- [ ] La pose couchée se lit-elle ?
 
 ### La gare, phase 2 : les objets trouvés, le dépôt, la gare étrange (D-81)
 
@@ -1123,6 +1138,6 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. PR du jardin (2a + 2b), merge, essai sur téléphone ; réglage des valeurs du saut mural.
-2. Zone suivante (le quartier, §26), avec les liaisons entre zones.
-3. Avant d'offrir le jeu : installation facile (PWA), sauvegarde sûre sur iPhone, option « réduire les effets ».
+1. Essai de la glissade sur téléphone (parcours 11), réglages exportés du DEBUG.
+2. Le train, PR 2 à 6 (D-83).
+3. Avant d'offrir le jeu : identifiants fixes des trouvailles et lanternes (D-71), installation facile (PWA), sauvegarde sûre sur iPhone, option « réduire les effets ».

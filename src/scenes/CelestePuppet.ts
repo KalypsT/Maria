@@ -187,7 +187,8 @@ export class CelestePuppet {
     this.sin = Math.sin(tilt);
     const body = this.body;
     this.hipX = HIP.x;
-    this.hipY = HIP.y * body + pose.bodyY;
+    // Couchée (D-84) : la hanche descend jusqu'au tiers de la longueur des jambes.
+    this.hipY = HIP.y * body * (1 - 0.66 * pose.lie) + pose.bodyY;
     const reach = (pose.armReach * body) / this.scale;
     this.torso.setPosition(this.hipX, this.hipY).setRotation(tilt);
     this.skirt.setPosition(this.hipX, this.hipY).setRotation(tilt);

@@ -123,6 +123,23 @@ export interface MovementParams {
   cableJumpWindowMs: number;
   /** Hauteur d'un saut depuis un câble (tuiles), bouton maintenu. */
   cableJumpHeightTiles: number;
+  /**
+   * Glissade (D-84) : au sol, le bouton Capacité lance Céleste, couchée, à cette vitesse (px/s),
+   * dans le sens où elle regarde (ou où l'on pousse).
+   */
+  slideSpeed: number;
+  /** Durée de la poussée de la glissade (ms). La distance est `slideSpeed × slideDurationMs`. */
+  slideDurationMs: number;
+  /** Hauteur de la hitbox couchée (px) : moins d'une tuile, elle passe sous un obstacle bas. */
+  slideHeightPx: number;
+  /** Sous un plafond trop bas pour se relever, Céleste avance couchée à cette vitesse (px/s). */
+  slideCrawlSpeed: number;
+  /** Vitesse horizontale d'un saut depuis la glissade (px/s), gardée jusqu'au sol : saut long. */
+  slideJumpSpeedX: number;
+  /** Délai entre la fin d'une glissade et la suivante (ms). */
+  slideCooldownMs: number;
+  /** Pression du bouton Capacité mémorisée avant l'atterrissage (ms). */
+  slideBufferMs: number;
 }
 
 export const DEFAULT_MOVEMENT: Readonly<MovementParams> = {
@@ -172,6 +189,13 @@ export const DEFAULT_MOVEMENT: Readonly<MovementParams> = {
   cableFlatSlope: 0.1,
   cableJumpWindowMs: 120,
   cableJumpHeightTiles: 2,
+  slideSpeed: 230,
+  slideDurationMs: 240,
+  slideHeightPx: 12,
+  slideCrawlSpeed: 70,
+  slideJumpSpeedX: 190,
+  slideCooldownMs: 250,
+  slideBufferMs: 100,
 };
 
 /** Bornes des réglages en direct de l'overlay de debug. */
@@ -224,6 +248,13 @@ export const MOVEMENT_PARAM_RANGES: Readonly<
   cableFlatSlope: { min: 0, max: 0.5, step: 0.01 },
   cableJumpWindowMs: { min: 0, max: 300, step: 5 },
   cableJumpHeightTiles: { min: 0.5, max: 5, step: 0.1 },
+  slideSpeed: { min: 60, max: 500, step: 5 },
+  slideDurationMs: { min: 60, max: 600, step: 10 },
+  slideHeightPx: { min: 8, max: 15, step: 1 },
+  slideCrawlSpeed: { min: 20, max: 200, step: 5 },
+  slideJumpSpeedX: { min: 60, max: 400, step: 5 },
+  slideCooldownMs: { min: 0, max: 1000, step: 10 },
+  slideBufferMs: { min: 0, max: 250, step: 5 },
 };
 
 /** Hissé sur un rebord, Céleste se tient à cette distance du bord (px), bien posée. */
@@ -266,6 +297,10 @@ export interface DerivedMovement {
   cableJumpSteps: number;
   /** Vitesse initiale d'un saut depuis un câble (px/s, vers le haut). */
   cableJumpVelocity: number;
+  /** Pas de poussée d'une glissade (D-84). */
+  slideSteps: number;
+  slideCooldownSteps: number;
+  slideBufferSteps: number;
 }
 
 export function msToSteps(ms: number, stepHz: number = PHYSICS_STEP_HZ): number {
@@ -294,6 +329,9 @@ export function deriveMovement(
     glideAutoDelaySteps: 0,
     cableJumpSteps: 0,
     cableJumpVelocity: 0,
+    slideSteps: 0,
+    slideCooldownSteps: 0,
+    slideBufferSteps: 0,
   },
 ): DerivedMovement {
   const heightPx = params.jumpHeightTiles * TILE_SIZE;
@@ -315,5 +353,8 @@ export function deriveMovement(
   out.glideAutoDelaySteps = msToSteps(params.glideAutoDelayMs, stepHz);
   out.cableJumpSteps = msToSteps(params.cableJumpWindowMs, stepHz);
   out.cableJumpVelocity = Math.sqrt(2 * out.riseGravity * params.cableJumpHeightTiles * TILE_SIZE);
+  out.slideSteps = Math.max(1, msToSteps(params.slideDurationMs, stepHz));
+  out.slideCooldownSteps = msToSteps(params.slideCooldownMs, stepHz);
+  out.slideBufferSteps = msToSteps(params.slideBufferMs, stepHz);
   return out;
 }

@@ -43,7 +43,10 @@ export const JOYSTICK = {
   baseFollowsThumb: true as boolean,
 } as const;
 
-/** Boutons affichés. Attaque n'a pas d'effet avant la phase combat (affiché pour l'ergonomie). */
+/**
+ * Boutons affichés. Capacité n'apparaît en plus qu'une fois une capacité à bouton obtenue (la
+ * glissade, D-84) : voir `computeTouchLayout`.
+ */
 export const TOUCH_BUTTONS_ENABLED: Readonly<Record<ButtonAction, boolean>> = {
   Jump: true,
   Attack: true,

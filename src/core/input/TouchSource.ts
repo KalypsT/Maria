@@ -6,7 +6,7 @@ import { computeTouchLayout, type Insets, type TouchLayout } from './touchLayout
 const LABELS: Readonly<Record<ButtonAction, string>> = {
   Jump: 'Saut',
   Attack: 'Action',
-  Ability: 'Cap.',
+  Ability: 'Glisser',
   Interact: 'Agir',
   Pause: 'II',
   Map: 'Carte',
@@ -30,6 +30,7 @@ export class TouchSource implements InputSource {
   private readonly joystickKnob: HTMLElement;
   private readonly buttonElements = new Map<ButtonAction, HTMLElement>();
   private shownMask = 0;
+  private showAbility = false;
   private shownJoystick = false;
   private shownKnobX = Number.NaN;
   private shownKnobY = Number.NaN;
@@ -65,6 +66,15 @@ export class TouchSource implements InputSource {
   setSettings(settings: Readonly<ControlSettings>): void {
     this.settings = { ...settings };
     this.relayout();
+  }
+
+  /** Affiche le bouton Capacité une fois la glissade obtenue (D-84). */
+  setAbilityVisible(visible: boolean): void {
+    if (visible !== this.showAbility) {
+      this.showAbility = visible;
+      this.controller.releaseAll();
+      this.relayout();
+    }
   }
 
   /** Libellé d'un bouton (Action devient « Agir » près de ce qu'on peut faire, D-31). */
@@ -153,6 +163,7 @@ export class TouchSource implements InputSource {
       window.innerHeight,
       this.measureInsets(),
       this.settings,
+      this.showAbility,
     );
   }
 
