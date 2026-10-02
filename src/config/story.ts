@@ -105,6 +105,11 @@ export const StoryFlag = {
    */
   TrainArrived: 'train.arrived',
   /**
+   * La station balnéaire (D-98) : la classe a quitté la gare de la mer pour le centre ; Céleste est
+   * libre sur la promenade.
+   */
+  SeaArrived: 'sea.arrived',
+  /**
    * La marée est haute (D-95), à la station balnéaire : la seule étape réversible (les bancs des
    * marées la posent et la retirent). Les salles de marée prennent leur variante haute.
    */

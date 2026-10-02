@@ -2,6 +2,7 @@ import { STORY_TIMING as S, StoryFlag as F } from '../../config/story';
 import type { StoryData, StoryStep, TileArea } from '../../core/story/story';
 import { STATION_STORY } from '../station/story';
 import { TRAIN_STORY } from '../train/story';
+import { SEA_STORY } from '../sea/story';
 
 /** Haut de la bibliothèque du salon, là où Maria était assise. */
 const LIVING_TOP: TileArea = { col: 46, row: 5, w: 10, h: 3 };
@@ -909,12 +910,16 @@ export const HOUSE_STORY: StoryData = {
     ...STATION_STORY.triggers,
     // Le train (D-85).
     ...TRAIN_STORY.triggers,
+    // La station balnéaire (D-98).
+    ...SEA_STORY.triggers,
   ],
   props: [
     // La gare (D-68).
     ...STATION_STORY.props,
     // Le train (D-85).
     ...TRAIN_STORY.props,
+    // La station balnéaire (D-98).
+    ...SEA_STORY.props,
     // La toise de la chambre (D-43), au mur près de la porte.
     {
       id: 'height-chart',
@@ -1239,6 +1244,7 @@ export const HOUSE_STORY: StoryData = {
     // La gare (D-69).
     ...STATION_STORY.lockedRooms,
     ...TRAIN_STORY.lockedRooms,
+    ...SEA_STORY.lockedRooms,
   ],
   omens: [
     // L'oculus de l'école (D-64) : en montant les étagères, tant que la fin n'est pas vécue.

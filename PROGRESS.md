@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1a faite : le moteur de la marée et l'analyse** (D-96) et **PR 1b faite : l'eau qui ramène au bord, son dessin, le parcours d'essai 13 « Marée »** (D-97), sur `ccr-014503d9-cj0c7a`. **Essai sur téléphone avant de continuer** (parcours 13). Suite : PR 2, l'arrivée (la gare de la mer ouverte, la promenade, le centre, la page « La mer »).
+**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98), sur `ccr-014503d9-cj0c7a`. Suite : PR 3, la plage et les rochers (la pêche à pied, la première marée, les bancs). Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
 
 **Le train** (niveau 5, D-83 à D-91) : complet et fusionné. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
@@ -17,6 +17,19 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### La station balnéaire, PR 2 : l'arrivée, la promenade, le centre (D-98)
+
+- **L'arrivée** : Agir près de la maîtresse sur le quai ; la classe part au centre (le dortoir, les sacs, la camarade) ; Céleste pense à Maria. La sortie de la gare de la mer est fermée jusque-là.
+- **La promenade** : l'ancre, la grille du port et l'escalier de la plage (fermés pour l'instant, « ? »), la lanterne et le banc, le kiosque à glaces, les lampadaires, le centre et son enseigne. Défi moyen jusqu'au toit du centre (une trouvaille).
+- **Le centre** : le réfectoire, l'escalier, le dortoir. Défi moyen par la suspension jusqu'à la poutre (une trouvaille).
+- **Le cahier** : une page « La mer ».
+- DEBUG → Histoire : « la classe de mer, au centre ».
+- Tests : TESTCOUNT. Vérifié dans Chromium : le quai et la classe, la promenade de bout en bout (le kiosque, les lampadaires, la façade, le toit), le réfectoire, l'escalier, le dortoir, la poutre.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « le train arrivé, la gare de la mer », puis la maîtresse) : l'arrivée se comprend-elle ? Trouve-t-on la sortie de la gare, puis la porte du centre ?
+- [ ] La promenade : agréable à parcourir ? Le défi des lampadaires et des balcons se voit-il depuis le kiosque ? Juste (moyen) ?
+- [ ] Le centre : l'escalier (une marche toutes les deux colonnes) est-il pénible ? La suspension se remarque-t-elle comme un appui ?
+- [ ] Le dessin : la façade, le kiosque, l'ancre, l'enseigne se lisent-ils sur un petit écran ? Les herbes d'avant-plan sur la digue gênent-elles ?
 
 ### La station balnéaire, PR 1b : l'eau, le parcours 13 (D-97)
 

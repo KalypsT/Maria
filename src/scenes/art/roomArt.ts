@@ -27,6 +27,7 @@ import { drawMemory } from './memoryArt';
 import { livingDrawers } from './livingArt';
 import { houseDrawers } from './houseArt';
 import { trainDrawers } from './trainArt';
+import { seaDrawers } from './seaArt';
 import { drawBrokenDishes, drawHotPlates, trainStrangeDrawers } from './trainStrangeArt';
 import { paperGrainPattern } from './paperGrain';
 
@@ -260,6 +261,7 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
   ...houseDrawers({ tileShape, rounded }),
   ...trainDrawers({ tileShape, rounded }),
   ...trainStrangeDrawers({ tileShape, rounded }),
+  ...seaDrawers({ tileShape, rounded }),
   console(a, r) {
     wood(a, r);
     if (!a.palette.silhouettes) {

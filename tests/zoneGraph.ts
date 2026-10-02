@@ -191,12 +191,13 @@ export function zoneGraph(
     const late =
       roomOf(from).startsWith('garden-') ||
       roomOf(from).startsWith('school') ||
-      roomOf(from).startsWith('station-');
+      roomOf(from).startsWith('station-') ||
+      roomOf(from).startsWith('sea-');
     if (late !== growth >= 2 || (roomOf(from) === 'garden-tree' && !wallJump)) {
       continue;
     }
     // Le train (D-85) part quelques mois après la gare (phase 3) : on n'en revient qu'à l'arrivée.
-    if (roomOf(to).startsWith('train-') && growth < 3) {
+    if ((roomOf(to).startsWith('train-') || roomOf(to).startsWith('sea-')) && growth < 3) {
       continue;
     }
     edge(from, to);

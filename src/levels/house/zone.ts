@@ -37,6 +37,8 @@ import trainRestaurant from '../train/restaurant.txt?raw';
 import trainStrangeKitchen from '../train/strange-kitchen.txt?raw';
 import trainStrangeDishes from '../train/strange-dishes.txt?raw';
 import seaStation from '../sea/station.txt?raw';
+import seaPromenade from '../sea/promenade.txt?raw';
+import seaCentre from '../sea/centre.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -113,6 +115,10 @@ export const HOUSE: ZoneSource = {
     { id: 'train-strange-dishes', text: trainStrangeDishes },
     // La gare de la mer (D-90) : au bout du voyage, le train y reste à quai.
     { id: 'sea-station', text: seaStation },
+    // La station balnéaire (D-95, D-98) : la promenade, salle centrale de la baie, et le centre de
+    // la classe de mer, derrière sa porte.
+    { id: 'sea-promenade', text: seaPromenade },
+    { id: 'sea-centre', text: seaCentre },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -169,6 +175,9 @@ export const HOUSE: ZoneSource = {
     // gare de la mer, celle du fourgon sur les quais de la gare de la ville.
     ['train-couchettes:2', 'sea-station:1'],
     ['train-baggage:4', 'station-platforms:4'],
+    // La station balnéaire (D-98) : la gare de la mer s'ouvre sur la promenade, la porte du centre.
+    ['sea-station:2', 'sea-promenade:1'],
+    ['sea-promenade:2', 'sea-centre:1'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur
@@ -211,6 +220,10 @@ export const HOUSE: ZoneSource = {
     // Le toit, au-dessus du fourgon et du wagon-restaurant.
     'train-roof': { x: 13.2, y: -0.4, w: 10.4, h: 1, page: 'train' },
     // La gare de la mer (D-90), au bout du train, du côté de la voiture-couchettes.
-    'sea-station': { x: -4.4, y: 0.8, w: 4, h: 1.8, page: 'train' },
+    // La mer (D-98) : la baie dessinée par Céleste, la gare à droite, la promenade au bord de l'eau,
+    // le centre au-dessus de sa porte.
+    'sea-station': { x: 16.4, y: 2.4, w: 3.6, h: 1.6, page: 'sea' },
+    'sea-promenade': { x: 0, y: 2.6, w: 16, h: 1.4, page: 'sea' },
+    'sea-centre': { x: 10.4, y: 0.2, w: 4.6, h: 2.0, page: 'sea' },
   },
 };

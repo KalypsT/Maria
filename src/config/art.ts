@@ -533,6 +533,25 @@ export const DECOR_KINDS: Readonly<
   kitchendoor: { furniture: false },
   /** Échelle sous la trappe du toit (fond). */
   hatchladder: { furniture: false },
+  // La station balnéaire (D-98) : la promenade et le centre de la classe de mer.
+  seabalustrade: { furniture: false },
+  portgate: { furniture: false },
+  anchor: { furniture: false },
+  plinth: { furniture: true },
+  beachstairs: { furniture: false },
+  telescope: { furniture: false },
+  seabench: { furniture: true },
+  freezer: { furniture: true },
+  icekiosk: { furniture: true },
+  kioskawning: { furniture: true },
+  colonie: { furniture: false },
+  colonybalcony: { furniture: true },
+  colonyroof: { furniture: true },
+  roofsign: { furniture: true },
+  colonyfloor: { furniture: true },
+  servinghatch: { furniture: false },
+  colonybunk: { furniture: true },
+  schoolbags: { furniture: false },
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */

@@ -7,6 +7,7 @@ import { DEFAULT_MOVEMENT } from '../src/config/movement';
 import { StoryFlag } from '../src/config/story';
 import { analyzeLevel, type LevelAnalysis } from '../src/core/analysis/analyzeLevel';
 import { CombatWorld } from '../src/core/combat/CombatWorld';
+import { EntityType } from '../src/core/level/LevelData';
 import { PlayerPhysics } from '../src/core/player/PlayerPhysics';
 import { StoryDirector, type StoryHost } from '../src/core/story/StoryDirector';
 import { checkCondition } from '../src/core/story/story';
@@ -168,15 +169,19 @@ describe('le train, PR 6a : le matin, la gare de la mer, le train à quai (D-90)
     expect(director(ARRIVED).omen('train-restaurant', 59 * T, 17 * T)).toBe(0);
   });
 
-  it('la gare de la mer : sur la page du train, un quai, une lanterne, aucune sortie (la suite au niveau 6)', () => {
+  it('la gare de la mer : sur la page de la mer, un quai, une lanterne ; elle s’ouvre sur la promenade (D-98)', () => {
     const sea = level(SEA);
     expect(isStrangeRoom(sea)).toBe(false);
-    expect(mapPage(zone, SEA)).toBe('train');
-    expect(sea.exits).toEqual([]);
+    expect(mapPage(zone, SEA)).toBe('sea');
+    expect(sea.exits.map((e) => e.id)).toEqual([2]);
     expect(sea.doors.map((d) => d.id)).toEqual([1]);
     expect(zone.destination(SEA, 1)).toEqual({ room: 'train-couchettes', exit: 2 });
+    expect(zone.destination(SEA, 2)).toEqual({ room: 'sea-promenade', exit: 1 });
     expect(zone.destination('train-baggage', 4)).toEqual({ room: 'station-platforms', exit: 4 });
-    expect(trigger('sea-teacher').repeat).toBe(true);
+    // La lanterne de la gare de la mer n'a pas bougé (son identifiant dépend de sa position).
+    expect(sea.entities.filter((e) => e.type === EntityType.Checkpoint)).toEqual([
+      { type: EntityType.Checkpoint, col: 24, row: 17 },
+    ]);
   });
 
   it('les portes du train à quai : cachées et fermées avant l’arrivée, ouvertes ensuite', () => {

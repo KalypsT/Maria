@@ -155,6 +155,7 @@ const MAP_TITLES: Readonly<Record<string, string>> = {
   street: 'Mon quartier',
   station: 'La gare',
   train: 'Le train',
+  sea: 'La mer',
 };
 
 /** Boîte englobant toutes les salles d'une page de la carte (disposition stable). */

@@ -334,24 +334,6 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.lookMs },
     ],
   },
-  {
-    // La gare de la mer (D-90, PLACEHOLDER) : la classe attend avec la maîtresse ; on ne va pas
-    // plus loin pour l'instant (le niveau 6). Céleste demande ; la maîtresse sourit au soleil.
-    id: 'sea-teacher',
-    room: 'sea-station',
-    on: 'interact',
-    area: { col: 5, row: 15, w: 11, h: 3 },
-    mark: { col: 8, row: 12 },
-    when: { all: [F.TrainArrived] },
-    lock: true,
-    repeat: true,
-    steps: [
-      { do: 'thought', icon: 'question', ms: S.thoughtMs },
-      { do: 'wait', ms: S.thoughtMs },
-      { do: 'thought', icon: 'sun', ms: S.thoughtMs, by: 'teacher-sea' },
-      { do: 'wait', ms: S.lookMs },
-    ],
-  },
 ];
 
 /**
@@ -558,9 +540,24 @@ const PROPS: StoryProp[] = [
     flip: true,
     when: MORNING,
   },
-  // La gare de la mer (D-90) : la maîtresse et la classe attendent, le train à quai.
-  { id: 'teacher-sea', room: 'sea-station', kind: 'teacher', col: 8, row: 17, when: ARRIVED },
-  { id: 'kids-sea', room: 'sea-station', kind: 'kids-quay', col: 13, row: 17, when: ARRIVED },
+  // La gare de la mer (D-90) : la maîtresse et la classe attendent, jusqu'au départ pour le centre
+  // (D-98) ; le train à quai.
+  {
+    id: 'teacher-sea',
+    room: 'sea-station',
+    kind: 'teacher',
+    col: 8,
+    row: 17,
+    when: { all: [F.TrainArrived], none: [F.SeaArrived] },
+  },
+  {
+    id: 'kids-sea',
+    room: 'sea-station',
+    kind: 'kids-quay',
+    col: 13,
+    row: 17,
+    when: { all: [F.TrainArrived], none: [F.SeaArrived] },
+  },
   { id: 'train-sea', room: 'sea-station', kind: 'quay-train-day', col: 42, row: 17, when: ARRIVED },
   // Le même train, à quai à la gare de la ville : il relie les deux gares.
   {
