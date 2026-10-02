@@ -65,6 +65,13 @@ export class CelestePoser {
   runPhase = 0;
   /** Assise (imposée par l'histoire : jouer avec Maria, réveil dans le lit), jambes devant. */
   sitting = false;
+  /**
+   * Souvenir jouable (D-89) : geste « les mains devant » en cours (remuer, verser, poser), jusqu'à
+   * `gestureSteps` pas ; `carrying` : elle tient la tasse devant elle, les deux mains.
+   */
+  gesture: 'stir' | 'pour' | 'serve' | null = null;
+  gestureSteps = 0;
+  carrying = false;
   private time = 0;
   private stateSteps = 0;
   private lastState: PlayerState = PlayerState.Idle;
@@ -112,6 +119,9 @@ export class CelestePoser {
     this.runPhase = 0;
     this.stateSteps = 0;
     this.sitting = false;
+    this.gesture = null;
+    this.gestureSteps = 0;
+    this.carrying = false;
   }
 
   /** Un pas de simulation. `attack` : phase d'attaque (`PoseAttack`), `attackProgress` 0 → 1. */
@@ -277,6 +287,26 @@ export class CelestePoser {
       t.armFront = (150 - 80 * Math.min(1, attackProgress * 2)) * DEG;
     } else if (attack === PoseAttack.Recovery) {
       t.armFront = 70 * DEG;
+    }
+    // Souvenir jouable (D-89) : les mains devant. Remuer : un petit cercle ; verser : la main avant
+    // penche ; poser : les deux bras descendent. Tenir la tasse : les deux mains devant.
+    if (this.gestureSteps > 0) {
+      this.gestureSteps--;
+      const swirl = Math.sin(this.time * 9);
+      t.headTilt = 8 * DEG;
+      if (this.gesture === 'stir') {
+        t.armFront = (68 + swirl * 12) * DEG;
+        t.armBack = 52 * DEG;
+      } else if (this.gesture === 'pour') {
+        t.armFront = 96 * DEG;
+        t.armBack = 60 * DEG;
+      } else {
+        t.armFront = 48 * DEG;
+        t.armBack = 44 * DEG;
+      }
+    } else if (this.carrying) {
+      t.armFront = 66 * DEG;
+      t.armBack = 58 * DEG;
     }
     // Passage en douceur vers la pose visée (la course garde son cycle exact).
     const k = p.blendMs <= 0 ? 1 : 1 - Math.exp((-dt * 1000) / p.blendMs);

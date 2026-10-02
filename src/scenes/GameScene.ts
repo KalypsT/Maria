@@ -1,5 +1,10 @@
 import Phaser from 'phaser';
-import { CHASE_CAMERA_UP_PX, DEFAULT_CAMERA, type CameraParams } from '../config/camera';
+import {
+  CHASE_CAMERA_UP_PX,
+  DEFAULT_CAMERA,
+  MEMORY_CAMERA_ZOOM,
+  type CameraParams,
+} from '../config/camera';
 import { DEFAULT_COMBAT, type CombatParams } from '../config/combat';
 import { DEFAULT_FEEL, type FeelParams } from '../config/feel';
 import {
@@ -27,7 +32,23 @@ import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../core/player/PlayerPhysics';
 import { PlayerFeel } from '../core/player/playerFeel';
 import { growthPhase, phaseMovement, type GrowthPhase } from '../config/growth';
-import { LEVELS, levelName, startRoom, zoneRoom, type LevelSource, type ZoneRoom } from '../levels';
+import {
+  LEVELS,
+  MEMORY_ROOMS,
+  levelName,
+  startRoom,
+  zoneRoom,
+  type LevelSource,
+  type ZoneRoom,
+} from '../levels';
+import {
+  PLAYABLE_MEMORIES,
+  PLAYABLE_MEMORY_TIMING,
+  TODDLER_LOOK,
+  type PlayableMemoryId,
+} from '../config/playableMemories';
+import { MemoryEvent, PlayableMemory } from '../core/memory/PlayableMemory';
+import { teaCup } from './art/memoryArt';
 import { DEFAULT_WORLD, type WorldParams } from '../config/world';
 import { checkpointId } from '../core/save/saveData';
 import type { SaveSession } from '../core/save/SaveSession';
@@ -63,6 +84,7 @@ import {
   DEFAULT_ART_FINISH,
   type ArtFinish,
   GARDEN_PALETTE,
+  MEMORY_PALETTE,
   STREET_DUSK_PALETTE,
   STREET_PALETTE,
   TRAIN_NIGHT_PALETTE,
@@ -224,9 +246,28 @@ export class GameScene extends Phaser.Scene {
   /** Échelle des textures dessinées (habillage, Céleste) : celle de l'écran, plafonnée. */
   private artScale = 1;
   /** Carte (§24) et salles déjà dessinées lors d'une ouverture précédente (tracé animé). */
-  private readonly mapPage = new MapPage(() => {
-    this.closeMap();
-  });
+  private readonly mapPage = new MapPage(
+    () => {
+      this.closeMap();
+    },
+    (id) => {
+      // Un souvenir jouable touché dans le cahier (D-89) : on le rejoue, puis on revient ici.
+      this.closeMap();
+      this.playMemory(id, false);
+    },
+  );
+  /** Souvenir jouable en cours (D-89), null sinon ; et ce qu'il faut retrouver à sa fin. */
+  private memoryPlay: PlayableMemory | null = null;
+  private memoryReturn: {
+    level: LevelData;
+    zone: Zone | null;
+    x: number;
+    y: number;
+    facing: number;
+    fromStory: boolean;
+  } | null = null;
+  /** La tasse que Céleste tient dans le souvenir de la cuisine. */
+  private cupImage!: Phaser.GameObjects.Image;
   private readonly mapSeen = new Set<string>();
   /** Changement de salle en cours (D-25). */
   readonly transition = new RoomTransition(this.worldParams);
@@ -237,6 +278,8 @@ export class GameScene extends Phaser.Scene {
   private flashbackView!: FlashbackView;
   /** Heure de la dernière réapparition (fondu de retour), -1 sinon. */
   private reappearAtMs = -1;
+  /** Zoom appliqué à la caméra (celui des réglages, ou rapproché dans un souvenir, D-89). */
+  private appliedZoom = DEFAULT_CAMERA.zoom;
   readonly clock = new FixedStepClock(1 / PHYSICS_STEP_HZ, MAX_STEPS_PER_FRAME);
   readonly frameStats: FrameStats = { steps: 0, simulationMs: 0 };
   level!: LevelData;
@@ -354,6 +397,9 @@ export class GameScene extends Phaser.Scene {
           this.learnAbility(id);
         }
       },
+      play: (id) => {
+        this.playMemory(id, true);
+      },
     });
     this.story.setFlags(this.session.data.story.flags);
     this.growth = growthPhase(this.story.flags);
@@ -363,11 +409,11 @@ export class GameScene extends Phaser.Scene {
     this.backdrop = new BackdropView(this);
     this.foreground = new ForegroundView(this);
     this.worldLife = new WorldLifeView(this);
-    this.artScale = this.computeArtScale();
     const save = this.session.data;
     const { room, checkpointId } = savedReturn(this.session);
     this.level = room.level;
     this.zone = room.zone;
+    this.artScale = this.computeArtScale();
     // Partie reprise dans le monde étrange (veilleuse du passage d'ombres, D-34).
     this.drawnStrange = isStrangeRoom(this.level);
     this.drawLevel();
@@ -407,6 +453,7 @@ export class GameScene extends Phaser.Scene {
     );
     this.hud = new Hud();
     this.flashbackView = new FlashbackView();
+    this.cupImage = this.createCupImage();
     this.applyMovement();
     this.applyAbilities();
     this.motion = this.movingTarget();
@@ -531,7 +578,7 @@ export class GameScene extends Phaser.Scene {
       }
       return;
     }
-    if (this.controls.consumePressed('Pause')) {
+    if (this.controls.consumePressed('Pause') && !this.memoryPlay) {
       this.setPaused(!this.paused);
     }
     if (this.paused) {
@@ -572,6 +619,12 @@ export class GameScene extends Phaser.Scene {
         if ((run.events & RunEvent.Respawn) !== 0) {
           this.respawnAtCheckpoint();
         }
+        continue;
+      }
+      const memory = this.memoryPlay;
+      if (memory) {
+        // Souvenir jouable (D-89) : sa propre petite boucle, hors de la partie.
+        this.stepMemory(memory);
         continue;
       }
       // Histoire (D-31) : près de ce qu'on peut faire, Action devient Agir. Une porte de façade
@@ -653,6 +706,7 @@ export class GameScene extends Phaser.Scene {
       feel.lean,
       this.poser.pose,
     );
+    this.renderCup();
     this.finishView.render(
       this.level,
       this.artFinish,
@@ -846,9 +900,14 @@ export class GameScene extends Phaser.Scene {
    */
   private applyGrowth(): void {
     const growth = growthPhase(this.story.flags);
-    if (growth === this.growth) {
+    if (growth === this.growth || this.memoryPlay) {
       return;
     }
+    this.useGrowth(growth);
+  }
+
+  /** Hitbox, mouvement et marionnette d'une phase (ou de Céleste toute petite, D-89). */
+  private useGrowth(growth: GrowthPhase): void {
     this.growth = growth;
     this.player.setHitbox(growth.hitbox);
     this.applyMovement();
@@ -900,14 +959,22 @@ export class GameScene extends Phaser.Scene {
    */
   private applyRoomCamera(): void {
     const up = this.level.meta.camera === 'up';
-    this.camera.setParams(
-      up
-        ? {
-            ...this.cameraParams,
-            verticalOffsetPx: this.cameraParams.verticalOffsetPx + CHASE_CAMERA_UP_PX,
-          }
-        : this.cameraParams,
-    );
+    const zoom = this.roomZoom;
+    this.camera.setParams({
+      ...this.cameraParams,
+      zoom,
+      ...(up ? { verticalOffsetPx: this.cameraParams.verticalOffsetPx + CHASE_CAMERA_UP_PX } : {}),
+    });
+    if (zoom !== this.appliedZoom) {
+      // Un souvenir jouable (D-89) rapproche la caméra : la vue et les dessins suivent.
+      this.appliedZoom = zoom;
+      this.onResize();
+    }
+  }
+
+  /** Zoom de la salle : celui des réglages, rapproché dans un souvenir jouable (D-89). */
+  private get roomZoom(): number {
+    return this.cameraParams.zoom * (this.level.meta.world === 'memory' ? MEMORY_CAMERA_ZOOM : 1);
   }
 
   /** Change la résolution de rendu (D-18) : sauvegardée, puis appliquée par main.ts. */
@@ -954,6 +1021,13 @@ export class GameScene extends Phaser.Scene {
   private renderRunState(): void {
     // Court souvenir (D-68) : la vignette au-dessus du jeu.
     this.flashbackView.update(this.story.flashback, this.story.flashbackProgress);
+    const memory = this.memoryPlay;
+    if (memory) {
+      // Souvenir jouable (D-89) : son propre voile ; à la fin, la salle reste seule.
+      this.hud.setVeil(memory.veil);
+      this.puppet.setAlpha(memory.celesteVisible ? 1 : 0);
+      return;
+    }
     const run = this.run;
     this.hud.setFear(run.fear, this.worldParams.fearMax);
     if (run.fainting) {
@@ -990,6 +1064,7 @@ export class GameScene extends Phaser.Scene {
    * modifiée, « La maison » ramène au point de retour de la partie.
    */
   loadLevel(source: LevelSource): void {
+    this.abortMemory();
     this.story.cancel();
     this.setRoom(parseAsciiLevel(source.id, source.text), null, null);
     this.respawn();
@@ -997,6 +1072,7 @@ export class GameScene extends Phaser.Scene {
 
   /** Retour au point de retour de la partie, dans sa salle (réapparition, menu pause). */
   returnToSaved(): void {
+    this.abortMemory();
     const { room, checkpointId } = savedReturn(this.session);
     if (room.level !== this.level) {
       this.setRoom(room.level, room.zone, checkpointId);
@@ -1011,6 +1087,7 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     const { checkpointId, levelId } = this.session.data.checkpoint;
+    this.abortMemory();
     this.story.cancel();
     this.setRoom(room.level, room.zone, levelId === id ? checkpointId : null);
     const { spawn } = room.level;
@@ -1203,7 +1280,7 @@ export class GameScene extends Phaser.Scene {
   private readonly onResize = (): void => {
     const scale = this.renderScale;
     this.camera.setView(this.scale.width / scale, this.scale.height / scale);
-    this.cameras.main.setZoom(this.cameraParams.zoom * scale);
+    this.cameras.main.setZoom(this.roomZoom * scale);
     this.cameras.main.centerOn(this.camera.x, this.camera.y);
     const artScale = this.computeArtScale();
     if (artScale !== this.artScale) {
@@ -1214,7 +1291,7 @@ export class GameScene extends Phaser.Scene {
 
   /** Échelle des dessins : pixels de l'écran par pixel logique (arrondie au demi, plafonnée). */
   private computeArtScale(): number {
-    const screen = this.renderScale * this.cameraParams.zoom;
+    const screen = this.renderScale * this.roomZoom;
     return Math.min(MAX_ART_SCALE, Math.max(1, Math.ceil(screen * 2) / 2));
   }
 
@@ -1437,6 +1514,10 @@ export class GameScene extends Phaser.Scene {
       // Derrière la haie (D-49) : le monde étrange, dehors (ciel violet au lieu du mur).
       return this.level.meta.outdoor ? { ...STRANGE_PALETTE, outdoor: true } : STRANGE_PALETTE;
     }
+    if (this.level.meta.world === 'memory') {
+      // Un souvenir jouable (D-89) : couleurs chaudes et passées.
+      return MEMORY_PALETTE;
+    }
     if (isGardenRoom(this.level)) {
       return GARDEN_PALETTE;
     }
@@ -1488,17 +1569,23 @@ export class GameScene extends Phaser.Scene {
     view.y = camera.y - view.height / 2;
     const story = this.story;
     const veil = Math.max(story.veil, this.transition.veil);
-    if (this.props.update(story.flags, view, veil)) {
+    const memory = this.memoryPlay;
+    if (this.props.update(memory ? memory.flags : story.flags, view, veil)) {
       this.storyView.refresh();
     }
     if (veil >= 1 && (story.timeOfDay() !== this.drawnTime || this.isDim() !== this.drawnDim)) {
       this.redrawArt();
     }
-    const near = (story.interactable >= 0 || this.nearDoor !== 0) && !story.busy;
+    const near = memory
+      ? memory.interactable >= 0
+      : (story.interactable >= 0 || this.nearDoor !== 0) && !story.busy;
     this.touch?.setLabel('Attack', near ? 'Agir' : null);
     const door = this.level.doors.find((d) => d.id === this.nearDoor);
     const mark = this.storyView.doorMark;
-    if (!door) {
+    if (memory) {
+      // Souvenir jouable : l'étincelle montre l'action à faire.
+      this.storyView.doorMark = memory.locked ? null : (memory.current?.mark ?? null);
+    } else if (!door) {
       this.storyView.doorMark = null;
     } else if (mark?.col !== door.col || mark.row !== door.row - 3) {
       this.storyView.doorMark = { col: door.col, row: door.row - 3 };
@@ -1561,6 +1648,174 @@ export class GameScene extends Phaser.Scene {
     this.setRoom(room.level, room.zone, saved.levelId === id ? saved.checkpointId : null);
     this.transition.cancel();
     this.placeCeleste(col, row, facing);
+  }
+
+  /**
+   * Souvenir jouable (D-89) : le jeu est mis de côté (salle, place de Céleste), Céleste toute
+   * petite joue le souvenir dans sa salle, hors de la partie (rien n'est sauvegardé). À la fin, elle
+   * revient exactement où elle était, dans le noir. `fromStory` : lancé par le script (étape
+   * `play`), qui reprend ensuite ; sinon par le cahier, et l'image revient doucement.
+   */
+  playMemory(id: PlayableMemoryId, fromStory: boolean): void {
+    const data = PLAYABLE_MEMORIES[id];
+    const source = MEMORY_ROOMS.find((room) => room.id === data.room);
+    if (this.memoryPlay || !source) {
+      if (fromStory) {
+        this.story.endPlay();
+      }
+      return;
+    }
+    const box = this.player.box;
+    this.memoryReturn = {
+      level: this.level,
+      zone: this.zone,
+      x: box.x,
+      y: box.y,
+      facing: this.player.facing,
+      fromStory,
+    };
+    this.memoryPlay = new PlayableMemory(data, PHYSICS_STEP_HZ);
+    this.transition.cancel();
+    this.storyView.clearThought();
+    this.setRoom(parseAsciiLevel(source.id, source.text), null, null);
+    this.useGrowth(TODDLER_LOOK);
+    // Ni saut ni capacité dans un souvenir : Céleste toute petite marche seulement.
+    const player = this.player;
+    player.canClimb = player.canWallJump = player.canGlide = player.canHook = false;
+    player.canSlide = false;
+    this.touch?.setAbilityVisible(false);
+    this.props.load(data.props, data.room, this.memoryPlay.flags);
+    this.storyView.rebuild();
+    this.placeCeleste(data.start.col, data.start.row, data.start.facing);
+    this.clock.reset();
+  }
+
+  /** Un pas du souvenir jouable : marcher, Agir près de l'action suivante. */
+  private stepMemory(memory: PlayableMemory): void {
+    const controls = this.controls;
+    const interact = controls.consumePressed('Interact') || controls.consumePressed('Attack');
+    controls.consumePressed('Jump');
+    controls.consumePressed('Ability');
+    const input = this.playerInput;
+    input.moveX = memory.locked ? 0 : controls.moveX;
+    input.moveY = 0;
+    input.jumpPressed = false;
+    input.jumpHeld = false;
+    input.abilityPressed = false;
+    const player = this.player;
+    player.step(input);
+    const events = memory.step(player.box, interact && player.grounded);
+    if ((events & MemoryEvent.Gesture) !== 0) {
+      const action = memory.data.actions[memory.lastAction];
+      if (action) {
+        // Céleste se tourne vers ce qu'elle fait, les mains devant.
+        const center = (action.area.col + action.area.w / 2) * TILE_SIZE;
+        player.facing = center < player.box.x + player.box.width / 2 ? -1 : 1;
+        this.poser.gesture = action.gesture;
+        this.poser.gestureSteps = msToSteps(PLAYABLE_MEMORY_TIMING.gestureMs, PHYSICS_STEP_HZ);
+        if (action.sparkle) {
+          this.fx.sparkle(action.sparkle, PLAYABLE_MEMORY_TIMING.gestureMs);
+        }
+      }
+      this.poser.carrying = memory.carrying;
+    }
+    if ((events & MemoryEvent.Heart) !== 0) {
+      this.storyView.think('heart', PLAYABLE_MEMORY_TIMING.heartMs);
+    }
+    if ((events & MemoryEvent.Done) !== 0) {
+      this.endMemory();
+      return;
+    }
+    this.camera.lookInput = 0;
+    this.camera.step(player);
+    this.feel.step(player);
+    this.stepPose();
+    this.stepStage();
+  }
+
+  /** Fin du souvenir (dans le noir) : retour exact là où était Céleste. */
+  private endMemory(): void {
+    const back = this.memoryReturn;
+    this.clearMemory();
+    if (!back) {
+      return;
+    }
+    const saved = this.session.data.checkpoint;
+    this.setRoom(
+      back.level,
+      back.zone,
+      saved.levelId === back.level.id ? saved.checkpointId : null,
+    );
+    this.useGrowth(growthPhase(this.story.flags));
+    this.player.reset(back.x, back.y, this.level);
+    this.player.facing = back.facing < 0 ? -1 : 1;
+    this.feel.reset(this.player);
+    this.resetCamera();
+    this.clock.reset();
+    if (back.fromStory) {
+      // Le script reprend, toujours dans le noir.
+      this.story.endPlay();
+    } else {
+      this.reappearAtMs = this.time.now;
+    }
+  }
+
+  /** Souvenir interrompu (menu pause, debug) : Céleste reprend sa taille ; le script s'arrête. */
+  private abortMemory(): void {
+    if (!this.memoryPlay) {
+      return;
+    }
+    const fromStory = this.memoryReturn?.fromStory ?? false;
+    this.clearMemory();
+    this.useGrowth(growthPhase(this.story.flags));
+    if (fromStory) {
+      this.story.cancel();
+    }
+  }
+
+  private clearMemory(): void {
+    this.memoryPlay = null;
+    this.memoryReturn = null;
+    this.poser.reset();
+    this.cupImage.setVisible(false);
+    this.puppet.setAlpha(1);
+  }
+
+  /** La tasse tenue devant Céleste, les deux mains (souvenir de la cuisine, D-89). */
+  private createCupImage(): Phaser.GameObjects.Image {
+    const key = 'memory-cup';
+    const scale = 4;
+    const canvas = document.createElement('canvas');
+    canvas.width = 8 * scale;
+    canvas.height = 7 * scale;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.scale(scale, scale);
+      ctx.translate(4, 3.5);
+      teaCup(ctx, 6);
+    }
+    if (!this.textures.exists(key)) {
+      this.textures.addCanvas(key, canvas);
+    }
+    return this.add
+      .image(0, 0, key)
+      .setScale(1 / scale)
+      .setDepth(10.5)
+      .setVisible(false);
+  }
+
+  private renderCup(): void {
+    const memory = this.memoryPlay;
+    const visible = memory !== null && memory.carrying && memory.celesteVisible;
+    this.cupImage.setVisible(visible);
+    if (visible) {
+      const facing = this.player.facing;
+      this.cupImage.setPosition(
+        this.puppet.x + facing * 6,
+        this.puppet.y - this.growth.hitbox.height * 0.48,
+      );
+      this.cupImage.setFlipX(facing < 0);
+    }
   }
 
   /** Outil de debug : étapes de l'histoire remplacées (sans sauvegarde), salle redessinée. */

@@ -226,6 +226,10 @@ export const PROP_SIZE = {
   roger: { w: 16, h: 18 },
   // La cuisine rose (D-88), la dînette d'enfance, à peu près à hauteur de Céleste.
   'pink-kitchen': { w: 32, h: 32 },
+  // Le souvenir jouable de la cuisine (D-89), à l'échelle de Céleste toute petite.
+  'toy-kitchen': { w: 30, h: 30 },
+  'tea-table': { w: 64, h: 30 },
+  'tea-cup': { w: 6, h: 5 },
   'dad-garden': { w: 44 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // Le train (D-85) : sur le quai, la maîtresse et les parents (à hauteur d'enfant), les enfants
   // et leurs sacs ; dans la voiture-couchettes, des enfants de la taille de Céleste.

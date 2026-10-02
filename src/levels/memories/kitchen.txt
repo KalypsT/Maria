@@ -1,0 +1,38 @@
+; Souvenir jouable (D-89) : la cuisine. Céleste toute petite, dans un coin de la cuisine de la
+; maison, devant sa dînette rose ; Roger et ses peluches (un panda roux, un lapin) assis autour d'une
+; petite table. Le frigo et le plan de travail, très hauts pour elle ; la fenêtre, l'horloge. Hors de
+; la partie (la sauvegarde n'est jamais modifiée) ; les objets et les actions sont dans
+; `src/config/playableMemories.ts`. Couleurs chaudes et passées. PLACEHOLDER.
+; @name: Souvenir de la cuisine
+; @world: memory
+; @music: memory
+; @ambient: #4a3328
+; @wall: tiles
+; @decor: window 17 6 6 6
+; @decor: clock 27 5 2 2
+; @decor: fridgebody 1 11 4 9
+; @decor: fridgetop 1 11 4 1
+; @decor: counter 34 15 11 5
+; Légende : # paroi et sol, b meuble (plein), P départ.
+##############################################
+#............................................#
+#............................................#
+#............................................#
+#............................................#
+#............................................#
+#............................................#
+#............................................#
+#............................................#
+#............................................#
+#............................................#
+#----........................................#
+#............................................#
+#............................................#
+#............................................#
+#.................................bbbbbbbbbbb#
+#.................................bbbbbbbbbbb#
+#.................................bbbbbbbbbbb#
+#.................................bbbbbbbbbbb#
+#................P................bbbbbbbbbbb#
+##############################################
+##############################################

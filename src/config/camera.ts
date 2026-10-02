@@ -109,3 +109,9 @@ export const CAMERA_PARAM_RANGES: Readonly<
  * de Céleste, pour voir où aller et garder le poursuivant en bas de l'écran. PROVISOIRE.
  */
 export const CHASE_CAMERA_UP_PX = 30;
+
+/**
+ * Souvenirs jouables (D-89) : la caméra se rapproche (zoom × ce facteur), la petite cuisine remplit
+ * l'écran et Céleste toute petite se voit bien. PROVISOIRE.
+ */
+export const MEMORY_CAMERA_ZOOM = 1.7;

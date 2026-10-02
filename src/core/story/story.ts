@@ -1,4 +1,5 @@
 import type { FlashbackId } from '../../config/memories';
+import type { PlayableMemoryId } from '../../config/playableMemories';
 import type { Box } from '../physics/gridCollision';
 
 /**
@@ -132,7 +133,12 @@ export type StoryStep =
    * Capacité apprise (D-85) : sauvegardée aussitôt, avec son indice et sa bulle d'aide, comme un
    * objet de capacité ramassé. La glissade s'apprend en imitant la camarade du train.
    */
-  | { readonly do: 'ability'; readonly id: string };
+  | { readonly do: 'ability'; readonly id: string }
+  /**
+   * Souvenir jouable (D-89, bloquant) : la scène met le jeu de côté, joue le souvenir, puis revient
+   * là où était Céleste, toujours dans le noir. À placer après un fondu au noir.
+   */
+  | { readonly do: 'play'; readonly id: PlayableMemoryId };
 
 export interface StoryTrigger {
   readonly id: string;
@@ -233,6 +239,11 @@ export const PROP_KINDS = [
   'dog-sleep',
   /** La cuisine rose (D-88), la dînette d'enfance de Céleste, au bout du train de la vaisselle. */
   'pink-kitchen',
+  // Le souvenir jouable de la cuisine (D-89), dans sa propre salle : la dînette (sans la lueur), la
+  // petite table où sont assis Roger, un panda roux et un lapin, la tasse.
+  'toy-kitchen',
+  'tea-table',
+  'tea-cup',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 

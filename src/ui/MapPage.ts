@@ -11,6 +11,7 @@ import {
 } from '../config/memories';
 import { drawAbility } from '../scenes/art/abilityArt';
 import { drawFlashback } from '../scenes/art/flashbackArt';
+import { playableOf, type PlayableMemoryId } from '../config/playableMemories';
 import { drawMemory } from '../scenes/art/memoryArt';
 
 /** Durée du tracé d'une salle découverte depuis la dernière ouverture (ms). */
@@ -64,7 +65,11 @@ export class MapPage {
   private model: MapModel | null = null;
   private bounds: MapBox = { x: 0, y: 0, w: 1, h: 1 };
 
-  constructor(private readonly onClose: () => void) {
+  constructor(
+    private readonly onClose: () => void,
+    /** Un souvenir jouable touché dans le cahier (D-89) : le cahier se ferme, il se rejoue. */
+    private readonly onPlayMemory: (id: PlayableMemoryId) => void = () => undefined,
+  ) {
     this.root = document.createElement('div');
     this.root.id = 'map-page';
     this.root.setAttribute(UI_OVERLAY_ATTRIBUTE, '');
@@ -230,7 +235,12 @@ export class MapPage {
   /** Toucher sur la page des souvenirs : ouvre ou referme un souvenir ; vrai s'il est traité. */
   private touchMemories(event: PointerEvent): boolean {
     if (this.selected !== null) {
+      // Un souvenir jouable (D-89), affiché en grand : le toucher encore le rejoue.
+      const playable = playableOf(this.selected);
       this.selected = null;
+      if (playable) {
+        this.onPlayMemory(playable);
+      }
       return true;
     }
     const bounds = this.canvas.getBoundingClientRect();
@@ -275,6 +285,19 @@ export class MapPage {
       ctx.roundRect(width / 2 - size / 2, height / 2 - size / 2, size, size, 12);
       ctx.stroke();
       drawMemory(ctx, this.selected, width / 2, height / 2, size * 0.85);
+      if (playableOf(this.selected)) {
+        // Un souvenir jouable (D-89) : un petit triangle « lecture », sans texte.
+        const r = size * 0.08;
+        const cx = width / 2 + size / 2 - r * 1.8;
+        const cy = height / 2 + size / 2 - r * 1.8;
+        ctx.fillStyle = ink;
+        ctx.beginPath();
+        ctx.moveTo(cx - r * 0.6, cy - r);
+        ctx.lineTo(cx + r, cy);
+        ctx.lineTo(cx - r * 0.6, cy + r);
+        ctx.closePath();
+        ctx.fill();
+      }
       return;
     }
     const cols = list.length <= 4 ? list.length : 3;
