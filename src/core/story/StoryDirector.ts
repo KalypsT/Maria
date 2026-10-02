@@ -33,6 +33,8 @@ export interface StoryHost {
   memory(id: string): void;
   /** Silence de Maria (D-57). */
   hush(ms: number): void;
+  /** Capacité apprise (D-85). */
+  ability(id: string): void;
 }
 
 /**
@@ -130,6 +132,26 @@ export class StoryDirector {
       }
     }
     return null;
+  }
+
+  /** Salle qui roule en ce moment (le train en route, D-85). */
+  moving(room: string): boolean {
+    for (const rule of this.data.moving ?? []) {
+      if (rule.room === room && this.check(rule.when)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** Lumières éteintes dans la salle (la nuit dans le train, D-85). */
+  dim(room: string): boolean {
+    for (const rule of this.data.dim ?? []) {
+      if (rule.room === room && this.check(rule.when)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -280,6 +302,9 @@ export class StoryDirector {
         break;
       case 'hush':
         this.host.hush(step.ms);
+        break;
+      case 'ability':
+        this.host.ability(step.id);
         break;
       default:
         break;

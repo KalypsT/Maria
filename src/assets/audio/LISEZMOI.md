@@ -14,6 +14,7 @@ Déposer ici les morceaux, nommés d'après leur emplacement :
 | `street-strange`  | l'école étrange (le monde étrange du quartier)     |
 | `station`         | la gare                                            |
 | `station-strange` | le monde étrange de la gare et sa tour             |
+| `train`           | le train de nuit                                   |
 | `found` (court)   | capacité ou trouvaille ramassée                    |
 | `memory` (court)  | nouveau souvenir                                   |
 | `maria` (court)   | apparition de Maria (sans ce fichier : le silence) |

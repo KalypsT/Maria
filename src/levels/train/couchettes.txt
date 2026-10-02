@@ -1,0 +1,56 @@
+; Le train (D-83, D-85), PR 2 : la voiture-couchettes de la classe, la nuit, en route. À gauche, la
+; plateforme d'où l'on monte ; le compartiment de la classe (couchettes sur trois étages, tablette
+; sous la fenêtre, la veilleuse) ; une grille en accordéon à moitié fermée (on glisse dessous :
+; la camarade montre la glissade) ; le compartiment suivant (couchettes, le chariot du vendeur,
+; le filet à bagages et sa trouvaille) ; au bout, la porte de la voiture suivante (PR 3).
+; @name: La voiture-couchettes
+; @icon: train
+; @vehicle: train
+; @music: train
+; @ambient: #1d2133
+; @wall: planks
+; @walls: #e9dfc8 #b48d68
+; @difficulty: easy
+; @note: la grille (colonnes 39-40) laisse une tuile au sol : on ne passe qu'en glissant (D-84).
+; @note-2: la trouvaille du filet (moyenne) : un saut long depuis la glissade, sur l'étagère au-dessus des couchettes de droite.
+; @decor: carceiling 1 2 84 1
+; @decor: traindoor 3 11 5 8
+; @decor: traindoor 80 11 5 8
+; @decor: trainwindow 18 8 13 6
+; @decor: trainwindow 46 8 16 6
+; @decor: trainlamp 16 8 1 2
+; @decor: trainlamp 63 8 1 2
+; @decor: partition 10 2 1 11
+; @decor: partition 69 2 1 11
+; @decor: partition 38 2 2 11
+; @decor: accordiongate 38 13 2 5
+; @decor: bunks 11 10 5 9
+; @decor: bunks 33 10 5 9
+; @decor: bunks 40 10 5 9
+; @decor: bunks 64 7 5 12
+; @decor: foldtable 21 14 7 5
+; @decor: rack 49 4 11 1
+; @decor: trolley 52 16 4 3
+; Légende : # paroi/plancher, b bois (plein), - couchette, tablette ou filet (traversables), C veilleuse (checkpoint), P repère de départ, S trouvaille.
+######################################################################################
+######################################################################################
+#.........b...........................bb.............................b...............#
+#.........b...........................bb..............S..............b...............#
+#.........b...........................bb.........-----------.........b...............#
+#.........b...........................bb.............................b...............#
+#.........b...........................bb.............................b...............#
+#.........b...........................bb........................-----b...............#
+#.........b...........................bb.............................b...............#
+#.........b...........................bb.............................b...............#
+#.........b-----.................-----bb-----...................-----b...............#
+#.........b...........................bb.............................b...............#
+#.........b...........................bb.............................b...............#
+#..........-----.................-----bb-----...................-----................#
+#....................-------..........bb.............................................#
+#.....................................bb.............................................#
+#..........-----.................-----bb-----.......bbbb........-----................#
+#.....................................bb............bbbb.............................#
+#...P...................C............................................................#
+######################################################################################
+######################################################################################
+######################################################################################

@@ -190,10 +190,10 @@ const TRIGGERS: StoryTrigger[] = [
 const OMENS: StoryOmen[] = [
   // En grimpant vers le haut des casiers : la lumière vacille, les couleurs se refroidissent.
   { room: 'station-lost', when: { none: [F.StationDone] }, col: 40, row: 8, radius: 10 },
-  // Devant la porte ouverte du train à quai (D-69) : la suite.
+  // Devant la porte ouverte du train à quai (D-69) : la suite, jusqu'au départ (D-85).
   {
     room: 'station-platforms',
-    when: { all: [F.GrownOlder] },
+    when: { all: [F.GrownOlder], none: [F.TrainBoarding] },
     col: TRAIN_DOOR.col,
     row: TRAIN_DOOR.row,
     radius: 10,
@@ -212,12 +212,13 @@ const PROPS: StoryProp[] = [
     when: { all: [F.StationDone], none: [F.GrownOlder] },
   },
   {
-    // Quelques mois plus tard (D-69) : le train arrêté à quai, sa porte ouverte.
+    // Quelques mois plus tard (D-69) : le train arrêté à quai, sa porte ouverte ; il part avec la
+    // classe (D-85).
     id: 'quay-train',
     room: 'station-platforms',
     kind: 'quay-train',
     ...TRAIN_DOOR,
-    when: { all: [F.GrownOlder] },
+    when: { all: [F.GrownOlder], none: [F.TrainDeparted] },
   },
 ];
 

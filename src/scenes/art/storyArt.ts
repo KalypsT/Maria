@@ -933,6 +933,41 @@ function drawIcon(
       ctx.stroke();
       break;
     }
+    case 'slide': {
+      // Aide de la glissade (D-84, D-85) : une barrière basse, quelqu'un couché qui passe dessous,
+      // une flèche.
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 1;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx - 9, cy + 6);
+      ctx.lineTo(cx + 9, cy + 6);
+      ctx.moveTo(cx + 1, cy + 6);
+      ctx.lineTo(cx + 1, cy - 2);
+      ctx.lineTo(cx + 8, cy - 2);
+      ctx.lineTo(cx + 8, cy + 6);
+      ctx.stroke();
+      ctx.fillStyle = PINK;
+      ctx.beginPath();
+      ctx.arc(cx - 0.5, cy + 3, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = PINK;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(cx - 2, cy + 3.8);
+      ctx.lineTo(cx - 8, cy + 4.5);
+      ctx.stroke();
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(cx - 9, cy - 1);
+      ctx.lineTo(cx - 3, cy - 1);
+      ctx.moveTo(cx - 5, cy - 2.6);
+      ctx.lineTo(cx - 3, cy - 1);
+      ctx.lineTo(cx - 5, cy + 0.6);
+      ctx.stroke();
+      break;
+    }
     case 'question':
       // « ? » seul, au crayon : un parent qui ne sait pas (D-37).
       ctx.strokeStyle = INK;

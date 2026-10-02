@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { PARALLAX, WORLD_LIFE, type ArtPalette } from '../config/art';
+import { PARALLAX, TRAIN_RIDE, WORLD_LIFE, type ArtPalette } from '../config/art';
 import { GAME_BASE_WIDTH, GAME_HEIGHT, GAME_MAX_WIDTH, TILE_SIZE as T } from '../config/display';
 import { nextDelay, wind, wrap } from '../core/fx/worldLife';
 import type { LevelData } from '../core/level/LevelData';
@@ -10,6 +10,9 @@ import {
   drawOutsidePlane,
   drawRoofsPlane,
   drawSkyPlane,
+  drawTrainHillsPlane,
+  drawTrainNearPlane,
+  drawTrainSkyPlane,
   type Extent,
 } from './art/backdropArt';
 import { drawSkyDecor, floorRow, seesOutside, windowPanes } from './art/roomArt';
@@ -40,6 +43,11 @@ interface PlaneSpec {
   readonly clouds?: CloudSpec;
   /** Des oiseaux traversent ce plan de temps en temps (D-73). */
   readonly birds?: boolean;
+  /**
+   * Plan qui défile quand la salle roule (le train, D-85) : vitesse à pleine allure (px/s) et
+   * période du motif (px), qui se répète sans couture.
+   */
+  readonly scroll?: { readonly pxPerS: number; readonly period: number };
 }
 
 /** Image qui suit un plan : position dans le plan (px logiques depuis son coin). */
@@ -62,6 +70,9 @@ interface Plane {
   readonly image: Phaser.GameObjects.Image;
   readonly clouds: Drifter[];
   readonly birds: boolean;
+  readonly scroll: { readonly pxPerS: number; readonly period: number } | null;
+  /** Défilement accumulé (px, dans [0, période[). */
+  shift: number;
   /** Position courante du coin du plan (px du monde). */
   x: number;
   y: number;
@@ -133,7 +144,9 @@ export class BackdropView {
       const f = spec.factor;
       const ox = minX * f - margin;
       const oy = minY * f - margin;
-      const w = (maxX - minX) * f + GAME_MAX_WIDTH + 2 * margin;
+      // Un plan qui défile a une période de plus à droite : il recule d'au plus une période.
+      const extra = spec.scroll?.period ?? 0;
+      const w = (maxX - minX) * f + GAME_MAX_WIDTH + 2 * margin + extra;
       const h = (maxY - minY) * f + GAME_HEIGHT + 2 * margin;
       const ref = spec.ref ?? { x: minX, y: maxY };
       // Coordonnées du monde du coin du plan quand la vue est en `ref`.
@@ -165,7 +178,21 @@ export class BackdropView {
         ? this.makeClouds(spec.clouds, level.id, index, w, y0, scale, depth)
         : [];
       const birds = spec.birds === true;
-      this.planes.push({ factor: f, ox, oy, w, h, scale, image, clouds, birds, x: 0, y: 0 });
+      this.planes.push({
+        factor: f,
+        ox,
+        oy,
+        w,
+        h,
+        scale,
+        image,
+        clouds,
+        birds,
+        scroll: spec.scroll ?? null,
+        shift: 0,
+        x: 0,
+        y: 0,
+      });
     });
     if (this.planes.some((plane) => plane.birds)) {
       this.makeBirds();
@@ -255,13 +282,25 @@ export class BackdropView {
 
   /**
    * Place les plans pour une vue dont le coin haut gauche est en (`left`, `top`) (px du monde) ;
-   * fait dériver les nuages (au vent) et passer les oiseaux.
+   * fait dériver les nuages (au vent) et passer les oiseaux. `motion` : allure de la salle qui roule
+   * (0 à l'arrêt, 1 à pleine vitesse, D-85) ; le paysage recule.
    */
-  update(left: number, top: number, viewWidth: number, nowMs: number, dtMs: number): void {
+  update(
+    left: number,
+    top: number,
+    viewWidth: number,
+    nowMs: number,
+    dtMs: number,
+    motion = 0,
+  ): void {
     const gust = 0.5 + wind(nowMs);
     for (const plane of this.planes) {
       const k = 1 - plane.factor;
-      plane.x = plane.ox + left * k;
+      const scroll = plane.scroll;
+      if (scroll && motion > 0) {
+        plane.shift = wrap(plane.shift + (scroll.pxPerS * motion * dtMs) / 1000, 0, scroll.period);
+      }
+      plane.x = plane.ox + left * k - plane.shift;
       plane.y = plane.oy + top * k;
       plane.image.setPosition(plane.x, plane.y);
       this.cropToRoom(plane.image, plane.x, plane.y, plane.scale);
@@ -347,6 +386,9 @@ function planeSpecs(
     return [];
   }
   const floorY = floorRow(level) * T;
+  if (level.meta.vehicle === 'train') {
+    return trainSpecs(level, p);
+  }
   if (!p.outdoor) {
     return outsideSpecs(level, p);
   }
@@ -478,6 +520,53 @@ function outsideSpecs(level: LevelData, p: Readonly<ArtPalette>): PlaneSpec[] {
         shadow: p.stars ? 'rgba(24,30,66,0.5)' : 'rgba(210,222,240,0.7)',
         y: [main.y - 8, main.y + main.h * 0.45],
         spacingPx: WORLD_LIFE.clouds.windowSpacingPx,
+      },
+    },
+  ];
+}
+
+/**
+ * Derrière les vitres du train (D-85) : le ciel de nuit et la lune, immobiles ; les collines, puis
+ * le bord de la voie, qui défilent quand le train roule. L'horizon est sous le bas des fenêtres.
+ */
+function trainSpecs(level: LevelData, p: Readonly<ArtPalette>): PlaneSpec[] {
+  const panes = windowPanes(level);
+  const first = panes[0];
+  if (!first) {
+    return [];
+  }
+  const top = Math.min(...panes.map((pane) => pane.y));
+  const bottom = Math.max(...panes.map((pane) => pane.y + pane.h));
+  const horizonY = bottom + 2;
+  const width = level.width * T;
+  const height = level.height * T;
+  const [minX] = viewRange(width, GAME_BASE_WIDTH, GAME_MAX_WIDTH);
+  const [minY, maxY] = viewRange(height, GAME_HEIGHT, GAME_HEIGHT);
+  const ref = { x: minX, y: Math.max(minY, Math.min(maxY, top - GAME_HEIGHT / 3)) };
+  const moon = { x: first.x + first.w * 0.7, y: top + (bottom - top) * 0.28 };
+  const r = TRAIN_RIDE;
+  return [
+    {
+      factor: r.parallax.sky,
+      ref,
+      draw: (ctx, e) => {
+        drawTrainSkyPlane(ctx, p, e, horizonY, moon);
+      },
+    },
+    {
+      factor: r.parallax.hills,
+      ref,
+      scroll: { pxPerS: r.hillsScrollPxPerS, period: r.hillsPeriodPx },
+      draw: (ctx, e) => {
+        drawTrainHillsPlane(ctx, p, e, horizonY, r.hillsPeriodPx);
+      },
+    },
+    {
+      factor: r.parallax.near,
+      ref,
+      scroll: { pxPerS: r.nearScrollPxPerS, period: r.nearPeriodPx },
+      draw: (ctx, e) => {
+        drawTrainNearPlane(ctx, p, e, horizonY, r.nearPeriodPx);
       },
     },
   ];

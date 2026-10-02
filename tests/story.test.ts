@@ -33,6 +33,7 @@ function recorder() {
     shake: (ms) => log.push(`shake ${String(ms)}`),
     memory: (id) => log.push(`memory ${id}`),
     hush: (ms) => log.push(`hush ${String(ms)}`),
+    ability: (id) => log.push(`ability ${id}`),
   };
   return { log, host };
 }
@@ -96,6 +97,23 @@ describe('StoryDirector', () => {
     d.step('r', standing(2, 3), true);
     expect(d.interactable).toBe(-1);
     expect(log).toHaveLength(2);
+  });
+
+  it('une capacité apprise (D-85) ; la salle qui roule et les lumières éteintes suivent les étapes', () => {
+    const { log, host } = recorder();
+    const data: StoryData = {
+      ...story([{ do: 'ability', id: 'slide' }], 'touch', false),
+      moving: [{ room: 'r', when: { all: ['done'] } }],
+      dim: [{ room: 'r', when: { none: ['done'] } }],
+    };
+    const d = new StoryDirector(data, host, HZ);
+    expect(d.moving('r')).toBe(false);
+    expect(d.dim('r')).toBe(true);
+    d.step('r', standing(3, 3), false);
+    expect(log).toEqual(['ability slide', 'flag done']);
+    expect(d.moving('r')).toBe(true);
+    expect(d.moving('autre')).toBe(false);
+    expect(d.dim('r')).toBe(false);
   });
 
   it('un contact lance le script sans Agir', () => {

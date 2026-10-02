@@ -2,9 +2,9 @@
 
 ## Phase en cours
 
-**Le train** (niveau 5, D-82, D-83) : plan validé en 6 PR. **PR 1 faite : la glissade** (D-84), dans le parcours d'essai 11, sur `ccr-982d9f94-2fndno`. **À essayer sur téléphone avant la PR 2** (c'est une modification du mouvement).
+**Le train** (niveau 5, D-82, D-83) : plan validé en 6 PR. **PR 1 faite : la glissade** (D-84, fusionnée). **PR 2 faite : le départ et la voiture-couchettes** (D-85), sur `ccr-982d9f94-2fndno`. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
-Suite du train : PR 2 le départ (la classe sur le quai le soir, la voiture-couchettes, la camarade qui apprend la glissade, le paysage qui défile, la nuit et la lueur) ; PR 3 le reste du train réel (compartiments, fourgon, toit et tunnels, wagon-restaurant) ; PR 4 la poursuite horizontale (parcours d'essai 12) ; PR 5 le monde étrange, la cuisine rose et le souvenir jouable ; PR 6 la fin, la gare de la mer, la revisite du train et les revisites avec la glissade.
+Suite du train : PR 3 le reste du train réel (compartiments, fourgon, toit et tunnels, wagon-restaurant) ; PR 4 la poursuite horizontale (parcours d'essai 12) ; PR 5 le monde étrange, la cuisine rose et le souvenir jouable ; PR 6 la fin, la gare de la mer, la revisite du train et les revisites avec la glissade.
 
 **Structure de la fin du jeu** (D-82) : 8 niveaux (maison, jardin, quartier, gare, train, station balnéaire, avant-dernier, monde de Maria). Niveau 6 et niveau 7 : pistes retenues, détails décidés le moment venu.
 
@@ -17,6 +17,23 @@ Suite du train : PR 2 le départ (la classe sur le quai le soir, la voiture-couc
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le train, PR 2 : le départ, la voiture-couchettes, la nuit (D-85)
+
+- **Le départ** : en phase 3, Agir à la porte du train à quai. Le soir sur le quai : la maîtresse, trois enfants et leurs sacs, maman et papa qui font au revoir (un cœur). Puis la voiture-couchettes ; le train s'ébranle, le paysage se met à défiler. Pas de parents dans le train.
+- **La voiture-couchettes** : le compartiment de la classe, une grille en accordéon à moitié fermée (on glisse dessous), le compartiment suivant (le chariot du vendeur, le filet à bagages et sa trouvaille, moyenne, par un saut long depuis la glissade), la porte du bout.
+- **La glissade s'apprend** : la camarade invite Céleste, passe sous la grille (dans le noir d'un court fondu), montre comment ; Céleste apprend la glissade (bulle « glisser »). La maîtresse rappelle l'heure du coucher.
+- **La nuit** : Agir sur sa couchette ; tout le monde dort, les lumières s'éteignent ; une lueur passe dans le couloir. Au bout, la porte : « ? » (la suite avec la PR 3).
+- **Le train roule** : derrière les vitres, collines, villages allumés, arbres et poteaux de caténaire qui défilent ; petites secousses de l'image de temps en temps. Rien ne touche à Céleste. Réglages `TRAIN_RIDE`.
+- DEBUG → Histoire : « le train, en route (la glissade à apprendre) », « le train, la nuit (la lueur) ».
+- Tests : 572. Vérifié dans Chromium : le quai (maîtresse, enfants, parents), la montée, le départ, la camarade et la glissade apprise, la grille, la nuit (lumières éteintes), la porte du bout.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « quelques mois après la gare », puis aller sur les quais) : la porte du train se remarque-t-elle ? La scène du quai (au revoir) est-elle assez lente et tendre ?
+- [ ] Le paysage qui défile : agréable, ou donne-t-il le tournis ? Les secousses : se sentent-elles sans gêner les sauts ? (`TRAIN_RIDE`)
+- [ ] La camarade : se reconnaît-elle ? Comprend-on qu'elle est passée sous la grille et qu'il faut faire pareil ?
+- [ ] La grille et le chariot : lit-on qu'on passe dessous ?
+- [ ] La trouvaille du filet (saut long depuis l'étagère) : juste (moyenne) ?
+- [ ] La nuit : assez sombre, assez douce ? La lueur dans le couloir se voit-elle et donne-t-elle envie de la suivre ?
+- [ ] Mémoire et fluidité dans la voiture (trois plans qui défilent).
 
 ### Le train, PR 1 : la glissade (D-84)
 
@@ -1138,6 +1155,6 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. Essai de la glissade sur téléphone (parcours 11), réglages exportés du DEBUG.
-2. Le train, PR 2 à 6 (D-83).
+1. Essai de la glissade (parcours 11) et du départ du train sur téléphone, réglages exportés du DEBUG.
+2. Le train, PR 3 à 6 (D-83).
 3. Avant d'offrir le jeu : identifiants fixes des trouvailles et lanternes (D-71), installation facile (PWA), sauvegarde sûre sur iPhone, option « réduire les effets ».
