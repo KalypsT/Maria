@@ -1934,6 +1934,9 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
     if (d.kind === 'lostoffice' && p.darkness > 0) {
       return [{ x: r.x + r.w / 2, y: r.y + r.h - 48, k: 0.6 }];
     }
+    if (d.kind === 'desklamp') {
+      return [{ x: r.x + r.w / 2, y: r.y + r.h - 8, k: 0.7 }];
+    }
     if (d.kind === 'balcony') {
       const lamp = balconyLamp(level, r);
       return lamp ? [{ x: lamp.x, y: lamp.y - 4, k: 0.6 }] : [];

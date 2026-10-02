@@ -60,6 +60,44 @@ function coveredByOther(a: ArtContext, self: Rect, col: number, row: number): bo
   );
 }
 
+/** Contour des tuiles pleines d'un rectangle, sur chaque côté qui donne sur le vide (D-81). */
+function solidOutline(a: ArtContext, r: Rect, stroke: string, alpha: number): void {
+  const { ctx, level } = a;
+  const solid = (col: number, row: number) => tileAt(level, col, row) === Tile.Solid;
+  ctx.strokeStyle = stroke;
+  ctx.globalAlpha = alpha;
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  for (let row = r.y / T; row < (r.y + r.h) / T; row++) {
+    for (let col = r.x / T; col < (r.x + r.w) / T; col++) {
+      if (!solid(col, row)) {
+        continue;
+      }
+      const x = col * T;
+      const y = row * T;
+      if (!solid(col - 1, row)) {
+        ctx.moveTo(x + 0.6, y);
+        ctx.lineTo(x + 0.6, y + T);
+      }
+      if (!solid(col + 1, row)) {
+        ctx.moveTo(x + T - 0.6, y);
+        ctx.lineTo(x + T - 0.6, y + T);
+      }
+      if (!solid(col, row + 1)) {
+        ctx.moveTo(x, y + T - 0.6);
+        ctx.lineTo(x + T, y + T - 0.6);
+      }
+    }
+  }
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+}
+
+/** La cheminée de l'atelier du dépôt (D-81) : son sommet, d'où sort la fumée. */
+export function depotChimney(r: Rect): { x: number; y: number } {
+  return { x: r.x + r.w * 0.18, y: r.y - 2.2 * T };
+}
+
 /** Le réverbère du balcon du hall (D-80) : au bout de câble posé au-dessus du balcon. */
 export function balconyLamp(level: ArtContext['level'], r: Rect): { x: number; y: number } | null {
   for (const c of level.cables) {
@@ -949,14 +987,45 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
     },
     lostshelf(a, r) {
       const { ctx } = a;
-      // Étagères des objets perdus : montants dans l'ombre, planches (traversables), et dessus
-      // des choses perdues par des inconnus.
-      ctx.fillStyle = 'rgba(110,80,56,0.45)';
-      ctx.fillRect(r.x, r.y, 2, r.h);
-      ctx.fillRect(r.x + r.w - 2, r.y, 2, r.h);
+      // Étagères des objets perdus (D-81) : deux rails de bois fixés au mur, du sol au plafond ;
+      // les planches (traversables) y sont accrochées, avec dessus des choses perdues par des
+      // inconnus ; des parapluies pendent aux rails.
+      const top = T;
+      const ground = groundRow(a, r.x + 1, r.y / T) * T;
+      ctx.fillStyle = 'rgba(110,80,56,0.6)';
+      ctx.fillRect(r.x, top, 2.5, ground - top);
+      ctx.fillRect(r.x + r.w - 2.5, top, 2.5, ground - top);
+      ctx.fillStyle = 'rgba(0,0,0,0.12)';
+      ctx.fillRect(r.x + 2.5, top, 1, ground - top);
+      ctx.fillRect(r.x + r.w - 1.5, top, 1, ground - top);
+      for (const [x, y, k] of [
+        [r.x + 3, r.y + r.h * 0.35, 0],
+        [r.x + r.w - 3, r.y + r.h * 0.62, 1],
+        [r.x + 3, r.y + r.h * 0.9, 2],
+      ] as const) {
+        ctx.strokeStyle = '#3b3440';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(x + (k === 1 ? -2 : 2), y + 2, 2, Math.PI, 0, k === 1);
+        ctx.stroke();
+        ctx.fillStyle = LOST_THINGS[(k * 2 + 1) % LOST_THINGS.length] ?? WOOD;
+        const ux = x + (k === 1 ? -4 : 4);
+        ctx.beginPath();
+        ctx.moveTo(ux - 2.5, y + 4);
+        ctx.lineTo(ux + 2.5, y + 4);
+        ctx.lineTo(ux, y + 22);
+        ctx.fill();
+      }
       for (const [c0, c1, row] of oneWayRuns(a, r)) {
         const x = c0 * T;
         const w = (c1 - c0 + 1) * T;
+        ctx.fillStyle = WOOD_DARK;
+        const bx = x < r.x + r.w / 2 ? x + 3 : x + w - 9;
+        ctx.beginPath();
+        ctx.moveTo(bx, row * T + 4);
+        ctx.lineTo(bx + 6, row * T + 4);
+        ctx.lineTo(x < r.x + r.w / 2 ? bx : bx + 6, row * T + 11);
+        ctx.fill();
         tileShape(a, { x, y: row * T, w, h: T }, WOOD, WOOD_LIGHT);
         for (let k = 0; k * 9 + 2 < w - 4; k++) {
           lostThing(ctx, x + 2 + k * 9, row * T, Math.floor(hash(x + k, row) * 5) + k);
@@ -965,7 +1034,38 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
     },
     tallcabinet(a, r) {
       const { ctx } = a;
-      // Haute armoire de rangement (pleine) : deux portes, une poignée.
+      // Haut placard mural (plein, D-81) : vissé au mur sur deux équerres (on passe dessous) ;
+      // dessous, posé au sol, un porte-parapluies (fond).
+      const ground = groundRow(a, r.x + r.w / 2, (r.y + r.h) / T) * T;
+      ctx.fillStyle = WOOD_DARK;
+      for (const x of [r.x + 2, r.x + r.w - 2]) {
+        const dir = x < r.x + r.w / 2 ? 1 : -1;
+        ctx.beginPath();
+        ctx.moveTo(x, r.y + r.h);
+        ctx.lineTo(x + dir * 8, r.y + r.h);
+        ctx.lineTo(x, r.y + r.h + 10);
+        ctx.fill();
+      }
+      if (ground > r.y + r.h + 2 * T) {
+        const cx = r.x + r.w / 2;
+        ctx.fillStyle = '#6d86c2';
+        ctx.fillRect(cx - 6, ground - 14, 12, 14);
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.fillRect(cx - 6, ground - 14, 12, 2);
+        ctx.strokeStyle = '#3b3440';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        for (const [dx, h] of [
+          [-3, 24],
+          [1, 28],
+          [4, 21],
+        ] as const) {
+          ctx.moveTo(cx + dx, ground - 12);
+          ctx.lineTo(cx + dx, ground - h);
+          ctx.arc(cx + dx + 2, ground - h, 2, Math.PI, 0);
+        }
+        ctx.stroke();
+      }
       tileShape(a, r, WOOD_DARK, WOOD);
       ctx.strokeStyle = 'rgba(0,0,0,0.25)';
       ctx.lineWidth = 1;
@@ -975,6 +1075,23 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
       ctx.stroke();
       ctx.fillStyle = AMBER;
       ctx.fillRect(r.x + r.w / 2 - 3, r.y + r.h / 2, 1.5, 4);
+    },
+    desklamp(a, r) {
+      const { ctx } = a;
+      // Lampe de bureau à abat-jour vert (fond, D-81), posée sur le guichet ; allumée.
+      const cx = r.x + r.w / 2;
+      const base = r.y + r.h;
+      ctx.fillStyle = '#c9a43a';
+      ctx.fillRect(cx - 4, base - 2, 8, 2);
+      ctx.fillRect(cx - 0.75, base - 11, 1.5, 9);
+      ctx.fillStyle = '#3f7a5a';
+      ctx.beginPath();
+      ctx.moveTo(cx - 7, base - 10);
+      ctx.quadraticCurveTo(cx, base - 17, cx + 7, base - 10);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#fff3c9';
+      ctx.fillRect(cx - 5, base - 10, 10, 1.5);
     },
     lockers(a, r) {
       const { ctx } = a;
@@ -1080,45 +1197,65 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
     },
     floatsuitcase(a, r) {
       const { ctx, palette: p } = a;
-      // Une valise qui flotte (son dessus est une planche traversable), poignée et sangles.
-      tileShape(a, { x: r.x, y: r.y, w: r.w, h: T }, p.wood, p.woodLight);
+      // Une valise qui flotte (D-81, lisibilité) : son dessus est une planche traversable, bien
+      // marquée ; le corps, qu'on traverse d'en dessous, n'est qu'un contour léger (le plein, lui,
+      // est rempli et bordé partout).
       ctx.fillStyle = p.wood;
+      ctx.globalAlpha = 0.3;
       ctx.beginPath();
       ctx.roundRect(r.x + 1, r.y + 3, r.w - 2, r.h - 3, 3);
       ctx.fill();
+      ctx.globalAlpha = 1;
       ctx.strokeStyle = p.rim;
-      ctx.globalAlpha = 0.5;
+      ctx.globalAlpha = 0.22;
       ctx.lineWidth = 1;
-      ctx.strokeRect(r.x + r.w / 2 - 4, r.y - 3, 8, 3);
+      ctx.stroke();
       ctx.beginPath();
       ctx.moveTo(r.x + 5, r.y + 4);
       ctx.lineTo(r.x + 5, r.y + r.h - 1);
       ctx.moveTo(r.x + r.w - 5, r.y + 4);
       ctx.lineTo(r.x + r.w - 5, r.y + r.h - 1);
       ctx.stroke();
+      ctx.globalAlpha = 0.6;
+      ctx.strokeRect(r.x + r.w / 2 - 4, r.y - 3, 8, 3);
       ctx.globalAlpha = 1;
+      tileShape(a, { x: r.x, y: r.y, w: r.w, h: T }, p.wood, p.woodLight);
     },
     suitcasestack(a, r) {
       const { ctx, palette: p } = a;
-      // Une pile de valises (pleine) : des bords de valises, des poignées.
-      tileShape(a, r, p.wood, p.woodLight);
+      // Une pile de valises (pleine, D-81) : plus sombre que le mur, bordée de turquoise sur tous
+      // ses côtés libres, et découpée en valises (bords, poignées) : on la distingue du fond.
+      tileShape(a, r, p.structure, p.structure);
       ctx.strokeStyle = p.rim;
-      ctx.globalAlpha = 0.25;
+      ctx.globalAlpha = 0.35;
       ctx.lineWidth = 1;
-      for (let y = r.y + 10; y < r.y + r.h - 4; y += 9 + hash(r.x, y) * 8) {
-        ctx.beginPath();
-        ctx.moveTo(r.x + 1, y);
-        ctx.lineTo(r.x + r.w - 1, y);
-        ctx.stroke();
+      const vertical = r.h > r.w;
+      ctx.beginPath();
+      if (vertical) {
+        for (let y = r.y + 10; y < r.y + r.h - 4; y += 9 + hash(r.x, y) * 8) {
+          ctx.moveTo(r.x + 1, y);
+          ctx.lineTo(r.x + r.w - 1, y);
+          ctx.moveTo(r.x + r.w / 2 - 3, y - 4);
+          ctx.lineTo(r.x + r.w / 2 + 3, y - 4);
+        }
+      } else {
+        for (let x = r.x + 18; x < r.x + r.w - 6; x += 18 + hash(x, r.y) * 14) {
+          ctx.moveTo(x, r.y + 2);
+          ctx.lineTo(x, r.y + r.h - 2);
+          ctx.moveTo(x - 12, r.y + 5);
+          ctx.lineTo(x - 6, r.y + 5);
+        }
       }
+      ctx.stroke();
       ctx.globalAlpha = 1;
+      solidOutline(a, r, p.rim, 0.7);
     },
     lostpile(a, r) {
       const { ctx, palette: p } = a;
-      // La montagne des choses perdues (pleine, en marches) : parapluies, chapeaux, valises,
-      // gants, en silhouettes, des bords turquoise.
-      tileShape(a, r, p.wood, p.woodLight);
-      ctx.globalAlpha = 0.35;
+      // La montagne des choses perdues (pleine, en marches, D-81) : plus sombre que le mur, bordée
+      // de turquoise sur ses côtés libres ; dedans, des valises en contours.
+      tileShape(a, r, p.structure, p.structure);
+      ctx.globalAlpha = 0.28;
       for (let x = r.x + 3; x < r.x + r.w - 8; x += 9) {
         for (let y = r.y + 10; y < r.y + r.h; y += 12) {
           if (tileAt(a.level, Math.floor(x / T), Math.floor(y / T)) !== Tile.Solid) {
@@ -1132,19 +1269,39 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
         }
       }
       ctx.globalAlpha = 1;
+      solidOutline(a, r, p.rim, 0.7);
     },
     // ——— Le dépôt ———
     depotwindows(a, r) {
       const { ctx } = a;
-      // Le grand atelier au fond du dépôt : un mur de briques, de hautes verrières à petits
-      // carreaux.
+      const dusk = a.palette.darkness > 0;
+      // Le grand atelier au fond du dépôt (D-81) : un toit en sheds (dents de scie), un mur de
+      // briques, de hautes verrières à petits carreaux (allumées au crépuscule), une cheminée.
+      const roofY = r.y - 8;
+      ctx.fillStyle = 'rgba(122,63,52,0.55)';
+      ctx.beginPath();
+      ctx.moveTo(r.x, roofY);
+      for (let x = r.x; x < r.x + r.w; x += 4 * T) {
+        ctx.lineTo(x, roofY - 1.2 * T);
+        ctx.lineTo(Math.min(x + 4 * T, r.x + r.w), roofY);
+      }
+      ctx.lineTo(r.x + r.w, roofY);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(200,228,240,0.4)';
+      for (let x = r.x; x < r.x + r.w; x += 4 * T) {
+        ctx.fillRect(x, roofY - 1.2 * T, 2, 1.2 * T);
+      }
+      const chimney = depotChimney(r);
+      ctx.fillStyle = 'rgba(122,63,52,0.65)';
+      ctx.fillRect(chimney.x - 5, chimney.y, 10, roofY - chimney.y);
       ctx.fillStyle = 'rgba(181,103,79,0.45)';
-      ctx.fillRect(r.x, r.y - 8, r.w, r.h + 8);
+      ctx.fillRect(r.x, roofY, r.w, r.h + 8);
       ctx.fillStyle = 'rgba(122,63,52,0.5)';
-      ctx.fillRect(r.x, r.y - 8, r.w, 4);
+      ctx.fillRect(r.x, roofY, r.w, 4);
       const windowH = r.h * 0.55;
       for (let x = r.x + 10; x < r.x + r.w - 40; x += 70) {
-        ctx.fillStyle = 'rgba(200,228,240,0.35)';
+        ctx.fillStyle =
+          dusk && hash(x, r.y) > 0.5 ? 'rgba(243,213,138,0.6)' : 'rgba(200,228,240,0.35)';
         ctx.fillRect(x, r.y, 40, windowH);
         ctx.strokeStyle = 'rgba(60,64,70,0.6)';
         ctx.lineWidth = 1;
@@ -1162,17 +1319,44 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
     },
     wagon(a, r) {
       const { ctx } = a;
-      // Wagon de marchandises garé (plein) : caisse rouge brique, nervures, roues.
+      // Wagon de marchandises garé (plein) : caisse rouge brique, nervures, roues sur leur bout de
+      // rail (D-81).
       tileShape(a, r, BRICK, BRICK_LIGHT);
       ctx.fillStyle = 'rgba(0,0,0,0.2)';
       for (let x = r.x + 8; x < r.x + r.w - 4; x += 12) {
         ctx.fillRect(x, r.y + 4, 2, r.h - 10);
       }
+      ctx.fillStyle = '#6f777c';
+      ctx.fillRect(r.x - 6, r.y + r.h - 1.5, r.w + 12, 1.5);
       ctx.fillStyle = '#2a2436';
       for (const x of [r.x + 14, r.x + 26, r.x + r.w - 26, r.x + r.w - 14]) {
         ctx.beginPath();
-        ctx.arc(x, r.y + r.h - 1, 5, Math.PI, 0);
+        ctx.arc(x, r.y + r.h - 1.5, 5, Math.PI, 0);
         ctx.fill();
+      }
+    },
+    trestle(a, r) {
+      const { ctx, level } = a;
+      // Planche sur deux chevalets de bois (D-81), plantés dans les gravats de la fosse.
+      for (const [c0, c1, row] of oneWayRuns(a, r)) {
+        const x = c0 * T;
+        const w = (c1 - c0 + 1) * T;
+        let ground = row + 1;
+        while (ground < level.height && tileAt(level, c0, ground) === Tile.Empty) {
+          ground++;
+        }
+        const gy = ground * T + 4;
+        ctx.strokeStyle = WOOD_DARK;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (const lx of [x + 5, x + w - 5]) {
+          ctx.moveTo(lx, row * T + 3);
+          ctx.lineTo(lx - 4, gy);
+          ctx.moveTo(lx, row * T + 3);
+          ctx.lineTo(lx + 4, gy);
+        }
+        ctx.stroke();
+        tileShape(a, { x, y: row * T, w, h: T }, WOOD, WOOD_LIGHT);
       }
     },
     cranehook(a, r) {
@@ -1196,13 +1380,36 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
     },
     overheadcrane(a, r) {
       const { ctx } = a;
-      // Pont roulant : la poutre jaune et son chariot (fond).
+      // Portique roulant (fond, D-81) : la poutre jaune, son chariot, et deux pieds en A posés sur
+      // le sol du dépôt (avant, la poutre flottait).
+      const beamY = r.y + r.h / 2;
+      const ground = (a.level.height - 2) * T;
+      ctx.strokeStyle = '#d29f30';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (const x of [r.x + 4, r.x + r.w - 4]) {
+        ctx.moveTo(x, beamY);
+        ctx.lineTo(x - 10, ground);
+        ctx.moveTo(x, beamY);
+        ctx.lineTo(x + 10, ground);
+      }
+      ctx.stroke();
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (const x of [r.x + 4, r.x + r.w - 4]) {
+        for (let y = beamY + 3 * T; y < ground - T; y += 4 * T) {
+          const spread = (10 * (y - beamY)) / (ground - beamY);
+          ctx.moveTo(x - spread, y);
+          ctx.lineTo(x + spread, y);
+        }
+      }
+      ctx.stroke();
       ctx.fillStyle = '#e8b23a';
-      ctx.fillRect(r.x, r.y + r.h / 2 - 4, r.w, 8);
+      ctx.fillRect(r.x - 4, beamY - 4, r.w + 8, 8);
       ctx.fillStyle = '#b98a22';
-      ctx.fillRect(r.x, r.y + r.h / 2 + 2, r.w, 2);
+      ctx.fillRect(r.x - 4, beamY + 2, r.w + 8, 2);
       ctx.fillStyle = '#4b4f55';
-      ctx.fillRect(r.x + r.w / 2 - 10, r.y + r.h / 2 - 7, 20, 12);
+      ctx.fillRect(r.x + r.w / 2 - 10, beamY - 7, 20, 12);
     },
   };
 }

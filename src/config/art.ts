@@ -444,7 +444,11 @@ export const DECOR_KINDS: Readonly<
   /** Crochet du pont roulant (traversable). */
   cranehook: { furniture: true },
   /** Pont roulant (fond). */
-  overheadcrane: { furniture: false, far: true },
+  overheadcrane: { furniture: false },
+  /** Planche sur deux chevalets plantés dans les gravats (D-81). */
+  trestle: { furniture: true },
+  /** Lampe de bureau à abat-jour vert, allumée (fond, D-81). */
+  desklamp: { furniture: false },
   // Derrière la haie (D-49).
   /** Tuteur géant (bois plein), paroi d'une cheminée. */
   giantstake: { furniture: true },

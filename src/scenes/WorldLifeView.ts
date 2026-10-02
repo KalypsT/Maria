@@ -8,6 +8,7 @@ import { drawFlames, hearth, pendulum } from './art/livingArt';
 import { garlandPoints, swingPivot } from './art/gardenArt';
 import { houseLayout } from './art/streetArt';
 import { swingsetSeats } from './art/playgroundArt';
+import { depotChimney } from './art/stationArt';
 
 /** Linge : avec le fond proche, sous les meubles (dessinés avec le fond, -5) on passe devant. */
 const LAUNDRY_DEPTH = -4.6;
@@ -371,6 +372,14 @@ export class WorldLifeView {
         this.fishes.push({ image, x: r.x + r.w / 2, y: r.y + r.h - 8 });
       } else if (d.kind === 'tubeflicker') {
         this.makeFlicker(r);
+      } else if (d.kind === 'depotwindows' && palette.outdoor) {
+        // La cheminée de l'atelier du dépôt (D-81).
+        const top = depotChimney(r);
+        this.makeSparks(
+          'smoke',
+          { x: top.x - 8, y: top.y - 56, w: 16, h: 56 },
+          WORLD_LIFE.smoke.alpha,
+        );
       } else if (d.kind === 'departures') {
         this.makeFlaps(r);
       } else if (d.kind === 'fan') {
