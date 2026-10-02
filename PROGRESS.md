@@ -26,7 +26,7 @@ Suite du train : PR 3 le reste du train réel (compartiments, fourgon, toit et t
 - **La nuit** : Agir sur sa couchette ; tout le monde dort, les lumières s'éteignent ; une lueur passe dans le couloir. Au bout, la porte : « ? » (la suite avec la PR 3).
 - **Le train roule** : derrière les vitres, collines, villages allumés, arbres et poteaux de caténaire qui défilent ; petites secousses de l'image de temps en temps. Rien ne touche à Céleste. Réglages `TRAIN_RIDE`.
 - DEBUG → Histoire : « le train, en route (la glissade à apprendre) », « le train, la nuit (la lueur) ».
-- Tests : 572. Vérifié dans Chromium : le quai (maîtresse, enfants, parents), la montée, le départ, la camarade et la glissade apprise, la grille, la nuit (lumières éteintes), la porte du bout.
+- Tests : 571. Vérifié dans Chromium : le quai (maîtresse, enfants, parents), la montée, le départ, la camarade et la glissade apprise, la grille, la nuit (lumières éteintes), la porte du bout.
 - [ ] À vérifier sur téléphone (DEBUG → Histoire → « quelques mois après la gare », puis aller sur les quais) : la porte du train se remarque-t-elle ? La scène du quai (au revoir) est-elle assez lente et tendre ?
 - [ ] Le paysage qui défile : agréable, ou donne-t-il le tournis ? Les secousses : se sentent-elles sans gêner les sauts ? (`TRAIN_RIDE`)
 - [ ] La camarade : se reconnaît-elle ? Comprend-on qu'elle est passée sous la grille et qu'il faut faire pareil ?
