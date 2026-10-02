@@ -64,6 +64,11 @@ export interface Move {
    * poursuite laisse le temps de passer. `Infinity` si inconnue.
    */
   readonly durationMs: number;
+  /**
+   * Position d'atterrissage (px, bord gauche de la hitbox) de l'essai qui donne `durationMs`, quand
+   * elle est connue : le rejeu d'une poursuite horizontale suit Céleste le long des surfaces (D-87).
+   */
+  readonly toX?: number;
 }
 
 export type CableExit = 'drop' | 'jump';
@@ -124,6 +129,8 @@ interface Family {
   readonly targets: number[];
   /** Pas en l'air de chaque essai (jusqu'à l'atterrissage ou l'appui). */
   readonly steps: number[];
+  /** Position d'atterrissage de chaque essai (px, NaN : inconnue). */
+  readonly lands: number[];
 }
 
 /**
@@ -159,6 +166,8 @@ class MoveExplorer {
   readonly records: TryRecord[] = [];
   /** Pas en l'air du dernier essai (`tryJump`, `tryKick`, `finish`), pour sa durée (D-67). */
   airSteps = 0;
+  /** Position d'atterrissage du dernier essai (px, bord gauche de la hitbox ; NaN : aucune). */
+  private landX = Number.NaN;
 
   constructor(
     private readonly level: LevelData,
@@ -251,6 +260,7 @@ class MoveExplorer {
             slideJumpAfter: -2,
             targets: [],
             steps: [],
+            lands: [],
           });
         }
       }
@@ -268,6 +278,7 @@ class MoveExplorer {
             slideJumpAfter: -2,
             targets: [],
             steps: [],
+            lands: [],
           });
         }
       }
@@ -282,7 +293,15 @@ class MoveExplorer {
     }
     const base = { dir, airRelease: false, glide: false, cableExit: null };
     const families: Family[] = [
-      { ...base, kind: MoveKind.Slide, holdSteps: 0, slideJumpAfter: -1, targets: [], steps: [] },
+      {
+        ...base,
+        kind: MoveKind.Slide,
+        holdSteps: 0,
+        slideJumpAfter: -1,
+        targets: [],
+        steps: [],
+        lands: [],
+      },
     ];
     for (const slideJumpAfter of SLIDE_SEARCH.jumpAfterSteps) {
       for (const holdSteps of SLIDE_SEARCH.jumpHoldSteps) {
@@ -293,6 +312,7 @@ class MoveExplorer {
           slideJumpAfter,
           targets: [],
           steps: [],
+          lands: [],
         });
       }
     }
@@ -335,8 +355,13 @@ class MoveExplorer {
       });
       for (const [to, { count, end }] of bestRun) {
         let durationMs = 0;
+        let toX = Number.NaN;
         for (let i = end - count + 1; i <= end; i++) {
-          durationMs = Math.max(durationMs, times[i] ?? Number.POSITIVE_INFINITY);
+          const time = times[i] ?? Number.POSITIVE_INFINITY;
+          if (time >= durationMs) {
+            durationMs = time;
+            toX = family.lands[i] ?? Number.NaN;
+          }
         }
         offer({
           from,
@@ -350,6 +375,7 @@ class MoveExplorer {
           ...(family.glide ? { glide: true } : {}),
           ...(family.cableExit ? { cableExit: family.cableExit } : {}),
           ...(family.slideJumpAfter >= 0 ? { slideJumpAfter: family.slideJumpAfter } : {}),
+          ...(Number.isFinite(toX) ? { toX } : {}),
         });
       }
     }
@@ -423,6 +449,7 @@ class MoveExplorer {
         }
         family.targets.push(target);
         family.steps.push(worth ? this.airSteps : 0);
+        family.lands.push(worth ? this.landX : Number.NaN);
       }
       ran++;
       input.moveX = dir;
@@ -450,6 +477,7 @@ class MoveExplorer {
         airRelease: false,
         windowMs: Number.POSITIVE_INFINITY,
         durationMs: (ran + this.airSteps) * this.stepMs,
+        ...this.landing(),
       });
     }
 
@@ -468,6 +496,7 @@ class MoveExplorer {
         airRelease: false,
         windowMs: Number.POSITIVE_INFINITY,
         durationMs: (ran + this.airSteps) * this.stepMs,
+        ...this.landing(),
       });
       if (this.canGlide) {
         // Tomber du bord, puis ouvrir le parapluie (D-62).
@@ -484,6 +513,7 @@ class MoveExplorer {
           windowMs: Number.POSITIVE_INFINITY,
           durationMs: (ran + this.airSteps) * this.stepMs,
           glide: true,
+          ...this.landing(),
         });
       }
     }
@@ -514,6 +544,7 @@ class MoveExplorer {
         }
         family.targets.push(target);
         family.steps.push(this.airSteps);
+        family.lands.push(worth ? this.landX : Number.NaN);
       }
     }
     // Précision de placement demandée, exprimée en temps de course.
@@ -548,6 +579,7 @@ class MoveExplorer {
         airRelease: false,
         windowMs: Number.POSITIVE_INFINITY,
         durationMs: this.airSteps * this.stepMs,
+        ...this.landing(),
       });
     }
   }
@@ -572,6 +604,7 @@ class MoveExplorer {
     let airborne = false;
     let apex = false;
     this.airSteps = 0;
+    this.landX = Number.NaN;
     /** Pas depuis la sortie d'un câble (-1 : pas encore quitté). */
     let sinceCable = -1;
     /** Ouverture du parapluie au sommet : 0 pas encore, 1 Saut relâché, 2 pressé de nouveau. */
@@ -631,6 +664,7 @@ class MoveExplorer {
     input.moveX = dir;
     let airborne = false;
     this.airSteps = 0;
+    this.landX = Number.NaN;
     for (let s = 0; s < this.maxAirSteps; s++) {
       if (airborne && probe.grounded) {
         break;
@@ -741,6 +775,7 @@ class MoveExplorer {
         for (const family of families) {
           family.targets.push(this.tryKick(main, family.dir, family.holdSteps));
           family.steps.push(this.airSteps);
+          family.lands.push(this.landX);
         }
       }
       input.moveX = w;
@@ -778,6 +813,7 @@ class MoveExplorer {
     const input = this.input;
     input.moveY = 0;
     this.airSteps = 0;
+    this.landX = Number.NaN;
     for (let s = 0; s < MOVE_SEARCH.maxSteps && !probe.grounded; s++) {
       // Pas de plané après un saut mural dans l'analyse (prudente).
       input.jumpPressed = s === 0;
@@ -802,6 +838,7 @@ class MoveExplorer {
    * tenu jusqu'au sol, pressé au premier pas si le parapluie n'est pas encore ouvert (D-62).
    */
   private finish(dir: number, glide = false): number {
+    this.landX = Number.NaN;
     const probe = this.probe;
     const input = this.input;
     input.moveX = dir;
@@ -833,7 +870,16 @@ class MoveExplorer {
         return -1;
       }
     }
-    return probe.grounded ? this.surfaceOf(probe) : -1;
+    if (!probe.grounded) {
+      return -1;
+    }
+    this.landX = probe.box.x;
+    return this.surfaceOf(probe);
+  }
+
+  /** Position d'atterrissage du dernier essai, pour un passage (`toX`, D-87). */
+  private landing(): { toX?: number } {
+    return Number.isFinite(this.landX) ? { toX: this.landX } : {};
   }
 
   private surfaceOf(player: PlayerPhysics): number {

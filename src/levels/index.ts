@@ -9,6 +9,7 @@ import parapluie from './courses/08-parapluie.txt?raw';
 import crochet from './courses/09-crochet.txt?raw';
 import poursuite from './courses/10-poursuite.txt?raw';
 import glissade from './courses/11-glissade.txt?raw';
+import poursuiteHorizontale from './courses/12-poursuite-horizontale.txt?raw';
 import testRoomText from './test-room.txt?raw';
 import type { LevelData } from '../core/level/LevelData';
 import { buildZone, type Zone } from '../core/world/zone';
@@ -36,6 +37,7 @@ export const LEVELS: readonly LevelSource[] = [
   { id: 'crochet', text: crochet },
   { id: 'poursuite', text: poursuite },
   { id: 'glissade', text: glissade },
+  { id: 'poursuite-horizontale', text: poursuiteHorizontale },
   { id: 'test-room', text: testRoomText },
 ];
 
@@ -52,6 +54,7 @@ export const COURSE_IDS: readonly string[] = [
   'crochet',
   'poursuite',
   'glissade',
+  'poursuite-horizontale',
 ];
 
 const NAME = /^;\s*@name\s*:\s*(.*)$/m;

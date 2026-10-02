@@ -68,26 +68,39 @@ export interface CombatParams {
   trainGustX: number;
   trainGustY: number;
   /**
-   * Poursuite verticale (boss, D-67, D-70). Au départ et après une réapparition, il attend
-   * `chaseStartDelayMs` puis monte à vitesse constante (celle de la salle × `chaseSpeedScale`).
+   * Poursuite (boss, D-67, D-70, D-87), verticale ou horizontale. Au départ et après une
+   * réapparition, il attend `chaseStartDelayMs` puis avance à vitesse constante (celle de la salle ×
+   * `chaseSpeedScale`).
    */
   chaseStartDelayMs: number;
-  /** Facteur sur la vitesse de montée (réglage en direct). */
+  /** Facteur sur la vitesse d'avance (réglage en direct). */
   chaseSpeedScale: number;
   /**
-   * Rattrapage doux (D-70) : au-delà de `chaseCatchUpGapTiles` sous les pieds de Céleste, il
+   * Rattrapage doux (D-70) : au-delà de `chaseCatchUpGapTiles` derrière Céleste, il
    * accélère de `chaseCatchUpRate` tuiles/s par tuile de retard en plus, sans dépasser
    * `chaseCatchUpMaxSpeed` tuiles/s. Jamais de saut.
    */
   chaseCatchUpGapTiles: number;
   chaseCatchUpRate: number;
   chaseCatchUpMaxSpeed: number;
-  /** À la réapparition, il repart à cette distance sous les pieds de Céleste (tuiles). */
+  /** À la réapparition, il repart à cette distance derrière Céleste (sous ses pieds, ou dans son dos ; tuiles). */
   chaseRestartGapTiles: number;
   /** Contact : Céleste rebondit vers le haut (px/s), il recule (tuiles) et s'arrête (ms). */
   chaseContactBounceY: number;
   chaseContactRecoilTiles: number;
   chaseContactPauseMs: number;
+  /**
+   * Contact d'une poursuite horizontale (D-87) : Céleste est poussée en avant, dans le sens de la
+   * fuite (px/s), et un peu vers le haut (px/s), au lieu du rebond vertical.
+   */
+  chaseContactPushX: number;
+  chaseContactHopY: number;
+  /**
+   * Poursuite horizontale (D-87) : attente au départ (ms) et écart dans le dos de Céleste (tuiles),
+   * plus courts qu'à la verticale : Céleste court vite et les tronçons entre lanternes sont courts.
+   */
+  chaseSideStartDelayMs: number;
+  chaseSideRestartGapTiles: number;
   /** Croc-en-jambe (passage qui le fait trébucher) : il s'arrête ce temps-là (ms). */
   chaseTripPauseMs: number;
   /**
@@ -155,6 +168,10 @@ export const DEFAULT_COMBAT: Readonly<CombatParams> = {
   chaseContactBounceY: 420,
   chaseContactRecoilTiles: 3,
   chaseContactPauseMs: 1200,
+  chaseContactPushX: 220,
+  chaseContactHopY: 240,
+  chaseSideStartDelayMs: 1200,
+  chaseSideRestartGapTiles: 6,
   chaseTripPauseMs: 2500,
   tunnelPeriodMs: 10000,
   tunnelWarnMs: 2600,
@@ -211,6 +228,10 @@ export const COMBAT_PARAM_RANGES: Readonly<
   chaseContactBounceY: { min: 100, max: 800, step: 10 },
   chaseContactRecoilTiles: { min: 0, max: 10, step: 0.5 },
   chaseContactPauseMs: { min: 0, max: 5000, step: 100 },
+  chaseContactPushX: { min: 0, max: 500, step: 10 },
+  chaseContactHopY: { min: 0, max: 600, step: 10 },
+  chaseSideStartDelayMs: { min: 0, max: 6000, step: 100 },
+  chaseSideRestartGapTiles: { min: 2, max: 30, step: 1 },
   chaseTripPauseMs: { min: 0, max: 8000, step: 100 },
   tunnelPeriodMs: { min: 3000, max: 30000, step: 500 },
   tunnelWarnMs: { min: 500, max: 6000, step: 100 },

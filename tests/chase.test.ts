@@ -36,9 +36,10 @@ function course(): LevelData {
 describe('poursuite verticale (boss, D-67, D-70)', () => {
   it('@chase : ligne d’arrivée, phases de bas en haut, crocs-en-jambe', () => {
     const level = course();
-    expect(level.chase?.endRow).toBe(7);
+    expect(level.chase?.dir).toBe('up');
+    expect(level.chase?.end).toBe(7);
     // Une seule vitesse, constante (D-70).
-    expect(level.chase?.phases).toEqual([{ untilRow: 7, speed: 2.8 }]);
+    expect(level.chase?.phases).toEqual([{ until: 7, speed: 2.8 }]);
     expect(level.chase?.trips).toHaveLength(1);
     expect(level.meta.camera).toBe('up');
     const bad = (extra: string) => () => parseAsciiLevel('c', `${extra}\n####\n#P.#\n####`);
@@ -52,18 +53,18 @@ describe('poursuite verticale (boss, D-67, D-70)', () => {
     const chase = new Chase(need(level.chase, 'poursuite'), P, HZ);
     const feet = 98 * T;
     chase.step(box(40, feet), false);
-    expect(chase.frontY).toBe(feet + P.chaseRestartGapTiles * T);
+    expect(chase.front).toBe(feet + P.chaseRestartGapTiles * T);
     const delaySteps = (P.chaseStartDelayMs / 1000) * HZ;
     for (let s = 1; s < delaySteps; s++) {
       chase.step(box(40, feet), false);
     }
-    const y0 = chase.frontY;
+    const y0 = chase.front;
     expect(y0).toBe(feet + P.chaseRestartGapTiles * T);
     for (let s = 0; s < HZ; s++) {
       chase.step(box(40, feet), false);
     }
     // Une seconde de montée à la vitesse de la salle (pas de rattrapage : il est assez près).
-    expect(y0 - chase.frontY).toBeCloseTo(2.8 * T, 3);
+    expect(y0 - chase.front).toBeCloseTo(2.8 * T, 3);
   });
 
   it('trop loin, il accélère peu à peu, sans jamais sauter (rattrapage doux)', () => {
@@ -74,9 +75,9 @@ describe('poursuite verticale (boss, D-67, D-70)', () => {
     // Céleste loin au-dessus : chaque pas le fait monter un peu plus vite, au plus à la vitesse max.
     let previous = 0;
     for (let s = 0; s < HZ * 3; s++) {
-      const y = chase.frontY;
+      const y = chase.front;
       chase.step(box(40, 60 * T), false);
-      const moved = y - chase.frontY;
+      const moved = y - chase.front;
       expect(moved).toBeLessThanOrEqual((P.chaseCatchUpMaxSpeed * T) / HZ + 1e-9);
       expect(moved).toBeGreaterThanOrEqual(previous - 1e-9);
       expect(moved).toBeGreaterThan((2.8 * T) / HZ);
@@ -88,12 +89,12 @@ describe('poursuite verticale (boss, D-67, D-70)', () => {
     const chase = new Chase(need(course().chase, 'poursuite'), P, HZ);
     const feet = 90 * T;
     chase.step(box(40, feet), false);
-    chase.frontY = feet - 10;
+    chase.front = feet - 10;
     expect(chase.step(box(40, feet), false)).toBe(true);
     expect(chase.events & ChaseEvent.Contact).toBeTruthy();
-    expect(chase.frontY).toBeGreaterThanOrEqual(feet + P.chaseContactRecoilTiles * T);
+    expect(chase.front).toBeGreaterThanOrEqual(feet + P.chaseContactRecoilTiles * T);
     expect(chase.paused).toBe(true);
-    chase.frontY = feet - 10;
+    chase.front = feet - 10;
     expect(chase.step(box(40, feet), true)).toBe(false);
   });
 
@@ -104,14 +105,14 @@ describe('poursuite verticale (boss, D-67, D-70)', () => {
     const feet = (trip.row + 2) * T;
     // Hors du croc-en-jambe d'abord (à la même hauteur), puis dedans.
     chase.step(box(200, feet), false);
-    const before = chase.frontY;
+    const before = chase.front;
     chase.step(box(trip.col * T + 4, feet), false);
     expect(chase.events & ChaseEvent.Trip).toBeTruthy();
-    expect(chase.frontY).toBeCloseTo(before + trip.recoil * T, 3);
-    const after = chase.frontY;
+    expect(chase.front).toBeCloseTo(before + trip.recoil * T, 3);
+    const after = chase.front;
     chase.step(box(trip.col * T + 4, feet), false);
     expect(chase.events & ChaseEvent.Trip).toBeFalsy();
-    expect(chase.frontY).toBe(after);
+    expect(chase.front).toBe(after);
     chase.restart();
     chase.step(box(trip.col * T + 4, feet), false);
     expect(chase.events & ChaseEvent.Trip).toBeTruthy();
@@ -121,9 +122,9 @@ describe('poursuite verticale (boss, D-67, D-70)', () => {
     const chase = new Chase(need(course().chase, 'poursuite'), P, HZ);
     chase.step(box(40, 8 * T), false);
     expect(chase.done).toBe(true);
-    const y = chase.frontY;
+    const y = chase.front;
     chase.step(box(40, 8 * T), false);
-    expect(chase.frontY).toBeGreaterThan(y);
+    expect(chase.front).toBeGreaterThan(y);
   });
 
   it('dans le combat : le toucher fait rebondir Céleste et monter la peur', () => {
@@ -132,7 +133,7 @@ describe('poursuite verticale (boss, D-67, D-70)', () => {
     const combat = new CombatWorld(level, P);
     combat.step(player, false);
     const chase = need(combat.chase, 'poursuite');
-    chase.frontY = player.box.y + player.box.height - 10;
+    chase.front = player.box.y + player.box.height - 10;
     combat.step(player, false);
     expect(combat.events & CombatEvent.Hurt).toBeTruthy();
     expect(player.vy).toBe(-P.chaseContactBounceY);

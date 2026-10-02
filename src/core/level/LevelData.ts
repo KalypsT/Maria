@@ -45,19 +45,30 @@ export interface LevelData {
   readonly cables: readonly LevelCable[];
   /** Voies ferrées (D-66) : un train y passe et son souffle repousse ; déclarées par `; @train:`. */
   readonly trains: readonly LevelTrain[];
-  /** Poursuite verticale (boss, D-67), déclarée par `; @chase:` ; null sinon. */
+  /** Poursuite (boss, D-67, D-87), déclarée par `; @chase:` ; null sinon. */
   readonly chase: LevelChase | null;
 }
 
+/** Sens d'une poursuite : vers le haut (D-67), vers la droite ou vers la gauche (D-87). */
+export type ChaseDir = 'up' | 'right' | 'left';
+
 /**
- * Poursuite verticale (D-67) : quelque chose de grand monte derrière Céleste. Par phases, de bas en
- * haut ; des passages qui le font trébucher ; une ligne d'arrivée.
+ * Poursuite (D-67, D-87) : quelque chose de grand avance derrière Céleste, dans le sens `dir`. Par
+ * phases, dans le sens de la course ; des passages qui le font trébucher ; une ligne d'arrivée.
  */
 export interface LevelChase {
-  /** Ligne à atteindre (les pieds au-dessus du bas de cette ligne) : la poursuite s'arrête. */
-  readonly endRow: number;
-  /** Phases de bas en haut : vitesse de montée (tuiles/s) tant que Céleste est sous `untilRow`. */
-  readonly phases: readonly { readonly untilRow: number; readonly speed: number }[];
+  readonly dir: ChaseDir;
+  /**
+   * Ligne d'arrivée : une ligne de tuiles (vers le haut, les pieds au-dessus de son bas) ou une
+   * colonne (vers la droite, le dos de Céleste au-delà de son bord gauche ; vers la gauche, de son
+   * bord droit). Atteinte, la poursuite s'arrête.
+   */
+  readonly end: number;
+  /**
+   * Phases dans le sens de la course : vitesse (tuiles/s) tant que Céleste n'a pas dépassé la ligne
+   * ou la colonne `until` (même convention que `end`).
+   */
+  readonly phases: readonly { readonly until: number; readonly speed: number }[];
   /** Passages qui le font trébucher : il recule de `recoil` tuiles et s'arrête un moment. */
   readonly trips: readonly {
     readonly col: number;

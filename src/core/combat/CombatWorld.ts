@@ -100,7 +100,7 @@ export class CombatWorld {
   /** État d'une valise (réutilisé : aucune allocation). */
   private readonly luggageScratch = { phase: LuggagePhase.Rack as LuggagePhase, fallen: 0 };
   private readonly luggageBox: Box = { x: 0, y: 0, width: LUGGAGE_BOX.width, height: 0 };
-  /** Poursuite verticale de la salle (boss, D-67), null sans poursuite. */
+  /** Poursuite de la salle (boss, D-67, D-87), null sans poursuite. */
   chase: Chase | null = null;
   /** Zone du souffle (réutilisée : aucune allocation). */
   private readonly gustBox: Box = { x: 0, y: 0, width: 0, height: 0 };
@@ -376,9 +376,16 @@ export class CombatWorld {
     if (this.stepTrains(player) || this.stepTunnel(player) || this.stepLuggage(player)) {
       return;
     }
-    // Poursuite (D-67) : le toucher fait rebondir Céleste vers le haut, la peur monte.
-    if (this.chase?.step(player.box, this.invulnerableSteps > 0)) {
-      player.vy = -this.params.chaseContactBounceY;
+    // Poursuite (D-67, D-87) : le toucher fait rebondir Céleste vers le haut, ou la pousse en avant
+    // dans le sens de la fuite (horizontale) ; la peur monte.
+    const chase = this.chase;
+    if (chase?.step(player.box, this.invulnerableSteps > 0)) {
+      if (chase.horizontal) {
+        player.vx = chase.sign * this.params.chaseContactPushX;
+        player.vy = -this.params.chaseContactHopY;
+      } else {
+        player.vy = -this.params.chaseContactBounceY;
+      }
       player.startHurt(this.hurtSteps);
       this.invulnerableSteps = Math.max(this.invulnerableSteps, this.invulnerableTotal);
       this.events |= CombatEvent.Hurt;

@@ -2,9 +2,9 @@
 
 ## Phase en cours
 
-**Le train** (niveau 5, D-82, D-83) : plan validé en 6 PR. **PR 1 faite : la glissade** (D-84, fusionnée). **PR 2 faite : le départ et la voiture-couchettes** (D-85, fusionnée). **PR 3 faite : le reste du train réel** (D-86), sur `ccr-982d9f94-2fndno`. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
+**Le train** (niveau 5, D-82, D-83) : plan validé en 6 PR. **PR 1 faite : la glissade** (D-84, fusionnée). **PR 2 faite : le départ et la voiture-couchettes** (D-85, fusionnée). **PR 3 faite : le reste du train réel** (D-86, fusionnée). **PR 4 faite : la poursuite horizontale** (D-87), sur `ccr-6ca08fb4-rwfcx0`. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
-Suite du train : PR 4 la poursuite horizontale (parcours d'essai 12) ; PR 5 le monde étrange, la cuisine rose et le souvenir jouable ; PR 6 la fin, la gare de la mer, la revisite du train et les revisites avec la glissade.
+Suite du train : PR 5 le monde étrange, la cuisine rose et le souvenir jouable ; PR 6 la fin, la gare de la mer, la revisite du train et les revisites avec la glissade.
 
 **Structure de la fin du jeu** (D-82) : 8 niveaux (maison, jardin, quartier, gare, train, station balnéaire, avant-dernier, monde de Maria). Niveau 6 et niveau 7 : pistes retenues, détails décidés le moment venu.
 
@@ -17,6 +17,21 @@ Suite du train : PR 4 la poursuite horizontale (parcours d'essai 12) ; PR 5 le m
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le train, PR 4 : la poursuite horizontale, parcours d'essai 12 (D-87)
+
+- **La poursuite va aussi de côté** : `; @chase: right 117` (ou `left`) ; mêmes règles que la tour (départ en retard, vitesse constante, rattrapage doux, croc-en-jambe, la peur monte au contact, trois contacts : retour à la lanterne). Au contact, Céleste est poussée en avant, dans le sens de la fuite. La tour et le parcours 10 ne changent pas.
+- **Le poursuivant du train** (PLACEHOLDER) : un chariot de service géant, une tour de vaisselle jusqu'au plafond (assiettes, tasses, théières, cloches), sans visage, le liseré turquoise sur le bord avant ; elle oscille et tremble quand il trébuche ou touche Céleste.
+- **Parcours d'essai 12 « Poursuite horizontale »** (menu pause, mode debug) : barrière basse, caisses et filets ; poutre basse et passage couché (le chariot s'y cogne et s'arrête) ; fosse de vaisselle cassée (saut long), pile de valises, dernière barrière. 6,5 tuiles/s. Impossible sans la glissade.
+- **Rythme** (phase 3) : chaque tronçon prend 45 à 68 % du temps du chariot ; parfait, jamais touché ; 50 % plus lent, touché. Le rejeu suit maintenant Céleste le long des planchers (point d'atterrissage des passages).
+- Nouveaux réglages (DEBUG → Combat) : `chaseContactPushX`, `chaseContactHopY`, `chaseSideStartDelayMs`, `chaseSideRestartGapTiles`. PROVISOIRES.
+- Tests : TESTCOUNT. Vérifié dans Chromium : le chariot derrière Céleste, la glissade sous la barrière, le contact (la peur monte).
+- [ ] À vérifier sur téléphone (menu pause → Parcours d'essai → « 12. Poursuite horizontale ») : le chariot presse-t-il sans être injuste ? Vitesse (`; @chase-phase`, `chaseSpeedScale`), attente et écart au départ (`chaseSideStartDelayMs`, `chaseSideRestartGapTiles`).
+- [ ] Le contact : la poussée en avant (`chaseContactPushX`, `chaseContactHopY`) se comprend-elle ? Ne relance-t-elle pas Céleste dans un obstacle ?
+- [ ] La poutre basse : voit-on que le chariot s'y cogne et s'arrête (`chaseTripPauseMs`) ?
+- [ ] Voit-on assez loin devant ? Le chariot reste-t-il dans l'écran sans le manger (caméra inchangée) ?
+- [ ] Le chariot et sa tour : inquiétants sans faire peur ? Se lisent-ils sur un petit écran ?
+- [ ] Fluidité avec le chariot à l'écran.
 
 ### Le train, PR 3 : les compartiments, le fourgon, le toit, le wagon-restaurant (D-86)
 

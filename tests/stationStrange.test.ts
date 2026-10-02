@@ -105,7 +105,7 @@ describe('le monde étrange de la gare (D-68)', () => {
     },
     () => {
       const entrance = node(TOWER, exitSurface(TOWER, 1));
-      expect(level(TOWER).chase?.endRow).toBe(7);
+      expect(level(TOWER).chase?.end).toBe(7);
       expect(reachable(strange(medium), entrance).has(rogerNode())).toBe(true);
       expect(reachable(strange(easy), entrance).has(rogerNode()), 'trop facile').toBe(false);
     },
