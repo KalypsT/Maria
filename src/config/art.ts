@@ -194,6 +194,23 @@ export const DECOR_KINDS: Readonly<
   flag: { furniture: false },
   /** Chat roux du voisinage, assis sur un rebord de fenêtre (fond ; la queue bouge). */
   cat: { furniture: false },
+  // L'aire de jeux, la supérette, le chantier refaits (D-78).
+  /** Faux plafond de la supérette (plein) : dalles et joints. */
+  ceilingpanels: { furniture: true },
+  /** Tube fluorescent sous le faux plafond (fond, une source de lumière). */
+  tube: { furniture: false },
+  /** Tube fluorescent de la réserve qui clignote de temps en temps (animé). */
+  tubeflicker: { furniture: false },
+  /** Ventilateur de plafond (fond ; les pales tournent, animées). */
+  fan: { furniture: false },
+  /** Affiche de promotion dessinée, sans texte (fond). */
+  promo: { furniture: false },
+  /** Rangée pleine du haut d'une salle dehors, dessinée comme du ciel (D-78, le chantier). */
+  opensky: { furniture: true },
+  /** Façade arrière de la supérette, côté chantier (fond) ; le rebord en est le parapet. */
+  backfacade: { furniture: false },
+  /** Bâche tendue sur l'échafaudage, qui claque au vent (animée). */
+  tarp: { furniture: false },
   // Le jardin (D-46), dessiné par le code (PLACEHOLDER, pas d'image clé pour l'instant).
   /** Frondaison des arbres en haut des salles (feuillage plein). */
   canopy: { furniture: true },
@@ -820,6 +837,11 @@ export const WORLD_LIFE = {
   /** Drapeau de l'école (D-77) : une vague (ms). Queue du chat : un aller-retour (ms). */
   flag: { periodMs: 900 },
   catTail: { periodMs: 2600, swingRad: 0.35 },
+  /** Supérette (D-78) : tour du ventilateur (ms) ; clignotement du tube de la réserve. */
+  fan: { periodMs: 700 },
+  tubeFlicker: { everyMs: [4000, 9000] as [number, number], blinkMs: 90, blinks: 3 },
+  /** Bâche du chantier (D-78) : une vague (ms). */
+  tarp: { periodMs: 1100 },
 } as const;
 
 /** Rayon du halo d'une veilleuse (px logiques). */

@@ -7,6 +7,7 @@ import { clotheslineItems, drawLaundryItem } from './art/roomArt';
 import { drawFlames, hearth, pendulum } from './art/livingArt';
 import { garlandPoints, swingPivot } from './art/gardenArt';
 import { houseLayout } from './art/streetArt';
+import { swingsetSeats } from './art/playgroundArt';
 
 /** Linge : avec le fond proche, sous les meubles (dessinés avec le fond, -5) on passe devant. */
 const LAUNDRY_DEPTH = -4.6;
@@ -41,6 +42,9 @@ const VANE_FRAMES = 8;
 /** Drapeau de l'école, queue du chat (D-77). */
 const FLAG_FRAMES = 6;
 const TAIL_FRAMES = 7;
+/** Ventilateur, bâche (D-78). */
+const FAN_FRAMES = 4;
+const TARP_FRAMES = 6;
 const FRAME_NAMES = Array.from({ length: Math.max(LAUNDRY_FRAMES, LEAF_FRAMES) }, (_, i) =>
   String(i),
 );
@@ -158,7 +162,7 @@ interface Drum {
 /** Un objet animé par images (balançoire, girouette) : son image et sa phase. */
 interface Framed {
   readonly image: Phaser.GameObjects.Image;
-  readonly kind: 'swing' | 'vane' | 'flag' | 'tail';
+  readonly kind: 'swing' | 'vane' | 'flag' | 'tail' | 'fan' | 'tarp';
 }
 
 /** Une ampoule de la guirlande, à sa place sur le fil. */
@@ -176,6 +180,13 @@ interface Butterfly {
   readonly w: number;
   readonly h: number;
   readonly phase: number;
+}
+
+/** Le tube fluorescent de la réserve (D-78) : sa lueur, et le tube éteint par-dessus. */
+interface Flicker {
+  readonly glow: Phaser.GameObjects.Image;
+  readonly off: Phaser.GameObjects.Image;
+  nextMs: number;
 }
 
 interface Moth {
@@ -209,6 +220,7 @@ export class WorldLifeView {
   private readonly framed: Framed[] = [];
   private readonly bulbs: Bulb[] = [];
   private readonly butterflies: Butterfly[] = [];
+  private readonly flickers: Flicker[] = [];
   /** Textures propres à la salle, retirées avec elle. */
   private readonly roomTextures: string[] = [];
   private readonly rand = Math.random;
@@ -269,6 +281,11 @@ export class WorldLifeView {
       }
       list.length = 0;
     }
+    for (const flicker of this.flickers) {
+      flicker.glow.destroy();
+      flicker.off.destroy();
+    }
+    this.flickers.length = 0;
     for (const key of this.roomTextures) {
       this.scene.textures.remove(key);
     }
@@ -295,6 +312,16 @@ export class WorldLifeView {
             this.makeSparks('smoke', { x: x - 8, y: y - 56, w: 16, h: 56 }, WORLD_LIFE.smoke.alpha);
           }
         }
+      } else if (d.kind === 'swingset') {
+        swingsetSeats(level, r).forEach((seat, k) => {
+          this.makeSwing(`${level.id}-${String(i)}-${String(k)}`, seat, palette, artScale);
+        });
+      } else if (d.kind === 'tubeflicker') {
+        this.makeFlicker(r);
+      } else if (d.kind === 'fan') {
+        this.makeFan(`${level.id}-${String(i)}`, r, artScale);
+      } else if (d.kind === 'tarp') {
+        this.makeTarp(`${level.id}-${String(i)}`, r, palette, artScale);
       } else if (d.kind === 'flag') {
         this.makeFlag(`${level.id}-${String(i)}`, r, artScale);
       } else if (d.kind === 'cat') {
@@ -798,6 +825,123 @@ export class WorldLifeView {
     this.framed.push({ image, kind: 'tail' });
   }
 
+  /** Le tube de la réserve (D-78) : une lueur blanche ; éteint, un tube gris par-dessus. */
+  private makeFlicker(r: { x: number; y: number; w: number; h: number }): void {
+    this.ensureSprites();
+    const glow = this.scene.add
+      .image(r.x + r.w / 2, r.y + 10, DOT_TEXTURE)
+      .setDisplaySize(r.w * 2.4, 3.5 * T)
+      .setTint(0xeef6ff)
+      .setAlpha(0.35)
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setDepth(SPARK_DEPTH);
+    const off = this.scene.add
+      .image(r.x + r.w / 2, r.y + 4.5, DOT_TEXTURE)
+      .setDisplaySize(r.w - 2, 4)
+      .setTint(0x8a9099)
+      .setDepth(MOBILE_DEPTH)
+      .setVisible(false);
+    this.flickers.push({ glow, off, nextMs: 2500 + this.rand() * 3000 });
+  }
+
+  /** Les pales du ventilateur (D-78), vues de côté : leur longueur change en tournant. */
+  private makeFan(
+    id: string,
+    r: { x: number; y: number; w: number; h: number },
+    artScale: number,
+  ): void {
+    const key = `life-fan-${id}`;
+    let frame = 0;
+    const w = r.w + 2 * T;
+    const made = framedTexture(
+      this.scene,
+      key,
+      FAN_FRAMES,
+      w,
+      6,
+      w / 2,
+      3,
+      artScale,
+      () => 0,
+      (ctx) => {
+        const turn = (frame / FAN_FRAMES) * Math.PI;
+        frame++;
+        ctx.fillStyle = '#7a6a58';
+        for (const angle of [turn, turn + Math.PI / 2]) {
+          const half = Math.abs(Math.cos(angle)) * (w / 2 - 1);
+          ctx.beginPath();
+          ctx.ellipse(0, 0, Math.max(1.5, half), 1.6, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      },
+    );
+    if (!made) {
+      return;
+    }
+    this.roomTextures.push(key);
+    const image = this.scene.add
+      .image(r.x + r.w / 2, r.y + r.h - 5, key, FRAME_NAMES[0])
+      .setScale(1 / artScale)
+      .setDepth(MOBILE_DEPTH);
+    this.framed.push({ image, kind: 'fan' });
+  }
+
+  /** La bâche du chantier (D-78) : tendue en haut, son bas ondule au vent. */
+  private makeTarp(
+    id: string,
+    r: { x: number; y: number; w: number; h: number },
+    palette: Readonly<ArtPalette>,
+    artScale: number,
+  ): void {
+    const key = `life-tarp-${id}`;
+    let frame = 0;
+    const made = framedTexture(
+      this.scene,
+      key,
+      TARP_FRAMES,
+      r.w,
+      r.h + 4,
+      0,
+      0,
+      artScale,
+      () => 0,
+      (ctx) => {
+        const phase = (frame / TARP_FRAMES) * Math.PI * 2;
+        frame++;
+        ctx.fillStyle = palette.silhouettes ? palette.structure : '#4f7fae';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(r.w, 0);
+        for (let x = r.w; x >= 0; x -= 2) {
+          const k = x / r.w;
+          ctx.lineTo(x, r.h - 2 + Math.sin(k * 7 + phase) * 3 * k);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.18)';
+        for (let x = 6; x < r.w; x += 12) {
+          ctx.fillRect(x, 2, 1.2, r.h - 8);
+        }
+        ctx.fillStyle = '#e8eef4';
+        for (let x = 3; x < r.w; x += 10) {
+          ctx.beginPath();
+          ctx.arc(x, 2, 1.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      },
+    );
+    if (!made) {
+      return;
+    }
+    this.roomTextures.push(key);
+    const image = this.scene.add
+      .image(r.x, r.y, key, FRAME_NAMES[0])
+      .setOrigin(0, 0)
+      .setScale(1 / artScale)
+      .setDepth(LAUNDRY_DEPTH);
+    this.framed.push({ image, kind: 'tarp' });
+  }
+
   /** Les ampoules de la guirlande de la pergola (D-76) : de petites boules qui se balancent. */
   private makeGarland(r: { x: number; y: number; w: number; h: number }): void {
     this.ensureSprites();
@@ -861,6 +1005,12 @@ export class WorldLifeView {
         const k = gust * Math.sin((nowMs / cfg.swing.periodMs) * Math.PI * 2);
         const frame = Math.round(((k + 1) / 2) * (SWING_FRAMES - 1));
         item.image.setFrame(FRAME_NAMES[frame] ?? '0', false, false);
+      } else if (item.kind === 'fan') {
+        const blade = Math.floor(nowMs / (cfg.fan.periodMs / FAN_FRAMES)) % FAN_FRAMES;
+        item.image.setFrame(FRAME_NAMES[blade] ?? '0', false, false);
+      } else if (item.kind === 'tarp') {
+        const k = Math.floor((nowMs / cfg.tarp.periodMs) * TARP_FRAMES * (0.6 + 0.4 * gust));
+        item.image.setFrame(FRAME_NAMES[k % TARP_FRAMES] ?? '0', false, false);
       } else if (item.kind === 'flag') {
         const wave = Math.floor(nowMs / (cfg.flag.periodMs / FLAG_FRAMES)) % FLAG_FRAMES;
         item.image.setFrame(FRAME_NAMES[wave] ?? '0', false, false);
@@ -873,6 +1023,18 @@ export class WorldLifeView {
         const turn = Math.abs(Math.sin(nowMs / 9000 + gust * 1.5));
         const frame = Math.min(VANE_FRAMES - 1, Math.floor(turn * VANE_FRAMES));
         item.image.setFrame(FRAME_NAMES[frame] ?? '0', false, false);
+      }
+    }
+    for (const flicker of this.flickers) {
+      // De temps en temps, quelques clignotements rapides, puis le tube tient de nouveau.
+      const t = nowMs - flicker.nextMs;
+      const span = cfg.tubeFlicker.blinkMs * 2 * cfg.tubeFlicker.blinks;
+      const off = t >= 0 && t < span && Math.floor(t / cfg.tubeFlicker.blinkMs) % 2 === 0;
+      flicker.off.setVisible(off);
+      flicker.glow.setVisible(!off);
+      if (t >= span) {
+        const [min, max] = cfg.tubeFlicker.everyMs;
+        flicker.nextMs = nowMs + min + this.rand() * (max - min);
       }
     }
     for (const bulb of this.bulbs) {

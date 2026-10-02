@@ -97,16 +97,7 @@ export function shopSiteDrawers({ tileShape }: ShapeTools): Record<string, Drawe
         const h = 18 + hash(r.x, k) * 22;
         ctx.fillRect(x, r.y + r.h - h, 22, h);
       }
-      ctx.strokeStyle = '#5b4a44';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(r.x + r.w / 2, r.y);
-      ctx.lineTo(r.x + r.w / 2, r.y + 2 * T);
-      ctx.stroke();
-      ctx.fillStyle = '#fff1b8';
-      ctx.beginPath();
-      ctx.arc(r.x + r.w / 2, r.y + 2 * T + 3, 3, 0, Math.PI * 2);
-      ctx.fill();
+      // L'ampoule nue d'avant est remplacée par un tube fluorescent sous le faux plafond (D-78).
     },
     checkout(a, r) {
       const { ctx } = a;
@@ -178,15 +169,24 @@ export function shopSiteDrawers({ tileShape }: ShapeTools): Record<string, Drawe
     },
     stockshelf(a, r) {
       const { ctx } = a;
-      // Étagère fixée au mur devant la porte de la réserve, sur deux équerres.
-      ctx.fillStyle = METAL;
-      for (const x of [r.x + 4, r.x + r.w - 6]) {
-        ctx.beginPath();
-        ctx.moveTo(x, r.y + 3);
-        ctx.lineTo(x + 2, r.y + 3);
-        ctx.lineTo(x + 2, r.y + 12);
-        ctx.fill();
+      // Mezzanine métallique devant la porte de la réserve, sur pilotis jusqu'au sol (D-78 :
+      // avant, une étagère murale) ; on passe entre les pilotis.
+      let floor = r.y / T + 1;
+      while (floor < a.level.height && tileAt(a.level, r.x / T, floor) !== Tile.Solid) {
+        floor++;
       }
+      ctx.fillStyle = METAL;
+      for (const x of [r.x + 3, r.x + r.w - 5]) {
+        ctx.fillRect(x, r.y + 3, 2, floor * T - r.y - 3);
+      }
+      ctx.strokeStyle = METAL;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(r.x + 4, r.y + 3 * T);
+      ctx.lineTo(r.x + r.w - 4, r.y + 6 * T);
+      ctx.moveTo(r.x + r.w - 4, r.y + 3 * T);
+      ctx.lineTo(r.x + 4, r.y + 6 * T);
+      ctx.stroke();
       tileShape(a, r, METAL, METAL_LIGHT);
     },
 
@@ -330,19 +330,126 @@ export function shopSiteDrawers({ tileShape }: ShapeTools): Record<string, Drawe
       }
       ctx.stroke();
     },
+    ceilingpanels(a, r) {
+      // Faux plafond : dalles claires, joints métalliques, une bordure sous le bord (D-78).
+      const { ctx, level } = a;
+      for (let row = r.y / T; row < (r.y + r.h) / T; row++) {
+        for (let col = r.x / T; col < (r.x + r.w) / T; col++) {
+          if (tileAt(level, col, row) !== Tile.Solid) {
+            continue;
+          }
+          ctx.fillStyle = '#d9d4c6';
+          ctx.fillRect(col * T, row * T, T, T);
+          ctx.fillStyle = 'rgba(0,0,0,0.12)';
+          if (col % 2 === 0) {
+            ctx.fillRect(col * T, row * T, 1, T);
+          }
+          if (row % 2 === 0) {
+            ctx.fillRect(col * T, row * T, T, 1);
+          }
+          if (tileAt(level, col, row + 1) !== Tile.Solid) {
+            ctx.fillStyle = METAL;
+            ctx.fillRect(col * T, (row + 1) * T - 3, T, 3);
+          }
+        }
+      }
+    },
+    tube(a, r) {
+      // Tube fluorescent sous le faux plafond, dans sa réglette.
+      const { ctx } = a;
+      ctx.fillStyle = METAL;
+      ctx.fillRect(r.x, r.y, r.w, 3);
+      ctx.fillStyle = '#f8fbff';
+      ctx.fillRect(r.x + 2, r.y + 3, r.w - 4, 3);
+    },
+    tubeflicker(a, r) {
+      // Même tube ; son clignotement est animé (WorldLifeView).
+      const { ctx } = a;
+      ctx.fillStyle = METAL;
+      ctx.fillRect(r.x, r.y, r.w, 3);
+      ctx.fillStyle = '#e8eef4';
+      ctx.fillRect(r.x + 2, r.y + 3, r.w - 4, 3);
+    },
+    fan(a, r) {
+      // Ventilateur de plafond : la tige et le moyeu ; les pales tournent (animées).
+      const { ctx } = a;
+      const cx = r.x + r.w / 2;
+      ctx.fillStyle = '#5b5f66';
+      ctx.fillRect(cx - 1, r.y, 2, r.h - 6);
+      ctx.beginPath();
+      ctx.ellipse(cx, r.y + r.h - 5, 4, 2.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+    },
+    promo(a, r) {
+      // Affiche de la supérette, dessinée : une pomme, une étoile, une flèche (pas de texte).
+      const { ctx } = a;
+      ctx.fillStyle = '#f6e04a';
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+      ctx.strokeStyle = '#e2574c';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(r.x + 2, r.y + 2, r.w - 4, r.h - 4);
+      ctx.fillStyle = '#e2574c';
+      ctx.beginPath();
+      ctx.arc(r.x + r.w * 0.35, r.y + r.h * 0.55, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#5d9152';
+      ctx.fillRect(r.x + r.w * 0.35 - 0.5, r.y + r.h * 0.55 - 10, 1.5, 5);
+      ctx.fillStyle = '#e2574c';
+      ctx.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const t = (i * Math.PI) / 5 - Math.PI / 2;
+        const radius = i % 2 === 0 ? 8 : 3.5;
+        ctx.lineTo(
+          r.x + r.w * 0.72 + Math.cos(t) * radius,
+          r.y + r.h * 0.38 + Math.sin(t) * radius,
+        );
+      }
+      ctx.fill();
+    },
+    opensky(a, r) {
+      // La rangée pleine du haut, dessinée comme du ciel (D-78) : on la découpe, le ciel des plans
+      // lointains se voit. Elle reste pleine (le bord de la salle l'est aussi).
+      const { ctx } = a;
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillStyle = '#000';
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+      ctx.restore();
+    },
+    backfacade(a, r) {
+      // L'arrière de la supérette, côté chantier : un mur crépi, une fenêtre, la porte de la
+      // réserve en bas ; le rebord de pierre en haut en est le parapet.
+      const { ctx } = a;
+      ctx.fillStyle = '#e4e0d4';
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+      ctx.fillStyle = 'rgba(0,0,0,0.08)';
+      for (let y = r.y + 6; y < r.y + r.h; y += 9) {
+        ctx.fillRect(r.x, y, r.w, 1);
+      }
+      ctx.fillStyle = '#9a958d';
+      ctx.fillRect(r.x + T - 1, r.y + 4 * T - 1, 2.6 * T + 2, 2.2 * T + 2);
+      ctx.fillStyle = '#bcdcee';
+      ctx.fillRect(r.x + T, r.y + 4 * T, 2.6 * T, 2.2 * T);
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.fillRect(r.x + 2.3 * T, r.y + 4 * T, 1, 2.2 * T);
+    },
+    tarp() {
+      // Animée (WorldLifeView) : la bâche claque au vent.
+    },
     floodlight(a, r) {
       const { ctx } = a;
       // Lampe de chantier sur un poteau : son chapeau est un perchoir (la trouvaille s'y pose).
       const cx = r.x + r.w / 2;
+      // La lampe est juste sous le chapeau (D-78 : avant, le chapeau flottait au-dessus).
       ctx.fillStyle = '#4d5a63';
-      ctx.fillRect(cx - 1.5, r.y + T, 3, r.h - T);
+      ctx.fillRect(cx - 1.5, r.y + 11, 3, r.h - 11);
       ctx.fillRect(cx - 5, r.y + r.h - 3, 10, 3);
       ctx.fillStyle = '#fff1b8';
       ctx.beginPath();
-      ctx.moveTo(cx - 7, r.y + T + 1);
-      ctx.lineTo(cx + 7, r.y + T + 1);
-      ctx.lineTo(cx + 4, r.y + T + 8);
-      ctx.lineTo(cx - 4, r.y + T + 8);
+      ctx.moveTo(cx - 7, r.y + 4);
+      ctx.lineTo(cx + 7, r.y + 4);
+      ctx.lineTo(cx + 4, r.y + 11);
+      ctx.lineTo(cx - 4, r.y + 11);
       ctx.fill();
       plank(a, r.x / T, (r.x + r.w) / T - 1, r.y / T, '#4d5a63', '#8a9aa5');
     },
