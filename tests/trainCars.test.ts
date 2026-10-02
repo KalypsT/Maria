@@ -10,6 +10,7 @@ import { surfaceUnder } from '../src/core/analysis/surfaces';
 import { EntityType, Tile, tileAt } from '../src/core/level/LevelData';
 import { checkCondition } from '../src/core/story/story';
 import { HOUSE_STORY } from '../src/levels/house/story';
+import { isStrangeRoom } from '../src/core/world/zone';
 import { level, phase, zone } from './zoneGraph';
 import { ANALYSIS_TIMEOUT_MS } from './timeouts';
 
@@ -105,7 +106,9 @@ describe('le train, PR 3 : les compartiments, le fourgon, le toit, le wagon-rest
 
   it('toutes les voitures roulent ; dedans, la nuit, les lumières sont éteintes', () => {
     const night = new Set([F.TrainDeparted, F.TrainNight]);
-    for (const room of [...zone.rooms.keys()].filter((r) => r.startsWith('train-'))) {
+    // Les salles du monde étrange du train (D-88) ne sont pas des voitures : elles ne roulent pas.
+    const cars = [...zone.rooms].filter(([r, l]) => r.startsWith('train-') && !isStrangeRoom(l));
+    for (const [room] of cars) {
       const moving = HOUSE_STORY.moving?.find((m) => m.room === room);
       expect(moving && checkCondition(night, moving.when), room).toBe(true);
       const dim = HOUSE_STORY.dim?.find((d) => d.room === room);

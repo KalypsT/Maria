@@ -25,7 +25,7 @@ Suite du train : PR 5b le souvenir jouable (nouveau système, réutilisé pour E
 - **Le train de la vaisselle** : la poursuite horizontale dans le niveau (6,8 tuiles/s), une veilleuse à chaque tronçon ; au bout, **la cuisine rose**, la dînette d'enfance de Céleste.
 - **La fin** (provisoire) : sur sa couchette, la nuit ; une bulle Maria, puis lit. Le souvenir jouable vient avec la PR 5b, le matin avec la PR 6.
 - DEBUG → Histoire : « le train étrange (la cuisine, la vaisselle) », « la cuisine rose trouvée ».
-- Tests : TESTCOUNT. Vérifié dans Chromium : la porte de la cuisine, la cuisine étrange (hotte, plaques, cheminée, rail), le train de la vaisselle (chariot, filets), la cuisine rose.
+- Tests : 605. Vérifié dans Chromium : la porte de la cuisine, la cuisine étrange (hotte, plaques, cheminée, rail), le train de la vaisselle (chariot, filets), la cuisine rose.
 - [ ] À vérifier sur téléphone (DEBUG → Histoire → « le train, la nuit (la lueur) », puis la porte de la cuisine) : l'entrée se comprend-elle ?
 - [ ] La cuisine étrange : les plaques chaudes se voient-elles ? La hotte basse rend-elle les sauts justes, sans frustration (moyen) ? Le rail des louches se remarque-t-il ?
 - [ ] Le train de la vaisselle : le chariot (`; @chase-phase` 6,8, `chaseSpeedScale`) presse-t-il sans être injuste ? La poutre basse le fait-elle trébucher de façon lisible ?
