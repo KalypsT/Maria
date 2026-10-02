@@ -24,7 +24,7 @@
 - **Le dessin de l'eau** (PLACEHOLDER) : plus sombre en profondeur, une ligne de surface, des vaguelettes qui défilent.
 - **DEBUG** : case « Marée haute ».
 - **Parcours d'essai 13 « Marée »** : à marée basse, la flaque, la glissade sous la digue (une trouvaille noyée à marée haute), la cheminée en saut mural ; à marée haute, le ponton et le bateau montés, par le haut.
-- Tests : TESTCOUNT. Vérifié dans Chromium : la chute dans la flaque et le retour sur la berge ; le parcours aux deux marées.
+- Tests : 653. Vérifié dans Chromium : la chute dans la flaque et le retour sur la berge ; le parcours aux deux marées.
 - [ ] À vérifier sur téléphone (menu pause → Parcours d'essai → « 13. Marée », puis DEBUG → « Marée haute ») : comprend-on la marée, ce qui flotte et ce qui est noyé ? Changer de marée dans le noir trouble-t-il ?
 - [ ] La chute dans l'eau : l'éclaboussement se lit-il ? Le retour au bord est-il assez rapide (`splashMs`, `reappearMs`) ? Juste, ou trop punitif avec la peur qui monte ?
 - [ ] L'eau elle-même : se lit-elle comme de l'eau (couleur, vaguelettes, `WATER_LIFE`) ? Les vaguelettes gênent-elles ?
