@@ -1,0 +1,30 @@
+; Parcours 12 : la poursuite horizontale (boss, D-87). Capacités prêtées par le parcours (hors partie).
+; Un chariot de service géant chargé d'une tour de vaisselle avance derrière Céleste, de gauche à
+; droite. Trois tronçons, une lanterne au début de chacun : une barrière basse (glisser dessous), des
+; caisses et des filets à bagages ; une poutre basse et un passage couché (la tour s'y cogne : il
+; s'arrête un moment) puis une pile de caisses ; une fosse de vaisselle cassée (saut long depuis la
+; glissade), une pile de valises et une dernière barrière. Le toucher fait monter la peur ; il recule
+; alors un peu.
+; @name: 12. Poursuite horizontale
+; @difficulty: easy
+; @abilities: climb wall-jump slide
+; @chase: right 117
+; @chase-phase: 117 6.5
+; @chase-trip: 56 11 8 1 6
+; Légende : # plein, b bois (plein), - filet (traversable), ^ vaisselle cassée (danger), . vide,
+; P départ, C lanterne, G arrivée.
+##########################################################################################################################
+#.............bbb.......................................bbbbbbbb..............................................bbb........#
+#.............bbb.......................................bbbbbbbb..............................................bbb........#
+#.............bbb.......................................bbbbbbbb..............................................bbb........#
+#.............bbb.......................................bbbbbbbb..............................................bbb........#
+#.............bbb.......................................bbbbbbbb..............................................bbb........#
+#.............bbb................----...----............bbbbbbbb........bbbbb..........................bbb....bbb........#
+#.............bbb..........bbb..........................bbbbbbbb........bbbbb..........................bbb....bbb........#
+#.............bbb..........bbb..........................bbbbbbbb........bbbbb..........................bbb....bbb........#
+#.............bbb.......bbbbbb..........................bbbbbbbb......bbbbbbb........................bbbbb....bbb........#
+#.............bbb.......bbbbbb..........................bbbbbbbb......bbbbbbb........................bbbbb....bbb........#
+#.P.....................bbbbbb..................C.....................bbbbbbb.......C................bbbbb............G..#
+############################################################################################.......#######################
+############################################################################################^^^^^^^#######################
+##########################################################################################################################

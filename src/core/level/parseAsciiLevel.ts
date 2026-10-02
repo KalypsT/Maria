@@ -1,4 +1,5 @@
 import {
+  type ChaseDir,
   EntityType,
   type LevelDecor,
   Material,
@@ -63,8 +64,12 @@ const DOOR = /^([1-9])\s+(\d+)\s+(\d+)$/;
 const CABLE = /^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
 /** Voie ferrée (D-66), répétable : `; @train: 26 right` (ligne des rails, sens du train). */
 const TRAIN = /^(\d+)\s+(left|right)$/;
-/** Poursuite (D-67) : `; @chase: 4` (ligne d'arrivée), `; @chase-phase: 40 1.5` (jusqu'à la ligne, tuiles/s), `; @chase-trip: col ligne l h recul`. */
-const CHASE_END = /^(\d+)$/;
+/**
+ * Poursuite (D-67, D-87) : `; @chase: 4` (vers le haut, ligne d'arrivée) ou `; @chase: right 140`
+ * (sens, ligne ou colonne d'arrivée), `; @chase-phase: 40 1.5` (jusqu'à la ligne ou la colonne,
+ * tuiles/s), `; @chase-trip: col ligne l h recul`.
+ */
+const CHASE_END = /^(?:(up|right|left)\s+)?(\d+)$/;
 const CHASE_PHASE = /^(\d+)\s+(\d+(?:\.\d+)?)$/;
 const CHASE_TRIP = /^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+(?:\.\d+)?)$/;
 
@@ -87,7 +92,8 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   const cableTiles: number[][] = [];
   const trains: LevelTrain[] = [];
   let chaseEnd = -1;
-  const chasePhases: { untilRow: number; speed: number }[] = [];
+  let chaseDir = 'up' as ChaseDir;
+  const chasePhases: { until: number; speed: number }[] = [];
   const chaseTrips: { col: number; row: number; width: number; height: number; recoil: number }[] =
     [];
   text.split('\n').forEach((raw, index) => {
@@ -141,13 +147,14 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         if (!c) {
           throw bad();
         }
-        chaseEnd = Number(c[1]);
+        chaseDir = (c[1] ?? 'up') as ChaseDir;
+        chaseEnd = Number(c[2]);
       } else if (match[1] === 'chase-phase') {
         const c = CHASE_PHASE.exec(value);
         if (!c) {
           throw bad();
         }
-        chasePhases.push({ untilRow: Number(c[1]), speed: Number(c[2]) });
+        chasePhases.push({ until: Number(c[1]), speed: Number(c[2]) });
       } else if (match[1] === 'chase-trip') {
         const c = CHASE_TRIP.exec(value);
         if (!c) {
@@ -253,10 +260,20 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   if (chaseEnd >= 0 !== chasePhases.length > 0 || (chaseEnd < 0 && chaseTrips.length > 0)) {
     throw new Error(`Niveau ${id} : @chase va de pair avec au moins une @chase-phase`);
   }
+  // Les phases vont dans le sens de la course : lignes décroissantes vers le haut, colonnes
+  // croissantes vers la droite, décroissantes vers la gauche.
+  const forward = chaseDir === 'right' ? 1 : -1;
   for (let k = 1; k < chasePhases.length; k++) {
-    if ((chasePhases[k]?.untilRow ?? 0) >= (chasePhases[k - 1]?.untilRow ?? 0)) {
-      throw new Error(`Niveau ${id} : les @chase-phase vont de bas en haut`);
+    if (((chasePhases[k]?.until ?? 0) - (chasePhases[k - 1]?.until ?? 0)) * forward <= 0) {
+      throw new Error(
+        chaseDir === 'up'
+          ? `Niveau ${id} : les @chase-phase vont de bas en haut`
+          : `Niveau ${id} : les @chase-phase vont dans le sens de la poursuite`,
+      );
     }
+  }
+  if (chaseEnd >= (chaseDir === 'up' ? height : width)) {
+    throw new Error(`Niveau ${id} : @chase ${chaseEnd} hors de la salle`);
   }
   for (const train of trains) {
     if (train.row >= height) {
@@ -291,7 +308,10 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
     decor,
     cables,
     trains,
-    chase: chaseEnd >= 0 ? { endRow: chaseEnd, phases: chasePhases, trips: chaseTrips } : null,
+    chase:
+      chaseEnd >= 0
+        ? { dir: chaseDir, end: chaseEnd, phases: chasePhases, trips: chaseTrips }
+        : null,
   };
 }
 

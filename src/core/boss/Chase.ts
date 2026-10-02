@@ -7,33 +7,45 @@ import type { Box } from '../physics/gridCollision';
 /** Événements du dernier pas de la poursuite (masque de bits). */
 export const ChaseEvent = { None: 0, Contact: 1, Trip: 2, End: 4 } as const;
 
-/** Les pieds de Céleste doivent dépasser le haut du front de cette profondeur pour le toucher (px). */
+/** Le dos de Céleste (ses pieds, vers le haut) doit passer derrière le front de cette profondeur pour le toucher (px). */
 const CONTACT_DEPTH_PX = 3;
-/** Une fois la poursuite finie, il redescend à cette vitesse (px/s). */
+/** Une fois la poursuite finie, il recule à cette vitesse (px/s). */
 const SINK_SPEED = 90;
 
 /**
- * Poursuite verticale (boss, D-67, D-70), pure et indépendante de Phaser : un « front » (le haut
- * d'une masse sans visage) monte sous Céleste à vitesse constante (la phase où elle se trouve, une
- * seule en général). S'il prend trop de retard, il accélère peu à peu (rattrapage doux, jamais de
- * saut) : il reste présent sans devenir injuste. Le toucher
- * fait rebondir Céleste et monter la peur ; il recule alors un peu et s'arrête un instant. Passer
- * par un croc-en-jambe le fait reculer et s'arrêter. La poursuite s'arrête quand Céleste atteint la
- * ligne d'arrivée ; il redescend alors. Aucune allocation dans `step`.
+ * Poursuite (boss, D-67, D-70, D-87), pure et indépendante de Phaser : un « front » (le bord d'une
+ * masse sans visage) avance derrière Céleste à vitesse constante (la phase où elle se trouve, une
+ * seule en général) : vers le haut sous ses pieds, ou vers la droite ou la gauche dans son dos.
+ * S'il prend trop de retard, il accélère peu à peu (rattrapage doux, jamais de saut) : il reste
+ * présent sans devenir injuste. Le toucher fait monter la peur (l'appelant pousse Céleste) ; il
+ * recule alors un peu et s'arrête un instant. Passer par un croc-en-jambe le fait reculer et
+ * s'arrêter. La poursuite s'arrête quand Céleste atteint la ligne d'arrivée ; il recule alors.
+ *
+ * Toutes les distances se comptent sur un axe orienté dans le sens de la course (`sign` × la
+ * coordonnée du monde) : le même code sert aux trois sens. Aucune allocation dans `step`.
  */
 export class Chase {
-  /** Haut du front (px). */
-  frontY = 0;
+  /** Front sur l'axe de la course (px, croissant dans le sens de la course). */
+  private axis = 0;
   /** Fini : Céleste a atteint la ligne d'arrivée. */
   done = false;
   /** Événements du dernier pas (`ChaseEvent`). */
   events = 0;
   /** Phase en cours (indice dans `data.phases`). */
   phase = 0;
+  /** Nombre de secousses (contact ou croc-en-jambe) depuis la création : l'affichage le fait trembler. */
+  jolts = 0;
+  /** Poursuite horizontale (vers la droite ou la gauche). */
+  readonly horizontal: boolean;
+  /** Sens de la course dans la coordonnée du monde : +1 vers la droite, -1 vers le haut ou la gauche. */
+  readonly sign: number;
   private pauseSteps = 0;
   private needsRestart = true;
   private readonly tripsUsed: Uint8Array;
   private readonly dt: number;
+  /** Ligne d'arrivée et limites des phases sur l'axe de la course (px). */
+  private readonly endAxis: number;
+  private readonly phaseAxis: Float64Array;
 
   constructor(
     readonly data: LevelChase,
@@ -42,13 +54,52 @@ export class Chase {
   ) {
     this.tripsUsed = new Uint8Array(data.trips.length);
     this.dt = 1 / stepHz;
+    this.horizontal = data.dir !== 'up';
+    this.sign = data.dir === 'right' ? 1 : -1;
+    this.endAxis = this.lineAxis(data.end);
+    this.phaseAxis = Float64Array.from(data.phases, (p) => this.lineAxis(p.until));
+  }
+
+  /**
+   * Une ligne (vers le haut) ou une colonne de tuiles, sur l'axe : le dos de Céleste la franchit en
+   * dépassant le bas de la ligne, le bord gauche (vers la droite) ou droit (vers la gauche) de la
+   * colonne.
+   */
+  private lineAxis(index: number): number {
+    return this.sign * (this.data.dir === 'right' ? index : index + 1) * T;
   }
 
   setParams(params: Readonly<CombatParams>): void {
     this.params = params;
   }
 
-  /** Il repartira au prochain pas, sous les pieds de Céleste (départ, réapparition). */
+  /** Front dans la coordonnée du monde (px) : y du haut de la masse, ou x de son bord avant. */
+  get front(): number {
+    return this.sign * this.axis;
+  }
+
+  set front(value: number) {
+    this.axis = this.sign * value;
+  }
+
+  /** Dos de Céleste dans la coordonnée du monde : ses pieds, son bord gauche ou droit. */
+  rear(box: Box): number {
+    switch (this.data.dir) {
+      case 'up':
+        return box.y + box.height;
+      case 'right':
+        return box.x;
+      case 'left':
+        return box.x + box.width;
+    }
+  }
+
+  /** Avance de Céleste sur le front (tuiles) ; négative quand il l'a dépassée. */
+  lead(box: Box): number {
+    return (this.sign * this.rear(box) - this.axis) / T;
+  }
+
+  /** Il repartira au prochain pas, derrière Céleste (départ, réapparition). */
   restart(): void {
     this.needsRestart = true;
     this.done = false;
@@ -61,34 +112,38 @@ export class Chase {
   }
 
   /**
-   * Un pas. Retourne vrai si Céleste vient de le toucher : l'appelant la fait rebondir et monter
-   * la peur (CombatWorld).
+   * Un pas. Retourne vrai si Céleste vient de le toucher : l'appelant la pousse et fait monter la
+   * peur (CombatWorld).
    */
   step(box: Box, invulnerable: boolean): boolean {
     this.events = 0;
     const p = this.params;
-    const feet = box.y + box.height;
+    const rear = this.sign * this.rear(box);
     if (this.needsRestart) {
       this.needsRestart = false;
-      this.frontY = feet + p.chaseRestartGapTiles * T;
-      this.pauseSteps = msToSteps(p.chaseStartDelayMs, this.stepHz);
+      const side = this.horizontal;
+      this.axis = rear - (side ? p.chaseSideRestartGapTiles : p.chaseRestartGapTiles) * T;
+      this.pauseSteps = msToSteps(
+        side ? p.chaseSideStartDelayMs : p.chaseStartDelayMs,
+        this.stepHz,
+      );
       this.tripsUsed.fill(0);
     }
     if (this.done) {
-      this.frontY += SINK_SPEED * this.dt;
+      this.axis -= SINK_SPEED * this.dt;
       return false;
     }
     const data = this.data;
-    if (feet <= (data.endRow + 1) * T) {
+    if (rear >= this.endAxis) {
       this.done = true;
       this.events |= ChaseEvent.End;
       return false;
     }
-    // Phase : la première dont la limite est encore au-dessus des pieds de Céleste.
-    let phase = data.phases.length - 1;
-    for (let i = 0; i < data.phases.length; i++) {
-      const limit = data.phases[i]?.untilRow ?? 0;
-      if (feet > (limit + 1) * T) {
+    // Phase : la première dont la limite est encore devant Céleste.
+    const limits = this.phaseAxis;
+    let phase = limits.length - 1;
+    for (let i = 0; i < limits.length; i++) {
+      if (rear < (limits[i] ?? 0)) {
         phase = i;
         break;
       }
@@ -98,15 +153,16 @@ export class Chase {
       this.pauseSteps--;
     } else {
       let speed = (data.phases[phase]?.speed ?? 0) * p.chaseSpeedScale;
-      const behind = (this.frontY - feet) / T - p.chaseCatchUpGapTiles;
+      const behind = (rear - this.axis) / T - p.chaseCatchUpGapTiles;
       if (behind > 0) {
         speed = Math.max(
           speed,
           Math.min(p.chaseCatchUpMaxSpeed, speed + behind * p.chaseCatchUpRate),
         );
       }
-      this.frontY -= speed * T * this.dt;
+      this.axis += speed * T * this.dt;
     }
+    const feet = box.y + box.height;
     for (let i = 0; i < data.trips.length; i++) {
       const trip = data.trips[i];
       if (
@@ -120,14 +176,16 @@ export class Chase {
         continue;
       }
       this.tripsUsed[i] = 1;
-      this.frontY += trip.recoil * T;
+      this.axis -= trip.recoil * T;
       this.pauseSteps = msToSteps(p.chaseTripPauseMs, this.stepHz);
       this.events |= ChaseEvent.Trip;
+      this.jolts++;
     }
-    if (!invulnerable && feet > this.frontY + CONTACT_DEPTH_PX) {
-      this.frontY = Math.max(this.frontY, feet) + p.chaseContactRecoilTiles * T;
+    if (!invulnerable && this.axis > rear + CONTACT_DEPTH_PX) {
+      this.axis = Math.min(this.axis, rear) - p.chaseContactRecoilTiles * T;
       this.pauseSteps = msToSteps(p.chaseContactPauseMs, this.stepHz);
       this.events |= ChaseEvent.Contact;
+      this.jolts++;
       return true;
     }
     return false;
