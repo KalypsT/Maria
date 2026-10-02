@@ -36,6 +36,45 @@ function hash(x: number, y: number): number {
   return n - Math.floor(n);
 }
 
+/** Ligne (tuiles) du premier sol plein sous (x px, ligne), ou la hauteur de la salle. */
+function groundRow(a: ArtContext, x: number, row: number): number {
+  const col = Math.floor(x / T);
+  for (let r = Math.floor(row); r < a.level.height; r++) {
+    if (tileAt(a.level, col, r) === Tile.Solid) {
+      return r;
+    }
+  }
+  return a.level.height;
+}
+
+/** Une tuile (col, ligne) couverte par un autre meuble que `self` (un abri sous la passerelle). */
+function coveredByOther(a: ArtContext, self: Rect, col: number, row: number): boolean {
+  return a.level.decor.some(
+    (d) =>
+      (d.col * T !== self.x || d.row * T !== self.y) &&
+      col >= d.col &&
+      col < d.col + d.width &&
+      row >= d.row &&
+      row < d.row + d.height &&
+      d.kind !== 'canopyroof',
+  );
+}
+
+/** Le réverbère du balcon du hall (D-80) : au bout de câble posé au-dessus du balcon. */
+export function balconyLamp(level: ArtContext['level'], r: Rect): { x: number; y: number } | null {
+  for (const c of level.cables) {
+    for (const [x, y] of [
+      [c.x1, c.y1],
+      [c.x2, c.y2],
+    ] as const) {
+      if (x >= r.x - T && x <= r.x + r.w && y < r.y && y > r.y - 6 * T) {
+        return { x, y };
+      }
+    }
+  }
+  return null;
+}
+
 /** Tuiles traversables d'un rectangle, en segments (col0, col1, ligne). */
 function oneWayRuns(a: ArtContext, r: Rect): [number, number, number][] {
   const runs: [number, number, number][] = [];
@@ -117,24 +156,73 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
     // ——— Dehors : les voies et les quais ———
     stationfacade(a, r) {
       const { ctx } = a;
-      // La gare au fond : un long bâtiment de pierre, de grandes fenêtres cintrées, un fronton.
-      ctx.fillStyle = 'rgba(217,204,178,0.55)';
-      ctx.fillRect(r.x, r.y + r.h * 0.25, r.w, r.h * 0.75);
-      ctx.fillStyle = 'rgba(184,168,136,0.6)';
-      ctx.fillRect(r.x, r.y + r.h * 0.25, r.w, 3);
+      const dusk = a.palette.darkness > 0;
+      // La gare au fond (D-80) : deux ailes sous un toit d'ardoise, de hautes fenêtres cintrées
+      // (quelques-unes allumées au crépuscule) et, au milieu, la tour de l'horloge (le repère).
+      const eave = r.y + r.h * 0.42;
+      const bottom = r.y + r.h;
       const mid = r.x + r.w / 2;
+      const towerW = 5 * T;
+      ctx.fillStyle = 'rgba(112,120,134,0.75)';
       ctx.beginPath();
-      ctx.moveTo(mid - 60, r.y + r.h * 0.25);
-      ctx.lineTo(mid, r.y);
-      ctx.lineTo(mid + 60, r.y + r.h * 0.25);
-      ctx.closePath();
+      ctx.moveTo(r.x, eave);
+      ctx.lineTo(r.x + 1.5 * T, eave - 1.8 * T);
+      ctx.lineTo(r.x + r.w - 1.5 * T, eave - 1.8 * T);
+      ctx.lineTo(r.x + r.w, eave);
       ctx.fill();
-      ctx.fillStyle = 'rgba(120,140,160,0.35)';
-      for (let x = r.x + 12; x < r.x + r.w - 20; x += 34) {
+      ctx.fillStyle = 'rgba(217,204,178,0.8)';
+      ctx.fillRect(r.x, eave, r.w, bottom - eave);
+      ctx.fillStyle = 'rgba(160,144,114,0.8)';
+      ctx.fillRect(r.x, eave, r.w, 3);
+      ctx.fillRect(r.x, eave + (bottom - eave) * 0.62, r.w, 2);
+      const windowTop = eave + 10;
+      const windowH = (bottom - eave) * 0.62 - 16;
+      for (let x = r.x + T; x < r.x + r.w - 1.5 * T; x += 2.5 * T) {
+        if (Math.abs(x + 6 - mid) < towerW / 2 + 8) {
+          continue;
+        }
+        ctx.fillStyle =
+          dusk && hash(x, r.y) > 0.55 ? 'rgba(243,213,138,0.95)' : 'rgba(110,130,150,0.55)';
         ctx.beginPath();
-        ctx.roundRect(x, r.y + r.h * 0.4, 16, r.h * 0.45, [8, 8, 0, 0]);
+        ctx.roundRect(x, windowTop, 12, windowH, [6, 6, 0, 0]);
         ctx.fill();
+        ctx.fillStyle = 'rgba(110,130,150,0.45)';
+        ctx.fillRect(x + 2, eave + (bottom - eave) * 0.62 + 6, 8, (bottom - eave) * 0.3);
       }
+      // La tour : un toit en pointe, l'horloge, une grande porte cintrée (éclairée le soir).
+      const tx = mid - towerW / 2;
+      const towerTop = r.y + 2.2 * T;
+      ctx.fillStyle = 'rgba(206,192,164,0.9)';
+      ctx.fillRect(tx, towerTop, towerW, bottom - towerTop);
+      ctx.fillStyle = 'rgba(112,120,134,0.85)';
+      ctx.beginPath();
+      ctx.moveTo(tx - 4, towerTop);
+      ctx.lineTo(mid, r.y);
+      ctx.lineTo(tx + towerW + 4, towerTop);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(160,144,114,0.9)';
+      ctx.fillRect(tx - 3, towerTop, towerW + 6, 3);
+      const cy = towerTop + 2.2 * T;
+      ctx.fillStyle = '#fbf6ea';
+      ctx.beginPath();
+      ctx.arc(mid, cy, 1.4 * T, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(80,72,64,0.9)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(mid, cy);
+      ctx.lineTo(mid + 6, cy - 9);
+      ctx.moveTo(mid, cy);
+      ctx.lineTo(mid - 2, cy + 13);
+      ctx.stroke();
+      ctx.fillStyle = dusk ? 'rgba(243,213,138,0.95)' : 'rgba(110,130,150,0.6)';
+      ctx.beginPath();
+      ctx.roundRect(mid - 1.2 * T, bottom - 3.6 * T, 2.4 * T, 3.6 * T, [1.2 * T, 1.2 * T, 0, 0]);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(160,144,114,0.9)';
+      ctx.fillRect(mid - 1.2 * T, bottom - 2.4 * T, 2.4 * T, 2);
     },
     rails(a, r) {
       const { ctx } = a;
@@ -163,14 +251,15 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
     },
     shelter(a, r) {
       const { ctx } = a;
-      // Abri de quai : toit vert sur deux poteaux de fonte, un banc dessous (fond).
+      // Abri de quai : toit vert sur deux poteaux de fonte posés sur le quai, un banc dessous.
+      const ground = groundRow(a, r.x + 4, r.y / T + 1) * T;
       ctx.fillStyle = IRON;
-      ctx.fillRect(r.x + 3, r.y + 4, 2, r.h - 4);
-      ctx.fillRect(r.x + r.w - 5, r.y + 4, 2, r.h - 4);
+      ctx.fillRect(r.x + 3, r.y + 4, 2, ground - r.y - 4);
+      ctx.fillRect(r.x + r.w - 5, r.y + 4, 2, ground - r.y - 4);
       ctx.fillStyle = 'rgba(110,80,56,0.7)';
-      ctx.fillRect(r.x + 8, r.y + r.h - 6, r.w - 16, 2);
-      ctx.fillRect(r.x + 9, r.y + r.h - 4, 1.5, 4);
-      ctx.fillRect(r.x + r.w - 10.5, r.y + r.h - 4, 1.5, 4);
+      ctx.fillRect(r.x + 8, ground - 6, r.w - 16, 2);
+      ctx.fillRect(r.x + 9, ground - 4, 1.5, 4);
+      ctx.fillRect(r.x + r.w - 10.5, ground - 4, 1.5, 4);
       tileShape(a, { x: r.x, y: r.y, w: r.w, h: T }, IRON, IRON_LIGHT);
       ctx.fillStyle = 'rgba(0,0,0,0.15)';
       ctx.fillRect(r.x + 1, r.y + 4, r.w - 2, 2);
@@ -214,16 +303,49 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
     },
     catenarymast(a, r) {
       const { ctx } = a;
-      // Mât de caténaire : un poteau, un bras en haut, un isolateur (le câble est dessiné à part).
+      // Mât de caténaire posé au sol (quai, toit du poste) ; un bras en console tient le bout de
+      // câble voisin, avec son isolateur (D-80 : avant, le câble commençait dans le vide).
+      const cx = r.x + T / 2;
+      const foot = groundRow(a, cx, r.y / T) * T;
       ctx.fillStyle = '#6e737a';
-      ctx.fillRect(r.x + T / 2 - 1.5, r.y, 3, r.h);
-      ctx.fillRect(r.x + T / 2 - 8, r.y + 2, 16, 2);
+      ctx.fillRect(cx - 1.5, r.y, 3, foot - r.y);
+      ctx.fillRect(cx - 3.5, foot - 2, 7, 2);
       ctx.fillStyle = '#9aa0a8';
-      ctx.fillRect(r.x + T / 2 - 1.5, r.y, 1, r.h);
+      ctx.fillRect(cx - 1.5, r.y, 1, foot - r.y);
+      let held = false;
+      for (const c of a.level.cables) {
+        for (const [x, y] of [
+          [c.x1, c.y1],
+          [c.x2, c.y2],
+        ] as const) {
+          if (Math.abs(x - cx) > 6 * T || y < r.y - T || y > foot) {
+            continue;
+          }
+          held = true;
+          ctx.strokeStyle = '#6e737a';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(cx, y);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(cx, Math.max(r.y, y - 12));
+          ctx.lineTo(x, y);
+          ctx.stroke();
+          ctx.fillStyle = '#c9d4da';
+          ctx.fillRect(x - 1.5, y - 1, 3, 4);
+        }
+      }
+      if (!held) {
+        ctx.fillStyle = '#6e737a';
+        ctx.fillRect(cx - 8, r.y + 2, 16, 2);
+      }
     },
     signalbox(a, r) {
       const { ctx } = a;
-      // Poste d'aiguillage sur pilotis : la cabine de briques (pleine), ses vitres, le toit.
+      // Poste d'aiguillage sur pilotis : la cabine de briques (pleine), ses vitres (allumées au
+      // crépuscule), le toit.
       const bottom = (lastSolidRow(a, r) + 1) * T;
       ctx.fillStyle = WOOD_DARK;
       for (const x of [r.x + 6, r.x + r.w - 9]) {
@@ -238,33 +360,165 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
       ctx.lineTo(r.x + 7, r.y + r.h - 2);
       ctx.stroke();
       tileShape(a, { x: r.x, y: r.y, w: r.w, h: bottom - r.y }, BRICK, BRICK_LIGHT);
-      ctx.fillStyle = '#bcdcee';
+      ctx.fillStyle = a.palette.darkness > 0 ? '#f3d58a' : '#bcdcee';
       for (let x = r.x + 6; x < r.x + r.w - 12; x += 14) {
         ctx.fillRect(x, r.y + 14, 10, 12);
       }
       ctx.fillStyle = '#7a3f34';
       ctx.fillRect(r.x - 2, r.y, r.w + 4, 3);
     },
+    luggagecart(a, r) {
+      const { ctx } = a;
+      // Chariot à bagages (plein, D-80) : des valises oubliées empilées sur un plateau à roulettes,
+      // la barre de poussée ; le haut de la pile est le haut de la collision.
+      const deckY = r.y + r.h - 5;
+      ctx.strokeStyle = METAL;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(r.x + 1, deckY);
+      ctx.lineTo(r.x - 3, r.y + r.h * 0.35);
+      ctx.lineTo(r.x - 6, r.y + r.h * 0.35);
+      ctx.stroke();
+      ctx.fillStyle = METAL;
+      ctx.fillRect(r.x, deckY, r.w, 2.5);
+      ctx.fillStyle = '#2a2436';
+      for (const x of [r.x + 6, r.x + r.w - 6]) {
+        ctx.beginPath();
+        ctx.arc(x, r.y + r.h - 2.5, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      const colors = ['#8a5a44', '#6d86c2', '#b0894f', '#7a8f6a', '#a0607a'];
+      let y = deckY;
+      let k = 0;
+      while (y > r.y + 0.5) {
+        const h = Math.min(y - r.y, 9 + Math.floor(hash(r.x + k, r.y) * 6));
+        const top = y - h;
+        const split = hash(r.x, top) > 0.5 ? r.w * (0.4 + hash(top, r.x) * 0.2) : r.w;
+        for (const [x0, x1] of [
+          [r.x, r.x + split],
+          [r.x + split, r.x + r.w],
+        ] as const) {
+          if (x1 - x0 < 4) {
+            continue;
+          }
+          ctx.fillStyle = colors[(k + Math.floor(x0)) % colors.length] ?? WOOD;
+          ctx.beginPath();
+          ctx.roundRect(x0 + 0.5, top + 0.5, x1 - x0 - 1, h - 1, 2);
+          ctx.fill();
+          ctx.fillStyle = 'rgba(0,0,0,0.2)';
+          ctx.fillRect(x0 + 4, top + 1, 1.5, h - 2);
+          ctx.fillRect(x1 - 5.5, top + 1, 1.5, h - 2);
+        }
+        y = top;
+        k++;
+      }
+      ctx.strokeStyle = WOOD_DARK;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(r.x + r.w / 2 - 3, r.y - 2.5, 6, 2.5);
+    },
+    quaylamp(a, r) {
+      const { ctx } = a;
+      // Lampadaire de quai (fond, D-80) : un mât de fonte, une crosse, la lanterne allumée au
+      // crépuscule.
+      const cx = r.x + T / 2;
+      const ground = r.y + r.h;
+      ctx.fillStyle = IRON;
+      ctx.fillRect(cx - 1.5, r.y + 4, 3, ground - r.y - 4);
+      ctx.fillRect(cx - 3.5, ground - 4, 7, 4);
+      ctx.strokeStyle = IRON;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, r.y + 5);
+      ctx.quadraticCurveTo(cx, r.y, cx + 6, r.y + 2);
+      ctx.stroke();
+      ctx.fillStyle = a.palette.darkness > 0 ? '#ffe9a8' : '#f4ecd4';
+      ctx.beginPath();
+      ctx.moveTo(cx + 3, r.y + 4);
+      ctx.lineTo(cx + 9, r.y + 4);
+      ctx.lineTo(cx + 8, r.y + 11);
+      ctx.lineTo(cx + 4, r.y + 11);
+      ctx.fill();
+      ctx.fillStyle = IRON;
+      ctx.fillRect(cx + 2.5, r.y + 3, 7, 1.5);
+    },
     canopyroof(a, r) {
       const { ctx } = a;
-      // Marquise de verre au-dessus des quais : des fermes de fonte et des vitres pâles.
-      ctx.fillStyle = GLASS;
-      ctx.fillRect(r.x, r.y, r.w, r.h - 6);
-      ctx.strokeStyle = 'rgba(63,90,82,0.75)';
+      // Marquise de verre (D-80) : des fermes de fonte en arc, posées sur le pilier, les piles de
+      // la passerelle et des colonnes ; des vitres pâles.
+      const chord = r.y + r.h - 4;
+      ctx.fillStyle = a.palette.darkness > 0 ? 'rgba(120,140,170,0.45)' : GLASS;
+      ctx.fillRect(r.x, r.y, r.w, chord - r.y);
+      ctx.strokeStyle = 'rgba(63,90,82,0.85)';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      for (let x = r.x; x <= r.x + r.w; x += 48) {
-        ctx.moveTo(x, r.y);
-        ctx.lineTo(x + 24, r.y + r.h - 6);
-        ctx.lineTo(x + 48, r.y);
+      const span = 6 * T;
+      for (let x = r.x; x < r.x + r.w; x += span) {
+        ctx.moveTo(x, chord);
+        ctx.quadraticCurveTo(x + span / 2, r.y - (chord - r.y) * 0.5, x + span, chord);
+        for (let k = 1; k < 6; k++) {
+          const hx = x + (span * k) / 6;
+          const t = k / 6;
+          ctx.moveTo(hx, chord);
+          ctx.lineTo(hx, chord - (chord - r.y) * 4 * t * (1 - t) * 0.75);
+        }
       }
-      ctx.moveTo(r.x, r.y + r.h - 6);
-      ctx.lineTo(r.x + r.w, r.y + r.h - 6);
       ctx.stroke();
+      ctx.fillStyle = 'rgba(63,90,82,0.9)';
+      ctx.fillRect(r.x, chord, r.w, 3);
+    },
+    canopycolumn(a, r) {
+      const { ctx } = a;
+      // Colonne de fonte (fond, D-80) : du dessous de la marquise jusqu'au quai, chapiteau et socle.
+      const cx = r.x + T / 2;
+      const ground = groundRow(a, cx, r.y / T) * T;
+      ctx.fillStyle = IRON;
+      ctx.fillRect(cx - 2, r.y, 4, ground - r.y);
+      ctx.fillRect(cx - 5, r.y, 10, 3);
+      ctx.fillRect(cx - 4, ground - 5, 8, 5);
+      ctx.fillStyle = IRON_LIGHT;
+      ctx.fillRect(cx - 2, r.y + 3, 1, ground - r.y - 8);
+      // Les consoles qui tiennent la marquise.
+      ctx.strokeStyle = IRON;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(cx - 12, r.y);
+      ctx.quadraticCurveTo(cx - 2, r.y + 2, cx - 1, r.y + 12);
+      ctx.moveTo(cx + 12, r.y);
+      ctx.quadraticCurveTo(cx + 2, r.y + 2, cx + 1, r.y + 12);
+      ctx.stroke();
+    },
+    globelamp(a, r) {
+      const { ctx } = a;
+      // Lampe-globe (fond, D-80), au bout de sa tige.
+      const cx = r.x + T / 2;
+      const gy = r.y + r.h - 6;
+      ctx.fillStyle = IRON;
+      ctx.fillRect(cx - 0.5, r.y, 1, gy - r.y - 4);
+      ctx.fillRect(cx - 2.5, gy - 6, 5, 2.5);
+      ctx.fillStyle = a.palette.darkness > 0 ? '#ffe9a8' : '#f4ecd4';
+      ctx.beginPath();
+      ctx.arc(cx, gy, 4.5, 0, Math.PI * 2);
+      ctx.fill();
     },
     pillar(a, r) {
       const { ctx } = a;
-      // Pilier de fonte de la marquise (plein), un chapiteau en haut.
+      // Pilier de fonte de la marquise (plein), un chapiteau en haut ; sous la partie pleine, sa
+      // colonne fine (fond) descend jusqu'au quai : on passe dessous, il tient (D-80).
+      const cx = r.x + r.w / 2;
+      const ground = groundRow(a, cx, (r.y + r.h) / T) * T;
+      if (ground > r.y + r.h) {
+        ctx.fillStyle = IRON;
+        ctx.fillRect(cx - 2.5, r.y + r.h, 5, ground - r.y - r.h);
+        ctx.fillRect(cx - 5, ground - 5, 10, 5);
+        ctx.beginPath();
+        ctx.moveTo(r.x + 1, r.y + r.h);
+        ctx.lineTo(r.x + r.w - 1, r.y + r.h);
+        ctx.lineTo(cx + 2.5, r.y + r.h + 6);
+        ctx.lineTo(cx - 2.5, r.y + r.h + 6);
+        ctx.fill();
+        ctx.fillStyle = IRON_LIGHT;
+        ctx.fillRect(cx - 2.5, r.y + r.h + 6, 1, ground - r.y - r.h - 11);
+      }
       tileShape(a, r, IRON, IRON_LIGHT);
       ctx.fillStyle = IRON_LIGHT;
       ctx.fillRect(r.x - 2, r.y + 2, r.w + 4, 3);
@@ -273,21 +527,71 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
     },
     footbridge(a, r) {
       const { ctx } = a;
-      // Passerelle : marches et tablier (traversables), garde-corps au-dessus du tablier.
+      // Passerelle (D-80) : le tablier (traversable) bordé d'une poutre en treillis, sur deux piles
+      // posées au bord des quais ; ses escaliers sont des tours de paliers en caillebotis, chaque
+      // palier sur ses montants jusqu'au quai.
       for (const [c0, c1, row] of oneWayRuns(a, r)) {
+        if (coveredByOther(a, r, c0, row)) {
+          continue;
+        }
         const x = c0 * T;
         const w = (c1 - c0 + 1) * T;
+        const y = row * T;
         ctx.strokeStyle = METAL;
         ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(x, row * T - 9);
-        ctx.lineTo(x + w, row * T - 9);
-        for (let bx = x + 3; bx < x + w; bx += 6) {
-          ctx.moveTo(bx, row * T - 9);
-          ctx.lineTo(bx, row * T);
+        if (c1 - c0 + 1 >= 8) {
+          // Piles : là où le sol change (le bord d'un quai), côté quai.
+          for (let c = c0; c < c1; c++) {
+            const here = groundRow(a, (c + 0.5) * T, row + 1);
+            const next = groundRow(a, (c + 1.5) * T, row + 1);
+            if (here === next) {
+              continue;
+            }
+            const pc = here < next ? c : c + 1;
+            const ground = Math.min(here, next) * T;
+            const px = pc * T + 3;
+            ctx.strokeRect(px, y + T, 10, ground - y - T);
+            ctx.beginPath();
+            for (let yy = y + T; yy < ground - 8; yy += 10) {
+              ctx.moveTo(px, yy);
+              ctx.lineTo(px + 10, yy + 10);
+              ctx.moveTo(px + 10, yy);
+              ctx.lineTo(px, yy + 10);
+            }
+            ctx.stroke();
+            ctx.fillStyle = METAL;
+            ctx.fillRect(px - 2, ground - 3, 14, 3);
+          }
+          // Poutre en treillis (Warren) au-dessus du tablier.
+          ctx.beginPath();
+          ctx.moveTo(x, y - 10);
+          ctx.lineTo(x + w, y - 10);
+          for (let bx = x; bx + 12 <= x + w; bx += 12) {
+            ctx.moveTo(bx, y);
+            ctx.lineTo(bx + 6, y - 10);
+            ctx.lineTo(bx + 12, y);
+          }
+          ctx.stroke();
+        } else {
+          // Palier : deux montants jusqu'au quai, une entretoise, un garde-corps.
+          const ground = groundRow(a, x + 2, row + 1) * T;
+          ctx.fillStyle = METAL;
+          ctx.fillRect(x + 2, y + T, 2, ground - y - T);
+          ctx.fillRect(x + w - 4, y + T, 2, ground - y - T);
+          ctx.beginPath();
+          ctx.moveTo(x + 3, y + T);
+          ctx.lineTo(x + w - 3, Math.min(ground, y + T + w));
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(x, y - 9);
+          ctx.lineTo(x + w, y - 9);
+          for (let bx = x + 3; bx < x + w; bx += 6) {
+            ctx.moveTo(bx, y - 9);
+            ctx.lineTo(bx, y);
+          }
+          ctx.stroke();
         }
-        ctx.stroke();
-        tileShape(a, { x, y: row * T, w, h: T }, METAL, METAL_LIGHT);
+        tileShape(a, { x, y, w, h: T }, METAL, METAL_LIGHT);
       }
     },
     stationclock(a, r) {
@@ -314,21 +618,28 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
     // ——— Le hall ———
     glassroof(a, r) {
       const { ctx } = a;
-      // Verrière en arc : de grands carreaux pâles et leurs montants.
-      ctx.fillStyle = GLASS;
-      ctx.beginPath();
-      ctx.moveTo(r.x, r.y + r.h);
-      ctx.quadraticCurveTo(r.x + r.w / 2, r.y - r.h * 0.6, r.x + r.w, r.y + r.h);
-      ctx.closePath();
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(93,111,120,0.7)';
+      // La verrière (D-80) sous la voûte : de grands carreaux (bleu nuit le soir), des montants qui
+      // rayonnent, deux tirants de fonte ; la voûte en couvre les coins.
+      ctx.fillStyle = a.palette.darkness > 0 ? 'rgba(70,82,120,0.6)' : GLASS;
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+      const cx = r.x + r.w / 2;
+      const cy = r.y + r.h + 4 * T;
+      ctx.strokeStyle = 'rgba(93,111,120,0.75)';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      for (let x = r.x + 16; x < r.x + r.w; x += 16) {
-        ctx.moveTo(x, r.y + r.h);
-        ctx.lineTo(r.x + r.w / 2 + (x - r.x - r.w / 2) * 0.4, r.y);
+      for (let k = -14; k <= 14; k++) {
+        const angle = -Math.PI / 2 + k * 0.1;
+        ctx.moveTo(cx + Math.cos(angle) * 4 * T, cy + Math.sin(angle) * 4 * T);
+        ctx.lineTo(cx + Math.cos(angle) * 60 * T, cy + Math.sin(angle) * 60 * T);
+      }
+      for (const radius of [7, 10]) {
+        ctx.moveTo(cx + radius * T, cy);
+        ctx.arc(cx, cy, radius * T, 0, Math.PI, true);
       }
       ctx.stroke();
+      ctx.fillStyle = IRON;
+      ctx.fillRect(r.x, r.y + r.h - 3, r.w, 3);
+      ctx.fillRect(r.x, r.y + r.h * 0.45, r.w, 2);
     },
     bigclock(a, r) {
       const { ctx } = a;
@@ -382,41 +693,223 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
     },
     gallery(a, r) {
       const { ctx } = a;
-      // Galerie de bois au-dessus du hall, balustres dessous.
+      // Galerie de bois au-dessus du hall, balustres dessous, sur des consoles scellées (D-80).
       tileShape(a, r, WOOD, WOOD_LIGHT);
       ctx.fillStyle = WOOD_DARK;
       for (let x = r.x + 4; x < r.x + r.w - 2; x += 8) {
         ctx.fillRect(x, r.y + 4, 2, 10);
       }
+      for (const x of [r.x + r.w * 0.35, r.x + r.w * 0.8]) {
+        ctx.beginPath();
+        ctx.moveTo(x - 6, r.y + r.h);
+        ctx.lineTo(x + 6, r.y + r.h);
+        ctx.quadraticCurveTo(x + 1, r.y + r.h + 3, x - 4, r.y + r.h + 16);
+        ctx.lineTo(x - 6, r.y + r.h + 16);
+        ctx.fill();
+      }
     },
-    hallsteps(a, r) {
-      // Marches de pierre scellées au mur (traversables).
-      for (const [c0, c1, row] of oneWayRuns(a, r)) {
-        tileShape(a, { x: c0 * T, y: row * T, w: (c1 - c0 + 1) * T, h: T }, STONE_DARK, STONE);
+    vault(a, r) {
+      const { ctx, level, palette: p } = a;
+      // La voûte du hall (D-80) : les coins pleins du haut, sous une courbe qui passe par les
+      // coins des marches de la collision (hors d'atteinte), bordée d'une moulure.
+      const c0 = r.x / T;
+      const c1 = (r.x + r.w) / T - 1;
+      const bottom = (col: number) => {
+        let b = r.y / T;
+        for (let row = r.y / T; row < (r.y + r.h) / T; row++) {
+          if (tileAt(level, col, row) === Tile.Solid) {
+            b = row + 1;
+          }
+        }
+        return b;
+      };
+      const side = (from: number, step: 1 | -1) => {
+        const pts: { x: number; y: number }[] = [];
+        for (let col = from; bottom(col) > r.y / T; col += step) {
+          if (bottom(col) !== bottom(col + step)) {
+            pts.push({ x: (step > 0 ? col + 1 : col) * T, y: bottom(col) * T });
+          }
+        }
+        const wall = step > 0 ? from * T : (from + 1) * T;
+        const last = pts[pts.length - 1];
+        if (!last) {
+          return;
+        }
+        ctx.beginPath();
+        ctx.moveTo(wall, r.y);
+        ctx.lineTo(wall, pts[0]?.y ?? r.y);
+        const curve = new Path2D();
+        curve.moveTo(wall, pts[0]?.y ?? r.y);
+        let prev = { x: wall, y: pts[0]?.y ?? r.y };
+        for (const pt of pts) {
+          const mx = (prev.x + pt.x) / 2;
+          const my = (prev.y + pt.y) / 2;
+          ctx.quadraticCurveTo(prev.x, prev.y, mx, my);
+          curve.quadraticCurveTo(prev.x, prev.y, mx, my);
+          prev = pt;
+        }
+        const end = { x: last.x + step * 2 * T, y: r.y };
+        ctx.quadraticCurveTo(prev.x, prev.y, end.x, end.y);
+        curve.quadraticCurveTo(prev.x, prev.y, end.x, end.y);
+        ctx.closePath();
+        ctx.fillStyle = p.structure;
+        ctx.fill();
+        ctx.strokeStyle = STONE_DARK;
+        ctx.lineWidth = 4;
+        ctx.stroke(curve);
+        ctx.strokeStyle = STONE;
+        ctx.lineWidth = 1.5;
+        ctx.stroke(curve);
+      };
+      side(c0, 1);
+      side(c1, -1);
+    },
+    spiralstair(a, r) {
+      const { ctx } = a;
+      // Escalier en colimaçon de fonte (D-80) : un fût central du sol à la galerie, les marches
+      // (traversables) qui tournent autour, à gauche puis à droite, et la rampe en spirale.
+      const poleX = r.x + r.w / 2;
+      const ground = groundRow(a, poleX, r.y / T) * T;
+      const top = r.y - T;
+      ctx.fillStyle = IRON;
+      ctx.fillRect(poleX - 2.5, top, 5, ground - top);
+      ctx.fillRect(poleX - 5, ground - 4, 10, 4);
+      ctx.fillRect(poleX - 4, top, 8, 3);
+      ctx.fillStyle = IRON_LIGHT;
+      ctx.fillRect(poleX - 2.5, top + 3, 1, ground - top - 7);
+      const treads = oneWayRuns(a, r).sort((u, v) => v[2] - u[2]);
+      // La rampe passe derrière le fût, d'un bout de marche au suivant (claire, lisible sur le
+      // mur du soir).
+      ctx.strokeStyle = METAL_LIGHT;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      let prev: { x: number; y: number } | null = null;
+      for (const [c0, c1, row] of treads) {
+        const left = c0 * T < poleX;
+        const outer = { x: left ? c0 * T + 1 : (c1 + 1) * T - 1, y: row * T - 9 };
+        ctx.moveTo(outer.x, row * T);
+        ctx.lineTo(outer.x, outer.y);
+        if (prev) {
+          ctx.moveTo(prev.x, prev.y);
+          ctx.quadraticCurveTo(poleX, (prev.y + outer.y) / 2 + 8, outer.x, outer.y);
+        }
+        prev = outer;
+      }
+      ctx.stroke();
+      for (const [c0, c1, row] of treads) {
+        const x = c0 * T;
+        const w = (c1 - c0 + 1) * T;
+        const left = x < poleX;
+        // Un bras sous la marche, du fût à son milieu ; la marche, une tôle épaisse.
+        ctx.fillStyle = IRON;
+        ctx.fillRect(left ? x + w / 2 : poleX, row * T + 4, Math.abs(poleX - (x + w / 2)), 2);
+        ctx.fillStyle = IRON_LIGHT;
+        ctx.fillRect(x, row * T, w, 5);
+        ctx.fillStyle = IRON;
+        ctx.fillRect(x, row * T + 3, w, 2);
+        tileShape(a, { x, y: row * T, w, h: T }, IRON, IRON_LIGHT);
+      }
+    },
+    balcony(a, r) {
+      const { ctx } = a;
+      // Balcon de pierre (D-80) sur trois consoles, devant la porte close du chef de gare ; au bout
+      // du câble, un réverbère où il est attaché.
+      const doorW = 1.8 * T;
+      const doorX = r.x + r.w - 2.8 * T;
+      ctx.fillStyle = STONE_DARK;
+      ctx.beginPath();
+      ctx.roundRect(doorX - 3, r.y - 3.6 * T, doorW + 6, 3.6 * T, [doorW, doorW, 0, 0]);
+      ctx.fill();
+      ctx.fillStyle = WOOD_DARK;
+      ctx.beginPath();
+      ctx.roundRect(doorX, r.y - 3.4 * T, doorW, 3.4 * T, [doorW / 2, doorW / 2, 0, 0]);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      ctx.fillRect(doorX + doorW / 2 - 0.5, r.y - 2.9 * T, 1, 2.9 * T);
+      ctx.fillStyle = AMBER;
+      ctx.fillRect(doorX + doorW / 2 + 3, r.y - 1.6 * T, 1.5, 3);
+      for (const x of [r.x + T, r.x + r.w / 2, r.x + r.w - T]) {
+        ctx.fillStyle = STONE_DARK;
+        ctx.beginPath();
+        ctx.moveTo(x - 6, r.y + r.h);
+        ctx.lineTo(x + 6, r.y + r.h);
+        ctx.quadraticCurveTo(x + 2, r.y + r.h + 8, x + 2, r.y + r.h + 20);
+        ctx.lineTo(x - 2, r.y + r.h + 20);
+        ctx.quadraticCurveTo(x - 4, r.y + r.h + 6, x - 6, r.y + r.h);
+        ctx.fill();
+      }
+      tileShape(a, r, STONE_DARK, STONE);
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      ctx.fillRect(r.x, r.y + r.h - 5, r.w, 2);
+      const lamp = balconyLamp(a.level, r);
+      if (lamp) {
+        ctx.fillStyle = IRON;
+        ctx.fillRect(lamp.x - 1.5, lamp.y + 2, 3, r.y - lamp.y - 2);
+        ctx.fillRect(lamp.x - 3.5, r.y - 3, 7, 3);
+        ctx.fillStyle = '#ffe9a8';
+        ctx.beginPath();
+        ctx.moveTo(lamp.x - 4, lamp.y - 8);
+        ctx.lineTo(lamp.x + 4, lamp.y - 8);
+        ctx.lineTo(lamp.x + 3, lamp.y);
+        ctx.lineTo(lamp.x - 3, lamp.y);
+        ctx.fill();
+        ctx.fillStyle = IRON;
+        ctx.fillRect(lamp.x - 5, lamp.y - 10, 10, 2);
+        ctx.fillRect(lamp.x - 3, lamp.y, 6, 2);
       }
     },
     kiosk(a, r) {
       const { ctx } = a;
-      // Kiosque à journaux : un toit (traversable) rayé, le comptoir plein, des journaux.
-      const roof = { x: r.x, y: r.y, w: r.w, h: T };
-      tileShape(a, { x: r.x, y: r.y + T, w: r.w, h: r.h - T }, '#6d86c2', '#98ade0');
-      tileShape(a, roof, '#e2574c', '#f39a8f');
-      ctx.fillStyle = '#fbf6ea';
-      for (let x = r.x + 4; x < r.x + r.w - 4; x += 8) {
-        ctx.fillRect(x, r.y + 1, 4, 3);
-      }
+      // Kiosque à journaux (D-80) : un auvent rayé (son haut est la planche traversable) qui
+      // retombe sur le comptoir plein, une vitrine éclairée, des journaux.
+      const body = { x: r.x + T, y: r.y + T, w: r.w - 2 * T, h: r.h - T };
+      tileShape(a, body, '#6d86c2', '#98ade0');
+      ctx.fillStyle = a.palette.darkness > 0 ? '#f3d58a' : '#dfe8f2';
+      ctx.fillRect(body.x + 4, body.y + 6, body.w - 8, 12);
       for (let k = 0; k < 4; k++) {
         ctx.fillStyle = k % 2 === 0 ? '#f3ead7' : '#e6c27a';
-        ctx.fillRect(r.x + 8 + k * 9, r.y + T + 8, 7, 9);
+        ctx.fillRect(body.x + 6 + k * 9, body.y + 22, 7, 9);
       }
+      const awningBottom = r.y + T + 5;
+      for (let k = 0, x = r.x; x < r.x + r.w; k++, x += 8) {
+        ctx.fillStyle = k % 2 === 0 ? '#e2574c' : '#fbf6ea';
+        ctx.beginPath();
+        ctx.moveTo(x, r.y);
+        ctx.lineTo(Math.min(x + 8, r.x + r.w), r.y);
+        ctx.lineTo(Math.min(x + 8, r.x + r.w), awningBottom);
+        ctx.arc(x + 4, awningBottom, 4, 0, Math.PI);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#b8443b';
+      ctx.fillRect(r.x, r.y, r.w, 2.5);
     },
     lostoffice(a, r) {
       const { ctx } = a;
-      // L'entrée du bureau des objets trouvés : un encadrement de bois, la porte, un guichet, et
-      // au-dessus un parapluie et un « ? » dessinés (aucun texte).
-      ctx.fillStyle = 'rgba(110,80,56,0.35)';
-      ctx.fillRect(r.x, r.y, r.w, r.h);
+      const lit = a.palette.darkness > 0;
+      // La devanture du bureau des objets trouvés (D-80) : pilastres et corniche de bois, une
+      // enseigne (un parapluie et un « ? », aucun texte), deux vitrines où dorment des choses
+      // perdues, l'imposte vitrée au-dessus de la porte, allumée le soir.
+      ctx.fillStyle = WOOD_DARK;
+      ctx.fillRect(r.x, r.y + 8, r.w, r.h - 8);
+      ctx.fillStyle = WOOD;
+      ctx.fillRect(r.x - 3, r.y + 6, r.w + 6, 5);
+      ctx.fillRect(r.x, r.y + 11, 5, r.h - 11);
+      ctx.fillRect(r.x + r.w - 5, r.y + 11, 5, r.h - 11);
       const doorX = r.x + r.w / 2 - 12;
+      for (const wx of [r.x + 8, doorX + 28]) {
+        const ww = doorX - 4 - (r.x + 8);
+        ctx.fillStyle = lit ? 'rgba(243,213,138,0.85)' : 'rgba(188,220,238,0.7)';
+        ctx.fillRect(wx, r.y + r.h - 46, ww, 30);
+        for (let k = 0; k * 9 + 6 < ww; k++) {
+          lostThing(ctx, wx + 2 + k * 9, r.y + r.h - 16, Math.floor(hash(wx + k, r.y) * 5) + k);
+        }
+        ctx.fillStyle = WOOD;
+        ctx.fillRect(wx - 1, r.y + r.h - 16, ww + 2, 4);
+      }
+      ctx.fillStyle = lit ? '#f3d58a' : 'rgba(188,220,238,0.8)';
+      ctx.beginPath();
+      ctx.roundRect(doorX, r.y + r.h - 54, 24, 12, [12, 12, 0, 0]);
+      ctx.fill();
       ctx.fillStyle = WOOD;
       ctx.fillRect(doorX, r.y + r.h - 40, 24, 40);
       ctx.fillStyle = WOOD_DARK;

@@ -13,6 +13,10 @@
 ; @decor: rails 1 30 78 1
 ; @decor: quay 1 27 22 3
 ; @decor: quay 49 27 30 3
+; @decor: canopycolumn 2 8 1 19
+; @decor: canopycolumn 76 8 1 19
+; @decor: globelamp 13 8 1 4
+; @decor: globelamp 66 14 1 3
 ; @decor: pillar 6 8 2 16
 ; @decor: footbridge 9 13 70 14
 ; @decor: shelter 62 21 9 6

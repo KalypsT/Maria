@@ -32,6 +32,8 @@ const GLOW_TEXTURE = 'life-fire-glow';
 const MOBILE_DEPTH = -4.6;
 const SPARK_DEPTH = 4.52;
 const DOT_TEXTURE = 'life-dot';
+/** Petit carré net (les volets du tableau des départs, D-80). */
+const SQUARE_TEXTURE = 'life-square';
 const STAR_TEXTURE = 'life-star';
 const MOON_TEXTURE = 'life-mobile-moon';
 const MOTH_TEXTURE = 'life-moth';
@@ -192,6 +194,13 @@ interface Flicker {
   nextMs: number;
 }
 
+/** Un volet du tableau des départs du hall (D-80) : il bascule de temps en temps. */
+interface Flap {
+  readonly image: Phaser.GameObjects.Image;
+  lit: boolean;
+  nextMs: number;
+}
+
 /** Le pigeon de la cour (D-79). */
 interface Pigeon {
   readonly image: Phaser.GameObjects.Image;
@@ -242,6 +251,7 @@ export class WorldLifeView {
   private readonly bulbs: Bulb[] = [];
   private readonly butterflies: Butterfly[] = [];
   private readonly flickers: Flicker[] = [];
+  private readonly flaps: Flap[] = [];
   private readonly pigeons: Pigeon[] = [];
   private readonly fishes: Fish[] = [];
   /** Textures propres à la salle, retirées avec elle. */
@@ -309,6 +319,10 @@ export class WorldLifeView {
       flicker.off.destroy();
     }
     this.flickers.length = 0;
+    for (const flap of this.flaps) {
+      flap.image.destroy();
+    }
+    this.flaps.length = 0;
     for (const list of [this.pigeons, this.fishes]) {
       for (const item of list) {
         item.image.destroy();
@@ -357,6 +371,8 @@ export class WorldLifeView {
         this.fishes.push({ image, x: r.x + r.w / 2, y: r.y + r.h - 8 });
       } else if (d.kind === 'tubeflicker') {
         this.makeFlicker(r);
+      } else if (d.kind === 'departures') {
+        this.makeFlaps(r);
       } else if (d.kind === 'fan') {
         this.makeFan(`${level.id}-${String(i)}`, r, artScale);
       } else if (d.kind === 'tarp') {
@@ -515,6 +531,10 @@ export class WorldLifeView {
         textures.addCanvas(key, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
       }
     };
+    make(SQUARE_TEXTURE, 4, (ctx) => {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, 4, 4);
+    });
     make(DOT_TEXTURE, 16, (ctx) => {
       const g = ctx.createRadialGradient(8, 8, 0, 8, 8, 8);
       g.addColorStop(0, 'rgba(255,255,255,1)');
@@ -989,6 +1009,31 @@ export class WorldLifeView {
     this.flickers.push({ glow, off, nextMs: 2500 + this.rand() * 3000 });
   }
 
+  /** Volets du tableau des départs (D-80), posés sur des cases du dessin (stationArt). */
+  private makeFlaps(r: { x: number; y: number; w: number; h: number }): void {
+    this.ensureSprites();
+    const cells: { x: number; y: number }[] = [];
+    for (let y = r.y + 6; y < r.y + r.h - 6; y += 12) {
+      for (let x = r.x + 6; x < r.x + r.w - 10; x += 8) {
+        cells.push({ x, y });
+      }
+    }
+    const [min, max] = WORLD_LIFE.flaps.everyMs;
+    for (let k = 0; k < WORLD_LIFE.flaps.count && cells.length > 0; k++) {
+      const [cell] = cells.splice(Math.floor(this.rand() * cells.length), 1);
+      if (!cell) {
+        break;
+      }
+      const image = this.scene.add
+        .image(cell.x + 3, cell.y + 3.5, SQUARE_TEXTURE)
+        .setDisplaySize(6, 7)
+        .setDepth(MOBILE_DEPTH);
+      const flap = { image, lit: this.rand() > 0.5, nextMs: min + this.rand() * (max - min) };
+      image.setTint(flap.lit ? 0xf2b84e : 0x5a4a2a);
+      this.flaps.push(flap);
+    }
+  }
+
   /** Les pales du ventilateur (D-78), vues de côté : leur longueur change en tournant. */
   private makeFan(
     id: string,
@@ -1168,6 +1213,14 @@ export class WorldLifeView {
         const turn = Math.abs(Math.sin(nowMs / 9000 + gust * 1.5));
         const frame = Math.min(VANE_FRAMES - 1, Math.floor(turn * VANE_FRAMES));
         item.image.setFrame(FRAME_NAMES[frame] ?? '0', false, false);
+      }
+    }
+    for (const flap of this.flaps) {
+      if (nowMs >= flap.nextMs) {
+        flap.lit = !flap.lit;
+        flap.image.setTint(flap.lit ? 0xf2b84e : 0x5a4a2a);
+        const [min, max] = cfg.flaps.everyMs;
+        flap.nextMs = nowMs + min + this.rand() * (max - min);
       }
     }
     for (const flicker of this.flickers) {
