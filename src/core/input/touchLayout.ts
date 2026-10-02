@@ -45,6 +45,8 @@ export function computeTouchLayout(
   height: number,
   insets: Insets,
   settings: Readonly<ControlSettings>,
+  /** Bouton Capacité affiché : une capacité à bouton est obtenue (la glissade, D-84). */
+  showAbility = false,
 ): TouchLayout {
   const m = TOUCH_METRICS;
   const margin = m.margin;
@@ -77,7 +79,7 @@ export function computeTouchLayout(
   if (enabled.Attack) {
     buttons.push({ action: 'Attack', x: attackX, y: attackY, r: attackR });
   }
-  if (enabled.Ability) {
+  if (enabled.Ability || showAbility) {
     const [x, y] = polar(jumpX, jumpY, jumpR + abilityR + gap, m.abilityAngleDeg);
     buttons.push({ action: 'Ability', x, y, r: abilityR });
   }

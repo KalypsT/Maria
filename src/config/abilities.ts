@@ -1,9 +1,9 @@
 import type { ThoughtIcon } from '../core/story/story';
 
 /**
- * Capacités de mouvement (spec §15, D-26, D-44, D-62, D-65). Liste ouverte (§45) : escalade, saut
- * mural, parapluie, et le crochet qui s'ajoute au parapluie (une extension, pas une capacité de
- * plus : il ne sert qu'en planant).
+ * Capacités de mouvement (spec §15, D-26, D-44, D-62, D-65, D-84). Liste ouverte (§45) : escalade,
+ * saut mural, parapluie, le crochet qui s'ajoute au parapluie (une extension, pas une capacité de
+ * plus : il ne sert qu'en planant), et la glissade (bouton Capacité).
  * L'identifiant est enregistré dans `progression.abilities` et nommé dans les salles
  * (`; @ability:`).
  */
@@ -12,6 +12,7 @@ export const Ability = {
   WallJump: 'wall-jump',
   Umbrella: 'umbrella',
   Hook: 'hook',
+  Slide: 'slide',
 } as const;
 export type Ability = (typeof Ability)[keyof typeof Ability];
 
@@ -26,6 +27,8 @@ export const ABILITY_HINTS: Readonly<Record<Ability, string>> = {
   umbrella:
     'En l’air, appuyer encore sur Saut : le parapluie s’ouvre et Céleste plane tant que Saut reste appuyé. Lâcher : il se referme.',
   hook: 'En planant, passer sur un câble : le crochet du parapluie s’y accroche et Céleste glisse. Lâcher Saut : elle lâche. Lâcher et vite rappuyer : elle saute.',
+  slide:
+    'Au sol, le bouton Glisser : Céleste se lance couchée et passe sous ce qui est bas. Sauter en glissant : un saut plus long.',
 };
 
 /**

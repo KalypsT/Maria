@@ -1,4 +1,4 @@
-/** États du joueur (spec §30). Les autres (Dash…) viendront avec leurs capacités. */
+/** États du joueur (spec §30). */
 export const PlayerState = {
   Idle: 'Idle',
   Run: 'Run',
@@ -18,6 +18,8 @@ export const PlayerState = {
   Glide: 'Glide',
   /** Accrochée à un câble par le crochet du parapluie, glisse le long (D-65). */
   Cable: 'Cable',
+  /** Glissade au sol, couchée (D-84), ou avance couchée sous un plafond trop bas. */
+  Slide: 'Slide',
 } as const;
 export type PlayerState = (typeof PlayerState)[keyof typeof PlayerState];
 
@@ -34,9 +36,13 @@ export function nextPlayerState(
   hurt = false,
   onWall = false,
   gliding = false,
+  sliding = false,
 ): PlayerState {
   if (hurt) {
     return PlayerState.Hurt;
+  }
+  if (grounded && sliding) {
+    return PlayerState.Slide;
   }
   if (!grounded) {
     if (rising) {

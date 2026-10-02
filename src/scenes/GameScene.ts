@@ -200,6 +200,8 @@ export class GameScene extends Phaser.Scene {
   debugUmbrella = false;
   /** Crochet du parapluie débloqué par l'overlay (D-65). */
   debugHook = false;
+  /** Glissade débloquée par l'overlay (D-84). */
+  debugSlide = false;
   /** Aperçu du monde étrange (D-28, overlay) : mêmes formes, autre palette. */
   strangeWorld = false;
   private roomArt!: RoomArtView;
@@ -285,6 +287,7 @@ export class GameScene extends Phaser.Scene {
     moveY: 0,
     jumpPressed: false,
     jumpHeld: false,
+    abilityPressed: false,
   };
 
   constructor() {
@@ -568,7 +571,12 @@ export class GameScene extends Phaser.Scene {
       input.moveY = locked ? 0 : this.controls.moveY;
       input.jumpPressed = this.controls.consumePressed('Jump') && !locked;
       input.jumpHeld = this.controls.isHeld('Jump') && !locked;
-      if (this.poser.sitting && !locked && (input.moveX !== 0 || input.jumpPressed)) {
+      input.abilityPressed = this.controls.consumePressed('Ability') && !locked;
+      if (
+        this.poser.sitting &&
+        !locked &&
+        (input.moveX !== 0 || input.jumpPressed || input.abilityPressed)
+      ) {
         this.poser.sitting = false; // Céleste se relève dès qu'on la fait bouger.
       }
       this.player.step(input);
@@ -1056,6 +1064,7 @@ export class GameScene extends Phaser.Scene {
       ...(player.canWallJump ? [Ability.WallJump] : []),
       ...(player.canGlide ? [Ability.Umbrella] : []),
       ...(player.canHook ? [Ability.Hook] : []),
+      ...(player.canSlide ? [Ability.Slide] : []),
     ];
   }
 
@@ -1072,6 +1081,9 @@ export class GameScene extends Phaser.Scene {
     this.player.canGlide = this.debugUmbrella || has(Ability.Umbrella);
     // Le crochet (D-65) s'ajoute au parapluie : il ne sert qu'en planant.
     this.player.canHook = this.debugHook || has(Ability.Hook);
+    this.player.canSlide = this.debugSlide || has(Ability.Slide);
+    // Le bouton Capacité n'apparaît qu'avec la glissade (D-84).
+    this.touch?.setAbilityVisible(this.player.canSlide);
   }
 
   /**

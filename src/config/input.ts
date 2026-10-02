@@ -12,7 +12,7 @@ export const KEY_BINDINGS = {
   buttons: {
     Jump: ['Space', 'KeyK'],
     Attack: ['KeyJ'],
-    Ability: ['KeyL'],
+    Ability: ['KeyL', 'ShiftLeft'],
     Interact: ['KeyE'],
     Pause: ['Escape', 'KeyP'],
     Map: ['KeyM', 'Tab'],

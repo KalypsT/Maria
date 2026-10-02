@@ -93,6 +93,29 @@ export function drawAbility(
       arrow(ctx, 1.5, -2.5, 8, 0);
       ctx.setLineDash([]);
       break;
+    case 'slide':
+      // Une barrière basse, Céleste couchée qui passe dessous, et l'élan.
+      ctx.beginPath();
+      ctx.moveTo(-9, 8);
+      ctx.lineTo(9, 8);
+      ctx.moveTo(2, 8);
+      ctx.lineTo(2, 1);
+      ctx.lineTo(9, 1);
+      ctx.lineTo(9, 8);
+      ctx.stroke();
+      ctx.fillStyle = rose;
+      ctx.beginPath();
+      ctx.arc(3.5, 5.6, 1.6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(1.8, 6.2);
+      ctx.lineTo(-4.5, 6.8);
+      ctx.stroke();
+      ctx.strokeStyle = rose;
+      ctx.setLineDash([1.5, 1.5]);
+      arrow(ctx, -9, 3.5, -3, 3.5);
+      ctx.setLineDash([]);
+      break;
   }
   ctx.restore();
 }

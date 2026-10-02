@@ -47,6 +47,7 @@ describe.each(COURSE_IDS)('parcours %s', (id) => {
     wallJump: lent.includes('wall-jump'),
     glide: lent.includes('umbrella'),
     hook: lent.includes('hook'),
+    slide: lent.includes('slide'),
   };
   const analysis = () => (cached ??= analyzeLevel(level, DEFAULT_MOVEMENT, abilities));
 

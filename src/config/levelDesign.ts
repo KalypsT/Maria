@@ -33,6 +33,17 @@ export const MOVE_SEARCH = {
 } as const;
 
 /**
+ * Recherche des passages par la glissade (D-84) : depuis chaque instant de la course, une glissade
+ * seule, ou suivie d'un saut long après quelques pas.
+ */
+export const SLIDE_SEARCH = {
+  /** Pas entre la pression de Capacité et celle de Saut, pour les sauts depuis la glissade. */
+  jumpAfterSteps: [2, 8, 14, 20, 26] as readonly number[],
+  /** Durées de maintien du saut essayées (sous-ensemble de `jumpHoldSteps`). */
+  jumpHoldSteps: [0, 8] as readonly number[],
+} as const;
+
+/**
  * Recherche des passages par le saut mural (D-44) : depuis chaque appui (entrée en glissade), un
  * rebond est essayé à intervalles réguliers de la glissade.
  */

@@ -223,7 +223,7 @@ export class CombatWorld {
     const enemies = this.enemies;
     const tuning = this.tuning;
     attack.step(
-      attackPressed && player.hurtSteps === 0 && !player.onLedge && player.cable < 0,
+      attackPressed && player.hurtSteps === 0 && !player.onLedge && player.cable < 0 && !player.low,
       player.facing,
     );
     if (attack.hitbox(player.box, this.attackBox)) {

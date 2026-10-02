@@ -597,6 +597,10 @@ export function installDebugOverlay(scene: GameScene): void {
     scene.debugHook = checked;
     scene.applyAbilities();
   });
+  addCheck(panel, 'Capacité : glissade', scene.debugSlide, (checked) => {
+    scene.debugSlide = checked;
+    scene.applyAbilities();
+  });
 
   const refreshMovement = addSliders<MovementParams>(panel, {
     title: 'Mouvement',

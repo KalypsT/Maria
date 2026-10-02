@@ -1,5 +1,5 @@
 import { TILE_SIZE as T } from '../../config/display';
-import { MOVE_SEARCH, WALL_SEARCH } from '../../config/levelDesign';
+import { MOVE_SEARCH, SLIDE_SEARCH, WALL_SEARCH } from '../../config/levelDesign';
 import { PLAYER_HITBOX, deriveMovement, type MovementParams } from '../../config/movement';
 import { Tile, tileAt, type LevelData } from '../level/LevelData';
 import { touchesHazard } from '../physics/gridCollision';
@@ -24,6 +24,13 @@ export const MoveKind = {
   WallJump: 'wall-jump',
   /** Lâcher un mur pendant la glissade (ou glisser jusqu'en bas) : aucun timing. */
   WallLetGo: 'wall-let-go',
+  /**
+   * Glissade au sol (D-84), lancée en courant : la fenêtre est la durée pendant laquelle la
+   * pression réussit. Depuis l'arrêt, contre l'obstacle bas : aucun timing.
+   */
+  Slide: 'slide',
+  /** Saut depuis la glissade (saut long, D-84), `slideJumpAfter` pas après la pression. */
+  SlideJump: 'slide-jump',
 } as const;
 export type MoveKind = (typeof MoveKind)[keyof typeof MoveKind];
 
@@ -49,6 +56,8 @@ export interface Move {
    * de nouveau aussitôt (`jump`, saut depuis le câble, tenu ensuite). Absent : Saut tenu.
    */
   readonly cableExit?: CableExit;
+  /** Saut depuis la glissade (D-84) : pas entre la pression de Capacité et celle de Saut. */
+  readonly slideJumpAfter?: number;
   /**
    * Durée du passage (ms, D-67) : de l'élan (course ou placement depuis le bord de la surface, ou
    * glissade contre un mur) jusqu'à l'atterrissage, au pire sur sa fenêtre. Sert à vérifier qu'une
@@ -106,6 +115,11 @@ interface Family {
   readonly glide: boolean;
   /** Sortie d'un câble (D-65) ; null : Saut tenu. */
   readonly cableExit: CableExit | null;
+  /**
+   * Glissade (D-84) : -2 aucune ; -1 glissade seule ; sinon, saut ce nombre de pas après la
+   * pression de Capacité.
+   */
+  readonly slideJumpAfter: number;
   /** Surface atteinte pour chaque essai successif (-1 : aucune autre surface). */
   readonly targets: number[];
   /** Pas en l'air de chaque essai (jusqu'à l'atterrissage ou l'appui). */
@@ -121,7 +135,13 @@ interface Family {
 class MoveExplorer {
   private readonly main: PlayerPhysics;
   private readonly probe: PlayerPhysics;
-  private readonly input: PlayerInput = { moveX: 0, moveY: 0, jumpPressed: false, jumpHeld: false };
+  private readonly input: PlayerInput = {
+    moveX: 0,
+    moveY: 0,
+    jumpPressed: false,
+    jumpHeld: false,
+    abilityPressed: false,
+  };
   private readonly stepMs: number;
   private readonly coyoteSteps: number;
   /** Portée horizontale prudente d'un saut (px) : au-delà, un saut au-dessus d'un sol plat y retombe. */
@@ -149,6 +169,7 @@ class MoveExplorer {
     private readonly canWallJump = false,
     private readonly canGlide = false,
     private readonly canHook = false,
+    private readonly canSlide = false,
   ) {
     this.main = new PlayerPhysics(level, params, 0, 0, hitbox);
     this.probe = new PlayerPhysics(level, params, 0, 0, hitbox);
@@ -160,6 +181,8 @@ class MoveExplorer {
     this.probe.canGlide = canGlide;
     this.main.canHook = canHook;
     this.probe.canHook = canHook;
+    this.main.canSlide = canSlide;
+    this.probe.canSlide = canSlide;
     const derived = deriveMovement(params);
     this.stepMs = derived.dt * 1000;
     this.coyoteSteps = derived.coyoteSteps;
@@ -177,7 +200,12 @@ class MoveExplorer {
         cableSpan += c.x2 - c.x1;
       }
     }
-    this.reachPx = 1.5 * params.maxRunSpeed * (airtime + glideTime) + cableSpan + 3 * T;
+    // Le saut long de la glissade (D-84) va plus vite que la course.
+    const speed = canSlide
+      ? Math.max(params.maxRunSpeed, params.slideJumpSpeedX)
+      : params.maxRunSpeed;
+    const slidePx = canSlide ? params.slideSpeed * (params.slideDurationMs / 1000) : 0;
+    this.reachPx = 1.5 * speed * (airtime + glideTime) + cableSpan + slidePx + 3 * T;
     this.maxAirSteps = canGlide
       ? MOVE_SEARCH.maxSteps + Math.ceil((glideTime + cableTime) / derived.dt)
       : MOVE_SEARCH.maxSteps;
@@ -220,6 +248,7 @@ class MoveExplorer {
             airRelease,
             glide: false,
             cableExit: null,
+            slideJumpAfter: -2,
             targets: [],
             steps: [],
           });
@@ -236,10 +265,35 @@ class MoveExplorer {
             airRelease: false,
             glide: true,
             cableExit,
+            slideJumpAfter: -2,
             targets: [],
             steps: [],
           });
         }
+      }
+    }
+    return families;
+  }
+
+  /** Glissades lancées en courant dans le sens `dir` (D-84) : seule, ou suivie d'un saut long. */
+  private slideFamilies(dir: number): Family[] {
+    if (!this.canSlide) {
+      return [];
+    }
+    const base = { dir, airRelease: false, glide: false, cableExit: null };
+    const families: Family[] = [
+      { ...base, kind: MoveKind.Slide, holdSteps: 0, slideJumpAfter: -1, targets: [], steps: [] },
+    ];
+    for (const slideJumpAfter of SLIDE_SEARCH.jumpAfterSteps) {
+      for (const holdSteps of SLIDE_SEARCH.jumpHoldSteps) {
+        families.push({
+          ...base,
+          kind: MoveKind.SlideJump,
+          holdSteps,
+          slideJumpAfter,
+          targets: [],
+          steps: [],
+        });
       }
     }
     return families;
@@ -295,6 +349,7 @@ class MoveExplorer {
           durationMs,
           ...(family.glide ? { glide: true } : {}),
           ...(family.cableExit ? { cableExit: family.cableExit } : {}),
+          ...(family.slideJumpAfter >= 0 ? { slideJumpAfter: family.slideJumpAfter } : {}),
         });
       }
     }
@@ -330,7 +385,10 @@ class MoveExplorer {
     const x0 = dir > 0 ? surface.colStart * T : (surface.colEnd + 1) * T - hitbox.width;
     const main = this.main;
     main.reset(x0, surface.row * T - hitbox.height, this.level);
-    const families = this.families(MoveKind.RunningJump, [dir], true);
+    const families = [
+      ...this.families(MoveKind.RunningJump, [dir], true),
+      ...this.slideFamilies(dir),
+    ];
     const input = this.input;
     const dirs = [dir];
     let lastX = Number.NaN;
@@ -349,18 +407,21 @@ class MoveExplorer {
       }
       const worth = this.worthTrying(surface, main.box.x, dirs);
       for (const family of families) {
-        family.targets.push(
-          worth
-            ? this.tryJump(
-                main,
-                dir,
-                family.holdSteps,
-                family.airRelease,
-                family.glide,
-                family.cableExit,
-              )
-            : surface.id,
-        );
+        let target = surface.id;
+        if (worth) {
+          target =
+            family.slideJumpAfter === -2
+              ? this.tryJump(
+                  main,
+                  dir,
+                  family.holdSteps,
+                  family.airRelease,
+                  family.glide,
+                  family.cableExit,
+                )
+              : this.trySlide(main, dir, family.slideJumpAfter, family.holdSteps);
+        }
+        family.targets.push(target);
         family.steps.push(worth ? this.airSteps : 0);
       }
       ran++;
@@ -376,6 +437,21 @@ class MoveExplorer {
       }
     }
     this.offerWindows(surface.id, families, this.stepMs, offer);
+
+    // Contre un obstacle bas : s'arrêter devant, puis glisser dessous (D-84), sans timing.
+    if (this.canSlide && stuck > 4 && !touchesHazard(this.level, main.box)) {
+      const to = this.trySlide(main, dir, -1, 0);
+      offer({
+        from: surface.id,
+        to,
+        kind: MoveKind.Slide,
+        dir,
+        holdSteps: 0,
+        airRelease: false,
+        windowMs: Number.POSITIVE_INFINITY,
+        durationMs: (ran + this.airSteps) * this.stepMs,
+      });
+    }
 
     // Sans sauter : courir au-delà du bord et tomber.
     if (stuck <= 4) {
@@ -540,6 +616,54 @@ class MoveExplorer {
       }
     }
     return this.finish(0, glide && cableExit === null);
+  }
+
+  /**
+   * Depuis l'état de `from`, glisse maintenant dans le sens `dir` (D-84), en poussant toujours vers
+   * lui ; `jumpAfter` ≥ 0 : saut long ce nombre de pas après, tenu `holdSteps` pas (0 : jusqu'au
+   * sol). Retourne la surface où Céleste s'arrête, debout.
+   */
+  private trySlide(from: PlayerPhysics, dir: number, jumpAfter: number, holdSteps: number): number {
+    const probe = this.probe;
+    probe.copyFrom(from);
+    const input = this.input;
+    input.moveY = 0;
+    input.moveX = dir;
+    let airborne = false;
+    this.airSteps = 0;
+    for (let s = 0; s < this.maxAirSteps; s++) {
+      if (airborne && probe.grounded) {
+        break;
+      }
+      if (
+        s > jumpAfter &&
+        s > 0 &&
+        !airborne &&
+        probe.grounded &&
+        !probe.low &&
+        probe.slideSteps === 0
+      ) {
+        break; // Debout après la glissade.
+      }
+      const sinceJump = jumpAfter >= 0 ? s - jumpAfter : -1;
+      input.abilityPressed = s === 0;
+      input.jumpPressed = sinceJump === 0;
+      input.jumpHeld = sinceJump >= 0 && (holdSteps === 0 || sinceJump < holdSteps);
+      const before = probe.state;
+      probe.step(input);
+      this.airSteps++;
+      if (touchesHazard(this.level, probe.box)) {
+        input.abilityPressed = false;
+        return -1;
+      }
+      if (this.enteredWall(before)) {
+        input.abilityPressed = false;
+        return this.wallNodeOf(probe);
+      }
+      airborne ||= !probe.grounded;
+    }
+    input.abilityPressed = false;
+    return this.finish(0);
   }
 
   /** Vrai si `probe` vient d'entrer en glissade contre un mur (appui du saut mural, D-44). */
@@ -789,6 +913,8 @@ export interface AnalysisAbilities {
   readonly glide?: boolean;
   /** Crochet du parapluie (D-65) : en planant, accroché aux câbles, avec ses sorties. */
   readonly hook?: boolean;
+  /** Glissade (D-84) : sous les obstacles bas, et sauts longs depuis la glissade. */
+  readonly slide?: boolean;
   /** Hitbox de Céleste (croissance, D-43) ; par défaut, celle de la première phase. */
   readonly hitbox?: Readonly<{ width: number; height: number }>;
 }
@@ -813,6 +939,7 @@ export function analyzeLevel(
     abilities.wallJump ?? false,
     abilities.glide ?? false,
     abilities.hook ?? false,
+    abilities.slide ?? false,
   );
   const moves = exploreAll(explorer, map);
   const start = surfaceUnder(level, map, level.spawn.col, level.spawn.row);
@@ -848,6 +975,7 @@ export function movesFrom(
     abilities.wallJump ?? false,
     abilities.glide ?? false,
     abilities.hook ?? false,
+    abilities.slide ?? false,
   );
   const moves = explorer.explore(surface);
   if (explorer.wallNodes.length === 0) {
@@ -1050,7 +1178,9 @@ const KIND_LABEL: Readonly<Record<MoveKind, string>> = {
   'walk-off': 'chute',
   drop: 'descente Bas + Saut',
   'wall-jump': 'saut mural',
-  'wall-let-go': 'glissade',
+  'wall-let-go': 'glissade contre le mur',
+  slide: 'glissade au sol',
+  'slide-jump': 'saut depuis la glissade',
 };
 
 /** Description lisible d'un passage (rapports de test, debug). Colonnes et lignes comptées depuis 1. */
@@ -1065,13 +1195,14 @@ export function describeMove(move: Move, map: SurfaceMap): string {
     (move.airRelease ? ', direction relâchée' : '') +
     (move.glide ? ', parapluie' : '') +
     (move.cableExit === 'drop' ? ', lâche le câble' : '') +
-    (move.cableExit === 'jump' ? ', saute du câble' : '');
+    (move.cableExit === 'jump' ? ', saute du câble' : '') +
+    (move.slideJumpAfter !== undefined ? `, saut ${String(move.slideJumpAfter)} pas après` : '');
   if (move.start) {
     const timing = Number.isFinite(move.windowMs) ? `, fenêtre ${move.windowMs.toFixed(0)} ms` : '';
     return `${where(move.from)} → ${where(move.to)} : ${KIND_LABEL[move.start]} ${arrow} puis appuis sur les murs${timing}`;
   }
   const timing =
-    move.kind === MoveKind.WalkOff || move.kind === MoveKind.Drop
+    move.kind === MoveKind.WalkOff || move.kind === MoveKind.Drop || !Number.isFinite(move.windowMs)
       ? ''
       : ` ${arrow} (${hold}${air}), fenêtre ${move.windowMs.toFixed(0)} ms`;
   return `${where(move.from)} → ${where(move.to)} : ${KIND_LABEL[move.kind]}${timing}`;
