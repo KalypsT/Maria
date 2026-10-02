@@ -943,6 +943,16 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Ce qui ne bouge pas** : portes, sorties, trouvailles (nichoir, lampe de chantier), lanternes, araignées, le parapluie sur la flèche, le trou du grillage, maman et papa. **Aucune sauvegarde touchée.**
 - Réglages `WORLD_LIFE.fan`, `tubeFlicker`, `tarp`.
 
+## D-79 — La cour, l'école et l'école étrange refaites (le quartier, phase 3)
+
+- **Plan validé** ; choix de l'utilisateur : un pigeon qui s'envole quand Céleste approche ; un poisson rouge sous l'oculus.
+- **Cour** : le bandeau de feuillage du haut retiré (seulement la couronne du platane, colonnes 23 à 34) ; une **marelle** à la craie (sans chiffres) et un **ballon** oublié ; un **pigeon** qui picore et **s'envole quand Céleste approche** (à 3 tuiles), puis revient une fois qu'elle s'est éloignée (purement visuel ; `WorldLifeView` reçoit maintenant la position de Céleste). Au **crépuscule**, quand maman vient la chercher, environ un quart des **fenêtres de l'école s'allument** (`schoolFacadeWindows`, partagé par le dessin et la lumière).
+- **École** : les trois étagères murales qui flottaient vers l'oculus deviennent des **casiers de classe posés au sol** (en escalier : un bas, un moyen, une haute armoire) ; on passe devant, leurs dessus sont les mêmes planches (mêmes sauts). Des **poutres** au plafond, deux **suspensions** (sources de lumière), une **frise de formes** (rond, carré, triangle : l'écho de la boîte à formes du monde étrange), les dessins des enfants, de la poussière dans le rayon de la fenêtre, un **poisson rouge** dans son bocal sur l'armoire, sous l'oculus.
+- **École étrange** (lisibilité seulement) : le cadre et la craie des tableaux en **violet pâle** au lieu du turquoise (le haut du cadre se lisait comme une plateforme) ; le turquoise reste réservé à ce qui porte. Géométrie inchangée.
+- **Ce qui ne bouge pas** : la porte de façade de la cour, l'arrivée en planant sur le local à vélos, le panier (trouvaille), la lanterne, maman, les deux portes de l'école, l'oculus et son présage. **Aucune sauvegarde touchée.**
+- Réglages `WORLD_LIFE.pigeon`, `fish`.
+- **Le quartier est refait** (D-77, D-78, D-79).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
