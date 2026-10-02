@@ -44,6 +44,8 @@ export const STRANGE_THINGS = [
   'shape-box',
   /** Roger, la peluche singe, tout en haut de la tour des objets perdus (D-68). */
   'roger',
+  /** La cuisine rose, la dînette d'enfance de Céleste, au bout du train de la vaisselle (D-88). */
+  'pink-kitchen',
 ] as const;
 
 export type MemoryId =

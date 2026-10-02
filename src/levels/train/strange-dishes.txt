@@ -1,0 +1,44 @@
+; Le train (D-88), PR 5a : le monde étrange du train, « le train de la vaisselle », la poursuite
+; horizontale (D-87). Un wagon-restaurant sans fin, de travers ; un chariot de service géant chargé
+; d'une tour de vaisselle avance derrière Céleste, de gauche à droite. Une barrière basse, des caisses
+; et des filets ; une poutre basse et un passage couché (la tour s'y cogne) ; une fosse de vaisselle
+; cassée (saut long depuis la glissade), une pile de valises, une dernière barrière. Au bout, la
+; cuisine rose. Une veilleuse au début de chaque tronçon.
+; @name: Train de la vaisselle
+; @world: strange
+; @music: train-strange
+; @hazard: brokendishes
+; @difficulty: easy
+; @ambient: #1d1a2c
+; @chase: right 117
+; @chase-phase: 117 7
+; @chase-trip: 56 11 8 1 6
+; @decor: upsidedining 1 1 124 5
+; @decor: dishshelf 14 1 3 10
+; @decor: dishshelf 56 1 8 10
+; @decor: dishshelf 110 1 3 10
+; @decor: dishstack 24 9 6 3
+; @decor: dishstack 27 7 3 2
+; @decor: dishstack 70 9 2 3
+; @decor: dishstack 72 6 5 6
+; @decor: dishstack 101 9 2 3
+; @decor: dishstack 103 6 3 6
+; @decor: rack 33 6 4 1
+; @decor: rack 40 6 4 1
+; @decor: eyes 90 4 1 1
+; Légende : # paroi, b bois (plein), - filet (traversable), ^ vaisselle cassée (pique), C veilleuse (checkpoint), P repère de départ, 1 sortie (liaisons dans zone.ts).
+##############################################################################################################################
+#.............bbb.......................................bbbbbbbb..............................................bbb............#
+#.............bbb.......................................bbbbbbbb..............................................bbb............#
+#.............bbb.......................................bbbbbbbb..............................................bbb............#
+#.............bbb.......................................bbbbbbbb..............................................bbb............#
+#.............bbb.......................................bbbbbbbb..............................................bbb............#
+#.............bbb................----...----............bbbbbbbb........bbbbb..........................bbb....bbb............#
+#.............bbb..........bbb..........................bbbbbbbb........bbbbb..........................bbb....bbb............#
+#.............bbb..........bbb..........................bbbbbbbb........bbbbb..........................bbb....bbb............#
+1.............bbb.......bbbbbb..........................bbbbbbbb......bbbbbbb........................bbbbb....bbb............#
+1.............bbb.......bbbbbb..........................bbbbbbbb......bbbbbbb........................bbbbb....bbb............#
+1.P.C...................bbbbbb..................C.....................bbbbbbb.......C................bbbbb...................#
+############################################################################################......############################
+############################################################################################^^^^^^############################
+##############################################################################################################################

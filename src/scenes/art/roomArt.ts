@@ -26,6 +26,7 @@ import { drawMemory } from './memoryArt';
 import { livingDrawers } from './livingArt';
 import { houseDrawers } from './houseArt';
 import { trainDrawers } from './trainArt';
+import { drawBrokenDishes, drawHotPlates, trainStrangeDrawers } from './trainStrangeArt';
 import { paperGrainPattern } from './paperGrain';
 
 /**
@@ -257,6 +258,7 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
   ...livingDrawers({ tileShape, rounded }),
   ...houseDrawers({ tileShape, rounded }),
   ...trainDrawers({ tileShape, rounded }),
+  ...trainStrangeDrawers({ tileShape, rounded }),
   console(a, r) {
     wood(a, r);
     if (!a.palette.silhouettes) {
@@ -1755,6 +1757,16 @@ function drawStructure(a: ArtContext, floorY: number): void {
         if (level.meta.hazard === 'rubble') {
           // Gravats du chantier (D-63).
           drawRubble(ctx, x, y, col, y >= floorY);
+          continue;
+        }
+        if (level.meta.hazard === 'hotplates') {
+          // Plaques chaudes de la cuisine étrange du train (D-88).
+          drawHotPlates(ctx, x, y, col, y >= floorY);
+          continue;
+        }
+        if (level.meta.hazard === 'brokendishes') {
+          // Vaisselle cassée du train de la vaisselle (D-88).
+          drawBrokenDishes(ctx, x, y, col, y >= floorY);
           continue;
         }
         if (level.meta.hazard === 'umbrellas') {

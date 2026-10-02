@@ -231,6 +231,8 @@ export const PROP_KINDS = [
   'conductor',
   'sleeper-seat',
   'dog-sleep',
+  /** La cuisine rose (D-88), la dînette d'enfance de Céleste, au bout du train de la vaisselle. */
+  'pink-kitchen',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 

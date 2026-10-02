@@ -61,7 +61,7 @@ function coveredByOther(a: ArtContext, self: Rect, col: number, row: number): bo
 }
 
 /** Contour des tuiles pleines d'un rectangle, sur chaque côté qui donne sur le vide (D-81). */
-function solidOutline(a: ArtContext, r: Rect, stroke: string, alpha: number): void {
+export function solidOutline(a: ArtContext, r: Rect, stroke: string, alpha: number): void {
   const { ctx, level } = a;
   const solid = (col: number, row: number) => tileAt(level, col, row) === Tile.Solid;
   ctx.strokeStyle = stroke;
