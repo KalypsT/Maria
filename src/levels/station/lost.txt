@@ -11,15 +11,19 @@
 ; @walls: #d8c7a6 #bfa983
 ; @difficulty: medium
 ; @ability: hook
+; @decor: soffit 1 1 17 3
+; @decor: pendant 11 4 3 6
 ; @decor: lostcounter 8 24 10 4
+; @decor: desklamp 15 22 1 2
+; @decor: dust 6 10 14 13
 ; @decor: lostshelf 19 8 8 13
 ; @decor: tallcabinet 31 6 2 18
 ; @decor: lockers 38 10 5 18
 ; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 ############################################
-#..........................................#
-#..........................................#
-#..........................................#
+##################.........................#
+##################.........................#
+##################.........................#
 #..........................................#
 #...............................A..........#
 #..............................bb..........#
