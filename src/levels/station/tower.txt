@@ -5,7 +5,7 @@
 ; Roger, la peluche singe, est assis. Une veilleuse au début de chaque phase.
 ; @name: Tour des objets perdus
 ; @world: strange
-; @music: station-strange
+; @music: strange
 ; @difficulty: medium
 ; @ambient: #1a1f2c
 ; @camera: up

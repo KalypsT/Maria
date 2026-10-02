@@ -6,7 +6,7 @@
 ; cuisine rose. Une veilleuse au début de chaque tronçon.
 ; @name: Train de la vaisselle
 ; @world: strange
-; @music: train-strange
+; @music: strange
 ; @hazard: brokendishes
 ; @difficulty: easy
 ; @ambient: #1d1a2c

@@ -1,6 +1,7 @@
 // Prépare les morceaux bruts (Suno…) pour le jeu (D-57, D-92) : silences du début et de la fin
 // coupés, volume ramené à la même sonie, AAC 96 kbit/s en .m4a, sans pochette ni métadonnées.
-// Usage : npm run audio:prepare -- <fichiers ou dossier> ; nécessite ffmpeg.
+// Usage : npm run audio:prepare -- [--max <secondes>] <fichiers ou dossier> ; nécessite ffmpeg.
+// `--max` raccourcit le son à cette durée, avec un fondu de sortie (D-94, jingle `memory`).
 // Le nom du fichier produit est le nom d'origine sans préfixe d'envoi (`f9d40126-garden.mp3` →
 // `garden.m4a`) ; il doit être un emplacement de `src/config/audio.ts`.
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -17,6 +18,8 @@ const HEAD_SILENCE_DB = -60;
 const TAIL_SILENCE_DB = -50;
 /** Petit fondu aux coupures, contre les clics. */
 const EDGE_FADE_S = 0.02;
+/** Fondu de sortie quand `--max` raccourcit le son. */
+const MAX_FADE_S = 1.5;
 
 function ffmpeg(args) {
   return execFileSync('ffmpeg', ['-hide_banner', '-nostdin', ...args], {
@@ -60,13 +63,17 @@ function measure(file, filters) {
   return JSON.parse(stderr.slice(stderr.lastIndexOf('{')));
 }
 
-function prepare(file) {
+function prepare(file, maxSec) {
   const name = basename(file, extname(file)).replace(/^[0-9a-f]{8}-/, '');
   const out = join(OUT_DIR, `${name}.m4a`);
-  const { start, end } = audibleRange(file);
+  const range = audibleRange(file);
+  const { start } = range;
+  const shortened = maxSec > 0 && range.end - start > maxSec;
+  const end = shortened ? start + maxSec : range.end;
+  const outFade = shortened ? Math.min(MAX_FADE_S, maxSec / 2) : EDGE_FADE_S;
   const trim =
     `atrim=start=${start}:end=${end},asetpts=PTS-STARTPTS,` +
-    `afade=t=in:d=${EDGE_FADE_S},areverse,afade=t=in:d=${EDGE_FADE_S},areverse`;
+    `afade=t=in:d=${EDGE_FADE_S},areverse,afade=t=in:d=${outFade},areverse`;
   // Mesure, puis normalisation linéaire (sans compression) avec les valeurs mesurées.
   const norm = `loudnorm=I=${TARGET_LUFS}:TP=${TARGET_TP}:LRA=20`;
   const json = measure(file, `${trim},${norm}:print_format=json`);
@@ -102,7 +109,14 @@ function prepare(file) {
   );
 }
 
-const inputs = process.argv.slice(2).flatMap((path) =>
+const args = process.argv.slice(2);
+const maxAt = args.indexOf('--max');
+const maxSec = maxAt >= 0 ? Number(args.splice(maxAt, 2)[1]) : 0;
+if (!(maxSec >= 0)) {
+  console.error('--max : durée en secondes attendue');
+  process.exit(1);
+}
+const inputs = args.flatMap((path) =>
   statSync(path).isDirectory()
     ? readdirSync(path)
         .filter((n) => /\.(mp3|wav|flac|ogg|m4a|opus)$/i.test(n))
@@ -110,9 +124,9 @@ const inputs = process.argv.slice(2).flatMap((path) =>
     : [path],
 );
 if (inputs.length === 0) {
-  console.error('Usage : npm run audio:prepare -- <fichiers ou dossier>');
+  console.error('Usage : npm run audio:prepare -- [--max <secondes>] <fichiers ou dossier>');
   process.exit(1);
 }
 for (const file of inputs) {
-  prepare(file);
+  prepare(file, maxSec);
 }

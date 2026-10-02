@@ -89,7 +89,7 @@ describe('l’école et son monde étrange (D-64)', () => {
     expect(level('school').meta.indoor).toBe('yes');
     expect(isStrangeRoom(level('school-strange'))).toBe(true);
     expect(zone.map['school-strange']).toBeUndefined();
-    expect(level('school-strange').meta.music).toBe('street-strange');
+    expect(level('school-strange').meta.music).toBe('strange');
   });
 
   it(

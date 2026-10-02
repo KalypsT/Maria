@@ -5,7 +5,7 @@
 ; (le haut des casiers du bureau des objets trouvés), jamais par une porte.
 ; @name: Objets perdus
 ; @world: strange
-; @music: station-strange
+; @music: strange
 ; @hazard: umbrellas
 ; @difficulty: medium
 ; @ambient: #1a1f2c

@@ -1,6 +1,6 @@
 /**
  * Musique (§39, D-57). Les morceaux sont des fichiers déposés dans `src/assets/audio/`, nommés
- * d'après leur emplacement (`garden.ogg`, `house-night.mp3`…). Un emplacement sans fichier reste
+ * d'après leur emplacement (`garden.m4a`, `house.m4a`…). Un emplacement sans fichier reste
  * silencieux : on peut ajouter les morceaux un par un. Valeurs PROVISOIRES, à régler sur téléphone.
  */
 
@@ -8,28 +8,21 @@
 export const MUSIC_TRACKS = [
   /** Écran d'accueil. */
   'title',
-  /** La maison le soir et la nuit (prologue). */
-  'house-night',
-  /** La maison le matin, et après la croissance. */
-  'house-day',
+  /** La maison, de jour comme de nuit (D-94). */
+  'house',
   /** Le jardin (dehors, de jour). */
   'garden',
-  /** Le monde étrange de la maison (salon étrange, passage d'ombres). */
+  /**
+   * Tous les mondes étranges (D-94) : la maison, derrière la haie, l'école, la gare et sa tour,
+   * la cuisine et le train de la vaisselle.
+   */
   'strange',
-  /** Derrière la haie (le monde étrange, dehors). */
-  'hedge',
   /** La rue du quartier (D-60). */
   'street',
-  /** L'école étrange, le monde étrange du quartier (D-64). */
-  'street-strange',
   /** La gare (D-66), par `; @music: station`. */
   'station',
-  /** Le monde étrange de la gare et la tour des objets perdus (D-68). */
-  'station-strange',
   /** Le train de nuit (D-85), par `; @music: train`. */
   'train',
-  /** Le monde étrange du train : la cuisine étrange et le train de la vaisselle (D-88). */
-  'train-strange',
   /**
    * Les souvenirs jouables (D-89), par `; @music: memory-play`. Pas `memory` : ce nom est celui du
    * jingle (un fichier `memory.*` servirait aux deux).
@@ -49,8 +42,8 @@ export const JINGLES = [
   /** Un nouveau souvenir dans le cahier. */
   'memory',
   /**
-   * Apparition de Maria (étape `hush` de l'histoire) : la musique se tait ; ce jingle étrange est
-   * joué s'il existe, sinon c'est le silence (§39, à comparer sur téléphone).
+   * Apparition de Maria (étape `hush` de l'histoire) : ce jingle étrange est joué par-dessus le
+   * thème s'il existe (D-94) ; sans lui, la musique se tait (§39).
    */
   'maria',
 ] as const;
@@ -61,7 +54,7 @@ export const AUDIO_EXTENSIONS = ['ogg', 'opus', 'm4a', 'mp3'] as const;
 
 /**
  * Poids maximal de l'ensemble des fichiers audio (précachés pour le hors ligne, D-23) : vérifié
- * par `check:pwa`. Les 13 thèmes et les jingles en AAC 96 kbit/s (D-92).
+ * par `check:pwa`. Les thèmes et les jingles en AAC 96 kbit/s (D-92).
  */
 export const AUDIO_BUDGET_BYTES = 25 * 1024 * 1024;
 
@@ -77,8 +70,13 @@ export const AUDIO_MIX = {
   hushOutMs: 1200,
   /** …puis revient lentement. */
   hushInMs: 3500,
+  /**
+   * Volume de la musique pendant l'apparition de Maria quand son jingle existe (D-94) : on entend
+   * encore le thème, baissé comme pour les autres jingles. Sans fichier `maria`, c'est le silence.
+   */
+  hushWithJingle: 1,
   /** Volume de la musique pendant un jingle, et vitesse de la baisse et du retour. */
-  jingleDuck: 0.3,
+  jingleDuck: 0.8,
   duckMs: 400,
   /** Volume de la musique pendant la pause. */
   pausedDuck: 0.45,

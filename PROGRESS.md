@@ -13,10 +13,18 @@ Suite : le niveau 6 (la station balnéaire), à planifier le moment venu.
 **En attente** :
 
 - essais sur téléphone de l'utilisateur (gare, passe graphique, glissade) ; les listes « À vérifier sur téléphone » ci-dessous restent ouvertes ;
-- **musique** (D-57, D-92) : 7 premiers fichiers intégrés ; les autres morceaux arrivent (à préparer avec `npm run audio:prepare`, budget 25 Mo, 7,2 Mo pris) ;
+- **musique** (D-57, D-92) : 7 premiers fichiers intégrés ; les autres morceaux arrivent (à préparer avec `npm run audio:prepare`, budget 25 Mo, 7,2 Mo pris ; 8 thèmes depuis D-94) ;
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Musique : retours d'écoute (D-94)
+
+- Un seul thème pour la maison (`house`, jour et nuit) et un seul pour tous les mondes étranges (`strange`). Restent 8 thèmes : `title`, `house`, `garden`, `street`, `station`, `train`, `strange`, `memory-play`.
+- Jingle `memory` raccourci à 5 s (fondu de sortie), option `--max` de `audio:prepare`.
+- Pendant un jingle, la musique ne baisse plus qu'à 80 % (30 % avant). À l'apparition de Maria, avec son jingle, le thème reste audible (plus de silence) ; sans fichier `maria`, le silence reste.
+- [ ] À vérifier sur téléphone : le thème s'entend-il assez sous les jingles, et les jingles se distinguent-ils encore (`jingleDuck`) ?
+- [ ] L'apparition de Maria avec le thème qui continue : garde-t-elle son étrangeté, ou faut-il revenir au silence (`hushWithJingle` à 0) ?
 
 ### Musique : premiers morceaux (D-92)
 
@@ -26,7 +34,7 @@ Suite : le niveau 6 (la station balnéaire), à planifier le moment venu.
 - Tests : 629. Build et précache vérifiés (`check:pwa`). Le Chromium de l'environnement ne lit pas l'AAC (codec absent des versions libres) : l'écoute dans le jeu reste à faire sur téléphone.
 - [ ] À vérifier sur téléphone : les morceaux jouent-ils (iPhone et Android) ? Volumes équilibrés entre thèmes et jingles ? Le jingle `maria` assez étrange ?
 - [ ] Les boucles (fondu de 4 s sur la fin) : se remarquent-elles ?
-- [ ] Le jingle `memory` (9 s, gardé tel quel) : trop long par-dessus la musique baissée ?
+- Le jingle `memory` : raccourci à 5 s (D-94).
 - **Rendu en mode écran par défaut** (D-93) : nouvelle partie en mode écran ; une sauvegarde existante garde son mode (le changer une fois dans le menu pause).
 - [ ] À vérifier sur téléphone : fluidité en mode écran (FPS de l'overlay).
 
