@@ -25,7 +25,7 @@
 - **Le centre** : le réfectoire, l'escalier, le dortoir. Défi moyen par la suspension jusqu'à la poutre (une trouvaille).
 - **Le cahier** : une page « La mer ».
 - DEBUG → Histoire : « la classe de mer, au centre ».
-- Tests : TESTCOUNT. Vérifié dans Chromium : le quai et la classe, la promenade de bout en bout (le kiosque, les lampadaires, la façade, le toit), le réfectoire, l'escalier, le dortoir, la poutre.
+- Tests : 660. Vérifié dans Chromium : le quai et la classe, la promenade de bout en bout (le kiosque, les lampadaires, la façade, le toit), le réfectoire, l'escalier, le dortoir, la poutre.
 - [ ] À vérifier sur téléphone (DEBUG → Histoire → « le train arrivé, la gare de la mer », puis la maîtresse) : l'arrivée se comprend-elle ? Trouve-t-on la sortie de la gare, puis la porte du centre ?
 - [ ] La promenade : agréable à parcourir ? Le défi des lampadaires et des balcons se voit-il depuis le kiosque ? Juste (moyen) ?
 - [ ] Le centre : l'escalier (une marche toutes les deux colonnes) est-il pénible ? La suspension se remarque-t-elle comme un appui ?
