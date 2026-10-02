@@ -70,7 +70,8 @@ export class ForegroundView {
     const row = floorRow(level);
     const height = level.height * T;
     const floorY = row * T;
-    if (level.decor.length === 0 || floorY >= height) {
+    // Pas d'herbes au bord d'un train (D-86) : dedans, ni sur son toit.
+    if (level.decor.length === 0 || floorY >= height || level.meta.vehicle !== undefined) {
       return;
     }
     this.floorY = floorY;

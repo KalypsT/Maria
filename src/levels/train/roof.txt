@@ -1,0 +1,44 @@
+; Le train (D-86), PR 3 : le toit, la nuit, dehors, en route (on n'y monte qu'en suivant la lueur).
+; Le toit du fourgon, le soufflet entre les deux voitures, le toit du wagon-restaurant et la
+; cheminée de sa cuisine. Les tunnels arrivent par l'avant (annoncés : l'image s'assombrit) : debout
+; sur le toit, on est repoussée ; couchée (glissade) ou dans un creux, entre deux voitures, rien.
+; Au bout, la trappe du wagon-restaurant (porte 2).
+; @name: Le toit du train
+; @icon: roof
+; @vehicle: train
+; @world: street
+; @outdoor: yes
+; @music: train
+; @tunnel: 15
+; @difficulty: medium
+; @door: 2 104 14
+; @decor: carroof 1 15 40 7
+; @decor: carroof 46 15 63 7
+; @decor: gangway 41 17 5 5
+; @decor: roofvent 10 13 3 2
+; @decor: roofvent 30 13 4 2
+; @decor: kitchenchimney 92 9 2 6
+; @decor: roofhatch 103 13 3 2
+; Légende : # paroi, plancher ou toit, b bois, t tissu (pleins), - filet, tablette, étagère ou crochet (traversables), C veilleuse (checkpoint), P repère de départ, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+#............................................................................................................#
+#............................................................................................................#
+#............................................................................................................#
+#............................................................................................................#
+#............................................................................................................#
+#............................................................................................................#
+#............................................................................................................#
+#............................................................................................................#
+#...........................................................................................S................#
+#...........................................................................................bb...............#
+#...........................................................................................bb...............#
+1...........................................................................................bb...............#
+1...........................................................................................bb...............#
+1.........bbb.................bbbb..........................................................bb...............#
+1..P......bbb.................bbbb..........................................................bb...............#
+#bbbbbbbbbbbbbbbbbbb...bbbbbbbbbbbbbbbbbb.....bbbbbbbbbbbbbbbb...bbbbbbbbbbbbbbb...bbbbbbbbbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbbbbb...bbbbbbbbbbbbbbbbbb.....bbbbbbbbbbbbbbbb...bbbbbbbbbbbbbbb...bbbbbbbbbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#

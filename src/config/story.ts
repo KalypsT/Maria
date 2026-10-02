@@ -89,6 +89,10 @@ export const StoryFlag = {
   TrainSlide: 'train.slide',
   /** La nuit dans le train (D-85) : tout le monde dort ; une lueur passe dans le couloir. */
   TrainNight: 'train.night',
+  /** Le contrôleur, bienveillant, a vu passer Céleste (D-86). */
+  TrainConductor: 'train.conductor',
+  /** La porte du wagon-restaurant, poussée de l'intérieur (D-86) : une boucle avec le fourgon. */
+  TrainRestaurantOpen: 'train.restaurant-open',
   /** Quelques mois plus tard (D-43) : Céleste a grandi (phase de croissance 2). */
   Grown: 'growth.2',
   /** Le jardin (D-46) : Céleste est sortie pour la première fois (il fait beau, et Maria ?). */
@@ -229,6 +233,12 @@ export const PROP_SIZE = {
   'kid-cap-sit': { w: 22, h: 24 },
   'kid-bob-sit': { w: 22, h: 24 },
   'kid-asleep': { w: 30, h: 12 },
+  // Le reste du train (D-86) : la maman qui berce son bébé, le contrôleur, des voyageurs endormis,
+  // le chien du fourgon.
+  'mother-baby': { w: 38 * PARENT_SCALE, h: 44 * PARENT_SCALE },
+  conductor: { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  'sleeper-seat': { w: 38 * PARENT_SCALE, h: 44 * PARENT_SCALE },
+  'dog-sleep': { w: 30, h: 16 },
   // Le chat gris, agrandi par CAT_SCALE (D-42).
   'cat-sleep': { w: 16 * CAT_SCALE, h: 8 * CAT_SCALE },
   'cat-sit': { w: 12 * CAT_SCALE, h: 14 * CAT_SCALE },

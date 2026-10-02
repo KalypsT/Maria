@@ -16,8 +16,9 @@ const TRAIN_DOOR = { col: 55, row: 26 };
 const BUNK = { col: 11, row: 11, w: 5, h: 3 };
 /** La grille en accordéon entre les deux compartiments : on glisse dessous (D-84). */
 const GATE_SIDE = { col: 32, row: 16, w: 6, h: 3 };
-/** La porte du bout de la voiture (la voiture suivante, PR 3). */
-const END_DOOR = { col: 78, row: 16, w: 6, h: 3 };
+
+/** La porte de la cuisine du wagon-restaurant : la lueur passe dessous (le monde étrange, PR 5). */
+const KITCHEN_DOOR = { col: 57, row: 16, w: 6, h: 3 };
 
 const TRIGGERS: StoryTrigger[] = [
   {
@@ -131,13 +132,72 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // La porte du bout de la voiture (PLACEHOLDER) : la lueur est passée par là ; la voiture
-    // suivante vient avec la PR 3.
-    id: 'train-door',
-    room: 'train-couchettes',
+    // Le contrôleur (D-86), bienveillant : il voit passer Céleste, la nuit, et la laisse aller.
+    id: 'train-conductor',
+    room: 'train-compartments',
+    on: 'touch',
+    area: { col: 33, row: 16, w: 6, h: 3 },
+    when: { all: [F.TrainNight], none: [F.TrainConductor] },
+    lock: true,
+    steps: [
+      { do: 'flag', id: F.TrainConductor },
+      { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'conductor' },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
+  {
+    // Une maman berce son bébé, qui serre son poupon (D-86) : on la regarde, autant qu'on veut.
+    id: 'train-mother',
+    room: 'train-compartments',
     on: 'interact',
-    area: END_DOOR,
-    mark: { col: 82, row: 15 },
+    area: { col: 9, row: 16, w: 5, h: 3 },
+    mark: { col: 11, row: 15 },
+    when: { all: [F.TrainNight] },
+    lock: true,
+    repeat: true,
+    steps: [
+      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
+  {
+    // Le chien du fourgon, qui dort dans sa caisse.
+    id: 'train-dog',
+    room: 'train-baggage',
+    on: 'interact',
+    area: { col: 37, row: 16, w: 7, h: 3 },
+    mark: { col: 40, row: 14 },
+    when: { all: [F.TrainNight] },
+    lock: true,
+    repeat: true,
+    steps: [
+      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
+  {
+    // La porte du wagon-restaurant vers le fourgon se pousse de l'intérieur (D-86) : une boucle.
+    id: 'train-restaurant-door',
+    room: 'train-restaurant',
+    on: 'interact',
+    area: { col: 1, row: 16, w: 4, h: 3 },
+    mark: { col: 2, row: 15 },
+    when: { none: [F.TrainRestaurantOpen] },
+    lock: true,
+    steps: [
+      { do: 'flag', id: F.TrainRestaurantOpen },
+      { do: 'sparkle', area: { col: 0, row: 14, w: 2, h: 5 }, ms: S.lookMs },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
+  {
+    // La porte de la cuisine (PLACEHOLDER) : la lueur passe dessous ; le monde étrange vient avec
+    // la PR 5.
+    id: 'train-kitchen',
+    room: 'train-restaurant',
+    on: 'interact',
+    area: KITCHEN_DOOR,
+    mark: { col: 59, row: 15 },
     when: { all: [F.TrainNight] },
     lock: true,
     repeat: true,
@@ -148,9 +208,19 @@ const TRIGGERS: StoryTrigger[] = [
   },
 ];
 
+/** La nuit, la lueur guide Céleste d'une voiture à l'autre : la lumière vacille en approchant. */
+const NIGHT_OMEN = { all: [F.TrainNight] };
 const OMENS: StoryOmen[] = [
-  // La nuit, en approchant de la porte du bout de la voiture : la lumière vacille.
-  { room: 'train-couchettes', when: { all: [F.TrainNight] }, col: 82, row: 17, radius: 12 },
+  // Le passage vers les compartiments, au bout de la voiture-couchettes.
+  { room: 'train-couchettes', when: NIGHT_OMEN, col: 83, row: 17, radius: 12 },
+  // La grille vers le fourgon.
+  { room: 'train-compartments', when: NIGHT_OMEN, col: 86, row: 17, radius: 12 },
+  // L'échelle du toit.
+  { room: 'train-baggage', when: NIGHT_OMEN, col: 63, row: 16, radius: 10 },
+  // La trappe du wagon-restaurant.
+  { room: 'train-roof', when: NIGHT_OMEN, col: 104, row: 13, radius: 12 },
+  // La porte de la cuisine.
+  { room: 'train-restaurant', when: NIGHT_OMEN, col: 59, row: 17, radius: 12 },
 ];
 
 /** Sur le quai, le soir du départ seulement. */
@@ -262,19 +332,74 @@ const PROPS: StoryProp[] = [
     flip: true,
     when: NIGHT,
   },
+  // Le reste du train, la nuit (D-86).
+  {
+    id: 'mother-baby',
+    room: 'train-compartments',
+    kind: 'mother-baby',
+    col: 10,
+    row: 16,
+    when: NIGHT,
+  },
+  {
+    id: 'conductor',
+    room: 'train-compartments',
+    kind: 'conductor',
+    col: 41,
+    row: 18,
+    flip: true,
+    when: NIGHT,
+  },
+  {
+    id: 'sleeper-b',
+    room: 'train-compartments',
+    kind: 'sleeper-seat',
+    col: 50,
+    row: 16,
+    flip: true,
+    when: NIGHT,
+  },
+  {
+    id: 'sleeper-c',
+    room: 'train-compartments',
+    kind: 'sleeper-seat',
+    col: 55,
+    row: 16,
+    when: NIGHT,
+  },
+  { id: 'dog', room: 'train-baggage', kind: 'dog-sleep', col: 40, row: 18, when: NIGHT },
 ];
 
 /** Le soir du départ et la nuit dans le train (jusqu'à l'arrivée, PR 6). */
 const TIMES: StoryData['times'] = [{ when: { all: [F.TrainBoarding] }, time: 'evening' }];
 
 /** Le train roule une fois parti (l'arrivée vient avec la PR 6). */
-const MOVING: NonNullable<StoryData['moving']> = [
-  { room: 'train-couchettes', when: { all: [F.TrainDeparted] } },
+const TRAIN_ROOMS = [
+  'train-couchettes',
+  'train-compartments',
+  'train-baggage',
+  'train-roof',
+  'train-restaurant',
 ];
+const MOVING: NonNullable<StoryData['moving']> = TRAIN_ROOMS.map((room) => ({
+  room,
+  when: { all: [F.TrainDeparted] },
+}));
 
 /** La nuit, les lumières de la voiture-couchettes s'éteignent : seules les veilleuses restent. */
-const DIM: NonNullable<StoryData['dim']> = [
-  { room: 'train-couchettes', when: { all: [F.TrainNight] } },
+const DIM: NonNullable<StoryData['dim']> = TRAIN_ROOMS.filter((room) => room !== 'train-roof').map(
+  (room) => ({ room, when: { all: [F.TrainNight] } }),
+);
+
+/**
+ * Portes fermées : le passage vers les compartiments avant la nuit (c'est l'heure du coucher) ;
+ * la porte entre le fourgon et le wagon-restaurant tant qu'elle n'a pas été poussée de
+ * l'intérieur (D-86).
+ */
+const LOCKED: StoryData['lockedRooms'] = [
+  { room: 'train-couchettes', exit: 1, when: { none: [F.TrainNight] }, icon: 'bed' },
+  { room: 'train-baggage', exit: 2, when: { none: [F.TrainRestaurantOpen] }, icon: 'question' },
+  { room: 'train-restaurant', exit: 1, when: { none: [F.TrainRestaurantOpen] }, icon: 'question' },
 ];
 
 /** Morceaux de l'histoire du train, ajoutés à ceux de la maison (`HOUSE_STORY`). */
@@ -289,7 +414,7 @@ export const TRAIN_STORY: Pick<
   omens: OMENS,
   props: PROPS,
   times: TIMES,
-  lockedRooms: [],
+  lockedRooms: LOCKED,
   moving: MOVING,
   dim: DIM,
 };

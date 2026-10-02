@@ -226,6 +226,11 @@ export const PROP_KINDS = [
   'kid-cap-sit',
   'kid-bob-sit',
   'kid-asleep',
+  // Le reste du train (D-86).
+  'mother-baby',
+  'conductor',
+  'sleeper-seat',
+  'dog-sleep',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 
@@ -273,6 +278,10 @@ export const CHARACTER_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'kid-cap-sit',
   'kid-bob-sit',
   'kid-asleep',
+  'mother-baby',
+  'conductor',
+  'sleeper-seat',
+  'dog-sleep',
 ]);
 
 export interface StoryProp {
