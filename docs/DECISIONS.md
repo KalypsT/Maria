@@ -1118,6 +1118,14 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Tests** (`slideRevisits.test.ts`) : la vraie Céleste (phase 3) simulée devant chaque passage ramasse la trouvaille en glissant, jamais sans (en marchant et en sautant) ; puis elle ressort toujours, debout (jamais coincée). Les tests des salles (maison, jardin, rue, gare, « rien ne se ferme » en grandissant) restent verts.
 - **Sauvegarde** : aucune migration (quatre nouvelles trouvailles, identifiants neufs).
 
+## D-92 — Musique : premiers morceaux, préparation des fichiers
+
+- **Premiers morceaux** (Suno, fournis par l'utilisateur) : thèmes `house-night`, `garden`, `strange`, `station` ; jingles `found`, `memory`, `maria`. Les autres emplacements restent silencieux.
+- **Préparation** (`npm run audio:prepare -- <fichiers ou dossier>`, ffmpeg requis) : silences du début et de la fin coupés (la boucle en fondu enchaîné de 4 s porte sur la musique, pas sur un silence) ; **même sonie pour tous**, −18 LUFS intégrés, crête vraie ≤ −1,5 dBTP, normalisation linéaire (sans compression ; les fichiers bruts allaient de −14,5 à −23 LUFS et touchaient 0 dBFS) ; pochette et métadonnées retirées. Les fichiers bruts ne sont pas commités.
+- **Format : AAC 96 kbit/s en `.m4a`** plutôt qu'Opus/Ogg (D-57) : lu par tous les navigateurs, y compris Safari sur les iPhone plus anciens, qui ne lisent pas toujours l'Ogg ; à débit égal, meilleur que le MP3. Environ 1,2 Mo par minute.
+- **Conflit de nom corrigé** : le thème des souvenirs jouables s'appelait `memory`, comme le jingle ; un fichier `memory.*` aurait servi aux deux (le jingle de 9 s en boucle dans la cuisine du souvenir). Le thème devient `memory-play` ; un test interdit qu'un thème et un jingle partagent un nom.
+- **Poids** : 7,2 Mo pour ces 7 fichiers, sur un budget de 12 Mo (`AUDIO_BUDGET_BYTES`). Les 9 thèmes restants ne tiendront pas dans ce budget : décision à prendre avant d'en ajouter (voir PROGRESS).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

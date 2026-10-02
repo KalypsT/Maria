@@ -12,6 +12,7 @@
     "build:debug": "vite build --mode debug",
     "check:no-debug": "node scripts/check-no-debug.js",
     "check:pwa": "node scripts/check-pwa.js",
+    "audio:prepare": "node scripts/prepare-audio.js",
     "preview": "vite preview --host",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
