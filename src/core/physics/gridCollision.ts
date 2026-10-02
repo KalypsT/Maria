@@ -161,6 +161,14 @@ export function touchesHazard(level: LevelData, box: Box): boolean {
   );
 }
 
+/**
+ * Danger qui pique (orties, ronces, D-56) : le même contact que `touchesHazard`, sans l'eau (une
+ * chute dans l'eau ramène au bord, D-97).
+ */
+export function touchesSting(level: LevelData, box: Box): boolean {
+  return touchesTile(level, box, Tile.Hazard) || touchesTile(level, box, Tile.Thorns);
+}
+
 /** Même contact, avec une seule sorte de danger (orties ou ronces, D-51). */
 export function touchesTile(level: LevelData, box: Box, kind: Tile): boolean {
   const inset = HAZARD_INSET_PX;

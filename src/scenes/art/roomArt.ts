@@ -1740,11 +1740,22 @@ function drawStructure(a: ArtContext, floorY: number): void {
           ctx.fillRect(x, y + 4, T, 3);
         }
       } else if (tile === Tile.Water) {
-        // L'eau (D-95), PLACEHOLDER : le corps, et la ligne de surface où rien n'est au-dessus.
-        const surface = tileAt(level, col, row - 1) !== Tile.Water;
-        ctx.fillStyle = p.silhouettes ? WATER_COLORS.strangeBody : WATER_COLORS.body;
+        // L'eau (D-95, D-97), PLACEHOLDER : plus sombre en profondeur ; la surface plus claire (les
+        // vaguelettes qui bougent sont dessinées à part, `WaterView`).
+        let depth = 0;
+        while (
+          depth < WATER_COLORS.deepRows &&
+          tileAt(level, col, row - depth - 1) === Tile.Water
+        ) {
+          depth++;
+        }
+        const k = depth / WATER_COLORS.deepRows;
+        const top = p.silhouettes ? WATER_COLORS.strangeBody : WATER_COLORS.body;
+        const deep = p.silhouettes ? WATER_COLORS.strangeDeep : WATER_COLORS.deep;
+        const mix = (i: 0 | 1 | 2) => Math.round(top[i] + (deep[i] - top[i]) * k);
+        ctx.fillStyle = `rgba(${String(mix(0))},${String(mix(1))},${String(mix(2))},${String(WATER_COLORS.alpha)})`;
         ctx.fillRect(x, y, T, T);
-        if (surface) {
+        if (depth === 0) {
           ctx.fillStyle = p.silhouettes ? WATER_COLORS.strangeSurface : WATER_COLORS.surface;
           ctx.fillRect(x, y + 2, T, 1.5);
         }

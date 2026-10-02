@@ -110,6 +110,7 @@ import { FinishView } from './FinishView';
 import { BackdropView } from './BackdropView';
 import { ForegroundView } from './ForegroundView';
 import { WorldLifeView } from './WorldLifeView';
+import { WaterView } from './WaterView';
 import { MapPage } from '../ui/MapPage';
 import { buildMapModel } from '../core/world/mapModel';
 import { DEFAULT_PUPPET, type PuppetParams } from '../config/puppet';
@@ -245,6 +246,7 @@ export class GameScene extends Phaser.Scene {
   private foreground!: ForegroundView;
   /** Vie du monde réel : feuilles et linge au vent (D-73), feu et balancier (D-74). */
   private worldLife!: WorldLifeView;
+  private water!: WaterView;
   /** Échelle des textures dessinées (habillage, Céleste) : celle de l'écran, plafonnée. */
   private artScale = 1;
   /** Carte (§24) et salles déjà dessinées lors d'une ouverture précédente (tracé animé). */
@@ -412,6 +414,7 @@ export class GameScene extends Phaser.Scene {
     this.backdrop = new BackdropView(this);
     this.foreground = new ForegroundView(this);
     this.worldLife = new WorldLifeView(this);
+    this.water = new WaterView(this);
     const save = this.session.data;
     const { room, checkpointId } = savedReturn(this.session);
     this.level = this.atTide(room.level);
@@ -624,6 +627,15 @@ export class GameScene extends Phaser.Scene {
         }
         continue;
       }
+      if (run.splashing) {
+        // Chute dans l'eau (D-97) : rien ne bouge ; à la fin, retour au dernier appui sec.
+        run.stepSplashing();
+        this.freezeInterpolation();
+        if ((run.events & RunEvent.SplashReturn) !== 0) {
+          this.returnToFooting();
+        }
+        continue;
+      }
       const memory = this.memoryPlay;
       if (memory) {
         // Souvenir jouable (D-89) : sa propre petite boucle, hors de la partie.
@@ -662,7 +674,10 @@ export class GameScene extends Phaser.Scene {
       if (combat.events !== 0) {
         this.combatView.onEvents(combat.events);
       }
-      run.step(this.player.box, combat.events);
+      run.step(this.player.box, combat.events, this.player.grounded);
+      if ((run.events & RunEvent.Splashed) !== 0) {
+        this.dust.splash(this.player.box);
+      }
       const picked = this.pickups.step(this.player.box);
       if (picked >= 0) {
         this.onPicked(picked);
@@ -754,6 +769,7 @@ export class GameScene extends Phaser.Scene {
     artView.w = view.width;
     artView.h = view.height;
     this.roomArt.update(artView, Math.max(this.story.veil, this.transition.veil) >= 1);
+    this.water.update(this.time.now);
     this.worldLife.update(
       this.time.now,
       this.game.loop.delta,
@@ -1021,6 +1037,20 @@ export class GameScene extends Phaser.Scene {
     this.reappearAtMs = this.time.now;
   }
 
+  /**
+   * Fin de l'éclaboussement (D-97) : Céleste reprend pied sur son dernier appui sec de la salle (ou,
+   * sans appui retenu, à son point de retour dans la salle), arrêtée ; l'image revient.
+   */
+  private returnToFooting(): void {
+    const footing = this.run.footing;
+    const { x, y } = footing ?? this.respawnPosition();
+    this.player.reset(x, y, this.level);
+    this.feel.reset(this.player);
+    this.poser.reset();
+    this.resetCamera();
+    this.reappearAtMs = this.time.now;
+  }
+
   /** Voile de l'évanouissement, jauge de peur, transparence de Céleste. */
   private renderRunState(): void {
     // Court souvenir (D-68) : la vignette au-dessus du jeu.
@@ -1034,6 +1064,12 @@ export class GameScene extends Phaser.Scene {
     }
     const run = this.run;
     this.hud.setFear(run.fear, this.worldParams.fearMax);
+    if (run.splashing) {
+      const progress = run.splashProgress;
+      this.hud.setVeil(Math.max(progress, this.transition.veil));
+      this.puppet.setAlpha(1 - progress);
+      return;
+    }
     if (run.fainting) {
       const progress = run.faintProgress;
       this.hud.setVeil(Math.max(progress, this.transition.veil));
@@ -1372,6 +1408,7 @@ export class GameScene extends Phaser.Scene {
     this.levelImages.length = 0;
     const level = this.level;
     const palette = this.palette();
+    this.water.load(level, palette.silhouettes);
     this.finishView.setPalette(palette, this.artFinish);
     // Salle habillée (D-28) : dessinée par l'habillage, pas tuile par tuile.
     const images = this.artImages();

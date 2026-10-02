@@ -10,6 +10,11 @@ export interface WorldParams {
   faintMs: number;
   /** Durée du retour à l'image après la réapparition (ms). */
   reappearMs: number;
+  /**
+   * Chute dans l'eau (D-95, D-97) : l'éclaboussement, Céleste s'efface et l'image s'assombrit (ms)
+   * avant le retour au dernier appui sec (puis `reappearMs`).
+   */
+  splashMs: number;
   /** Changement de salle (D-25) : fondu au noir en passant une sortie, jeu suspendu (ms). */
   roomFadeOutMs: number;
   /** Retour à l'image dans la nouvelle salle, jeu en marche (ms). */
@@ -21,6 +26,7 @@ export const DEFAULT_WORLD: Readonly<WorldParams> = {
   fearDecayMs: 0,
   faintMs: 450,
   reappearMs: 300,
+  splashMs: 320,
   roomFadeOutMs: 150,
   roomFadeInMs: 200,
 };
@@ -32,6 +38,7 @@ export const WORLD_PARAM_RANGES: Readonly<
   fearDecayMs: { min: 0, max: 20000, step: 500 },
   faintMs: { min: 0, max: 1500, step: 50 },
   reappearMs: { min: 0, max: 1500, step: 50 },
+  splashMs: { min: 0, max: 1500, step: 20 },
   roomFadeOutMs: { min: 0, max: 1000, step: 25 },
   roomFadeInMs: { min: 0, max: 1000, step: 25 },
 };

@@ -1176,6 +1176,23 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Vérifié dans Chromium** : la salle d'essai à marée basse (le sable, le ponton posé, la trouvaille), puis haute (l'eau, le ponton monté, la trouvaille noyée absente), Céleste à la même place ; et retour.
 - **Sauvegarde** : aucune migration (une étape d'histoire, retirable).
 
+## D-97 — La station balnéaire, PR 1b : l'eau ramène au bord, son dessin, le parcours d'essai 13
+
+- **Plan validé** (D-95, option A2, nouvelle règle de la boucle de jeu signalée et acceptée).
+- **L'eau ramène au dernier appui sec** (`RunState`, pur) : dès que la hitbox (réduite de `HAZARD_INSET_PX`) touche l'eau, un éclaboussement (des gouttes en gerbe), **la peur monte d'un cran**, Céleste s'efface pendant `splashMs` (320 ms), puis reprend pied, arrêtée, sur son **dernier appui sec** ; l'image revient (`reappearMs`). Au dernier cran de peur, elle s'évanouit comme d'ordinaire (retour à la lanterne).
+  - **Le dernier appui** : la dernière position où Céleste se tenait au sol, **les deux pieds sur un sol** (jamais au ras d'un bord), sans toucher ni danger ni eau, et sans coup ce pas-là. Oublié en changeant de salle, à la réapparition et quand la marée tourne ; sans appui retenu, retour au point de retour de la salle.
+  - **L'eau ne pique plus** comme les orties (la règle provisoire de D-96 est retirée) : le combat ne la voit pas (`touchesSting`) ; l'analyse, l'escalade et les rebords l'évitent toujours (`touchesHazard`). Une chute dans l'eau ramène au nœud de départ : aucune route nouvelle à vérifier.
+  - Réglage `splashMs` dans DEBUG → Monde. PROVISOIRE.
+- **Le dessin de l'eau** (PLACEHOLDER) : dans une salle habillée, l'eau fonce avec la profondeur (`WATER_COLORS`, 5 lignes jusqu'au plus sombre) ; une ligne de surface claire ; **des vaguelettes qui bougent** (`WaterView` : par nappe, deux bandes qui défilent lentement en sens contraires, créées au chargement de la salle, aucune création en jeu ; `WATER_LIFE`). En silhouettes, l'eau est sombre et l'écume turquoise.
+- **DEBUG** : case « Marée haute (la station balnéaire) » (la salle change aussitôt, Céleste reste où elle est).
+- **Parcours d'essai 13 « Marée »** (90 × 20, facile ; prête escalade, saut mural et glissade ; la marée se change dans DEBUG, il n'y a pas de banc hors de la partie) :
+  - **marée basse** : une flaque (toujours de l'eau) à sauter, le sable, la digue où l'on **glisse** dessous (une petite chambre et sa **trouvaille, noyée à marée haute**), le bateau échoué, une glissade sous le rocher, puis la **cheminée** entre le rocher et le quai (**saut mural**) ; impossible sans la glissade ni sans le saut mural (testé) ;
+  - **marée haute** : le sable et le dessous de la digue sous l'eau ; **le ponton et sa caisse ont monté**, on passe sur la digue, sur le **pont du bateau à flot**, sur le rocher, puis le quai. Jamais coincée (testé).
+  - Trois tronçons `; @leg:` vérifiés (D-96) : l'arrivée à marée basse (facile, glissade et saut mural exigés), la trouvaille (facile, glissade), l'arrivée à marée haute (facile).
+  - Essais pendant la conception : le parapluie franchissait la digue depuis un pieu fixe (planer va très loin) ; le pieu est retiré (ce qui aide à marée haute doit flotter), et l'escalade franchissait un quai trop bas (relevé). **À retenir pour les vraies salles** : une marée ne ferme une route que si rien de fixe, plané compris, ne la contourne.
+- **Vérifié dans Chromium** : la chute dans la flaque (l'éclaboussement, la peur à 1, le retour sur la berge, les deux pieds au sol) ; le parcours à marée basse puis haute (l'eau, le ponton et le bateau montés, les vaguelettes).
+- **Sauvegarde** : aucune migration (rien de sauvegardé de plus ; le parcours est hors partie).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

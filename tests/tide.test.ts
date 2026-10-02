@@ -9,11 +9,13 @@ import { StoryDirector, type StoryHost } from '../src/core/story/StoryDirector';
 import type { StoryData } from '../src/core/story/story';
 import { storyProblems } from '../src/core/story/storyProblems';
 import { buildZone } from '../src/core/world/zone';
+import { LEVELS } from '../src/levels';
 import tideRoom from './fixtures/tide-room.txt?raw';
 import {
   lanternNodes,
   legProblems,
   reachableNodes,
+  seaAnalysis,
   standOn,
   stuckNodes,
   tideGraph,
@@ -291,6 +293,58 @@ describe('le graphe de la marée et le banc (D-95)', () => {
       const noBench = tideGraph(zone, { ...story, triggers: [] }, [ROOM]);
       expect(reachableNodes(noBench, start).has(cliff(true))).toBe(false);
       expect(stuckNodes(graph, reached, lanternNodes(zone, [ROOM]))).toEqual([]);
+    },
+  );
+});
+
+describe('le parcours d’essai 13 « Marée » (D-97)', () => {
+  const source = LEVELS.find((l) => l.id === 'maree');
+  if (!source) {
+    throw new Error('parcours maree absent');
+  }
+  const course = parseAsciiLevel('maree', source.text);
+
+  it('a ce qui flotte et une trouvaille noyée à marée haute', () => {
+    expect(course.tide?.rises).toHaveLength(2);
+    const secrets = (level: LevelData) =>
+      level.entities.filter((e) => e.type === EntityType.Secret);
+    expect(secrets(course)).toHaveLength(1);
+    expect(secrets(highTide(course))).toHaveLength(0);
+  });
+
+  it(
+    'à marée haute (phase 3, toutes les capacités) : l’arrivée atteinte, jamais coincée',
+    { timeout: ANALYSIS_TIMEOUT_MS },
+    () => {
+      const high = highTide(course);
+      const a = seaAnalysis(high);
+      const next = new Map<number, number[]>();
+      const back = new Map<number, number[]>();
+      for (const m of a.moves) {
+        next.set(m.from, [...(next.get(m.from) ?? []), m.to]);
+        back.set(m.to, [...(back.get(m.to) ?? []), m.from]);
+      }
+      const walk = (from: number, edges: Map<number, number[]>) => {
+        const seen = new Set([from]);
+        const queue = [from];
+        for (let s = queue.shift(); s !== undefined; s = queue.shift()) {
+          for (const t of edges.get(s) ?? []) {
+            if (!seen.has(t)) {
+              seen.add(t);
+              queue.push(t);
+            }
+          }
+        }
+        return seen;
+      };
+      const start = standOn(high, high.spawn);
+      const goal = standOn(high, high.goal ?? high.spawn);
+      const reached = walk(start, next);
+      expect(reached.has(goal)).toBe(true);
+      const back2goal = walk(goal, back);
+      const back2start = walk(start, back);
+      const stuck = [...reached].filter((s) => !back2goal.has(s) && !back2start.has(s));
+      expect(stuck).toEqual([]);
     },
   );
 });

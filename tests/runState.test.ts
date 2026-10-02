@@ -220,3 +220,66 @@ describe('ennemis dispersés (D-56)', () => {
     expect(r.combat.enemies[0]?.dispersed).toBe(false);
   });
 });
+
+describe('l’eau ramène au dernier appui sec (D-97)', () => {
+  /** Une berge, l'eau, une autre berge : Céleste court vers l'eau depuis la gauche. */
+  const POOL = [
+    '##############',
+    '#............#',
+    '#.P..........#',
+    '#####~~~~#####',
+    '##############',
+  ];
+
+  function fall(world: Partial<WorldParams> = {}) {
+    const r = rig(POOL, world);
+    r.input.moveX = 1;
+    for (let i = 0; i < 400 && !r.run.splashing && !r.run.fainting; i++) {
+      r.player.step(r.input);
+      r.combat.step(r.player, false);
+      r.run.step(r.player.box, r.combat.events, r.player.grounded);
+    }
+    return r;
+  }
+
+  it('un éclaboussement : la peur monte d’un cran, puis retour au bord, le dernier appui retenu', () => {
+    const r = fall();
+    expect(r.run.splashing).toBe(true);
+    expect(r.run.events & RunEvent.Splashed).not.toBe(0);
+    expect(r.run.fear).toBe(1);
+    // Le dernier appui : au sol, près de l'eau, les deux pieds sur la berge.
+    const footing = r.run.footing;
+    expect(footing).not.toBeNull();
+    expect((footing?.x ?? 999) + PLAYER_HITBOX.width).toBeLessThanOrEqual(5 * 16 + 1);
+    expect(footing?.x ?? 0).toBeGreaterThan(3 * 16);
+    expect(footing?.y).toBe(3 * 16 - PLAYER_HITBOX.height);
+    const steps = msToSteps(DEFAULT_WORLD.splashMs);
+    let returned = 0;
+    for (let i = 0; i < steps; i++) {
+      r.run.stepSplashing();
+      returned |= r.run.events;
+    }
+    expect(returned & RunEvent.SplashReturn).not.toBe(0);
+    expect(r.run.splashing).toBe(false);
+    // La peur reste montée : ce n'est pas un évanouissement.
+    expect(r.run.fear).toBe(1);
+  });
+
+  it('au dernier cran, Céleste s’évanouit (retour à la lanterne)', () => {
+    const r = fall({ fearMax: 1 });
+    expect(r.run.splashing).toBe(false);
+    expect(r.run.fainting).toBe(true);
+    expect(r.run.faintCause).toBe(FaintCause.Fear);
+  });
+
+  it('l’eau ne pique pas comme les orties : aucun coup du combat', () => {
+    const r = fall();
+    expect(r.combat.events & CombatEvent.Hurt).toBe(0);
+  });
+
+  it('pas d’appui retenu en arrivant dans une salle ni après un évanouissement', () => {
+    const r = fall();
+    r.run.load(r.level, [], null);
+    expect(r.run.footing).toBeNull();
+  });
+});

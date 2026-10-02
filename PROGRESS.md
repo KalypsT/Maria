@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1a faite : le moteur de la marée et l'analyse** (D-96), sur `ccr-014503d9-cj0c7a`. Suite : **PR 1b**, l'eau qui ramène au dernier appui sec, son dessin et le parcours d'essai 13 « Marée », **à essayer sur téléphone avant de continuer**.
+**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1a faite : le moteur de la marée et l'analyse** (D-96) et **PR 1b faite : l'eau qui ramène au bord, son dessin, le parcours d'essai 13 « Marée »** (D-97), sur `ccr-014503d9-cj0c7a`. **Essai sur téléphone avant de continuer** (parcours 13). Suite : PR 2, l'arrivée (la gare de la mer ouverte, la promenade, le centre, la page « La mer »).
 
 **Le train** (niveau 5, D-83 à D-91) : complet et fusionné. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
@@ -18,6 +18,18 @@
 
 ## Fait
 
+### La station balnéaire, PR 1b : l'eau, le parcours 13 (D-97)
+
+- **L'eau ramène au bord** : une chute dans l'eau éclabousse, la peur monte d'un cran, Céleste reprend pied sur son dernier appui sec (les deux pieds au sol). Au dernier cran, elle s'évanouit (retour à la lanterne). L'eau ne pique plus comme les orties.
+- **Le dessin de l'eau** (PLACEHOLDER) : plus sombre en profondeur, une ligne de surface, des vaguelettes qui défilent.
+- **DEBUG** : case « Marée haute ».
+- **Parcours d'essai 13 « Marée »** : à marée basse, la flaque, la glissade sous la digue (une trouvaille noyée à marée haute), la cheminée en saut mural ; à marée haute, le ponton et le bateau montés, par le haut.
+- Tests : TESTCOUNT. Vérifié dans Chromium : la chute dans la flaque et le retour sur la berge ; le parcours aux deux marées.
+- [ ] À vérifier sur téléphone (menu pause → Parcours d'essai → « 13. Marée », puis DEBUG → « Marée haute ») : comprend-on la marée, ce qui flotte et ce qui est noyé ? Changer de marée dans le noir trouble-t-il ?
+- [ ] La chute dans l'eau : l'éclaboussement se lit-il ? Le retour au bord est-il assez rapide (`splashMs`, `reappearMs`) ? Juste, ou trop punitif avec la peur qui monte ?
+- [ ] L'eau elle-même : se lit-elle comme de l'eau (couleur, vaguelettes, `WATER_LIFE`) ? Les vaguelettes gênent-elles ?
+- [ ] La glissade sous la digue et la cheminée : faciles, comme annoncé ?
+
 ### La station balnéaire, PR 1a : le moteur de la marée (D-96)
 
 - **La marée** : une salle de marée existe en deux variantes statiques (basse, haute), réglées par le drapeau `sea.tide-high`. Données : `; @tide:`, `; @sea:`, `; @rise:` (ce qui flotte monte avec la marée, son décor et ses câbles aussi).
@@ -26,7 +38,7 @@
 - **Outils de test** : les tronçons `; @leg:` (difficulté exacte et capacités exigées d'un trajet, vérifiés pour toutes les salles) ; le graphe de la marée (un nœud par surface et par marée, les bancs passent de l'une à l'autre ; « jamais coincée »).
 - Aucune salle du jeu ne change : tout est essayé sur une salle d'essai des tests.
 - Tests : 643. Vérifié dans Chromium : la salle d'essai à marée basse puis haute (l'eau monte, le ponton flotte, la trouvaille du sable n'y est plus), Céleste à la même place.
-- [ ] Rien à essayer sur téléphone pour l'instant : le parcours d'essai 13 « Marée » viendra avec la PR 1b.
+- [ ] Rien à essayer sur téléphone de plus que le parcours d'essai 13 (PR 1b).
 
 ### Musique : retours d'écoute (D-94)
 
