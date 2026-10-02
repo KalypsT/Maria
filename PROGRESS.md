@@ -24,7 +24,7 @@ Suite du train : PR 6 la fin, la gare de la mer, la revisite du train et les rev
 - **Le souvenir de la cuisine** : Céleste toute petite, sa dînette rose ; elle remue la casserole, verse le thé, l'apporte à Roger, au panda roux et au lapin ; un cœur ; la petite cuisine reste seule. Sans texte, couleurs chaudes, la caméra plus près. Maria n'y est pas.
 - Il se joue **après la cuisine rose** (avant la couchette) et se **rejoue depuis le cahier** (toucher la cuisine rose, puis encore).
 - DEBUG : bouton « Jouer le souvenir de la cuisine ».
-- Tests : TESTCOUNT. Vérifié dans Chromium : de la cuisine rose au souvenir, puis la couchette ; depuis le debug, retour dans la salle de départ.
+- Tests : 613. Vérifié dans Chromium : de la cuisine rose au souvenir, puis la couchette ; depuis le debug, retour dans la salle de départ.
 - [ ] À vérifier sur téléphone (DEBUG → « Jouer le souvenir de la cuisine », ou la cuisine rose) : trouve-t-on quoi faire sans texte (l'étincelle, le bouton Agir) ?
 - [ ] Céleste toute petite : son pas (`TODDLER_LOOK`, × 0,55) trop lent ? Sa taille (corps × 0,78) se lit-elle comme « toute petite » ?
 - [ ] Les gestes (remuer, verser, poser) et la tasse tenue se comprennent-ils ? Durées (`PLAYABLE_MEMORY_TIMING`) : trop longues, trop courtes ?
