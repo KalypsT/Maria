@@ -863,6 +863,244 @@ export function gardenDrawers({ tileShape, rounded }: ShapeTools): Record<string
       ctx.stroke();
       ctx.restore();
     },
+    eave(a, r) {
+      // Avant-toit de la maison : tuiles de terre cuite (exactement sur la collision), gouttière.
+      const { ctx, level, palette: p } = a;
+      tileShape(a, r, p.silhouettes ? p.wood : '#a85a44', p.silhouettes ? p.wood : '#c97a5c');
+      if (p.silhouettes) {
+        return;
+      }
+      ctx.fillStyle = 'rgba(0,0,0,0.18)';
+      for (let row = r.y / T; row < (r.y + r.h) / T; row++) {
+        for (let col = r.x / T; col < (r.x + r.w) / T; col++) {
+          if (tileAt(level, col, row) !== Tile.Solid) {
+            continue;
+          }
+          for (let k = 0; k < 2; k++) {
+            ctx.beginPath();
+            ctx.arc(col * T + 4 + k * 8, row * T + 9, 4, 0, Math.PI);
+            ctx.fill();
+          }
+          if (tileAt(level, col, row + 1) !== Tile.Solid) {
+            // Gouttière en zinc, sous le bord.
+            ctx.fillStyle = '#9aa3ad';
+            rounded(ctx, { x: col * T, y: (row + 1) * T - 4, w: T, h: 4 }, [0, 0, 2, 2]);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(0,0,0,0.18)';
+          }
+        }
+      }
+    },
+    guinguette(a, r) {
+      // Le fil de la guirlande, sous la poutre de la pergola ; les ampoules sont animées.
+      const { ctx, palette: p } = a;
+      ctx.strokeStyle = p.silhouettes ? p.structure : 'rgba(60,50,45,0.7)';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      for (let k = 0; k <= 20; k++) {
+        const t = k / 20;
+        const x = r.x + t * r.w;
+        if (k === 0) {
+          ctx.moveTo(x, garlandY(r, t));
+        } else {
+          ctx.lineTo(x, garlandY(r, t));
+        }
+      }
+      ctx.stroke();
+      if (p.silhouettes) {
+        return;
+      }
+      ctx.fillStyle = '#3a3330';
+      for (const point of garlandPoints(r)) {
+        ctx.fillRect(point.x - 1, point.y - 3, 2, 2.5);
+      }
+    },
+    scarecrow(a, r) {
+      // Épouvantail planté dans le bac : un pieu, des bras en croix, une chemise à carreaux, une
+      // tête de toile cousue, un chapeau de paille (un peu inquiétant, jamais effrayant).
+      const { ctx, palette: p } = a;
+      const cx = r.x + r.w / 2;
+      const base = r.y + r.h;
+      const arms = r.y + 26;
+      ctx.fillStyle = p.silhouettes ? p.structure : '#7a5a40';
+      ctx.fillRect(cx - 1.5, r.y + 12, 3, base - r.y - 12);
+      ctx.fillRect(r.x + 4, arms, r.w - 8, 3);
+      if (p.silhouettes) {
+        return;
+      }
+      // Chemise.
+      ctx.fillStyle = '#b25b6e';
+      ctx.beginPath();
+      ctx.moveTo(r.x + 6, arms - 2);
+      ctx.lineTo(r.x + r.w - 6, arms - 2);
+      ctx.lineTo(r.x + r.w - 6, arms + 8);
+      ctx.lineTo(cx + 9, arms + 9);
+      ctx.lineTo(cx + 8, arms + 34);
+      ctx.lineTo(cx - 8, arms + 34);
+      ctx.lineTo(cx - 9, arms + 9);
+      ctx.lineTo(r.x + 6, arms + 8);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.18)';
+      for (let x = r.x + 9; x < r.x + r.w - 6; x += 6) {
+        ctx.fillRect(x, arms - 2, 1.5, 10);
+      }
+      ctx.fillRect(cx - 8, arms + 14, 16, 1.5);
+      ctx.fillRect(cx - 8, arms + 24, 16, 1.5);
+      // Paille aux manches.
+      ctx.fillStyle = '#e6c27a';
+      for (const side of [-1, 1]) {
+        const x = side < 0 ? r.x + 6 : r.x + r.w - 6;
+        for (let k = 0; k < 3; k++) {
+          ctx.fillRect(x + side * (1 + k), arms + 1 + k * 2.5, side * 4, 1);
+        }
+      }
+      // Tête de toile, yeux-boutons, bouche cousue.
+      ctx.fillStyle = '#d9c19a';
+      ctx.beginPath();
+      ctx.arc(cx, r.y + 18, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#3a3330';
+      ctx.fillRect(cx - 3.5, r.y + 16, 2, 2);
+      ctx.fillRect(cx + 1.5, r.y + 16, 2, 2);
+      ctx.fillRect(cx - 3, r.y + 21, 6, 0.8);
+      // Chapeau de paille.
+      ctx.fillStyle = '#e6c27a';
+      rounded(ctx, { x: cx - 11, y: r.y + 10, w: 22, h: 3 }, 1.5);
+      ctx.fill();
+      rounded(ctx, { x: cx - 6, y: r.y + 3, w: 12, h: 8 }, [4, 4, 0, 0]);
+      ctx.fill();
+      ctx.fillStyle = '#b25b6e';
+      ctx.fillRect(cx - 6, r.y + 8, 12, 2);
+    },
+    wheelbarrow(a, r) {
+      // Brouette posée au sol, la roue devant.
+      const { ctx, palette: p } = a;
+      const floor = r.y + r.h;
+      ctx.fillStyle = p.silhouettes ? p.structure : '#7f9aa8';
+      ctx.beginPath();
+      ctx.moveTo(r.x + 8, floor - 22);
+      ctx.lineTo(r.x + r.w - 4, floor - 22);
+      ctx.lineTo(r.x + r.w - 12, floor - 10);
+      ctx.lineTo(r.x + 14, floor - 10);
+      ctx.fill();
+      ctx.strokeStyle = p.silhouettes ? p.structure : '#6e4a32';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(r.x, floor - 16);
+      ctx.lineTo(r.x + r.w - 10, floor - 8);
+      ctx.moveTo(r.x + 16, floor - 10);
+      ctx.lineTo(r.x + 14, floor);
+      ctx.stroke();
+      ctx.fillStyle = p.silhouettes ? p.structure : '#3a3330';
+      ctx.beginPath();
+      ctx.arc(r.x + r.w - 8, floor - 5, 5, 0, Math.PI * 2);
+      ctx.fill();
+      if (!p.silhouettes) {
+        ctx.fillStyle = '#7a5a40';
+        rounded(ctx, { x: r.x + 12, y: floor - 27, w: 30, h: 7 }, 3);
+        ctx.fill();
+      }
+    },
+    barrel(a, r) {
+      // Tonneau de pluie sous la gouttière du voisin, cerclé de fer.
+      const { ctx, palette: p } = a;
+      const floor = r.y + r.h;
+      const body = { x: r.x + 4, y: r.y + 6, w: r.w - 8, h: floor - r.y - 6 };
+      ctx.fillStyle = p.silhouettes ? p.structure : '#8a6446';
+      rounded(ctx, body, 6);
+      ctx.fill();
+      if (p.silhouettes) {
+        return;
+      }
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      for (let x = body.x + 6; x < body.x + body.w - 2; x += 6) {
+        ctx.fillRect(x, body.y + 2, 1, body.h - 4);
+      }
+      ctx.fillStyle = '#5a5f66';
+      for (const y of [body.y + 6, body.y + body.h - 9]) {
+        ctx.fillRect(body.x - 1, y, body.w + 2, 2.5);
+      }
+      ctx.fillStyle = '#6f9ec2';
+      ctx.fillRect(body.x + 3, body.y + 1, body.w - 6, 2);
+    },
+    sunshaft(a, r) {
+      // Rayon de soleil par la trouée : un faisceau doré qui s'évase et s'efface vers le bas.
+      const { ctx, palette: p } = a;
+      if (p.silhouettes) {
+        return;
+      }
+      const g = ctx.createLinearGradient(0, r.y, 0, r.y + r.h);
+      g.addColorStop(0, 'rgba(255,244,200,0.34)');
+      g.addColorStop(0.6, 'rgba(255,240,190,0.14)');
+      g.addColorStop(1, 'rgba(255,240,190,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.moveTo(r.x + r.w * 0.3, r.y);
+      ctx.lineTo(r.x + r.w * 0.75, r.y);
+      ctx.lineTo(r.x + r.w, r.y + r.h);
+      ctx.lineTo(r.x, r.y + r.h);
+      ctx.closePath();
+      ctx.fill();
+    },
+    swing() {
+      // Animée (WorldLifeView) : cordes et planche dessinées d'avance.
+    },
+    drawings(a, r) {
+      // Dessins de Céleste punaisés au mur de la cabane : un soleil, une maison, une fleur.
+      const { ctx, palette: p } = a;
+      if (p.silhouettes) {
+        return;
+      }
+      const sheets: readonly [number, number, number][] = [
+        [0, 4, -0.08],
+        [r.w / 3 + 2, 0, 0.06],
+        [(2 * r.w) / 3 + 2, 6, -0.04],
+      ];
+      sheets.forEach(([dx, dy, angle], i) => {
+        ctx.save();
+        ctx.translate(r.x + dx + 13, r.y + dy + 11);
+        ctx.rotate(angle);
+        ctx.fillStyle = p.linen;
+        ctx.fillRect(-12, -10, 24, 20);
+        ctx.strokeStyle = ['#f2c14e', '#d9788f', '#7fa37a'][i] ?? '#d9788f';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        if (i === 0) {
+          ctx.arc(0, 0, 4, 0, Math.PI * 2);
+          for (let k = 0; k < 8; k++) {
+            const t = (k * Math.PI) / 4;
+            ctx.moveTo(Math.cos(t) * 6, Math.sin(t) * 6);
+            ctx.lineTo(Math.cos(t) * 8, Math.sin(t) * 8);
+          }
+        } else if (i === 1) {
+          ctx.rect(-5, -1, 10, 7);
+          ctx.moveTo(-7, -1);
+          ctx.lineTo(0, -7);
+          ctx.lineTo(7, -1);
+        } else {
+          ctx.moveTo(0, 8);
+          ctx.lineTo(0, -1);
+          ctx.arc(0, -4, 3, 0, Math.PI * 2);
+        }
+        ctx.stroke();
+        ctx.fillStyle = '#e0598b';
+        ctx.beginPath();
+        ctx.arc(0, -9, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    },
+    weathervane(a, r) {
+      // Girouette sur la remise : le mât et la croix des points cardinaux ; le coq tourne (animé).
+      const { ctx, palette: p } = a;
+      const cx = r.x + r.w / 2;
+      ctx.fillStyle = p.silhouettes ? p.structure : '#3a3330';
+      ctx.fillRect(cx - 0.8, r.y + 8, 1.6, r.h - 8);
+      ctx.fillRect(cx - 6, r.y + r.h - 12, 12, 1.2);
+      ctx.beginPath();
+      ctx.arc(cx, r.y + 8, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+    },
     cushions(a, r) {
       const { ctx } = a;
       const colors = ['#e58fa6', '#8fb8e5', '#f2c14e'];
@@ -873,4 +1111,28 @@ export function gardenDrawers({ tileShape, rounded }: ShapeTools): Record<string
       });
     },
   };
+}
+
+/**
+ * Ampoules de la guirlande de guinguette (D-76) : le long d'un fil qui pend un peu, d'un bout à
+ * l'autre du rectangle (px logiques). Partagé par le dessin (le fil) et l'animation (les ampoules).
+ */
+export function garlandPoints(r: Rect): { x: number; y: number }[] {
+  const points: { x: number; y: number }[] = [];
+  const count = Math.max(3, Math.floor(r.w / 20));
+  for (let i = 0; i < count; i++) {
+    const t = (i + 0.5) / count;
+    points.push({ x: r.x + t * r.w, y: garlandY(r, t) + 3 });
+  }
+  return points;
+}
+
+/** Hauteur du fil de la guirlande à la fraction `t` de sa longueur. */
+function garlandY(r: Rect, t: number): number {
+  return r.y + T + 3 + 4 * 4 * t * (1 - t);
+}
+
+/** Pivot (haut des cordes) et longueur des cordes d'une balançoire (px logiques). */
+export function swingPivot(r: Rect): { x: number; y: number; length: number } {
+  return { x: r.x + r.w / 2, y: r.y, length: r.h - 10 };
 }

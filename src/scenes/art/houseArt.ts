@@ -137,7 +137,8 @@ export function houseDrawers({ tileShape, rounded }: ShapeTools): Record<string,
       ctx.closePath();
       ctx.save();
       ctx.clip();
-      ctx.fillStyle = p.structure;
+      // Une salle aux murs de bois (la cabane, `@walls`, D-76) : un toit de planches, pas d'ardoise.
+      ctx.fillStyle = level.meta.walls && !p.silhouettes ? p.woodDark : p.structure;
       ctx.fillRect(r.x, r.y, r.w, r.h);
       if (!p.silhouettes) {
         ctx.fillStyle = 'rgba(255,230,190,0.06)';

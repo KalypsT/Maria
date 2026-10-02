@@ -2,11 +2,14 @@
 ; Raccourci qui boucle le jardin ; la cheminée entre la remise et le mur demande le saut mural.
 ; Au fond de cette cheminée, un passage sous le vieux mur mène au portillon (sortie 3, la rue, D-60) :
 ; il s'ouvre en tirant la chevillette, pendue haut dans la cheminée (saut mural), après le bonnet.
+; Refaite (D-76) : feuillage irrégulier, du ciel au-dessus de la clôture ; une girouette sur la remise.
 ; @name: Allée
 ; @icon: fence
 ; @world: garden
 ; @difficulty: medium
 ; @decor: canopy 0 0 56 1
+; @decor: canopy 16 1 2 1
+; @decor: canopy 48 1 7 2
 ; @decor: hedge 0 1 1 5
 ; @decor: hedge 0 9 1 15
 ; @decor: hedge 55 1 1 9
@@ -18,10 +21,11 @@
 ; @decor: shed 18 5 12 19
 ; @decor: fence 1 9 12 15
 ; @decor: sun 6 2 3 3
+; @decor: weathervane 27 1 2 4
 ; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
-vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-v.......................a.........vv...................v
-v.................................vv...................v
+v.............vvvvvvvvvvvvvvvvvv......vvvvvvvvvvvvvvvvvv
+v...............vv......a.........vv............vvvvvvvv
+v.................................vv...............vvvvv
 v.................................vv...................v
 v.................................vv...................v
 v.................bbbbbbbbbbbb....vv...................v

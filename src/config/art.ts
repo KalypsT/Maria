@@ -166,6 +166,27 @@ export const DECOR_KINDS: Readonly<
   atticbeam: { furniture: true },
   /** Entrait sous le faîte (plein), tenu au toit par un poinçon et une jambe de force. */
   collartie: { furniture: true },
+  // Le jardin refait (D-76).
+  /** Avant-toit et gouttière de la maison (plein), en haut de la terrasse. */
+  eave: { furniture: true },
+  /** Guirlande de guinguette sous la pergola : le fil ; les ampoules se balancent (animées). */
+  guinguette: { furniture: false },
+  /** Papillons (animés, rien de dessiné dans le décor). */
+  butterfly: { furniture: false },
+  /** Épouvantail planté dans un bac (fond : on passe devant). */
+  scarecrow: { furniture: false },
+  /** Brouette posée au sol (fond). */
+  wheelbarrow: { furniture: false },
+  /** Tonneau de pluie (fond). */
+  barrel: { furniture: false },
+  /** Rayon de soleil qui descend d'une trouée du feuillage (fond). */
+  sunshaft: { furniture: false },
+  /** Balançoire pendue à une branche (fond, animée : elle oscille au vent). */
+  swing: { furniture: false },
+  /** Dessins de Céleste punaisés au mur (fond). */
+  drawings: { furniture: false },
+  /** Girouette sur un toit (fond, animée : elle tourne au vent). */
+  weathervane: { furniture: false },
   // Le jardin (D-46), dessiné par le code (PLACEHOLDER, pas d'image clé pour l'instant).
   /** Frondaison des arbres en haut des salles (feuillage plein). */
   canopy: { furniture: true },
@@ -781,6 +802,12 @@ export const WORLD_LIFE = {
   steam: { count: 6, risePxPerS: 9, alpha: 0.32 },
   /** Linge dans le hublot de la machine (D-75) : un tour du tambour (ms). */
   drum: { periodMs: 2600 },
+  /** Balançoire du grand arbre (D-76) : angle maximal par vent fort (radians), aller-retour (ms). */
+  swing: { swayRad: 0.1, periodMs: 3000 },
+  /** Papillons (D-76) : nombre, un tour de leur boucle (ms), battement d'ailes (ms). */
+  butterfly: { count: 2, periodMs: 9000, flapMs: 140 },
+  /** Ampoules de la guirlande (D-76) : balancement (px par vent fort). */
+  garland: { swayPx: 2.5 },
 } as const;
 
 /** Rayon du halo d'une veilleuse (px logiques). */

@@ -903,6 +903,21 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Vérifié par les tests** : la maison reste facile et ne coince jamais (avec et sans escalade), les endroits d'escalade restent hors d'atteinte sans grimper, la trouvaille du couloir attend la phase 2 (moyenne), le soir de la chambre se joue sans grimper ; la trouvaille du grenier reste moyenne (ni facile, ni hors d'atteinte), celles de la cuisine et de la buanderie restent au même niveau.
 - **Sauvegarde** : aucune migration.
 
+## D-76 — Le jardin refait d'après la grille du salon (passe graphique)
+
+- **Plan validé** par l'utilisateur, sur la même branche que la maison (D-75), avec les choix par défaut proposés : la balançoire et l'épouvantail sont du **décor sans collision** (en faire des appuis changerait la difficulté du chemin jusqu'au saut mural, qui doit rester « moyen exactement ») ; **pas de nouvelle trouvaille**.
+- **Diagnostic** : le jardin tenait déjà au sol (D-50) ; ses défauts étaient des salles en boîte (un bandeau de feuillage plein, comme un plafond vert, en haut de chaque salle dehors), peu de repères hors du grand arbre, une lumière plate et peu de vie propre à chaque salle.
+- **Ce qui ne bouge pas** : sorties, trouvailles (jardinière, haut des tuteurs, nichoir, coffre de la cabane), lanternes, araignées (toujours pendues sous un feuillage), câble de la terrasse, zones et objets de l'histoire. **Aucune sauvegarde touchée.**
+- **Terrasse** : ciel ouvert entre l'**avant-toit de la maison** (tuiles, gouttière) et la **couronne de l'arbre du voisin** ; une **guirlande de guinguette** sous la pergola, dont les ampoules se balancent au vent ; des papillons.
+- **Potager** : ciel ouvert, deux couronnes dans les coins ; un **épouvantail** planté dans le dernier bac (repère, un peu inquiétant) ; une brouette et un tonneau au fond ; des papillons autour des haricots.
+- **Grand arbre** : une **trouée dans la couronne**, d'où descend un **rayon de soleil** plein de poussière dorée ; une **balançoire** pendue à la branche du bas, qui oscille au vent (9 inclinaisons dessinées d'avance).
+- **Cabane** : un **toit en appentis** (en planches), une lanterne pendue, les **dessins de Céleste** punaisés au mur (soleil, maison, fleur), la poussière dans le rayon de la fenêtre.
+- **Allée** : feuillage du haut irrégulier, du ciel au-dessus de la clôture et de la haie ; une **girouette** sur la remise, qui tourne au vent.
+- **Derrière la haie** (lisibilité seulement) : les épines des ronces sont plus grandes (elles se lisaient comme de l'herbe). Rien d'autre.
+- **Rendu** : dessins dans `gardenArt.ts` ; animations dans `WorldLifeView` (réglages `WORLD_LIFE.swing`, `butterfly`, `garland`). La mansarde de D-75 sert aussi au toit de la cabane (en bois dans une salle aux murs de bois).
+- **Vérifié par les tests** : la porte de derrière reste fermée avant la croissance ; le chemin jusqu'au saut mural reste moyen exactement ; le vieux mur et l'allée seulement avec le saut mural ; la boucle de l'allée ; ne coince jamais ; trouvailles du potager, de la cabane, de la terrasse (crochet) et du nichoir (parapluie) au même niveau ; le trou de la haie et la fin du monde étrange inchangés.
+- **Sauvegarde** : aucune migration.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
