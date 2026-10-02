@@ -5,6 +5,10 @@ import { FeelEvent } from '../core/player/playerFeel';
 
 const DUST_TEXTURE = 'dust-placeholder';
 const DUST_COLOR = 0xcfc8e0;
+/** Gouttes d'un éclaboussement (D-97), PLACEHOLDER. */
+const SPLASH_COLOR = 0xbfe6ec;
+const SPLASH_DROPS = 8;
+const SPLASH_SPEED = 90;
 
 interface Particle {
   image: Phaser.GameObjects.Image;
@@ -81,7 +85,31 @@ export class DustPool {
       particle.vx = Math.cos(angle) * speed;
       particle.vy = Math.sin(angle) * speed;
       particle.forced = true;
-      particle.image.setVisible(true).setPosition(cx, cy).setAlpha(1).setScale(1);
+      particle.image.setVisible(true).setPosition(cx, cy).setAlpha(1).setScale(1).clearTint();
+    }
+  }
+
+  /** Éclaboussement (D-97) : des gouttes en gerbe, aux pieds de la hitbox, toujours affichées. */
+  splash(box: Box): void {
+    const cx = box.x + box.width / 2;
+    const cy = box.y + box.height;
+    for (let i = 0; i < SPLASH_DROPS; i++) {
+      // Une gerbe vers le haut, de -70° à +70° autour de la verticale.
+      const angle = -Math.PI / 2 + ((i / (SPLASH_DROPS - 1)) * 2 - 1) * 1.2;
+      const speed = SPLASH_SPEED * (0.6 + 0.4 * ((i * 7) % 5) * 0.25);
+      const particle = this.take();
+      particle.bornMs = this.scene.time.now;
+      particle.x = cx;
+      particle.y = cy;
+      particle.vx = Math.cos(angle) * speed;
+      particle.vy = Math.sin(angle) * speed;
+      particle.forced = true;
+      particle.image
+        .setVisible(true)
+        .setPosition(cx, cy)
+        .setAlpha(1)
+        .setScale(1)
+        .setTint(SPLASH_COLOR);
     }
   }
 
@@ -126,6 +154,11 @@ export class DustPool {
     particle.y = box.y + box.height - 1;
     particle.vx = vx;
     particle.vy = -this.params.dustSpeed * lift;
-    particle.image.setVisible(true).setPosition(particle.x, particle.y).setAlpha(1).setScale(1);
+    particle.image
+      .setVisible(true)
+      .setPosition(particle.x, particle.y)
+      .setAlpha(1)
+      .setScale(1)
+      .clearTint();
   }
 }

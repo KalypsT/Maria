@@ -774,6 +774,21 @@ export function installDebugOverlay(scene: GameScene): void {
       scene.setStoryFlags([...flags]);
     },
   );
+  // La marée (D-95) : la salle de marée change aussitôt, Céleste reste où elle est.
+  addCheck(
+    panel,
+    'Marée haute (la station balnéaire)',
+    scene.story.flags.has(F.TideHigh),
+    (checked) => {
+      const flags = new Set(scene.story.flags);
+      if (checked) {
+        flags.add(F.TideHigh);
+      } else {
+        flags.delete(F.TideHigh);
+      }
+      scene.setStoryFlags([...flags]);
+    },
+  );
   // Déblocage des capacités (D-26) : pour la partie en cours seulement, sans sauvegarde.
   addCheck(panel, 'Capacité : grimper aux rebords', scene.debugClimb, (checked) => {
     scene.debugClimb = checked;

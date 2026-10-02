@@ -21,6 +21,8 @@ import {
 export interface StoryHost {
   /** Étape vécue : à sauvegarder aussitôt. */
   flagSet(id: string): void;
+  /** Étape réversible retirée (la marée, D-95) : à sauvegarder aussitôt. */
+  flagCleared?(id: string): void;
   place(col: number, row: number, facing: 1 | -1): void;
   /** Céleste passe dans la salle `room` (dans le noir) ; le script continue. */
   room(room: string, col: number, row: number, facing: 1 | -1, returnPoint: boolean): void;
@@ -295,6 +297,14 @@ export class StoryDirector {
     switch (step.do) {
       case 'flag':
         if (!this.flags.has(step.id)) {
+          this.flags.add(step.id);
+          this.host.flagSet(step.id);
+        }
+        break;
+      case 'toggle':
+        if (this.flags.delete(step.id)) {
+          this.host.flagCleared?.(step.id);
+        } else {
           this.flags.add(step.id);
           this.host.flagSet(step.id);
         }

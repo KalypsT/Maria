@@ -44,6 +44,8 @@ export const PLACEHOLDER_COLORS = {
   solidEdge: 0x6f6356,
   /** Planches traversables. */
   oneWay: 0xa08563,
+  /** L'eau (D-95). */
+  water: 0x34708a,
   /** Meubles en bois (lit, table, chaise, étagère). */
   wood: 0x7d5f45,
   woodEdge: 0x9d7a58,

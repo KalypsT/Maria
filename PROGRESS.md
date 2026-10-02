@@ -2,11 +2,11 @@
 
 ## Phase en cours
 
-**Le train** (niveau 5, D-82, D-83) : plan validé en 6 PR. **PR 1 faite : la glissade** (D-84, fusionnée). **PR 2 faite : le départ et la voiture-couchettes** (D-85, fusionnée). **PR 3 faite : le reste du train réel** (D-86, fusionnée). **PR 4 faite : la poursuite horizontale** (D-87, fusionnée). **PR 5 faite : le monde étrange, la cuisine rose et le souvenir jouable** (D-88, D-89, fusionnée). **PR 6a faite : le matin, la gare de la mer, le train à quai** (D-90) et **PR 6b faite : les revisites avec la glissade** (D-91), sur `ccr-6ca08fb4-rwfcx0`. **Le niveau 5 (le train) est complet** ; le niveau 6 (la station balnéaire) reste à concevoir (D-82). La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
+**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1a faite : le moteur de la marée et l'analyse** (D-96) et **PR 1b faite : l'eau qui ramène au bord, son dessin, le parcours d'essai 13 « Marée »** (D-97), sur `ccr-014503d9-cj0c7a`. **Essai sur téléphone avant de continuer** (parcours 13). Suite : PR 2, l'arrivée (la gare de la mer ouverte, la promenade, le centre, la page « La mer »).
 
-Suite : le niveau 6 (la station balnéaire), à planifier le moment venu.
+**Le train** (niveau 5, D-83 à D-91) : complet et fusionné. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
-**Structure de la fin du jeu** (D-82) : 8 niveaux (maison, jardin, quartier, gare, train, station balnéaire, avant-dernier, monde de Maria). Niveau 6 et niveau 7 : pistes retenues, détails décidés le moment venu.
+**Structure de la fin du jeu** (D-82) : 8 niveaux (maison, jardin, quartier, gare, train, station balnéaire, avant-dernier, monde de Maria). Niveau 6 : plan validé (D-95). Niveau 7 : piste retenue (presque entièrement étrange), détails décidés le moment venu ; la phase 4 de croissance viendra avec lui.
 
 **Passe graphique** (D-71 à D-81) : terminée, tout le monde réel est refait d'après la grille du salon. L'étape 4 (identifiants fixes des trouvailles et lanternes) est écartée jusqu'à la sortie (**à reprendre avant de diffuser le jeu**, pilier 10).
 
@@ -17,6 +17,28 @@ Suite : le niveau 6 (la station balnéaire), à planifier le moment venu.
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### La station balnéaire, PR 1b : l'eau, le parcours 13 (D-97)
+
+- **L'eau ramène au bord** : une chute dans l'eau éclabousse, la peur monte d'un cran, Céleste reprend pied sur son dernier appui sec (les deux pieds au sol). Au dernier cran, elle s'évanouit (retour à la lanterne). L'eau ne pique plus comme les orties.
+- **Le dessin de l'eau** (PLACEHOLDER) : plus sombre en profondeur, une ligne de surface, des vaguelettes qui défilent.
+- **DEBUG** : case « Marée haute ».
+- **Parcours d'essai 13 « Marée »** : à marée basse, la flaque, la glissade sous la digue (une trouvaille noyée à marée haute), la cheminée en saut mural ; à marée haute, le ponton et le bateau montés, par le haut.
+- Tests : 653. Vérifié dans Chromium : la chute dans la flaque et le retour sur la berge ; le parcours aux deux marées.
+- [ ] À vérifier sur téléphone (menu pause → Parcours d'essai → « 13. Marée », puis DEBUG → « Marée haute ») : comprend-on la marée, ce qui flotte et ce qui est noyé ? Changer de marée dans le noir trouble-t-il ?
+- [ ] La chute dans l'eau : l'éclaboussement se lit-il ? Le retour au bord est-il assez rapide (`splashMs`, `reappearMs`) ? Juste, ou trop punitif avec la peur qui monte ?
+- [ ] L'eau elle-même : se lit-elle comme de l'eau (couleur, vaguelettes, `WATER_LIFE`) ? Les vaguelettes gênent-elles ?
+- [ ] La glissade sous la digue et la cheminée : faciles, comme annoncé ?
+
+### La station balnéaire, PR 1a : le moteur de la marée (D-96)
+
+- **La marée** : une salle de marée existe en deux variantes statiques (basse, haute), réglées par le drapeau `sea.tide-high`. Données : `; @tide:`, `; @sea:`, `; @rise:` (ce qui flotte monte avec la marée, son décor et ses câbles aussi).
+- **L'eau** : nouvelle tuile (`~`), jamais un sol, évitée par l'analyse. Provisoire : elle pique comme les orties jusqu'à la PR 1b (retour au dernier appui sec). Dessin PLACEHOLDER.
+- **L'histoire** : étape réversible `toggle` (le banc des marées), seulement dans le noir ; la sauvegarde sait retirer ce drapeau, sans migration. La salle change sous Céleste dans le noir, elle garde sa place.
+- **Outils de test** : les tronçons `; @leg:` (difficulté exacte et capacités exigées d'un trajet, vérifiés pour toutes les salles) ; le graphe de la marée (un nœud par surface et par marée, les bancs passent de l'une à l'autre ; « jamais coincée »).
+- Aucune salle du jeu ne change : tout est essayé sur une salle d'essai des tests.
+- Tests : 643. Vérifié dans Chromium : la salle d'essai à marée basse puis haute (l'eau monte, le ponton flotte, la trouvaille du sable n'y est plus), Céleste à la même place.
+- [ ] Rien à essayer sur téléphone de plus que le parcours d'essai 13 (PR 1b).
 
 ### Musique : retours d'écoute (D-94)
 

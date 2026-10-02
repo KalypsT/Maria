@@ -89,6 +89,11 @@ export type StoryStep =
   /** Étape vécue, sauvegardée aussitôt. */
   | { readonly do: 'flag'; readonly id: string }
   /**
+   * Étape réversible (la marée, D-95), sauvegardée aussitôt : posée si elle ne l'est pas, retirée
+   * sinon. Seulement dans le noir (la salle change à ce moment).
+   */
+  | { readonly do: 'toggle'; readonly id: string }
+  /**
    * Bulle de pensée (non bloquante), au-dessus de Céleste, ou d'un personnage de la salle (`by` :
    * identifiant de l'objet de mise en scène, un parent par exemple, D-37).
    */

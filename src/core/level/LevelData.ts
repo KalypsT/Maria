@@ -13,6 +13,11 @@ export const Tile = {
   Hazard: 3,
   /** Ronces du monde étrange (D-51) : non solides, dessinées à part ; piquent comme les orties (D-56). */
   Thorns: 4,
+  /**
+   * Eau (la mer, une flaque, D-95) : non solide. Céleste n'y entre jamais : l'analyse de faisabilité
+   * l'évite comme un danger, et rien ne se tient dessous.
+   */
+  Water: 5,
 } as const;
 export type Tile = (typeof Tile)[keyof typeof Tile];
 
@@ -47,6 +52,55 @@ export interface LevelData {
   readonly trains: readonly LevelTrain[];
   /** Poursuite (boss, D-67, D-87), déclarée par `; @chase:` ; null sinon. */
   readonly chase: LevelChase | null;
+  /**
+   * Marée (D-95), déclarée par `; @tide:` : la salle telle quelle est à marée basse ; sa variante à
+   * marée haute est construite par `highTide`. Null sans marée.
+   */
+  readonly tide: LevelTide | null;
+  /** Tronçons dont la difficulté est vérifiée par les tests (`; @leg:`, D-96). */
+  readonly legs: readonly LevelLeg[];
+}
+
+/** Rectangle en tuiles (coin haut gauche, largeur, hauteur). */
+export interface TileRect {
+  readonly col: number;
+  readonly row: number;
+  readonly width: number;
+  readonly height: number;
+}
+
+/**
+ * Marée d'une salle (D-95). L'eau remplit les tuiles vides des zones de mer à partir de la ligne
+ * `lowRow` (marée basse) ou `highRow` (marée haute, plus haut). Ce qui flotte (bateaux, pontons)
+ * est dans une zone `rises` : tout son contenu monte de `lowRow - highRow` lignes à marée haute.
+ */
+export interface LevelTide {
+  /** Première ligne d'eau à marée basse (la hauteur de la salle : pas d'eau). */
+  readonly lowRow: number;
+  /** Première ligne d'eau à marée haute (`highRow <= lowRow`). */
+  readonly highRow: number;
+  readonly seas: readonly TileRect[];
+  readonly rises: readonly TileRect[];
+  /** Tuiles et matériaux tels que dessinés, sans eau (la variante haute en part). */
+  readonly rawTiles: Uint8Array;
+  readonly rawMaterials: Uint8Array;
+  /** Cette salle est la variante à marée haute. */
+  readonly high: boolean;
+}
+
+/** Marée d'un tronçon (`; @leg:`), basse par défaut (sans effet dans une salle sans marée). */
+export type LegTide = 'low' | 'high';
+
+/**
+ * Tronçon d'une salle (D-96) : d'une tuile à une autre (les pieds au bas de la tuile, comme `P`),
+ * de difficulté exacte, impossible sans chacune des capacités `needs`, à une marée.
+ */
+export interface LevelLeg {
+  readonly from: TilePos;
+  readonly to: TilePos;
+  readonly difficulty: 'easy' | 'medium' | 'hard';
+  readonly needs: readonly string[];
+  readonly tide: LegTide;
 }
 
 /** Sens d'une poursuite : vers le haut (D-67), vers la droite ou vers la gauche (D-87). */

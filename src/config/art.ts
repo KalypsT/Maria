@@ -1043,6 +1043,34 @@ export const WORLD_LIFE = {
 } as const;
 
 /** Rayon du halo d'une veilleuse (px logiques). */
+/**
+ * L'eau (D-95, D-97), PLACEHOLDER : un bleu-vert qui fonce avec la profondeur (`deepRows` lignes
+ * jusqu'au plus sombre), la ligne de surface plus claire. En silhouettes (monde étrange), plus
+ * sombre, l'écume turquoise.
+ */
+export const WATER_COLORS = {
+  body: [70, 140, 160] as const,
+  deep: [28, 70, 98] as const,
+  strangeBody: [26, 54, 74] as const,
+  strangeDeep: [10, 22, 36] as const,
+  alpha: 0.86,
+  deepRows: 5,
+  surface: 'rgba(190,232,236,0.9)',
+  strangeSurface: 'rgba(110,230,215,0.8)',
+} as const;
+
+/** La surface animée de l'eau (D-97, `WaterView`) : vaguelettes qui défilent. PROVISOIRE. */
+export const WATER_LIFE = {
+  /** Motif répété (px) et hauteur de la bande (px). */
+  periodPx: 32,
+  heightPx: 6,
+  speedPxPerS: 9,
+  crest: 0xe2f4f2,
+  foam: 0xffffff,
+  strangeCrest: 0x7fe9da,
+  strangeFoam: 0xc8fff6,
+} as const;
+
 export const LAMP_LIGHT_RADIUS = 110;
 /** Rayon de la lumière de la lune autour d'une fenêtre (px logiques). */
 export const MOON_LIGHT_RADIUS = 90;

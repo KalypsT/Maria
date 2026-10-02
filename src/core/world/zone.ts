@@ -2,6 +2,7 @@ import { TILE_SIZE as T } from '../../config/display';
 import { DOOR_REACH_TILES } from '../../config/world';
 import { Tile, tileAt, type LevelData, type LevelDoor, type LevelExit } from '../level/LevelData';
 import { parseAsciiLevel } from '../level/parseAsciiLevel';
+import { highTide } from '../level/tide';
 import type { Box } from '../physics/gridCollision';
 
 /** Salle d'une zone, avant analyse : identifiant et carte ASCII (D-06). */
@@ -131,7 +132,13 @@ export function buildZone(source: ZoneSource): Zone {
       table.set(key(ref), other);
     }
   }
-  for (const [roomId, level] of rooms) {
+  // Une salle de marée (D-95) : on doit arriver debout aux deux marées.
+  const variants = [...rooms].flatMap(([roomId, level]) =>
+    level.tide
+      ? [[roomId, level] as const, [roomId, highTide(level)] as const]
+      : [[roomId, level] as const],
+  );
+  for (const [roomId, level] of variants) {
     for (const exit of level.exits) {
       const ref = { room: roomId, exit: exit.id };
       if (!table.has(key(ref))) {

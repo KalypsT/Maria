@@ -15,7 +15,7 @@ import {
 import { TILE_SIZE } from '../../config/display';
 import { PHYSICS_STEP_HZ, msToSteps } from '../../config/movement';
 import { EntityType, Tile, tileAt, type LevelData } from '../level/LevelData';
-import { touchesHazard, type Box } from '../physics/gridCollision';
+import { touchesSting, type Box } from '../physics/gridCollision';
 import type { PlayerPhysics } from '../player/PlayerPhysics';
 import { Chase } from '../boss/Chase';
 import { PlayerAttack } from './PlayerAttack';
@@ -407,7 +407,7 @@ export class CombatWorld {
     // propre délai, plus court que l'invulnérabilité : rester dedans pique encore.
     if (this.stingSteps > 0) {
       this.stingSteps--;
-    } else if (touchesHazard(this.level, player.box)) {
+    } else if (touchesSting(this.level, player.box)) {
       const forward = player.vx > 0 ? 1 : player.vx < 0 ? -1 : player.facing;
       player.vx = forward * this.params.hurtKnockbackX;
       player.vy = -this.params.stingBounceY;
