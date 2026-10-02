@@ -121,6 +121,11 @@ export class StoryDirector {
     return this.lockOf(room, exit)?.speaker ?? null;
   }
 
+  /** Porte fermée qu'on ne montre pas comme une porte (D-90). */
+  doorHidden(room: string, door: number): boolean {
+    return this.lockOf(room, door)?.hidden === true;
+  }
+
   /** Bulle d'une sortie fermée. */
   lockIcon(room: string, exit?: number): ThoughtIcon {
     return this.lockOf(room, exit)?.icon ?? 'bed';

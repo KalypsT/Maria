@@ -87,6 +87,7 @@ import {
   MEMORY_PALETTE,
   STREET_DUSK_PALETTE,
   STREET_PALETTE,
+  TRAIN_DAY_PALETTE,
   TRAIN_NIGHT_PALETTE,
   MAX_ART_SCALE,
   REAL_PALETTE,
@@ -630,7 +631,8 @@ export class GameScene extends Phaser.Scene {
       // Histoire (D-31) : près de ce qu'on peut faire, Action devient Agir. Une porte de façade
       // (D-61) s'ouvre aussi avec Agir, si aucun déclencheur de l'histoire n'est à portée.
       const story = this.story;
-      const door = this.zone && !story.busy ? doorAt(this.level, this.player.box) : 0;
+      const seen = this.zone && !story.busy ? doorAt(this.level, this.player.box) : 0;
+      const door = seen !== 0 && story.doorHidden(this.level.id, seen) ? 0 : seen;
       const near = story.interactable >= 0 || door !== 0;
       const interact = this.controls.consumePressed('Interact');
       const action = this.controls.consumePressed('Attack');
@@ -1522,8 +1524,8 @@ export class GameScene extends Phaser.Scene {
       return GARDEN_PALETTE;
     }
     if (this.level.meta.vehicle === 'train' && this.level.meta.outdoor) {
-      // Le toit du train (D-86) : dehors, la nuit.
-      return TRAIN_NIGHT_PALETTE;
+      // Le toit du train (D-86) : dehors, la nuit ; de jour à quai (D-90), un ciel clair.
+      return this.story.timeOfDay() === 'morning' ? TRAIN_DAY_PALETTE : TRAIN_NIGHT_PALETTE;
     }
     if (isStreetRoom(this.level) && this.level.meta.indoor) {
       // Un lieu fermé du quartier (la supérette, D-63) : dedans, de jour, ses propres murs. La nuit
@@ -1569,6 +1571,8 @@ export class GameScene extends Phaser.Scene {
     view.y = camera.y - view.height / 2;
     const story = this.story;
     const veil = Math.max(story.veil, this.transition.veil);
+    // Le train arrêté (D-90) : ni tunnel ni valise qui tombe.
+    this.combat.still = this.level.meta.vehicle === 'train' && !story.moving(this.level.id);
     const memory = this.memoryPlay;
     if (this.props.update(memory ? memory.flags : story.flags, view, veil)) {
       this.storyView.refresh();

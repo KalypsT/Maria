@@ -91,6 +91,11 @@ export class CombatWorld {
   private trainGusted = -1;
   /** Pas écoulés depuis le chargement ou la réapparition (tunnels, valises, D-86). */
   hazardSteps = 0;
+  /**
+   * Le train est arrêté (à quai, de jour, D-90) : ni tunnel ni valise qui tombe ; les valises
+   * restent sur leurs filets. Posé par la scène selon l'histoire.
+   */
+  still = false;
   /** Le tunnel en cours a déjà repoussé Céleste (une fois par tunnel). */
   private tunnelHit = false;
   /** Ligne du toit sous les tunnels (`; @tunnel:`), -1 sans tunnel. */
@@ -372,8 +377,13 @@ export class CombatWorld {
     for (const enemy of enemies) {
       enemy.step(this.level, tuning);
     }
-    this.hazardSteps++;
-    if (this.stepTrains(player) || this.stepTunnel(player) || this.stepLuggage(player)) {
+    if (!this.still) {
+      this.hazardSteps++;
+    }
+    if (
+      this.stepTrains(player) ||
+      (!this.still && (this.stepTunnel(player) || this.stepLuggage(player)))
+    ) {
       return;
     }
     // Poursuite (D-67, D-87) : le toucher fait rebondir Céleste vers le haut, ou la pousse en avant

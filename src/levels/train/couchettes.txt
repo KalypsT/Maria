@@ -12,6 +12,7 @@
 ; @wall: planks
 ; @walls: #e9dfc8 #b48d68
 ; @difficulty: easy
+; @door: 2 5 18
 ; @note: la grille (colonnes 39-40) laisse une tuile au sol : on ne passe qu'en glissant (D-84).
 ; @note-2: la trouvaille du filet (moyenne) : un saut long depuis la glissade, sur l'étagère au-dessus des couchettes de droite.
 ; @decor: carceiling 1 2 84 1
