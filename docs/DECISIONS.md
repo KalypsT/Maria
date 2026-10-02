@@ -1113,6 +1113,7 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
   2. **la terrasse du jardin** : sous la table de jardin (le plateau reste à la même hauteur, on monte toujours dessus) ;
   3. **la rue** : sous les planches vertes de la palissade (nouveau décor `sitehoarding`), une petite cachette entre l'échafaudage et le mur du fond ;
   4. **le hall de la gare** : sous le kiosque à journaux (7 cases couché).
+- **Conséquence dans la rue** : les dix dernières cases du trottoir (colonnes 189 à 198) deviennent la cachette ; on n'y entre plus qu'en glissant (rien n'y était). Le bout du trottoir testé est maintenant la colonne 185, devant la palissade.
 - Aucune nouvelle route : seulement des tuiles retirées ou ajoutées et quatre nouvelles trouvailles. **Aucune trouvaille ni lanterne existante n'a bougé** (leurs identifiants restent valables : une partie existante n'est pas touchée).
 - **Tests** (`slideRevisits.test.ts`) : la vraie Céleste (phase 3) simulée devant chaque passage ramasse la trouvaille en glissant, jamais sans (en marchant et en sautant) ; puis elle ressort toujours, debout (jamais coincée). Les tests des salles (maison, jardin, rue, gare, « rien ne se ferme » en grandissant) restent verts.
 - **Sauvegarde** : aucune migration (quatre nouvelles trouvailles, identifiants neufs).
