@@ -29,6 +29,7 @@ import stationLost from '../station/lost.txt?raw';
 import stationDepot from '../station/depot.txt?raw';
 import stationStrange from '../station/strange.txt?raw';
 import stationTower from '../station/tower.txt?raw';
+import trainCouchettes from '../train/couchettes.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -93,6 +94,8 @@ export const HOUSE: ZoneSource = {
     // Le monde étrange de la gare (D-68) : par l'histoire (le haut des casiers).
     { id: 'station-strange', text: stationStrange },
     { id: 'station-tower', text: stationTower },
+    // Le train (D-83, D-85) : on y monte par l'histoire (la porte du train à quai), en route.
+    { id: 'train-couchettes', text: trainCouchettes },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -169,5 +172,7 @@ export const HOUSE: ZoneSource = {
     'station-hall': { x: 9.4, y: 1.2, w: 3.6, h: 2.4, page: 'station' },
     'station-lost': { x: 11.3, y: -0.6, w: 1.8, h: 1.4, page: 'station' },
     'station-depot': { x: 13.4, y: 2, w: 4.6, h: 1.6, page: 'station' },
+    // Le train (D-85) : les voitures en long, sur leur propre page du cahier.
+    'train-couchettes': { x: 0, y: 1, w: 6, h: 1.4, page: 'train' },
   },
 };

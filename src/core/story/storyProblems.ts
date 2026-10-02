@@ -1,4 +1,5 @@
 import { TILE_SIZE } from '../../config/display';
+import { isAbility } from '../../config/abilities';
 import { isMemory } from '../../config/memories';
 import { EntityType, Tile, tileAt, type LevelData } from '../level/LevelData';
 import type { Zone } from '../world/zone';
@@ -109,6 +110,8 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
     for (const step of t.steps) {
       if (step.do === 'memory' && !isMemory(step.id)) {
         problems.push(`${what} : souvenir inconnu ${step.id}`);
+      } else if (step.do === 'ability' && !isAbility(step.id)) {
+        problems.push(`${what} : capacité inconnue ${step.id}`);
       } else if (step.do === 'sparkle') {
         inRoom(room, step.area, what);
       } else if (step.do === 'thought' && step.by !== undefined) {
@@ -188,6 +191,17 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
     inRoom(omen.room, { col: omen.col, row: omen.row, w: 1, h: 1 }, what);
     if (omen.radius <= 0) {
       problems.push(`${what} : rayon nul`);
+    }
+  }
+  for (const [what, rules] of [
+    ['salle qui roule', story.moving ?? []],
+    ['lumières éteintes', story.dim ?? []],
+  ] as const) {
+    for (const rule of rules) {
+      knownFlags(rule.when, `${what} ${rule.room}`);
+      if (!zone.rooms.has(rule.room)) {
+        problems.push(`${what} : salle ${rule.room} inconnue`);
+      }
     }
   }
   for (const lock of story.lockedRooms) {

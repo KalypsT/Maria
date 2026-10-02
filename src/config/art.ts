@@ -454,6 +454,27 @@ export const DECOR_KINDS: Readonly<
   giantstake: { furniture: true },
   giantflower: { furniture: false },
   giantcan: { furniture: false },
+  // Le train (D-85).
+  /** Plafond de la voiture : plafonniers, aérations (fond). */
+  carceiling: { furniture: false },
+  /** Porte de bout de voiture ou de la plateforme, fermée (fond). */
+  traindoor: { furniture: false },
+  /** Grande fenêtre de voiture : le paysage défile derrière la vitre (fond). */
+  trainwindow: { furniture: false },
+  /** Liseuse au-dessus des couchettes, allumée (fond, source de lumière). */
+  trainlamp: { furniture: false },
+  /** Cloison entre deux compartiments (bois plein, du plafond au-dessus du passage). */
+  partition: { furniture: true },
+  /** Grille en accordéon à moitié fermée (pleine), une tuile libre dessous. */
+  accordiongate: { furniture: true },
+  /** Couchettes superposées (traversables) et leurs montants. */
+  bunks: { furniture: true },
+  /** Tablette repliable sous la fenêtre (traversable). */
+  foldtable: { furniture: true },
+  /** Filet à bagages accroché à la paroi (traversable). */
+  rack: { furniture: true },
+  /** Chariot du vendeur, garé (plein), une tuile libre sous la caisse. */
+  trolley: { furniture: true },
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */
@@ -780,6 +801,31 @@ export const PARALLAX = {
   maxScale: 1.5,
   /** Marge autour de la vue (tremblements, arrondis), px logiques. */
   marginPx: 48,
+} as const;
+
+/**
+ * Le train en route (D-85) : derrière les vitres, le paysage de nuit défile (collines lointaines,
+ * puis arbres, poteaux et maisons proches) ; la voiture a des secousses de temps en temps. Rien ne
+ * touche à Céleste ni à la collision (pilier 1). PROVISOIRE.
+ */
+export const TRAIN_RIDE = {
+  /** Plans derrière la vitre : ciel (immobile), collines, bord de la voie (parallaxe). */
+  parallax: { sky: 0.75, hills: 0.82, near: 0.92 },
+  /** Défilement à pleine vitesse (px logiques par seconde). */
+  hillsScrollPxPerS: 22,
+  nearScrollPxPerS: 170,
+  /** Période du motif de chaque plan (px logiques) : il se répète sans couture. */
+  hillsPeriodPx: 960,
+  nearPeriodPx: 720,
+  /** Mise en vitesse et ralentissement (fraction de la pleine vitesse par seconde). */
+  accelPerS: 0.25,
+  /** Secousses : intervalle (ms), durée (ms), force (fraction de `STRANGE_FX.shakePx`). */
+  joltEveryMs: [6000, 11000] as readonly [number, number],
+  joltMs: 320,
+  joltStrength: 0.3,
+  /** Lumières éteintes la nuit (`dim`) : obscurité de la salle, halos des lampes (liseuses éteintes). */
+  dimDarkness: 0.74,
+  dimGlow: 0.4,
 } as const;
 
 /**

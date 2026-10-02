@@ -38,6 +38,7 @@ export const ABILITY_HINTS: Readonly<Record<Ability, string>> = {
 export const ABILITY_HELP_ICONS: Readonly<Partial<Record<Ability, ThoughtIcon>>> = {
   umbrella: 'umbrella',
   hook: 'hook',
+  slide: 'slide',
 };
 
 /** Durée d'affichage de l'indice (ms). */

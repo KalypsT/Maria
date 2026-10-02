@@ -1,5 +1,6 @@
 import { PROP_SIZE } from '../../config/story';
 import type { PropKind } from '../../core/story/story';
+import { drawClassCharacter } from './classArt';
 
 /**
  * Les parents et le chat (D-37), PLACEHOLDERS dans le style « papier découpé » de Céleste (D-29) :
@@ -26,6 +27,8 @@ interface Person {
   curly: boolean;
   beard: boolean;
   cuffs: boolean;
+  /** Cheveux relevés en chignon (la maîtresse, D-85). */
+  bun?: boolean;
 }
 
 const DAD: Person = {
@@ -55,6 +58,22 @@ const MOM: Person = {
   curly: true,
   beard: false,
   cuffs: false,
+};
+/** La maîtresse de la classe de mer (D-85) : cheveux auburn mi-courts, gilet vert, pantalon sombre. */
+const TEACHER: Person = {
+  hair: '#a5653a',
+  hairDark: '#7d4a28',
+  skin: '#eab896',
+  skinDark: '#d39d7b',
+  top: '#5f8f6e',
+  topDark: '#4d7759',
+  jeans: '#4a4458',
+  jeansDark: '#3c3749',
+  seam: '#625b74',
+  curly: false,
+  beard: false,
+  cuffs: false,
+  bun: true,
 };
 const SHOE = { body: '#e6ddcb', stripe: '#3f5d8f', sole: '#fbf8f1' };
 const GLASSES = '#1f1c22';
@@ -141,7 +160,18 @@ function head(
     ctx.restore();
   }
   ctx.fillStyle = p.hair;
-  if (p.curly) {
+  if (p.bun) {
+    // Chignon : les cheveux tirés en arrière, relevés derrière la tête, une mèche devant l'oreille.
+    disc(ctx, x - r * 0.95, y - r * 0.75, r * 0.55);
+    ctx.beginPath();
+    ctx.arc(x - r * 0.05, y - r * 0.2, r * 1.05, Math.PI * 0.95, Math.PI * 1.9);
+    ctx.lineTo(x - r * 0.35, y + r * 0.35);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#e6c27a';
+    ctx.fillRect(x - r * 1.05, y - r * 0.85, r * 0.5, r * 0.18);
+    ctx.fillStyle = p.hair;
+  } else if (p.curly) {
     for (const [dx, dy, dr] of CURLS_TOP) {
       disc(ctx, x + dx * r, y + dy * r, dr * r);
     }
@@ -421,6 +451,9 @@ const DRAWN_SIZE: Readonly<Partial<Record<PropKind, { w: number; h: number; pad:
   'dad-shop': { w: 44, h: 62, pad: 8 },
   'mom-yard': { w: 42, h: 62, pad: 8 },
   'dad-hall': { w: 42, h: 62, pad: 8 },
+  teacher: { w: 42, h: 62, pad: 8 },
+  'mom-quay': { w: 42, h: 62, pad: 8 },
+  'dad-quay': { w: 42, h: 62, pad: 8 },
 };
 
 export function drawCharacter(ctx: CanvasRenderingContext2D, kind: PropKind, frame: number): void {
@@ -538,7 +571,24 @@ function drawAt(
     case 'cat-sit':
       catSit(ctx, h, frame);
       break;
+    case 'teacher': {
+      // La maîtresse (D-85), son classeur contre elle ; elle penche un peu la tête.
+      const hand = standing(ctx, TEACHER, w, h, 0.55, frame === 0 ? 0 : 0.5);
+      ctx.fillStyle = '#d9788f';
+      round(ctx, hand.handX - 4, hand.handY - 9, 7, 10, 1);
+      ctx.fillStyle = '#fdf8ee';
+      ctx.fillRect(hand.handX - 3, hand.handY - 8, 5, 8);
+      break;
+    }
+    case 'mom-quay':
+      // Sur le quai, le soir du départ (D-85) : maman fait au revoir de la main.
+      standing(ctx, MOM, w, h, frame === 0 ? 2.65 : 2.95, 0);
+      break;
+    case 'dad-quay':
+      standing(ctx, DAD, w, h, frame === 0 ? 2.9 : 2.6, 0.3);
+      break;
     default:
+      drawClassCharacter(ctx, kind, frame, w, h);
       break;
   }
 }

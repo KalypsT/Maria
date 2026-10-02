@@ -65,6 +65,8 @@ export const THOUGHT_ICONS = [
   'crane',
   /** Un train, sa porte ouverte et sa lueur turquoise (au réveil, après la gare, D-69). */
   'train',
+  /** Aide de la glissade (D-84, D-85) : une barrière basse, et quelqu'un qui glisse dessous. */
+  'slide',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
@@ -125,7 +127,12 @@ export type StoryStep =
    * Court souvenir (D-68, bloquant) : une vignette plein écran pendant `ms`, qui apparaît et
    * disparaît lentement. Non jouable, sans texte.
    */
-  | { readonly do: 'flashback'; readonly id: FlashbackId; readonly ms: number };
+  | { readonly do: 'flashback'; readonly id: FlashbackId; readonly ms: number }
+  /**
+   * Capacité apprise (D-85) : sauvegardée aussitôt, avec son indice et sa bulle d'aide, comme un
+   * objet de capacité ramassé. La glissade s'apprend en imitant la camarade du train.
+   */
+  | { readonly do: 'ability'; readonly id: string };
 
 export interface StoryTrigger {
   readonly id: string;
@@ -206,6 +213,19 @@ export const PROP_KINDS = [
   'gate-open',
   /** Roger, la peluche singe, tout en haut de la tour des objets perdus (D-68). */
   'roger',
+  // Le train (D-85) : la classe de mer. Sur le quai, le soir, les parents disent au revoir ; la
+  // maîtresse, les enfants et leurs sacs. Dans la voiture-couchettes : la camarade qui montre la
+  // glissade, des enfants assis sur les couchettes, puis endormis.
+  'teacher',
+  'mom-quay',
+  'dad-quay',
+  'kids-quay',
+  'classmate',
+  'classmate-slid',
+  'classmate-asleep',
+  'kid-cap-sit',
+  'kid-bob-sit',
+  'kid-asleep',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 
@@ -243,6 +263,16 @@ export const CHARACTER_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'dad-shop',
   'mom-yard',
   'dad-hall',
+  'teacher',
+  'mom-quay',
+  'dad-quay',
+  'kids-quay',
+  'classmate',
+  'classmate-slid',
+  'classmate-asleep',
+  'kid-cap-sit',
+  'kid-bob-sit',
+  'kid-asleep',
 ]);
 
 export interface StoryProp {
@@ -297,6 +327,16 @@ export interface StoryData {
     readonly icon?: ThoughtIcon;
   }[];
   readonly omens: readonly StoryOmen[];
+  /**
+   * Salles qui roulent (D-85) : le train en route. Le paysage défile derrière les vitres, la voiture
+   * a des secousses (visuelles seulement : jamais sur Céleste, pilier 1). Sinon, à l'arrêt.
+   */
+  readonly moving?: readonly { readonly room: string; readonly when: FlagCondition }[];
+  /**
+   * Lumières éteintes (D-85) : la nuit dans le train, la salle est plus sombre et les liseuses
+   * s'éteignent ; seules les veilleuses restent. Changé dans le noir d'un fondu (salle redessinée).
+   */
+  readonly dim?: readonly { readonly room: string; readonly when: FlagCondition }[];
 }
 
 export function checkCondition(flags: ReadonlySet<string>, when: FlagCondition): boolean {

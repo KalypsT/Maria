@@ -78,6 +78,17 @@ export const StoryFlag = {
   GrownOlder: 'growth.3',
   /** Le train à quai (D-69) : Céleste a vu sa porte ouverte et sa lueur turquoise. */
   StationTrain: 'station.train',
+  /**
+   * Le train (D-85) : le soir du départ de la classe de mer, sur le quai (la maîtresse, les
+   * enfants, les parents qui disent au revoir).
+   */
+  TrainBoarding: 'train.boarding',
+  /** Le train est parti : Céleste est dans la voiture-couchettes, en route (D-85). */
+  TrainDeparted: 'train.departed',
+  /** La camarade a glissé sous la grille ; Céleste a appris la glissade (D-84, D-85). */
+  TrainSlide: 'train.slide',
+  /** La nuit dans le train (D-85) : tout le monde dort ; une lueur passe dans le couloir. */
+  TrainNight: 'train.night',
   /** Quelques mois plus tard (D-43) : Céleste a grandi (phase de croissance 2). */
   Grown: 'growth.2',
   /** Le jardin (D-46) : Céleste est sortie pour la première fois (il fait beau, et Maria ?). */
@@ -206,6 +217,18 @@ export const PROP_SIZE = {
   // Roger, la peluche singe (D-68), tout en haut de la tour des objets perdus.
   roger: { w: 16, h: 18 },
   'dad-garden': { w: 44 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  // Le train (D-85) : sur le quai, la maîtresse et les parents (à hauteur d'enfant), les enfants
+  // et leurs sacs ; dans la voiture-couchettes, des enfants de la taille de Céleste.
+  teacher: { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  'mom-quay': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  'dad-quay': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  'kids-quay': { w: 48, h: 32 },
+  classmate: { w: 18, h: 32 },
+  'classmate-slid': { w: 26, h: 24 },
+  'classmate-asleep': { w: 30, h: 12 },
+  'kid-cap-sit': { w: 22, h: 24 },
+  'kid-bob-sit': { w: 22, h: 24 },
+  'kid-asleep': { w: 30, h: 12 },
   // Le chat gris, agrandi par CAT_SCALE (D-42).
   'cat-sleep': { w: 16 * CAT_SCALE, h: 8 * CAT_SCALE },
   'cat-sit': { w: 12 * CAT_SCALE, h: 14 * CAT_SCALE },

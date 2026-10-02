@@ -25,6 +25,7 @@ import { houseLayout, streetDrawers } from './streetArt';
 import { drawMemory } from './memoryArt';
 import { livingDrawers } from './livingArt';
 import { houseDrawers } from './houseArt';
+import { trainDrawers } from './trainArt';
 import { paperGrainPattern } from './paperGrain';
 
 /**
@@ -255,6 +256,7 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
   ...stationDrawers({ tileShape, rounded }),
   ...livingDrawers({ tileShape, rounded }),
   ...houseDrawers({ tileShape, rounded }),
+  ...trainDrawers({ tileShape, rounded }),
   console(a, r) {
     wood(a, r);
     if (!a.palette.silhouettes) {
@@ -1342,6 +1344,8 @@ export function windowPanes(level: LevelData): Pane[] {
     const r = rect(d);
     if (d.kind === 'window') {
       panes.push({ ...r, shape: 'rect' });
+    } else if (d.kind === 'trainwindow') {
+      panes.push({ ...r, shape: 'rect' });
     } else if (d.kind === 'roundwindow') {
       panes.push({ ...r, shape: 'round' });
     } else if (d.kind === 'tallwindow') {
@@ -1894,7 +1898,13 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
   const height = level.height * T;
   const lamps = level.entities.filter((e) => e.type === EntityType.Checkpoint);
   const windows = level.decor
-    .filter((d) => d.kind === 'window' || d.kind === 'roundwindow' || d.kind === 'tallwindow')
+    .filter(
+      (d) =>
+        d.kind === 'window' ||
+        d.kind === 'roundwindow' ||
+        d.kind === 'tallwindow' ||
+        d.kind === 'trainwindow',
+    )
     .map(rect);
   // Sources de lumière du décor : lampes, lustre (sous l'abat-jour), feu de la cheminée (D-74).
   const lights = level.decor.flatMap((d) => {
@@ -1933,6 +1943,10 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
     }
     if (d.kind === 'lostoffice' && p.darkness > 0) {
       return [{ x: r.x + r.w / 2, y: r.y + r.h - 48, k: 0.6 }];
+    }
+    // Les liseuses du train s'éteignent la nuit (lumières éteintes, D-85).
+    if (d.kind === 'trainlamp' && p.glow >= 0.5) {
+      return [{ x: r.x + r.w / 2, y: r.y + r.h, k: 0.75 }];
     }
     if (d.kind === 'desklamp') {
       return [{ x: r.x + r.w / 2, y: r.y + r.h - 8, k: 0.7 }];

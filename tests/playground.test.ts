@@ -134,6 +134,7 @@ describe('l’aire de jeux (D-61)', () => {
         shake: noop,
         memory: noop,
         hush: noop,
+        ability: noop,
       },
       100,
     );

@@ -68,6 +68,7 @@ import {
   MAX_ART_SCALE,
   REAL_PALETTE,
   STRANGE_PALETTE,
+  TRAIN_RIDE,
 } from '../config/art';
 import { STORY_TIMING } from '../config/story';
 import { PropStage } from '../core/story/PropStage';
@@ -126,6 +127,7 @@ const MAP_TITLES: Readonly<Record<string, string>> = {
   house: 'Ma maison',
   street: 'Mon quartier',
   station: 'La gare',
+  train: 'Le train',
 };
 
 /** Boîte englobant toutes les salles d'une page de la carte (disposition stable). */
@@ -266,6 +268,8 @@ export class GameScene extends Phaser.Scene {
   /** Moment de la journée et monde étrange de la salle dessinée. */
   private drawnTime: TimeOfDay = 'evening';
   private drawnStrange = false;
+  /** Lumières éteintes dans la salle dessinée (la nuit dans le train, D-85). */
+  private drawnDim = false;
   /** Vue de la caméra (px logiques), pour les objets de mise en scène (pilier 5). */
   private readonly viewBox: Box = { x: 0, y: 0, width: 0, height: 0 };
   /** Musique (D-57) ; le contexte est réutilisé à chaque image (aucune allocation). */
@@ -282,6 +286,10 @@ export class GameScene extends Phaser.Scene {
   private lockedThoughtUntil = 0;
   /** Porte de façade à portée (D-61), 0 si aucune. */
   private nearDoor = 0;
+  /** Allure de la salle qui roule (le train, D-85) : 0 à l'arrêt, 1 à pleine vitesse. */
+  private motion = 0;
+  /** Heure de la prochaine secousse du train (ms). */
+  private nextJoltMs = 0;
   private readonly playerInput: PlayerInput = {
     moveX: 0,
     moveY: 0,
@@ -337,6 +345,11 @@ export class GameScene extends Phaser.Scene {
       hush: (ms) => {
         this.audio.hush(ms);
       },
+      ability: (id) => {
+        if (isAbility(id)) {
+          this.learnAbility(id);
+        }
+      },
     });
     this.story.setFlags(this.session.data.story.flags);
     this.growth = growthPhase(this.story.flags);
@@ -389,6 +402,7 @@ export class GameScene extends Phaser.Scene {
     this.flashbackView = new FlashbackView();
     this.applyMovement();
     this.applyAbilities();
+    this.motion = this.movingTarget();
     this.feel.reset(this.player);
     this.poser.reset();
 
@@ -681,12 +695,14 @@ export class GameScene extends Phaser.Scene {
     // Coin haut gauche de la vue (px du monde) : la caméra Phaser zoome autour de son centre.
     const unzoom = 1 - 1 / main.zoom;
     const viewLeft = main.scrollX + (main.width / 2) * unzoom;
+    this.stepMotion(this.game.loop.delta);
     this.backdrop.update(
       viewLeft,
       main.scrollY + (main.height / 2) * unzoom,
       camera.viewWidth,
       this.time.now,
       this.game.loop.delta,
+      this.motion,
     );
     this.foreground.update(
       viewLeft,
@@ -697,6 +713,41 @@ export class GameScene extends Phaser.Scene {
       this.game.loop.delta,
     );
     this.renderRunState();
+  }
+
+  /**
+   * Le train en route (D-85) : l'allure monte et descend doucement (le départ se voit au paysage) ;
+   * à pleine vitesse, une petite secousse de temps en temps (visuelle seulement, pilier 1).
+   */
+  private stepMotion(dtMs: number): void {
+    const target = this.movingTarget();
+    const step = (TRAIN_RIDE.accelPerS * dtMs) / 1000;
+    this.motion =
+      this.motion < target
+        ? Math.min(target, this.motion + step)
+        : Math.max(target, this.motion - step);
+    const now = this.time.now;
+    if (this.motion < 0.9) {
+      this.nextJoltMs = 0;
+      return;
+    }
+    const [min, max] = TRAIN_RIDE.joltEveryMs;
+    if (this.nextJoltMs === 0) {
+      this.nextJoltMs = now + min + Math.random() * (max - min);
+    } else if (now >= this.nextJoltMs && !this.story.busy) {
+      this.fx.shake(TRAIN_RIDE.joltMs, TRAIN_RIDE.joltStrength);
+      this.nextJoltMs = now + min + Math.random() * (max - min);
+    }
+  }
+
+  /** Allure visée : 1 dans une salle qui roule, 0 sinon. */
+  private movingTarget(): number {
+    return this.zone && this.story.moving(this.level.id) ? 1 : 0;
+  }
+
+  /** Allure du train (outil de debug). */
+  get trainMotion(): number {
+    return this.motion;
   }
 
   /** Blocs d'habillage dessinés en ce moment (outil de debug, D-60). */
@@ -1054,6 +1105,9 @@ export class GameScene extends Phaser.Scene {
     this.poser.sitting = false;
     this.fx.reset();
     this.fx.load(level, isStrangeRoom(level), this.palette(), this.story.timeOfDay() === 'morning');
+    // Arrivée dans une salle qui roule déjà : à pleine vitesse (le départ, lui, se voit).
+    this.motion = this.movingTarget();
+    this.nextJoltMs = 0;
   }
 
   /** Capacités de Céleste en ce moment (sauvegarde, debug, parcours d'essai), pour le cahier. */
@@ -1100,15 +1154,22 @@ export class GameScene extends Phaser.Scene {
       void this.session.addCollectible(item.id);
       return;
     }
-    if (!isAbility(item.id)) {
-      return;
+    if (isAbility(item.id)) {
+      this.learnAbility(item.id);
     }
+  }
+
+  /**
+   * Capacité obtenue (objet ramassé, D-26, ou apprise dans l'histoire, D-85) : sauvegardée,
+   * appliquée, indice de prototype et bulle d'aide.
+   */
+  private learnAbility(id: Ability): void {
     this.audio.playJingle('found');
-    void this.session.unlockAbility(item.id);
+    void this.session.unlockAbility(id);
     this.applyAbilities();
-    this.hud.showHint(ABILITY_HINTS[item.id], ABILITY_HINT_MS);
+    this.hud.showHint(ABILITY_HINTS[id], ABILITY_HINT_MS);
     // Bulle d'aide (D-62, demande de l'utilisateur) : comment s'en servir, en pictogramme.
-    const help = ABILITY_HELP_ICONS[item.id];
+    const help = ABILITY_HELP_ICONS[id];
     if (help) {
       this.storyView.think(help, ABILITY_HINT_MS);
     }
@@ -1152,6 +1213,7 @@ export class GameScene extends Phaser.Scene {
   /** Redessine la salle et Céleste (échelle ou palette changée). */
   private redrawArt(): void {
     this.drawnTime = this.story.timeOfDay();
+    this.drawnDim = this.isDim();
     this.drawnStrange = isStrangeRoom(this.level);
     this.worldView.setArt(this.artScale, this.strangeWorld || isStrangeRoom(this.level));
     this.storyView.setArt(this.artScale, this.artImages());
@@ -1334,8 +1396,28 @@ export class GameScene extends Phaser.Scene {
     this.poser.setParams(this.puppetParams, this.grownMovement.maxRunSpeed);
   }
 
-  /** Palette courante : monde étrange (D-28), ou maison le soir ou le matin (D-31). */
+  /** Lumières éteintes dans la salle courante (la nuit dans le train, D-85). */
+  private isDim(): boolean {
+    return this.zone !== null && this.story.dim(this.level.id);
+  }
+
+  /**
+   * Palette courante ; lumières éteintes (D-85) : plus sombre, les liseuses éteintes (halos des
+   * lampes réduits).
+   */
   private palette() {
+    const palette = this.basePalette();
+    return this.isDim()
+      ? {
+          ...palette,
+          darkness: Math.max(palette.darkness, TRAIN_RIDE.dimDarkness),
+          glow: Math.min(palette.glow, TRAIN_RIDE.dimGlow),
+        }
+      : palette;
+  }
+
+  /** Palette de la salle : monde étrange (D-28), ou maison le soir ou le matin (D-31). */
+  private basePalette() {
     if (this.strangeWorld || isStrangeRoom(this.level)) {
       // Derrière la haie (D-49) : le monde étrange, dehors (ciel violet au lieu du mur).
       return this.level.meta.outdoor ? { ...STRANGE_PALETTE, outdoor: true } : STRANGE_PALETTE;
@@ -1390,7 +1472,7 @@ export class GameScene extends Phaser.Scene {
     if (this.props.update(story.flags, view, veil)) {
       this.storyView.refresh();
     }
-    if (veil >= 1 && story.timeOfDay() !== this.drawnTime) {
+    if (veil >= 1 && (story.timeOfDay() !== this.drawnTime || this.isDim() !== this.drawnDim)) {
       this.redrawArt();
     }
     const near = (story.interactable >= 0 || this.nearDoor !== 0) && !story.busy;

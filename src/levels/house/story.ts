@@ -1,6 +1,7 @@
 import { STORY_TIMING as S, StoryFlag as F } from '../../config/story';
 import type { StoryData, StoryStep, TileArea } from '../../core/story/story';
 import { STATION_STORY } from '../station/story';
+import { TRAIN_STORY } from '../train/story';
 
 /** Haut de la bibliothèque du salon, là où Maria était assise. */
 const LIVING_TOP: TileArea = { col: 46, row: 5, w: 10, h: 3 };
@@ -906,10 +907,14 @@ export const HOUSE_STORY: StoryData = {
     },
     // La gare (D-66).
     ...STATION_STORY.triggers,
+    // Le train (D-85).
+    ...TRAIN_STORY.triggers,
   ],
   props: [
     // La gare (D-68).
     ...STATION_STORY.props,
+    // Le train (D-85).
+    ...TRAIN_STORY.props,
     // La toise de la chambre (D-43), au mur près de la porte.
     {
       id: 'height-chart',
@@ -1209,6 +1214,8 @@ export const HOUSE_STORY: StoryData = {
   ],
   // La nuit après le câlin de maman (D-58), puis le matin quelques mois plus tard.
   times: [
+    // Le soir du départ du train et la nuit dans le train (D-85).
+    ...TRAIN_STORY.times,
     // La nuit après la gare (D-69), jusqu'au matin, quelques mois plus tard.
     ...STATION_STORY.times,
     // Le crépuscule puis la nuit, après l'école étrange (D-64), jusqu'au lendemain matin.
@@ -1231,6 +1238,7 @@ export const HOUSE_STORY: StoryData = {
     { room: 'bedroom', when: { all: [F.SchoolDone], none: [F.StreetMorning] }, icon: 'bed' },
     // La gare (D-69).
     ...STATION_STORY.lockedRooms,
+    ...TRAIN_STORY.lockedRooms,
   ],
   omens: [
     // L'oculus de l'école (D-64) : en montant les étagères, tant que la fin n'est pas vécue.
@@ -1262,5 +1270,11 @@ export const HOUSE_STORY: StoryData = {
     },
     // La gare (D-66).
     ...STATION_STORY.omens,
+    // Le train (D-85).
+    ...TRAIN_STORY.omens,
   ],
+  // Le train en route (D-85).
+  moving: TRAIN_STORY.moving,
+  // La nuit dans le train, lumières éteintes (D-85).
+  dim: TRAIN_STORY.dim,
 };

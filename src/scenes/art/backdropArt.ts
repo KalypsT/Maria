@@ -220,3 +220,148 @@ export function drawOutsidePlane(
     scale: 0.8,
   });
 }
+
+/** Indice de motif périodique : `n` ramené dans [0, count[ (le paysage du train se répète). */
+function cycle(n: number, count: number): number {
+  return ((n % count) + count) % count;
+}
+
+/**
+ * Le train de nuit (D-85), le ciel derrière les vitres : dégradé de la palette, étoiles, la lune.
+ * Il ne défile pas (trop loin).
+ */
+export function drawTrainSkyPlane(
+  ctx: CanvasRenderingContext2D,
+  p: Readonly<ArtPalette>,
+  e: Extent,
+  horizonY: number,
+  moon: { x: number; y: number },
+): void {
+  drawOutsidePlane(ctx, p, { ...e, y1: horizonY }, moon, horizonY + 400);
+  const low = ctx.createLinearGradient(0, horizonY - 3 * T, 0, horizonY);
+  low.addColorStop(0, 'rgba(0,0,0,0)');
+  low.addColorStop(1, p.nightLow);
+  ctx.fillStyle = low;
+  ctx.fillRect(e.x0, horizonY - 3 * T, e.x1 - e.x0, e.y1 - horizonY + 3 * T);
+}
+
+/**
+ * Collines lointaines du train (D-85), sur une période de `period` px (multiple de 60) : une crête
+ * douce, quelques villages aux fenêtres allumées la nuit.
+ */
+export function drawTrainHillsPlane(
+  ctx: CanvasRenderingContext2D,
+  p: Readonly<ArtPalette>,
+  e: Extent,
+  horizonY: number,
+  period: number,
+): void {
+  const w = (2 * Math.PI) / period;
+  const ridge = (x: number) =>
+    horizonY - 2.2 * T - Math.sin(x * w * 2 + 1) * 14 - Math.sin(x * w * 5 + 0.4) * 5;
+  ctx.save();
+  ctx.fillStyle = p.stars ? '#1b2142' : '#8f9cc0';
+  ctx.globalAlpha = 0.9;
+  ctx.beginPath();
+  ctx.moveTo(e.x0, e.y1);
+  for (let x = startAt(e.x0, 8); x <= e.x1 + 8; x += 8) {
+    ctx.lineTo(x, ridge(x));
+  }
+  ctx.lineTo(e.x1 + 8, e.y1);
+  ctx.fill();
+  // Villages : une poignée de maisons sur la crête, de loin en loin.
+  const step = 60;
+  for (let x = startAt(e.x0 - step, step); x < e.x1 + step; x += step) {
+    const k = cycle(Math.round(x / step), period / step);
+    if (hash(k + 0.5) > 0.22) {
+      continue;
+    }
+    const count = 2 + Math.floor(hash(k + 0.9) * 4);
+    for (let i = 0; i < count; i++) {
+      const hx = x + i * 7;
+      const base = ridge(hx) + 3;
+      ctx.fillStyle = p.stars ? '#151a36' : '#7d89ad';
+      ctx.fillRect(hx, base - 7, 6, 7);
+      ctx.beginPath();
+      ctx.moveTo(hx - 1, base - 7);
+      ctx.lineTo(hx + 3, base - 10);
+      ctx.lineTo(hx + 7, base - 7);
+      ctx.fill();
+      if (p.stars && hash(k + i * 0.31) < 0.6) {
+        ctx.fillStyle = '#ffcf7a';
+        ctx.fillRect(hx + 2, base - 5, 2, 2);
+      }
+    }
+  }
+  ctx.restore();
+}
+
+/**
+ * Bord de la voie (D-85), tout près de la vitre : un talus sombre, des arbres, les poteaux de la
+ * caténaire et son fil, de temps en temps une maisonnette éclairée. Période de `period` px
+ * (multiple de 80). Il défile vite : on sent la vitesse.
+ */
+export function drawTrainNearPlane(
+  ctx: CanvasRenderingContext2D,
+  p: Readonly<ArtPalette>,
+  e: Extent,
+  horizonY: number,
+  period: number,
+): void {
+  const dark = p.stars ? '#0e1226' : '#5f6b8c';
+  const w = (2 * Math.PI) / period;
+  const bank = (x: number) => horizonY - 0.6 * T - Math.sin(x * w * 3) * 4;
+  ctx.save();
+  ctx.fillStyle = dark;
+  ctx.beginPath();
+  ctx.moveTo(e.x0, e.y1);
+  for (let x = startAt(e.x0, 8); x <= e.x1 + 8; x += 8) {
+    ctx.lineTo(x, bank(x));
+  }
+  ctx.lineTo(e.x1 + 8, e.y1);
+  ctx.fill();
+  const step = 80;
+  for (let x = startAt(e.x0 - step, step); x < e.x1 + step; x += step) {
+    const k = cycle(Math.round(x / step), period / step);
+    // Poteau de caténaire, à chaque pas, et le fil qui pend d'un poteau à l'autre.
+    const top = horizonY - 5.5 * T;
+    ctx.fillStyle = dark;
+    ctx.fillRect(x, top, 2.5, bank(x) - top + 2);
+    ctx.fillRect(x - 6, top + 4, 10, 1.5);
+    ctx.strokeStyle = dark;
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(x + 2, top + 5);
+    ctx.quadraticCurveTo(x + step / 2, top + 11, x + step + 2, top + 5);
+    ctx.stroke();
+    // Entre deux poteaux : un arbre, un buisson, ou une maisonnette au loin.
+    const kind = hash(k + 0.17);
+    const mx = x + 18 + hash(k + 0.41) * 40;
+    const base = bank(mx) + 2;
+    if (kind < 0.45) {
+      const size = 0.8 + hash(k + 0.6) * 0.6;
+      ctx.fillRect(mx - 1.5 * size, base - 14 * size, 3 * size, 14 * size);
+      ctx.beginPath();
+      ctx.arc(mx, base - 20 * size, 10 * size, 0, Math.PI * 2);
+      ctx.arc(mx - 7 * size, base - 14 * size, 7 * size, 0, Math.PI * 2);
+      ctx.arc(mx + 7 * size, base - 14 * size, 7 * size, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (kind < 0.62) {
+      ctx.fillRect(mx - 8, base - 12, 16, 12);
+      ctx.beginPath();
+      ctx.moveTo(mx - 10, base - 12);
+      ctx.lineTo(mx, base - 19);
+      ctx.lineTo(mx + 10, base - 12);
+      ctx.fill();
+      ctx.fillStyle = p.stars ? '#ffcf7a' : '#c9d4ea';
+      ctx.fillRect(mx - 4, base - 8, 3, 3);
+      ctx.fillStyle = dark;
+    } else if (kind < 0.85) {
+      ctx.beginPath();
+      ctx.arc(mx, base - 4, 7, Math.PI, 0);
+      ctx.arc(mx + 8, base - 3, 5, Math.PI, 0);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}

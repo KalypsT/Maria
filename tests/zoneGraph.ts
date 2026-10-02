@@ -195,6 +195,10 @@ export function zoneGraph(
     if (late !== growth >= 2 || (roomOf(from) === 'garden-tree' && !wallJump)) {
       continue;
     }
+    // Le train (D-85) part quelques mois après la gare (phase 3) : on n'en revient qu'à l'arrivée.
+    if (roomOf(to).startsWith('train-') && growth < 3) {
+      continue;
+    }
     edge(from, to);
   }
   return graph;
