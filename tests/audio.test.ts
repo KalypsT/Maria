@@ -5,6 +5,7 @@ import {
   DEFAULT_AUDIO_SETTINGS,
   JINGLES,
   MUSIC_TRACKS,
+  isMusicTrack,
 } from '../src/config/audio';
 import { AudioMix, equalPower, loopOverlapSec } from '../src/core/audio/AudioMix';
 import { audioFileMap } from '../src/core/audio/audioFiles';
@@ -23,14 +24,32 @@ function run(mix: AudioMix, ms: number): void {
 }
 
 describe('choix du thème (D-57)', () => {
-  const base = { strange: false, outdoor: false, garden: false, street: false } as const;
+  const base = { strange: false, garden: false, street: false } as const;
 
-  it('maison de nuit et de jour, jardin, monde étrange, derrière la haie', () => {
-    expect(chooseMusic({ ...base, time: 'evening' })).toBe('house-night');
-    expect(chooseMusic({ ...base, time: 'morning' })).toBe('house-day');
-    expect(chooseMusic({ ...base, garden: true, time: 'morning' })).toBe('garden');
-    expect(chooseMusic({ ...base, strange: true, time: 'morning' })).toBe('strange');
-    expect(chooseMusic({ ...base, strange: true, outdoor: true, time: 'morning' })).toBe('hedge');
+  it('maison, jardin, rue, monde étrange (D-94 : un seul thème pour chacun)', () => {
+    expect(chooseMusic(base)).toBe('house');
+    expect(chooseMusic({ ...base, garden: true })).toBe('garden');
+    expect(chooseMusic({ ...base, street: true })).toBe('street');
+    expect(chooseMusic({ ...base, strange: true })).toBe('strange');
+  });
+
+  it('tous les mondes étranges ont le même thème (D-94)', () => {
+    for (const { id, text } of HOUSE.rooms) {
+      const level = parseAsciiLevel(id, text);
+      if (!isStrangeRoom(level)) {
+        continue;
+      }
+      const room = level.meta.music;
+      expect(
+        chooseMusic({
+          strange: true,
+          garden: isGardenRoom(level),
+          street: isStreetRoom(level),
+          room: isMusicTrack(room) ? room : null,
+        }),
+        id,
+      ).toBe('strange');
+    }
   });
 
   it('chaque salle de la maison et du jardin a le thème attendu', () => {
@@ -41,19 +60,17 @@ describe('choix du thème (D-57)', () => {
         id,
         chooseMusic({
           strange: isStrangeRoom(level),
-          outdoor: Boolean(level.meta.outdoor),
           garden: isGardenRoom(level),
           street: isStreetRoom(level),
-          time: 'morning',
         }),
       );
     }
-    expect(themes.get('bedroom')).toBe('house-day');
+    expect(themes.get('bedroom')).toBe('house');
     expect(themes.get('garden-terrace')).toBe('garden');
     expect(themes.get('living-strange')).toBe('strange');
     expect(themes.get('shadows')).toBe('strange');
-    expect(themes.get('garden-upside')).toBe('hedge');
-    expect(themes.get('garden-thorns')).toBe('hedge');
+    expect(themes.get('garden-upside')).toBe('strange');
+    expect(themes.get('garden-thorns')).toBe('strange');
     expect(themes.get('street')).toBe('street');
   });
 });
@@ -61,19 +78,32 @@ describe('choix du thème (D-57)', () => {
 describe('mixage (D-57)', () => {
   it('fondu enchaîné entre deux thèmes, sans creux de volume', () => {
     const mix = new AudioMix();
-    mix.setTrack('house-night');
+    mix.setTrack('house');
     run(mix, AUDIO_MIX.crossfadeMs);
-    expect(mix.presenceOf('house-night')).toBe(1);
-    mix.setTrack('house-day');
+    expect(mix.presenceOf('house')).toBe(1);
+    mix.setTrack('garden');
     run(mix, AUDIO_MIX.crossfadeMs / 2);
-    const a = mix.musicVolume('house-night');
-    const b = mix.musicVolume('house-day');
+    const a = mix.musicVolume('house');
+    const b = mix.musicVolume('garden');
     // Puissance constante : a² + b² reste celle d'un seul thème.
     const full = AUDIO_MIX.musicGain * DEFAULT_AUDIO_SETTINGS.volume;
     expect(a * a + b * b).toBeCloseTo(full * full, 2);
     run(mix, AUDIO_MIX.crossfadeMs);
-    expect(mix.presenceOf('house-night')).toBe(0);
-    expect(mix.musicVolume('house-day')).toBeCloseTo(full, 5);
+    expect(mix.presenceOf('house')).toBe(0);
+    expect(mix.musicVolume('garden')).toBeCloseTo(full, 5);
+  });
+
+  it('Maria avec son jingle : le thème reste audible, baissé comme pour un jingle (D-94)', () => {
+    const mix = new AudioMix();
+    mix.setTrack('strange');
+    run(mix, AUDIO_MIX.crossfadeMs);
+    const full = mix.musicVolume('strange');
+    mix.hush(2000, AUDIO_MIX.hushWithJingle);
+    mix.jinglePlaying = true;
+    run(mix, AUDIO_MIX.hushOutMs + AUDIO_MIX.duckMs);
+    expect(mix.hushing).toBe(true);
+    expect(mix.musicVolume('strange')).toBeCloseTo(full * AUDIO_MIX.jingleDuck, 5);
+    expect(AUDIO_MIX.jingleDuck).toBeGreaterThanOrEqual(0.7);
   });
 
   it('silence de Maria : la musique se tait, reste tue, puis revient lentement', () => {

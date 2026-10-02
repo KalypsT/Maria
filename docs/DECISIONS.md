@@ -1132,6 +1132,18 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Décision** (demande de l'utilisateur) : le mode « écran » de D-18 devient le réglage par défaut, à la place du mode « logique ». Toujours réglable dans le menu pause.
 - **Conséquences** : une nouvelle partie démarre en mode écran ; une sauvegarde existante garde le mode qu'elle a enregistré (le défaut et un choix ne se distinguent pas), il suffit de le changer une fois dans le menu pause. Coût GPU plus élevé (≈ 9 fois plus de pixels), à surveiller au FPS de l'overlay.
 
+## D-94 — Musique : moins de thèmes, jingles par-dessus le thème
+
+Retours d'écoute de l'utilisateur sur téléphone.
+
+- **Un seul thème pour la maison** (`house`, ancien `house-night`), de jour comme de nuit : `house-day` et `house-night` disparaissent ; le moment de la journée ne choisit plus la musique (la palette, si).
+- **Un seul thème pour tous les mondes étranges** (`strange`) : la maison, derrière la haie, l'école, la gare et sa tour, la cuisine et le train de la vaisselle. `hedge`, `street-strange`, `station-strange`, `train-strange` disparaissent ; les salles qui les imposaient (`; @music:`) imposent `strange`. Testé pour toutes les salles étranges.
+- Restent 8 thèmes : `title`, `house`, `garden`, `street`, `station`, `train`, `strange`, `memory-play`.
+- **Le jingle `memory` raccourci** à 5 s (fondu de sortie de 1,5 s), par la nouvelle option `--max` de `audio:prepare`.
+- **Les jingles laissent entendre le thème** : pendant `found`, `memory` et `maria`, la musique ne descend plus qu'à 80 % (`jingleDuck`, 30 % avant).
+- **Apparition de Maria** : quand le jingle `maria` existe, le thème n'est plus coupé, seulement baissé comme pour les autres jingles (`hushWithJingle`) ; les autres jingles restent bloqués pendant ce moment. Sans fichier `maria`, le silence de D-57 est inchangé.
+- **Sauvegarde** : rien (les thèmes ne sont pas enregistrés).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

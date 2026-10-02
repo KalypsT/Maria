@@ -71,7 +71,7 @@ describe('le monde étrange de la gare (D-68)', () => {
   it('on y entre par le haut des casiers ; hors de la carte ; sa musique', () => {
     for (const room of [STRANGE, TOWER]) {
       expect(isStrangeRoom(level(room)), room).toBe(true);
-      expect(level(room).meta.music, room).toBe('station-strange');
+      expect(level(room).meta.music, room).toBe('strange');
     }
     expect(mapPage(zone, STRANGE)).toBeNull();
     expect(zone.destination(STRANGE, 1)).toEqual({ room: TOWER, exit: 1 });

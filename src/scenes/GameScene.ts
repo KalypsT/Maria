@@ -324,10 +324,8 @@ export class GameScene extends Phaser.Scene {
   audio!: AudioPlayer;
   private readonly musicContext = {
     strange: false,
-    outdoor: false,
     garden: false,
     street: false,
-    time: 'evening' as TimeOfDay,
     room: null as MusicTrack | null,
   };
   /** Heure (ms) avant laquelle une porte fermée ne redonne pas de bulle. */
@@ -1596,10 +1594,8 @@ export class GameScene extends Phaser.Scene {
     }
     const music = this.musicContext;
     music.strange = isStrangeRoom(this.level);
-    music.outdoor = Boolean(this.level.meta.outdoor);
     music.garden = isGardenRoom(this.level);
     music.street = isStreetRoom(this.level);
-    music.time = story.timeOfDay();
     const roomTrack = this.level.meta.music;
     music.room = isMusicTrack(roomTrack) ? roomTrack : null;
     this.audio.setMusic(chooseMusic(music));

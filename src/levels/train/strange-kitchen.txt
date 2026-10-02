@@ -6,7 +6,7 @@
 ; cuisine du wagon-restaurant), jamais par une porte.
 ; @name: Cuisine étrange
 ; @world: strange
-; @music: train-strange
+; @music: strange
 ; @hazard: hotplates
 ; @difficulty: medium
 ; @ambient: #1d1a2c

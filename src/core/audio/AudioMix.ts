@@ -34,6 +34,8 @@ export class AudioMix {
   private hushLevel = 1;
   private hushHoldMs = 0;
   private hushActive = false;
+  /** Niveau visé pendant le silence (0 : silence complet). */
+  private hushFloor = 0;
   private duck = 1;
 
   constructor(private readonly params: AudioMixParams = AUDIO_MIX) {}
@@ -44,10 +46,11 @@ export class AudioMix {
   }
 
   /**
-   * Maria apparaît : la musique s'éteint vite, reste tue `ms`, puis revient lentement. Un nouveau
-   * silence pendant le premier le prolonge.
+   * Maria apparaît : la musique s'éteint vite (jusqu'à `floor`, 0 : silence complet), reste ainsi
+   * `ms`, puis revient lentement. Un nouveau silence pendant le premier le prolonge.
    */
-  hush(ms: number): void {
+  hush(ms: number, floor = 0): void {
+    this.hushFloor = this.hushActive ? Math.min(this.hushFloor, floor) : floor;
     this.hushActive = true;
     this.hushHoldMs = Math.max(this.hushHoldMs, ms);
   }
@@ -65,8 +68,8 @@ export class AudioMix {
       this.presence.set(t, approach(current, target, dtMs / Math.max(1, p.crossfadeMs)));
     }
     if (this.hushActive) {
-      if (this.hushLevel > 0) {
-        this.hushLevel = approach(this.hushLevel, 0, dtMs / Math.max(1, p.hushOutMs));
+      if (this.hushLevel > this.hushFloor) {
+        this.hushLevel = approach(this.hushLevel, this.hushFloor, dtMs / Math.max(1, p.hushOutMs));
       } else if (this.hushHoldMs > 0) {
         this.hushHoldMs = Math.max(0, this.hushHoldMs - dtMs);
       } else {

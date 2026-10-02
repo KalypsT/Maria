@@ -212,9 +212,9 @@ export class AudioPlayer {
     this.mix.paused = paused;
   }
 
-  /** Maria apparaît : silence (et jingle étrange s'il existe). */
+  /** Maria apparaît : son jingle par-dessus le thème s'il existe, sinon le silence (D-94). */
   hush(ms: number): void {
-    this.mix.hush(ms);
+    this.mix.hush(ms, this.files.has('maria') ? AUDIO_MIX.hushWithJingle : 0);
     this.playJingle('maria');
   }
 

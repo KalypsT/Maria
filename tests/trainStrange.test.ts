@@ -101,7 +101,7 @@ describe('le monde étrange du train (D-88)', () => {
   it('on y entre par la porte de la cuisine du wagon-restaurant ; hors de la carte ; sa musique', () => {
     for (const room of [KITCHEN, DISHES]) {
       expect(isStrangeRoom(level(room)), room).toBe(true);
-      expect(level(room).meta.music, room).toBe('train-strange');
+      expect(level(room).meta.music, room).toBe('strange');
       expect(mapPage(zone, room), room).toBeNull();
     }
     expect(zone.destination(KITCHEN, 1)).toEqual({ room: DISHES, exit: 1 });

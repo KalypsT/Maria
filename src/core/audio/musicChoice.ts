@@ -1,17 +1,13 @@
 import type { MusicTrack } from '../../config/audio';
-import type { TimeOfDay } from '../story/story';
 
-/** Ce qui décide du thème : le monde de la salle et le moment de la journée. */
+/** Ce qui décide du thème : le monde de la salle (D-94 : plus le moment de la journée). */
 export interface MusicContext {
   /** Salle du monde étrange (`; @world: strange`). */
   readonly strange: boolean;
-  /** Dehors (`; @outdoor: yes`), pour le monde étrange : derrière la haie. */
-  readonly outdoor: boolean;
   /** Salle du jardin (`; @world: garden`). */
   readonly garden: boolean;
   /** La rue du quartier (`; @world: street`, D-60). */
   readonly street: boolean;
-  readonly time: TimeOfDay;
   /** Thème imposé par la salle (`; @music:`, D-64), s'il existe. */
   readonly room?: MusicTrack | null;
 }
@@ -22,7 +18,7 @@ export function chooseMusic(context: MusicContext): MusicTrack {
     return context.room;
   }
   if (context.strange) {
-    return context.outdoor ? 'hedge' : 'strange';
+    return 'strange';
   }
   if (context.garden) {
     return 'garden';
@@ -30,5 +26,5 @@ export function chooseMusic(context: MusicContext): MusicTrack {
   if (context.street) {
     return 'street';
   }
-  return context.time === 'morning' ? 'house-day' : 'house-night';
+  return 'house';
 }

@@ -8,7 +8,7 @@
 ; la boîte à formes. On y arrive par l'histoire (l'oculus de l'école), jamais par une porte.
 ; @name: École étrange
 ; @world: strange
-; @music: street-strange
+; @music: strange
 ; @hazard: pencils
 ; @difficulty: hard
 ; @ambient: #1a1f2c
