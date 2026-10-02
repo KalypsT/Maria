@@ -1,10 +1,12 @@
 ; Jardin : le potager (D-46). Papa arrose ; bacs surélevés au-dessus des orties.
+; Refait (D-76) : ciel ouvert, l'épouvantail planté dans le dernier bac, la brouette et le tonneau au fond.
 ; @name: Potager
 ; @icon: flower
 ; @world: garden
 ; @difficulty: medium
 ; @note: haut des tuteurs de haricots : trouvaille difficile.
-; @decor: canopy 0 0 66 1
+; @decor: canopy 0 0 12 2
+; @decor: canopy 52 0 14 2
 ; @decor: hedge 0 1 1 18
 ; @decor: hedge 65 1 1 18
 ; @decor: planter 9 19 5 3
@@ -15,9 +17,13 @@
 ; @decor: beanpoles 20 4 23 12
 ; @decor: birdhouse 60 8 2 14
 ; @decor: sun 48 2 3 3
+; @decor: scarecrow 50 9 5 10
+; @decor: wheelbarrow 55 19 4 3
+; @decor: barrel 62 18 3 4
+; @decor: butterfly 16 5 30 12
 ; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
-vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-v................................................................v
+vvvvvvvvvvvv........................................vvvvvvvvvvvvvv
+vvvvvvv..................................................vvvvvvvvv
 v................................................................v
 v................................................................v
 v................................................................v

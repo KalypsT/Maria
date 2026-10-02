@@ -5,6 +5,7 @@ import { wind } from '../core/fx/worldLife';
 import type { LevelData } from '../core/level/LevelData';
 import { clotheslineItems, drawLaundryItem } from './art/roomArt';
 import { drawFlames, hearth, pendulum } from './art/livingArt';
+import { garlandPoints, swingPivot } from './art/gardenArt';
 
 /** Linge : avec le fond proche, sous les meubles (dessinés avec le fond, -5) on passe devant. */
 const LAUNDRY_DEPTH = -4.6;
@@ -32,6 +33,10 @@ const DOT_TEXTURE = 'life-dot';
 const STAR_TEXTURE = 'life-star';
 const MOON_TEXTURE = 'life-mobile-moon';
 const MOTH_TEXTURE = 'life-moth';
+const BUTTERFLY_TEXTURE = 'life-butterfly';
+/** Balançoire, girouette (D-76) : inclinaisons et orientations dessinées d'avance. */
+const SWING_FRAMES = 9;
+const VANE_FRAMES = 8;
 const FRAME_NAMES = Array.from({ length: Math.max(LAUNDRY_FRAMES, LEAF_FRAMES) }, (_, i) =>
   String(i),
 );
@@ -146,6 +151,29 @@ interface Drum {
   readonly clothes: readonly Phaser.GameObjects.Image[];
 }
 
+/** Un objet animé par images (balançoire, girouette) : son image et sa phase. */
+interface Framed {
+  readonly image: Phaser.GameObjects.Image;
+  readonly kind: 'swing' | 'vane';
+}
+
+/** Une ampoule de la guirlande, à sa place sur le fil. */
+interface Bulb {
+  readonly image: Phaser.GameObjects.Image;
+  readonly x: number;
+  readonly y: number;
+  readonly phase: number;
+}
+
+interface Butterfly {
+  readonly image: Phaser.GameObjects.Image;
+  readonly x: number;
+  readonly y: number;
+  readonly w: number;
+  readonly h: number;
+  readonly phase: number;
+}
+
 interface Moth {
   readonly image: Phaser.GameObjects.Image;
   readonly x: number;
@@ -174,6 +202,9 @@ export class WorldLifeView {
   private readonly fields: SparkField[] = [];
   private readonly moths: Moth[] = [];
   private readonly drums: Drum[] = [];
+  private readonly framed: Framed[] = [];
+  private readonly bulbs: Bulb[] = [];
+  private readonly butterflies: Butterfly[] = [];
   /** Textures propres à la salle, retirées avec elle. */
   private readonly roomTextures: string[] = [];
   private readonly rand = Math.random;
@@ -228,6 +259,12 @@ export class WorldLifeView {
       }
     }
     this.drums.length = 0;
+    for (const list of [this.framed, this.bulbs, this.butterflies]) {
+      for (const item of list) {
+        item.image.destroy();
+      }
+      list.length = 0;
+    }
     for (const key of this.roomTextures) {
       this.scene.textures.remove(key);
     }
@@ -261,6 +298,14 @@ export class WorldLifeView {
         this.makeSparks('steam', r, WORLD_LIFE.steam.alpha);
       } else if (d.kind === 'machine' && !palette.outdoor) {
         this.makeDrum(r);
+      } else if (d.kind === 'swing') {
+        this.makeSwing(`${level.id}-${String(i)}`, r, palette, artScale);
+      } else if (d.kind === 'weathervane') {
+        this.makeVane(`${level.id}-${String(i)}`, r, artScale);
+      } else if (d.kind === 'guinguette') {
+        this.makeGarland(r);
+      } else if (d.kind === 'butterfly') {
+        this.makeButterflies(r);
       } else if (d.kind === 'moth' && palette.stars) {
         this.makeMoth(r);
       }
@@ -533,6 +578,198 @@ export class WorldLifeView {
     this.drums.push({ x: r.x + r.w / 2, y: r.y + r.h / 2 + 4, radius: radius * 0.5, clothes });
   }
 
+  /** La balançoire du grand arbre (D-76) : deux cordes et une planche, qui oscillent au vent. */
+  private makeSwing(
+    id: string,
+    r: { x: number; y: number; w: number; h: number },
+    palette: Readonly<ArtPalette>,
+    artScale: number,
+  ): void {
+    const pivot = swingPivot(r);
+    const sway = WORLD_LIFE.swing.swayRad;
+    const half = r.w / 2 - 3;
+    const w = 2 * (pivot.length * Math.sin(sway) + half + 4);
+    const h = pivot.length + 6;
+    const key = `life-swing-${id}`;
+    const made = framedTexture(
+      this.scene,
+      key,
+      SWING_FRAMES,
+      w,
+      h,
+      w / 2,
+      1,
+      artScale,
+      (k) => -sway + (2 * sway * k) / (SWING_FRAMES - 1),
+      (ctx) => {
+        ctx.strokeStyle = '#d9c7a3';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(-half + 2, 0);
+        ctx.lineTo(-half + 2, pivot.length);
+        ctx.moveTo(half - 2, 0);
+        ctx.lineTo(half - 2, pivot.length);
+        ctx.stroke();
+        ctx.fillStyle = palette.wood;
+        ctx.beginPath();
+        ctx.roundRect(-half, pivot.length - 1, 2 * half, 4, 1.5);
+        ctx.fill();
+        ctx.fillStyle = palette.woodLight;
+        ctx.fillRect(-half + 1, pivot.length - 1, 2 * half - 2, 1.2);
+      },
+    );
+    if (!made) {
+      return;
+    }
+    this.roomTextures.push(key);
+    const image = this.scene.add
+      .image(pivot.x, pivot.y, key, FRAME_NAMES[(SWING_FRAMES - 1) / 2])
+      .setOrigin(0.5, 1 / h)
+      .setScale(1 / artScale)
+      .setDepth(LAUNDRY_DEPTH);
+    this.framed.push({ image, kind: 'swing' });
+  }
+
+  /** La girouette de la remise (D-76) : un coq de profil, vu tourner (plus court de face). */
+  private makeVane(
+    id: string,
+    r: { x: number; y: number; w: number; h: number },
+    artScale: number,
+  ): void {
+    const key = `life-vane-${id}`;
+    let frame = 0;
+    const made = framedTexture(
+      this.scene,
+      key,
+      VANE_FRAMES,
+      20,
+      12,
+      10,
+      8,
+      artScale,
+      () => 0,
+      (ctx) => {
+        // De profil (image 0) à de face (dernière image) : le coq se raccourcit.
+        const k = Math.cos((frame / (VANE_FRAMES - 1)) * (Math.PI / 2));
+        frame++;
+        ctx.save();
+        ctx.scale(Math.max(0.15, k), 1);
+        ctx.fillStyle = '#3a3330';
+        ctx.beginPath();
+        ctx.moveTo(-9, 0);
+        ctx.lineTo(-3, -3);
+        ctx.lineTo(1, -7);
+        ctx.lineTo(4, -5);
+        ctx.lineTo(3, -2);
+        ctx.lineTo(8, -1);
+        ctx.lineTo(6, 2);
+        ctx.lineTo(-6, 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      },
+    );
+    if (!made) {
+      return;
+    }
+    this.roomTextures.push(key);
+    const image = this.scene.add
+      .image(r.x + r.w / 2, r.y + 8, key, FRAME_NAMES[0])
+      .setOrigin(0.5, 8 / 12)
+      .setScale(1 / artScale)
+      .setDepth(LAUNDRY_DEPTH);
+    this.framed.push({ image, kind: 'vane' });
+  }
+
+  /** Les ampoules de la guirlande de la pergola (D-76) : de petites boules qui se balancent. */
+  private makeGarland(r: { x: number; y: number; w: number; h: number }): void {
+    this.ensureSprites();
+    const tints = [0xffd88a, 0xf6b3c4, 0xfff3c9];
+    garlandPoints(r).forEach((point, i) => {
+      const image = this.scene.add
+        .image(point.x, point.y, DOT_TEXTURE)
+        .setDisplaySize(4.5, 5.5)
+        .setTint(tints[i % tints.length] ?? 0xffd88a)
+        .setDepth(LAUNDRY_DEPTH);
+      this.bulbs.push({ image, x: point.x, y: point.y, phase: point.x * 0.05 });
+    });
+  }
+
+  /** Papillons (D-76) : une boucle lente dans leur rectangle, ailes qui battent. */
+  private makeButterflies(r: { x: number; y: number; w: number; h: number }): void {
+    if (!this.scene.textures.exists(BUTTERFLY_TEXTURE)) {
+      let open = true;
+      framedTexture(
+        this.scene,
+        BUTTERFLY_TEXTURE,
+        2,
+        10,
+        8,
+        5,
+        4,
+        4,
+        () => 0,
+        (ctx) => {
+          ctx.fillStyle = '#ffffff';
+          const span = open ? 4.2 : 1.6;
+          ctx.beginPath();
+          ctx.ellipse(-span / 2 - 0.3, -1, span / 2 + 0.4, 2.6, -0.4, 0, Math.PI * 2);
+          ctx.ellipse(span / 2 + 0.3, -1, span / 2 + 0.4, 2.6, 0.4, 0, Math.PI * 2);
+          ctx.ellipse(-span / 2, 1.6, span / 3 + 0.3, 1.6, -0.2, 0, Math.PI * 2);
+          ctx.ellipse(span / 2, 1.6, span / 3 + 0.3, 1.6, 0.2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#4a3b33';
+          ctx.fillRect(-0.5, -2.5, 1, 5);
+          open = !open;
+        },
+      );
+    }
+    const tints = [0xf6b3c4, 0xf2d28a, 0xb9d6f2];
+    for (let i = 0; i < WORLD_LIFE.butterfly.count; i++) {
+      const image = this.scene.add
+        .image(0, 0, BUTTERFLY_TEXTURE, FRAME_NAMES[0])
+        .setScale(1 / 4)
+        .setTint(tints[i % tints.length] ?? 0xf6b3c4)
+        .setDepth(LEAF_DEPTH);
+      this.butterflies.push({ image, ...r, phase: i * 2.4 });
+    }
+  }
+
+  /** Balançoire, girouette, guirlande, papillons : d'après l'heure et le vent. */
+  private updateGardenLife(nowMs: number): void {
+    const cfg = WORLD_LIFE;
+    const gust = wind(nowMs);
+    for (const item of this.framed) {
+      if (item.kind === 'swing') {
+        const k = gust * Math.sin((nowMs / cfg.swing.periodMs) * Math.PI * 2);
+        const frame = Math.round(((k + 1) / 2) * (SWING_FRAMES - 1));
+        item.image.setFrame(FRAME_NAMES[frame] ?? '0', false, false);
+      } else {
+        // La girouette se tourne lentement, plus vite quand le vent forcit.
+        const turn = Math.abs(Math.sin(nowMs / 9000 + gust * 1.5));
+        const frame = Math.min(VANE_FRAMES - 1, Math.floor(turn * VANE_FRAMES));
+        item.image.setFrame(FRAME_NAMES[frame] ?? '0', false, false);
+      }
+    }
+    for (const bulb of this.bulbs) {
+      bulb.image.setPosition(
+        bulb.x + cfg.garland.swayPx * gust * Math.sin(nowMs / 900 + bulb.phase),
+        bulb.y,
+      );
+    }
+    const wing = FRAME_NAMES[Math.floor(nowMs / cfg.butterfly.flapMs) % 2] ?? '0';
+    for (const fly of this.butterflies) {
+      const t = (nowMs / cfg.butterfly.periodMs) * Math.PI * 2 + fly.phase;
+      fly.image
+        .setPosition(
+          fly.x + fly.w * (0.5 + 0.45 * Math.sin(t)),
+          fly.y + fly.h * (0.5 + 0.35 * Math.sin(2 * t + 0.7)) + 3 * Math.sin(t * 7),
+        )
+        .setFrame(wing, false, false)
+        .setFlipX(Math.cos(t) < 0);
+    }
+  }
+
   /** Le papillon de nuit autour d'une lampe (D-75), le soir. */
   private makeMoth(r: { x: number; y: number; w: number; h: number }): void {
     this.ensureSprites();
@@ -614,6 +851,7 @@ export class WorldLifeView {
         );
       });
     }
+    this.updateGardenLife(nowMs);
     const fly = (nowMs / cfg.moth.periodMs) * Math.PI * 2;
     const wing = FRAME_NAMES[Math.floor(nowMs / cfg.moth.flapMs) % 2] ?? '0';
     for (const moth of this.moths) {

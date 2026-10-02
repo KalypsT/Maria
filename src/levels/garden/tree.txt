@@ -1,6 +1,7 @@
 ; Jardin : le grand arbre (D-46). On y monte par les branches et les buissons de la haie (en grimpant),
 ; jusqu'à la cabane (sortie 2). Le vieux mur (sortie 3, en haut à gauche) ne s'atteint qu'avec le saut mural,
 ; par la cheminée entre le mur et le tronc.
+; Refait (D-76) : une trouée dans la couronne, un rayon de soleil ; une balançoire pendue à la branche du bas.
 ; @name: Grand arbre
 ; @icon: tree
 ; @world: garden
@@ -21,13 +22,16 @@
 ; @decor: branch 26 16 7 1
 ; @decor: deck 36 12 9 1
 ; @decor: hedgehole 39 37 6 3
+; @decor: sunshaft 29 3 9 34
+; @decor: dust 29 6 9 30
+; @decor: swing 27 33 5 6
 ; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv....vvvvvvvvvvv
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv......vvvvvvvvvv
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv......vvvvvvvvvv
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv......vv.......v
 3...................bbbbbb...................v
 3...................bbbbbb...................v
 3...................bbbbbb...................v

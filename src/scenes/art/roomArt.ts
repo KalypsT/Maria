@@ -1836,13 +1836,15 @@ function drawThorns(
   }
   ctx.stroke();
   ctx.fillStyle = spike;
+  // Monde étrange : épines plus grandes (D-76), elles se lisaient comme de l'herbe.
+  const big = p.silhouettes ? 1.7 : 1;
   for (let k = 0; k < 5; k++) {
     const sx = x + 2 + ((col * 5 + k * 7) % 12);
     const sy = base - 3 - ((col * 3 + k * 5) % 9);
     ctx.beginPath();
-    ctx.moveTo(sx - 1.5, sy + 1);
-    ctx.lineTo(sx, sy - 3);
-    ctx.lineTo(sx + 1.5, sy + 1);
+    ctx.moveTo(sx - 1.5 * big, sy + 1);
+    ctx.lineTo(sx, sy - 3 * big);
+    ctx.lineTo(sx + 1.5 * big, sy + 1);
     ctx.fill();
   }
 }
