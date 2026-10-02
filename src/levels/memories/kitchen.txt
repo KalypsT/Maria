@@ -5,7 +5,7 @@
 ; `src/config/playableMemories.ts`. Couleurs chaudes et passées. PLACEHOLDER.
 ; @name: Souvenir de la cuisine
 ; @world: memory
-; @music: memory
+; @music: memory-play
 ; @ambient: #4a3328
 ; @wall: tiles
 ; @decor: window 17 6 6 6

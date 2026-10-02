@@ -13,10 +13,20 @@ Suite : le niveau 6 (la station balnéaire), à planifier le moment venu.
 **En attente** :
 
 - essais sur téléphone de l'utilisateur (gare, passe graphique, glissade) ; les listes « À vérifier sur téléphone » ci-dessous restent ouvertes ;
-- **musique** (D-57) : lecteur en place, morceaux en cours de création par l'utilisateur ;
+- **musique** (D-57, D-92) : 7 premiers fichiers intégrés ; les autres morceaux arrivent. **Budget à décider** avant d'en ajouter (12 Mo, 7,2 Mo déjà pris : les 9 thèmes restants n'y tiennent pas) ;
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Musique : premiers morceaux (D-92)
+
+- Intégrés : thèmes `house-night`, `garden`, `strange`, `station` ; jingles `found`, `memory`, `maria`.
+- Retravaillés par `npm run audio:prepare` : silences coupés, même sonie pour tous (−18 LUFS, crête ≤ −1,5 dBTP ; les bruts allaient de −14,5 à −23 LUFS et touchaient 0 dBFS), AAC 96 kbit/s `.m4a`, pochettes retirées. 15,5 Mo bruts → 7,2 Mo.
+- Corrigé : le thème des souvenirs jouables portait le même nom que le jingle `memory` ; il devient `memory-play` (test ajouté).
+- Tests : 629. Build et précache vérifiés (`check:pwa`). Le Chromium de l'environnement ne lit pas l'AAC (codec absent des versions libres) : l'écoute dans le jeu reste à faire sur téléphone.
+- [ ] À vérifier sur téléphone : les morceaux jouent-ils (iPhone et Android) ? Volumes équilibrés entre thèmes et jingles ? Le jingle `maria` assez étrange ?
+- [ ] Les boucles (fondu de 4 s sur la fin) : se remarquent-elles ?
+- [ ] Le jingle `memory` (9 s) : trop long par-dessus la musique baissée ?
 
 ### Le train, PR 6b : les revisites avec la glissade (D-91)
 

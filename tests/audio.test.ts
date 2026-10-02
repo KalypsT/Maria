@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { AUDIO_BUDGET_BYTES, AUDIO_MIX, DEFAULT_AUDIO_SETTINGS } from '../src/config/audio';
+import {
+  AUDIO_BUDGET_BYTES,
+  AUDIO_MIX,
+  DEFAULT_AUDIO_SETTINGS,
+  JINGLES,
+  MUSIC_TRACKS,
+} from '../src/config/audio';
 import { AudioMix, equalPower, loopOverlapSec } from '../src/core/audio/AudioMix';
 import { audioFileMap } from '../src/core/audio/audioFiles';
 import { chooseMusic } from '../src/core/audio/musicChoice';
@@ -135,6 +141,11 @@ describe('fichiers audio (D-57)', () => {
     expect(slots.get('maria')).toBe('/a/maria.m4a');
     expect(slots.has('title')).toBe(false);
     expect(unknown.sort()).toEqual(['jardin.mp3', 'title.wav']);
+  });
+
+  it('un thème et un jingle ne partagent jamais un nom (un fichier servirait aux deux, D-92)', () => {
+    const tracks: readonly string[] = MUSIC_TRACKS;
+    expect(JINGLES.filter((jingle) => tracks.includes(jingle))).toEqual([]);
   });
 
   it('réglages du son bornés', () => {
