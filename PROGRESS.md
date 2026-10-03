@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) et **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101), sur `ccr-014503d9-cj0c7a`. Suite : PR 6, la fête engloutie (le monde étrange, par le carrousel). Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
+**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101, fusionnées) et **PR 6 faite : la fête engloutie** (D-102), sur `ccr-014503d9-cj0c7a`. Suite : PR 7, le rythme de la vague (parcours d'essai 14). Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
 
 **Le train** (niveau 5, D-83 à D-91) : complet et fusionné. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
@@ -17,6 +17,19 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### La station balnéaire, PR 6 : la fête engloutie (D-102)
+
+- **Le monde étrange** : le soir, Agir devant le carrousel ; la lueur, le tremblement, le cercle : la fête de la jetée sous une eau immobile (difficile). Le carrousel y ramène ensuite.
+- **La salle** : le toit du carrousel englouti, la cheminée des chevaux (saut mural), la première veilleuse ; deux guirlandes au-dessus de l'eau (le crochet), la grande roue noyée ; le toit d'un stand, la toile tombée (glisser dessous), la seconde veilleuse ; le saut long sous l'auvent bas jusqu'au flanc d'un cheval (difficile), le toit du dernier stand.
+- **Fin provisoire** : la mer gronde, « ? », retour devant le carrousel (la vague viendra avec les PR 7 et 8).
+- DEBUG → Histoire : « la fête engloutie (le carrousel) ».
+- Tests : TESTCOUNT. Vérifié dans Chromium : l'entrée par le carrousel (le cercle, la bulle), l'arrivée, la traverse, le toit du stand, l'auvent, le toit du dernier stand, la fin provisoire et le retour sur la jetée.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « le soir de la fête, la jetée », puis le carrousel) : l'entrée se comprend-elle ? La fête engloutie inquiète-t-elle sans faire peur ?
+- [ ] La cheminée des chevaux : voit-on qu'on passe sous la barre qui flotte ? Les guirlandes au-dessus de l'eau : le saut de l'une à l'autre est-il lisible ?
+- [ ] Le saut long sous l'auvent (difficile, 67 ms) puis le saut mural le long du cheval : juste, ou frustrant ? La seconde veilleuse est-elle assez proche ?
+- [ ] Tomber dans l'eau (retour au dernier appui, la peur) : trop punitif dans une salle difficile ?
+- [ ] Le dessin en silhouettes : les chevaux, les toiles, les stands se lisent-ils sur un petit écran ?
 
 ### La station balnéaire, PR 5 : la jetée, la fête, le soir (D-101)
 

@@ -125,6 +125,11 @@ export const StoryFlag = {
    */
   SeaEvening: 'sea.evening',
   /**
+   * Le monde étrange de la station balnéaire (D-102) : le soir, Céleste est passée par le carrousel
+   * dans la fête engloutie.
+   */
+  SeaStrange: 'sea.strange',
+  /**
    * La marée est haute (D-95), à la station balnéaire : la seule étape réversible (les bancs des
    * marées la posent et la retirent). Les salles de marée prennent leur variante haute.
    */
