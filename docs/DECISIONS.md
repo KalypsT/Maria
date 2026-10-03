@@ -1320,6 +1320,25 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Tests** (`seaStrangeWave.test.ts`) : la liaison, hors carte, la poursuite et sa digue, le rythme des quatre tronçons, jamais coincée, le livre et sa fin ; `seaStrangeFair.test.ts` mis à jour (la sortie vers la vague).
 - **Sauvegarde** : aucune migration (étape `sea.strange-done`, souvenir `music-book` ajouté en dernier).
 
+## D-105 — La station balnéaire, PR 9 : le court souvenir, la nuit, le couloir en boucle, la fin
+
+- **Plan validé** (D-95). Le niveau 6 est complet ; sa fin reste un PLACEHOLDER jusqu'au niveau 7.
+- **Le court souvenir du livre** (deuxième court souvenir, D-68 ; rejouable dans le cahier en touchant le livre) : Céleste toute petite, **seule**, assise sur un tapis, le livre ouvert devant elle ; elle appuie sur un bouton, la bouche ronde ; des notes de couleur s'en échappent et montent. Une fenêtre pâle derrière. Il se place après le cœur, avant que le cercle se referme. Maria n'y est pas (pilier 5).
+- **La nuit au dortoir** : le centre a des murs de nuit (`; @nightwalls`), le soir (la fête et la nuit ne font qu'un). Après le livre, la camarade et deux enfants dorment sur leurs couchettes ; la maîtresse n'est plus au réfectoire. Sur sa couchette, Céleste pense à Maria, puis à son lit ; puis **la mélodie du livre** (bulle « musique »), d'on ne sait où, et une lueur sous **la porte du dortoir** (entre deux couchettes, du décor ; des sacs du décor y laissent la place) ; la lumière vacille près d'elle.
+- **Le couloir en boucle** : Agir à la porte, la mélodie ; dans le noir, un couloir (le couloir du centre, la nuit : des portes fermées, des veilleuses). **Cinq couloirs aux tuiles identiques, reliés en anneau** (la sortie droite de l'un mène à la gauche du suivant, le dernier au premier) : le couloir « revient sur lui-même », et **change à chaque tour** :
+  1. le couloir ordinaire ;
+  2. du sable, en dunes basses le long des murs ;
+  3. le papier peint de la chambre de Céleste (des pois roses) et sa toise (trois traits) ;
+  4. l'horloge de la gare et des valises le long du mur ;
+  5. le sol devenu une vitre sur la mer, le plafond un ciel à l'envers, et **une porte qui n'était pas là**, bordée de lueur turquoise ; la lumière vacille près d'elle.
+  - Hors carte, en silhouettes comme les mondes étranges (`; @world: strange`), musique `strange` ; ce qui vient d'un autre lieu garde un peu de sa couleur, passée. **Écart avec le plan** (quatre tours) : un premier tour ordinaire avant les quatre changements, pour qu'on voie le couloir changer.
+  - Sans danger ni lanterne : on rejoint toujours la porte en faisant le tour (testé). Le couloir est un point de non-retour : on n'en sort que par la porte.
+- **La fin** : Agir à la porte ; la lueur, l'image tremble ; le noir, longtemps (`sea.end`). **PLACEHOLDER** : Céleste se retrouve devant la porte ouverte sur la lueur ; Agir : « ? » (la suite, le niveau 7, viendra). Ni parents ni Maria à l'écran.
+- **Dessin** (`seaCorridorArt.ts`, `flashbackArt.ts`, PLACEHOLDER) : `corridordoors`, `sanddrift`, `bedroomwallpaper`, `heightmark`, `corridorsuitcases`, `seabelow`, `skyreversed`, `strangedoor` ; l'horloge de quai et la porte reprises.
+- **Debug** : histoires « le livre musical trouvé, la nuit au dortoir » et « la fin de la station balnéaire (la porte du couloir) ».
+- **Tests** (`seaNight.test.ts`) : le court souvenir et sa place, la nuit au dortoir, la porte du dortoir (seul passage vers le couloir), l'anneau des cinq couloirs (tuiles identiques, décors tous différents), la porte du dernier tour et la fin, on rejoint toujours la porte.
+- **Sauvegarde** : aucune migration (étape `sea.end`) ; aucune lanterne ni trouvaille déplacée.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

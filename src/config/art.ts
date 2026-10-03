@@ -610,6 +610,15 @@ export const DECOR_KINDS: Readonly<
   drownedwheel: { furniture: false, far: true },
   drowneddeck: { furniture: true },
   strangeseawall: { furniture: true },
+  // Le couloir en boucle (D-105), la fin de la station balnéaire.
+  corridordoors: { furniture: false },
+  sanddrift: { furniture: false },
+  bedroomwallpaper: { furniture: false, far: true },
+  heightmark: { furniture: false },
+  corridorsuitcases: { furniture: false },
+  seabelow: { furniture: true },
+  skyreversed: { furniture: false },
+  strangedoor: { furniture: false },
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */

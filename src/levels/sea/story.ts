@@ -18,6 +18,10 @@ const TEACHER_CENTRE = { col: 57, row: 23 };
 
 const ON_QUAY = { all: [F.TrainArrived], none: [F.SeaArrived] };
 const SETTLED = { all: [F.SeaArrived] };
+/** Au centre, de jour et le soir de la fête, avant le livre musical (ensuite, la nuit, D-105). */
+const DAY_CENTRE = { all: [F.SeaArrived], none: [F.SeaStrangeDone] };
+/** La nuit au dortoir et après (D-105). */
+const NIGHT_ON = { all: [F.SeaStrangeDone] };
 /** La pêche à pied (D-99) : la classe sur la plage, à marée basse, jusqu'à la première marée. */
 const FISHING = { all: [F.SeaArrived], none: [F.SeaFirstTide] };
 const AFTER_TIDE = { all: [F.SeaFirstTide] };
@@ -49,6 +53,12 @@ const MUSIC_BOOK = { col: 181, row: 13 };
 const BUNK_SEAT = { col: 45, row: 9 };
 /** Le monde étrange, en cours (avant le livre musical). */
 const IN_STRANGE = { all: [F.SeaStrange], none: [F.SeaStrangeDone] };
+/** La nuit au dortoir (D-105), après le livre musical, jusqu'à la fin du niveau. */
+const NIGHT = { all: [F.SeaStrangeDone], none: [F.SeaEnd] };
+/** La porte du dortoir, entre deux couchettes : elle donne sur le couloir en boucle. */
+const DORM_DOOR = { col: 60, row: 11 };
+/** La porte qui n'était pas là, au dernier tour du couloir. */
+const LAST_DOOR = { col: 45, row: 9 };
 
 /**
  * Le banc des marées (D-95, D-99) : Agir, Céleste s'assoit et regarde la mer ; le noir ; la marée a
@@ -268,7 +278,11 @@ const TRIGGERS: StoryTrigger[] = [
       },
       { do: 'wait', ms: S.cradleSparkleMs },
       { do: 'thought', icon: 'heart', ms: S.thoughtMs },
-      { do: 'wait', ms: S.thoughtMs + S.lookMs },
+      { do: 'wait', ms: S.thoughtMs },
+      // Le court souvenir (D-105) : Céleste toute petite, seule, appuie sur un bouton du livre ;
+      // des notes dessinées s'en échappent.
+      { do: 'flashback', id: 'music-book', ms: S.flashbackMs },
+      { do: 'wait', ms: S.lookMs },
       { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
       { do: 'flag', id: F.SeaStrangeDone },
       { do: 'room', room: 'sea-centre', ...BUNK_SEAT, facing: 1, returnPoint: true },
@@ -279,8 +293,76 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'thought', icon: 'maria', ms: S.thoughtMs },
       { do: 'wait', ms: S.thoughtMs + 300 },
       { do: 'thought', icon: 'bed', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs + S.lookMs },
+      // La nuit (D-105) : tout le monde dort ; la mélodie du livre, d'on ne sait où ; une lueur sous
+      // la porte du dortoir.
+      { do: 'thought', icon: 'music', ms: S.thoughtMs + 600 },
+      {
+        do: 'sparkle',
+        area: { col: DORM_DOOR.col - 1, row: DORM_DOOR.row - 3, w: 3, h: 4 },
+        ms: S.cradleSparkleMs,
+      },
       { do: 'wait', ms: S.lookMs },
     ],
+  },
+  {
+    // La porte du dortoir, la nuit (D-105) : la mélodie vient de derrière ; Céleste l'ouvre. Dans le
+    // noir, un couloir qui n'était pas là, celui du centre la nuit. Il revient sur lui-même.
+    id: 'sea-corridor-enter',
+    room: 'sea-centre',
+    on: 'interact',
+    area: { col: DORM_DOOR.col - 2, row: DORM_DOOR.row - 2, w: 5, h: 3 },
+    mark: { col: DORM_DOOR.col, row: DORM_DOOR.row - 4 },
+    when: NIGHT,
+    lock: true,
+    steps: [
+      { do: 'thought', icon: 'music', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs },
+      { do: 'fadeOut', ms: S.fadeMs },
+      { do: 'room', room: 'sea-corridor', col: 6, row: 9, facing: 1 },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'fadeIn', ms: S.fadeMs },
+    ],
+  },
+  {
+    // La fin de la station balnéaire (D-105) : au cinquième tour du couloir, une porte qui n'était
+    // pas là, sa lueur. Céleste l'ouvre ; la lumière ; le noir, longtemps. PLACEHOLDER : la suite
+    // (le niveau 7, presque entièrement étrange) viendra ; Céleste se retrouve devant la porte,
+    // ouverte sur la lueur.
+    id: 'sea-end-door',
+    room: 'sea-corridor-sea',
+    on: 'interact',
+    area: { col: LAST_DOOR.col - 2, row: LAST_DOOR.row - 2, w: 5, h: 3 },
+    mark: { col: LAST_DOOR.col, row: LAST_DOOR.row - 5 },
+    when: NIGHT,
+    lock: true,
+    steps: [
+      {
+        do: 'sparkle',
+        area: { col: LAST_DOOR.col - 1, row: LAST_DOOR.row - 4, w: 3, h: 5 },
+        ms: S.omenPeakMs + 1200,
+      },
+      { do: 'shake', ms: S.omenPeakMs, strength: 0.6 },
+      { do: 'wait', ms: S.omenPeakMs + 600 },
+      { do: 'fadeOut', ms: S.nightFadeOutMs },
+      { do: 'flag', id: F.SeaEnd },
+      { do: 'wait', ms: S.monthsBlackMs },
+      { do: 'fadeIn', ms: S.nightFadeInMs },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'thought', icon: 'question', ms: S.thoughtMs },
+    ],
+  },
+  {
+    // Après la fin (PLACEHOLDER) : la porte ouverte sur la lueur ; la suite viendra (« ? »).
+    id: 'sea-end-later',
+    room: 'sea-corridor-sea',
+    on: 'interact',
+    area: { col: LAST_DOOR.col - 2, row: LAST_DOOR.row - 2, w: 5, h: 3 },
+    mark: { col: LAST_DOOR.col, row: LAST_DOOR.row - 5 },
+    when: { all: [F.SeaEnd] },
+    lock: false,
+    repeat: true,
+    steps: [{ do: 'thought', icon: 'question', ms: S.thoughtMs }],
   },
   // Les bancs des marées (D-95) : sur la promenade, face à la plage ; devant la capitainerie du port.
   tideBench('sea-bench-promenade', 'sea-promenade', PROMENADE_BENCH),
@@ -357,7 +439,13 @@ const PROPS: StoryProp[] = [
   { id: 'kids-jetty', room: 'sea-jetty', kind: 'kids-quay', col: 166, row: 15, when: EVENING },
   // Au centre (D-98), une fois arrivés : la maîtresse au réfectoire ; la camarade et deux enfants au
   // dortoir, assis sur les couchettes.
-  { id: 'teacher-centre', room: 'sea-centre', kind: 'teacher', ...TEACHER_CENTRE, when: SETTLED },
+  {
+    id: 'teacher-centre',
+    room: 'sea-centre',
+    kind: 'teacher',
+    ...TEACHER_CENTRE,
+    when: DAY_CENTRE,
+  },
   {
     id: 'classmate-dorm',
     room: 'sea-centre',
@@ -365,9 +453,16 @@ const PROPS: StoryProp[] = [
     col: 60,
     row: 11,
     flip: true,
-    when: SETTLED,
+    when: DAY_CENTRE,
   },
-  { id: 'kid-cap-dorm', room: 'sea-centre', kind: 'kid-cap-sit', col: 55, row: 9, when: SETTLED },
+  {
+    id: 'kid-cap-dorm',
+    room: 'sea-centre',
+    kind: 'kid-cap-sit',
+    col: 55,
+    row: 9,
+    when: DAY_CENTRE,
+  },
   {
     id: 'kid-bob-dorm',
     room: 'sea-centre',
@@ -375,8 +470,19 @@ const PROPS: StoryProp[] = [
     col: 65,
     row: 9,
     flip: true,
-    when: SETTLED,
+    when: DAY_CENTRE,
   },
+  // La nuit (D-105) : la camarade et deux enfants dorment sur leurs couchettes.
+  {
+    id: 'classmate-night',
+    room: 'sea-centre',
+    kind: 'classmate-asleep',
+    col: 55,
+    row: 6,
+    when: NIGHT_ON,
+  },
+  { id: 'kid-night-1', room: 'sea-centre', kind: 'kid-asleep', col: 55, row: 9, when: NIGHT_ON },
+  { id: 'kid-night-2', room: 'sea-centre', kind: 'kid-asleep', col: 65, row: 9, when: NIGHT_ON },
 ];
 
 /**
@@ -405,6 +511,9 @@ const TIMES: StoryData['times'] = [{ when: EVENING, time: 'evening' }];
  * livre musical (D-104).
  */
 const OMENS: StoryData['omens'] = [
+  // La nuit (D-105), la lumière vacille près de la porte du dortoir, puis de la porte du couloir.
+  { room: 'sea-centre', when: NIGHT, col: DORM_DOOR.col, row: DORM_DOOR.row, radius: 10 },
+  { room: 'sea-corridor-sea', when: NIGHT, col: LAST_DOOR.col, row: LAST_DOOR.row, radius: 12 },
   {
     room: 'sea-jetty',
     when: { all: [F.SeaEvening], none: [F.SeaStrangeDone] },
