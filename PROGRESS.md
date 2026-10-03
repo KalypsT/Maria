@@ -24,7 +24,7 @@
 - **La salle** : le toit du carrousel englouti, la cheminée des chevaux (saut mural), la première veilleuse ; deux guirlandes au-dessus de l'eau (le crochet), la grande roue noyée ; le toit d'un stand, la toile tombée (glisser dessous), la seconde veilleuse ; le saut long sous l'auvent bas jusqu'au flanc d'un cheval (difficile), le toit du dernier stand.
 - **Fin provisoire** : la mer gronde, « ? », retour devant le carrousel (la vague viendra avec les PR 7 et 8).
 - DEBUG → Histoire : « la fête engloutie (le carrousel) ».
-- Tests : TESTCOUNT. Vérifié dans Chromium : l'entrée par le carrousel (le cercle, la bulle), l'arrivée, la traverse, le toit du stand, l'auvent, le toit du dernier stand, la fin provisoire et le retour sur la jetée.
+- Tests : 690. Vérifié dans Chromium : l'entrée par le carrousel (le cercle, la bulle), l'arrivée, la traverse, le toit du stand, l'auvent, le toit du dernier stand, la fin provisoire et le retour sur la jetée.
 - [ ] À vérifier sur téléphone (DEBUG → Histoire → « le soir de la fête, la jetée », puis le carrousel) : l'entrée se comprend-elle ? La fête engloutie inquiète-t-elle sans faire peur ?
 - [ ] La cheminée des chevaux : voit-on qu'on passe sous la barre qui flotte ? Les guirlandes au-dessus de l'eau : le saut de l'une à l'autre est-il lisible ?
 - [ ] Le saut long sous l'auvent (difficile, 67 ms) puis le saut mural le long du cheval : juste, ou frustrant ? La seconde veilleuse est-elle assez proche ?
