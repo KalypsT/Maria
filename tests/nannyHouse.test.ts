@@ -82,6 +82,7 @@ describe('la maison de la nounou : l’entrée, le miroir, la maison (D-110)', (
     expect(kinds.sort()).toEqual([
       'nap-light-bed',
       'nap-light-school',
+      'nap-light-sea',
       'nap-light-station',
       'reflection',
       'reflection-through',

@@ -59,6 +59,8 @@ import nannySchool from '../nanny/school.txt?raw';
 import nannyStreet from '../nanny/street.txt?raw';
 import nannyStation from '../nanny/station.txt?raw';
 import nannyTrain from '../nanny/train.txt?raw';
+import nannyBeach from '../nanny/beach.txt?raw';
+import nannyCarousel from '../nanny/carousel.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -169,6 +171,9 @@ export const HOUSE: ZoneSource = {
     // L'îlot de mémoire 3 (D-114) : la gare d'autrefois, puis le train et la cuisine rose.
     { id: 'nanny-station', text: nannyStation },
     { id: 'nanny-train', text: nannyTrain },
+    // L'îlot de mémoire 4 (D-115) : la plage d'autrefois, puis le carrousel et le livre musical.
+    { id: 'nanny-beach', text: nannyBeach },
+    { id: 'nanny-carousel', text: nannyCarousel },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -262,6 +267,12 @@ export const HOUSE: ZoneSource = {
     // Près de la cuisine rose, une porte vers la maison et une vers la rue d'autrefois (l'îlot voisin).
     ['nanny-train:2', 'nanny-house:7'],
     ['nanny-train:3', 'nanny-street:4'],
+    // L'îlot 4 (D-115) : la trappe du plancher de la maison mène à la plage, puis au carrousel ; près
+    // du livre musical, une porte vers la maison et une vers le train d'autrefois (l'îlot voisin).
+    ['nanny-house:8', 'nanny-beach:1'],
+    ['nanny-beach:2', 'nanny-carousel:1'],
+    ['nanny-carousel:2', 'nanny-house:9'],
+    ['nanny-carousel:3', 'nanny-train:4'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur
@@ -326,5 +337,8 @@ export const HOUSE: ZoneSource = {
     // L'îlot 3, à droite de la maison (son mur de droite) : la gare, puis le train.
     'nanny-station': { x: 11.6, y: 1.6, w: 4.2, h: 1.4, page: 'nanny' },
     'nanny-train': { x: 16.2, y: 1.8, w: 4.2, h: 1.2, page: 'nanny' },
+    // L'îlot 4, sous la maison (on y descend par la trappe) : la plage, puis le carrousel.
+    'nanny-beach': { x: 6.6, y: 4.3, w: 4.4, h: 1.4, page: 'nanny' },
+    'nanny-carousel': { x: 11.4, y: 4.1, w: 3.0, h: 1.6, page: 'nanny' },
   },
 };

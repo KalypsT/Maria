@@ -1,5 +1,11 @@
 import Phaser from 'phaser';
-import { ERASURE_COLORS, SHIFT_LAYER_VIEW, type ArtFinish, type ArtPalette } from '../config/art';
+import {
+  ERASURE_COLORS,
+  SHIFT_LAYER_VIEW,
+  WATER_COLORS,
+  type ArtFinish,
+  type ArtPalette,
+} from '../config/art';
 import { TILE_SIZE as T } from '../config/display';
 import { erasedLevel } from '../core/level/erase';
 import { atLayer, rawOf } from '../core/level/layers';
@@ -393,6 +399,11 @@ export class ShiftLayerView {
             filled.fillStyle(colors.edge, 0.8);
             filled.fillTriangle(x, y + T, x + T / 2, y + 6, x + T, y + T);
             ghost.strokeTriangle(x, y + T, x + T / 2, y + 6, x + T, y + T);
+          } else if (tile === Tile.Water) {
+            // L'eau d'une seule couche (la marée haute du présent, D-115) ; sans contour fantôme.
+            const [r, g, b] = WATER_COLORS.strangeBody;
+            filled.fillStyle((r << 16) | (g << 8) | b, WATER_COLORS.alpha);
+            filled.fillRect(x, y, T, T);
           }
         }
       }
