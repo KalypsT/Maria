@@ -4,13 +4,15 @@
 ; En haut, la traversée des ronces : des rideaux de ronces d'une seule couche, des branches de
 ; l'autre ; on bascule en plein saut. Défi : la cheminée du pilier, des ronces d'une couche sur
 ; chaque mur, jusqu'à l'étagère haute et sa trouvaille. Dans l'armoire, ouverte dans le souvenir,
-; une trouvaille. Sorties : (1) vers la maison, (2) vers le jardin renversé.
+; une trouvaille. Sorties : (1) vers la maison, (2) vers le jardin renversé ; porte (3) vers la
+; rue d'autrefois (îlot 2), ouverte une fois la boîte à formes retrouvée.
 ; @name: La chambre d'autrefois
 ; @world: strange
 ; @mapped: yes
 ; @music: strange
 ; @difficulty: medium
 ; @ambient: #1d1a2a
+; @door: 3 66 36
 ; @shift: memory 44 13 1 18
 ; @shift: present 35 34 5 3
 ; @shift: memory 31 9 1 7
@@ -53,6 +55,7 @@
 ; @decor: hedge 1 8 6 2
 ; @decor: hedge 14 1 20 8
 ; @decor: rug 58 36 16 1
+; @decor: schoolgate 65 32 3 5
 ; Légende : # mur/sol, b bois et v feuillage (pleins), - branche ou étagère et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S trouvaille, 1-9 sorties.
 ############################################################################
 #............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#

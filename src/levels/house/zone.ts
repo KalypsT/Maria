@@ -55,6 +55,8 @@ import nannyEntry from '../nanny/entry.txt?raw';
 import nannyHouse from '../nanny/house.txt?raw';
 import nannyBed from '../nanny/bed.txt?raw';
 import nannyGarden from '../nanny/garden.txt?raw';
+import nannySchool from '../nanny/school.txt?raw';
+import nannyStreet from '../nanny/street.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -159,6 +161,9 @@ export const HOUSE: ZoneSource = {
     // L'îlot de mémoire 1 (D-112) : la chambre d'autrefois, puis le jardin renversé et Roger.
     { id: 'nanny-bed', text: nannyBed },
     { id: 'nanny-garden', text: nannyGarden },
+    // L'îlot de mémoire 2 (D-113) : l'école d'autrefois, puis la rue et la boîte à formes.
+    { id: 'nanny-school', text: nannySchool },
+    { id: 'nanny-street', text: nannyStreet },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -240,6 +245,12 @@ export const HOUSE: ZoneSource = {
     ['nanny-house:2', 'nanny-bed:1'],
     ['nanny-bed:2', 'nanny-garden:1'],
     ['nanny-garden:2', 'nanny-house:3'],
+    // L'îlot 2 (D-113) : le haut de la bibliothèque mène à l'école, puis à la rue ; près de la boîte
+    // à formes, une porte vers la maison et une vers la chambre d'autrefois (l'îlot voisin).
+    ['nanny-house:5', 'nanny-school:1'],
+    ['nanny-school:2', 'nanny-street:1'],
+    ['nanny-street:2', 'nanny-house:4'],
+    ['nanny-street:3', 'nanny-bed:3'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur
@@ -298,5 +309,8 @@ export const HOUSE: ZoneSource = {
     // L'îlot 1, au-dessus de l'entrée : la chambre, puis le jardin renversé à sa gauche.
     'nanny-bed': { x: 0.2, y: -1.8, w: 4.0, h: 2.0, page: 'nanny' },
     'nanny-garden': { x: -3.8, y: -1.7, w: 3.6, h: 1.6, page: 'nanny' },
+    // L'îlot 2, au-dessus de la maison (on y monte par la bibliothèque) : l'école, puis la rue.
+    'nanny-school': { x: 4.6, y: -2.0, w: 4.4, h: 1.6, page: 'nanny' },
+    'nanny-street': { x: 9.4, y: -2.0, w: 4.2, h: 1.4, page: 'nanny' },
   },
 };

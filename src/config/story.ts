@@ -178,6 +178,11 @@ export const StoryFlag = {
    * souvenir ; le passage vers la maison s'ouvre, une veilleuse s'allume sur la porte de la sieste.
    */
   NannyBedDone: 'nanny.bed-done',
+  /**
+   * L'îlot de mémoire 2 (D-113) : sur l'abribus de la rue d'autrefois, la boîte à formes ; les
+   * passages vers la maison et la chambre d'autrefois s'ouvrent, une veilleuse jaune s'allume.
+   */
+  NannySchoolDone: 'nanny.school-done',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -307,6 +312,7 @@ export const PROP_SIZE = {
   // Une veilleuse de la porte de la sieste (D-112) : la lueur en haut, à la place de la veilleuse
   // éteinte dessinée sur la porte.
   'nap-light-bed': { w: 12, h: 24 },
+  'nap-light-school': { w: 12, h: 24 },
   'dad-garden': { w: 44 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // Le train (D-85) : sur le quai, la maîtresse et les parents (à hauteur d'enfant), les enfants
   // et leurs sacs ; dans la voiture-couchettes, des enfants de la taille de Céleste.

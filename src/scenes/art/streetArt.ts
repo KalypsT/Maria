@@ -448,6 +448,13 @@ export function streetDrawers({ tileShape, rounded }: ShapeTools): Record<string
       // Lampadaire : le chapeau (en haut) est la plateforme ; le mât descend jusqu'au trottoir.
       // La lanterne est juste sous le chapeau (D-77 : avant, le chapeau flottait au-dessus).
       const cx = r.x + r.w / 2;
+      if (a.palette.silhouettes) {
+        // Dans un monde étrange (D-113) : la silhouette, sans la lumière.
+        ctx.fillStyle = a.palette.wood;
+        ctx.fillRect(cx - 1.5, r.y + T, 3, r.h - T);
+        ledge(a, { x: r.x, y: r.y, w: r.w, h: T }, a.palette.wood, a.palette.woodLight);
+        return;
+      }
       ctx.fillStyle = METAL;
       ctx.fillRect(cx - 1.5, r.y + 11, 3, r.h - 11);
       ctx.fillRect(cx - 4, r.y + r.h - 3, 8, 3);
@@ -463,6 +470,14 @@ export function streetDrawers({ tileShape, rounded }: ShapeTools): Record<string
     busstop(a, r) {
       const { ctx } = a;
       // Abribus : toit (plateforme), vitre, banc, panneau.
+      if (a.palette.silhouettes) {
+        // Dans un monde étrange (D-113) : le toit et les deux montants, en silhouette.
+        ctx.fillStyle = a.palette.wood;
+        ctx.fillRect(r.x + 2, r.y + T, 3, r.h - T);
+        ctx.fillRect(r.x + r.w - 5, r.y + T, 3, r.h - T);
+        ledge(a, { x: r.x, y: r.y, w: r.w, h: T }, a.palette.wood, a.palette.woodLight);
+        return;
+      }
       ctx.fillStyle = 'rgba(188,220,238,0.45)';
       ctx.fillRect(r.x + 4, r.y + T, r.w - 8, r.h - T - 6);
       ctx.fillStyle = METAL;
@@ -534,6 +549,10 @@ export function streetDrawers({ tileShape, rounded }: ShapeTools): Record<string
     awning(a, r) {
       const { ctx } = a;
       // Store rayé de la supérette, et son lambrequin festonné.
+      if (a.palette.silhouettes) {
+        ledge(a, r, a.palette.wood, a.palette.woodLight);
+        return;
+      }
       ledge(a, r, '#e2574c', '#f39a8f');
       ctx.fillStyle = '#fff6f0';
       for (let x = r.x + 4; x < r.x + r.w; x += 8) {
@@ -622,7 +641,7 @@ export function streetDrawers({ tileShape, rounded }: ShapeTools): Record<string
     scaffold(a, r) {
       const { ctx, level } = a;
       // Échafaudage : montants, diagonales, puis les planches (exactement sur leurs tuiles).
-      ctx.strokeStyle = '#8a9aa5';
+      ctx.strokeStyle = a.palette.silhouettes ? a.palette.rim : '#8a9aa5';
       ctx.lineWidth = 2;
       ctx.beginPath();
       for (let x = r.x + 2; x < r.x + r.w; x += 7 * T) {

@@ -631,6 +631,7 @@ export const DECOR_KINDS: Readonly<
   passagestation: { furniture: false },
   passagesea: { furniture: false },
   bedgate: { furniture: false },
+  schoolgate: { furniture: false },
   cantower: { furniture: true },
 };
 
