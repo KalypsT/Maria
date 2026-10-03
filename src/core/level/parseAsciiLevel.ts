@@ -1,5 +1,6 @@
 import {
   type ChaseDir,
+  type ChaseLook,
   EntityType,
   type LevelDecor,
   Material,
@@ -72,7 +73,7 @@ const TRAIN = /^(\d+)\s+(left|right)$/;
 /**
  * Poursuite (D-67, D-87) : `; @chase: 4` (vers le haut, ligne d'arrivée) ou `; @chase: right 140`
  * (sens, ligne ou colonne d'arrivée), `; @chase-phase: 40 1.5` (jusqu'à la ligne ou la colonne,
- * tuiles/s), `; @chase-trip: col ligne l h recul`.
+ * tuiles/s), `; @chase-trip: col ligne l h recul`, `; @chase-look: wave` (la vague, D-103).
  */
 const CHASE_END = /^(?:(up|right|left)\s+)?(\d+)$/;
 const CHASE_PHASE = /^(\d+)\s+(\d+(?:\.\d+)?)$/;
@@ -112,6 +113,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   const trains: LevelTrain[] = [];
   let chaseEnd = -1;
   let chaseDir = 'up' as ChaseDir;
+  let chaseLook = 'default' as ChaseLook;
   const chasePhases: { until: number; speed: number }[] = [];
   const chaseTrips: { col: number; row: number; width: number; height: number; recoil: number }[] =
     [];
@@ -221,6 +223,11 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
           throw bad();
         }
         chasePhases.push({ until: Number(c[1]), speed: Number(c[2]) });
+      } else if (match[1] === 'chase-look') {
+        if (value !== 'wave') {
+          throw bad();
+        }
+        chaseLook = 'wave';
       } else if (match[1] === 'chase-trip') {
         const c = CHASE_TRIP.exec(value);
         if (!c) {
@@ -365,6 +372,9 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
       );
     }
   }
+  if (chaseLook === 'wave' && (chaseEnd < 0 || chaseDir === 'up')) {
+    throw new Error(`Niveau ${id} : @chase-look: wave va avec une poursuite horizontale`);
+  }
   if (chaseEnd >= (chaseDir === 'up' ? height : width)) {
     throw new Error(`Niveau ${id} : @chase ${chaseEnd} hors de la salle`);
   }
@@ -403,7 +413,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
     trains,
     chase:
       chaseEnd >= 0
-        ? { dir: chaseDir, end: chaseEnd, phases: chasePhases, trips: chaseTrips }
+        ? { dir: chaseDir, end: chaseEnd, phases: chasePhases, trips: chaseTrips, look: chaseLook }
         : null,
     tide,
     legs,

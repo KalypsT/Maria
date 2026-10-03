@@ -1285,6 +1285,21 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Tests** (`seaStrangeFair.test.ts`) : entrée et réentrée, hors carte, sa musique, le script (dans le noir, le cercle), la fin provisoire (retour devant le carrousel, aucun personnage), difficile, les veilleuses, les tronçons, jamais coincée.
 - **Sauvegarde** : aucune migration (étape `sea.strange`).
 
+## D-103 — La station balnéaire, PR 7 : le rythme de la vague (parcours d'essai 14)
+
+- **Plan validé** (D-95) : le boss du niveau 6 est une poursuite horizontale, **la vague** ; son rythme est essayé seul dans le parcours 14, branché dans le niveau avec la PR 8.
+- **Données** : `; @chase-look: wave` (seulement pour une poursuite horizontale, vérifié à la lecture) donne au poursuivant l'allure de la vague **et son rythme** ; le reste ne change pas (`; @chase`, `; @chase-phase`, `; @chase-trip`). Les autres poursuites gardent leur allure (testé).
+- **Le rythme** (cœur pur `Chase`) : la vague **déferle** pendant `surgeMs` (2 s), à la vitesse de la salle, puis **se retire** pendant `backwashMs` (1,5 s), en reculant de `backwashSpeed` (3 tuiles/s) ; et ainsi de suite. Le cycle ne court que quand elle bouge (ni pendant l'attente du départ, ni pendant les pauses) et repart à chaque essai. **Pendant le reflux**, ni contact ni rattrapage. Réglages dans DEBUG → Combat, PROVISOIRES.
+  - **Conséquence voulue** : quand elle déferle, elle va plus vite que Céleste (13 tuiles/s contre environ 9,5) ; le reflux rend l'avance. C'est **pendant le reflux qu'on monte une cheminée** (les fenêtres du §19). En moyenne, elle avance d'environ 6 tuiles/s, comme le chariot du train (6,5).
+- **La vague** (PLACEHOLDER, `ChaseView`) : une masse d'eau sombre de toute la hauteur, sans visage ; un front strié d'écume, bordé de **turquoise** (là où il ne faut pas être) ; dans l'eau, des chevaux de bois et des ballons pâles ; en haut, **la crête** qui s'avance quand elle déferle, se replie et pâlit quand elle se retire ; elle se soulève lentement et tremble au contact. Trois images par salle, aucune allocation par image.
+- **Parcours d'essai 14 « La vague »** (130 × 18, facile en statique ; prête escalade, saut mural et glissade ; le parapluie n'est pas prêté). Trois tronçons, une lanterne au début de chacun :
+  - une barrière basse (glisser dessous), puis **une cheminée à pied sec** (on passe sous une barre pendue, saut mural jusqu'au haut d'un bloc) ;
+  - un bassin à sauter, puis **une cheminée au-dessus de l'eau** (tomber ramène au dernier appui) ;
+  - un dernier bassin, une barrière basse, une caisse, et **la digue où la vague se brise** (la ligne d'arrivée de la poursuite, colonne 117).
+  - Impossible sans le saut mural, ni sans la glissade (testé).
+- **Test de rythme** (phase 3, rejeu du vrai `Chase` le long du chemin le plus rapide, D-70, D-87) : le joueur parfait n'est **jamais touché** (au moins 2,4 tuiles d'avance) ; **sans le reflux** (une vague qui ne se retire jamais), il est touché à chaque tronçon : le rythme compte ; **50 % plus lent**, il est touché à chaque tronçon. 25 % plus lent passe les deux premiers tronçons, pas le troisième. En phase 1 : le joueur parfait n'est jamais touché.
+- **Sauvegarde** : aucun changement (parcours d'essai hors partie).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

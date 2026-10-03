@@ -1,0 +1,33 @@
+; Parcours 14 : le rythme de la vague (boss, D-103). Capacités prêtées par le parcours (hors partie).
+; Une vague immense, de toute la hauteur, avance derrière Céleste, de gauche à droite : elle
+; déferle, puis se retire un instant. Trois tronçons, une lanterne au début de chacun : une barrière
+; basse (glisser dessous) et une cheminée à pied sec (saut mural, on la monte pendant le reflux) ;
+; un bassin à sauter et une cheminée au-dessus de l'eau ; un dernier bassin, une barrière basse et la
+; digue où la vague se brise. Le toucher fait monter la peur ; elle recule alors un peu.
+; @name: 14. La vague
+; @difficulty: easy
+; @abilities: climb wall-jump slide
+; @chase: right 117
+; @chase-phase: 117 13
+; @chase-look: wave
+; Légende : # plein, b bois (plein), ~ eau (ramène au dernier appui), . vide, P départ, C lanterne,
+; G arrivée.
+
+##################################################################################################################################
+#.............bbb..........b...............................................b................................bbb..................#
+#.............bbb..........b...............................................b..............C.................bbb..................#
+#.............bbb..........b...............................................b....bbbbbbbbbbbbbbb.............bbb..................#
+#.............bbb..........b...............................................b....bbbbbbbbbbbbbbb.............bbb..................#
+#.............bbb..........b...............................................b....bbbbbbbbbbbbbbb.............bbb..................#
+#.............bbb..........b....bbbbbbbbbbbbbbbbb..........................b....bbbbbbbbbbbbbbb.............bbb..................#
+#.............bbb..........b....bbbbbbbbbbbbbbbbb..........................b....bbbbbbbbbbbbbbb.............bbb..................#
+#.............bbb..........b....bbbbbbbbbbbbbbbbb..........................b....bbbbbbbbbbbbbbb.............bbb..................#
+#.............bbb..........b....bbbbbbbbbbbbbbbbb..........................b....bbbbbbbbbbbbbbb.............bbb..................#
+#.............bbb..........b....bbbbbbbbbbbbbbbbb..........................b....bbbbbbbbbbbbbbb.............bbb.............G....#
+#.............bbb..........b....bbbbbbbbbbbbbbbbb..........................b....bbbbbbbbbbbbbbb.............bbb......#############
+#.............bbb..........b....bbbbbbbbbbbbbbbbb...............................bbbbbbbbbbbbbbb.............bbb......#############
+#.............bbb...............bbbbbbbbbbbbbbbbb...............................bbbbbbbbbbbbbbb.............bbb...bbb#############
+#.............bbb...............bbbbbbbbbbbbbbbbb...............................bbbbbbbbbbbbbbb.............bbb...bbb#############
+#.P.............................bbbbbbbbbbbbbbbbb.......C.......................bbbbbbbbbbbbbbb...................bbb#############
+##############################################################~~~~~~########~~~~#######################~~~~#######################
+##################################################################################################################################

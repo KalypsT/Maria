@@ -8,6 +8,20 @@ const BODY = 'chase-body-placeholder';
 const CAP = 'chase-cap-placeholder';
 const CART = 'chase-cart-placeholder';
 const TOWER = 'chase-tower-placeholder';
+const WAVE_FACE = 'chase-wave-face-placeholder';
+const WAVE_CREST = 'chase-wave-crest-placeholder';
+/** La vague (D-103) : largeur du front d'écume et de la crête (px logiques). */
+const FACE_W = 3 * T;
+const CREST_W = 5 * T;
+const CREST_H = 4 * T;
+/** La crête s'avance quand la vague déferle, se replie quand elle se retire (px). */
+const CREST_REACH_PX = 14;
+/** La vague se soulève un peu, lentement (px, ms). */
+const HEAVE_PX = 2;
+const HEAVE_MS = 1700;
+const SEA_DEEP = '#1c2a46';
+const SEA_MID = '#2a3f62';
+const FOAM = '#bff5ea';
 /** Chariot de vaisselle (D-87) : largeur (px logiques) et hauteur du chariot sous la tour. */
 const CART_W = 6 * T;
 const CART_H = 3 * T;
@@ -78,6 +92,8 @@ export class ChaseView {
   private cap: Phaser.GameObjects.Image | null = null;
   private cart: Phaser.GameObjects.Image | null = null;
   private tower: Phaser.GameObjects.Image | null = null;
+  private face: Phaser.GameObjects.Image | null = null;
+  private crest: Phaser.GameObjects.Image | null = null;
   private artScale = 1;
   private width = 0;
   private height = 0;
@@ -101,10 +117,18 @@ export class ChaseView {
 
   /** Recrée le poursuivant de la salle (changement de salle, échelle). */
   rebuild(): void {
-    for (const image of [this.top, this.body, this.cap, this.cart, this.tower]) {
+    for (const image of [
+      this.top,
+      this.body,
+      this.cap,
+      this.cart,
+      this.tower,
+      this.face,
+      this.crest,
+    ]) {
       image?.destroy();
     }
-    this.top = this.body = this.cap = this.cart = this.tower = null;
+    this.top = this.body = this.cap = this.cart = this.tower = this.face = this.crest = null;
     const room = this.combat.room;
     if (!room.chase) {
       return;
@@ -124,6 +148,27 @@ export class ChaseView {
     }
     // Vers la droite, la masse est à gauche du front ; vers la gauche, à droite (image retournée).
     const right = room.chase.dir === 'right';
+    if (room.chase.look === 'wave') {
+      this.createWaveTextures();
+      this.body = this.scene.add
+        .image(0, 0, BODY)
+        .setOrigin(right ? 1 : 0, 0)
+        .setDepth(9);
+      this.body.setDisplaySize(this.width, this.height);
+      this.face = this.scene.add
+        .image(0, 0, WAVE_FACE)
+        .setOrigin(right ? 1 : 0, 0)
+        .setScale(inverse)
+        .setFlipX(!right)
+        .setDepth(9);
+      this.crest = this.scene.add
+        .image(0, 0, WAVE_CREST)
+        .setOrigin(right ? 1 : 0, 0)
+        .setScale(inverse)
+        .setFlipX(!right)
+        .setDepth(9);
+      return;
+    }
     this.cartY = commonFloorY(room) - CART_H;
     this.createCartTextures();
     this.body = this.scene.add
@@ -152,6 +197,23 @@ export class ChaseView {
       return;
     }
     const now = this.scene.time.now;
+    if (this.face && this.crest && this.body) {
+      // La vague (D-103) : le front d'écume au front ; la crête s'avance quand elle déferle, se
+      // replie et pâlit quand elle se retire ; la masse suit derrière.
+      if (chase.jolts !== this.seenJolts) {
+        this.seenJolts = chase.jolts;
+        this.joltAt = now;
+      }
+      const jolt = Math.max(0, 1 - (now - this.joltAt) / JOLT_MS);
+      const heave = Math.sin((now / HEAVE_MS) * Math.PI * 2) * HEAVE_PX;
+      const x = chase.front;
+      const reach = (chase.swell * CREST_REACH_PX - 4) * chase.sign;
+      this.face.setPosition(x, heave);
+      this.crest.setPosition(x + reach + Math.sin(now * 0.05) * JOLT_PX * jolt, heave - 2);
+      this.crest.setAlpha(chase.backwash ? 0.65 : 1);
+      this.body.setPosition(x - chase.sign * (FACE_W - 2), 0);
+      return;
+    }
     if (chase.horizontal) {
       if (!this.body || !this.cart || !this.tower) {
         return;
@@ -340,6 +402,111 @@ export class ChaseView {
         ctx.lineTo(w - 1 - Math.abs(Math.sin(yy * 0.13)) * 1.5, yy);
       }
       ctx.stroke();
+      ctx.globalAlpha = 1;
+    });
+  }
+
+  /**
+   * La vague (D-103), dessinée le front à droite (retournée vers la gauche) : sans visage, de toute la
+   * hauteur de la salle ; un front d'eau sombre strié d'écume, bordé de turquoise ; en haut, la
+   * crête qui s'enroule ; dans l'écume, des chevaux de bois et des ballons.
+   */
+  private createWaveTextures(): void {
+    const h = this.height + 2 * HEAVE_PX;
+    this.make(BODY, 4, 4, (ctx) => {
+      ctx.fillStyle = SEA_DEEP;
+      ctx.fillRect(0, 0, 4, 4);
+    });
+    this.make(WAVE_FACE, FACE_W, h, (ctx) => {
+      const grad = ctx.createLinearGradient(0, 0, FACE_W, 0);
+      grad.addColorStop(0, SEA_DEEP);
+      grad.addColorStop(1, SEA_MID);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(FACE_W - 6, 0);
+      for (let y = 0; y <= h; y += 8) {
+        ctx.lineTo(FACE_W - 2 - Math.abs(Math.sin(y * 0.09)) * 4, y);
+      }
+      ctx.lineTo(0, h);
+      ctx.closePath();
+      ctx.fill();
+      // Des stries d'écume qui descendent le long du front.
+      ctx.strokeStyle = FOAM;
+      ctx.lineWidth = 1;
+      for (let k = 0; k < 14; k++) {
+        const x = 4 + hash(k, 1) * (FACE_W - 10);
+        const y = hash(k, 2) * h;
+        ctx.globalAlpha = 0.15 + hash(k, 3) * 0.25;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.quadraticCurveTo(x + 3, y + 10, x + 1, y + 22);
+        ctx.stroke();
+      }
+      // Un cheval de bois et un ballon pris dans l'eau (silhouettes pâles).
+      ctx.globalAlpha = 0.45;
+      ctx.fillStyle = FOAM;
+      for (let y = 5 * T; y < h - 3 * T; y += 9 * T) {
+        const cx = FACE_W / 2 + (hash(y, 4) - 0.5) * 10;
+        ctx.beginPath();
+        ctx.ellipse(cx, y, 9, 4, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillRect(cx + 5, y - 10, 3, 8);
+        ctx.beginPath();
+        ctx.ellipse(cx - 4, y + 3 * T, 4, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Le liseré turquoise le long du front : là où il ne faut pas être.
+      ctx.globalAlpha = 0.9;
+      ctx.strokeStyle = RIM;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let y = 0; y <= h; y += 8) {
+        const xx = FACE_W - 2 - Math.abs(Math.sin(y * 0.09)) * 4;
+        if (y === 0) {
+          ctx.moveTo(xx, y);
+        } else {
+          ctx.lineTo(xx, y);
+        }
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    });
+    this.make(WAVE_CREST, CREST_W, CREST_H, (ctx) => {
+      // La crête qui s'enroule vers l'avant, son écume qui s'effiloche ; fondue dans la masse.
+      const crestGrad = ctx.createLinearGradient(0, 0, CREST_W, 0);
+      crestGrad.addColorStop(0, SEA_DEEP);
+      crestGrad.addColorStop(1, SEA_MID);
+      ctx.fillStyle = crestGrad;
+      ctx.beginPath();
+      ctx.moveTo(0, CREST_H);
+      ctx.lineTo(0, 10);
+      ctx.quadraticCurveTo(CREST_W * 0.5, -6, CREST_W - 4, 12);
+      ctx.quadraticCurveTo(CREST_W - 10, 20, CREST_W - 18, 16);
+      ctx.quadraticCurveTo(CREST_W - 22, 30, CREST_W - 2 * T, CREST_H);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = FOAM;
+      ctx.lineWidth = 2.5;
+      ctx.globalAlpha = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(4, 9);
+      ctx.quadraticCurveTo(CREST_W * 0.5, -5, CREST_W - 4, 12);
+      ctx.quadraticCurveTo(CREST_W - 10, 20, CREST_W - 18, 16);
+      ctx.stroke();
+      ctx.fillStyle = FOAM;
+      for (let k = 0; k < 8; k++) {
+        ctx.globalAlpha = 0.3 + hash(k, 5) * 0.5;
+        ctx.beginPath();
+        ctx.arc(
+          CREST_W - 6 - hash(k, 6) * 24,
+          14 + hash(k, 7) * 14,
+          1 + hash(k, 8) * 1.5,
+          0,
+          Math.PI * 2,
+        );
+        ctx.fill();
+      }
       ctx.globalAlpha = 1;
     });
   }

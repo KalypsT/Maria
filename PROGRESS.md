@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101, fusionnées) et **PR 6 faite : la fête engloutie** (D-102), sur `ccr-014503d9-cj0c7a`. Suite : PR 7, le rythme de la vague (parcours d'essai 14). Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
+**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101, fusionnées) et **PR 6 faite : la fête engloutie** (D-102) et **PR 7 faite : le rythme de la vague, parcours d'essai 14** (D-103), sur `ccr-014503d9-cj0c7a`. Suite : PR 8, la vague dans le niveau et le livre musical. Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
 
 **Le train** (niveau 5, D-83 à D-91) : complet et fusionné. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
@@ -17,6 +17,16 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### La station balnéaire, PR 7 : le rythme de la vague (D-103)
+
+- **La vague** : une poursuite horizontale qui déferle (plus vite que Céleste), puis se retire un instant ; on monte les cheminées pendant le reflux. Dessin PLACEHOLDER : une masse d'eau de toute la hauteur, un front d'écume turquoise, des chevaux de bois et des ballons dans l'eau, la crête qui s'avance et se replie.
+- **Parcours d'essai 14 « La vague »** : une barrière basse et une cheminée à pied sec ; un bassin et une cheminée au-dessus de l'eau ; un dernier bassin, une barrière, la digue où la vague se brise.
+- Réglages `surgeMs`, `backwashMs`, `backwashSpeed` dans DEBUG → Combat.
+- Tests : TESTCOUNT. Vérifié dans Chromium : la vague dans le parcours 14 (le front, la crête, le contact).
+- [ ] À vérifier sur téléphone (menu pause → Parcours d'essai → « 14. La vague ») : le rythme se lit-il (la crête qui s'avance, puis se replie) ? Comprend-on qu'il faut attendre le reflux pour monter ?
+- [ ] La vague plus rapide que Céleste quand elle déferle : stimulant, ou injuste ? Les durées (`surgeMs`, `backwashMs`) et le recul (`backwashSpeed`) sont-ils justes ?
+- [ ] La cheminée au-dessus de l'eau pendant la poursuite : trop punitive (l'eau ramène au dernier appui, la vague continue) ?
 
 ### La station balnéaire, PR 6 : la fête engloutie (D-102)
 

@@ -104,6 +104,15 @@ export interface CombatParams {
   /** Croc-en-jambe (passage qui le fait trébucher) : il s'arrête ce temps-là (ms). */
   chaseTripPauseMs: number;
   /**
+   * Le rythme de la vague (D-103), une poursuite à l'allure de vague (`; @chase-look: wave`) : elle
+   * déferle pendant `surgeMs` (à la vitesse de la salle), puis se retire pendant `backwashMs` en
+   * reculant de `backwashSpeed` tuiles/s ; et ainsi de suite. Le reflux laisse le temps de monter
+   * une cheminée. Ni le rattrapage doux ni le contact ne jouent pendant le reflux.
+   */
+  surgeMs: number;
+  backwashMs: number;
+  backwashSpeed: number;
+  /**
    * Tunnels sur le toit du train (D-86), danger simple : un tunnel arrive toutes les
    * `tunnelPeriodMs`, annoncé pendant `tunnelWarnMs` (sa bouche approche, l'image s'assombrit),
    * puis le train est dedans pendant `tunnelPassMs`. Debout sur le toit, Céleste est repoussée vers
@@ -198,6 +207,9 @@ export const DEFAULT_COMBAT: Readonly<CombatParams> = {
   chaseSideStartDelayMs: 1200,
   chaseSideRestartGapTiles: 6,
   chaseTripPauseMs: 2500,
+  surgeMs: 2000,
+  backwashMs: 1500,
+  backwashSpeed: 3,
   tunnelPeriodMs: 10000,
   tunnelWarnMs: 2600,
   tunnelPassMs: 2400,
@@ -268,6 +280,9 @@ export const COMBAT_PARAM_RANGES: Readonly<
   chaseSideStartDelayMs: { min: 0, max: 6000, step: 100 },
   chaseSideRestartGapTiles: { min: 2, max: 30, step: 1 },
   chaseTripPauseMs: { min: 0, max: 8000, step: 100 },
+  surgeMs: { min: 500, max: 8000, step: 100 },
+  backwashMs: { min: 0, max: 5000, step: 100 },
+  backwashSpeed: { min: 0, max: 10, step: 0.5 },
   tunnelPeriodMs: { min: 3000, max: 30000, step: 500 },
   tunnelWarnMs: { min: 500, max: 6000, step: 100 },
   tunnelPassMs: { min: 300, max: 6000, step: 100 },
