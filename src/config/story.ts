@@ -161,6 +161,18 @@ export const StoryFlag = {
   HedgeEntered: 'hedge.entered',
   /** Fin de derrière la haie : le bonnet de Maria ; Céleste revient au pied du grand arbre. */
   HedgeDone: 'hedge.done',
+  /**
+   * L'avant-dernier niveau (D-107, D-110) : derrière la porte du couloir, la même nuit, l'entrée de
+   * la maison de la nounou, démesurée.
+   */
+  NannyArrived: 'nanny.arrived',
+  /**
+   * Le miroir de l'entrée (D-110) : le reflet de Céleste toute petite est passé de l'autre côté ;
+   * Céleste l'imite, elle a appris la bascule.
+   */
+  NannyMirror: 'nanny.mirror',
+  /** La maison de la nounou (D-110) : Céleste y est entrée (le reflet n'est plus là). */
+  NannyHouse: 'nanny.house',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -284,6 +296,9 @@ export const PROP_SIZE = {
   'toy-kitchen': { w: 30, h: 30 },
   'tea-table': { w: 64, h: 30 },
   'tea-cup': { w: 6, h: 5 },
+  // Le reflet du miroir de la nounou (D-110) : Céleste toute petite, plus petite qu'elle.
+  reflection: { w: 16, h: 26 },
+  'reflection-through': { w: 16, h: 26 },
   'dad-garden': { w: 44 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // Le train (D-85) : sur le quai, la maîtresse et les parents (à hauteur d'enfant), les enfants
   // et leurs sacs ; dans la voiture-couchettes, des enfants de la taille de Céleste.

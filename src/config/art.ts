@@ -619,6 +619,17 @@ export const DECOR_KINDS: Readonly<
   seabelow: { furniture: true },
   skyreversed: { furniture: false },
   strangedoor: { furniture: false },
+  // La maison de la nounou (D-110), l'avant-dernier monde étrange.
+  nannymirror: { furniture: false },
+  mirrorglass: { furniture: true },
+  nightslit: { furniture: false },
+  napdoor: { furniture: false },
+  toyblocks: { furniture: true },
+  giantable: { furniture: true },
+  passagebed: { furniture: false },
+  passageschool: { furniture: false },
+  passagestation: { furniture: false },
+  passagesea: { furniture: false },
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */

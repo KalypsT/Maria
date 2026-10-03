@@ -182,6 +182,14 @@ export function isStrangeRoom(level: LevelData): boolean {
   return level.meta.world === 'strange';
 }
 
+/**
+ * Salle dessinée sur la carte de Céleste : toutes, sauf celles du monde étrange (D-34) ; mais la
+ * maison de la nounou et ses îlots (D-107), presque tout le niveau, ont leur page (`; @mapped: yes`).
+ */
+export function isMappedRoom(level: LevelData): boolean {
+  return !isStrangeRoom(level) || level.meta.mapped === 'yes';
+}
+
 /** La rue et le quartier (D-60) : dehors, de jour (`; @world: street`). */
 export function isStreetRoom(level: LevelData): boolean {
   return level.meta.world === 'street';

@@ -264,6 +264,12 @@ export const PROP_KINDS = [
   'toy-kitchen',
   'tea-table',
   'tea-cup',
+  /**
+   * Le reflet du miroir de la nounou (D-110) : Céleste toute petite, dans la vitre ; puis passée de
+   * l'autre côté (elle change de place dans le noir).
+   */
+  'reflection',
+  'reflection-through',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 
@@ -316,6 +322,8 @@ export const CHARACTER_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'conductor',
   'sleeper-seat',
   'dog-sleep',
+  'reflection',
+  'reflection-through',
 ]);
 
 export interface StoryProp {

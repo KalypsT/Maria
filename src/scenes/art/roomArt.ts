@@ -29,6 +29,7 @@ import { houseDrawers } from './houseArt';
 import { trainDrawers } from './trainArt';
 import { seaDrawers } from './seaArt';
 import { seaCorridorDrawers } from './seaCorridorArt';
+import { nannyDrawers } from './nannyArt';
 import { seaStrangeDrawers } from './seaStrangeArt';
 import { drawBrokenDishes, drawHotPlates, trainStrangeDrawers } from './trainStrangeArt';
 import { paperGrainPattern } from './paperGrain';
@@ -266,6 +267,7 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
   ...seaDrawers({ tileShape, rounded }),
   ...seaStrangeDrawers({ tileShape, rounded }),
   ...seaCorridorDrawers({ tileShape, rounded }),
+  ...nannyDrawers({ tileShape, rounded }),
   console(a, r) {
     wood(a, r);
     if (!a.palette.silhouettes) {

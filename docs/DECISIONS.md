@@ -1416,6 +1416,32 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Vérifié dans Chromium** : la salle habillée d'essai dans le présent (les zones du souvenir en contour fantôme) et dans le souvenir (ses meubles en couleurs chaudes, celles du présent en fantôme turquoise, le voile) ; le bouton tactile (`?touch`) qui bascule ; le bouton pâli dans la chambre (sans couches).
 - **Sauvegarde** : aucun changement.
 
+## D-110 — L'avant-dernier niveau, PR 3 : la porte du couloir, l'entrée et le miroir, la maison, la carte
+
+- **Plan validé** (D-107). Écarts et précisions ci-dessous.
+- **La porte du couloir** (`sea-end-door`, D-105) : après le noir (`sea.end`), Céleste est **dans l'entrée de la maison de la nounou**, la même nuit (point de retour : la veilleuse de l'entrée) ; le cercle s'ouvre, elle pense à Maria (le début d'un niveau, D-70). Le « ? » provisoire (`sea-end-later`) devient le même passage, pour une partie sauvegardée juste après la fin du niveau 6. Nouvelles étapes `nanny.arrived`, `nanny.mirror`, `nanny.house`, ajoutées en fin de liste.
+- **L'entrée** (`nanny-entry`, 84 × 26, facile, `; @world: strange`, musique `strange`) : la porte par où l'on est venu (elle ne mène plus nulle part) ; **une fente sur la nuit du dortoir** (la camarade endormie, la mer et la lune, la lampe de poche de la maîtresse ; le seul élément réel, en couleur), qui sert de veilleuse ; le banc à chaussures ; **le grand miroir** qui barre l'entrée : sa vitre n'existe que dans le présent (`; @shift: present`), dans le souvenir le cadre est vide ; puis la sortie vers la maison.
+  - **Le miroir** (`nanny-mirror`, en s'approchant) : dans la vitre, Céleste toute petite (nouvel objet `reflection` : couettes courtes, lunettes rondes roses, pyjama) ; elle envoie un cœur ; dans le noir d'un clignement, elle est **passée de l'autre côté** (`reflection-through`) et montre la bascule (bulle « bascule ») ; Céleste l'imite : **la bascule s'apprend** (étape `ability`, comme la glissade, D-85). Le reflet n'est plus là une fois dans la maison.
+  - **Défi** : les patères du souvenir (on les voit en contour fantôme dès l'arrivée, avant d'avoir la bascule : signposting) jusqu'à l'étagère à chapeaux et sa trouvaille.
+  - Tronçons : la sortie (facile, la bascule exigée) ; la trouvaille (facile, la bascule exigée).
+- **La maison** (`nanny-house`, 132 × 40, **moyenne** à cause de son défi), à hauteur de tout-petit :
+  - la veilleuse de l'arrivée et sa fente ; **un pouf** (une marche) et **le canapé** ; **dessous, dans le souvenir**, un passage d'une tuile (dans le présent, la jupe du canapé descend jusqu'au sol) et **une trouvaille** qu'on n'atteint qu'en glissant, dans le souvenir (testé par une Céleste simulée : ni sans glisser, ni dans le présent) ;
+  - la table basse géante (on passe dessous, devant ses pieds : nouveau dessin `giantable`) ; **la petite porte de la sieste** et ses quatre veilleuses éteintes, une seconde fente-veilleuse ;
+  - **la grande bibliothèque** : ses étagères d'aujourd'hui (présent, à droite) et d'autrefois (souvenir, à gauche) alternent, 4 rangs d'écart ; on monte en basculant (facile ; impossible sans la bascule, testé) jusqu'au dessus, où s'ouvrira le passage de l'îlot de l'école ;
+  - **le défi** (moyen, 175 ms) : du haut de la bibliothèque, le mobile du souvenir, puis la lampe du présent, jusqu'à l'étagère haute et sa trouvaille ;
+  - **les passages des îlots** (signposting, dessinés seulement : ils s'ouvriront avec les PR 5 à 8) : l'étagère de gauche (la chambre et le jardin : une tête de lit, des feuilles de haie ; on y monte par l'accoudoir et la barrière de lit du souvenir), le haut de la bibliothèque (l'école : l'horloge, un crayon), le mur de droite (la gare : l'horloge de quai, un rail), une trappe dans le plancher (la plage : une vague, du sable).
+  - Tronçons : le haut de la bibliothèque (facile, bascule), l'étagère de gauche (facile, bascule), le défi (moyen, bascule).
+- **Écarts avec le plan** :
+  - la maison est un premier état : la cage d'escalier (le boss, PR 10) et les passages réels viendront avec leurs PR ; aucune lanterne ni trouvaille posée ici ne bougera ;
+  - la table basse avait d'abord des pieds pleins qui barraient le sol, et le canapé ne se franchissait qu'en glissant dessous : un pouf et des pieds dessinés derrière (détecté par la sonde de faisabilité) ;
+  - le banc à chaussures, d'abord trop haut pour un saut tenu bref, est abaissé d'une tuile.
+- **La carte** : nouvelle page **« Chez la nounou »** (l'entrée, la maison) ; une salle du monde étrange peut y figurer avec `; @mapped: yes` (`isMappedRoom`) ; les autres restent hors carte (D-34).
+- **Dessin** (`nannyArt.ts`, PLACEHOLDER) : `nannymirror`, `mirrorglass`, `nightslit`, `napdoor`, `toyblocks`, `giantable`, `passagebed`, `passageschool`, `passagestation`, `passagesea` ; le reste repris de la maison (canapé, pouf, étagères, bibliothèque, porte-manteau, tapis, la porte étrange du couloir).
+- **Debug** : histoires « la maison de la nounou, l'entrée et le miroir » et « la bascule apprise, la maison de la nounou ».
+- **Tests** (`nannyHouse.test.ts`) : la porte (dans le noir, point de retour, Maria en pensée), les salles et la carte, aucun personnage réel, la vitre du présent, le reflet et la bascule apprise, les veilleuses-fentes, jamais coincée (graphe à deux couches), le miroir infranchissable sans la bascule, la trouvaille sous le canapé ; `seaNight.test.ts` mis à jour (la fin mène au niveau 7) ; les tronçons par `legs.test.ts`.
+- **Vérifié dans Chromium** : de la porte du couloir à l'entrée (le cercle, la fente), le miroir (le reflet dans la vitre, le cœur, puis de l'autre côté), la bascule apprise, le passage du miroir dans le souvenir, l'arrivée dans la maison ; la bibliothèque dans les deux couches.
+- **Sauvegarde** : aucune migration (trois étapes en fin de liste, la capacité `shift`, trois trouvailles neuves).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

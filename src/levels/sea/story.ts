@@ -1,5 +1,6 @@
 import { STORY_TIMING as S, StoryFlag as F } from '../../config/story';
 import type { StoryData, StoryProp, StoryStep, StoryTrigger } from '../../core/story/story';
+import { NANNY_ENTER } from '../nanny/story';
 
 /**
  * Histoire de la station balnéaire (D-95, D-98), PLACEHOLDER, réunie à celle de la maison (une
@@ -326,9 +327,8 @@ const TRIGGERS: StoryTrigger[] = [
   },
   {
     // La fin de la station balnéaire (D-105) : au cinquième tour du couloir, une porte qui n'était
-    // pas là, sa lueur. Céleste l'ouvre ; la lumière ; le noir, longtemps. PLACEHOLDER : la suite
-    // (le niveau 7, presque entièrement étrange) viendra ; Céleste se retrouve devant la porte,
-    // ouverte sur la lueur.
+    // pas là, sa lueur. Céleste l'ouvre ; la lumière ; le noir, longtemps. Derrière, la même nuit,
+    // l'entrée de la maison de la nounou (le niveau 7, D-110).
     id: 'sea-end-door',
     room: 'sea-corridor-sea',
     on: 'interact',
@@ -347,22 +347,30 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'fadeOut', ms: S.nightFadeOutMs },
       { do: 'flag', id: F.SeaEnd },
       { do: 'wait', ms: S.monthsBlackMs },
-      { do: 'fadeIn', ms: S.nightFadeInMs },
-      { do: 'wait', ms: S.lookMs },
-      { do: 'thought', icon: 'question', ms: S.thoughtMs },
+      ...NANNY_ENTER,
     ],
   },
   {
-    // Après la fin (PLACEHOLDER) : la porte ouverte sur la lueur ; la suite viendra (« ? »).
+    // Une partie sauvegardée juste après la fin, avant le niveau 7 (l'ancien « ? ») : la porte,
+    // ouverte sur la lueur, mène à la maison de la nounou.
     id: 'sea-end-later',
     room: 'sea-corridor-sea',
     on: 'interact',
     area: { col: LAST_DOOR.col - 2, row: LAST_DOOR.row - 2, w: 5, h: 3 },
     mark: { col: LAST_DOOR.col, row: LAST_DOOR.row - 5 },
-    when: { all: [F.SeaEnd] },
-    lock: false,
-    repeat: true,
-    steps: [{ do: 'thought', icon: 'question', ms: S.thoughtMs }],
+    when: { all: [F.SeaEnd], none: [F.NannyArrived] },
+    lock: true,
+    steps: [
+      {
+        do: 'sparkle',
+        area: { col: LAST_DOOR.col - 1, row: LAST_DOOR.row - 4, w: 3, h: 5 },
+        ms: 900,
+      },
+      { do: 'wait', ms: 600 },
+      { do: 'fadeOut', ms: S.nightFadeOutMs },
+      { do: 'wait', ms: S.nightBlackMs },
+      ...NANNY_ENTER,
+    ],
   },
   // Les bancs des marées (D-95) : sur la promenade, face à la plage ; devant la capitainerie du port.
   tideBench('sea-bench-promenade', 'sea-promenade', PROMENADE_BENCH),

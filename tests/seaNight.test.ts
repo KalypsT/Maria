@@ -104,11 +104,14 @@ describe('la nuit, le couloir en boucle, la fin (D-105)', () => {
     const order = end.steps.map((s) => s.do);
     expect(order.indexOf('flag')).toBeGreaterThan(order.indexOf('fadeOut'));
     expect(end.steps.find((s) => s.do === 'flag')).toEqual({ do: 'flag', id: F.SeaEnd });
-    expect(end.steps.some((s) => s.do === 'thought' && s.icon === 'maria')).toBe(false);
-    // Ensuite (PLACEHOLDER) : « ? », la suite viendra.
+    // Ensuite, la même nuit, l'entrée de la maison de la nounou (le niveau 7, D-110) ; une partie
+    // sauvegardée juste après la fin y entre par la même porte.
+    const toNanny = end.steps.find((s) => s.do === 'room');
+    expect(toNanny).toMatchObject({ do: 'room', room: 'nanny-entry' });
+    expect(order.indexOf('room')).toBeGreaterThan(order.indexOf('flag'));
     const later = trigger('sea-end-later');
-    expect(later.when).toEqual({ all: [F.SeaEnd] });
-    expect(later.repeat).toBe(true);
+    expect(later.when).toEqual({ all: [F.SeaEnd], none: [F.NannyArrived] });
+    expect(later.steps.find((s) => s.do === 'room')).toMatchObject({ room: 'nanny-entry' });
     expect(standOn(last, LAST_DOOR)).toBeGreaterThanOrEqual(0);
   });
 
