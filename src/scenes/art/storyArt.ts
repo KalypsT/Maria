@@ -7,6 +7,7 @@ import {
   drawNotes,
   heightChart,
   momHead,
+  musicBook,
   pinkKitchen,
   rabbit,
   redPanda,
@@ -515,6 +516,14 @@ export function drawProp(
       ctx.save();
       ctx.translate(w / 2, h / 2);
       pinkKitchen(ctx, Math.min(w, h), true);
+      ctx.restore();
+      break;
+    case 'music-book':
+      // Le livre musical (D-104), sur le toit du carrousel étrange : on le regarde, on ne le prend
+      // pas. La lueur turquoise du monde étrange autour de lui.
+      ctx.save();
+      ctx.translate(w / 2, h / 2);
+      musicBook(ctx, Math.min(w, h), true);
       ctx.restore();
       break;
     case 'toy-kitchen':

@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) et **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101), sur `ccr-014503d9-cj0c7a`. Suite : PR 6, la fête engloutie (le monde étrange, par le carrousel). Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
+**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101, fusionnées) et **PR 6 faite : la fête engloutie** (D-102) **PR 7 faite : le rythme de la vague, parcours d'essai 14** (D-103) **PR 8 faite : la vague dans le niveau, le livre musical** (D-104) et **PR 9 faite : le court souvenir, la nuit, le couloir en boucle, la fin** (D-105), sur `ccr-014503d9-cj0c7a`. **Le niveau 6 est complet** (sa fin reste un PLACEHOLDER jusqu'au niveau 7). Suite : essais sur téléphone, puis le niveau 7. Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
 
 **Le train** (niveau 5, D-83 à D-91) : complet et fusionné. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
@@ -18,13 +18,59 @@
 
 ## Fait
 
-### Retours de partie : la chevillette, le boss de la tour, des paliers (D-60, D-102)
+### Retours de partie : la chevillette, le boss de la tour, des paliers (D-60, D-106)
 
 - **Papa au potager** montre d'abord la ficelle rouge et la chevillette (nouveau pictogramme `cord`), puis le portillon : on savait où aller, pas quoi faire.
 - **Le boss de la tour** se voit maintenant : sous le bas de l'écran, sa crête turquoise et la casquette dépassent (plus pâles s'il est loin) ; il se met en marche avec une secousse. Difficulté inchangée.
 - **Paliers de repos** à mi-hauteur de trois cheminées à saut mural : jardin renversé, objets perdus (monde étrange de la gare), objets trouvés (gare).
 - Vérifié dans Chromium : la crête du boss au bas de l'écran à l'arrivée dans la tour, les trois paliers.
 - [ ] À vérifier sur téléphone : la bulle « ficelle » de papa se comprend-elle ? Voit-on le boss arriver, sans qu'il gêne la vue ? Les paliers suffisent-ils, ou faut-il resserrer les cheminées d'une case ?
+
+### La station balnéaire, PR 9 : le court souvenir, la nuit, le couloir en boucle, la fin (D-105)
+
+- **Le court souvenir** du livre musical : Céleste toute petite, seule, appuie sur un bouton, des notes s'en échappent (rejouable dans le cahier).
+- **La nuit au dortoir** : les enfants dorment ; la mélodie du livre ; une lueur sous la porte du dortoir.
+- **Le couloir en boucle** : cinq couloirs pareils en anneau, le décor change à chaque tour (ordinaire, le sable, la chambre et la toise, l'horloge et les valises, la mer en bas et le ciel à l'envers) ; au dernier, une porte qui n'était pas là ; le noir, la fin du niveau 6 (la suite : « ? », PLACEHOLDER).
+- DEBUG → Histoire : « le livre musical trouvé, la nuit au dortoir », « la fin de la station balnéaire ».
+- Tests : 712. Vérifié dans Chromium : le court souvenir, le dortoir la nuit (enfants endormis, la porte), les cinq couloirs, la porte et la fin.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « le livre musical trouvé, la nuit au dortoir », puis la porte du dortoir) : comprend-on qu'il faut ouvrir la porte ? La mélodie (bulle) suffit-elle ?
+- [ ] Le couloir : remarque-t-on qu'il revient sur lui-même et qu'il change ? Cinq tours, trop long ou juste ? Inquiétant sans faire peur ?
+- [ ] Le court souvenir du livre : se reconnaît-on Céleste toute petite ? Le livre ?
+- [ ] La fin (le noir, puis « ? ») : acceptable comme attente du niveau 7 ?
+
+### La station balnéaire, PR 8 : la vague dans le niveau, le livre musical (D-104)
+
+- **La vague** : au sortir de la fête engloutie, une vague immense poursuit Céleste sur le platelage englouti ; quatre tronçons, une veilleuse au début de chacun (le comptoir, la cheminée des chevaux, le grand bassin et la poutre basse, la cheminée au-dessus de l'eau, les chevaux dans l'eau) ; elle se brise contre la digue.
+- **Le livre musical**, sur le toit du carrousel étrange : un souvenir du monde étrange ; le cercle se referme, Céleste est assise sur sa couchette au dortoir ; Maria, puis le lit (fin provisoire : le court souvenir et la nuit avec la PR 9).
+- DEBUG → Histoire : « le livre musical trouvé (fin de la mer étrange) ».
+- Tests : 706. Vérifié dans Chromium : la vague au départ, la cheminée, la digue, le livre sur le toit du carrousel, la fin sur la couchette.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « la fête engloutie (le carrousel) », puis traverser la fête engloutie) : la poursuite est-elle difficile mais juste ? Les veilleuses sont-elles assez proches ?
+- [ ] Le reflux se voit-il assez pour qu'on pense à monter les cheminées à ce moment-là ?
+- [ ] La digue et la vague qui s'y brise : se comprend-il qu'on est sauvée ?
+- [ ] Le livre musical : se reconnaît-il comme un livre d'enfant ? Le dessin dans le cahier ?
+
+### La station balnéaire, PR 7 : le rythme de la vague (D-103)
+
+- **La vague** : une poursuite horizontale qui déferle (plus vite que Céleste), puis se retire un instant ; on monte les cheminées pendant le reflux. Dessin PLACEHOLDER : une masse d'eau de toute la hauteur, un front d'écume turquoise, des chevaux de bois et des ballons dans l'eau, la crête qui s'avance et se replie.
+- **Parcours d'essai 14 « La vague »** : une barrière basse et une cheminée à pied sec ; un bassin et une cheminée au-dessus de l'eau ; un dernier bassin, une barrière, la digue où la vague se brise.
+- Réglages `surgeMs`, `backwashMs`, `backwashSpeed` dans DEBUG → Combat.
+- Tests : 701. Vérifié dans Chromium : la vague dans le parcours 14 (le front, la crête, le contact).
+- [ ] À vérifier sur téléphone (menu pause → Parcours d'essai → « 14. La vague ») : le rythme se lit-il (la crête qui s'avance, puis se replie) ? Comprend-on qu'il faut attendre le reflux pour monter ?
+- [ ] La vague plus rapide que Céleste quand elle déferle : stimulant, ou injuste ? Les durées (`surgeMs`, `backwashMs`) et le recul (`backwashSpeed`) sont-ils justes ?
+- [ ] La cheminée au-dessus de l'eau pendant la poursuite : trop punitive (l'eau ramène au dernier appui, la vague continue) ?
+
+### La station balnéaire, PR 6 : la fête engloutie (D-102)
+
+- **Le monde étrange** : le soir, Agir devant le carrousel ; la lueur, le tremblement, le cercle : la fête de la jetée sous une eau immobile (difficile). Le carrousel y ramène ensuite.
+- **La salle** : le toit du carrousel englouti, la cheminée des chevaux (saut mural), la première veilleuse ; deux guirlandes au-dessus de l'eau (le crochet), la grande roue noyée ; le toit d'un stand, la toile tombée (glisser dessous), la seconde veilleuse ; le saut long sous l'auvent bas jusqu'au flanc d'un cheval (difficile), le toit du dernier stand.
+- **Fin provisoire** : la mer gronde, « ? », retour devant le carrousel (la vague viendra avec les PR 7 et 8).
+- DEBUG → Histoire : « la fête engloutie (le carrousel) ».
+- Tests : 690. Vérifié dans Chromium : l'entrée par le carrousel (le cercle, la bulle), l'arrivée, la traverse, le toit du stand, l'auvent, le toit du dernier stand, la fin provisoire et le retour sur la jetée.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « le soir de la fête, la jetée », puis le carrousel) : l'entrée se comprend-elle ? La fête engloutie inquiète-t-elle sans faire peur ?
+- [ ] La cheminée des chevaux : voit-on qu'on passe sous la barre qui flotte ? Les guirlandes au-dessus de l'eau : le saut de l'une à l'autre est-il lisible ?
+- [ ] Le saut long sous l'auvent (difficile, 67 ms) puis le saut mural le long du cheval : juste, ou frustrant ? La seconde veilleuse est-elle assez proche ?
+- [ ] Tomber dans l'eau (retour au dernier appui, la peur) : trop punitif dans une salle difficile ?
+- [ ] Le dessin en silhouettes : les chevaux, les toiles, les stands se lisent-ils sur un petit écran ?
 
 ### La station balnéaire, PR 5 : la jetée, la fête, le soir (D-101)
 

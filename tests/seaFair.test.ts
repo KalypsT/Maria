@@ -122,7 +122,8 @@ describe('la jetée et la fête foraine, le soir (D-101)', () => {
     expect(16 * T - DEFAULT_MOVEMENT.slideHeightPx).toBeGreaterThanOrEqual(
       ((sweep?.row ?? 0) + (sweep?.height ?? 0)) * T,
     );
-    const carousel = HOUSE_STORY.triggers.find((c) => c.id === 'sea-carousel');
+    // Le carrousel mène au monde étrange (D-102).
+    const carousel = HOUSE_STORY.triggers.find((c) => c.id === 'sea-strange-enter');
     expect(carousel?.room).toBe('sea-jetty');
     expect(HOUSE_STORY.omens.some((o) => o.room === 'sea-jetty')).toBe(true);
   });

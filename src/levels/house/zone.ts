@@ -44,6 +44,13 @@ import seaRocks from '../sea/rocks.txt?raw';
 import seaLighthouse from '../sea/lighthouse.txt?raw';
 import seaPort from '../sea/port.txt?raw';
 import seaJetty from '../sea/jetty.txt?raw';
+import seaStrangeFair from '../sea/strange-fair.txt?raw';
+import seaStrangeWave from '../sea/strange-wave.txt?raw';
+import seaCorridor from '../sea/corridor.txt?raw';
+import seaCorridorSand from '../sea/corridor-sand.txt?raw';
+import seaCorridorRoom from '../sea/corridor-room.txt?raw';
+import seaCorridorStation from '../sea/corridor-station.txt?raw';
+import seaCorridorSea from '../sea/corridor-sea.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -134,6 +141,13 @@ export const HOUSE: ZoneSource = {
     { id: 'sea-port', text: seaPort },
     // La jetée et la fête foraine (D-101), par l'arche du quai du port : une salle de marée.
     { id: 'sea-jetty', text: seaJetty },
+    { id: 'sea-strange-fair', text: seaStrangeFair },
+    { id: 'sea-strange-wave', text: seaStrangeWave },
+    { id: 'sea-corridor', text: seaCorridor },
+    { id: 'sea-corridor-sand', text: seaCorridorSand },
+    { id: 'sea-corridor-room', text: seaCorridorRoom },
+    { id: 'sea-corridor-station', text: seaCorridorStation },
+    { id: 'sea-corridor-sea', text: seaCorridorSea },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -201,6 +215,13 @@ export const HOUSE: ZoneSource = {
     ['sea-lighthouse:2', 'sea-port:2'],
     ['sea-port:1', 'sea-promenade:4'],
     ['sea-port:3', 'sea-jetty:1'],
+    ['sea-strange-fair:1', 'sea-strange-wave:1'],
+    // Le couloir en boucle (D-105) : cinq couloirs pareils en anneau, le décor change à chaque tour.
+    ['sea-corridor:2', 'sea-corridor-sand:1'],
+    ['sea-corridor-sand:2', 'sea-corridor-room:1'],
+    ['sea-corridor-room:2', 'sea-corridor-station:1'],
+    ['sea-corridor-station:2', 'sea-corridor-sea:1'],
+    ['sea-corridor-sea:2', 'sea-corridor:1'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur

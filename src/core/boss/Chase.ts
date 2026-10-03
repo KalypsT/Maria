@@ -22,6 +22,9 @@ const SINK_SPEED = 90;
  * recule alors un peu et s'arrête un instant. Passer par un croc-en-jambe le fait reculer et
  * s'arrêter. La poursuite s'arrête quand Céleste atteint la ligne d'arrivée ; il recule alors.
  *
+ * La vague (D-103, `; @chase-look: wave`) a un rythme : elle déferle à la vitesse de la salle
+ * pendant `surgeMs`, puis se retire pendant `backwashMs` en reculant de `backwashSpeed` tuiles/s.
+ *
  * Toutes les distances se comptent sur un axe orienté dans le sens de la course (`sign` × la
  * coordonnée du monde) : le même code sert aux trois sens. Aucune allocation dans `step`.
  */
@@ -38,6 +41,10 @@ export class Chase {
   jolts = 0;
   /** Poursuite horizontale (vers la droite ou la gauche). */
   readonly horizontal: boolean;
+  /** La vague (D-103) : elle déferle, puis se retire un instant ; et ainsi de suite. */
+  readonly wave: boolean;
+  /** Temps dans le cycle de la vague (ms) : il ne court qu'en mouvement (ni attente ni pause). */
+  private cycleMs = 0;
   /** Sens de la course dans la coordonnée du monde : +1 vers la droite, -1 vers le haut ou la gauche. */
   readonly sign: number;
   private pauseSteps = 0;
@@ -58,6 +65,7 @@ export class Chase {
     this.tripsUsed = new Uint8Array(data.trips.length);
     this.dt = 1 / stepHz;
     this.horizontal = data.dir !== 'up';
+    this.wave = data.look === 'wave';
     this.sign = data.dir === 'right' ? 1 : -1;
     this.endAxis = this.lineAxis(data.end);
     this.phaseAxis = Float64Array.from(data.phases, (p) => this.lineAxis(p.until));
@@ -109,6 +117,25 @@ export class Chase {
     this.events = 0;
   }
 
+  /** La vague se retire (le reflux, D-103) ; toujours faux hors de la vague. */
+  get backwash(): boolean {
+    return this.wave && this.cycleMs >= this.params.surgeMs;
+  }
+
+  /**
+   * Où en est la vague dans son mouvement (D-103), pour l'affichage : de 0 à 1 pendant qu'elle
+   * déferle, puis de 1 à 0 pendant qu'elle se retire. Hors de la vague, 1.
+   */
+  get swell(): number {
+    const p = this.params;
+    if (!this.wave) {
+      return 1;
+    }
+    return this.cycleMs < p.surgeMs
+      ? this.cycleMs / p.surgeMs
+      : 1 - (this.cycleMs - p.surgeMs) / Math.max(1, p.backwashMs);
+  }
+
   /** Vrai s'il s'est arrêté un instant (départ, contact, croc-en-jambe). */
   get paused(): boolean {
     return this.pauseSteps > 0;
@@ -131,6 +158,7 @@ export class Chase {
         this.stepHz,
       );
       this.tripsUsed.fill(0);
+      this.cycleMs = 0;
       this.waking = this.pauseSteps > 0;
       if (!this.waking) {
         this.events |= ChaseEvent.Wake;
@@ -162,6 +190,9 @@ export class Chase {
         this.waking = false;
         this.events |= ChaseEvent.Wake;
       }
+    } else if (this.wave && this.stepCycle()) {
+      // Le reflux : elle recule un instant, sans rattrapage.
+      this.axis -= p.backwashSpeed * T * this.dt;
     } else {
       let speed = (data.phases[phase]?.speed ?? 0) * p.chaseSpeedScale;
       const behind = (rear - this.axis) / T - p.chaseCatchUpGapTiles;
@@ -193,7 +224,7 @@ export class Chase {
       this.events |= ChaseEvent.Trip;
       this.jolts++;
     }
-    if (!invulnerable && this.axis > rear + CONTACT_DEPTH_PX) {
+    if (!invulnerable && !this.backwash && this.axis > rear + CONTACT_DEPTH_PX) {
       this.axis = Math.min(this.axis, rear) - p.chaseContactRecoilTiles * T;
       this.pauseSteps = msToSteps(p.chaseContactPauseMs, this.stepHz);
       this.waking = false;
@@ -202,5 +233,15 @@ export class Chase {
       return true;
     }
     return false;
+  }
+
+  /** Avance le cycle de la vague d'un pas ; vrai pendant le reflux. */
+  private stepCycle(): boolean {
+    const p = this.params;
+    this.cycleMs += this.dt * 1000;
+    if (this.cycleMs >= p.surgeMs + p.backwashMs) {
+      this.cycleMs -= p.surgeMs + p.backwashMs;
+    }
+    return this.cycleMs >= p.surgeMs;
   }
 }

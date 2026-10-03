@@ -112,6 +112,12 @@ export interface LevelLeg {
 export type ChaseDir = 'up' | 'right' | 'left';
 
 /**
+ * Allure du poursuivant : celle de son sens (le tas des objets perdus, le chariot de vaisselle), ou
+ * la vague (D-103, horizontale seulement), qui déferle puis se retire (`surgeMs`, `backwashMs`).
+ */
+export type ChaseLook = 'default' | 'wave';
+
+/**
  * Poursuite (D-67, D-87) : quelque chose de grand avance derrière Céleste, dans le sens `dir`. Par
  * phases, dans le sens de la course ; des passages qui le font trébucher ; une ligne d'arrivée.
  */
@@ -136,6 +142,8 @@ export interface LevelChase {
     readonly height: number;
     readonly recoil: number;
   }[];
+  /** Allure (`; @chase-look: wave`) ; la vague a un rythme (D-103). */
+  readonly look: ChaseLook;
 }
 
 /**

@@ -1266,7 +1266,80 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Tests** (`seaFair.test.ts`) : l'arche ouverte le soir, le soir sur la baie, le script du soir, **les chaises volantes** (une fois par passage, couchée en dessous), le carrousel et son présage, **toute la baie avec la jetée, aux deux marées : jamais coincée**, le carrousel atteint. Les tronçons (`legs.test.ts`) : trois.
 - **Sauvegarde** : aucune migration (étape `sea.evening`, une trouvaille neuve).
 
-## D-102 — Retours de partie : le boss de la tour visible, des paliers dans trois cheminées
+## D-102 — La station balnéaire, PR 6 : le monde étrange, la fête engloutie
+
+- **Plan validé** (D-95). Écarts et précisions ci-dessous.
+- **Entrée** (comme la cuisine du train, D-88) : le soir, Agir devant le carrousel de la jetée (le « ? » provisoire de D-101 est remplacé) ; la lueur scintille sous les chevaux, l'image tremble ; un clignement dans le noir (`sea.strange`), la fête engloutie se révèle en cercle. Ensuite, le carrousel y ramène (version courte), après un évanouissement ou la fin provisoire. Pas de sortie volontaire. La lumière vacille toujours près du carrousel, le soir.
+- **La fête engloutie** (`sea-strange-fair`, 180 × 30, `; @world: strange`, dehors sous le ciel violet, hors carte, musique `strange` PLACEHOLDER, **difficile**) : la fête de la jetée sous une eau immobile, démesurée. **L'eau partout dessous** : une chute ramène au dernier appui (D-97), la peur monte. De gauche à droite :
+  - **le toit du carrousel englouti** (l'arrivée), son mât penché ;
+  - **la cheminée des chevaux** : la barre du carrousel flotte au-dessus du toit, une autre sort de l'eau ; on passe sous la première, puis **saut mural** jusqu'à la traverse et **la première veilleuse** (facile exactement, 200 ms ; impossible sans le saut mural) ;
+  - **deux guirlandes** au-dessus de l'eau (**le crochet**, on saute de l'une à l'autre), la grande roue à demi noyée au fond, ses ballons ; sans le crochet, le toit du stand d'en face est hors de portée du plané (plus de 60 tuiles) ;
+  - **le toit d'un stand englouti** et une toile tombée jusqu'au toit (**on glisse dessous**), **la seconde veilleuse** (ce tronçon : facile, le crochet et la glissade exigés) ;
+  - **sous l'auvent bas, le saut long** jusqu'au flanc d'un cheval de bois géant, et le **saut mural** pour s'y hisser (16 tuiles, **difficile**, 67 ms ; à 15 tuiles, il devient moyen) ; puis une cheminée entre une barre pendue et le dernier stand, jusqu'à son toit.
+  - Trois tronçons `; @leg:` vérifiés (D-96). Jamais coincée (testé : de chaque surface, une veilleuse ou le bout) ; toutes les surfaces servent.
+  - **Écart avec le plan** : la difficulté vient d'un seul passage difficile (le saut long) ; les cheminées et les guirlandes restent faciles, avec l'eau dessous. Les cheminées de chevaux de la poursuite viendront avec la vague (PR 7, 8).
+- **Fin provisoire** (PLACEHOLDER jusqu'à la vague, PR 7 et 8) : sur le toit du dernier stand, l'image tremble (la mer gronde au loin) ; Céleste regarde (« ? ») ; le cercle se referme ; elle est sur la jetée, devant le carrousel. Aucune étape n'est posée : le carrousel y ramène. Ni parents ni Maria (pilier 5, D-95).
+- **Étrangetés** : les chevaux tournés dans tous les sens, des têtes de chevaux qui dépassent de l'eau, une nacelle turquoise, des ballons immobiles, des yeux.
+- **Dessin** (`seaStrangeArt.ts`, PLACEHOLDER, en silhouettes bordées de turquoise, D-81) : `drownedcarousel`, `horsepole`, `carouselbeam`, `fairawning`, `drownedstall`, `bigtop`, `balloons`, `sunkenhorses`, `drownedwheel`. Rayures des toiles et ampoules passées.
+- **Debug** : histoire « la fête engloutie (le carrousel) ».
+- **Tests** (`seaStrangeFair.test.ts`) : entrée et réentrée, hors carte, sa musique, le script (dans le noir, le cercle), la fin provisoire (retour devant le carrousel, aucun personnage), difficile, les veilleuses, les tronçons, jamais coincée.
+- **Sauvegarde** : aucune migration (étape `sea.strange`).
+
+## D-103 — La station balnéaire, PR 7 : le rythme de la vague (parcours d'essai 14)
+
+- **Plan validé** (D-95) : le boss du niveau 6 est une poursuite horizontale, **la vague** ; son rythme est essayé seul dans le parcours 14, branché dans le niveau avec la PR 8.
+- **Données** : `; @chase-look: wave` (seulement pour une poursuite horizontale, vérifié à la lecture) donne au poursuivant l'allure de la vague **et son rythme** ; le reste ne change pas (`; @chase`, `; @chase-phase`, `; @chase-trip`). Les autres poursuites gardent leur allure (testé).
+- **Le rythme** (cœur pur `Chase`) : la vague **déferle** pendant `surgeMs` (2 s), à la vitesse de la salle, puis **se retire** pendant `backwashMs` (1,5 s), en reculant de `backwashSpeed` (3 tuiles/s) ; et ainsi de suite. Le cycle ne court que quand elle bouge (ni pendant l'attente du départ, ni pendant les pauses) et repart à chaque essai. **Pendant le reflux**, ni contact ni rattrapage. Réglages dans DEBUG → Combat, PROVISOIRES.
+  - **Conséquence voulue** : quand elle déferle, elle va plus vite que Céleste (13 tuiles/s contre environ 9,5) ; le reflux rend l'avance. C'est **pendant le reflux qu'on monte une cheminée** (les fenêtres du §19). En moyenne, elle avance d'environ 6 tuiles/s, comme le chariot du train (6,5).
+- **La vague** (PLACEHOLDER, `ChaseView`) : une masse d'eau sombre de toute la hauteur, sans visage ; un front strié d'écume, bordé de **turquoise** (là où il ne faut pas être) ; dans l'eau, des chevaux de bois et des ballons pâles ; en haut, **la crête** qui s'avance quand elle déferle, se replie et pâlit quand elle se retire ; elle se soulève lentement et tremble au contact. Trois images par salle, aucune allocation par image.
+- **Parcours d'essai 14 « La vague »** (130 × 18, facile en statique ; prête escalade, saut mural et glissade ; le parapluie n'est pas prêté). Trois tronçons, une lanterne au début de chacun :
+  - une barrière basse (glisser dessous), puis **une cheminée à pied sec** (on passe sous une barre pendue, saut mural jusqu'au haut d'un bloc) ;
+  - un bassin à sauter, puis **une cheminée au-dessus de l'eau** (tomber ramène au dernier appui) ;
+  - un dernier bassin, une barrière basse, une caisse, et **la digue où la vague se brise** (la ligne d'arrivée de la poursuite, colonne 117).
+  - Impossible sans le saut mural, ni sans la glissade (testé).
+- **Test de rythme** (phase 3, rejeu du vrai `Chase` le long du chemin le plus rapide, D-70, D-87) : le joueur parfait n'est **jamais touché** (au moins 2,4 tuiles d'avance) ; **sans le reflux** (une vague qui ne se retire jamais), il est touché à chaque tronçon : le rythme compte ; **50 % plus lent**, il est touché à chaque tronçon. 25 % plus lent passe les deux premiers tronçons, pas le troisième. En phase 1 : le joueur parfait n'est jamais touché.
+- **Sauvegarde** : aucun changement (parcours d'essai hors partie).
+
+## D-104 — La station balnéaire, PR 8 : la vague dans le niveau, le livre musical
+
+- **Plan validé** (D-95) ; même schéma que le train (D-88) : le monde étrange finit sur un objet d'enfance, un souvenir de la rubrique « Monde étrange », puis une fin provisoire sur la couchette.
+- **La fête engloutie** (D-102) s'ouvre à droite (sortie 1, au bout du toit du dernier stand) sur **la vague** ; sa fin provisoire est retirée. Ses veilleuses n'ont pas bougé.
+- **La vague** (`sea-strange-wave`, 190 × 22, `; @world: strange`, dehors, hors carte, musique `strange` PLACEHOLDER) : la poursuite horizontale à l'allure de vague (D-103, `; @chase-look: wave`, 13 tuiles/s quand elle déferle), sur le platelage englouti de la fête. **Quatre tronçons, une veilleuse au début de chacun** :
+  - le comptoir d'un stand (glisser dessous), un bassin, **la cheminée des chevaux** à pied sec (saut mural, pendant le reflux) ;
+  - du haut du stand, **le grand bassin** et sa guirlande, la grande roue noyée au fond, une poutre basse (glisser dessous) ;
+  - **la cheminée au-dessus de l'eau** ;
+  - les chevaux dans l'eau, une caisse, **la digue où la vague se brise** (la ligne d'arrivée, colonne 160) ; après la digue, **le toit du carrousel étrange** et le livre.
+  - Difficulté statique : facile (tronçons `; @leg:` vérifiés : glissade et saut mural exigés au premier, glissade au deuxième, saut mural au troisième). La difficulté est celle de la poursuite.
+  - **Test de rythme** (phase 3, toutes les capacités) : le joueur parfait n'est **jamais touché** (plus de 2 tuiles d'avance) ; **sans le reflux**, ou **50 % plus lent**, il est touché à chaque tronçon. Pendant la conception, 25 % plus lent, il l'était à trois tronçons sur quatre (plus dur que le parcours 14 : la « poursuite difficile » du plan).
+  - Jamais coincée de la fête engloutie au livre (testé). Une bande de platelage d'une colonne au pied du stand du deuxième tronçon était un cul-de-sac (détecté par le test) : le stand est élargi.
+  - **Écart avec le plan** : les guirlandes et les chevaux dans l'eau servent peu à la poursuite (le plané passe au-dessus du grand bassin et des chevaux) ; ils restent pour l'image et comme appuis.
+- **Le livre musical** (`music-book`, PLACEHOLDER) : un livre cartonné d'enfant, une note sur la couverture, quatre gros boutons ronds de couleur ; la lueur turquoise autour. Agir : un souvenir de la rubrique « Monde étrange » (ajouté **à la fin** de `STRANGE_THINGS`), une lueur, un cœur ; le cercle se referme (`sea.strange-done`) ; Céleste est assise sur sa couchette, au dortoir (point de retour) ; une bulle Maria (la fin d'un monde étrange, D-70), puis une bulle lit. **Fin provisoire** : le court souvenir (Céleste toute petite et le livre) et la nuit viennent avec la PR 9 ; en attendant, le dortoir garde la lumière du jour.
+- Le carrousel ne ramène plus dans le monde étrange et la lumière ne vacille plus une fois le livre trouvé.
+- **Dessin** (`seaStrangeArt.ts`) : `drowneddeck` (le platelage), `strangeseawall` (la digue), et les éléments de la fête engloutie.
+- **Debug** : histoire « le livre musical trouvé (fin de la mer étrange) ».
+- **Tests** (`seaStrangeWave.test.ts`) : la liaison, hors carte, la poursuite et sa digue, le rythme des quatre tronçons, jamais coincée, le livre et sa fin ; `seaStrangeFair.test.ts` mis à jour (la sortie vers la vague).
+- **Sauvegarde** : aucune migration (étape `sea.strange-done`, souvenir `music-book` ajouté en dernier).
+
+## D-105 — La station balnéaire, PR 9 : le court souvenir, la nuit, le couloir en boucle, la fin
+
+- **Plan validé** (D-95). Le niveau 6 est complet ; sa fin reste un PLACEHOLDER jusqu'au niveau 7.
+- **Le court souvenir du livre** (deuxième court souvenir, D-68 ; rejouable dans le cahier en touchant le livre) : Céleste toute petite, **seule**, assise sur un tapis, le livre ouvert devant elle ; elle appuie sur un bouton, la bouche ronde ; des notes de couleur s'en échappent et montent. Une fenêtre pâle derrière. Il se place après le cœur, avant que le cercle se referme. Maria n'y est pas (pilier 5).
+- **La nuit au dortoir** : le centre a des murs de nuit (`; @nightwalls`), le soir (la fête et la nuit ne font qu'un). Après le livre, la camarade et deux enfants dorment sur leurs couchettes ; la maîtresse n'est plus au réfectoire. Sur sa couchette, Céleste pense à Maria, puis à son lit ; puis **la mélodie du livre** (bulle « musique »), d'on ne sait où, et une lueur sous **la porte du dortoir** (entre deux couchettes, du décor ; des sacs du décor y laissent la place) ; la lumière vacille près d'elle.
+- **Le couloir en boucle** : Agir à la porte, la mélodie ; dans le noir, un couloir (le couloir du centre, la nuit : des portes fermées, des veilleuses). **Cinq couloirs aux tuiles identiques, reliés en anneau** (la sortie droite de l'un mène à la gauche du suivant, le dernier au premier) : le couloir « revient sur lui-même », et **change à chaque tour** :
+  1. le couloir ordinaire ;
+  2. du sable, en dunes basses le long des murs ;
+  3. le papier peint de la chambre de Céleste (des pois roses) et sa toise (trois traits) ;
+  4. l'horloge de la gare et des valises le long du mur ;
+  5. le sol devenu une vitre sur la mer, le plafond un ciel à l'envers, et **une porte qui n'était pas là**, bordée de lueur turquoise ; la lumière vacille près d'elle.
+  - Hors carte, en silhouettes comme les mondes étranges (`; @world: strange`), musique `strange` ; ce qui vient d'un autre lieu garde un peu de sa couleur, passée. **Écart avec le plan** (quatre tours) : un premier tour ordinaire avant les quatre changements, pour qu'on voie le couloir changer.
+  - Sans danger ni lanterne : on rejoint toujours la porte en faisant le tour (testé). Le couloir est un point de non-retour : on n'en sort que par la porte.
+- **La fin** : Agir à la porte ; la lueur, l'image tremble ; le noir, longtemps (`sea.end`). **PLACEHOLDER** : Céleste se retrouve devant la porte ouverte sur la lueur ; Agir : « ? » (la suite, le niveau 7, viendra). Ni parents ni Maria à l'écran.
+- **Dessin** (`seaCorridorArt.ts`, `flashbackArt.ts`, PLACEHOLDER) : `corridordoors`, `sanddrift`, `bedroomwallpaper`, `heightmark`, `corridorsuitcases`, `seabelow`, `skyreversed`, `strangedoor` ; l'horloge de quai et la porte reprises.
+- **Debug** : histoires « le livre musical trouvé, la nuit au dortoir » et « la fin de la station balnéaire (la porte du couloir) ».
+- **Tests** (`seaNight.test.ts`) : le court souvenir et sa place, la nuit au dortoir, la porte du dortoir (seul passage vers le couloir), l'anneau des cinq couloirs (tuiles identiques, décors tous différents), la porte du dernier tour et la fin, on rejoint toujours la porte.
+- **Sauvegarde** : aucune migration (étape `sea.end`) ; aucune lanterne ni trouvaille déplacée.
+
+## D-106 — Retours de partie : le boss de la tour visible, des paliers dans trois cheminées
 
 - **Le boss de la tour ne se voyait jamais** (retour de l'utilisateur : « jamais vu le boss ») : la poursuite marchait (testé en simulation et dans le jeu), mais la vue montre environ 7 tuiles sous Céleste (`; @camera: up`), il part 9 tuiles sous ses pieds (sous le sol à l'arrivée) et ne rattrape qu'au-delà de 12 tuiles : un joueur correct le garde toujours sous le bas de l'écran. Choix de l'utilisateur, **visuel seulement, difficulté inchangée** :
   - **il dépasse au bas de l'écran** quand il est dessous : sa crête, son liseré turquoise et la casquette, à `CHASE_VIEW.peekPx` (10 px) du bas, plus pâle quand il est loin (jusqu'à `peekMinAlpha` à `peekFadeTiles` tuiles) ; la collision reste celle du vrai front ;
