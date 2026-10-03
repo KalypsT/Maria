@@ -1,18 +1,31 @@
 import Phaser from 'phaser';
-import { SHIFT_LAYER_VIEW, type ArtFinish, type ArtPalette } from '../config/art';
+import { ERASURE_COLORS, SHIFT_LAYER_VIEW, type ArtFinish, type ArtPalette } from '../config/art';
 import { TILE_SIZE as T } from '../config/display';
-import { atLayer } from '../core/level/layers';
-import { Tile, type Layer, type LevelData, type TileRect } from '../core/level/LevelData';
+import { erasedLevel } from '../core/level/erase';
+import { atLayer, rawOf } from '../core/level/layers';
+import {
+  LayerMask,
+  Tile,
+  type Layer,
+  type LevelData,
+  type TileRect,
+} from '../core/level/LevelData';
 import { drawRoomLayer, floorRow, type ArtContext } from './art/roomArt';
 
 /** Au-dessus du fond et de l'eau, sous les personnages et la lumière. */
 const LAYER_DEPTH = -4;
+/** L'annonce de l'effacement, juste au-dessus des couches. */
+const WHITEN_DEPTH = -3.9;
 /** Le voile chaud du souvenir : au-dessus de la lumière, sous l'interface. */
 const VEIL_DEPTH = 5;
 const SIGN_DEPTH = 9;
 /** Marge autour d'une zone dessinée (px logiques) : ombres et liserés qui débordent un peu. */
 const PAD = 6;
 const LAYERS: readonly Layer[] = ['present', 'memory'];
+const BIT: Readonly<Record<Layer, number>> = {
+  present: LayerMask.Present,
+  memory: LayerMask.Memory,
+};
 
 /** De quoi dessiner une salle habillée (D-28) : les palettes des deux couches, la finition. */
 export interface LayerArt {
@@ -23,37 +36,54 @@ export interface LayerArt {
   readonly images: ReadonlyMap<string, CanvasImageSource>;
 }
 
+type Shown = Phaser.GameObjects.Image | Phaser.GameObjects.Graphics;
+
+/**
+ * Une zone dessinée à part : une zone `; @shift:` (groupe -1), ou un groupe de l'effacement dans
+ * une couche (D-111). Son dessin plein et son contour fantôme.
+ */
+interface Area {
+  readonly layer: Layer;
+  readonly group: number;
+  readonly rects: readonly TileRect[];
+  readonly filled: Shown;
+  readonly ghost: Shown;
+}
+
+/** Ce que l'effacement donne à la vue : les couches de chaque groupe et leurs annonces. */
+export interface EraseShown {
+  readonly masks: ArrayLike<number>;
+  /** Couches visées par l'annonce en cours de chaque groupe (-1 : aucune). */
+  readonly target: ArrayLike<number>;
+  announce(group: number): number;
+}
+
 /**
  * Les deux couches d'une salle (la bascule, D-107). Ce qui n'existe que dans une couche est dessiné
  * à part, zone par zone : plein dans la couche active, en **contour fantôme** dans l'autre (pour
  * prévoir). Une salle habillée dessine ses zones avec l'habillage : le présent dans la palette de la
  * salle (les silhouettes du monde étrange), le souvenir dans les couleurs chaudes et passées des
- * courts souvenirs ; une salle de tuiles (les parcours) les dessine en tuiles. Tout est créé au
- * chargement de la salle ; basculer ne fait que changer des visibilités (aucune création en jeu).
- * Dans le souvenir, un voile chaud recouvre la vue. Le petit signe du refus et l'éclair de la bascule.
+ * courts souvenirs ; une salle de tuiles (les parcours) les dessine en tuiles. Les groupes de
+ * l'effacement (D-111) sont dessinés de même, dans chaque couche, et montrés selon leurs couches du
+ * moment ; une plateforme annoncée blanchit. Tout est créé au chargement de la salle ; basculer ou
+ * effacer ne fait que changer des visibilités (aucune création en jeu). Dans le souvenir, un voile
+ * chaud recouvre la vue. Le petit signe du refus et l'éclair de la bascule.
  */
 export class ShiftLayerView {
-  private readonly filled: Record<Layer, Phaser.GameObjects.Graphics>;
-  private readonly ghost: Record<Layer, Phaser.GameObjects.Graphics>;
-  /** Images des zones d'une salle habillée (pleines, fantômes), par couche. */
-  private readonly images: Record<Layer, Phaser.GameObjects.Image[]> = { present: [], memory: [] };
-  private readonly ghostImages: Record<Layer, Phaser.GameObjects.Image[]> = {
-    present: [],
-    memory: [],
-  };
+  private readonly areas: Area[] = [];
   private readonly textureKeys: string[] = [];
   private readonly veil: Phaser.GameObjects.Rectangle;
   private readonly sign: Phaser.GameObjects.Graphics;
+  private readonly whiten: Phaser.GameObjects.Graphics;
   private readonly scratch = document.createElement('canvas');
   private signStart = -1;
   private signKind: 'refuse' | 'flash' = 'refuse';
   private active: Layer = 'present';
   private layered = false;
+  private masks: ArrayLike<number> | null = null;
+  private whitened = false;
 
   constructor(private readonly scene: Phaser.Scene) {
-    const make = () => scene.add.graphics().setDepth(LAYER_DEPTH).setVisible(false);
-    this.filled = { present: make(), memory: make() };
-    this.ghost = { present: make(), memory: make() };
     const v = SHIFT_LAYER_VIEW;
     // Plus grand que tout écran : fixe dans la vue, il n'a pas à suivre les redimensionnements.
     this.veil = scene.add
@@ -63,44 +93,59 @@ export class ShiftLayerView {
       .setDepth(VEIL_DEPTH)
       .setVisible(false);
     this.sign = scene.add.graphics().setDepth(SIGN_DEPTH).setVisible(false);
+    this.whiten = scene.add.graphics().setDepth(WHITEN_DEPTH);
   }
 
   /**
-   * Nouvelle salle : prépare ses deux couches (rien sans couches). `art` : salle habillée (null :
-   * une salle de tuiles).
+   * Nouvelle salle : prépare ses deux couches et les groupes de l'effacement (rien sans eux).
+   * `base` : la salle telle que lue (ses zones `; @shift:`, ses groupes) ; `art` : salle habillée
+   * (null : une salle de tuiles).
    */
-  load(level: LevelData, art: LayerArt | null): void {
+  load(base: LevelData, art: LayerArt | null): void {
     this.clear();
-    const layers = level.layers;
-    this.layered = layers !== null;
+    const layers = base.layers;
+    const erase = base.erase;
+    this.layered = layers !== null || erase !== null;
+    const tiles = rawOf(base).tiles;
     if (layers) {
       for (const layer of LAYERS) {
-        const rects = layers[layer];
-        if (art) {
-          rects.forEach((r, i) => {
-            this.bake(level, layer, r, i, art);
-          });
-        } else {
-          this.drawTiles(layer, rects, layers.rawTiles, level.width);
-        }
+        layers[layer].forEach((r, i) => {
+          this.add(atLayer(base, layer), layer, -1, [r], String(i), tiles, art);
+        });
       }
     }
+    if (erase) {
+      // Chaque groupe, dans chaque couche : dessiné depuis le motif où il est dans les deux.
+      const everywhere = erasedLevel(
+        base,
+        erase.groups.map(() => LayerMask.Both),
+      );
+      erase.groups.forEach((g, i) => {
+        for (const layer of LAYERS) {
+          this.add(atLayer(everywhere, layer), layer, i, g.rects, `g${String(i)}`, tiles, art);
+        }
+      });
+    }
+    this.masks = erase ? erase.groups.map((g) => g.initial) : null;
     this.show('present');
   }
 
-  /** La couche active (les autres dessins restent créés). */
-  show(layer: Layer): void {
+  /** La couche active ; `masks` : les couches de chaque groupe de l'effacement (s'il y en a). */
+  show(layer: Layer, masks: ArrayLike<number> | null = this.masks): void {
     this.active = layer;
-    for (const l of LAYERS) {
-      const on = l === layer;
-      this.filled[l].setVisible(on);
-      this.ghost[l].setVisible(!on);
-      for (const image of this.images[l]) {
-        image.setVisible(on);
+    this.masks = masks;
+    const bit = BIT[layer];
+    for (const area of this.areas) {
+      if (area.group < 0) {
+        area.filled.setVisible(area.layer === layer);
+        area.ghost.setVisible(area.layer !== layer);
+        continue;
       }
-      for (const image of this.ghostImages[l]) {
-        image.setVisible(!on);
-      }
+      const mask = masks?.[area.group] ?? 0;
+      const here = (mask & BIT[area.layer]) !== 0;
+      area.filled.setVisible(here && area.layer === layer);
+      // L'autre couche en fantôme, seulement si le groupe n'est pas aussi dans la couche active.
+      area.ghost.setVisible(here && area.layer !== layer && (mask & bit) === 0);
     }
     this.veil.setVisible(this.layered && layer === 'memory');
   }
@@ -117,8 +162,12 @@ export class ShiftLayerView {
     this.signStart = now;
   }
 
-  /** Une image : le signe suit Céleste (x, y : centre, px). */
-  render(now: number, x: number, y: number): void {
+  /**
+   * Une image : le signe suit Céleste (x, y : centre, px) ; les plateformes annoncées par
+   * l'effacement blanchissent (dans la couche active).
+   */
+  render(now: number, x: number, y: number, erase: EraseShown | null = null): void {
+    this.renderWhiten(now, erase);
     const sign = this.sign;
     const v = SHIFT_LAYER_VIEW;
     const total = this.signKind === 'refuse' ? v.refuseMs : v.flashMs;
@@ -143,40 +192,116 @@ export class ShiftLayerView {
     }
   }
 
-  private clear(): void {
-    for (const layer of LAYERS) {
-      this.filled[layer].clear();
-      this.ghost[layer].clear();
-      for (const image of [...this.images[layer], ...this.ghostImages[layer]]) {
-        image.destroy();
+  /** L'annonce de l'effacement : un voile gris pâle qui monte sur la plateforme, en battant. */
+  private renderWhiten(now: number, erase: EraseShown | null): void {
+    const g = this.whiten;
+    if (!erase || !this.masks) {
+      if (this.whitened) {
+        g.clear();
+        this.whitened = false;
       }
-      this.images[layer].length = 0;
-      this.ghostImages[layer].length = 0;
+      return;
     }
+    let any = false;
+    const bit = BIT[this.active];
+    for (const area of this.areas) {
+      if (area.group < 0 || area.layer !== this.active) {
+        continue;
+      }
+      const a = erase.announce(area.group);
+      const mask = this.masks[area.group] ?? 0;
+      const target = erase.target[area.group] ?? -1;
+      // Elle blanchit avant de quitter la couche active ; une lueur pâle là où elle va apparaître.
+      const leaving = (mask & bit) !== 0;
+      const coming = !leaving && target >= 0 && (target & bit) !== 0;
+      if (a <= 0 || (!leaving && !coming)) {
+        continue;
+      }
+      if (!any) {
+        g.clear();
+        any = true;
+      }
+      const beat = 0.75 + 0.25 * Math.sin(now / 90);
+      const alpha = leaving ? 0.15 + 0.7 * a : 0.08 + 0.3 * a;
+      g.fillStyle(ERASURE_COLORS.tile, Math.min(0.9, alpha * beat));
+      for (const r of area.rects) {
+        g.fillRect(r.col * T, r.row * T, r.width * T, r.height * T);
+      }
+    }
+    if (!any && this.whitened) {
+      g.clear();
+    }
+    this.whitened = any;
+  }
+
+  private clear(): void {
+    for (const area of this.areas) {
+      area.filled.destroy();
+      area.ghost.destroy();
+    }
+    this.areas.length = 0;
     for (const key of this.textureKeys) {
       this.scene.textures.remove(key);
     }
     this.textureKeys.length = 0;
+    this.whiten.clear();
+    this.whitened = false;
+  }
+
+  /** Une zone : dessinée avec l'habillage, ou en tuiles. */
+  private add(
+    variant: LevelData,
+    layer: Layer,
+    group: number,
+    rects: readonly TileRect[],
+    tag: string,
+    tiles: Uint8Array,
+    art: LayerArt | null,
+  ): void {
+    const made = art
+      ? this.bake(variant, layer, rects, tag, art)
+      : this.drawTiles(layer, rects, tiles, variant.width);
+    if (made) {
+      this.areas.push({ layer, group, rects, ...made });
+    }
   }
 
   /** Une zone d'une salle habillée : son dessin plein et son contour fantôme, deux textures. */
-  private bake(level: LevelData, layer: Layer, r: TileRect, index: number, art: LayerArt): void {
-    const variant = atLayer(level, layer);
-    const { width } = level;
+  private bake(
+    variant: LevelData,
+    layer: Layer,
+    rects: readonly TileRect[],
+    tag: string,
+    art: LayerArt,
+  ): { filled: Shown; ghost: Shown } | null {
+    const { width } = variant;
     const tiles = new Uint8Array(variant.tiles.length);
     const materials = new Uint8Array(variant.materials.length);
-    for (let row = r.row; row < r.row + r.height; row++) {
-      for (let col = r.col; col < r.col + r.width; col++) {
-        const i = row * width + col;
-        tiles[i] = variant.tiles[i] ?? Tile.Empty;
-        materials[i] = variant.materials[i] ?? 0;
+    let col0 = Infinity;
+    let row0 = Infinity;
+    let col1 = -Infinity;
+    let row1 = -Infinity;
+    for (const r of rects) {
+      col0 = Math.min(col0, r.col);
+      row0 = Math.min(row0, r.row);
+      col1 = Math.max(col1, r.col + r.width);
+      row1 = Math.max(row1, r.row + r.height);
+      for (let row = r.row; row < r.row + r.height; row++) {
+        for (let col = r.col; col < r.col + r.width; col++) {
+          const i = row * width + col;
+          tiles[i] = variant.tiles[i] ?? Tile.Empty;
+          materials[i] = variant.materials[i] ?? 0;
+        }
       }
     }
     const inside = (d: TileRect) =>
-      d.col >= r.col &&
-      d.row >= r.row &&
-      d.col + d.width <= r.col + r.width &&
-      d.row + d.height <= r.row + r.height;
+      rects.some(
+        (r) =>
+          d.col >= r.col &&
+          d.row >= r.row &&
+          d.col + d.width <= r.col + r.width &&
+          d.row + d.height <= r.row + r.height,
+      );
     const only: LevelData = {
       ...variant,
       tiles,
@@ -185,17 +310,17 @@ export class ShiftLayerView {
       entities: [],
       cables: [],
     };
-    const x0 = r.col * T - PAD;
-    const y0 = r.row * T - PAD;
-    const w = r.width * T + 2 * PAD;
-    const h = r.height * T + 2 * PAD;
+    const x0 = col0 * T - PAD;
+    const y0 = row0 * T - PAD;
+    const w = (col1 - col0) * T + 2 * PAD;
+    const h = (row1 - row0) * T + 2 * PAD;
     const scale = art.scale;
     const canvas = document.createElement('canvas');
     canvas.width = Math.ceil(w * scale);
     canvas.height = Math.ceil(h * scale);
     const ctx = canvas.getContext('2d');
     if (!ctx) {
-      return;
+      return null;
     }
     ctx.setTransform(scale, 0, 0, scale, -x0 * scale, -y0 * scale);
     const context: ArtContext = {
@@ -205,7 +330,7 @@ export class ShiftLayerView {
       images: art.images,
       clip: { x: x0, y: y0, w, h },
     };
-    const floorY = floorRow(level) * T;
+    const floorY = floorRow(variant) * T;
     drawRoomLayer(context, this.scratch, art.finish, floorY);
     // Le contour fantôme suit les formes, pas leurs ombres : un second dessin, sans ombre.
     const bare = document.createElement('canvas');
@@ -218,41 +343,38 @@ export class ShiftLayerView {
       drawRoomLayer({ ...context, ctx: bctx }, this.scratch, flat, floorY);
     }
     this.scratch.width = this.scratch.height = 1;
-    const ghost = outline(bare, SHIFT_LAYER_VIEW[layer].edge, scale);
-    const key = `shift-${level.id}-${layer}-${String(index)}`;
-    for (const [suffix, source, list] of [
-      ['', canvas, this.images[layer]],
-      ['-ghost', ghost, this.ghostImages[layer]],
-    ] as const) {
+    const ghostCanvas = outline(bare, SHIFT_LAYER_VIEW[layer].edge, scale);
+    const key = `shift-${variant.id}-${layer}-${tag}`;
+    const make = (suffix: string, source: HTMLCanvasElement) => {
       const textures = this.scene.textures;
       if (textures.exists(key + suffix)) {
         textures.remove(key + suffix);
       }
       textures.addCanvas(key + suffix, source)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
       this.textureKeys.push(key + suffix);
-      const image = this.scene.add
+      return this.scene.add
         .image(x0, y0, key + suffix)
         .setOrigin(0, 0)
         .setScale(1 / scale)
         .setDepth(LAYER_DEPTH)
         .setVisible(false);
-      if (suffix) {
-        image.setAlpha(SHIFT_LAYER_VIEW.ghostAlpha);
-      }
-      list.push(image);
-    }
+    };
+    return {
+      filled: make('', canvas),
+      ghost: make('-ghost', ghostCanvas).setAlpha(SHIFT_LAYER_VIEW.ghostAlpha),
+    };
   }
 
-  /** Une salle de tuiles (les parcours) : les tuiles de la couche, pleines et en contour. */
+  /** Une salle de tuiles (les parcours) : les tuiles de la zone, pleines et en contour. */
   private drawTiles(
     layer: Layer,
     rects: readonly TileRect[],
     tiles: Uint8Array,
     width: number,
-  ): void {
+  ): { filled: Shown; ghost: Shown } {
     const colors = SHIFT_LAYER_VIEW[layer];
-    const filled = this.filled[layer];
-    const ghost = this.ghost[layer];
+    const filled = this.scene.add.graphics().setDepth(LAYER_DEPTH).setVisible(false);
+    const ghost = this.scene.add.graphics().setDepth(LAYER_DEPTH).setVisible(false);
     ghost.lineStyle(SHIFT_LAYER_VIEW.ghostLine, colors.edge, SHIFT_LAYER_VIEW.ghostAlpha);
     for (const r of rects) {
       for (let row = r.row; row < r.row + r.height; row++) {
@@ -275,6 +397,7 @@ export class ShiftLayerView {
         }
       }
     }
+    return { filled, ghost };
   }
 }
 

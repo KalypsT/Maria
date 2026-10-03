@@ -1442,6 +1442,38 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Vérifié dans Chromium** : de la porte du couloir à l'entrée (le cercle, la fente), le miroir (le reflet dans la vitre, le cœur, puis de l'autre côté), la bascule apprise, le passage du miroir dans le souvenir, l'arrivée dans la maison ; la bibliothèque dans les deux couches.
 - **Sauvegarde** : aucune migration (trois étapes en fin de liste, la capacité `shift`, trois trouvailles neuves).
 
+## D-111 — L'avant-dernier niveau, PR 4 : l'effacement (le système) et le parcours d'essai 16
+
+- **Plan validé** (D-107), PR avancée avant les îlots (essai sur téléphone). Aucune salle du jeu ne l'utilise encore : le boss viendra avec la PR 10.
+- **Données** :
+  - `; @erase: <groupe> present|memory|both col ligne l h` (répétable ; plusieurs zones par groupe) : des tuiles qui pourront changer de couche, avec leurs couches de départ ;
+  - `; @erase-step: a,b` (répétable, dans l'ordre, en boucle) : à chaque étape, les groupes cités passent d'une couche à l'autre. Un groupe cité est une **vague** ; les autres sont des **bandes** (avec une poursuite vers le haut) ;
+  - `; @chase-look: erasure` (vers le haut seulement) : la poursuite prend l'allure de l'effacement ;
+  - `; @void: erasure` : les tuiles d'eau de la salle sont **l'effacement** (gris pâle, sans vaguelettes) ; y tomber fait **comme l'eau** (D-97 : retour au dernier appui, la peur monte d'un cran).
+  - Vérifié à la lecture : zones dans la salle, sans chevauchement entre elles ni avec les zones `; @shift:` ; lanternes, objets, départ, arrivée, portes (et leur sol) hors des groupes ; une vague est dans une seule couche au départ ; pas d'effacement et de marée dans la même salle.
+- **Des variantes statiques** (`src/core/level/erase.ts`, pur) : un état de l'effacement (les couches de chaque groupe, un « motif ») est une variante de la salle, construite et mise en cache (`erasedLevel`), analysable comme une autre ; ses couches par `atLayer`. Même identifiant : lanternes et trouvailles gardent les leurs (pilier 10). La salle se lit à son motif de départ.
+- **Le moteur** (`EraseState`, pur, sans allocation par pas) :
+  - **les bandes** : quand le front de l'effacement qui monte arrive à `eraseLeadTiles` (5) sous une bande, elle **blanchit** pendant `eraseWarnMs` (1,2 s), puis **quitte le présent** ; elle reste dans le souvenir ;
+  - **les vagues** : toutes les `eraseWaveMs / eraseSpeedScale` (4 s), l'étape suivante est annoncée (`eraseWarnMs`), puis ses groupes changent de couche. `eraseSpeedScale` servira au boss quand il accélère ;
+  - **rien n'apparaît sur Céleste** : une apparition dans sa couche, là où elle se tient, attend qu'elle soit partie. Rien ne bouge (D-86) ;
+  - retour au départ au chargement de la salle et à la réapparition. Réglages dans DEBUG → Combat, PROVISOIRES.
+- **Changement de la boucle de jeu, signalé et accepté** (D-107) : pour la première fois, la collision change pendant le jeu, hors du noir. Le jeu passe à la variante du nouveau motif dans la couche de Céleste (`PlayerPhysics.shiftTo`, sans marge : la place est toujours libre).
+- **Le dessin** : la salle est dessinée sans aucun groupe ; chaque groupe est dessiné à part dans chaque couche (comme les zones de la bascule, D-109 : plein ou en contour fantôme, avec l'habillage dans une salle habillée), et montré selon ses couches du moment. **Annonce** : un voile gris pâle qui bat et monte sur la plateforme qui va partir ; une lueur pâle là où une plateforme va apparaître dans la couche active. **La poursuite** à l'allure de l'effacement : une décoloration grise et pâle qui monte, son bord en brume, des formes de jouets sans couleur, sans visage (grise plutôt que blanche, pour le torchon). PLACEHOLDERS.
+- **Parcours d'essai 16 « Effacement »** (64 × 60, facile en statique ; prête escalade et bascule) :
+  - **la fuite** : un puits de planches qui alternent (présent, souvenir, et des bandes dans les deux couches), l'effacement monte (3,5 tuiles/s) ; une lanterne en bas et au milieu ; on monte en basculant ;
+  - **les vagues** : en haut, au-dessus du bassin de l'effacement, sous un plafond bas, quatre planches qui changent de couche deux par deux ; une lanterne avant.
+  - Tronçons : la fuite et les vagues, faciles, la bascule exigée (en statique).
+- **Tests** (`erase.test.ts`, `eraseCourse.test.ts`) : les données, les motifs (variantes et cache), les vagues annoncées puis appliquées, l'apparition qui attend, les bandes devant l'effacement ; dans le parcours 16 :
+  - la fuite faisable une fois toutes les bandes parties du présent, impossible sans la bascule ;
+  - **le rythme** (rejeu du vrai `Chase` le long du chemin le plus rapide, D-70, prudemment avec toutes les bandes parties) : le joueur parfait n'est **jamais touché** (au moins 2 tuiles d'avance, depuis le départ et la lanterne du milieu) ; **50 % plus lent, il l'est**. Pendant la conception : 25 % plus lent, il l'était aussi (difficile mais juste, à juger au téléphone) ;
+  - **chaque motif des vagues** (quatre, en boucle) laisse un chemin jusqu'à l'arrivée, et on n'y est jamais coincée ;
+  - **chaque vague est annoncée assez tôt** : de toute plateforme qui va disparaître, un appui qui reste est à portée pendant l'annonce (chemin le plus rapide).
+- **Écarts et limites** :
+  - les vagues sont dessinées en blocs de tuiles dans le parcours (un dessin habillé viendra avec la salle du boss) ;
+  - le test de rythme suppose toutes les bandes déjà parties (prudent : en vrai, elles partent une à une) ;
+  - premiers essais du parcours (détectés par les sondes) : le palier du haut fermait le puits par-dessus ; le plané traversait le bassin (un plafond bas l'empêche) ; une marche au bord du bassin rend le premier saut faisable en phase 1.
+- **Sauvegarde** : aucun changement (parcours hors partie ; l'effacement n'est jamais sauvegardé).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

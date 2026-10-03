@@ -45,6 +45,9 @@ const CHINA = '#a99fbd';
 const CHINA_LIGHT = '#cfc8dc';
 const CHINA_DARK = '#6f6690';
 const METAL = '#2a2540';
+/** L'effacement (D-111) : gris pâle, son bord plus clair. */
+const ERASE_MASS = '#a9a6b8';
+const ERASE_RIM = 'rgba(242,240,248,0.9)';
 const METAL_LIGHT = '#4a4268';
 
 /** Pseudo-hasard stable. */
@@ -140,11 +143,17 @@ export class ChaseView {
     this.joltAt = -Infinity;
     const inverse = 1 / this.artScale;
     if (room.chase.dir === 'up') {
-      this.createTextures();
+      if (room.chase.look === 'erasure') {
+        this.createErasureTextures();
+      } else {
+        this.createTextures();
+      }
       this.body = this.scene.add.image(0, 0, BODY).setOrigin(0, 0).setDepth(9);
       this.body.setDisplaySize(this.width, this.height);
       this.top = this.scene.add.image(0, 0, TOP).setOrigin(0, 0).setScale(inverse).setDepth(9);
       this.cap = this.scene.add.image(0, 0, CAP).setOrigin(0.5, 1).setScale(inverse).setDepth(9);
+      // L'effacement (D-111) n'a ni casquette ni visage.
+      this.cap.setVisible(room.chase.look !== 'erasure');
       return;
     }
     // Vers la droite, la masse est à gauche du front ; vers la gauche, à droite (image retournée).
@@ -519,6 +528,65 @@ export class ChaseView {
       }
       ctx.globalAlpha = 1;
     });
+  }
+
+  /**
+   * L'effacement (D-111) : une décoloration grise et pâle qui monte, sans visage. Son bord se défait
+   * en brume ; dedans, des formes de jouets qui ont perdu leur couleur. Grise plutôt que blanche (le
+   * torchon est blanc). Inquiétante, jamais horreur (pilier 8). PLACEHOLDER.
+   */
+  private createErasureTextures(): void {
+    const make = this.make.bind(this);
+    const width = this.width;
+    make(TOP, width, TOP_H, (ctx) => {
+      const mist = ctx.createLinearGradient(0, 0, 0, TOP_H);
+      mist.addColorStop(0, 'rgba(200,198,212,0)');
+      mist.addColorStop(0.3, 'rgba(190,187,204,0.55)');
+      mist.addColorStop(0.6, ERASE_MASS);
+      mist.addColorStop(1, ERASE_MASS);
+      ctx.fillStyle = mist;
+      ctx.fillRect(0, 0, width, TOP_H);
+      // Un bord qui se défait : des volutes plus claires.
+      ctx.fillStyle = 'rgba(232,230,240,0.35)';
+      for (let x = 0; x < width; x += 9) {
+        ctx.beginPath();
+        ctx.ellipse(x, T + Math.sin(x * 0.13) * 3, 6 + hash(x, 7) * 6, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Des jouets qui perdent leur couleur : un cube, une balle, un petit cheval, à peine.
+      ctx.strokeStyle = 'rgba(250,250,255,0.35)';
+      ctx.lineWidth = 1;
+      for (let x = 12; x < width - 12; x += 40 + hash(x, 8) * 30) {
+        const y = T * 2 + hash(x, 9) * T;
+        const kind = Math.floor(hash(x, 10) * 3);
+        ctx.beginPath();
+        if (kind === 0) {
+          ctx.rect(x, y, 8, 8);
+        } else if (kind === 1) {
+          ctx.arc(x + 4, y + 4, 4, 0, Math.PI * 2);
+        } else {
+          ctx.moveTo(x, y + 8);
+          ctx.lineTo(x + 3, y);
+          ctx.lineTo(x + 9, y + 1);
+          ctx.lineTo(x + 10, y + 8);
+        }
+        ctx.stroke();
+      }
+      // Le bord pâle (là où il ne faut pas être), un peu plus clair que le reste.
+      ctx.strokeStyle = ERASE_RIM;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, T + 1);
+      for (let x = 0; x <= width; x += 8) {
+        ctx.lineTo(x, T + 1 + Math.sin(x * 0.17) * 1.8);
+      }
+      ctx.stroke();
+    });
+    make(BODY, 4, 4, (ctx) => {
+      ctx.fillStyle = ERASE_MASS;
+      ctx.fillRect(0, 0, 4, 4);
+    });
+    make(CAP, 2, 2, () => undefined);
   }
 
   private createTextures(): void {

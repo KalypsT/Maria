@@ -11,12 +11,14 @@ import {
   type LevelEntity,
   type LevelExit,
   type LevelLayers,
+  type LayerMask,
   type LevelLeg,
   type LevelTide,
   type LevelTrain,
   type TilePos,
   type TileRect,
 } from './LevelData';
+import { buildErase, checkErase, erasedLevel, initialMasks, maskOf } from './erase';
 import { buildLayers, checkLayers, presentOf } from './layers';
 import { buildTide, checkTide } from './tide';
 import { TILE_SIZE } from '../../config/display';
@@ -102,6 +104,10 @@ const LEG_NEEDS: ReadonlySet<string> = new Set([
 ]);
 /** Mots d'un tronçon qui ne sont pas des capacités : la marée, la couche de départ (D-107). */
 const LEG_STATES: ReadonlySet<string> = new Set(['high', 'low', 'memory', 'present']);
+/** Groupe de l'effacement (D-111), répétable : `; @erase: a present 10 4 6 1`. */
+const ERASE = /^([a-z0-9-]+)\s+(present|memory|both)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
+/** Étape des vagues de l'effacement (D-111), répétable, dans l'ordre : `; @erase-step: a,b`. */
+const ERASE_STEP = /^([a-z0-9-]+(?:\s*,\s*[a-z0-9-]+)*)$/;
 /** Zone d'une seule couche (D-107), répétable : `; @shift: memory 10 4 6 2`. */
 const SHIFT = /^(present|memory)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
 
@@ -136,6 +142,8 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   const legs: LevelLeg[] = [];
   const sweeps: TileRect[] = [];
   const shiftZones: { present: TileRect[]; memory: TileRect[] } = { present: [], memory: [] };
+  const eraseRects: { id: string; mask: LayerMask; rect: TileRect }[] = [];
+  const eraseSteps: string[][] = [];
   text.split('\n').forEach((raw, index) => {
     const line = raw.replace(/\r$/, '').trimEnd();
     if (!line.startsWith(COMMENT)) {
@@ -200,6 +208,24 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
       }
       const [col = 0, row = 0, w = 0, h = 0] = r.slice(1, 5).map(Number);
       (match[1] === 'sea' ? seas : rises).push({ col, row, width: w, height: h });
+    } else if (match?.[1] === 'erase' && match[2] !== undefined) {
+      const z = ERASE.exec(match[2].trim());
+      const mask = z ? maskOf(z[2] ?? '') : null;
+      if (!z || mask === null) {
+        throw new Error(
+          `Niveau ${id}, ligne ${index + 1} : @erase attend « groupe present|memory|both col ligne l h »`,
+        );
+      }
+      const [col = 0, row = 0, w = 0, h = 0] = z.slice(3, 7).map(Number);
+      eraseRects.push({ id: z[1] ?? '', mask, rect: { col, row, width: w, height: h } });
+    } else if (match?.[1] === 'erase-step' && match[2] !== undefined) {
+      const z = ERASE_STEP.exec(match[2].trim());
+      if (!z) {
+        throw new Error(
+          `Niveau ${id}, ligne ${index + 1} : @erase-step attend « groupe[,groupe] »`,
+        );
+      }
+      eraseSteps.push((z[1] ?? '').split(',').map((g) => g.trim()));
     } else if (match?.[1] === 'shift' && match[2] !== undefined) {
       const z = SHIFT.exec(match[2].trim());
       if (!z) {
@@ -250,10 +276,10 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         }
         chasePhases.push({ until: Number(c[1]), speed: Number(c[2]) });
       } else if (match[1] === 'chase-look') {
-        if (value !== 'wave') {
+        if (value !== 'wave' && value !== 'erasure') {
           throw bad();
         }
-        chaseLook = 'wave';
+        chaseLook = value;
       } else if (match[1] === 'chase-trip') {
         const c = CHASE_TRIP.exec(value);
         if (!c) {
@@ -412,6 +438,9 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   if (chaseLook === 'wave' && (chaseEnd < 0 || chaseDir === 'up')) {
     throw new Error(`Niveau ${id} : @chase-look: wave va avec une poursuite horizontale`);
   }
+  if (chaseLook === 'erasure' && (chaseEnd < 0 || chaseDir !== 'up')) {
+    throw new Error(`Niveau ${id} : @chase-look: erasure va avec une poursuite vers le haut`);
+  }
   if (chaseEnd >= (chaseDir === 'up' ? height : width)) {
     throw new Error(`Niveau ${id} : @chase ${chaseEnd} hors de la salle`);
   }
@@ -454,13 +483,19 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         : null,
     tide,
     layers,
+    erase:
+      eraseRects.length > 0 || eraseSteps.length > 0
+        ? buildErase(id, width, height, { rects: eraseRects, steps: eraseSteps })
+        : null,
     legs,
     sweeps,
   };
   checkTide(level);
   const present = presentOf(level);
   checkLayers(present);
-  return present;
+  checkErase(present);
+  // Avec l'effacement (D-111), la salle se lit à son motif de départ.
+  return present.erase ? erasedLevel(present, initialMasks(present.erase)) : present;
 }
 
 /** Une sortie : tuiles d'une même colonne de mur latéral, contiguës, au moins 2 de haut. */

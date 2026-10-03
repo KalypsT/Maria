@@ -1174,6 +1174,20 @@ export const WATER_COLORS = {
   strangeSurface: 'rgba(110,230,215,0.8)',
 } as const;
 
+/**
+ * L'effacement (D-111) : là où il n'y a plus rien (`; @void: erasure`), les tuiles d'eau se
+ * dessinent en une décoloration grise et pâle, sans vaguelettes (grise plutôt que blanche, pour ne
+ * pas se confondre avec le torchon blanc). Tomber dedans fait comme l'eau (D-97). PLACEHOLDER.
+ */
+export const ERASURE_COLORS = {
+  body: [176, 172, 190] as const,
+  deep: [128, 124, 146] as const,
+  alpha: 0.9,
+  surface: 'rgba(236,234,242,0.85)',
+  /** Salles de tuiles (les parcours). */
+  tile: 0xb4b0c4,
+} as const;
+
 /** La surface animée de l'eau (D-97, `WaterView`) : vaguelettes qui défilent. PROVISOIRE. */
 export const WATER_LIFE = {
   /** Motif répété (px) et hauteur de la bande (px). */

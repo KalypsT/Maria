@@ -33,11 +33,14 @@ import {
   Material,
   Tile,
   tileAt,
+  LayerMask,
   type Layer,
   type LevelData,
 } from '../core/level/LevelData';
 import { atLayer, commonLayer, layerOf } from '../core/level/layers';
 import { LayerShift, ShiftEvent, type ShiftHost } from '../core/player/LayerShift';
+import { EraseState, type EraseHost } from '../core/boss/Erase';
+import { eraseRoot, erasedLevel } from '../core/level/erase';
 import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
 import { atTide } from '../core/level/tide';
 import { PlayerPhysics, type PlayerInput } from '../core/player/PlayerPhysics';
@@ -97,6 +100,7 @@ import {
   type ArtFinish,
   GARDEN_PALETTE,
   MEMORY_PALETTE,
+  ERASURE_COLORS,
   STREET_DUSK_PALETTE,
   STREET_PALETTE,
   TRAIN_DAY_PALETTE,
@@ -258,6 +262,13 @@ export class GameScene extends Phaser.Scene {
   private readonly layerShift = new LayerShift();
   private readonly shiftHost: ShiftHost = { tryShift: (to) => this.tryShiftTo(to) };
   private shiftView!: ShiftLayerView;
+  /** L'effacement de la salle (D-111) et la salle telle que lue (ses groupes), null sans lui. */
+  private erase: EraseState | null = null;
+  private eraseBase: LevelData | null = null;
+  private eraseVersion = -1;
+  private readonly eraseHost: EraseHost = {
+    canApply: (group, mask) => this.eraseCanApply(group, mask),
+  };
   /** Aperçu du monde étrange (D-28, overlay) : mêmes formes, autre palette. */
   strangeWorld = false;
   private roomArt!: RoomArtView;
@@ -445,7 +456,7 @@ export class GameScene extends Phaser.Scene {
     this.ride = new RideView(this);
     const save = this.session.data;
     const { room, checkpointId } = savedReturn(this.session);
-    this.level = this.atTide(room.level);
+    this.level = this.roomLevel(room.level);
     this.zone = room.zone;
     this.artScale = this.computeArtScale();
     // Partie reprise dans le monde étrange (veilleuse du passage d'ombres, D-34).
@@ -699,6 +710,7 @@ export class GameScene extends Phaser.Scene {
         this.poser.sitting = false; // Céleste se relève dès qu'on la fait bouger.
       }
       this.stepShift(this.controls.consumePressed('Shift') && !locked);
+      this.stepErase();
       this.player.step(input);
       combat.step(this.player, action && !near && !locked);
       const chase = combat.chase;
@@ -778,7 +790,7 @@ export class GameScene extends Phaser.Scene {
     );
     this.chaseView.render(camera.prevY + (camera.y - camera.prevY) * alpha + camera.viewHeight / 2);
     this.storyView.render(this.puppet.x, this.puppet.y, box.height);
-    this.shiftView.render(this.time.now, this.puppet.x, this.puppet.y - box.height / 2);
+    this.shiftView.render(this.time.now, this.puppet.x, this.puppet.y - box.height / 2, this.erase);
     this.worldView.render();
     this.dust.update();
     const main = this.cameras.main;
@@ -989,6 +1001,7 @@ export class GameScene extends Phaser.Scene {
   /** Applique les réglages de combat (overlay). */
   applyCombat(): void {
     this.combat.setParams(this.combatParams);
+    this.erase?.setParams(this.combatParams);
   }
 
   /** Ennemis remis à leur départ (overlay). */
@@ -1138,6 +1151,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   respawn(): void {
+    this.erase?.reset();
+    this.applyErase();
     this.showLayer('present');
     const { x, y } = this.respawnPosition();
     this.player.reset(x, y, this.level);
@@ -1284,8 +1299,76 @@ export class GameScene extends Phaser.Scene {
     this.level = target;
     this.run.setLayer(target);
     this.combat.setLayer(target);
-    this.shiftView.show(to);
+    this.shiftView.show(to, this.erase?.masks ?? null);
     return true;
+  }
+
+  /**
+   * La salle telle qu'elle se charge (D-107, D-111) : à la marée du moment, dans le présent, et avec
+   * l'effacement à son départ s'il y en a un (créé ici).
+   */
+  private roomLevel(source: LevelData): LevelData {
+    const level = this.atTide(source);
+    if (level.erase) {
+      this.eraseBase = eraseRoot(level);
+      this.erase = new EraseState(level.erase, this.combatParams, PHYSICS_STEP_HZ);
+      this.eraseVersion = this.erase.version;
+      return atLayer(erasedLevel(level, this.erase.masks), 'present');
+    }
+    this.eraseBase = null;
+    this.erase = null;
+    return atLayer(level, 'present');
+  }
+
+  /** L'effacement (D-111), à chaque pas : les bandes devant la poursuite, les vagues. */
+  private stepErase(): void {
+    const erase = this.erase;
+    if (!erase) {
+      return;
+    }
+    const chase = this.combat.chase;
+    const rising = chase && !chase.horizontal && !chase.done && chase.placed;
+    erase.step(rising ? chase.front : null, this.eraseHost);
+    this.applyErase();
+  }
+
+  /** Le motif de l'effacement a changé : la salle à jour, Céleste dans la même couche. */
+  private applyErase(): void {
+    const erase = this.erase;
+    const base = this.eraseBase;
+    if (!erase || !base || erase.version === this.eraseVersion) {
+      return;
+    }
+    this.eraseVersion = erase.version;
+    const layer = layerOf(this.level);
+    const target = atLayer(erasedLevel(base, erase.masks), layer);
+    // Rien n'apparaît sur Céleste (`eraseCanApply`) : la place est libre.
+    this.player.shiftTo(target, 0);
+    this.level = target;
+    this.run.setLayer(target);
+    this.combat.setLayer(target);
+    this.shiftView.show(layer, erase.masks);
+  }
+
+  /** Un groupe peut prendre ces couches : il n'apparaît pas sur Céleste, dans sa couche (D-111). */
+  private eraseCanApply(group: number, mask: number): boolean {
+    const erase = this.erase;
+    const g = erase?.data.groups[group];
+    if (!erase || !g) {
+      return true;
+    }
+    const bit = layerOf(this.level) === 'present' ? LayerMask.Present : LayerMask.Memory;
+    if ((mask & bit) === 0 || ((erase.masks[group] ?? 0) & bit) !== 0) {
+      return true;
+    }
+    const box = this.player.box;
+    return !g.rects.some(
+      (r) =>
+        box.x < (r.col + r.width) * TILE_SIZE &&
+        box.x + box.width > r.col * TILE_SIZE &&
+        box.y < (r.row + r.height) * TILE_SIZE &&
+        box.y + box.height > r.row * TILE_SIZE,
+    );
   }
 
   /** Affiche une couche sans rien vérifier (réapparition, retour au dernier appui, D-107). */
@@ -1298,7 +1381,7 @@ export class GameScene extends Phaser.Scene {
     this.run.setLayer(target);
     this.combat.setLayer(target);
     this.layerShift.layer = layer;
-    this.shiftView.show(layer);
+    this.shiftView.show(layer, this.erase?.masks ?? null);
   }
 
   /** La variante d'une salle à la marée du moment (D-95) ; une salle sans marée est inchangée. */
@@ -1325,7 +1408,7 @@ export class GameScene extends Phaser.Scene {
    */
   private setRoom(source: LevelData, zone: Zone | null, checkpointId: string | null): void {
     // Une salle à deux couches se charge toujours dans le présent (D-107).
-    const level = atLayer(this.atTide(source), 'present');
+    const level = this.roomLevel(source);
     this.level = level;
     this.layerShift.reset();
     this.zone = zone;
@@ -1512,7 +1595,16 @@ export class GameScene extends Phaser.Scene {
     }
     this.levelImages.length = 0;
     // Une salle à deux couches (D-107) : seulement ce qui est commun ; les couches à part.
-    const level = commonLayer(this.level);
+    // Avec l'effacement (D-111), sans aucun de ses groupes : ils sont dessinés à part.
+    const base = this.eraseBase ?? this.level;
+    const level = commonLayer(
+      base.erase
+        ? erasedLevel(
+            base,
+            base.erase.groups.map(() => LayerMask.None),
+          )
+        : base,
+    );
     const palette = this.palette();
     const waves = wavesOf(level);
     this.water.load(level, palette.silhouettes, waves?.row ?? -1, level.tide?.highRow ?? -1);
@@ -1522,7 +1614,7 @@ export class GameScene extends Phaser.Scene {
     const dressed = this.roomArt.build(level, palette, this.artFinish, this.artScale, images);
     // Les deux couches (D-107) : dessinées à part, avec l'habillage si la salle en a.
     this.shiftView.load(
-      this.level,
+      atTide(base, false),
       dressed
         ? {
             present: palette,
@@ -1533,7 +1625,7 @@ export class GameScene extends Phaser.Scene {
           }
         : null,
     );
-    this.shiftView.show(layerOf(this.level));
+    this.shiftView.show(layerOf(this.level), this.erase?.masks ?? null);
     if (dressed) {
       this.backdrop.build(level, palette, this.artScale, images);
       this.foreground.build(level, palette, this.artScale);
@@ -1631,7 +1723,11 @@ export class GameScene extends Phaser.Scene {
       return true;
     }
     if (tile === Tile.Water) {
-      g.fillStyle(PLACEHOLDER_COLORS.water, 0.8);
+      // L'effacement (D-111) : gris pâle à la place de l'eau.
+      g.fillStyle(
+        level.meta.void === 'erasure' ? ERASURE_COLORS.tile : PLACEHOLDER_COLORS.water,
+        0.8,
+      );
       g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
       return true;
     }

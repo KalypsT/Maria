@@ -13,6 +13,7 @@ import poursuiteHorizontale from './courses/12-poursuite-horizontale.txt?raw';
 import maree from './courses/13-maree.txt?raw';
 import vague from './courses/14-vague.txt?raw';
 import bascule from './courses/15-bascule.txt?raw';
+import effacement from './courses/16-effacement.txt?raw';
 import testRoomText from './test-room.txt?raw';
 import memoryKitchen from './memories/kitchen.txt?raw';
 import type { LevelData } from '../core/level/LevelData';
@@ -45,6 +46,7 @@ export const LEVELS: readonly LevelSource[] = [
   { id: 'maree', text: maree },
   { id: 'vague', text: vague },
   { id: 'bascule', text: bascule },
+  { id: 'effacement', text: effacement },
   { id: 'test-room', text: testRoomText },
 ];
 
@@ -71,6 +73,7 @@ export const COURSE_IDS: readonly string[] = [
   'maree',
   'vague',
   'bascule',
+  'effacement',
 ];
 
 const NAME = /^;\s*@name\s*:\s*(.*)$/m;

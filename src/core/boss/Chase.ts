@@ -136,6 +136,11 @@ export class Chase {
       : 1 - (this.cycleMs - p.surgeMs) / Math.max(1, p.backwashMs);
   }
 
+  /** Le front est placé (il ne repart pas au prochain pas) : sa position a un sens. */
+  get placed(): boolean {
+    return !this.needsRestart;
+  }
+
   /** Vrai s'il s'est arrêté un instant (départ, contact, croc-en-jambe). */
   get paused(): boolean {
     return this.pauseSteps > 0;
