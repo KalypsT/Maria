@@ -1,5 +1,5 @@
 import { STORY_TIMING as S, StoryFlag as F } from '../../config/story';
-import type { StoryData, StoryProp, StoryTrigger } from '../../core/story/story';
+import type { StoryData, StoryProp, StoryStep, StoryTrigger } from '../../core/story/story';
 
 /**
  * Histoire de la station balnéaire (D-95, D-98), PLACEHOLDER, réunie à celle de la maison (une
@@ -33,6 +33,20 @@ const TEACHER_BEACH = { col: 134, row: 23 };
 /** Les bancs des marées (on s'y assoit, debout sur la tuile du dessus) : la promenade, le port. */
 const PROMENADE_BENCH = { col: 61, row: 23 };
 const PORT_BENCH = { col: 141, row: 16 };
+/** La lueur sous les chevaux du carrousel, qui scintille quand on y entre (D-102). */
+const CAROUSEL_GLOW = { col: CAROUSEL.col - 3, row: CAROUSEL.row - 4, w: 7, h: 4 };
+/** Arrivée dans la fête engloutie (dans le noir), sur le toit du carrousel englouti. */
+const STRANGE_ARRIVAL: StoryStep = {
+  do: 'room',
+  room: 'sea-strange-fair',
+  col: 6,
+  row: 18,
+  facing: 1,
+};
+/** Le toit du dernier stand de la fête engloutie : la suite viendra (la vague, PR 8). */
+const FAIR_END = { col: 168, row: 6 };
+/** Retour provisoire sur la jetée, devant le carrousel (PLACEHOLDER jusqu'à la PR 8). */
+const CAROUSEL_FRONT = { col: 28, row: 15 };
 
 /**
  * Le banc des marées (D-95, D-99) : Agir, Céleste s'assoit et regarde la mer ; le noir ; la marée a
@@ -187,17 +201,69 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // Le carrousel, au bout de la jetée, le soir : la lueur sous les chevaux (PLACEHOLDER jusqu'au
-    // monde étrange, PR 6) : « ? ».
-    id: 'sea-carousel',
+    // Le monde étrange de la station balnéaire (D-102), comme la cuisine du train (D-88) : le soir,
+    // Agir devant le carrousel ; la lueur scintille sous les chevaux, l'image tremble ; un
+    // clignement dans le noir, et la fête engloutie se révèle autour de Céleste.
+    id: 'sea-strange-enter',
     room: 'sea-jetty',
     on: 'interact',
     area: { col: CAROUSEL.col - 4, row: CAROUSEL.row - 2, w: 9, h: 3 },
     mark: { col: CAROUSEL.col, row: CAROUSEL.row - 4 },
-    when: EVENING,
-    lock: false,
-    repeat: true,
-    steps: [{ do: 'thought', icon: 'question', ms: S.thoughtMs }],
+    when: { all: [F.SeaEvening], none: [F.SeaStrange] },
+    lock: true,
+    steps: [
+      { do: 'sparkle', area: CAROUSEL_GLOW, ms: S.omenPeakMs + 400 },
+      { do: 'shake', ms: S.omenPeakMs, strength: 1 },
+      { do: 'wait', ms: S.omenPeakMs },
+      { do: 'fadeOut', ms: S.blinkOutMs },
+      { do: 'flag', id: F.SeaStrange },
+      STRANGE_ARRIVAL,
+      { do: 'wait', ms: S.blinkBlackMs },
+      { do: 'fadeIn', ms: S.blinkInMs, shape: 'iris' },
+      { do: 'wait', ms: 500 },
+      { do: 'thought', icon: 'question', ms: S.thoughtMs + 800 },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
+  {
+    // Après un évanouissement (avant la première veilleuse) ou la fin provisoire : le carrousel y
+    // ramène, plus vite.
+    id: 'sea-strange-reenter',
+    room: 'sea-jetty',
+    on: 'interact',
+    area: { col: CAROUSEL.col - 4, row: CAROUSEL.row - 2, w: 9, h: 3 },
+    mark: { col: CAROUSEL.col, row: CAROUSEL.row - 4 },
+    when: { all: [F.SeaStrange] },
+    lock: true,
+    steps: [
+      { do: 'sparkle', area: CAROUSEL_GLOW, ms: S.reomenPeakMs + 300 },
+      { do: 'shake', ms: S.reomenPeakMs, strength: 0.6 },
+      { do: 'wait', ms: S.reomenPeakMs },
+      { do: 'fadeOut', ms: S.blinkOutMs },
+      STRANGE_ARRIVAL,
+      { do: 'wait', ms: S.blinkBlackMs },
+      { do: 'fadeIn', ms: S.reblinkInMs, shape: 'iris' },
+    ],
+  },
+  {
+    // Le bout de la fête engloutie (D-102), PLACEHOLDER jusqu'à la vague (PR 7 et 8) : au loin, la
+    // mer gronde ; Céleste regarde (« ? ») ; le cercle se referme, elle est devant le carrousel.
+    id: 'sea-strange-fair-end',
+    room: 'sea-strange-fair',
+    on: 'touch',
+    area: { col: FAIR_END.col - 3, row: FAIR_END.row - 2, w: 7, h: 3 },
+    when: { all: [F.SeaStrange] },
+    lock: true,
+    steps: [
+      { do: 'shake', ms: S.omenPeakMs, strength: 0.6 },
+      { do: 'wait', ms: S.omenPeakMs },
+      { do: 'thought', icon: 'question', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs + S.lookMs },
+      { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
+      { do: 'room', room: 'sea-jetty', ...CAROUSEL_FRONT, facing: -1, returnPoint: true },
+      { do: 'wait', ms: S.nightBlackMs },
+      { do: 'fadeIn', ms: S.nightFadeInMs },
+    ],
   },
   // Les bancs des marées (D-95) : sur la promenade, face à la plage ; devant la capitainerie du port.
   tideBench('sea-bench-promenade', 'sea-promenade', PROMENADE_BENCH),

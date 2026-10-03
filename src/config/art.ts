@@ -598,6 +598,16 @@ export const DECOR_KINDS: Readonly<
   garlandpoles: { furniture: false },
   bigwheel: { furniture: false, far: true },
   carousel: { furniture: false },
+  // La fête engloutie (D-102), le monde étrange de la station balnéaire.
+  drownedcarousel: { furniture: true },
+  horsepole: { furniture: true },
+  carouselbeam: { furniture: true },
+  fairawning: { furniture: true },
+  drownedstall: { furniture: true },
+  bigtop: { furniture: true },
+  balloons: { furniture: false },
+  sunkenhorses: { furniture: false },
+  drownedwheel: { furniture: false, far: true },
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */

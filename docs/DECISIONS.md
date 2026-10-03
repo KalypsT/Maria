@@ -1266,6 +1266,25 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Tests** (`seaFair.test.ts`) : l'arche ouverte le soir, le soir sur la baie, le script du soir, **les chaises volantes** (une fois par passage, couchée en dessous), le carrousel et son présage, **toute la baie avec la jetée, aux deux marées : jamais coincée**, le carrousel atteint. Les tronçons (`legs.test.ts`) : trois.
 - **Sauvegarde** : aucune migration (étape `sea.evening`, une trouvaille neuve).
 
+## D-102 — La station balnéaire, PR 6 : le monde étrange, la fête engloutie
+
+- **Plan validé** (D-95). Écarts et précisions ci-dessous.
+- **Entrée** (comme la cuisine du train, D-88) : le soir, Agir devant le carrousel de la jetée (le « ? » provisoire de D-101 est remplacé) ; la lueur scintille sous les chevaux, l'image tremble ; un clignement dans le noir (`sea.strange`), la fête engloutie se révèle en cercle. Ensuite, le carrousel y ramène (version courte), après un évanouissement ou la fin provisoire. Pas de sortie volontaire. La lumière vacille toujours près du carrousel, le soir.
+- **La fête engloutie** (`sea-strange-fair`, 180 × 30, `; @world: strange`, dehors sous le ciel violet, hors carte, musique `strange` PLACEHOLDER, **difficile**) : la fête de la jetée sous une eau immobile, démesurée. **L'eau partout dessous** : une chute ramène au dernier appui (D-97), la peur monte. De gauche à droite :
+  - **le toit du carrousel englouti** (l'arrivée), son mât penché ;
+  - **la cheminée des chevaux** : la barre du carrousel flotte au-dessus du toit, une autre sort de l'eau ; on passe sous la première, puis **saut mural** jusqu'à la traverse et **la première veilleuse** (facile exactement, 200 ms ; impossible sans le saut mural) ;
+  - **deux guirlandes** au-dessus de l'eau (**le crochet**, on saute de l'une à l'autre), la grande roue à demi noyée au fond, ses ballons ; sans le crochet, le toit du stand d'en face est hors de portée du plané (plus de 60 tuiles) ;
+  - **le toit d'un stand englouti** et une toile tombée jusqu'au toit (**on glisse dessous**), **la seconde veilleuse** (ce tronçon : facile, le crochet et la glissade exigés) ;
+  - **sous l'auvent bas, le saut long** jusqu'au flanc d'un cheval de bois géant, et le **saut mural** pour s'y hisser (16 tuiles, **difficile**, 67 ms ; à 15 tuiles, il devient moyen) ; puis une cheminée entre une barre pendue et le dernier stand, jusqu'à son toit.
+  - Trois tronçons `; @leg:` vérifiés (D-96). Jamais coincée (testé : de chaque surface, une veilleuse ou le bout) ; toutes les surfaces servent.
+  - **Écart avec le plan** : la difficulté vient d'un seul passage difficile (le saut long) ; les cheminées et les guirlandes restent faciles, avec l'eau dessous. Les cheminées de chevaux de la poursuite viendront avec la vague (PR 7, 8).
+- **Fin provisoire** (PLACEHOLDER jusqu'à la vague, PR 7 et 8) : sur le toit du dernier stand, l'image tremble (la mer gronde au loin) ; Céleste regarde (« ? ») ; le cercle se referme ; elle est sur la jetée, devant le carrousel. Aucune étape n'est posée : le carrousel y ramène. Ni parents ni Maria (pilier 5, D-95).
+- **Étrangetés** : les chevaux tournés dans tous les sens, des têtes de chevaux qui dépassent de l'eau, une nacelle turquoise, des ballons immobiles, des yeux.
+- **Dessin** (`seaStrangeArt.ts`, PLACEHOLDER, en silhouettes bordées de turquoise, D-81) : `drownedcarousel`, `horsepole`, `carouselbeam`, `fairawning`, `drownedstall`, `bigtop`, `balloons`, `sunkenhorses`, `drownedwheel`. Rayures des toiles et ampoules passées.
+- **Debug** : histoire « la fête engloutie (le carrousel) ».
+- **Tests** (`seaStrangeFair.test.ts`) : entrée et réentrée, hors carte, sa musique, le script (dans le noir, le cercle), la fin provisoire (retour devant le carrousel, aucun personnage), difficile, les veilleuses, les tronçons, jamais coincée.
+- **Sauvegarde** : aucune migration (étape `sea.strange`).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

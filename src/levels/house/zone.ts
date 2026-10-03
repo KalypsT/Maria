@@ -44,6 +44,7 @@ import seaRocks from '../sea/rocks.txt?raw';
 import seaLighthouse from '../sea/lighthouse.txt?raw';
 import seaPort from '../sea/port.txt?raw';
 import seaJetty from '../sea/jetty.txt?raw';
+import seaStrangeFair from '../sea/strange-fair.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -134,6 +135,7 @@ export const HOUSE: ZoneSource = {
     { id: 'sea-port', text: seaPort },
     // La jetée et la fête foraine (D-101), par l'arche du quai du port : une salle de marée.
     { id: 'sea-jetty', text: seaJetty },
+    { id: 'sea-strange-fair', text: seaStrangeFair },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
