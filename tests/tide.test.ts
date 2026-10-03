@@ -183,6 +183,7 @@ describe('les tronçons (`; @leg:`, D-96)', () => {
         difficulty: 'easy',
         needs: [],
         tide: 'low',
+        layer: 'present',
       },
       {
         from: { col: 6, row: 10 },
@@ -190,6 +191,7 @@ describe('les tronçons (`; @leg:`, D-96)', () => {
         difficulty: 'easy',
         needs: ['climb'],
         tide: 'high',
+        layer: 'present',
       },
     ]);
     expect(() => parseAsciiLevel('x', room(BASIN, ['leg: 1,1 2,2 tricky']))).toThrow(/@leg/);
