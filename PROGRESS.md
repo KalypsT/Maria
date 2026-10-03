@@ -25,7 +25,7 @@
 - Après le torchon blanc : **la fuite dans la cage d'escalier**. L'effacement monte derrière Céleste et pâlit des bandes du présent (elles restent dans le souvenir) ; on monte en basculant. Une veilleuse en bas, au milieu, en haut.
 - **La salle de jeux** : l'effacement au centre, des plateformes qui changent de couche par vagues annoncées. Les quatre objets déjà vus, pâlis, se rallument l'un après l'autre ; Céleste les atteint et fait Agir. La couleur revient à une partie de la salle ; l'effacement recule, puis accélère. Au quatrième, il se dissout, la porte s'ouvre.
 - DEBUG → Histoire : « l'effacement, la cage d'escalier », « l'effacement dissous ».
-- Tests : TESTS_PR10. Vérifié dans Chromium : du torchon à la cage d'escalier (l'effacement qui monte), la salle de jeux (objets pâlis, puis rallumés), la dissolution et la porte.
+- Tests : 810 tests (86 fichiers), tous verts (un tronçon de la salle de jeux corrigé après la suite : il exigeait à tort la bascule). Vérifié dans Chromium : du torchon à la cage d'escalier (l'effacement qui monte), la salle de jeux (objets pâlis, puis rallumés), la dissolution et la porte.
 - [ ] À vérifier sur téléphone (DEBUG → Histoire → « le torchon blanc retrouvé », ou « l'effacement, la cage d'escalier ») : la fuite fait-elle peur sans faire horreur ? Voit-on à temps la bande blanchir ?
 - [ ] La salle de jeux : comprend-on quel objet est rallumé (en couleur parmi les pâles) ? Le rythme des vagues qui accélèrent (× 1,25 à × 1,75) est-il juste ?
 - [ ] Le retour des couleurs (une lueur chaude, PLACEHOLDER) suffit-il, ou faut-il redessiner une partie de la salle ?

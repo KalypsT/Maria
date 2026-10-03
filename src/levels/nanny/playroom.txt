@@ -26,7 +26,7 @@
 ; @leg: 35,14 64,14 easy
 ; @leg: 35,14 34,10 easy
 ; @leg: 35,14 22,9 easy
-; @leg: 35,14 47,9 easy shift
+; @leg: 35,14 47,9 easy
 ; @decor: toyblocks 31 15 8 10
 ; @decor: toyblocks 60 15 9 10
 ; @decor: shelf 21 10 3 1

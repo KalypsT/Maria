@@ -1613,7 +1613,7 @@ Retours d'écoute de l'utilisateur sur téléphone.
   - le moteur reste pur (`EraseState.recoil`, `eraseFactor`, `eraseDissolved`). Le recul ne change aucune couche : rien n'apparaît sur Céleste.
 - **Écarts avec le plan** :
   - les perchoirs des objets servaient d'abord de marchepieds qui rendaient les vagues inutiles (la sonde l'a montré). Ils sont plus hauts, au-dessus des plateformes à vagues ;
-  - dans le motif de départ, des tronçons se font sans basculer. La difficulté vient du temps : les vagues obligent à basculer au bon moment. C'est prouvé par motif, pas par les tronçons ;
+  - dans le motif de départ, les tronçons de la salle de jeux se font sans basculer (aucun n'exige la bascule). La difficulté vient du temps : les vagues obligent à basculer au bon moment. C'est prouvé par motif, pas par les tronçons ;
   - « rendre sa couleur à une partie de la salle » est une lueur chaude PLACEHOLDER ; la salle elle-même reste en silhouettes ;
   - la salle de jeux « rendue à ses couleurs » et Eden viendront avec la PR 11.
 - **Tests** (`nannyBoss.test.ts`) :
