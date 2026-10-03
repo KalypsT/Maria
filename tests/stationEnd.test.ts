@@ -100,7 +100,8 @@ describe('fin de la gare (D-69)', () => {
     expect(older.id).toBe(3);
     expect(older.hair).toBe('ponytail');
     expect(older.outfit).toBe('jacket');
-    expect(GROWTH_PHASES.map((p) => p.id)).toEqual([1, 2, 3]);
+    // La phase 4 vient après la classe de mer (D-119).
+    expect(GROWTH_PHASES.map((p) => p.id)).toEqual([1, 2, 3, 4]);
     const grown = phase(2);
     expect(older.hitbox.height).toBeGreaterThan(grown.hitbox.height);
     expect(older.hitbox.height).toBeLessThan(2 * TILE_SIZE);

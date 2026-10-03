@@ -25,7 +25,7 @@
 - Après Eden : **le réveil au dortoir à l'aube** ; **le train du retour** (une courte scène, la mer à la fenêtre) ; **quelques mois plus tard**, chez elle : Céleste a encore grandi (**phase 4** : plus grande à l'écran, course un peu plus rapide ; la hitbox reste celle de la phase 3, le grenier l'exige), la toise a un quatrième trait.
 - **Le niveau 8** (le monde de Maria) reste un PLACEHOLDER : une bulle « ? ».
 - DEBUG → Histoire : « quelques mois plus tard, phase 4 ».
-- Tests : TESTS_PR12. Vérifié dans Chromium : la fin entière, d'Eden à la chambre.
+- Tests : 820 tests (88 fichiers), tous verts (un test de la phase 3, qui attendait trois phases exactement, mis à jour après la suite). Vérifié dans Chromium : la fin entière, d'Eden à la chambre.
 - [ ] À vérifier sur téléphone : la fin (dortoir, train, chambre) est-elle assez lente pour s'en imprégner ? La phase 4 se voit-elle (corps, cheveux) ? La course × 1,08 change-t-elle quelque chose au toucher ?
 - [ ] Le train du retour sans la classe : manque-t-elle ?
 
