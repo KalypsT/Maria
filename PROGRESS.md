@@ -23,7 +23,7 @@
 - **La vague** : une poursuite horizontale qui déferle (plus vite que Céleste), puis se retire un instant ; on monte les cheminées pendant le reflux. Dessin PLACEHOLDER : une masse d'eau de toute la hauteur, un front d'écume turquoise, des chevaux de bois et des ballons dans l'eau, la crête qui s'avance et se replie.
 - **Parcours d'essai 14 « La vague »** : une barrière basse et une cheminée à pied sec ; un bassin et une cheminée au-dessus de l'eau ; un dernier bassin, une barrière, la digue où la vague se brise.
 - Réglages `surgeMs`, `backwashMs`, `backwashSpeed` dans DEBUG → Combat.
-- Tests : TESTCOUNT. Vérifié dans Chromium : la vague dans le parcours 14 (le front, la crête, le contact).
+- Tests : 701. Vérifié dans Chromium : la vague dans le parcours 14 (le front, la crête, le contact).
 - [ ] À vérifier sur téléphone (menu pause → Parcours d'essai → « 14. La vague ») : le rythme se lit-il (la crête qui s'avance, puis se replie) ? Comprend-on qu'il faut attendre le reflux pour monter ?
 - [ ] La vague plus rapide que Céleste quand elle déferle : stimulant, ou injuste ? Les durées (`surgeMs`, `backwashMs`) et le recul (`backwashSpeed`) sont-ils justes ?
 - [ ] La cheminée au-dessus de l'eau pendant la poursuite : trop punitive (l'eau ramène au dernier appui, la vague continue) ?
