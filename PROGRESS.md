@@ -25,7 +25,7 @@
 - **Les deux couches dessinées** : dans une salle habillée, chaque zone propre à une couche avec l'habillage ; le présent en silhouettes violet et turquoise, le souvenir aux couleurs chaudes ; la couche inactive en **contour fantôme** ; un voile chaud léger dans le souvenir. Basculer ne crée rien, seulement des visibilités.
 - **Le bouton « Basculer »** : à gauche d'Action, sur la rangée du bas ; seulement avec la bascule ; pâli dans une salle sans couches.
 - **L'aide** : une bulle « bascule » à l'obtention (le miroir viendra avec la PR 3).
-- Tests : TESTS_PR2. Vérifié dans Chromium : une salle habillée d'essai dans les deux couches, le bouton tactile, le bouton pâli.
+- Tests : 737, tous verts. Vérifié dans Chromium : une salle habillée d'essai dans les deux couches, le bouton tactile, le bouton pâli.
 - [ ] À vérifier sur téléphone (menu pause → Parcours d'essai → « 15. Bascule ») : le bouton Basculer est-il bien placé pour le pouce, même en plein saut ? Le confond-on avec Action ?
 - [ ] Le contour fantôme se voit-il assez (sans gêner) ? Le voile chaud du souvenir suffit-il à savoir dans quelle couche on est ?
 
