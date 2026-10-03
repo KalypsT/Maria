@@ -223,6 +223,38 @@ export function seaStrangeDrawers({ tileShape }: ShapeTools): Record<string, Dra
         horse(ctx, x, r.y + r.h - 2 + hash(r.y, x) * 3, dir);
       }
     },
+    drowneddeck(a, r) {
+      // Le platelage englouti (plein) : des lattes, leurs joints ; l'eau affleure.
+      const { ctx, palette: p } = a;
+      tileShape(a, r, p.structure, p.structure);
+      ctx.strokeStyle = p.rim;
+      ctx.globalAlpha = 0.18;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let x = r.x + 2 * T; x < r.x + r.w; x += 2 * T + hash(x, r.y) * T) {
+        ctx.moveTo(x, r.y + 2);
+        ctx.lineTo(x, r.y + 7);
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      solidOutline(a, r, p.rim, 0.7);
+    },
+    strangeseawall(a, r) {
+      // La digue où la vague se brise (pleine) : de gros blocs de pierre, bordés de turquoise.
+      const { ctx, palette: p } = a;
+      tileShape(a, r, p.structure, p.structure);
+      ctx.strokeStyle = p.rim;
+      ctx.globalAlpha = 0.22;
+      ctx.lineWidth = 1;
+      for (let y = r.y; y < r.y + r.h; y += T) {
+        const shift = ((y / T) % 2) * T;
+        for (let x = r.x - shift; x < r.x + r.w; x += 2 * T) {
+          ctx.strokeRect(Math.max(r.x, x) + 0.5, y + 0.5, 2 * T - 1, T - 1);
+        }
+      }
+      ctx.globalAlpha = 1;
+      solidOutline(a, r, p.rim, 0.8);
+    },
     bigtop(a, r) {
       // Le bord du grand chapiteau, tout en haut (plein) : une toile festonnée.
       const { ctx, palette: p } = a;

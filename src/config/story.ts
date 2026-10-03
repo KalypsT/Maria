@@ -130,6 +130,11 @@ export const StoryFlag = {
    */
   SeaStrange: 'sea.strange',
   /**
+   * Fin du monde étrange de la station balnéaire (D-104) : au bout de la vague, le livre musical,
+   * sur le toit du carrousel étrange.
+   */
+  SeaStrangeDone: 'sea.strange-done',
+  /**
    * La marée est haute (D-95), à la station balnéaire : la seule étape réversible (les bancs des
    * marées la posent et la retirent). Les salles de marée prennent leur variante haute.
    */
@@ -268,6 +273,8 @@ export const PROP_SIZE = {
   roger: { w: 16, h: 18 },
   // La cuisine rose (D-88), la dînette d'enfance, à peu près à hauteur de Céleste.
   'pink-kitchen': { w: 32, h: 32 },
+  // Le livre musical (D-104), un gros livre cartonné posé sur le toit du carrousel.
+  'music-book': { w: 24, h: 24 },
   // Le souvenir jouable de la cuisine (D-89), à l'échelle de Céleste toute petite.
   'toy-kitchen': { w: 30, h: 30 },
   'tea-table': { w: 64, h: 30 },

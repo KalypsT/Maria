@@ -525,6 +525,45 @@ export function shapeBox(ctx: CanvasRenderingContext2D, s: number, glow = false)
  * dosseret et ses boutons ; dessous, la porte du four (un hublot) et un petit placard. Vue de face.
  * `glow` : la lueur turquoise du monde étrange autour d'elle. PLACEHOLDER.
  */
+/**
+ * Le livre musical (D-104) : un livre cartonné d'enfant, épais, aux coins arrondis ; une note sur la
+ * couverture, une rangée de gros boutons ronds de couleur sur la tranche (on appuie, ça joue).
+ * PLACEHOLDER. Centré en (0, 0), de taille `s`.
+ */
+export function musicBook(ctx: CanvasRenderingContext2D, s: number, glow = false): void {
+  if (glow) {
+    const halo = ctx.createRadialGradient(0, 0, s * 0.1, 0, 0, s * 0.62);
+    halo.addColorStop(0, 'rgba(94,230,210,0.35)');
+    halo.addColorStop(1, 'rgba(94,230,210,0)');
+    ctx.fillStyle = halo;
+    ctx.fillRect(-s * 0.62, -s * 0.62, s * 1.24, s * 1.24);
+  }
+  // L'épaisseur des pages cartonnées, puis la couverture.
+  roundRect(ctx, -s * 0.36, -s * 0.24, s * 0.74, s * 0.56, s * 0.08, '#f4ead8');
+  roundRect(ctx, -s * 0.4, -s * 0.3, s * 0.74, s * 0.56, s * 0.08, '#6fa8d6');
+  roundRect(ctx, -s * 0.34, -s * 0.24, s * 0.62, s * 0.3, s * 0.05, '#f6dc7a');
+  // La note, sur la couverture.
+  ctx.fillStyle = INK;
+  ctx.beginPath();
+  ctx.ellipse(-s * 0.08, -s * 0.02, s * 0.05, s * 0.035, -0.4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillRect(-s * 0.04, -s * 0.2, s * 0.018, s * 0.18);
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.022, -s * 0.2);
+  ctx.quadraticCurveTo(s * 0.08, -s * 0.16, s * 0.05, -s * 0.08);
+  ctx.lineWidth = s * 0.02;
+  ctx.strokeStyle = INK;
+  ctx.stroke();
+  // Les boutons ronds, en bas de la couverture.
+  const colours = ['#e8565e', '#f2a23a', '#5cbf73', '#b07ad6'];
+  for (let k = 0; k < colours.length; k++) {
+    ctx.fillStyle = colours[k] ?? INK;
+    ctx.beginPath();
+    ctx.arc(-s * 0.28 + k * s * 0.17, s * 0.15, s * 0.055, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
 export function pinkKitchen(ctx: CanvasRenderingContext2D, s: number, glow = false): void {
   const pink = '#f2a2bf';
   const pinkDark = '#d9779c';
@@ -904,6 +943,9 @@ export function drawMemory(
       break;
     case 'pink-kitchen':
       pinkKitchen(ctx, size * 0.95);
+      break;
+    case 'music-book':
+      musicBook(ctx, size * 0.95);
       break;
   }
   ctx.restore();

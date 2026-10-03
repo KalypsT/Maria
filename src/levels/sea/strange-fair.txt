@@ -4,8 +4,9 @@
 ; la première veilleuse ; deux guirlandes (le crochet) au-dessus de l'eau, la grande roue à demi
 ; noyée au fond ; le toit d'un stand, une toile tombée (on glisse dessous), la seconde veilleuse ;
 ; sous l'auvent bas, le saut long jusqu'au flanc d'un cheval (difficile), le saut mural le long de
-; sa barre, le toit du dernier stand (la suite : la vague, PR 7 et 8). On y arrive par l'histoire (le
-; carrousel de la jetée, le soir), jamais par une porte. Tomber dans l'eau ramène au dernier appui.
+; sa barre, le toit du dernier stand et la sortie (1) vers la vague (D-104). On y arrive par
+; l'histoire (le carrousel de la jetée, le soir), jamais par une porte. Tomber dans l'eau ramène au
+; dernier appui.
 ; @name: La fête engloutie
 ; @world: strange
 ; @outdoor: yes
@@ -35,14 +36,14 @@
 ; @decor: horsepole 138 1 1 10
 ; @decor: drownedstall 135 14 8 10
 ; @decor: drownedstall 143 7 36 17
-; Légende : # bordure, t toile et b bois (pleins), ~ eau (ramène au dernier appui), C veilleuse (checkpoint), P repère de départ.
+; Légende : # bordure, t toile et b bois (pleins), ~ eau (ramène au dernier appui), C veilleuse (checkpoint), P repère de départ, 1 sortie (liaisons dans zone.ts).
 ####################################################################################################################################################################################
 #.......................................................................................................ttttt.ttttttttttttttttttttttttttttb........................................#
 #.......................................................................................................ttttt.ttttttttttttttttttttttttttttb........................................#
 #..........................C............................................................................ttttt.ttttttttttttttttttttttttttttb........................................#
-#.......................bbbbbbb.........................................................................ttttt.ttttttttttttttttttttttttttttb........................................#
-#..................b....b...............................................................................ttttt.ttttttttttttttttttttttttttttb........................................#
-#..................b....b...............................................................................ttttt.ttttttttttttttttttttttttttttb........................................#
+#.......................bbbbbbb.........................................................................ttttt.ttttttttttttttttttttttttttttb........................................1
+#..................b....b...............................................................................ttttt.ttttttttttttttttttttttttttttb........................................1
+#..................b....b...............................................................................ttttt.ttttttttttttttttttttttttttttb........................................1
 #..................b....b...............................................................................ttttt.ttttttttttttttttttttttttttttb....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
 #..................b....b...............................................................................ttttt.ttttttttttttttttttttttttttttb....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
 #..................b....b...............................................................................ttttt.ttttttttttttttttttttttttttttb....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#

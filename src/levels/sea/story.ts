@@ -43,10 +43,12 @@ const STRANGE_ARRIVAL: StoryStep = {
   row: 18,
   facing: 1,
 };
-/** Le toit du dernier stand de la fête engloutie : la suite viendra (la vague, PR 8). */
-const FAIR_END = { col: 168, row: 6 };
-/** Retour provisoire sur la jetée, devant le carrousel (PLACEHOLDER jusqu'à la PR 8). */
-const CAROUSEL_FRONT = { col: 28, row: 15 };
+/** Le livre musical (D-104), sur le toit du carrousel étrange, au bout de la vague. */
+const MUSIC_BOOK = { col: 181, row: 13 };
+/** Assise sur sa couchette, au dortoir (fin provisoire du monde étrange, D-104). */
+const BUNK_SEAT = { col: 45, row: 9 };
+/** Le monde étrange, en cours (avant le livre musical). */
+const IN_STRANGE = { all: [F.SeaStrange], none: [F.SeaStrangeDone] };
 
 /**
  * Le banc des marées (D-95, D-99) : Agir, Céleste s'assoit et regarde la mer ; le noir ; la marée a
@@ -226,14 +228,13 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // Après un évanouissement (avant la première veilleuse) ou la fin provisoire : le carrousel y
-    // ramène, plus vite.
+    // Après un évanouissement avant la première veilleuse : le carrousel y ramène, plus vite.
     id: 'sea-strange-reenter',
     room: 'sea-jetty',
     on: 'interact',
     area: { col: CAROUSEL.col - 4, row: CAROUSEL.row - 2, w: 9, h: 3 },
     mark: { col: CAROUSEL.col, row: CAROUSEL.row - 4 },
-    when: { all: [F.SeaStrange] },
+    when: IN_STRANGE,
     lock: true,
     steps: [
       { do: 'sparkle', area: CAROUSEL_GLOW, ms: S.reomenPeakMs + 300 },
@@ -246,23 +247,39 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // Le bout de la fête engloutie (D-102), PLACEHOLDER jusqu'à la vague (PR 7 et 8) : au loin, la
-    // mer gronde ; Céleste regarde (« ? ») ; le cercle se referme, elle est devant le carrousel.
-    id: 'sea-strange-fair-end',
-    room: 'sea-strange-fair',
-    on: 'touch',
-    area: { col: FAIR_END.col - 3, row: FAIR_END.row - 2, w: 7, h: 3 },
-    when: { all: [F.SeaStrange] },
+    // Fin du monde étrange de la station balnéaire (D-104) : au bout de la vague, sur le toit du
+    // carrousel étrange, le livre musical de quand Céleste était toute petite. On le regarde, on ne
+    // le prend pas : un souvenir de la rubrique « Monde étrange ». Le cercle se referme ; Céleste est
+    // assise sur sa couchette, au dortoir ; elle pense à Maria (la fin d'un monde étrange, D-70),
+    // puis à son lit. PLACEHOLDER : le court souvenir et la nuit viennent avec la PR 9.
+    id: 'sea-music-book',
+    room: 'sea-strange-wave',
+    on: 'interact',
+    area: { col: MUSIC_BOOK.col - 3, row: MUSIC_BOOK.row - 2, w: 7, h: 3 },
+    mark: { col: MUSIC_BOOK.col, row: MUSIC_BOOK.row - 3 },
+    when: IN_STRANGE,
     lock: true,
     steps: [
-      { do: 'shake', ms: S.omenPeakMs, strength: 0.6 },
-      { do: 'wait', ms: S.omenPeakMs },
-      { do: 'thought', icon: 'question', ms: S.thoughtMs },
+      { do: 'memory', id: 'music-book' },
+      {
+        do: 'sparkle',
+        area: { col: MUSIC_BOOK.col - 2, row: MUSIC_BOOK.row - 2, w: 4, h: 3 },
+        ms: S.cradleSparkleMs + 600,
+      },
+      { do: 'wait', ms: S.cradleSparkleMs },
+      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
       { do: 'wait', ms: S.thoughtMs + S.lookMs },
       { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
-      { do: 'room', room: 'sea-jetty', ...CAROUSEL_FRONT, facing: -1, returnPoint: true },
+      { do: 'flag', id: F.SeaStrangeDone },
+      { do: 'room', room: 'sea-centre', ...BUNK_SEAT, facing: 1, returnPoint: true },
+      { do: 'pose', pose: 'sit' },
       { do: 'wait', ms: S.nightBlackMs },
       { do: 'fadeIn', ms: S.nightFadeInMs },
+      { do: 'wait', ms: 1200 },
+      { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs + 300 },
+      { do: 'thought', icon: 'bed', ms: S.thoughtMs },
+      { do: 'wait', ms: S.lookMs },
     ],
   },
   // Les bancs des marées (D-95) : sur la promenade, face à la plage ; devant la capitainerie du port.
@@ -288,6 +305,14 @@ const TRIGGERS: StoryTrigger[] = [
 ];
 
 const PROPS: StoryProp[] = [
+  // Le livre musical (D-104), sur le toit du carrousel étrange, tant qu'on ne l'a pas trouvé.
+  {
+    id: 'music-book',
+    room: 'sea-strange-wave',
+    kind: 'music-book',
+    ...MUSIC_BOOK,
+    when: IN_STRANGE,
+  },
   // La pêche à pied (D-99) : la maîtresse, la camarade et des enfants sur le sable.
   { id: 'teacher-beach', room: 'sea-beach', kind: 'teacher', ...TEACHER_BEACH, when: FISHING },
   {
@@ -375,9 +400,18 @@ const LOCKED: StoryData['lockedRooms'] = [
 /** Le soir de la fête (D-101) : toute la baie passe au soir. */
 const TIMES: StoryData['times'] = [{ when: EVENING, time: 'evening' }];
 
-/** Le carrousel, le soir : la lumière vacille en approchant (la lueur sous les chevaux). */
+/**
+ * Le carrousel, le soir : la lumière vacille en approchant (la lueur sous les chevaux), jusqu'au
+ * livre musical (D-104).
+ */
 const OMENS: StoryData['omens'] = [
-  { room: 'sea-jetty', when: EVENING, col: CAROUSEL.col, row: CAROUSEL.row, radius: 14 },
+  {
+    room: 'sea-jetty',
+    when: { all: [F.SeaEvening], none: [F.SeaStrangeDone] },
+    col: CAROUSEL.col,
+    row: CAROUSEL.row,
+    radius: 14,
+  },
 ];
 
 export const SEA_STORY: Pick<StoryData, 'triggers' | 'props' | 'lockedRooms' | 'times' | 'omens'> =
