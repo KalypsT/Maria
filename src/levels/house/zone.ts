@@ -252,6 +252,6 @@ export const HOUSE: ZoneSource = {
     'sea-rocks': { x: -9.4, y: 4.0, w: 11.2, h: 2.2, page: 'sea' },
     'sea-lighthouse': { x: -11.6, y: -2.6, w: 2.0, h: 6.4, page: 'sea' },
     'sea-port': { x: -9.4, y: 1.0, w: 9.0, h: 1.6, page: 'sea' },
-    'sea-jetty': { x: -20.4, y: -0.6, w: 11.0, h: 1.2, page: 'sea' },
+    'sea-jetty': { x: -9.4, y: -0.8, w: 9.0, h: 1.2, page: 'sea' },
   },
 };
