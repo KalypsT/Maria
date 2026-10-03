@@ -152,6 +152,15 @@ body {
   font-size: 1.05rem;
 }
 
+/* Basculer (D-107) : pâli dans une salle sans couches. */
+.touch-shift {
+  font-size: 0.72rem;
+}
+
+.touch-button.dimmed {
+  opacity: calc(var(--touch-opacity) * 0.45);
+}
+
 .touch-joystick-base,
 .touch-joystick-knob {
   display: none;

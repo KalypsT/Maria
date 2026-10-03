@@ -32,7 +32,7 @@ export const ABILITY_HINTS: Readonly<Record<Ability, string>> = {
   slide:
     'Au sol, le bouton Glisser : Céleste se lance couchée et passe sous ce qui est bas. Sauter en glissant : un saut plus long.',
   shift:
-    'Le bouton Basculer : Céleste passe du présent au souvenir, et retour, au sol comme en l’air. Ce qui n’existe que dans l’autre couche se voit en contour.',
+    'Le bouton Basculer : Céleste passe du présent au souvenir, et retour, au sol comme en l’air. Ce qui n’existe que dans l’autre couche se voit en contour pâle.',
 };
 
 /**
@@ -43,6 +43,7 @@ export const ABILITY_HELP_ICONS: Readonly<Partial<Record<Ability, ThoughtIcon>>>
   umbrella: 'umbrella',
   hook: 'hook',
   slide: 'slide',
+  shift: 'shift',
 };
 
 /** Durée d'affichage de l'indice (ms). */

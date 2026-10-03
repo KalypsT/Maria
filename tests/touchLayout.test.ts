@@ -18,12 +18,13 @@ describe('computeTouchLayout', () => {
         it(`garde les boutons dans l’écran et les zones sûres : ${name}, échelle ${scale}, ${
           insets === NOTCH ? 'encoche' : 'sans encoche'
         }`, () => {
-          // Avec le bouton Capacité (la glissade, D-84) : la disposition la plus chargée.
+          // Avec les boutons Capacité (D-84) et Basculer (D-107) : la disposition la plus chargée.
           const layout = computeTouchLayout(
             w,
             h,
             insets,
             { ...DEFAULT_CONTROL_SETTINGS, buttonScale: scale },
+            true,
             true,
           );
           for (const b of layout.buttons) {
@@ -45,6 +46,7 @@ describe('computeTouchLayout', () => {
           h,
           NOTCH,
           { ...DEFAULT_CONTROL_SETTINGS, buttonScale: scale },
+          true,
           true,
         );
         for (const a of buttons) {
@@ -69,6 +71,22 @@ describe('computeTouchLayout', () => {
     }
     // À gauche de Saut, à portée du même pouce.
     expect(ability.x).toBeLessThan(jump.x);
+  });
+
+  it('n’affiche le bouton Basculer qu’une fois la bascule obtenue, à gauche d’Action (D-107)', () => {
+    const without = computeTouchLayout(844, 390, NO_INSETS, DEFAULT_CONTROL_SETTINGS, true);
+    const withIt = computeTouchLayout(844, 390, NO_INSETS, DEFAULT_CONTROL_SETTINGS, true, true);
+    expect(without.buttons.some((b) => b.action === 'Shift')).toBe(false);
+    const shift = withIt.buttons.find((b) => b.action === 'Shift');
+    const attack = withIt.buttons.find((b) => b.action === 'Attack');
+    const ability = withIt.buttons.find((b) => b.action === 'Ability');
+    if (!shift || !attack || !ability) {
+      throw new Error('boutons manquants');
+    }
+    // Sur la rangée du bas, à gauche d'Action, sous Glisser.
+    expect(shift.x).toBeLessThan(attack.x);
+    expect(shift.y).toBeCloseTo(attack.y);
+    expect(shift.y).toBeGreaterThan(ability.y);
   });
 
   it('place Action dans le coin bas droit, Saut au-dessus, Pause en haut à gauche', () => {
@@ -115,10 +133,14 @@ describe('computeTouchLayout', () => {
 
   it('garde une zone de joystick à gauche, hors bande de sécurité iOS, sans recouvrir les boutons', () => {
     for (const { w, h } of SCREENS) {
-      const layout = computeTouchLayout(w, h, NOTCH, {
-        ...DEFAULT_CONTROL_SETTINGS,
-        buttonScale: 1.5,
-      });
+      const layout = computeTouchLayout(
+        w,
+        h,
+        NOTCH,
+        { ...DEFAULT_CONTROL_SETTINGS, buttonScale: 1.5 },
+        false,
+        true,
+      );
       const zone = layout.joystickZone;
       expect(zone.left).toBeGreaterThanOrEqual(NOTCH.left + TOUCH_METRICS.edgeGuard);
       expect(zone.right).toBeLessThan(w / 2);

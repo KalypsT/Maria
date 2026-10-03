@@ -74,6 +74,11 @@ export const THOUGHT_ICONS = [
   'tide',
   /** Un petit carrousel, son toit rayé et un cheval (la fête du soir, D-101). */
   'carousel',
+  /**
+   * Aide de la bascule (D-107) : une planche pleine, une autre en pointillés, et la flèche qui passe
+   * de l'une à l'autre.
+   */
+  'shift',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 

@@ -1043,6 +1043,29 @@ function drawIcon(
       ctx.stroke();
       break;
     }
+    case 'shift': {
+      // Aide de la bascule (D-107) : la planche où l'on est (pleine), celle de l'autre couche (en
+      // pointillés), et la flèche qui passe de l'une à l'autre.
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 1;
+      ctx.lineCap = 'round';
+      ctx.strokeRect(cx - 9, cy + 3, 8, 3);
+      ctx.strokeStyle = PINK;
+      ctx.setLineDash([1.6, 1.4]);
+      ctx.strokeRect(cx + 1, cy - 6, 8, 3);
+      ctx.beginPath();
+      ctx.moveTo(cx - 5, cy + 1.5);
+      ctx.quadraticCurveTo(cx - 4, cy - 5, cx - 0.5, cy - 4.5);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(cx - 2.4, cy - 6);
+      ctx.lineTo(cx - 0.5, cy - 4.5);
+      ctx.lineTo(cx - 2.6, cy - 3.2);
+      ctx.stroke();
+      break;
+    }
     case 'carousel': {
       // Le carrousel (D-101) : un toit rayé pointu, le mât, un cheval de bois.
       ctx.fillStyle = PINK;

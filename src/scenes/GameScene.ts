@@ -483,7 +483,6 @@ export class GameScene extends Phaser.Scene {
       this.palette(),
       this.story.timeOfDay() === 'morning',
     );
-    this.shiftView.load(this.level);
     this.hud = new Hud();
     this.flashbackView = new FlashbackView();
     this.cupImage = this.createCupImage();
@@ -1326,7 +1325,6 @@ export class GameScene extends Phaser.Scene {
     const level = atLayer(this.atTide(source), 'present');
     this.level = level;
     this.layerShift.reset();
-    this.shiftView.load(level);
     this.zone = zone;
     if (zone && !isStrangeRoom(level)) {
       void this.session.revealRoom(level.id);
@@ -1388,6 +1386,8 @@ export class GameScene extends Phaser.Scene {
     this.player.canHook = this.debugHook || has(Ability.Hook);
     this.player.canSlide = this.debugSlide || has(Ability.Slide);
     this.canShift = this.debugShift || has(Ability.Shift);
+    // Le bouton Basculer n'apparaît qu'avec la bascule (D-107), pâli dans une salle sans couches.
+    this.touch?.setShiftState(this.canShift, this.level.layers === null);
     // Le bouton Capacité n'apparaît qu'avec la glissade (D-84).
     this.touch?.setAbilityVisible(this.player.canSlide);
   }
@@ -1516,7 +1516,22 @@ export class GameScene extends Phaser.Scene {
     this.finishView.setPalette(palette, this.artFinish);
     // Salle habillée (D-28) : dessinée par l'habillage, pas tuile par tuile.
     const images = this.artImages();
-    if (this.roomArt.build(level, palette, this.artFinish, this.artScale, images)) {
+    const dressed = this.roomArt.build(level, palette, this.artFinish, this.artScale, images);
+    // Les deux couches (D-107) : dessinées à part, avec l'habillage si la salle en a.
+    this.shiftView.load(
+      this.level,
+      dressed
+        ? {
+            present: palette,
+            memory: MEMORY_PALETTE,
+            finish: this.artFinish,
+            scale: this.artScale,
+            images,
+          }
+        : null,
+    );
+    this.shiftView.show(layerOf(this.level));
+    if (dressed) {
       this.backdrop.build(level, palette, this.artScale, images);
       this.foreground.build(level, palette, this.artScale);
       this.worldLife.load(level, palette, this.artScale);

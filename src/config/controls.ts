@@ -12,6 +12,8 @@ export const TOUCH_METRICS = {
   jumpRadius: 46,
   attackRadius: 36,
   abilityRadius: 32,
+  /** Bouton Basculer (D-107), à gauche d'Action, sur la rangée du bas. */
+  shiftRadius: 32,
   /** Rayon des petites icônes (Pause, Carte). */
   iconRadius: 22,
   /** Écart entre deux boutons voisins. */
@@ -20,6 +22,8 @@ export const TOUCH_METRICS = {
   jumpAngleDeg: 100,
   /** Capacité est à gauche de Saut (degrés autour de Saut : 180 = à gauche). */
   abilityAngleDeg: 165,
+  /** Basculer est à gauche d'Action (degrés autour d'Action : 180 = à gauche). */
+  shiftAngleDeg: 180,
   /** Bande gauche non tactile : le balayage retour d'iOS ne peut pas être neutralisé (D-03). */
   edgeGuard: 28,
   /** Distance maximale de la base du joystick à son bouton (déplacement du pouce). */

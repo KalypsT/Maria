@@ -1400,6 +1400,22 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Vérifié dans Chromium** : le parcours 15, le présent puis le souvenir (contours fantômes, planche du souvenir), le refus dans le mur (le cercle, la couche ne change pas), le retour au présent, le sol du présent au-dessus de la fosse.
 - **Sauvegarde** : aucun changement (la capacité `shift` ira dans `progression.abilities`, sans migration).
 
+## D-109 — L'avant-dernier niveau, PR 2 : le dessin des deux couches, le bouton « Basculer », l'aide
+
+- **Plan validé** (D-107). Toujours aucune salle du jeu à deux couches : le parcours 15 (tuiles) et une salle habillée d'essai (hors dépôt) ont servi à vérifier le dessin.
+- **Le dessin des couches** (`ShiftLayerView`, PLACEHOLDER pour les couleurs) :
+  - la salle est dessinée sans ce qui est propre à une couche (D-108) ; chaque **zone** `; @shift:` est dessinée à part, **avec l'habillage** dans une salle habillée (nouvelle fonction `drawRoomLayer` : le fond proche, la structure, les ombres de contact et les meubles de la zone), en tuiles dans une salle de tuiles (les parcours) ;
+  - **le présent** prend la palette de la salle (les silhouettes violet et turquoise du monde étrange) ; **le souvenir**, les couleurs chaudes et passées des courts souvenirs (`MEMORY_PALETTE`) ;
+  - la couche inactive en **contour fantôme** : la silhouette de chaque zone, épaissie d'un px puis évidée (un liseré de la couleur de sa couche), un voile très léger dedans ; calculée sur un dessin sans ombre, pour suivre les formes ;
+  - dans le souvenir, **un voile chaud** très léger recouvre la vue (`memoryVeil`) ;
+  - deux textures par zone (pleine, fantôme), créées au chargement de la salle ; **basculer ne fait que changer des visibilités** (aucune création en jeu). Une salle à beaucoup de zones coûte donc de la mémoire graphique en proportion : à surveiller au téléphone avec les vraies salles.
+  - Réglages `SHIFT_LAYER_VIEW` dans `src/config/art.ts`.
+- **Le bouton « Basculer »** (changement des contrôles accepté, D-107) : **à gauche d'Action, sur la rangée du bas**, sous Glisser (`shiftRadius` 32, `shiftAngleDeg` 180) ; il n'apparaît qu'une fois la bascule obtenue ; **pâli** dans une salle sans couches (une pression y donne le petit signe du refus). Le pouce y glisse depuis Saut sans le toucher. Testé : dans l'écran et ses zones sûres, sans chevauchement, hors de la zone du joystick.
+  - Remarque (antérieure à cette PR) : à l'échelle 1,5 sur un écran de 640 px, le bouton Glisser déborde déjà un peu dans la zone du joystick ; Basculer, non.
+- **L'aide** : à l'obtention, l'indice (texte PLACEHOLDER) et **une bulle « bascule »** (nouveau pictogramme : une planche pleine, une en pointillés, la flèche entre les deux), comme le parapluie et la glissade ; la ligne de « Mes capacités » (D-108). L'obtention dans le jeu (le miroir) vient avec la PR 3.
+- **Vérifié dans Chromium** : la salle habillée d'essai dans le présent (les zones du souvenir en contour fantôme) et dans le souvenir (ses meubles en couleurs chaudes, celles du présent en fantôme turquoise, le voile) ; le bouton tactile (`?touch`) qui bascule ; le bouton pâli dans la chambre (sans couches).
+- **Sauvegarde** : aucun changement.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.
