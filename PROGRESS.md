@@ -24,7 +24,7 @@
 - **La jetée** (salle de marée) : les stands où l'on glisse sous le comptoir, **les chaises volantes** (elles balaient à hauteur de tête : on se couche ou on attend), le saut long sous le toit bas de la pêche aux canards, les guirlandes (le crochet), la grande roue, le carrousel. Sous la jetée, à marée basse, les pilotis et une trouvaille.
 - Le carrousel : la lumière vacille ; Agir : « ? » (le monde étrange viendra).
 - DEBUG → Histoire : « le soir de la fête, la jetée ».
-- Tests : TESTCOUNT. Vérifié dans Chromium : la jetée le soir (stands, chaises volantes qui descendent, guirlandes allumées, grande roue, carrousel), la promenade le soir, la jetée à marée haute.
+- Tests : 684. Vérifié dans Chromium : la jetée le soir (stands, chaises volantes qui descendent, guirlandes allumées, grande roue, carrousel), la promenade le soir, la jetée à marée haute.
 - [ ] À vérifier sur téléphone (DEBUG → Histoire → « le soir de la fête, la jetée ») : les chaises volantes se lisent-elles ? L'annonce (`sweepWarnMs`) suffit-elle ? Pense-t-on à se coucher ?
 - [ ] Le saut long sous le toit bas (moyen) : juste ? Les guirlandes : les voit-on comme un chemin ?
 - [ ] Le soir sur la baie (palette du crépuscule) : agréable ? Les ampoules de la fête suffisent-elles ?
