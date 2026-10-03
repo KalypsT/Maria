@@ -68,6 +68,8 @@ export const THOUGHT_ICONS = [
   'train',
   /** Aide de la glissade (D-84, D-85) : une barrière basse, et quelqu'un qui glisse dessous. */
   'slide',
+  /** Une vague, sa flèche qui monte : la marée monte (la pêche à pied, D-99) ; le banc des marées. */
+  'tide',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 

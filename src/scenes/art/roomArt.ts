@@ -1757,7 +1757,7 @@ function drawStructure(a: ArtContext, floorY: number): void {
         const mix = (i: 0 | 1 | 2) => Math.round(top[i] + (deep[i] - top[i]) * k);
         ctx.fillStyle = `rgba(${String(mix(0))},${String(mix(1))},${String(mix(2))},${String(WATER_COLORS.alpha)})`;
         ctx.fillRect(x, y, T, T);
-        if (depth === 0) {
+        if (depth === 0 && tileAt(level, col, row - 1) === Tile.Empty) {
           ctx.fillStyle = p.silhouettes ? WATER_COLORS.strangeSurface : WATER_COLORS.surface;
           ctx.fillRect(x, y + 2, T, 1.5);
         }

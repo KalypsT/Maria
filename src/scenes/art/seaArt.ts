@@ -32,6 +32,13 @@ const STRIPE_BLUE = '#4f86b8';
 const MINT = '#9fd8c8';
 const PINK = '#f2a7b8';
 const NAVY = '#2c3e66';
+const SAND = '#e6d3a3';
+const SAND_LIGHT = '#f2e4bd';
+const SAND_WET = '#c9b282';
+const ROCK = '#7d7a72';
+const ROCK_LIGHT = '#a19d92';
+const ROCK_DARK = '#5a5852';
+const WEED = '#5f8a4e';
 const BAGS = ['#e2574c', '#f2c14e', '#6d86c2', '#8cc26f', '#b07ac9', '#e38aa0'] as const;
 
 /** Pseudo-hasard stable (même dessin à chaque chargement). */
@@ -418,6 +425,258 @@ export function seaDrawers({ rounded, tileShape }: ShapeTools): Record<string, D
       ctx.quadraticCurveTo(cx + 9, cy - 13, cx + 14, cy - 8);
       ctx.quadraticCurveTo(cx + 19, cy - 13, cx + 24, cy - 8);
       ctx.stroke();
+    },
+    // ——— La plage et les rochers (D-99) ———
+    wetsand(a, r) {
+      // Le sable mouillé (on y marche à marée basse) : plus sombre, des rides et des coquillages.
+      tileShape(a, r, SAND_WET, SAND);
+      const { ctx } = a;
+      if (a.palette.silhouettes) {
+        return;
+      }
+      ctx.fillStyle = 'rgba(0,0,0,0.08)';
+      for (let x = r.x + 5; x < r.x + r.w; x += 11) {
+        if (tileAt(a.level, Math.floor(x / T), r.y / T) === Tile.Solid) {
+          ctx.fillRect(x, r.y + 5 + hash(x, r.y) * 6, 6, 1);
+        }
+      }
+      for (let x = r.x + 9; x < r.x + r.w; x += 37) {
+        if (tileAt(a.level, Math.floor(x / T), r.y / T) === Tile.Solid) {
+          ctx.fillStyle = hash(x, 1) > 0.5 ? '#f6efe4' : PINK;
+          ctx.beginPath();
+          ctx.arc(x, r.y + 3, 1.6, Math.PI, 0);
+          ctx.fill();
+        }
+      }
+    },
+    upperbeach(a, r) {
+      // Le haut de plage, au sec : du sable clair, quelques oyats.
+      tileShape(a, r, SAND, SAND_LIGHT);
+      const { ctx } = a;
+      if (a.palette.silhouettes) {
+        return;
+      }
+      ctx.strokeStyle = WEED;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let x = r.x + 30; x < r.x + r.w - 8; x += 47) {
+        for (let k = -2; k <= 2; k++) {
+          ctx.moveTo(x + k * 2, r.y);
+          ctx.lineTo(x + k * 3.5, r.y - 7 - Math.abs(k));
+        }
+      }
+      ctx.stroke();
+    },
+    sandstep(a, r) {
+      tileShape(a, r, SAND, SAND_LIGHT);
+    },
+    cave(a, r) {
+      // L'entrée de la grotte sous le haut de plage (fond) : une bouche sombre, des algues.
+      const { ctx } = a;
+      ctx.fillStyle = 'rgba(30,26,22,0.55)';
+      ctx.beginPath();
+      ctx.ellipse(r.x + T * 1.5, r.y + r.h - 6, 14, 10, 0, Math.PI, 0);
+      ctx.fill();
+      ctx.fillStyle = WEED;
+      for (let k = 0; k < 4; k++) {
+        ctx.fillRect(r.x + 6 + k * 8, r.y + r.h - 18 + (k % 2) * 3, 2, 6);
+      }
+    },
+    beachcabin(a, r) {
+      // Une cabine de plage (on monte sur son toit) : des planches rayées, une porte, un toit pointu.
+      const body = { x: r.x, y: r.y + 2 * T, w: r.w, h: r.h - 2 * T };
+      const stripe = [STRIPE_BLUE, STRIPE_RED, MINT][Math.floor(hash(r.x, r.y) * 3)] ?? STRIPE_BLUE;
+      tileShape(a, body, WHITE, '#ffffff');
+      const { ctx } = a;
+      if (!a.palette.silhouettes) {
+        ctx.fillStyle = stripe;
+        for (let x = body.x + 2; x < body.x + body.w; x += 8) {
+          ctx.fillRect(x, body.y + 3, 4, body.h - 3);
+        }
+        ctx.fillStyle = WOOD_DARK;
+        rounded(
+          ctx,
+          { x: body.x + body.w / 2 - 7, y: body.y + 22, w: 14, h: body.h - 22 },
+          [7, 7, 0, 0],
+        );
+        ctx.fill();
+      }
+      ctx.fillStyle = stripe;
+      ctx.beginPath();
+      ctx.moveTo(r.x - 3, body.y + 1);
+      ctx.lineTo(r.x + r.w / 2, r.y + 6);
+      ctx.lineTo(r.x + r.w + 3, body.y + 1);
+      ctx.fill();
+    },
+    beachstairsfoot(a, r) {
+      // Le bas de l'escalier de la digue (fond) : la digue de pierre, des marches, la porte (1).
+      const { ctx } = a;
+      ctx.fillStyle = STONE_DARK;
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+      for (let k = 0; k < 8; k++) {
+        ctx.fillStyle = k % 2 === 0 ? STONE_LIGHT : STONE;
+        ctx.fillRect(r.x + 4 + k * 6, r.y + 10 + k * 22, r.w - 8 - k * 6, 8);
+      }
+      ctx.fillStyle = WHITE;
+      ctx.fillRect(r.x, r.y, r.w, 4);
+    },
+    lifeguardchair(a, r) {
+      // La chaise du maître-nageur : quatre pieds blancs, une échelle, le siège (on s'y pose), le
+      // drapeau en haut de son mât (la drisse part de là).
+      const { ctx } = a;
+      const seat = 7 * T + r.y;
+      const ground = groundRow(a, r.x + r.w / 2, seat / T + 1) * T;
+      ctx.fillStyle = WHITE;
+      ctx.fillRect(r.x + 4, seat, 3, ground - seat);
+      ctx.fillRect(r.x + r.w - 7, seat, 3, ground - seat);
+      ctx.strokeStyle = WHITE_SHADE;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let y = seat + 8; y < ground; y += 8) {
+        ctx.moveTo(r.x + 6, y);
+        ctx.lineTo(r.x + r.w - 6, y);
+      }
+      ctx.stroke();
+      tileShape(a, { x: r.x + T, y: seat, w: r.w - 2 * T, h: T }, STRIPE_RED, '#ef7a76');
+      ctx.fillStyle = STRIPE_RED;
+      ctx.fillRect(r.x + T, seat - 10, 3, 10);
+      ctx.fillStyle = IRON;
+      ctx.fillRect(r.x + 2.5 * T - 1, r.y + T, 2, seat - r.y - T);
+      ctx.fillStyle = '#f2c14e';
+      ctx.beginPath();
+      ctx.moveTo(r.x + 2.5 * T + 1, r.y + T);
+      ctx.lineTo(r.x + 2.5 * T + 14, r.y + T + 5);
+      ctx.lineTo(r.x + 2.5 * T + 1, r.y + T + 10);
+      ctx.fill();
+    },
+    groynepost(a, r) {
+      // Un pieu de l'épi : bois sombre jusqu'au sable, coiffé d'une planche (on s'y pose).
+      const { ctx } = a;
+      ctx.fillStyle = WOOD_DARK;
+      ctx.fillRect(r.x + 3, r.y + 3, r.w - 6, r.h - 3);
+      ctx.fillStyle = 'rgba(95,138,78,0.7)';
+      ctx.fillRect(r.x + 3, r.y + r.h - 12, r.w - 6, 12);
+      tileShape(a, { x: r.x, y: r.y, w: r.w, h: T }, WOOD, WOOD_LIGHT);
+    },
+    buoy(a, r) {
+      // Une bouée (traversable, elle monte avec la marée) : ronde, rouge et blanche, un anneau.
+      const { ctx } = a;
+      const cx = r.x + r.w / 2;
+      const cy = r.y + r.h - 7;
+      ctx.fillStyle = STRIPE_RED;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = WHITE;
+      ctx.fillRect(cx - 8, cy - 2, 16, 4);
+      ctx.strokeStyle = IRON;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(cx, cy - 10, 2.5, 0, Math.PI * 2);
+      ctx.stroke();
+    },
+    beacon(a, r) {
+      // La balise au large : un mât rayé jusqu'au sable, une petite cage en haut (on s'y pose), un
+      // voyant au sommet.
+      const { ctx } = a;
+      const cx = r.x + r.w / 2;
+      const cage = r.y + 10 * T;
+      const ground = groundRow(a, cx, cage / T + 1) * T;
+      for (let y = cage; y < ground; y += 12) {
+        ctx.fillStyle = (y - cage) % 24 === 0 ? NAVY : '#f2c14e';
+        ctx.fillRect(cx - 2, y, 4, Math.min(12, ground - y));
+      }
+      tileShape(a, { x: r.x, y: cage, w: r.w, h: T }, NAVY, '#3d5a8a');
+      ctx.strokeStyle = NAVY;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let x = r.x + 1; x <= r.x + r.w - 1; x += 5) {
+        ctx.moveTo(x, cage);
+        ctx.lineTo(x, cage - 8);
+      }
+      ctx.moveTo(r.x, cage - 8);
+      ctx.lineTo(r.x + r.w, cage - 8);
+      ctx.stroke();
+      ctx.fillStyle = NAVY;
+      ctx.fillRect(cx - 1, r.y + 4, 2, cage - r.y - 12);
+      ctx.fillStyle = a.palette.darkness > 0 ? '#ffe28a' : STRIPE_RED;
+      ctx.beginPath();
+      ctx.arc(cx, r.y + 6, 3, 0, Math.PI * 2);
+      ctx.fill();
+    },
+    searock(a, r) {
+      // Les rochers (on y monte) : de la pierre grise, plus sombre vers le bas ; des bosses sur les
+      // crêtes, des fissures, des algues et des bernaches au pied (la ligne de la mer).
+      tileShape(a, r, ROCK, ROCK_LIGHT);
+      const { ctx } = a;
+      if (a.palette.silhouettes) {
+        return;
+      }
+      for (let row = r.y / T; row < (r.y + r.h) / T; row++) {
+        for (let col = r.x / T; col < (r.x + r.w) / T; col++) {
+          if (tileAt(a.level, col, row) !== Tile.Solid) {
+            continue;
+          }
+          const x = col * T;
+          const y = row * T;
+          const n = hash(col, row);
+          const above = tileAt(a.level, col, row - 1);
+          // Plus sombre à mesure qu'on descend dans le rocher.
+          let depth = 0;
+          while (depth < 6 && tileAt(a.level, col, row - depth - 1) === Tile.Solid) {
+            depth++;
+          }
+          ctx.fillStyle = `rgba(40,38,34,${String(0.05 * depth)})`;
+          ctx.fillRect(x, y, T, T);
+          if (above !== Tile.Solid) {
+            // Une crête irrégulière (au-dessus de la collision, de 2 px au plus).
+            ctx.fillStyle = ROCK_LIGHT;
+            ctx.beginPath();
+            ctx.ellipse(x + 4 + n * 8, y + 1, 4 + n * 3, 2, 0, Math.PI, 0);
+            ctx.fill();
+          }
+          if (n < 0.22) {
+            ctx.strokeStyle = ROCK_DARK;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(x + 3 + n * 20, y + 2);
+            ctx.lineTo(x + 6 + n * 18, y + 9);
+            ctx.lineTo(x + 4 + n * 22, y + 15);
+            ctx.stroke();
+          } else if (n > 0.86) {
+            ctx.fillStyle = '#d9d3c4';
+            ctx.beginPath();
+            ctx.arc(x + 8, y + 8, 1.5, 0, Math.PI * 2);
+            ctx.arc(x + 11, y + 10, 1.2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          const below = tileAt(a.level, col, row + 1);
+          if (below === Tile.Water || (below === Tile.Empty && n > 0.6)) {
+            ctx.fillStyle = WEED;
+            ctx.fillRect(x, y + T - 4, T, 4);
+            ctx.fillRect(x + 3 + n * 6, y + T, 2, 4);
+          }
+        }
+      }
+    },
+    lighthousefoot(a, r) {
+      // Le pied du phare (fond) : la tour blanche à bandes rouges, sur son rocher ; la porte, fermée
+      // pour l'instant (le phare vient avec la PR 4).
+      const { ctx } = a;
+      const ground = r.y + r.h;
+      const tower = { x: r.x + 2 * T, y: r.y, w: r.w - 4 * T, h: r.h };
+      ctx.fillStyle = WHITE;
+      ctx.fillRect(tower.x, tower.y, tower.w, tower.h);
+      ctx.fillStyle = STRIPE_RED;
+      for (let y = tower.y + 2 * T; y < ground - 2 * T; y += 6 * T) {
+        ctx.fillRect(tower.x, y, tower.w, 2 * T);
+      }
+      ctx.fillStyle = 'rgba(0,0,0,0.12)';
+      ctx.fillRect(tower.x + tower.w - 10, tower.y, 10, tower.h);
+      const door = { x: r.x + 4 * T, y: ground - 3 * T, w: 2 * T, h: 3 * T };
+      ctx.fillStyle = NAVY;
+      rounded(ctx, door, [door.w / 2, door.w / 2, 0, 0]);
+      ctx.fill();
     },
     // ——— Le centre de la classe de mer ———
     colonyfloor(a, r) {
