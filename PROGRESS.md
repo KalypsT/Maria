@@ -29,7 +29,7 @@
 - **Parcours d'essai 15 « Bascule »** : un mur du présent, une fosse franchie en basculant en plein saut, une cheminée aux murs de couches alternées.
 - DEBUG : case « Capacité : bascule », réglages `shift*` dans Mouvement ; une ligne dans « Mes capacités ».
 - Dessin des couches PLACEHOLDER (violet et turquoise / couleurs chaudes, contour fantôme).
-- Tests : TESTS_PR1. Vérifié dans Chromium : le parcours 15, les deux couches, le refus dans un mur, le retour au présent.
+- Tests : 736, tous verts. Vérifié dans Chromium : le parcours 15, les deux couches, le refus dans un mur, le retour au présent.
 - [ ] À vérifier sur téléphone (après la PR 2, avec le bouton) : le parcours 15. La bascule en plein saut est-elle naturelle ? Le contour fantôme suffit-il pour prévoir ? Le refus se comprend-il ?
 - [ ] La cheminée aux murs alternés : faisable sans frustration, ou trop exigeante (D-106) ?
 
