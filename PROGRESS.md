@@ -26,7 +26,7 @@
 - **Le jardin renversé** : trois pots géants aux ronces d'une seule couche, **l'arrosoir géant** et ses prises qui alternent de couche ; **tout en haut, Roger** et son court souvenir. Défi : vers la fleur géante (une trouvaille) ; dans un pot, ouvert dans le souvenir, une trouvaille.
 - Après Roger : **une porte vers la maison** (le raccourci, cachée avant) et **une veilleuse rose** sur la porte de la sieste.
 - DEBUG → Histoire : « l'îlot de la chambre fait, Roger retrouvé ».
-- Tests : TESTS_PR5. Vérifié dans Chromium : les deux salles dans les deux couches, Roger et son court souvenir, la porte jusqu'à la maison, la veilleuse.
+- Tests : 772 tests (84 fichiers), tous verts. Vérifié dans Chromium : les deux salles dans les deux couches, Roger et son court souvenir, la porte jusqu'à la maison, la veilleuse.
 - [ ] À vérifier sur téléphone (DEBUG → Histoire → « la bascule apprise… », puis l'étagère de gauche de la maison) : la cheminée de l'armoire se comprend-elle (descendre dans le présent, monter dans le souvenir) ? La traversée des ronces (moyenne) est-elle juste ?
 - [ ] Les prises de l'arrosoir (une tuile) se voient-elles assez ? Les deux défis (difficiles) sont-ils faisables sans frustration ?
 - [ ] Les salles sont sombres (silhouettes PLACEHOLDER) : lit-on assez le lit, l'armoire, les pots, l'arrosoir ?
