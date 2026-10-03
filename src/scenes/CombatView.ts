@@ -16,6 +16,8 @@ const SPIDER_TEXTURE = 'spider-placeholder';
 const SNAIL_TEXTURE = 'snail-placeholder';
 /** Crabe de la plage et des rochers (D-99), à la place de la souris mécanique (`; @enemies: crab`). */
 const CRAB_TEXTURE = 'crab-placeholder';
+/** Mouette du port (D-100), à la place de l'araignée (`; @enemies: gull`) : elle pique, sans fil. */
+const GULL_TEXTURE = 'gull-placeholder';
 const THREAD_TEXTURE = 'spider-thread';
 const STICK_TEXTURE = 'stick-placeholder';
 const SLASH_TEXTURE = 'slash-placeholder';
@@ -72,14 +74,18 @@ export class CombatView {
       thread?.destroy();
     }
     const level = this.world.room;
-    const walker = level.meta.enemies === 'crab' ? CRAB_TEXTURE : PATROLLER_TEXTURE;
+    const skins = (level.meta.enemies ?? '').split(/\s+/);
+    const walker = skins.includes('crab') ? CRAB_TEXTURE : PATROLLER_TEXTURE;
+    const gulls = skins.includes('gull');
     this.enemySprites = this.world.enemies.map((enemy) =>
       this.scene.add
         .image(
           0,
           0,
           enemy.kind === EnemyKind.Spider
-            ? SPIDER_TEXTURE
+            ? gulls
+              ? GULL_TEXTURE
+              : SPIDER_TEXTURE
             : enemy.kind === EnemyKind.Snail
               ? SNAIL_TEXTURE
               : walker,
@@ -101,7 +107,7 @@ export class CombatView {
       return (row + 1) * TILE_SIZE;
     });
     this.threads = this.world.enemies.map((enemy) =>
-      enemy.kind === EnemyKind.Spider
+      enemy.kind === EnemyKind.Spider && !gulls
         ? this.scene.add
             .image((enemy.spawnCol + 0.5) * TILE_SIZE, 0, THREAD_TEXTURE)
             .setOrigin(0.5, 0)
@@ -297,6 +303,7 @@ export class CombatView {
     this.drawSpider(scale, dark, palette);
     this.drawSnail(scale, dark, palette);
     this.drawCrab(scale, dark, palette);
+    this.drawGull(scale, dark, palette);
     this.rebuild();
   }
 
@@ -304,6 +311,44 @@ export class CombatView {
    * Escargot de derrière la haie (D-49), placeholder : collé au mur (dessiné à droite), la tête
    * vers le haut, une coquille en spirale. Retourné selon son mur et son sens.
    */
+  /**
+   * Mouette (D-100), placeholder : un corps blanc, les ailes grises repliées vers le haut (elle
+   * pique), le bec jaune.
+   */
+  private drawGull(scale: number, dark: boolean, palette: Readonly<ArtPalette>): void {
+    const { width: w, height: h } = SPIDER_HITBOX;
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.ceil(w * scale);
+    canvas.height = Math.ceil(h * scale);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
+    ctx.scale(scale, scale);
+    ctx.fillStyle = dark ? '#2a3140' : '#f4f1e8';
+    ctx.beginPath();
+    ctx.ellipse(w / 2, h * 0.6, w * 0.3, h * 0.28, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = dark ? palette.rim : '#9aa3a8';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.1, h * 0.15);
+    ctx.quadraticCurveTo(w * 0.3, h * 0.6, w / 2, h * 0.5);
+    ctx.quadraticCurveTo(w * 0.7, h * 0.6, w * 0.9, h * 0.15);
+    ctx.stroke();
+    ctx.fillStyle = dark ? '#ffb36a' : '#f2c14e';
+    ctx.beginPath();
+    ctx.moveTo(w / 2 - 1, h * 0.85);
+    ctx.lineTo(w / 2 + 1, h * 0.85);
+    ctx.lineTo(w / 2, h);
+    ctx.fill();
+    const textures = this.scene.textures;
+    if (textures.exists(GULL_TEXTURE)) {
+      textures.remove(GULL_TEXTURE);
+    }
+    textures.addCanvas(GULL_TEXTURE, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
+  }
+
   /**
    * Crabe (D-99), placeholder : carapace ronde orangée, deux pinces levées, les yeux sur leurs
    * tiges, des pattes fines. Il marche de côté ; touché, il s'enfouit (l'éclat, comme les autres).
@@ -467,6 +512,14 @@ export class CombatView {
       g.fillRect(width - 6, 3, 2, 3);
       g.fillRect(width - 10, 3, 2, 3);
       g.generateTexture(PATROLLER_TEXTURE, width, height);
+      g.destroy();
+    }
+    if (!textures.exists(GULL_TEXTURE)) {
+      const { width, height } = SPIDER_HITBOX;
+      const g = this.scene.make.graphics({}, false);
+      g.fillStyle(0xf4f1e8);
+      g.fillEllipse(width / 2, height * 0.6, width * 0.6, height * 0.56);
+      g.generateTexture(GULL_TEXTURE, width, height);
       g.destroy();
     }
     if (!textures.exists(CRAB_TEXTURE)) {

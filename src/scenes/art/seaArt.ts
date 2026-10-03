@@ -74,6 +74,77 @@ function shutteredWindow(a: ArtContext, x: number, y: number, w: number, h: numb
   ctx.fillRect(x - 1, y + h, w + 2, 2);
 }
 
+/**
+ * Un bateau (D-100) : la coque et la cabine suivent leurs tuiles (on marche dessus) ; le mât part du
+ * pont jusqu'en haut du cadre, ses haubans, un liseré de couleur.
+ */
+function paintBoat(a: ArtContext, r: Rect, hull: string, trim: string): void {
+  const { ctx } = a;
+  const solid = (col: number, row: number) => tileAt(a.level, col, row) === Tile.Solid;
+  const col0 = r.x / T;
+  const col1 = col0 + r.w / T - 1;
+  // Le pont : la première ligne pleine au bord de la coque ; la cabine est au-dessus.
+  let deckRow = -1;
+  let bottomRow = -1;
+  for (let row = r.y / T; row < (r.y + r.h) / T; row++) {
+    if (solid(col0, row)) {
+      if (deckRow < 0) {
+        deckRow = row;
+      }
+      bottomRow = row;
+    }
+  }
+  if (deckRow < 0) {
+    return;
+  }
+  const deck = deckRow * T;
+  const bottom = (bottomRow + 1) * T;
+  const left = col0 * T;
+  const right = (col1 + 1) * T;
+  const mastX = r.x + r.w * 0.45;
+  ctx.fillStyle = WOOD_DARK;
+  ctx.fillRect(mastX - 1.5, r.y, 3, deck - r.y);
+  ctx.strokeStyle = 'rgba(60,60,60,0.6)';
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(mastX, r.y + 4);
+  ctx.lineTo(left + 4, deck);
+  ctx.moveTo(mastX, r.y + 4);
+  ctx.lineTo(right - 4, deck);
+  ctx.stroke();
+  // La cabine : les tuiles pleines au-dessus du pont.
+  for (let row = r.y / T; row < deckRow; row++) {
+    for (let col = col0; col <= col1; col++) {
+      if (solid(col, row)) {
+        ctx.fillStyle = WHITE;
+        ctx.fillRect(col * T, row * T, T, T);
+        ctx.fillStyle = '#bcd9e6';
+        ctx.fillRect(col * T + 4, row * T + 4, 8, 6);
+      }
+    }
+  }
+  // La coque : l'étrave relevée à droite, la quille arrondie, un liseré et des hublots.
+  ctx.fillStyle = hull;
+  ctx.beginPath();
+  ctx.moveTo(left, deck);
+  ctx.lineTo(right + 6, deck - 4);
+  ctx.quadraticCurveTo(right - 6, bottom - 2, right - 18, bottom);
+  ctx.lineTo(left + 10, bottom);
+  ctx.quadraticCurveTo(left + 2, bottom - 4, left, deck + T);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = trim;
+  ctx.fillRect(left, deck, r.w, 3);
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.fillRect(left + 8, bottom - 6, r.w - 26, 3);
+  ctx.fillStyle = trim;
+  for (let x = left + 2 * T; x < right - 2 * T; x += 2 * T) {
+    ctx.beginPath();
+    ctx.arc(x, deck + 10, 2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
 export function seaDrawers({ rounded, tileShape }: ShapeTools): Record<string, Drawer> {
   return {
     // ——— La promenade ———
@@ -98,6 +169,8 @@ export function seaDrawers({ rounded, tileShape }: ShapeTools): Record<string, D
       // La grille du port (fond), fermée : deux piliers de pierre, des barreaux à pointes, une roue de
       // bateau forgée au milieu. La suite viendra avec le port (PR 4).
       const ground = r.y + r.h;
+      // Ouverte (D-100) : la sortie vers le port est dans le mur, les grilles sont repliées.
+      const open = tileAt(a.level, 0, r.y / T + r.h / T - 1) === Tile.Empty;
       ctx.fillStyle = STONE_DARK;
       ctx.fillRect(r.x, r.y + 6, 10, ground - r.y - 6);
       ctx.fillRect(r.x + r.w - 10, r.y + 6, 10, ground - r.y - 6);
@@ -106,6 +179,15 @@ export function seaDrawers({ rounded, tileShape }: ShapeTools): Record<string, D
       ctx.fillRect(r.x + r.w - 11, r.y + 3, 12, 4);
       ctx.strokeStyle = IRON;
       ctx.lineWidth = 1.5;
+      if (open) {
+        ctx.beginPath();
+        for (let k = 0; k < 4; k++) {
+          ctx.moveTo(r.x + r.w - 12 + k * 2, r.y + 14);
+          ctx.lineTo(r.x + r.w - 12 + k * 2, ground);
+        }
+        ctx.stroke();
+        return;
+      }
       ctx.beginPath();
       for (let x = r.x + 13; x < r.x + r.w - 11; x += 5) {
         ctx.moveTo(x, r.y + 14);
@@ -676,6 +758,281 @@ export function seaDrawers({ rounded, tileShape }: ShapeTools): Record<string, D
       const door = { x: r.x + 4 * T, y: ground - 3 * T, w: 2 * T, h: 3 * T };
       ctx.fillStyle = NAVY;
       rounded(ctx, door, [door.w / 2, door.w / 2, 0, 0]);
+      ctx.fill();
+    },
+    // ——— Le phare et le port (D-100) ———
+    lighthousecore(a, r) {
+      const { ctx } = a;
+      // Le noyau de l'escalier (fond) : une colonne de pierre blanchie, on passe devant.
+      ctx.fillStyle = WHITE_SHADE;
+      ctx.fillRect(r.x + 3, r.y, r.w - 6, r.h);
+      ctx.fillStyle = 'rgba(0,0,0,0.1)';
+      ctx.fillRect(r.x + r.w - 8, r.y, 5, r.h);
+    },
+    lighthousestair(a, r) {
+      // Les volées de l'escalier (traversables) : des marches de pierre en éventail, une rampe de fer.
+      const { ctx } = a;
+      for (let row = r.y / T; row < (r.y + r.h) / T; row++) {
+        for (let col = r.x / T; col < (r.x + r.w) / T; col++) {
+          if (tileAt(a.level, col, row) !== Tile.OneWay) {
+            continue;
+          }
+          const x = col * T;
+          const y = row * T;
+          ctx.fillStyle = col % 2 === 0 ? STONE : STONE_LIGHT;
+          ctx.fillRect(x, y, T, 5);
+          ctx.fillStyle = STONE_DARK;
+          ctx.fillRect(x, y + 5, T, 1.5);
+          ctx.fillStyle = IRON;
+          ctx.fillRect(x, y - 9, T, 1);
+          ctx.fillRect(x + 7, y - 9, 1, 9);
+        }
+      }
+    },
+    keeperfloor(a, r) {
+      tileShape(a, r, WOOD, WOOD_LIGHT);
+    },
+    lampfloor(a, r) {
+      tileShape(a, r, IRON, IRON_LIGHT);
+    },
+    lighthousewall(a, r) {
+      // La maçonnerie de la tour qui se resserre vers le haut : des pierres blanches jointoyées.
+      tileShape(a, r, STONE_LIGHT, WHITE);
+      const { ctx } = a;
+      if (a.palette.silhouettes) {
+        return;
+      }
+      ctx.fillStyle = 'rgba(0,0,0,0.08)';
+      for (let y = r.y; y < r.y + r.h; y += 8) {
+        for (let x = r.x + ((y / 8) % 2) * 8; x < r.x + r.w; x += 16) {
+          ctx.fillRect(x, y, 1, 8);
+        }
+        ctx.fillRect(r.x, y, r.w, 1);
+      }
+    },
+    lamproom(a, r) {
+      const { ctx } = a;
+      // La salle de la lanterne (fond) : de grandes vitres sur le ciel, les montants de fonte.
+      ctx.fillStyle = 'rgba(190,225,240,0.5)';
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+      ctx.fillStyle = IRON;
+      for (let x = r.x; x < r.x + r.w; x += 3 * T) {
+        ctx.fillRect(x, r.y, 2, r.h);
+      }
+      ctx.fillRect(r.x, r.y + r.h / 2, r.w, 1.5);
+    },
+    lens(a, r) {
+      // La grande lentille (on monte dessus) : des anneaux de verre, une lueur au cœur, parfois
+      // turquoise (une étrangeté, jamais expliquée) ; son socle de fonte, sous lequel on passe.
+      const { ctx } = a;
+      const body = { x: r.x, y: r.y, w: r.w, h: 5 * T };
+      tileShape(a, body, '#d6ecf2', '#f2fbfd');
+      const cx = r.x + r.w / 2;
+      const cy = r.y + 2.5 * T;
+      ctx.strokeStyle = 'rgba(80,120,140,0.5)';
+      ctx.lineWidth = 1;
+      for (let k = 1; k <= 4; k++) {
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, k * 7, k * 6, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.fillStyle = 'rgba(120,240,220,0.55)';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = IRON;
+      ctx.fillRect(cx - 12, body.y + body.h, 3, r.h - body.h);
+      ctx.fillRect(cx + 9, body.y + body.h, 3, r.h - body.h);
+      ctx.fillRect(cx - 16, r.y + r.h - 3, 32, 3);
+    },
+    seachart(a, r) {
+      const { ctx } = a;
+      // La carte marine du gardien (fond) : la baie dessinée, une rose des vents.
+      ctx.fillStyle = '#efe3c2';
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+      ctx.strokeStyle = STRIPE_BLUE;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(r.x + 6, r.y + r.h - 10);
+      ctx.quadraticCurveTo(r.x + r.w / 2, r.y + 10, r.x + r.w - 6, r.y + r.h - 14);
+      ctx.stroke();
+      ctx.fillStyle = STRIPE_RED;
+      ctx.beginPath();
+      ctx.moveTo(r.x + r.w - 14, r.y + 6);
+      ctx.lineTo(r.x + r.w - 11, r.y + 14);
+      ctx.lineTo(r.x + r.w - 17, r.y + 14);
+      ctx.fill();
+    },
+    breakwaterwalk(a, r) {
+      // La passerelle du brise-lames (traversable) sur ses pilotis, et la tête de pierre au bout.
+      const { ctx } = a;
+      for (let col = r.x / T; col < (r.x + r.w) / T; col++) {
+        const tile = tileAt(a.level, col, r.y / T);
+        if (tile === Tile.OneWay) {
+          ctx.fillStyle = WOOD;
+          ctx.fillRect(col * T, r.y, T, 4);
+          if (col % 3 === 0) {
+            const ground = groundRow(a, col * T + 4, r.y / T + 1) * T;
+            ctx.fillStyle = WOOD_DARK;
+            ctx.fillRect(col * T + 3, r.y + 4, 3, ground - r.y - 4);
+          }
+          ctx.fillStyle = IRON;
+          ctx.fillRect(col * T, r.y - 10, T, 1);
+        }
+      }
+      const head = { x: r.x + r.w - 3 * T, y: r.y, w: 3 * T, h: r.h };
+      tileShape(a, head, STONE, STONE_LIGHT);
+    },
+    harbourmud(a, r) {
+      // La vase du port (à marée basse) : brune, luisante, des traces de crabes.
+      tileShape(a, r, '#8a7a5e', '#a39373');
+      const { ctx } = a;
+      if (a.palette.silhouettes) {
+        return;
+      }
+      ctx.fillStyle = 'rgba(255,255,255,0.12)';
+      for (let x = r.x + 7; x < r.x + r.w; x += 23) {
+        ctx.fillRect(x, r.y + 3, 9, 1);
+      }
+    },
+    sailboat(a, r) {
+      // Un voilier (il monte avec la marée) : la coque blanche, le liseré bleu, le mât, la bôme.
+      paintBoat(a, r, WHITE, STRIPE_BLUE);
+    },
+    fishingboat(a, r) {
+      // Un bateau de pêche : la coque rouge, la cabine, le mât et ses feux.
+      paintBoat(a, r, STRIPE_RED, WHITE);
+    },
+    pontoon(a, r) {
+      // Le ponton (traversable, il monte avec la marée) : des planches sur des flotteurs.
+      const { ctx } = a;
+      const y = r.y + T;
+      ctx.fillStyle = '#5b6c78';
+      for (let x = r.x + 6; x < r.x + r.w - 6; x += 3 * T) {
+        rounded(ctx, { x, y: y + 3, w: 2 * T - 4, h: 7 }, 3);
+        ctx.fill();
+      }
+      ctx.fillStyle = WOOD;
+      ctx.fillRect(r.x, y, r.w, 4);
+      ctx.fillStyle = WOOD_LIGHT;
+      ctx.fillRect(r.x, y, r.w, 1.5);
+    },
+    harbourquay(a, r) {
+      // Le quai de pierre (on y marche) : de gros blocs, un bord d'amarrage, des bittes.
+      tileShape(a, r, STONE, STONE_LIGHT);
+      const { ctx } = a;
+      if (a.palette.silhouettes) {
+        return;
+      }
+      ctx.fillStyle = 'rgba(0,0,0,0.08)';
+      for (let y = r.y + 8; y < r.y + r.h; y += 12) {
+        ctx.fillRect(r.x, y, r.w, 1);
+      }
+      ctx.fillStyle = IRON;
+      for (let x = r.x + 2 * T; x < r.x + r.w; x += 9 * T) {
+        if (tileAt(a.level, Math.floor(x / T), r.y / T - 1) === Tile.Empty) {
+          rounded(ctx, { x: x - 3, y: r.y - 6, w: 6, h: 6 }, [3, 3, 0, 0]);
+          ctx.fill();
+        }
+      }
+    },
+    quayladder(a, r) {
+      // L'échelle du quai, scellée dans la pierre : deux montants, des barreaux (on s'y pose).
+      const { ctx } = a;
+      ctx.fillStyle = IRON;
+      ctx.fillRect(r.x + 2, r.y, 2, r.h);
+      ctx.fillRect(r.x + r.w - 4, r.y, 2, r.h);
+      for (let row = r.y / T; row < (r.y + r.h) / T; row++) {
+        if (tileAt(a.level, r.x / T, row) === Tile.OneWay) {
+          ctx.fillStyle = IRON_LIGHT;
+          ctx.fillRect(r.x, row * T, r.w, 3);
+        }
+      }
+    },
+    drainpipe(a, r) {
+      const { ctx } = a;
+      // La buse sous le quai (fond) : une bouche ronde de béton, un filet d'eau.
+      ctx.fillStyle = '#9a958a';
+      ctx.beginPath();
+      ctx.arc(r.x + T * 1.5, r.y + r.h - 8, 12, Math.PI, 0);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(30,26,22,0.6)';
+      ctx.beginPath();
+      ctx.arc(r.x + T * 1.5, r.y + r.h - 8, 8, Math.PI, 0);
+      ctx.fill();
+    },
+    harbouroffice(a, r) {
+      const { ctx } = a;
+      // La capitainerie (fond) : une maisonnette blanche, son toit d'ardoise, un mât à pavillons et
+      // le panneau des marées : son horloge marque une heure qui n'existe pas (treize aiguilles,
+      // une étrangeté jamais expliquée).
+      ctx.fillStyle = WHITE;
+      ctx.fillRect(r.x, r.y + 3 * T, r.w, r.h - 3 * T);
+      ctx.fillStyle = '#5b6773';
+      ctx.beginPath();
+      ctx.moveTo(r.x - 6, r.y + 3 * T);
+      ctx.lineTo(r.x + r.w / 2, r.y + T);
+      ctx.lineTo(r.x + r.w + 6, r.y + 3 * T);
+      ctx.fill();
+      shutteredWindow(a, r.x + 2 * T, r.y + 4.5 * T, 2 * T, 2 * T);
+      const board = { x: r.x + r.w - 5 * T, y: r.y + 4 * T, w: 4 * T, h: 3 * T };
+      ctx.fillStyle = NAVY;
+      ctx.fillRect(board.x, board.y, board.w, board.h);
+      const cx = board.x + board.w / 2;
+      const cy = board.y + board.h / 2;
+      ctx.fillStyle = WHITE;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = NAVY;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let k = 0; k < 13; k++) {
+        const t = (k / 13) * Math.PI * 2;
+        ctx.moveTo(cx + Math.cos(t) * 10, cy + Math.sin(t) * 10);
+        ctx.lineTo(cx + Math.cos(t) * 13, cy + Math.sin(t) * 13);
+      }
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + 2, cy - 9);
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx - 7, cy + 3);
+      ctx.stroke();
+    },
+    harbourcrane(a, r) {
+      // La grue du port : un portique jaune qui enjambe le quai (on passe dessous), sa flèche
+      // (traversable), sa cabine (on monte dessus) et son crochet qui pend.
+      const { ctx } = a;
+      tileShape(a, r, '#e8b33c', '#f5cf6a');
+      const quay = groundRow(a, r.x + 13 * T, r.y / T + 10) * T;
+      ctx.fillStyle = '#e8b33c';
+      for (const col of [12, 17]) {
+        const x = r.x + col * T;
+        ctx.fillRect(x + 4, r.y + 14 * T, T * 2 - 8, quay - r.y - 14 * T);
+      }
+      ctx.strokeStyle = '#3b3b3b';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(r.x + 3 * T, r.y + 8 * T);
+      ctx.lineTo(r.x + 3 * T, r.y + 12 * T);
+      ctx.stroke();
+      ctx.fillStyle = '#3b3b3b';
+      ctx.fillRect(r.x + 3 * T - 3, r.y + 12 * T, 6, 4);
+      ctx.fillStyle = '#bcd9e6';
+      ctx.fillRect(r.x + 20 * T, r.y + 5 * T, 2 * T, T);
+    },
+    frozengull(a, r) {
+      const { ctx } = a;
+      // Une mouette immobile en plein vol, au-dessus du port (une étrangeté, jamais expliquée).
+      ctx.strokeStyle = '#f4f1e8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(r.x, r.y + 8);
+      ctx.quadraticCurveTo(r.x + 8, r.y, r.x + 16, r.y + 8);
+      ctx.quadraticCurveTo(r.x + 24, r.y, r.x + 32, r.y + 8);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(120,240,220,0.35)';
+      ctx.beginPath();
+      ctx.arc(r.x + 16, r.y + 8, 3, 0, Math.PI * 2);
       ctx.fill();
     },
     // ——— Le centre de la classe de mer ———

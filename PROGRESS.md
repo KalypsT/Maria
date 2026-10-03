@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) et **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99), sur `ccr-014503d9-cj0c7a`. Suite : PR 4, le port et le phare (la boucle de la baie, le banc du port, les mouettes). Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
+**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) et **PR 4 faite : le phare, le port, la boucle de la baie** (D-100), sur `ccr-014503d9-cj0c7a`. Suite : PR 5, la jetée et la fête foraine (le soir, le carrousel). Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
 
 **Le train** (niveau 5, D-83 à D-91) : complet et fusionné. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
@@ -17,6 +17,18 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### La station balnéaire, PR 4 : le phare, le port (D-100)
+
+- **La boucle de la baie** : rochers → porte du phare → galerie → passerelle → port → grille du port → promenade.
+- **Le phare** : l'escalier en colimaçon cassé, la chambre du gardien, une cage étroite (saut mural), la salle de la lanterne ; du haut, Céleste voit la lueur sous le carrousel (la fête viendra). Défi moyen : la lentille.
+- **Le port** (salle de marée) : la passerelle finit au-dessus des bateaux (deux sens à marée haute, sens unique à marée basse), les bateaux et leurs drisses qui montent, le ponton, la vase et ses crabes, le quai, **le banc du port**, la grue, des mouettes. Défis faciles : la buse sous le quai (marée basse), la cabine de la grue.
+- Étrangetés : une mouette immobile en plein vol, l'horloge à treize repères, le cœur turquoise de la lentille.
+- Tests : TESTCOUNT. Vérifié dans Chromium : le phare de bas en haut, la passerelle, les bateaux échoués puis à flot, le quai, la capitainerie, la grue, la grille du port ouverte.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « la première marée, le banc ») : trouve-t-on la porte du phare, puis la galerie et la passerelle ? Comprend-on qu'à marée basse on ne remonte pas à la passerelle ?
+- [ ] Le phare : l'escalier cassé (tous les 3 rangs) est-il agréable, ou trop long ? La cage le long du mur (saut mural) ?
+- [ ] Le port : les bateaux à flot se lisent-ils comme des appuis ? Les drisses donnent-elles envie ? Les mouettes piquent-elles de façon lisible ?
+- [ ] Les étrangetés se remarquent-elles sans être expliquées (la mouette immobile, l'horloge) ?
 
 ### La station balnéaire, PR 3 : la plage, les rochers, la première marée (D-99)
 
