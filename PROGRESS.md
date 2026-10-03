@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**L'avant-dernier niveau** (niveau 7, « la maison de la nounou », D-107) : plan validé en 12 PR (la bascule, la maison et le miroir, l'effacement, quatre îlots de mémoire, le torchon blanc, le boss, Eden, le réveil et la phase 4). **PR 1 faite : la bascule (moteur, analyse, parcours d'essai 15)** (D-108) , **PR 2 faite : le dessin des deux couches, le bouton « Basculer », l'aide** (D-109), **PR 3 faite : la porte du couloir, l'entrée et le miroir, la maison, la carte** (D-110) **PR 4 faite : l'effacement (le système) et le parcours d'essai 16** (D-111, fusionnées), **PR 5 faite : l'îlot 1, la chambre d'autrefois et le jardin renversé (Roger)** (D-112) **PR 6 faite : l'îlot 2, l'école et la rue d'autrefois (la boîte à formes)** (D-113) **PR 7 faite : l'îlot 3, la gare et le train d'autrefois (la cuisine rose)** (D-114) **PR 8 faite : l'îlot 4, la plage et le carrousel d'autrefois (le livre musical)** (D-115, fusionnées) **PR 9 faite : la chambre de la sieste et le torchon blanc** (D-116) et **PR 10 faite : le boss, l'effacement** (D-117), sur `ccr-3d597f8d-070zee`. Suite : Eden et son souvenir jouable (PR 11) ; **essai sur téléphone** (parcours 15 et 16, l'entrée, la maison, les îlots, la chambre de la sieste, le boss).
+**L'avant-dernier niveau** (niveau 7, « la maison de la nounou », D-107) : plan validé en 12 PR (la bascule, la maison et le miroir, l'effacement, quatre îlots de mémoire, le torchon blanc, le boss, Eden, le réveil et la phase 4). **PR 1 faite : la bascule (moteur, analyse, parcours d'essai 15)** (D-108) , **PR 2 faite : le dessin des deux couches, le bouton « Basculer », l'aide** (D-109), **PR 3 faite : la porte du couloir, l'entrée et le miroir, la maison, la carte** (D-110) **PR 4 faite : l'effacement (le système) et le parcours d'essai 16** (D-111, fusionnées), **PR 5 faite : l'îlot 1, la chambre d'autrefois et le jardin renversé (Roger)** (D-112) **PR 6 faite : l'îlot 2, l'école et la rue d'autrefois (la boîte à formes)** (D-113) **PR 7 faite : l'îlot 3, la gare et le train d'autrefois (la cuisine rose)** (D-114) **PR 8 faite : l'îlot 4, la plage et le carrousel d'autrefois (le livre musical)** (D-115, fusionnées) **PR 9 faite : la chambre de la sieste et le torchon blanc** (D-116) **PR 10 faite : le boss, l'effacement** (D-117) et **PR 11 faite : Eden et son souvenir jouable** (D-118), sur `ccr-3d597f8d-070zee`. Suite : le réveil, le train du retour, la phase 4 (PR 12) ; **essai sur téléphone** (parcours 15 et 16, l'entrée, la maison, les îlots, la chambre de la sieste, le boss).
 
 **La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101, fusionnées) et **PR 6 faite : la fête engloutie** (D-102) **PR 7 faite : le rythme de la vague, parcours d'essai 14** (D-103) **PR 8 faite : la vague dans le niveau, le livre musical** (D-104) et **PR 9 faite : le court souvenir, la nuit, le couloir en boucle, la fin** (D-105), sur `ccr-014503d9-cj0c7a`. **Le niveau 6 est complet** (sa fin reste un PLACEHOLDER jusqu'au niveau 7). Suite : essais sur téléphone, puis le niveau 7. Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
 
@@ -19,6 +19,16 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### L'avant-dernier niveau, PR 11 : Eden et son souvenir jouable (D-118)
+
+- Dans la salle de jeux, l'effacement dissous : **Eden**, tout petit, assis près d'une tour de cubes. Céleste le reconnaît (un cœur) ; dans le noir, **le souvenir jouable** : la tour de cubes à deux, puis un cache-cache (Eden change de place dans le noir, sa tête dépasse du pouf, du coffre ; trouvé, il rit) ; la nounou regarde depuis son fauteuil. À la fin, Eden n'est plus là, Céleste reste seule. Quand la lumière revient, Eden n'est plus dans la salle.
+- Rejouable depuis le cahier (« Monde étrange » : la tour de cubes).
+- La suite (le réveil) est un PLACEHOLDER jusqu'à la PR 12.
+- DEBUG : « Jouer le souvenir d'Eden » ; Histoire → « Eden, le souvenir joué ».
+- Tests : TESTS_PR11. Vérifié dans Chromium : Eden dans la salle de jeux, le souvenir joué en entier (la tour, les cachettes, Céleste seule), le retour.
+- [ ] À vérifier sur téléphone : le souvenir se comprend-il sans texte (la tour à deux, le cache-cache) ? Le moment où Eden n'est plus là est-il assez fort, sans être triste à l'excès ?
+- [ ] La nounou en silhouette : bienveillante, ou inquiétante ? Eden se reconnaît-il comme un vrai petit garçon ?
 
 ### L'avant-dernier niveau, PR 10 : le boss, l'effacement (D-117)
 

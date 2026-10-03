@@ -85,8 +85,9 @@ describe('la chambre de la sieste et le torchon blanc (D-116)', () => {
     },
   );
 
-  it('le torchon blanc : un souvenir du monde étrange (le dernier), son court souvenir', () => {
-    expect(STRANGE_THINGS.at(-1)).toBe('white-cloth');
+  it('le torchon blanc : un souvenir du monde étrange, son court souvenir', () => {
+    // Ajouté à la fin de la rubrique ; la tour d'Eden (D-118) vient après.
+    expect(STRANGE_THINGS.indexOf('white-cloth')).toBe(4);
     expect(FLASHBACKS).toContain('white-cloth');
     expect(flashbackOf('white-cloth')).toBe('white-cloth');
     const t = need(

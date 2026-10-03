@@ -50,6 +50,11 @@ export const STRANGE_THINGS = [
   'music-book',
   /** Le torchon blanc, dans le petit lit de la sieste chez la nounou (D-116). */
   'white-cloth',
+  /**
+   * La tour de cubes d'Eden, dans la salle de jeux de la nounou (D-118) : on y rejoue le souvenir
+   * d'Eden.
+   */
+  'eden-tower',
 ] as const;
 
 export type MemoryId =

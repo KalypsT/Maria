@@ -71,6 +71,10 @@ export const PLAY_OBJECTS = [
 /** L'étape qui rallume chaque objet : le début de la salle de jeux, puis l'objet d'avant. */
 const litBy = (k: number): string => (k === 0 ? F.NannyErasure : (PLAY_OBJECTS[k - 1]?.flag ?? ''));
 
+/** Eden (D-118), assis sur le gros cube de la salle de jeux, près de sa tour de cubes. */
+export const EDEN_SEAT = { col: 32, row: 14 };
+const EDEN_TOWER = { col: 37, row: 14 };
+
 /** La petite porte de la sieste, dans la maison (sa porte 10). */
 export const NAP_DOOR = { col: 63, row: 36 };
 /** Les quatre îlots faits : les quatre veilleuses allumées, la porte de la sieste s'ouvre. */
@@ -308,6 +312,35 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   })),
   {
+    // Eden (D-118) : dans la salle de jeux rendue à ses couleurs, un petit garçon assis près d'une
+    // tour de cubes. Céleste le reconnaît (un cœur). Dans le noir, le souvenir jouable : la tour à
+    // deux, le cache-cache, la nounou qui regarde ; à la fin, Céleste seule. Quand la lumière
+    // revient, Eden n'est plus là (il ne bouge jamais à l'écran). Le monde étrange garde aussi les
+    // relations, pas seulement les objets.
+    id: 'nanny-eden',
+    room: 'nanny-playroom',
+    on: 'interact',
+    area: { col: EDEN_SEAT.col - 2, row: EDEN_SEAT.row - 2, w: 6, h: 3 },
+    mark: { col: EDEN_SEAT.col, row: EDEN_SEAT.row - 3 },
+    when: { all: [F.NannyErasureGone], none: [F.NannyEden] },
+    lock: true,
+    steps: [
+      { do: 'memory', id: 'eden-tower' },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs + S.lookMs },
+      { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
+      { do: 'play', id: 'eden' },
+      { do: 'flag', id: F.NannyEden },
+      { do: 'wait', ms: S.blinkBlackMs },
+      { do: 'fadeIn', ms: S.nightFadeInMs, shape: 'iris' },
+      { do: 'wait', ms: S.lookMs },
+      // La suite (le réveil, la PR 12) : PLACEHOLDER, Céleste pense à Maria.
+      { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs },
+    ],
+  },
+  {
     // Dans la maison (D-110) : tout est immense. Céleste regarde ; le reflet n'est plus là.
     id: 'nanny-house',
     room: 'nanny-house',
@@ -415,6 +448,22 @@ const PROPS: StoryData['props'] = [
     col: 49,
     row: 20,
     when: { none: [F.NannyErasureGone] },
+  },
+  // Eden (D-118), dans la salle de jeux rendue à ses couleurs, près de sa tour de cubes ; la tour
+  // reste après lui.
+  {
+    id: 'nanny-eden',
+    room: 'nanny-playroom',
+    kind: 'eden-small',
+    ...EDEN_SEAT,
+    when: { all: [F.NannyErasureGone], none: [F.NannyEden] },
+  },
+  {
+    id: 'nanny-eden-tower',
+    room: 'nanny-playroom',
+    kind: 'cube-tower-4',
+    ...EDEN_TOWER,
+    when: { all: [F.NannyErasureGone] },
   },
   // La veilleuse de l'îlot 4, bleue, une fois le livre musical retrouvé.
   {

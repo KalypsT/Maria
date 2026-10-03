@@ -62,7 +62,7 @@ import {
   type PlayableMemoryId,
 } from '../config/playableMemories';
 import { MemoryEvent, PlayableMemory } from '../core/memory/PlayableMemory';
-import { teaCup } from './art/memoryArt';
+import { cubeTower, teaCup } from './art/memoryArt';
 import { DEFAULT_WORLD, type WorldParams } from '../config/world';
 import { checkpointId } from '../core/save/saveData';
 import type { SaveSession } from '../core/save/SaveSession';
@@ -2117,23 +2117,39 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** La tasse tenue devant Céleste, les deux mains (souvenir de la cuisine, D-89). */
+  /** Ce que Céleste porte dans un souvenir jouable (D-89, D-118) : la tasse, ou un cube. */
   private createCupImage(): Phaser.GameObjects.Image {
-    const key = 'memory-cup';
     const scale = 4;
-    const canvas = document.createElement('canvas');
-    canvas.width = 8 * scale;
-    canvas.height = 7 * scale;
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.scale(scale, scale);
-      ctx.translate(4, 3.5);
-      teaCup(ctx, 6);
-    }
-    if (!this.textures.exists(key)) {
+    for (const [key, draw] of [
+      [
+        'memory-cup',
+        (ctx: CanvasRenderingContext2D) => {
+          teaCup(ctx, 6);
+        },
+      ],
+      [
+        'memory-cube',
+        (ctx: CanvasRenderingContext2D) => {
+          cubeTower(ctx, 7);
+        },
+      ],
+    ] as const) {
+      if (this.textures.exists(key)) {
+        continue;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = 8 * scale;
+      canvas.height = 7 * scale;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.scale(scale, scale);
+        ctx.translate(4, 3.5);
+        draw(ctx);
+      }
       this.textures.addCanvas(key, canvas);
     }
     return this.add
-      .image(0, 0, key)
+      .image(0, 0, 'memory-cup')
       .setScale(1 / scale)
       .setDepth(10.5)
       .setVisible(false);
@@ -2144,6 +2160,10 @@ export class GameScene extends Phaser.Scene {
     const visible = memory !== null && memory.carrying && memory.celesteVisible;
     this.cupImage.setVisible(visible);
     if (visible) {
+      const key = memory.data.carried === 'cube' ? 'memory-cube' : 'memory-cup';
+      if (this.cupImage.texture.key !== key) {
+        this.cupImage.setTexture(key);
+      }
       const facing = this.player.facing;
       this.cupImage.setPosition(
         this.puppet.x + facing * 6,

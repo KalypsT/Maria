@@ -1623,3 +1623,24 @@ Retours d'écoute de l'utilisateur sur téléphone.
   - l'ordre des objets, le recul et l'accélération, la dissolution, la porte.
 - **Debug** : les histoires « l'effacement, la cage d'escalier » et « l'effacement dissous ».
 - **Sauvegarde** : aucune migration. Cinq étapes sont ajoutées en fin de liste. La couche et l'état de l'effacement ne sont jamais sauvegardés : à la réapparition, il repart du départ ; les objets déjà rallumés restent rallumés (étapes).
+
+## D-118 — L'avant-dernier niveau, PR 11 : Eden et son souvenir jouable
+
+- **Plan validé** (D-107). Le système des souvenirs jouables est celui de D-89.
+- **Eden dans le jeu** : dans la salle de jeux, une fois l'effacement dissous (« rendue à ses couleurs » : les lueurs chaudes de D-117, PLACEHOLDER), un petit garçon est assis sur le gros cube, près d'une tour de quatre cubes. C'est un vrai petit garçon, tout petit comme dans le souvenir : ni objet, ni fantôme, ni créature. Il ne bouge pas à l'écran. Agir :
+  - le souvenir de la tour de cubes est ajouté au cahier, à la fin de « Monde étrange » (`eden-tower`) : on y rejoue le souvenir ;
+  - Céleste le reconnaît (un cœur), puis le noir et **le souvenir jouable**. Quand la lumière revient, Eden n'est plus là ; sa tour reste. L'étape `nanny.eden` est ajoutée en fin de liste.
+- **Le souvenir d'Eden** (`memory-eden`, `; @world: memory`), chez la nounou, quand ils étaient tout petits. Il est plus long que celui de la cuisine (7 actions contre 3), sans texte :
+  - **la tour de cubes à deux** : Céleste prend un cube dans le tas, le pose sur la tour, en prend un autre, le pose ; dans le noir d'un clignement, Eden a posé le sien (la tour passe de un à quatre cubes) ;
+  - **un cache-cache simple** : Céleste touche Eden. Dans le noir, il se cache derrière le pouf, et sa tête dépasse ; Céleste le trouve. Dans le noir, il passe derrière le coffre à jouets ; trouvé, il rit ;
+  - **la nounou** est présente : une silhouette bienveillante dans son fauteuil, qui regarde, sans visage net ni texte (PLACEHOLDER) ;
+  - **à la fin**, un cœur ; dans le noir, **Eden n'est plus là ; Céleste reste seule** ;
+  - Maria n'y est pas (pilier 5), ni aucun parent.
+- **Le moteur des souvenirs jouables** a deux ajouts, tous deux optionnels (la cuisine est inchangée, testé) :
+  - `blink` : après le geste, un clignement dans le noir ; l'étape de l'action ne vient qu'au noir. C'est ainsi que les personnages changent de place, jamais à l'écran (testé : Eden ne change de place ou de pose que pendant un clignement) ;
+  - `alone` : la fin peut garder Céleste, seule, et poser une étape dans le noir (« Eden n'est plus là »).
+  - L'objet porté peut être un cube (`carried`).
+- **Dessins** (PLACEHOLDER) : Eden tout petit (cheveux courts et bruns, pull jaune, salopette bleue), assis, caché, riant ; la nounou en silhouette ; les cubes (le tas, la tour) ; la tour de cubes du cahier.
+- **La suite** : après Eden, Céleste pense à Maria. **PLACEHOLDER** : le réveil viendra avec la PR 12.
+- **Debug** : le bouton « Jouer le souvenir d'Eden » et l'histoire « Eden, le souvenir joué ».
+- **Sauvegarde** : aucune migration. Une étape et un souvenir sont ajoutés en fin de liste ; les étapes du souvenir (`memory.eden-*`) ne sont jamais sauvegardées (D-89).

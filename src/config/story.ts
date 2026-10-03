@@ -210,6 +210,11 @@ export const StoryFlag = {
   NannyPlay3: 'nanny.play-3',
   /** Le quatrième objet : l'effacement se dissout, la porte de la salle de jeux s'ouvre (D-117). */
   NannyErasureGone: 'nanny.erasure-gone',
+  /**
+   * Eden (D-118) : dans la salle de jeux rendue à ses couleurs, Céleste l'a reconnu ; le souvenir
+   * jouable ; puis Eden n'est plus là.
+   */
+  NannyEden: 'nanny.eden',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -352,6 +357,15 @@ export const PROP_SIZE = {
   'music-book-pale': { w: 24, h: 24 },
   'color-bloom': { w: 112, h: 80 },
   'erasure-figure': { w: 96, h: 72 },
+  // Le souvenir d'Eden (D-118), à l'échelle de Céleste toute petite ; la nounou, à hauteur d'enfant.
+  'eden-small': { w: 16, h: 20 },
+  'eden-peek': { w: 16, h: 20 },
+  'eden-laugh': { w: 16, h: 22 },
+  'nanny-shadow': { w: 40 * PARENT_SCALE, h: 46 * PARENT_SCALE },
+  'cube-pile': { w: 24, h: 14 },
+  'cube-tower-1': { w: 10, h: 10 },
+  'cube-tower-2': { w: 10, h: 18 },
+  'cube-tower-4': { w: 10, h: 32 },
   'dad-garden': { w: 44 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // Le train (D-85) : sur le quai, la maîtresse et les parents (à hauteur d'enfant), les enfants
   // et leurs sacs ; dans la voiture-couchettes, des enfants de la taille de Céleste.

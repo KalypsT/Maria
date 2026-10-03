@@ -291,6 +291,20 @@ export const PROP_KINDS = [
   'music-book-pale',
   'color-bloom',
   'erasure-figure',
+  /**
+   * Eden (D-118), l'ami de Céleste chez la nounou, tout petit : assis près de la tour de cubes, caché
+   * (sa tête dépasse), trouvé (il rit). Un vrai petit garçon, ni objet ni fantôme.
+   */
+  'eden-small',
+  'eden-peek',
+  'eden-laugh',
+  /** La nounou, dans le souvenir d'Eden (D-118) : une silhouette bienveillante dans son fauteuil. */
+  'nanny-shadow',
+  /** Les cubes du souvenir d'Eden (D-118) : le tas, la tour (un, deux, quatre cubes). */
+  'cube-pile',
+  'cube-tower-1',
+  'cube-tower-2',
+  'cube-tower-4',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 
@@ -353,6 +367,10 @@ export const CHARACTER_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'dog-sleep',
   'reflection',
   'reflection-through',
+  'eden-small',
+  'eden-peek',
+  'eden-laugh',
+  'nanny-shadow',
 ]);
 
 export interface StoryProp {

@@ -25,6 +25,11 @@ export interface MemoryAction {
   readonly sets?: string;
   /** Scintillement (vapeur, thé versé) au moment du geste. */
   readonly sparkle?: TileArea;
+  /**
+   * Après le geste, un clignement dans le noir (D-118) : l'étape `sets` ne vient qu'au noir. Les
+   * personnages changent de place ainsi, jamais à l'écran.
+   */
+  readonly blink?: boolean;
 }
 
 export interface PlayableMemoryData {
@@ -35,6 +40,13 @@ export interface PlayableMemoryData {
   readonly actions: readonly MemoryAction[];
   /** Objets de mise en scène de la salle, selon les étapes du souvenir. */
   readonly props: readonly StoryProp[];
+  /** Ce que Céleste porte entre deux actions (`carry`) : la tasse par défaut, ou un cube (D-118). */
+  readonly carried?: 'cup' | 'cube';
+  /**
+   * La fin (D-118) : par défaut, la salle reste seule (sans Céleste). `keepCeleste` : Céleste reste,
+   * seule ; `sets` : l'étape posée dans le noir, avant (quelqu'un n'est plus là).
+   */
+  readonly alone?: { readonly keepCeleste: boolean; readonly sets?: string };
 }
 
 /**
@@ -66,6 +78,8 @@ export const PLAYABLE_MEMORY_TIMING = {
   fadeMs: 1500,
   /** La petite cuisine reste seule. */
   aloneMs: 2800,
+  /** Un clignement dans le noir (D-118) : fondu, noir, retour. */
+  blinkMs: 1400,
 };
 
 /** Étapes du souvenir de la cuisine (jamais sauvegardées). */
@@ -141,10 +155,141 @@ const KITCHEN: PlayableMemoryData = {
   ],
 };
 
-export const PLAYABLE_MEMORIES = { kitchen: KITCHEN } as const;
+/** Étapes du souvenir d'Eden (D-118, jamais sauvegardées). */
+export const EDEN_MEMORY_STEP = {
+  /** Un cube pris dans le tas, puis posé sur la tour. */
+  cube1: 'memory.eden-cube-1',
+  tower2: 'memory.eden-tower-2',
+  cube2: 'memory.eden-cube-2',
+  /** Dans le noir, Eden a posé le sien : la tour a quatre cubes. */
+  tower4: 'memory.eden-tower-4',
+  /** Cache-cache : Eden s'est caché derrière le pouf, puis derrière le rideau. */
+  hideA: 'memory.eden-hide-a',
+  hideB: 'memory.eden-hide-b',
+  /** Trouvé : il rit. */
+  found: 'memory.eden-found',
+  /** À la fin, dans le noir : Eden n'est plus là. */
+  gone: 'memory.eden-gone',
+} as const;
+
+const PILE = { col: 13, row: 19 };
+const TOWER = { col: 19, row: 19 };
+const EDEN_AT = { col: 21, row: 19 };
+/** Les cachettes : derrière le pouf, derrière le coffre à jouets (sa tête dépasse, dessus). */
+const HIDE_A = { col: 31, row: 17 };
+const HIDE_B = { col: 4, row: 17 };
+const NANNY = { col: 40, row: 19 };
+/** Céleste se tient devant une cachette (par terre, à côté). */
+const beside = (p: { col: number; row: number }, side: -1 | 1) => ({
+  area: { col: side < 0 ? p.col - 4 : p.col, row: p.row, w: 4, h: 3 },
+  mark: { col: p.col, row: p.row - 1 },
+});
+const E = EDEN_MEMORY_STEP;
+
+/** Agir sur une case (zone de 4 × 3 tuiles autour, étincelle au-dessus). */
+const at = (p: { col: number; row: number }, w = 4) => ({
+  area: { col: p.col - Math.floor(w / 2), row: p.row - 2, w, h: 3 },
+  mark: { col: p.col, row: p.row - 3 },
+});
+
+/**
+ * Le souvenir d'Eden (D-107, D-118) : chez la nounou, quand ils étaient tout petits. Céleste et
+ * Eden construisent une tour de cubes à deux (elle prend un cube dans le tas et le pose ; dans le
+ * noir d'un clignement, Eden a posé le sien), puis un cache-cache simple : Eden se cache (on ne le
+ * voit jamais bouger, il change de place dans le noir), Céleste le trouve derrière le pouf, puis
+ * derrière le rideau ; il rit. La nounou, une silhouette bienveillante, regarde depuis son fauteuil,
+ * sans un mot. Un cœur ; dans le noir, Eden n'est plus là ; Céleste reste seule. Sans texte. Maria
+ * n'y est pas (pilier 5). Plus long que celui de la cuisine.
+ */
+const EDEN: PlayableMemoryData = {
+  room: 'memory-eden',
+  start: { col: 8, row: 19, facing: 1 },
+  carried: 'cube',
+  alone: { keepCeleste: true, sets: E.gone },
+  actions: [
+    { ...at(PILE), gesture: 'serve', carry: true, sets: E.cube1 },
+    { ...at(TOWER), gesture: 'serve', carry: false, sets: E.tower2 },
+    { ...at(PILE), gesture: 'serve', carry: true, sets: E.cube2 },
+    { ...at(TOWER), gesture: 'serve', carry: false, sets: E.tower4, blink: true },
+    // Le cache-cache : Céleste touche Eden (à lui de se cacher) ; dans le noir, il est caché.
+    { ...at(EDEN_AT), gesture: 'serve', carry: false, sets: E.hideA, blink: true },
+    { ...beside(HIDE_A, -1), gesture: 'serve', carry: false, sets: E.hideB, blink: true },
+    { ...beside(HIDE_B, 1), gesture: 'serve', carry: false, sets: E.found, blink: true },
+  ],
+  props: [
+    { id: 'eden-pile', room: 'memory-eden', kind: 'cube-pile', ...PILE, when: {} },
+    {
+      id: 'eden-tower-1',
+      room: 'memory-eden',
+      kind: 'cube-tower-1',
+      ...TOWER,
+      when: { none: [E.tower2] },
+      instant: true,
+    },
+    {
+      id: 'eden-tower-2',
+      room: 'memory-eden',
+      kind: 'cube-tower-2',
+      ...TOWER,
+      when: { all: [E.tower2], none: [E.tower4] },
+      instant: true,
+    },
+    {
+      id: 'eden-tower-4',
+      room: 'memory-eden',
+      kind: 'cube-tower-4',
+      ...TOWER,
+      when: { all: [E.tower4] },
+      instant: true,
+    },
+    // Eden : assis près de la tour, puis caché (on voit dépasser sa tête), puis trouvé, il rit.
+    {
+      id: 'eden-sit',
+      room: 'memory-eden',
+      kind: 'eden-small',
+      ...EDEN_AT,
+      flip: true,
+      when: { none: [E.hideA] },
+      instant: true,
+    },
+    {
+      id: 'eden-hide-a',
+      room: 'memory-eden',
+      kind: 'eden-peek',
+      ...HIDE_A,
+      when: { all: [E.hideA], none: [E.hideB] },
+      instant: true,
+    },
+    {
+      id: 'eden-hide-b',
+      room: 'memory-eden',
+      kind: 'eden-peek',
+      ...HIDE_B,
+      flip: true,
+      when: { all: [E.hideB], none: [E.found] },
+      instant: true,
+    },
+    {
+      id: 'eden-found',
+      room: 'memory-eden',
+      kind: 'eden-laugh',
+      col: HIDE_B.col + 3,
+      row: 19,
+      when: { all: [E.found], none: [E.gone] },
+      instant: true,
+    },
+    // La nounou, dans son fauteuil : une silhouette bienveillante qui regarde, sans visage net.
+    { id: 'eden-nanny', room: 'memory-eden', kind: 'nanny-shadow', ...NANNY, flip: true, when: {} },
+  ],
+};
+
+export const PLAYABLE_MEMORIES = { kitchen: KITCHEN, eden: EDEN } as const;
 export type PlayableMemoryId = keyof typeof PLAYABLE_MEMORIES;
 
 /** Le souvenir jouable lié à un souvenir du cahier, s'il en a un : on le rejoue en le touchant. */
 export function playableOf(id: MemoryId): PlayableMemoryId | null {
-  return id === 'pink-kitchen' ? 'kitchen' : null;
+  if (id === 'pink-kitchen') {
+    return 'kitchen';
+  }
+  return id === 'eden-tower' ? 'eden' : null;
 }

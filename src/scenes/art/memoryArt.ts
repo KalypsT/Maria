@@ -526,6 +526,21 @@ export function shapeBox(ctx: CanvasRenderingContext2D, s: number, glow = false)
  * `glow` : la lueur turquoise du monde étrange autour d'elle. PLACEHOLDER.
  */
 /**
+ * La tour de cubes d'Eden (D-118), pour le cahier : quatre cubes de couleurs passées, empilés un peu
+ * de travers. PLACEHOLDER. Centré en (0, 0), de taille `s`.
+ */
+export function cubeTower(ctx: CanvasRenderingContext2D, s: number): void {
+  const colours = ['#d9788f', '#6f8fc4', '#e6c27a', '#7fa37a'];
+  const c = s * 0.2;
+  for (let k = 0; k < 4; k++) {
+    ctx.fillStyle = colours[k] ?? INK;
+    ctx.beginPath();
+    ctx.roundRect(-c / 2 + (k % 2 === 0 ? 0 : s * 0.03), s * 0.4 - c * (k + 1), c, c, c * 0.15);
+    ctx.fill();
+  }
+}
+
+/**
  * Le torchon blanc (D-116) : un carré de coton blanc, doux, plié en deux et un peu froissé, un
  * liseré bleu pâle, un coin qui retombe. Un objet de réconfort, pas un jouet. Avec `glow`, une
  * lueur douce (grise et chaude, pas turquoise : il n'est pas de l'effacement, D-111). PLACEHOLDER.
@@ -1004,6 +1019,9 @@ export function drawMemory(
       break;
     case 'white-cloth':
       whiteCloth(ctx, size * 0.95);
+      break;
+    case 'eden-tower':
+      cubeTower(ctx, size * 0.9);
       break;
   }
   ctx.restore();
