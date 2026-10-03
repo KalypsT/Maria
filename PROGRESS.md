@@ -24,7 +24,7 @@
 - **Le phare** : l'escalier en colimaçon cassé, la chambre du gardien, une cage étroite (saut mural), la salle de la lanterne ; du haut, Céleste voit la lueur sous le carrousel (la fête viendra). Défi moyen : la lentille.
 - **Le port** (salle de marée) : la passerelle finit au-dessus des bateaux (deux sens à marée haute, sens unique à marée basse), les bateaux et leurs drisses qui montent, le ponton, la vase et ses crabes, le quai, **le banc du port**, la grue, des mouettes. Défis faciles : la buse sous le quai (marée basse), la cabine de la grue.
 - Étrangetés : une mouette immobile en plein vol, l'horloge à treize repères, le cœur turquoise de la lentille.
-- Tests : TESTCOUNT. Vérifié dans Chromium : le phare de bas en haut, la passerelle, les bateaux échoués puis à flot, le quai, la capitainerie, la grue, la grille du port ouverte.
+- Tests : 678. Vérifié dans Chromium : le phare de bas en haut, la passerelle, les bateaux échoués puis à flot, le quai, la capitainerie, la grue, la grille du port ouverte.
 - [ ] À vérifier sur téléphone (DEBUG → Histoire → « la première marée, le banc ») : trouve-t-on la porte du phare, puis la galerie et la passerelle ? Comprend-on qu'à marée basse on ne remonte pas à la passerelle ?
 - [ ] Le phare : l'escalier cassé (tous les 3 rangs) est-il agréable, ou trop long ? La cage le long du mur (saut mural) ?
 - [ ] Le port : les bateaux à flot se lisent-ils comme des appuis ? Les drisses donnent-elles envie ? Les mouettes piquent-elles de façon lisible ?
