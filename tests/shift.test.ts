@@ -140,3 +140,18 @@ describe('la bascule : pression gardée, délai, refus (D-107)', () => {
     ).toBe(ShiftEvent.Refused);
   });
 });
+
+describe('la bascule et le dernier appui (D-107)', () => {
+  it('le dernier appui retient sa couche', async () => {
+    const { RunState } = await import('../src/core/world/RunState');
+    const { DEFAULT_WORLD } = await import('../src/config/world');
+    const run = new RunState(present, DEFAULT_WORLD);
+    const box = { x: 12 * T, y: 6 * T - H, width: PLAYER_HITBOX.width, height: H };
+    run.setLayer(memory);
+    run.step(box, 0, true);
+    expect(run.footing?.level).toBe(memory);
+    run.setLayer(present);
+    run.step({ ...box, x: 3 * T }, 0, true);
+    expect(run.footing?.level).toBe(present);
+  });
+});

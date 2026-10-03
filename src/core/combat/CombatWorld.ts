@@ -180,6 +180,14 @@ export class CombatWorld {
     t.snailStep = p.snailSpeed / hz;
   }
 
+  /**
+   * La bascule (D-107) : la même salle dans l'autre couche ; les ennemis et les dangers à cycle
+   * continuent (une couche ne change que des tuiles, hors de leur chemin).
+   */
+  setLayer(level: LevelData): void {
+    this.level = level;
+  }
+
   /** Nouvelle salle : ennemis créés depuis ses marqueurs (allocation au chargement seulement). */
   load(level: LevelData): void {
     this.level = level;

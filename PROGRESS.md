@@ -2,6 +2,8 @@
 
 ## Phase en cours
 
+**L'avant-dernier niveau** (niveau 7, « la maison de la nounou », D-107) : plan validé en 12 PR (la bascule, la maison et le miroir, l'effacement, quatre îlots de mémoire, le torchon blanc, le boss, Eden, le réveil et la phase 4). **PR 1 faite : la bascule (moteur, analyse, parcours d'essai 15)** (D-108), sur `ccr-3d597f8d-070zee`. Suite : PR 2 (le dessin des deux couches, le bouton « Basculer », l'aide), puis **essai sur téléphone** du parcours 15.
+
 **La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101, fusionnées) et **PR 6 faite : la fête engloutie** (D-102) **PR 7 faite : le rythme de la vague, parcours d'essai 14** (D-103) **PR 8 faite : la vague dans le niveau, le livre musical** (D-104) et **PR 9 faite : le court souvenir, la nuit, le couloir en boucle, la fin** (D-105), sur `ccr-014503d9-cj0c7a`. **Le niveau 6 est complet** (sa fin reste un PLACEHOLDER jusqu'au niveau 7). Suite : essais sur téléphone, puis le niveau 7. Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
 
 **Le train** (niveau 5, D-83 à D-91) : complet et fusionné. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
@@ -17,6 +19,19 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### L'avant-dernier niveau, PR 1 : la bascule (D-107, D-108)
+
+- **Plan du niveau 7 validé** (D-107) : la maison de la nounou, quatre îlots de mémoire dans un ordre libre, le torchon blanc, l'effacement, Eden, la phase 4.
+- **La bascule** (sixième capacité) : deux couches statiques par salle (`; @shift: present|memory col ligne l h`), le présent et le souvenir ; instantanée, au sol comme en l'air ; refusée avec un petit signe si la place manque (marge de 3 px) ; pression gardée 100 ms, délai 150 ms ; jamais sauvegardée (présent en changeant de salle et à la réapparition).
+- **Clavier I** (K est déjà Saut) ; action `Shift` ; le bouton tactile viendra avec la PR 2.
+- **L'analyse de faisabilité sait basculer** : au sol, en courant, en plein saut, contre un mur ; tronçons `; @leg: … shift [memory]`.
+- **Parcours d'essai 15 « Bascule »** : un mur du présent, une fosse franchie en basculant en plein saut, une cheminée aux murs de couches alternées.
+- DEBUG : case « Capacité : bascule », réglages `shift*` dans Mouvement ; une ligne dans « Mes capacités ».
+- Dessin des couches PLACEHOLDER (violet et turquoise / couleurs chaudes, contour fantôme).
+- Tests : TESTS_PR1. Vérifié dans Chromium : le parcours 15, les deux couches, le refus dans un mur, le retour au présent.
+- [ ] À vérifier sur téléphone (après la PR 2, avec le bouton) : le parcours 15. La bascule en plein saut est-elle naturelle ? Le contour fantôme suffit-il pour prévoir ? Le refus se comprend-il ?
+- [ ] La cheminée aux murs alternés : faisable sans frustration, ou trop exigeante (D-106) ?
 
 ### Retours de partie : la chevillette, le boss de la tour, des paliers (D-60, D-106)
 
