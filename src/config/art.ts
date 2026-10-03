@@ -1192,17 +1192,23 @@ export const MOON_LIGHT_RADIUS = 90;
 export const MAX_ART_SCALE = 3;
 
 /**
- * La bascule (D-107) : dessin provisoire des deux couches d'une salle. Ce qui n'existe que dans la
- * couche active est plein ; ce qui n'existe que dans l'autre reste visible en contour fantôme, pour
- * qu'on puisse prévoir. Le présent en silhouettes violet et turquoise, le souvenir aux couleurs
- * chaudes et passées des courts souvenirs. PLACEHOLDER (la PR 2 dessine les couches).
+ * La bascule (D-107) : le dessin des deux couches d'une salle. Ce qui n'existe que dans la couche
+ * active est dessiné plein ; ce qui n'existe que dans l'autre reste visible en contour fantôme, pour
+ * qu'on puisse prévoir. Dans une salle habillée, chaque couche prend sa palette (le présent : celle
+ * de la salle, en silhouettes ; le souvenir : `MEMORY_PALETTE`) ; ces couleurs servent aux contours,
+ * aux salles de tuiles (les parcours) et aux signes. PLACEHOLDER.
  */
 export const SHIFT_LAYER_VIEW = {
   present: { fill: 0x4a3470, edge: 0x3fd6c8 },
-  memory: { fill: 0xd3a985, edge: 0xf2d9b8 },
-  /** Contour fantôme de la couche inactive : épaisseur (px) et opacité. */
+  memory: { fill: 0xd3a985, edge: 0xf2c99a },
+  /** Contour fantôme de la couche inactive : épaisseur (px logiques) et opacité. */
   ghostLine: 1,
-  ghostAlpha: 0.45,
+  ghostAlpha: 0.55,
+  /** Voile très léger à l'intérieur du contour fantôme (opacité). */
+  ghostFillAlpha: 0.12,
+  /** Dans le souvenir, un voile chaud recouvre la vue (couleur, opacité). */
+  memoryVeil: 0xffc68a,
+  memoryVeilAlpha: 0.12,
   /** Refus (place manquante) : un petit cercle qui s'ouvre autour de Céleste et s'efface (ms). */
   refuseMs: 320,
   refuseRadiusPx: 14,

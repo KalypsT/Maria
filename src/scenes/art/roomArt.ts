@@ -1336,6 +1336,33 @@ export function drawRoomBackground(
 }
 
 /**
+ * Une couche de la bascule (D-107), sur fond transparent : seulement ce qui est jouable (le fond
+ * proche, la structure, les ombres de contact, les meubles) de la salle donnée, qui ne contient que
+ * cette couche. `floorY` : le sol de la salle entière (px logiques).
+ */
+export function drawRoomLayer(
+  a: ArtContext,
+  sheet: HTMLCanvasElement,
+  finish: Readonly<ArtFinish>,
+  floorY: number,
+): void {
+  drawDecor(a, 'back');
+  drawSheet(
+    a,
+    sheet,
+    finish.playShadow,
+    finish.playShadowX,
+    finish.playShadowY,
+    finish.playShadowBlur,
+    (s) => {
+      drawStructure(s, floorY);
+      drawContactShadows(s, finish.contactShadow);
+      drawDecor(s, 'furniture');
+    },
+  );
+}
+
+/**
  * Vitres et ciel transparents (D-72) : dans le monde réel, ou dehors (le ciel). Le monde étrange
  * garde ses fenêtres peintes (silhouettes).
  */

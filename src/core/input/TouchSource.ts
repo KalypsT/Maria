@@ -32,6 +32,8 @@ export class TouchSource implements InputSource {
   private readonly buttonElements = new Map<ButtonAction, HTMLElement>();
   private shownMask = 0;
   private showAbility = false;
+  private showShift = false;
+  private shiftDimmed = false;
   private shownJoystick = false;
   private shownKnobX = Number.NaN;
   private shownKnobY = Number.NaN;
@@ -75,6 +77,22 @@ export class TouchSource implements InputSource {
       this.showAbility = visible;
       this.controller.releaseAll();
       this.relayout();
+    }
+  }
+
+  /**
+   * Bouton Basculer (D-107) : affiché une fois la bascule obtenue ; pâli dans une salle sans couches
+   * (une pression y donne le petit signe du refus).
+   */
+  setShiftState(visible: boolean, dimmed: boolean): void {
+    if (visible !== this.showShift) {
+      this.showShift = visible;
+      this.controller.releaseAll();
+      this.relayout();
+    }
+    if (dimmed !== this.shiftDimmed) {
+      this.shiftDimmed = dimmed;
+      this.buttonElements.get('Shift')?.classList.toggle('dimmed', dimmed);
     }
   }
 
@@ -165,6 +183,7 @@ export class TouchSource implements InputSource {
       this.measureInsets(),
       this.settings,
       this.showAbility,
+      this.showShift,
     );
   }
 
@@ -190,6 +209,9 @@ export class TouchSource implements InputSource {
         element = document.createElement('div');
         element.className = `touch-button touch-${b.action.toLowerCase()}`;
         element.textContent = LABELS[b.action];
+        if (b.action === 'Shift') {
+          element.classList.toggle('dimmed', this.shiftDimmed);
+        }
         this.root.appendChild(element);
         this.buttonElements.set(b.action, element);
       }

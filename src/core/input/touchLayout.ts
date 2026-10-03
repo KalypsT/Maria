@@ -47,6 +47,8 @@ export function computeTouchLayout(
   settings: Readonly<ControlSettings>,
   /** Bouton Capacité affiché : une capacité à bouton est obtenue (la glissade, D-84). */
   showAbility = false,
+  /** Bouton Basculer affiché : la bascule est obtenue (D-107). */
+  showShift = false,
 ): TouchLayout {
   const m = TOUCH_METRICS;
   const margin = m.margin;
@@ -62,6 +64,7 @@ export function computeTouchLayout(
   const jumpR = m.jumpRadius * scale;
   const attackR = m.attackRadius * scale;
   const abilityR = m.abilityRadius * scale;
+  const shiftR = m.shiftRadius * scale;
   const iconR = m.iconRadius * scale;
   const buttons: TouchButtonLayout[] = [];
 
@@ -82,6 +85,11 @@ export function computeTouchLayout(
   if (enabled.Ability || showAbility) {
     const [x, y] = polar(jumpX, jumpY, jumpR + abilityR + gap, m.abilityAngleDeg);
     buttons.push({ action: 'Ability', x, y, r: abilityR });
+  }
+  if (enabled.Shift || showShift) {
+    // Sur la rangée du bas, à gauche d'Action : le pouce y glisse depuis Saut sans le toucher.
+    const [x, y] = polar(attackX, attackY, attackR + shiftR + gap, m.shiftAngleDeg);
+    buttons.push({ action: 'Shift', x, y, r: shiftR });
   }
 
   // Petites icônes en haut à gauche (le haut à droite est libre pour l'interface de debug).
