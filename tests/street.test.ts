@@ -132,10 +132,12 @@ describe('la rue (D-60)', () => {
     expect(after.exitsLocked('garden-alley', 3)).toBe(false);
   });
 
-  it('papa montre le portillon après le bonnet ; ouvert, il reste ouvert', () => {
+  it('papa montre la ficelle puis le portillon après le bonnet ; ouvert, il reste ouvert', () => {
     const dad = trigger('garden-dad-gate');
     expect(dad.when.all).toContain(F.HedgeDone);
-    expect(dad.steps.some((s) => s.do === 'thought' && s.icon === 'gate')).toBe(true);
+    const icons = dad.steps.flatMap((s) => (s.do === 'thought' ? [s.icon] : []));
+    expect(icons.indexOf('cord')).toBeGreaterThanOrEqual(0);
+    expect(icons.indexOf('cord')).toBeLessThan(icons.indexOf('gate'));
     const gate = HOUSE_STORY.props.find((p) => p.id === 'gate');
     const open = HOUSE_STORY.props.find((p) => p.id === 'gate-open');
     expect(gate?.when.none).toContain(F.GateOpen);

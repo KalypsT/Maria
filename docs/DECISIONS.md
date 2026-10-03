@@ -638,7 +638,7 @@ Retours du téléphone. L'utilisateur valide le mouvement et la difficulté pour
 - **Plan validé** : le portillon au bout de l'allée, ouvert après le bonnet par une chevillette qu'on atteint en saut mural ; la rue, un grand niveau en long, sur deux étages ; quatre lieux (aire de jeux, école, supérette, chantier, ce dernier choisi par l'utilisateur), fermés pour l'instant ; pas de croissance dans cette phase.
 - **Le portillon** : au fond de la cheminée de l'allée (entre la remise et le vieux mur), un passage sous le vieux mur mène au portillon (allée:3 ↔ rue:1). Une ficelle rouge court du portillon, sous le linteau, puis le long du mur jusqu'à une **chevillette** pendue haut dans la cheminée (« tire la chevillette… »). On ne l'atteint qu'en saut mural (testé : même au plus haut d'un saut depuis le sol, la tête n'y arrive pas), et seulement après le bonnet. Agir la tire : le portillon s'ouvre et reste ouvert (étape `garden.gate`). Fermé, il bloque la sortie avec une bulle « portillon ».
   - Le fond de la cheminée n'a plus que deux cases d'orties sur quatre (on y marche pour entrer dans le passage) ; la cheminée elle-même ne change pas.
-  - Papa, au potager, montre le portillon une fois le bonnet trouvé (étape `garden.dad-gate`, nouveau pictogramme `gate`).
+  - Papa, au potager, montre le portillon une fois le bonnet trouvé (étape `garden.dad-gate`, nouveau pictogramme `gate`). Retour de test : la bulle seule ne disait pas quoi faire ; papa montre d'abord la **ficelle rouge et sa chevillette** (pictogramme `cord`, avec une petite flèche vers le haut), puis le portillon.
 - **La rue** (`; @world: street`, 200 × 30 tuiles, PLACEHOLDER, de jour) :
   - **trottoir facile** (testé) : poubelles, voitures garées, banc, abribus, cagettes ; deux lanternes (près du portillon, sous l'abribus) ;
   - **au-dessus, plus difficile** : rebords des fenêtres et corniche de l'école, lampadaires, store, enseigne et toit de la supérette, échafaudage du chantier ; deux trouvailles (toit de l'école, haut de l'échafaudage), **moyennes exactement** (testé : impossibles par des passages faciles) ;
@@ -1338,6 +1338,20 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Debug** : histoires « le livre musical trouvé, la nuit au dortoir » et « la fin de la station balnéaire (la porte du couloir) ».
 - **Tests** (`seaNight.test.ts`) : le court souvenir et sa place, la nuit au dortoir, la porte du dortoir (seul passage vers le couloir), l'anneau des cinq couloirs (tuiles identiques, décors tous différents), la porte du dernier tour et la fin, on rejoint toujours la porte.
 - **Sauvegarde** : aucune migration (étape `sea.end`) ; aucune lanterne ni trouvaille déplacée.
+
+## D-106 — Retours de partie : le boss de la tour visible, des paliers dans trois cheminées
+
+- **Le boss de la tour ne se voyait jamais** (retour de l'utilisateur : « jamais vu le boss ») : la poursuite marchait (testé en simulation et dans le jeu), mais la vue montre environ 7 tuiles sous Céleste (`; @camera: up`), il part 9 tuiles sous ses pieds (sous le sol à l'arrivée) et ne rattrape qu'au-delà de 12 tuiles : un joueur correct le garde toujours sous le bas de l'écran. Choix de l'utilisateur, **visuel seulement, difficulté inchangée** :
+  - **il dépasse au bas de l'écran** quand il est dessous : sa crête, son liseré turquoise et la casquette, à `CHASE_VIEW.peekPx` (10 px) du bas, plus pâle quand il est loin (jusqu'à `peekMinAlpha` à `peekFadeTiles` tuiles) ; la collision reste celle du vrai front ;
+  - **il se met en marche avec une secousse** (nouvel événement `ChaseEvent.Wake`, à la fin de l'attente du départ ou d'une réapparition ; poursuite vers le haut seulement, le chariot du train ne change pas).
+  - Réglages `CHASE_VIEW` dans `src/config/art.ts`, PROVISOIRES.
+- **Cheminées à saut mural trop exigeantes** (retour : « timing trop serré, précision quasi parfaite ; j'aime la difficulté mais c'est frustrant ») : les plus larges, au seuil « moyen ». Choix de l'utilisateur : **des paliers de repos**, sans toucher à la largeur ni à la physique. Une planche traversable de 2 cases contre le mur de gauche, à mi-hauteur : une erreur ne fait plus tout recommencer, chaque moitié demande toujours le saut mural.
+  - Jardin renversé (cheminée de 4, entre les tuteurs) : une branche, ligne 13 ;
+  - Objets perdus (monde étrange de la gare, cheminée de 5) : une valise qui flotte, ligne 15 ;
+  - Objets trouvés (gare, cheminée de 5 entre l'armoire et les casiers) : une étagère à chapeau (`hatshelf`, un chapeau oublié), ligne 19.
+  - Si ce n'est pas assez, l'étape suivante proposée : resserrer ces cheminées d'une case.
+- **Tests** : `chase.test.ts` (le réveil, une fois au départ, une fois à la réapparition) ; les difficultés exactes des trois salles et les tests de ces salles sont inchangés.
+- **Sauvegarde** : aucune migration.
 
 ## Risques identifiés à suivre
 

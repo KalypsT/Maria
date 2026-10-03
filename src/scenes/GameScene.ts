@@ -22,6 +22,7 @@ import {
   type MovementParams,
 } from '../config/movement';
 import { CameraController } from '../core/camera/CameraController';
+import { ChaseEvent } from '../core/boss/Chase';
 import { CombatWorld, wavesOf } from '../core/combat/CombatWorld';
 import { FixedStepClock } from '../core/FixedStepClock';
 import { InputController } from '../core/input/InputController';
@@ -94,6 +95,7 @@ import {
   REAL_PALETTE,
   STRANGE_PALETTE,
   TRAIN_RIDE,
+  CHASE_VIEW,
 } from '../config/art';
 import { STORY_TIMING, StoryFlag } from '../config/story';
 import { PropStage } from '../core/story/PropStage';
@@ -676,6 +678,10 @@ export class GameScene extends Phaser.Scene {
       }
       this.player.step(input);
       combat.step(this.player, action && !near && !locked);
+      const chase = combat.chase;
+      if (chase && !chase.horizontal && (chase.events & ChaseEvent.Wake) !== 0) {
+        this.fx.shake(CHASE_VIEW.wakeShakeMs, CHASE_VIEW.wakeShakeStrength);
+      }
       if (combat.events !== 0) {
         this.combatView.onEvents(combat.events);
       }
@@ -747,7 +753,7 @@ export class GameScene extends Phaser.Scene {
       camera.viewHeight,
       this.cameras.main.zoom,
     );
-    this.chaseView.render();
+    this.chaseView.render(camera.prevY + (camera.y - camera.prevY) * alpha + camera.viewHeight / 2);
     this.storyView.render(this.puppet.x, this.puppet.y, box.height);
     this.worldView.render();
     this.dust.update();

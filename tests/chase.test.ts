@@ -67,6 +67,28 @@ describe('poursuite verticale (boss, D-67, D-70)', () => {
     expect(y0 - chase.front).toBeCloseTo(2.8 * T, 3);
   });
 
+  it('il se met en marche une seule fois, à la fin de l’attente (réveil)', () => {
+    const chase = new Chase(need(course().chase, 'poursuite'), P, HZ);
+    const delaySteps = (P.chaseStartDelayMs / 1000) * HZ;
+    const wakes: number[] = [];
+    for (let s = 0; s < delaySteps * 2; s++) {
+      chase.step(box(40, 98 * T), false);
+      if (chase.events & ChaseEvent.Wake) {
+        wakes.push(s);
+      }
+    }
+    // Le premier pas compte dans l'attente : il se réveille au dernier pas d'attente.
+    expect(wakes).toEqual([delaySteps - 1]);
+    // Une réapparition : il attend puis se réveille de nouveau.
+    chase.restart();
+    let woke = 0;
+    for (let s = 0; s <= delaySteps; s++) {
+      chase.step(box(40, 98 * T), false);
+      woke += chase.events & ChaseEvent.Wake ? 1 : 0;
+    }
+    expect(woke).toBe(1);
+  });
+
   it('trop loin, il accélère peu à peu, sans jamais sauter (rattrapage doux)', () => {
     const chase = new Chase(need(course().chase, 'poursuite'), P, HZ);
     for (let s = 0; s <= (P.chaseStartDelayMs / 1000) * HZ; s++) {
