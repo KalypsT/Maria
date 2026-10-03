@@ -20,6 +20,13 @@
 
 ## Fait
 
+### Les boss ne reculent jamais (D-120)
+
+- Retour d'essai : les boss (la tour, la vague) reculaient parfois. Le front d'une poursuite **ne recule plus jamais en jeu** : au toucher (il redescendait jusqu'à Céleste tombée plus bas), au croc-en-jambe, au reflux de la vague (elle reste sur place) et à la fin (il ne redescend plus : il monte ou avance jusqu'à la ligne d'arrivée, sous la dernière plateforme ou contre la digue, et s'arrête). Seule la réapparition à une veilleuse le replace.
+- La vague de la station balnéaire : 13 → 12,5 tuiles/s (sans le recul du reflux, la marge du dernier tronçon était trop faible). La tour et le train de la vaisselle gardent leur vitesse (tests de rythme verts).
+- [ ] À vérifier sur téléphone : la tour, le train de la vaisselle, la vague : difficiles mais faisables ? L'arrêt à la fin se voit-il bien ?
+- [ ] La cage d'escalier (l'effacement, niveau 7) suit la même règle : pas encore essayée.
+
 ### L'avant-dernier niveau, PR 12 : le réveil, le train du retour, la phase 4 (D-119)
 
 - Après Eden : **le réveil au dortoir à l'aube** ; **le train du retour** (une courte scène, la mer à la fenêtre) ; **quelques mois plus tard**, chez elle : Céleste a encore grandi (**phase 4** : plus grande à l'écran, course un peu plus rapide ; la hitbox reste celle de la phase 3, le grenier l'exige), la toise a un quatrième trait.

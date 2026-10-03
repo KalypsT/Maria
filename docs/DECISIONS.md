@@ -1664,3 +1664,15 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Debug** : histoire « quelques mois plus tard, phase 4 ».
 - **Vérifié dans Chromium** : d'Eden au dortoir de jour, le train qui roule devant la mer, la chambre et la bulle « ? ».
 - **Sauvegarde** : aucune migration (deux étapes en fin de liste ; la phase se déduit des étapes, D-43).
+
+## D-120 — Les boss ne reculent jamais (poursuites)
+
+- **Demande de l'utilisateur** (après essai du boss de la tour et de la vague) : « parfois ils reviennent en arrière » ; les boss sont des épreuves, ils doivent avancer sans retour en arrière jusqu'à la fin et s'y arrêter, la difficulté venant seulement de leur vitesse.
+- **Le front ne recule plus jamais en jeu** (`src/core/boss/Chase.ts`) ; seule une réapparition à une veilleuse le replace derrière Céleste (comme avant). Quatre reculs supprimés :
+  - **le toucher** : il s'arrête un instant (`chaseContactPauseMs`) sans reculer ; avant, il reculait de 3 tuiles, et **redescendait jusqu'à Céleste si elle était tombée plus bas** (la cause la plus visible du « retour en arrière »). Tombée dans la masse, elle est repoussée vers le haut (ou en avant) et la peur monte : au bout de trois contacts, la veilleuse. `chaseContactRecoilTiles` est retiré ;
+  - **le croc-en-jambe** : il trébuche et s'arrête (`chaseTripPauseMs`), sans reculer. `; @chase-trip: col ligne l h` perd son cinquième nombre (le recul) ;
+  - **le reflux de la vague** (D-103) : elle reste sur place pendant `backwashMs` au lieu de reculer (la crête se retire toujours à l'image). `backwashSpeed` est retiré ;
+  - **la fin** : la ligne d'arrivée franchie, il ne redescend plus ; il finit sa course jusqu'à la ligne d'arrivée (à la vitesse de la dernière phase), au plus près à une tuile derrière Céleste, et s'immobilise. Ni contact ni rattrapage après la fin. Pour la tour, il s'arrête sous la dernière plateforme ; pour la vague, contre la digue.
+- **Vitesses** : la tour (2,8 tuiles/s) et le train de la vaisselle (7) passent tels quels leurs tests de rythme (le joueur parfait devance le boss de plus de 2 tuiles depuis chaque veilleuse ; un joueur 50 % plus lent est rattrapé). **La vague de la station balnéaire passe de 13 à 12,5 tuiles/s** : à 13, sans le recul du reflux, la marge du dernier tronçon tombait à 1,2 tuile ; à 12,5 elle est de 2,8 à 3,6 tuiles par tronçon, et un joueur 50 % plus lent est rattrapé sur chaque tronçon. Le parcours d'essai 14 garde 13.
+- **Non concerné** : l'effacement de la salle de jeux (D-117) qui « recule » après chaque objet rallumé (une récompense, pas une poursuite) ; la cage d'escalier (une poursuite) suit la nouvelle règle.
+- **Sauvegarde** : aucune migration.

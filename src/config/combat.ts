@@ -85,9 +85,8 @@ export interface CombatParams {
   chaseCatchUpMaxSpeed: number;
   /** À la réapparition, il repart à cette distance derrière Céleste (sous ses pieds, ou dans son dos ; tuiles). */
   chaseRestartGapTiles: number;
-  /** Contact : Céleste rebondit vers le haut (px/s), il recule (tuiles) et s'arrête (ms). */
+  /** Contact : Céleste rebondit vers le haut (px/s), il s'arrête (ms) sans reculer (D-120). */
   chaseContactBounceY: number;
-  chaseContactRecoilTiles: number;
   chaseContactPauseMs: number;
   /**
    * Contact d'une poursuite horizontale (D-87) : Céleste est poussée en avant, dans le sens de la
@@ -105,13 +104,12 @@ export interface CombatParams {
   chaseTripPauseMs: number;
   /**
    * Le rythme de la vague (D-103), une poursuite à l'allure de vague (`; @chase-look: wave`) : elle
-   * déferle pendant `surgeMs` (à la vitesse de la salle), puis se retire pendant `backwashMs` en
-   * reculant de `backwashSpeed` tuiles/s ; et ainsi de suite. Le reflux laisse le temps de monter
-   * une cheminée. Ni le rattrapage doux ni le contact ne jouent pendant le reflux.
+   * déferle pendant `surgeMs` (à la vitesse de la salle), puis reste sur place pendant `backwashMs`
+   * (le reflux, sans recul, D-120) ; et ainsi de suite. Le reflux laisse le temps de monter une
+   * cheminée. Ni le rattrapage doux ni le contact ne jouent pendant le reflux.
    */
   surgeMs: number;
   backwashMs: number;
-  backwashSpeed: number;
   /**
    * L'effacement (D-111) : une plateforme qui va quitter une couche blanchit pendant `eraseWarnMs`,
    * puis s'efface. Les vagues se suivent toutes les `eraseWaveMs` (divisé par `eraseSpeedScale`,
@@ -210,7 +208,6 @@ export const DEFAULT_COMBAT: Readonly<CombatParams> = {
   chaseCatchUpMaxSpeed: 6,
   chaseRestartGapTiles: 9,
   chaseContactBounceY: 420,
-  chaseContactRecoilTiles: 3,
   chaseContactPauseMs: 1200,
   chaseContactPushX: 220,
   chaseContactHopY: 240,
@@ -219,7 +216,6 @@ export const DEFAULT_COMBAT: Readonly<CombatParams> = {
   chaseTripPauseMs: 2500,
   surgeMs: 2000,
   backwashMs: 1500,
-  backwashSpeed: 3,
   eraseWarnMs: 1200,
   eraseWaveMs: 4000,
   eraseSpeedScale: 1,
@@ -287,7 +283,6 @@ export const COMBAT_PARAM_RANGES: Readonly<
   chaseCatchUpMaxSpeed: { min: 1, max: 15, step: 0.5 },
   chaseRestartGapTiles: { min: 2, max: 30, step: 1 },
   chaseContactBounceY: { min: 100, max: 800, step: 10 },
-  chaseContactRecoilTiles: { min: 0, max: 10, step: 0.5 },
   chaseContactPauseMs: { min: 0, max: 5000, step: 100 },
   chaseContactPushX: { min: 0, max: 500, step: 10 },
   chaseContactHopY: { min: 0, max: 600, step: 10 },
@@ -300,7 +295,6 @@ export const COMBAT_PARAM_RANGES: Readonly<
   eraseWaveMs: { min: 1000, max: 12000, step: 100 },
   eraseSpeedScale: { min: 0.3, max: 3, step: 0.05 },
   eraseLeadTiles: { min: 0, max: 20, step: 0.5 },
-  backwashSpeed: { min: 0, max: 10, step: 0.5 },
   tunnelPeriodMs: { min: 3000, max: 30000, step: 500 },
   tunnelWarnMs: { min: 500, max: 6000, step: 100 },
   tunnelPassMs: { min: 300, max: 6000, step: 100 },

@@ -80,11 +80,11 @@ const TRAIN = /^(\d+)\s+(left|right)$/;
 /**
  * Poursuite (D-67, D-87) : `; @chase: 4` (vers le haut, ligne d'arrivée) ou `; @chase: right 140`
  * (sens, ligne ou colonne d'arrivée), `; @chase-phase: 40 1.5` (jusqu'à la ligne ou la colonne,
- * tuiles/s), `; @chase-trip: col ligne l h recul`, `; @chase-look: wave` (la vague, D-103).
+ * tuiles/s), `; @chase-trip: col ligne l h`, `; @chase-look: wave` (la vague, D-103).
  */
 const CHASE_END = /^(?:(up|right|left)\s+)?(\d+)$/;
 const CHASE_PHASE = /^(\d+)\s+(\d+(?:\.\d+)?)$/;
-const CHASE_TRIP = /^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+(?:\.\d+)?)$/;
+const CHASE_TRIP = /^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
 /**
  * Marée (D-95) : `; @tide: 26 18` (première ligne d'eau à marée basse, puis à marée haute) ;
  * `; @sea: col ligne l h` (répétable) : là où monte la mer ; `; @rise: col ligne l h` (répétable) :
@@ -143,8 +143,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   let chaseDir = 'up' as ChaseDir;
   let chaseLook = 'default' as ChaseLook;
   const chasePhases: { until: number; speed: number }[] = [];
-  const chaseTrips: { col: number; row: number; width: number; height: number; recoil: number }[] =
-    [];
+  const chaseTrips: { col: number; row: number; width: number; height: number }[] = [];
   let tideRows = null as { low: number; high: number } | null;
   const seas: TileRect[] = [];
   const rises: TileRect[] = [];
@@ -308,13 +307,12 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         if (!c) {
           throw bad();
         }
-        const [col, row, width, height, recoil] = c.slice(1, 6).map(Number);
+        const [col, row, width, height] = c.slice(1, 5).map(Number);
         chaseTrips.push({
           col: col ?? 0,
           row: row ?? 0,
           width: width ?? 0,
           height: height ?? 0,
-          recoil: recoil ?? 0,
         });
       } else {
         throw bad();

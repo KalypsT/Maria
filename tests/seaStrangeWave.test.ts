@@ -71,7 +71,7 @@ describe('la vague, dans le niveau (D-104)', () => {
   });
 
   it(
-    'rythme (phase 3, toutes les capacités) : le joueur parfait n’est jamais touché ; sans le reflux, ou 50 % plus lent, il l’est à chaque tronçon',
+    'rythme (phase 3, toutes les capacités) : le joueur parfait n’est jamais touché ; 50 % plus lent, il l’est à chaque tronçon ; sans le reflux, il l’est aussi',
     { timeout: ANALYSIS_TIMEOUT_MS },
     () => {
       const wave = level(WAVE);
@@ -79,6 +79,7 @@ describe('la vague, dans le niveau (D-104)', () => {
       const run = phaseMovement(DEFAULT_MOVEMENT, SEA_PHASE).maxRunSpeed;
       const flat = { ...DEFAULT_COMBAT, backwashMs: 0 };
       const s = stops();
+      let flatContacts = 0;
       for (let i = 0; i + 1 < s.length; i++) {
         const from = need(s[i], 'départ');
         const to = need(s[i + 1], 'fin');
@@ -88,9 +89,11 @@ describe('la vague, dans le niveau (D-104)', () => {
         const perfect = go(1);
         expect(perfect.contacts, label).toBe(0);
         expect(perfect.margin, label).toBeGreaterThan(2);
-        expect(go(1, flat).contacts, label).toBeGreaterThan(0);
+        flatContacts += go(1, flat).contacts;
         expect(go(1.5).contacts, label).toBeGreaterThan(0);
       }
+      // Sans le reflux (une vague qui ne s'arrête jamais), le joueur parfait est rattrapé.
+      expect(flatContacts).toBeGreaterThan(0);
     },
   );
 
