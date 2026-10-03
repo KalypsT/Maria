@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**L'avant-dernier niveau** (niveau 7, « la maison de la nounou », D-107) : plan validé en 12 PR (la bascule, la maison et le miroir, l'effacement, quatre îlots de mémoire, le torchon blanc, le boss, Eden, le réveil et la phase 4). **PR 1 faite : la bascule (moteur, analyse, parcours d'essai 15)** (D-108) , **PR 2 faite : le dessin des deux couches, le bouton « Basculer », l'aide** (D-109), **PR 3 faite : la porte du couloir, l'entrée et le miroir, la maison, la carte** (D-110) **PR 4 faite : l'effacement (le système) et le parcours d'essai 16** (D-111, fusionnées) et **PR 5 faite : l'îlot 1, la chambre d'autrefois et le jardin renversé (Roger)** (D-112), sur `ccr-3d597f8d-070zee`. Suite : les îlots 2 à 4 (PR 6 à 8) ; **essai sur téléphone** (parcours 15 et 16, l'entrée, la maison, l'îlot 1).
+**L'avant-dernier niveau** (niveau 7, « la maison de la nounou », D-107) : plan validé en 12 PR (la bascule, la maison et le miroir, l'effacement, quatre îlots de mémoire, le torchon blanc, le boss, Eden, le réveil et la phase 4). **PR 1 faite : la bascule (moteur, analyse, parcours d'essai 15)** (D-108) , **PR 2 faite : le dessin des deux couches, le bouton « Basculer », l'aide** (D-109), **PR 3 faite : la porte du couloir, l'entrée et le miroir, la maison, la carte** (D-110) **PR 4 faite : l'effacement (le système) et le parcours d'essai 16** (D-111, fusionnées), **PR 5 faite : l'îlot 1, la chambre d'autrefois et le jardin renversé (Roger)** (D-112) et **PR 6 faite : l'îlot 2, l'école et la rue d'autrefois (la boîte à formes)** (D-113), sur `ccr-3d597f8d-070zee`. Suite : les îlots 3 et 4 (PR 7 et 8) ; **essai sur téléphone** (parcours 15 et 16, l'entrée, la maison, les îlots 1 et 2).
 
 **La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101, fusionnées) et **PR 6 faite : la fête engloutie** (D-102) **PR 7 faite : le rythme de la vague, parcours d'essai 14** (D-103) **PR 8 faite : la vague dans le niveau, le livre musical** (D-104) et **PR 9 faite : le court souvenir, la nuit, le couloir en boucle, la fin** (D-105), sur `ccr-014503d9-cj0c7a`. **Le niveau 6 est complet** (sa fin reste un PLACEHOLDER jusqu'au niveau 7). Suite : essais sur téléphone, puis le niveau 7. Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
 
@@ -19,6 +19,17 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### L'avant-dernier niveau, PR 6 : l'îlot 2, l'école et la rue d'autrefois (D-113)
+
+- **En haut de la grande bibliothèque**, une porte (Agir) mène à **l'école d'autrefois** : les casiers, puis de longs planés au-dessus de la classe, coupés par des **rideaux de ronces d'une seule couche, deux à deux** (on bascule en plein vol entre les deux). Défi : la cheminée des montants et deux rideaux (une trouvaille) ; dans un casier, ouvert dans le souvenir, une trouvaille.
+- **La rue d'autrefois** : on plane d'auvent en auvent, chaque auvent d'une seule couche ; au bout, sur l'abribus, **la boîte à formes** (un cœur). Défi : le rebord du lampadaire (une trouvaille).
+- Après la boîte à formes : **une porte vers la maison** et **une vers la chambre d'autrefois** (l'îlot voisin), **une veilleuse jaune** sur la porte de la sieste.
+- Les meubles repris de l'école et de la rue ont maintenant une version en silhouette dans un monde étrange.
+- DEBUG → Histoire : « les îlots de la chambre et de l'école faits ».
+- Tests : TESTS_PR6. Vérifié dans Chromium : la porte de la bibliothèque, l'école et la rue dans les deux couches, la boîte à formes, les deux portes (maison, chambre), la veilleuse jaune.
+- [ ] À vérifier sur téléphone : comprend-on qu'il faut Agir en haut de la bibliothèque (la porte) ? Basculer entre deux rideaux en planant est-il agréable, ou trop exigeant au pouce ?
+- [ ] Les auvents d'une seule couche se voient-ils assez en contour fantôme pendant le vol ?
 
 ### L'avant-dernier niveau, PR 5 : l'îlot 1, la chambre d'autrefois et le jardin renversé (D-112)
 

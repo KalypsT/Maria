@@ -262,6 +262,22 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
         ctx.fill();
       }
     },
+    schoolgate(a, r) {
+      // Le raccourci de l'îlot 2 (D-113) : la même petite arche, l'horloge ronde de l'école dessus.
+      arch(a, r);
+      const { ctx } = a;
+      const cx = r.x + r.w / 2;
+      const cy = r.y + r.h * 0.5;
+      ctx.strokeStyle = GLOW_SOFT;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r.w * 0.2, 0, Math.PI * 2);
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx, cy - r.w * 0.13);
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + r.w * 0.09, cy);
+      ctx.stroke();
+    },
     cantower(a, r) {
       // L'arrosoir de papa (D-49), géant, debout cette fois (D-112) : son corps est la collision ;
       // l'anse dessinée sur le haut, le bec qui part vers la droite, des bandes. On passe dessous.

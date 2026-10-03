@@ -78,8 +78,13 @@ describe('la maison de la nounou : l’entrée, le miroir, la maison (D-110)', (
 
   it('aucun personnage réel dans la maison de la nounou, ni Maria', () => {
     const kinds = HOUSE_STORY.props.filter((p) => ROOMS.includes(p.room)).map((p) => p.kind);
-    // La veilleuse de l'îlot 1 sur la porte de la sieste (D-112) est un objet.
-    expect(kinds.sort()).toEqual(['nap-light-bed', 'reflection', 'reflection-through']);
+    // Les veilleuses des îlots sur la porte de la sieste (D-112, D-113) sont des objets.
+    expect(kinds.sort()).toEqual([
+      'nap-light-bed',
+      'nap-light-school',
+      'reflection',
+      'reflection-through',
+    ]);
   });
 
   it('le miroir : sa vitre n’existe que dans le présent ; dans le souvenir, le cadre est vide', () => {

@@ -22,6 +22,8 @@ const HOUSE_ARRIVAL = { col: 1, row: 34, w: 6, h: 3 };
 export const ISLET_ROGER = { col: 20, row: 6 };
 /** La porte près de Roger, et celle de la maison où elle mène (le raccourci de l'îlot 1). */
 const BED_DOOR = { col: 24, row: 6 };
+/** La boîte à formes (D-113), sur l'abribus de la rue d'autrefois (îlot 2). */
+export const ISLET_SHAPE_BOX = { col: 76, row: 19 };
 /**
  * Les veilleuses de la porte de la sieste (D-107, D-110), une par îlot, dans l'ordre des îlots :
  * la tuile où chacune est posée (dessinée par `napdoor`, allumée par l'objet de l'îlot).
@@ -108,6 +110,32 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
+    // L'îlot 2 (D-113) : sur l'abribus de la rue d'autrefois, la boîte à formes (D-64). On la
+    // regarde (elle n'a pas de court souvenir : un cœur). Les deux passages près d'elle s'ouvrent,
+    // vers la maison et vers la chambre d'autrefois ; une veilleuse s'allume sur la porte de la
+    // sieste.
+    id: 'nanny-shape-box',
+    room: 'nanny-street',
+    on: 'interact',
+    area: { col: ISLET_SHAPE_BOX.col - 2, row: ISLET_SHAPE_BOX.row - 2, w: 5, h: 3 },
+    mark: { col: ISLET_SHAPE_BOX.col, row: ISLET_SHAPE_BOX.row - 3 },
+    when: { all: [F.NannyHouse], none: [F.NannySchoolDone] },
+    lock: true,
+    steps: [
+      {
+        do: 'sparkle',
+        area: { col: ISLET_SHAPE_BOX.col - 1, row: ISLET_SHAPE_BOX.row - 2, w: 3, h: 3 },
+        ms: S.cradleSparkleMs + 600,
+      },
+      { do: 'wait', ms: S.cradleSparkleMs },
+      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs },
+      { do: 'flag', id: F.NannySchoolDone },
+      { do: 'sparkle', area: { col: 71, row: 15, w: 10, h: 5 }, ms: S.lookMs },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
+  {
     // Dans la maison (D-110) : tout est immense. Céleste regarde ; le reflet n'est plus là.
     id: 'nanny-house',
     room: 'nanny-house',
@@ -134,6 +162,22 @@ const PROPS: StoryData['props'] = [
     kind: 'nap-light-bed',
     ...NAP_LIGHTS[0],
     when: { all: [F.NannyBedDone] },
+  },
+  // La boîte à formes (D-113), sur l'abribus : elle y reste.
+  {
+    id: 'nanny-shape-box',
+    room: 'nanny-street',
+    kind: 'shape-box',
+    ...ISLET_SHAPE_BOX,
+    when: {},
+  },
+  // La veilleuse de l'îlot 2, jaune, une fois la boîte à formes retrouvée.
+  {
+    id: 'nap-light-school',
+    room: 'nanny-house',
+    kind: 'nap-light-school',
+    ...NAP_LIGHTS[1],
+    when: { all: [F.NannySchoolDone] },
   },
   // Le reflet (D-110) : Céleste toute petite dans la vitre du miroir, puis de l'autre côté.
   {
@@ -169,12 +213,18 @@ const OMENS: StoryData['omens'] = [
 ];
 
 /**
- * Le raccourci de l'îlot 1 (D-112) : la porte près de Roger et celle de la maison n'existent qu'une
- * fois Roger retrouvé (avant, rien ne les montre : on ne coupe pas l'îlot).
+ * Les raccourcis des îlots (D-112, D-113) : les portes près de l'objet d'un îlot et celles où elles
+ * mènent n'existent qu'une fois l'objet retrouvé (avant, rien ne les montre : on ne coupe pas
+ * l'îlot).
  */
 const LOCKED: StoryData['lockedRooms'] = [
   { room: 'nanny-garden', exit: 2, when: { none: [F.NannyBedDone] }, hidden: true },
   { room: 'nanny-house', exit: 3, when: { none: [F.NannyBedDone] }, hidden: true },
+  // Ceux de l'îlot 2 (D-113), près de la boîte à formes : vers la maison et vers l'îlot 1.
+  { room: 'nanny-street', exit: 2, when: { none: [F.NannySchoolDone] }, hidden: true },
+  { room: 'nanny-house', exit: 4, when: { none: [F.NannySchoolDone] }, hidden: true },
+  { room: 'nanny-street', exit: 3, when: { none: [F.NannySchoolDone] }, hidden: true },
+  { room: 'nanny-bed', exit: 3, when: { none: [F.NannySchoolDone] }, hidden: true },
 ];
 
 /** Morceaux de l'histoire de la maison de la nounou, ajoutés à ceux de la maison (`HOUSE_STORY`). */

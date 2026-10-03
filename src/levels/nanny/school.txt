@@ -1,0 +1,74 @@
+; L'avant-dernier niveau (D-107, D-113), îlot de mémoire 2 : l'école d'autrefois, démesurée. On
+; arrive par le haut de la grande bibliothèque de la maison. On monte les casiers jusqu'à l'envol,
+; puis on plane au-dessus de la classe : des rideaux de ronces d'une seule couche, deux à deux ; on
+; bascule en plein vol entre les deux. La table du milieu, puis l'estrade du tableau. Défi : la
+; cheminée des deux montants, puis deux rideaux, jusqu'à l'étagère de la trouvaille. Dans un
+; casier, ouvert dans le souvenir, une trouvaille. Sorties : (1) vers la maison (la bibliothèque),
+; (2) vers la rue.
+; @name: L'école d'autrefois
+; @world: strange
+; @mapped: yes
+; @music: strange
+; @difficulty: medium
+; @ambient: #1b1c2e
+; @shift: present 9 29 5 2
+; @shift: present 23 1 1 16
+; @shift: memory 26 1 1 16
+; @shift: memory 50 1 1 20
+; @shift: present 53 1 1 20
+; @shift: present 78 1 1 9
+; @shift: memory 76 1 1 9
+; @leg: 2,30 3,8 easy
+; @leg: 3,8 39,14 medium umbrella shift
+; @leg: 39,14 90,19 easy umbrella shift
+; @leg: 90,19 71,4 hard shift
+; @leg: 2,30 10,30 easy shift
+; @decor: chalkboard 62 8 6 9
+; @decor: cubbytop 8 27 6 1
+; @decor: bookstack 8 28 6 3
+; @decor: shelf 1 23 6 1
+; @decor: shelf 7 19 6 1
+; @decor: shelf 10 15 5 1
+; @decor: shelf 9 12 6 1
+; @decor: bookstack 1 9 8 2
+; @decor: kidtable 36 15 7 2
+; @decor: tabletop 60 20 35 11
+; @decor: giantstake 80 8 1 9
+; @decor: giantstake 85 6 1 11
+; @decor: giantstake 70 1 1 12
+; @decor: shelf 71 5 2 1
+; Légende : # mur/sol, b bois (plein), - étagère et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S trouvaille, 1-9 sorties.
+################################################################################################
+#......................!..!.......................!..!................b.....!.!................#
+#......................!..!.......................!..!................b.....!.!................#
+#......................!..!.......................!..!................b.....!.!................#
+#......................!..!.......................!..!................bS....!.!................#
+#......................!..!.......................!..!................bbb...!.!................#
+#......................!..!.......................!..!................b.....!.!......b.........#
+#......................!..!.......................!..!................b.....!.!......b.........#
+#..C...................!..!.......................!..!................b.....!.!.b....b.........#
+#bbbbbbbb..............!..!.......................!..!................b.....!.!.b....b.........#
+#bbbbbbbb..............!..!.......................!..!................b.........b....b.........#
+#......................!..!.......................!..!................b.........b....b.........#
+#........------........!..!.......................!..!................b.........b....b.........#
+#......................!..!.......................!..!..........................b....b.........#
+#......................!..!............C..........!..!..........................b....b.........#
+#.........-----........!..!.........bbbbbbb.......!..!..........................b....b.........#
+#......................!..!.........bbbbbbb.......!..!..........................b....b.........#
+#.................................................!..!.........................................#
+#.................................................!..!.........................................2
+#......------.....................................!..!....................................C....2
+#.................................................!..!......bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#...........................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#...........................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#------.....................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#...........................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#...........................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#...........................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#.......bbbbbb..............................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#.......bbbbbb..............................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+1.......bbbbbb..............................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+1.P.....bbSbbb..............................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+################################################################################################
+################################################################################################
+################################################################################################

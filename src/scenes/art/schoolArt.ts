@@ -281,6 +281,11 @@ export function schoolDrawers({ tileShape }: ShapeTools): Record<string, Drawer>
     kidtable(a, r) {
       const { ctx } = a;
       // Petite table de la classe des petits, et une petite chaise à côté.
+      if (a.palette.silhouettes) {
+        // Dans un monde étrange (D-113) : la silhouette.
+        tileShape(a, r, a.palette.wood, a.palette.woodLight);
+        return;
+      }
       tileShape(a, r, '#f2c14e', '#f6d77a');
       ctx.fillStyle = '#6d86c2';
       ctx.fillRect(r.x + r.w + 2, r.y + T - 2, 8, 3);
