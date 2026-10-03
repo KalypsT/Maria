@@ -16,5 +16,7 @@ export const KEY_BINDINGS = {
     Interact: ['KeyE'],
     Pause: ['Escape', 'KeyP'],
     Map: ['KeyM', 'Tab'],
+    // La bascule (D-107) : I, au-dessus de J, K, L (K est déjà Saut).
+    Shift: ['KeyI'],
   } satisfies Record<ButtonAction, string[]>,
 } as const;

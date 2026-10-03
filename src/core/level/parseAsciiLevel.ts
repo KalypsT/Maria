@@ -10,12 +10,14 @@ import {
   type LevelDoor,
   type LevelEntity,
   type LevelExit,
+  type LevelLayers,
   type LevelLeg,
   type LevelTide,
   type LevelTrain,
   type TilePos,
   type TileRect,
 } from './LevelData';
+import { buildLayers, checkLayers, presentOf } from './layers';
 import { buildTide, checkTide } from './tide';
 import { TILE_SIZE } from '../../config/display';
 
@@ -90,7 +92,18 @@ const RECT = /^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
  * d'arrivée, difficulté exacte, capacités exigées, marée haute ; basse par défaut).
  */
 const LEG = /^(\d+),(\d+)\s+(\d+),(\d+)\s+(easy|medium|hard)((?:\s+[a-z-]+)*)$/;
-const LEG_NEEDS: ReadonlySet<string> = new Set(['climb', 'wall-jump', 'umbrella', 'hook', 'slide']);
+const LEG_NEEDS: ReadonlySet<string> = new Set([
+  'climb',
+  'wall-jump',
+  'umbrella',
+  'hook',
+  'slide',
+  'shift',
+]);
+/** Mots d'un tronçon qui ne sont pas des capacités : la marée, la couche de départ (D-107). */
+const LEG_STATES: ReadonlySet<string> = new Set(['high', 'low', 'memory', 'present']);
+/** Zone d'une seule couche (D-107), répétable : `; @shift: memory 10 4 6 2`. */
+const SHIFT = /^(present|memory)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
 
 /**
  * Convertit une carte ASCII (décision D-06) en `LevelData`.
@@ -122,6 +135,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   const rises: TileRect[] = [];
   const legs: LevelLeg[] = [];
   const sweeps: TileRect[] = [];
+  const shiftZones: { present: TileRect[]; memory: TileRect[] } = { present: [], memory: [] };
   text.split('\n').forEach((raw, index) => {
     const line = raw.replace(/\r$/, '').trimEnd();
     if (!line.startsWith(COMMENT)) {
@@ -186,16 +200,27 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
       }
       const [col = 0, row = 0, w = 0, h = 0] = r.slice(1, 5).map(Number);
       (match[1] === 'sea' ? seas : rises).push({ col, row, width: w, height: h });
+    } else if (match?.[1] === 'shift' && match[2] !== undefined) {
+      const z = SHIFT.exec(match[2].trim());
+      if (!z) {
+        throw new Error(
+          `Niveau ${id}, ligne ${index + 1} : @shift attend « present|memory col ligne l h »`,
+        );
+      }
+      const [col = 0, row = 0, w = 0, h = 0] = z.slice(2, 6).map(Number);
+      shiftZones[z[1] === 'memory' ? 'memory' : 'present'].push({ col, row, width: w, height: h });
     } else if (match?.[1] === 'leg' && match[2] !== undefined) {
       const l = LEG.exec(match[2].trim());
       const words = (l?.[6] ?? '')
         .trim()
         .split(/\s+/)
         .filter((w) => w !== '');
-      const needs = words.filter((w) => w !== 'high' && w !== 'low');
-      if (!l || needs.some((w) => !LEG_NEEDS.has(w)) || words.length - needs.length > 1) {
+      const needs = words.filter((w) => !LEG_STATES.has(w));
+      const tides = words.filter((w) => w === 'high' || w === 'low').length;
+      const layerWords = words.filter((w) => w === 'memory' || w === 'present').length;
+      if (!l || needs.some((w) => !LEG_NEEDS.has(w)) || tides > 1 || layerWords > 1) {
         throw new Error(
-          `Niveau ${id}, ligne ${index + 1} : @leg attend « col,ligne col,ligne difficulté [capacités] [high] »`,
+          `Niveau ${id}, ligne ${index + 1} : @leg attend « col,ligne col,ligne difficulté [capacités] [high] [memory] »`,
         );
       }
       const [c1 = 0, r1 = 0, c2 = 0, r2 = 0] = l.slice(1, 5).map(Number);
@@ -205,6 +230,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         difficulty: l[5] as LevelLeg['difficulty'],
         needs,
         tide: words.includes('high') ? 'high' : 'low',
+        layer: words.includes('memory') ? 'memory' : 'present',
       });
     } else if (match?.[1]?.startsWith('chase') && match[2] !== undefined) {
       const value = match[2].trim();
@@ -315,6 +341,17 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   }
   let tide: LevelTide | null = null;
   let tiles: Uint8Array = drawn;
+  let tileMaterials: Uint8Array = materials;
+  let layers: LevelLayers | null = null;
+  if (shiftZones.present.length > 0 || shiftZones.memory.length > 0) {
+    if (tideRows) {
+      throw new Error(`Niveau ${id} : @shift et @tide ne vont pas ensemble`);
+    }
+    const built = buildLayers(id, width, height, drawn, materials, shiftZones);
+    layers = built.layers;
+    tiles = built.tiles;
+    tileMaterials = built.materials;
+  }
   if (tideRows) {
     const built = buildTide(id, width, height, drawn, materials, {
       lowRow: tideRows.low,
@@ -405,7 +442,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
     goal,
     meta,
     entities,
-    materials,
+    materials: tileMaterials,
     exits,
     doors,
     decor,
@@ -416,11 +453,14 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         ? { dir: chaseDir, end: chaseEnd, phases: chasePhases, trips: chaseTrips, look: chaseLook }
         : null,
     tide,
+    layers,
     legs,
     sweeps,
   };
   checkTide(level);
-  return level;
+  const present = presentOf(level);
+  checkLayers(present);
+  return present;
 }
 
 /** Une sortie : tuiles d'une même colonne de mur latéral, contiguës, au moins 2 de haut. */

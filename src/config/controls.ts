@@ -54,6 +54,7 @@ export const TOUCH_BUTTONS_ENABLED: Readonly<Record<ButtonAction, boolean>> = {
   Interact: false,
   Pause: true,
   Map: true,
+  Shift: false,
 };
 
 export type JoystickMode = 'digital' | 'analog';

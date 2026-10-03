@@ -1,7 +1,8 @@
 import { TILE_SIZE as T } from '../../config/display';
-import { MOVE_SEARCH, SLIDE_SEARCH, WALL_SEARCH } from '../../config/levelDesign';
+import { MOVE_SEARCH, SHIFT_SEARCH, SLIDE_SEARCH, WALL_SEARCH } from '../../config/levelDesign';
 import { PLAYER_HITBOX, deriveMovement, type MovementParams } from '../../config/movement';
-import { Tile, tileAt, type LevelData } from '../level/LevelData';
+import { Tile, tileAt, type Layer, type LevelData } from '../level/LevelData';
+import { atLayer } from '../level/layers';
 import { touchesHazard } from '../physics/gridCollision';
 import { PlayerPhysics, type PlayerInput } from '../player/PlayerPhysics';
 import { PlayerState } from '../player/playerState';
@@ -31,6 +32,12 @@ export const MoveKind = {
   Slide: 'slide',
   /** Saut depuis la glissade (saut long, D-84), `slideJumpAfter` pas après la pression. */
   SlideJump: 'slide-jump',
+  /**
+   * Bascule (D-107) sans sauter : debout (la fenêtre est la zone de départ utile, en temps de
+   * course), en courant (la durée pendant laquelle la pression réussit), ou en glissant contre un
+   * mur. Une bascule en plein saut garde le type du saut, avec `shift`.
+   */
+  Shift: 'shift',
 } as const;
 export type MoveKind = (typeof MoveKind)[keyof typeof MoveKind];
 
@@ -58,6 +65,8 @@ export interface Move {
   readonly cableExit?: CableExit;
   /** Saut depuis la glissade (D-84) : pas entre la pression de Capacité et celle de Saut. */
   readonly slideJumpAfter?: number;
+  /** Bascule en plein saut (D-107) : la fenêtre tient compte de l'instant de la bascule. */
+  readonly shift?: boolean;
   /**
    * Durée du passage (ms, D-67) : de l'élan (course ou placement depuis le bord de la surface, ou
    * glissade contre un mur) jusqu'à l'atterrissage, au pire sur sa fenêtre. Sert à vérifier qu'une
@@ -87,6 +96,22 @@ interface TryRecord {
   readonly msPerTry: number;
   /** Durée de chaque essai (ms) : élan (`i × msPerTry`) puis vol jusqu'à la surface ou l'appui. */
   readonly times: readonly number[];
+  /** Essais qui mènent à des instants de bascule en plein saut (D-107). */
+  readonly shift?: boolean;
+}
+
+/**
+ * État d'un essai juste avant un pas (D-107) : de quoi le reprendre à ce pas avec une bascule, sans
+ * rejouer le début (la simulation et les variables de la boucle du saut).
+ */
+interface AirSnap {
+  readonly phys: PlayerPhysics;
+  airborne: boolean;
+  apex: boolean;
+  opened: number;
+  sinceCable: number;
+  /** Pris dans la boucle d'un saut ou d'un rebond (sinon : l'essai se rejoue en entier). */
+  resumable: boolean;
 }
 
 /** Appui sur un mur (D-44) : Céleste vient d'entrer en glissade ; état complet de la simulation. */
@@ -109,6 +134,12 @@ export interface LevelAnalysis {
   readonly critical: Move | null;
   /** Appuis sur les murs explorés (saut mural, D-44). */
   readonly wallNodeCount: number;
+  /**
+   * Salle à deux couches analysée avec la bascule (D-107) : les surfaces du présent sont numérotées
+   * de 0 à `presentCount - 1`, celles du souvenir ensuite (`map.idByTile` a deux plans, présent
+   * puis souvenir) ; absent sinon (une seule couche).
+   */
+  readonly presentCount?: number;
 }
 
 interface Family {
@@ -131,6 +162,8 @@ interface Family {
   readonly steps: number[];
   /** Position d'atterrissage de chaque essai (px, NaN : inconnue). */
   readonly lands: number[];
+  /** Essais de bascule en plein saut (D-107) : chaque cible est un nœud d'instants de bascule. */
+  readonly shift?: boolean;
 }
 
 /**
@@ -168,9 +201,27 @@ class MoveExplorer {
   airSteps = 0;
   /** Position d'atterrissage du dernier essai (px, bord gauche de la hitbox ; NaN : aucune). */
   private landX = Number.NaN;
+  /**
+   * Couches analysées (D-107) : la salle seule, ou le présent puis le souvenir. Les surfaces du
+   * souvenir sont numérotées après celles du présent (`presentCount`).
+   */
+  private readonly levels: readonly LevelData[];
+  private readonly presentCount: number;
+  /** Nœuds (appuis sur les murs et instants de bascule), numérotés après les surfaces. */
+  nodeTotal = 0;
+  /** Bascule en plein saut : avant le pas numéro `shiftAt` de l'essai (-1 : jamais). */
+  private shiftAt = -1;
+  /** Journal de l'essai joué : à chaque pas, Céleste est-elle près d'une zone d'une seule couche ? */
+  private nearLog: boolean[] | null = null;
+  /** Tuiles qui diffèrent d'une couche à l'autre. */
+  private readonly diff: Uint8Array | null;
+  /** États de l'essai journalisé, pas par pas (réutilisés d'un essai à l'autre). */
+  private readonly snaps: AirSnap[] = [];
+  /** Essais bruts gardés (saut mural ou bascule : fenêtres à travers les nœuds). */
+  private readonly keepRecords: boolean;
 
   constructor(
-    private readonly level: LevelData,
+    level: LevelData,
     private readonly params: Readonly<MovementParams>,
     private readonly map: SurfaceMap,
     canClimb: boolean,
@@ -179,7 +230,22 @@ class MoveExplorer {
     private readonly canGlide = false,
     private readonly canHook = false,
     private readonly canSlide = false,
+    /** Couches (D-107) : [présent, souvenir] et le nombre de surfaces du présent. */
+    layered: { readonly levels: readonly LevelData[]; readonly presentCount: number } | null = null,
   ) {
+    this.levels = layered?.levels ?? [level];
+    this.presentCount = layered?.presentCount ?? map.surfaces.length;
+    this.keepRecords = canWallJump || layered !== null;
+    const [first, second] = this.levels;
+    if (first && second) {
+      const diff = new Uint8Array(first.width * first.height);
+      for (let i = 0; i < diff.length; i++) {
+        diff[i] = first.tiles[i] === second.tiles[i] ? 0 : 1;
+      }
+      this.diff = diff;
+    } else {
+      this.diff = null;
+    }
     this.main = new PlayerPhysics(level, params, 0, 0, hitbox);
     this.probe = new PlayerPhysics(level, params, 0, 0, hitbox);
     this.main.canClimb = canClimb;
@@ -204,7 +270,7 @@ class MoveExplorer {
     let cableTime = 0;
     let cableSpan = 0;
     if (canGlide && canHook) {
-      for (const c of level.cables) {
+      for (const c of this.levels.flatMap((l) => l.cables)) {
         cableTime += Math.hypot(c.x2 - c.x1, c.y2 - c.y1) / params.cableMinSpeed;
         cableSpan += c.x2 - c.x1;
       }
@@ -266,7 +332,9 @@ class MoveExplorer {
       }
       if (this.canGlide) {
         const exits: (CableExit | null)[] =
-          this.canHook && this.level.cables.length > 0 ? [null, 'drop', 'jump'] : [null];
+          this.canHook && this.levels.some((l) => l.cables.length > 0)
+            ? [null, 'drop', 'jump']
+            : [null];
         for (const cableExit of exits) {
           families.push({
             kind,
@@ -284,6 +352,77 @@ class MoveExplorer {
       }
     }
     return families;
+  }
+
+  /**
+   * Passage sans timing suivi d'instants de bascule (D-107) : un essai brut vers leur nœud (aucun
+   * si `node` < 0). `startMs` : durée de l'élan avant le vol.
+   */
+  private recordShifted(
+    from: number,
+    kind: MoveKind,
+    dir: number,
+    node: number,
+    startMs: number,
+  ): void {
+    if (node < 0) {
+      return;
+    }
+    this.records.push({
+      from,
+      kind,
+      dir,
+      holdSteps: 0,
+      airRelease: false,
+      targets: [node],
+      msPerTry: Number.POSITIVE_INFINITY,
+      times: [startMs],
+      shift: true,
+    });
+  }
+
+  /** Famille d'essais simple (sans saut ni glissade) : la bascule sur place ou en courant. */
+  private plainFamily(kind: MoveKind, dir: number): Family {
+    return {
+      kind,
+      dir,
+      holdSteps: 0,
+      airRelease: false,
+      glide: false,
+      cableExit: null,
+      slideJumpAfter: -2,
+      targets: [],
+      steps: [],
+      lands: [],
+    };
+  }
+
+  /**
+   * La même famille, avec une bascule en plein vol (D-107) : ses cibles sont des nœuds. Seulement
+   * pour certains sauts (`SHIFT_SEARCH`) ; undefined sinon.
+   */
+  private shiftFamily(family: Family): Family | undefined {
+    const tried =
+      SHIFT_SEARCH.jumpHoldSteps.includes(family.holdSteps) &&
+      !family.airRelease &&
+      (family.slideJumpAfter < 0 ||
+        SHIFT_SEARCH.slideJumpAfterSteps.includes(family.slideJumpAfter));
+    return tried ? { ...family, targets: [], steps: [], lands: [], shift: true } : undefined;
+  }
+
+  /**
+   * Depuis l'état de `from`, bascule maintenant (D-107), puis garde la direction `dir` jusqu'au sol :
+   * la surface atteinte dans l'autre couche, -1 si la bascule est refusée ou mène au danger.
+   */
+  private tryShiftThen(from: PlayerPhysics, dir: number): number {
+    const probe = this.probe;
+    probe.copyFrom(from);
+    this.airSteps = 0;
+    this.landX = Number.NaN;
+    if (!this.shiftNow(probe) || touchesHazard(probe.collisionLevel, probe.box)) {
+      return -1;
+    }
+    return this.finish(dir);
   }
 
   /** Glissades lancées en courant dans le sens `dir` (D-84) : seule, ou suivie d'un saut long. */
@@ -319,9 +458,9 @@ class MoveExplorer {
     return families;
   }
 
-  /** Garde un passage sans timing comme un essai brut (saut mural seulement). */
+  /** Garde un passage sans timing comme un essai brut (saut mural ou bascule). */
   private recordSingle(move: Move): void {
-    if (this.canWallJump && !Number.isFinite(move.windowMs)) {
+    if (this.keepRecords && !Number.isFinite(move.windowMs)) {
       this.records.push({
         ...move,
         targets: [move.to],
@@ -340,8 +479,11 @@ class MoveExplorer {
   ): void {
     for (const family of families) {
       const times = family.steps.map((steps, i) => i * msPerTry + steps * this.stepMs);
-      if (this.canWallJump) {
+      if (this.keepRecords) {
         this.records.push({ ...family, from, msPerTry, times });
+      }
+      if (family.shift) {
+        continue; // Ses cibles sont des nœuds : passages calculés à travers eux (`wallWindows`).
       }
       const bestRun = new Map<number, { count: number; end: number }>();
       let runTarget = -2;
@@ -398,7 +540,7 @@ class MoveExplorer {
     const colTo = Math.floor((x + this.hitbox.width + this.reachPx) / T);
     for (let row = surface.row - 1; row >= surface.row - this.reachUpTiles; row--) {
       for (let col = colFrom; col <= colTo; col++) {
-        if (row >= 0 && tileAt(this.level, col, row) !== Tile.Empty) {
+        if (row >= 0 && this.levels.some((l) => tileAt(l, col, row) !== Tile.Empty)) {
           return true;
         }
       }
@@ -410,11 +552,15 @@ class MoveExplorer {
     const hitbox = this.hitbox;
     const x0 = dir > 0 ? surface.colStart * T : (surface.colEnd + 1) * T - hitbox.width;
     const main = this.main;
-    main.reset(x0, surface.row * T - hitbox.height, this.level);
+    main.reset(x0, surface.row * T - hitbox.height, this.levelOf(surface.id));
     const families = [
       ...this.families(MoveKind.RunningJump, [dir], true),
       ...this.slideFamilies(dir),
     ];
+    // La bascule (D-107) : les mêmes sauts avec une bascule en plein vol, et la bascule en courant.
+    const shiftFamilies = this.diff ? families.map((f) => this.shiftFamily(f)) : [];
+    const runShift = this.diff ? this.plainFamily(MoveKind.Shift, dir) : null;
+    const shifted = { node: -1 };
     const input = this.input;
     const dirs = [dir];
     let lastX = Number.NaN;
@@ -432,24 +578,39 @@ class MoveExplorer {
         break;
       }
       const worth = this.worthTrying(surface, main.box.x, dirs);
-      for (const family of families) {
+      const sampled = k % SHIFT_SEARCH.launchSteps === 0;
+      families.forEach((family, f) => {
         let target = surface.id;
+        const attempt = (resume?: AirSnap) =>
+          family.slideJumpAfter === -2
+            ? this.tryJump(
+                main,
+                dir,
+                family.holdSteps,
+                family.airRelease,
+                family.glide,
+                family.cableExit,
+                resume,
+              )
+            : this.trySlide(main, dir, family.slideJumpAfter, family.holdSteps);
+        shifted.node = -1;
         if (worth) {
-          target =
-            family.slideJumpAfter === -2
-              ? this.tryJump(
-                  main,
-                  dir,
-                  family.holdSteps,
-                  family.airRelease,
-                  family.glide,
-                  family.cableExit,
-                )
-              : this.trySlide(main, dir, family.slideJumpAfter, family.holdSteps);
+          target = sampled && shiftFamilies[f] ? this.withShift(attempt, shifted) : attempt();
         }
         family.targets.push(target);
         family.steps.push(worth ? this.airSteps : 0);
         family.lands.push(worth ? this.landX : Number.NaN);
+        if (sampled) {
+          shiftFamilies[f]?.targets.push(shifted.node);
+          shiftFamilies[f]?.steps.push(0);
+          shiftFamilies[f]?.lands.push(Number.NaN);
+        }
+      });
+      if (runShift && sampled) {
+        const target = this.tryShiftThen(main, dir);
+        runShift.targets.push(target);
+        runShift.steps.push(this.airSteps);
+        runShift.lands.push(this.landX);
       }
       ran++;
       input.moveX = dir;
@@ -457,16 +618,20 @@ class MoveExplorer {
       input.jumpPressed = false;
       input.jumpHeld = false;
       main.step(input);
-      if (touchesHazard(this.level, main.box)) {
+      if (touchesHazard(main.collisionLevel, main.box)) {
         // La course elle-même mène au danger : rien au-delà n'est atteignable ainsi.
         stuck = 5;
         break;
       }
     }
     this.offerWindows(surface.id, families, this.stepMs, offer);
+    if (runShift) {
+      const launchMs = SHIFT_SEARCH.launchSteps * this.stepMs;
+      this.offerWindows(surface.id, [...defined(shiftFamilies), runShift], launchMs, offer);
+    }
 
     // Contre un obstacle bas : s'arrêter devant, puis glisser dessous (D-84), sans timing.
-    if (this.canSlide && stuck > 4 && !touchesHazard(this.level, main.box)) {
+    if (this.canSlide && stuck > 4 && !touchesHazard(main.collisionLevel, main.box)) {
       const to = this.trySlide(main, dir, -1, 0);
       offer({
         from: surface.id,
@@ -483,10 +648,13 @@ class MoveExplorer {
 
     // Sans sauter : courir au-delà du bord et tomber.
     if (stuck <= 4) {
-      this.probe.copyFrom(main);
-      input.moveX = dir;
-      this.airSteps = 0;
-      const to = this.finish(dir);
+      const to = this.withShift(() => {
+        this.probe.copyFrom(main);
+        input.moveX = dir;
+        this.airSteps = 0;
+        return this.finish(dir);
+      }, shifted);
+      this.recordShifted(surface.id, MoveKind.WalkOff, dir, shifted.node, ran * this.stepMs);
       offer({
         from: surface.id,
         to,
@@ -500,9 +668,12 @@ class MoveExplorer {
       });
       if (this.canGlide) {
         // Tomber du bord, puis ouvrir le parapluie (D-62).
-        this.probe.copyFrom(main);
-        this.airSteps = 0;
-        const glideTo = this.finish(dir, true);
+        const glideTo = this.withShift(() => {
+          this.probe.copyFrom(main);
+          this.airSteps = 0;
+          return this.finish(dir, true);
+        }, shifted);
+        this.recordShifted(surface.id, MoveKind.WalkOff, dir, shifted.node, ran * this.stepMs);
         offer({
           from: surface.id,
           to: glideTo,
@@ -524,42 +695,71 @@ class MoveExplorer {
     const step = MOVE_SEARCH.standingSampleStepPx;
     const airDirs = [-1, 0, 1];
     const families = this.families(MoveKind.StandingJump, airDirs, false);
+    // La bascule (D-107) : les mêmes sauts avec une bascule en plein vol, et la bascule sur place.
+    const shiftFamilies = this.diff ? families.map((f) => this.shiftFamily(f)) : [];
+    const standShift = this.diff ? this.plainFamily(MoveKind.Shift, 0) : null;
+    const shifted = { node: -1 };
     const y = surface.row * T - hitbox.height;
     const xMax = (surface.colEnd + 1) * T - hitbox.width;
-    for (let x = surface.colStart * T; x <= xMax; x += step) {
+    const level = this.levelOf(surface.id);
+    let i = 0;
+    for (let x = surface.colStart * T; x <= xMax; x += step, i++) {
       const worth = this.worthTrying(surface, x, airDirs);
-      for (const family of families) {
+      const sampled = i % SHIFT_SEARCH.launchSteps === 0;
+      families.forEach((family, f) => {
         let target = surface.id;
         this.airSteps = 0;
+        shifted.node = -1;
         if (worth) {
-          this.main.reset(x, y, this.level);
-          target = this.tryJump(
-            this.main,
-            family.dir,
-            family.holdSteps,
-            false,
-            family.glide,
-            family.cableExit,
-          );
+          this.main.reset(x, y, level);
+          const attempt = (resume?: AirSnap) =>
+            this.tryJump(
+              this.main,
+              family.dir,
+              family.holdSteps,
+              false,
+              family.glide,
+              family.cableExit,
+              resume,
+            );
+          target = sampled && shiftFamilies[f] ? this.withShift(attempt, shifted) : attempt();
         }
         family.targets.push(target);
         family.steps.push(this.airSteps);
         family.lands.push(worth ? this.landX : Number.NaN);
+        if (sampled) {
+          shiftFamilies[f]?.targets.push(shifted.node);
+          shiftFamilies[f]?.steps.push(0);
+          shiftFamilies[f]?.lands.push(Number.NaN);
+        }
+      });
+      if (standShift) {
+        this.main.reset(x, y, level);
+        standShift.targets.push(this.tryShiftThen(this.main, 0));
+        standShift.steps.push(this.airSteps);
+        standShift.lands.push(this.landX);
       }
     }
     // Précision de placement demandée, exprimée en temps de course.
-    this.offerWindows(surface.id, families, (step / this.params.maxRunSpeed) * 1000, offer);
+    const placeMs = (step / this.params.maxRunSpeed) * 1000;
+    this.offerWindows(surface.id, families, placeMs, offer);
+    if (standShift) {
+      const launchMs = placeMs * SHIFT_SEARCH.launchSteps;
+      this.offerWindows(surface.id, defined(shiftFamilies), launchMs, offer);
+      this.offerWindows(surface.id, [standShift], placeMs, offer);
+    }
   }
 
   private drops(surface: Surface, offer: (move: Move) => void): void {
     const hitbox = this.hitbox;
     const input = this.input;
     for (let col = surface.colStart; col <= surface.colEnd; col++) {
-      if (tileAt(this.level, col, surface.row) !== Tile.OneWay) {
+      const level = this.levelOf(surface.id);
+      if (tileAt(level, col, surface.row) !== Tile.OneWay) {
         continue;
       }
       const probe = this.probe;
-      probe.reset(col * T + (T - hitbox.width) / 2, surface.row * T - hitbox.height, this.level);
+      probe.reset(col * T + (T - hitbox.width) / 2, surface.row * T - hitbox.height, level);
       input.moveX = 0;
       input.moveY = 1;
       input.jumpPressed = true;
@@ -596,23 +796,30 @@ class MoveExplorer {
     airRelease: boolean,
     glide = false,
     cableExit: CableExit | null = null,
+    /** Reprise d'un essai journalisé à un pas donné (bascule, D-107). */
+    resume?: AirSnap,
   ): number {
     const probe = this.probe;
-    probe.copyFrom(from);
+    probe.copyFrom(resume?.phys ?? from);
     const input = this.input;
     input.moveY = 0;
-    let airborne = false;
-    let apex = false;
-    this.airSteps = 0;
+    let airborne = resume?.airborne ?? false;
+    let apex = resume?.apex ?? false;
+    const start = resume ? this.shiftAt : 0;
+    this.airSteps = start;
     this.landX = Number.NaN;
     /** Pas depuis la sortie d'un câble (-1 : pas encore quitté). */
-    let sinceCable = -1;
+    let sinceCable = resume?.sinceCable ?? -1;
     /** Ouverture du parapluie au sommet : 0 pas encore, 1 Saut relâché, 2 pressé de nouveau. */
-    let opened = 0;
-    for (let s = 0; s < this.maxAirSteps; s++) {
+    let opened = resume?.opened ?? 0;
+    for (let s = start; s < this.maxAirSteps; s++) {
       if (airborne && probe.grounded) {
         break;
       }
+      // Variables au début du pas : une reprise à ce pas (D-107) refait la suite à l'identique.
+      const apexTop = apex;
+      const openedTop = opened;
+      const sinceCableTop = sinceCable;
       apex ||= airborne && probe.vy >= 0;
       input.jumpPressed = s === 0;
       if (glide) {
@@ -634,10 +841,13 @@ class MoveExplorer {
       }
       input.moveX = airRelease && s > 0 ? 0 : dir;
       const onCable = probe.cable >= 0;
+      if (!this.beforeStep(probe, true, airborne, apexTop, openedTop, sinceCableTop)) {
+        return -1;
+      }
       const before = probe.state;
       probe.step(input);
       this.airSteps++;
-      if (touchesHazard(this.level, probe.box)) {
+      if (touchesHazard(probe.collisionLevel, probe.box)) {
         return -1;
       }
       if (this.enteredWall(before)) {
@@ -683,10 +893,14 @@ class MoveExplorer {
       input.abilityPressed = s === 0;
       input.jumpPressed = sinceJump === 0;
       input.jumpHeld = sinceJump >= 0 && (holdSteps === 0 || sinceJump < holdSteps);
+      if (!this.beforeStep(probe)) {
+        input.abilityPressed = false;
+        return -1;
+      }
       const before = probe.state;
       probe.step(input);
       this.airSteps++;
-      if (touchesHazard(this.level, probe.box)) {
+      if (touchesHazard(probe.collisionLevel, probe.box)) {
         input.abilityPressed = false;
         return -1;
       }
@@ -717,7 +931,7 @@ class MoveExplorer {
   private wallNodeOf(player: PlayerPhysics): number {
     const key = `${String(player.wallDir)}:${String(player.wallCol)}:${String(
       Math.round(player.box.y / WALL_SEARCH.heightStepPx),
-    )}:${String(player.releasedWall)}`;
+    )}:${String(player.releasedWall)}:${player.collisionLevel === this.levels[0] ? 'p' : 'm'}`;
     const known = this.wallIds.get(key);
     if (known !== undefined) {
       return known;
@@ -725,10 +939,11 @@ class MoveExplorer {
     if (this.wallNodes.length >= WALL_SEARCH.maxNodes) {
       throw new Error(`Analyse : plus de ${String(WALL_SEARCH.maxNodes)} appuis sur les murs`);
     }
-    const snapshot = new PlayerPhysics(this.level, this.params, 0, 0, this.hitbox);
+    const id = this.newNode();
+    const snapshot = new PlayerPhysics(player.collisionLevel, this.params, 0, 0, this.hitbox);
     snapshot.copyFrom(player);
     const node: WallNode = {
-      id: this.map.surfaces.length + this.wallNodes.length,
+      id,
       dir: player.wallDir,
       snapshot,
     };
@@ -736,6 +951,169 @@ class MoveExplorer {
     this.wallQueue.push(node);
     this.wallIds.set(key, node.id);
     return node.id;
+  }
+
+  /** Nouveau nœud (appui ou instants de bascule), numéroté après les surfaces. */
+  private newNode(): number {
+    return this.map.surfaces.length + this.nodeTotal++;
+  }
+
+  /** Salle de la couche d'une surface (D-107). */
+  private levelOf(surfaceId: number): LevelData {
+    return (
+      (surfaceId >= this.presentCount ? this.levels[1] : this.levels[0]) ?? this.main.collisionLevel
+    );
+  }
+
+  /** Bascule de `player` dans l'autre couche (D-107), avec la marge des réglages. */
+  private shiftNow(player: PlayerPhysics): boolean {
+    const [present, memory] = this.levels;
+    if (!present || !memory) {
+      return false;
+    }
+    const to = player.collisionLevel === present ? memory : present;
+    return player.shiftTo(to, this.params.shiftNudgePx);
+  }
+
+  /** Vrai si la boîte est près d'une tuile qui diffère d'une couche à l'autre (D-107). */
+  private isNear(player: PlayerPhysics): boolean {
+    const diff = this.diff;
+    if (!diff) {
+      return false;
+    }
+    const box = player.box;
+    const level = player.collisionLevel;
+    const width = level.width;
+    const colFrom = Math.max(0, Math.floor(box.x / T) - SHIFT_SEARCH.nearTiles);
+    const colTo = Math.min(width - 1, Math.floor((box.x + box.width) / T) + SHIFT_SEARCH.nearTiles);
+    const rowFrom = Math.max(0, Math.floor(box.y / T) - SHIFT_SEARCH.nearTilesAbove);
+    const rowTo = Math.min(
+      level.height - 1,
+      Math.floor((box.y + box.height) / T) + SHIFT_SEARCH.nearTiles,
+    );
+    for (let row = rowFrom; row <= rowTo; row++) {
+      for (let col = colFrom; col <= colTo; col++) {
+        if (diff[row * width + col]) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Avant chaque pas d'un essai (D-107) : note si Céleste est près d'une zone, et bascule au pas
+   * `shiftAt`. Retourne false si la bascule est refusée (l'essai échoue).
+   */
+  private beforeStep(
+    player: PlayerPhysics,
+    resumable = false,
+    airborne = false,
+    apex = false,
+    opened = 0,
+    sinceCable = -1,
+  ): boolean {
+    const log = this.nearLog;
+    const k = this.airSteps;
+    if (log) {
+      const near = this.isNear(player);
+      log.push(near);
+      if (!isShiftCandidate(log, k)) {
+        return k !== this.shiftAt || this.shiftNow(player);
+      }
+      let snap = this.snaps[k];
+      if (!snap) {
+        snap = {
+          phys: new PlayerPhysics(player.collisionLevel, this.params, 0, 0, this.hitbox),
+          airborne,
+          apex,
+          opened,
+          sinceCable,
+          resumable,
+        };
+        this.snaps[k] = snap;
+      }
+      snap.phys.copyFrom(player);
+      snap.airborne = airborne;
+      snap.apex = apex;
+      snap.opened = opened;
+      snap.sinceCable = sinceCable;
+      snap.resumable = resumable;
+    }
+    return this.airSteps !== this.shiftAt || this.shiftNow(player);
+  }
+
+  /**
+   * Instants de bascule d'un essai qui vient d'être joué (D-107), d'après son journal : le début de
+   * chaque moment loin des zones (basculer plus tard dans ce moment revient au même), et tous les
+   * `sampleSteps` pas près d'elles. Rejoue l'essai (`attempt`) en basculant à chacun ; retourne le
+   * nœud de ces instants (ses essais sont espacés de `sampleSteps` pas), -1 si aucun.
+   */
+  private shiftNode(log: readonly boolean[], attempt: (resume?: AirSnap) => number): number {
+    const sample = SHIFT_SEARCH.sampleSteps;
+    const farCap = Math.max(1, Math.round(SHIFT_SEARCH.farCapMs / (sample * this.stepMs)));
+    if (!log.some((near) => near)) {
+      return -1;
+    }
+    const targets: number[] = [];
+    const times: number[] = [];
+    let k = 0;
+    while (k < log.length) {
+      let next = k + 1;
+      while (next < log.length && !isShiftCandidate(log, next)) {
+        next++;
+      }
+      const span = next - k;
+      this.shiftAt = k;
+      const snap = this.snaps[k];
+      const target = snap?.resumable ? attempt(snap) : attempt();
+      this.shiftAt = -1;
+      const time = this.airSteps * this.stepMs;
+      // Un moment loin des zones compte pour sa durée (bornée), en essais de `sample` pas.
+      const repeat = log[k] ? 1 : Math.min(farCap, Math.max(1, Math.round(span / sample)));
+      for (let r = 0; r < repeat; r++) {
+        targets.push(target);
+        times.push(time);
+      }
+      k = next;
+    }
+    if (targets.every((t) => t < 0)) {
+      return -1;
+    }
+    const id = this.newNode();
+    this.records.push({
+      from: id,
+      kind: MoveKind.Shift,
+      dir: 0,
+      holdSteps: 0,
+      airRelease: false,
+      targets,
+      msPerTry: sample * this.stepMs,
+      times,
+      shift: true,
+    });
+    return id;
+  }
+
+  /**
+   * Joue un essai (`attempt`) ; avec la bascule, joue aussi ses instants de bascule et retourne le
+   * nœud correspondant dans `shifted` (-1 sans bascule ou loin de toute zone).
+   */
+  private withShift(attempt: (resume?: AirSnap) => number, shifted: { node: number }): number {
+    shifted.node = -1;
+    if (!this.diff) {
+      return attempt();
+    }
+    const log: boolean[] = [];
+    this.nearLog = log;
+    const target = attempt();
+    this.nearLog = null;
+    const steps = this.airSteps;
+    const land = this.landX;
+    shifted.node = this.shiftNode(log, attempt);
+    this.airSteps = steps;
+    this.landX = land;
+    return target;
   }
 
   /** Prochain appui à explorer (null : tous explorés). */
@@ -764,6 +1142,14 @@ class MoveExplorer {
     const families = this.families(MoveKind.WallJump, [-w, 0, w], false).filter(
       (family) => !family.glide && WALL_SEARCH.jumpHoldSteps.includes(family.holdSteps),
     );
+    // La bascule (D-107) : les mêmes rebonds avec une bascule en plein vol, et la bascule en
+    // glissant contre le mur (on continue de pousser vers lui).
+    // Rebonds avec bascule : vers le large seulement (vers l'autre mur d'une cheminée).
+    const shiftFamilies = this.diff
+      ? families.map((f) => (f.dir === -w ? this.shiftFamily(f) : undefined))
+      : [];
+    const wallShift = this.diff ? this.plainFamily(MoveKind.Shift, w) : null;
+    const shifted = { node: -1 };
     const main = this.main;
     main.copyFrom(node.snapshot);
     const input = this.input;
@@ -772,10 +1158,25 @@ class MoveExplorer {
         break;
       }
       if (k % WALL_SEARCH.sampleSteps === 0) {
-        for (const family of families) {
-          family.targets.push(this.tryKick(main, family.dir, family.holdSteps));
+        const sampled = k % SHIFT_SEARCH.kickSteps === 0;
+        families.forEach((family, f) => {
+          const kick = (resume?: AirSnap) =>
+            this.tryKick(main, family.dir, family.holdSteps, resume);
+          shifted.node = -1;
+          const withShift = sampled && shiftFamilies[f];
+          family.targets.push(withShift ? this.withShift(kick, shifted) : kick());
           family.steps.push(this.airSteps);
           family.lands.push(this.landX);
+          if (sampled) {
+            shiftFamilies[f]?.targets.push(shifted.node);
+            shiftFamilies[f]?.steps.push(0);
+            shiftFamilies[f]?.lands.push(Number.NaN);
+          }
+        });
+        if (wallShift && sampled) {
+          wallShift.targets.push(this.tryShiftThen(main, w));
+          wallShift.steps.push(this.airSteps);
+          wallShift.lands.push(this.landX);
         }
       }
       input.moveX = w;
@@ -783,15 +1184,23 @@ class MoveExplorer {
       input.jumpPressed = false;
       input.jumpHeld = false;
       main.step(input);
-      if (touchesHazard(this.level, main.box)) {
+      if (touchesHazard(main.collisionLevel, main.box)) {
         break;
       }
     }
-    this.offerWindows(node.id, families, WALL_SEARCH.sampleSteps * this.stepMs, offer);
+    const kickMs = WALL_SEARCH.sampleSteps * this.stepMs;
+    this.offerWindows(node.id, families, kickMs, offer);
+    if (wallShift) {
+      const shiftKickMs = SHIFT_SEARCH.kickSteps * this.stepMs;
+      this.offerWindows(node.id, [...defined(shiftFamilies), wallShift], shiftKickMs, offer);
+    }
     for (const dir of [w, 0, -w]) {
-      this.probe.copyFrom(node.snapshot);
-      this.airSteps = 0;
-      const to = this.finish(dir);
+      const to = this.withShift(() => {
+        this.probe.copyFrom(node.snapshot);
+        this.airSteps = 0;
+        return this.finish(dir);
+      }, shifted);
+      this.recordShifted(node.id, MoveKind.WallLetGo, dir, shifted.node, 0);
       offer({
         from: node.id,
         to,
@@ -807,22 +1216,32 @@ class MoveExplorer {
   }
 
   /** Depuis la glissade de `from`, rebondit maintenant ; retourne la surface ou l'appui atteint. */
-  private tryKick(from: PlayerPhysics, dir: number, holdSteps: number): number {
+  private tryKick(
+    from: PlayerPhysics,
+    dir: number,
+    holdSteps: number,
+    /** Reprise d'un essai journalisé à un pas donné (bascule, D-107). */
+    resume?: AirSnap,
+  ): number {
     const probe = this.probe;
-    probe.copyFrom(from);
+    probe.copyFrom(resume?.phys ?? from);
     const input = this.input;
     input.moveY = 0;
-    this.airSteps = 0;
+    const start = resume ? this.shiftAt : 0;
+    this.airSteps = start;
     this.landX = Number.NaN;
-    for (let s = 0; s < MOVE_SEARCH.maxSteps && !probe.grounded; s++) {
+    for (let s = start; s < MOVE_SEARCH.maxSteps && !probe.grounded; s++) {
       // Pas de plané après un saut mural dans l'analyse (prudente).
       input.jumpPressed = s === 0;
       input.jumpHeld = holdSteps === 0 || s < holdSteps;
       input.moveX = dir;
+      if (!this.beforeStep(probe, true)) {
+        return -1;
+      }
       const before = probe.state;
       probe.step(input);
       this.airSteps++;
-      if (touchesHazard(this.level, probe.box)) {
+      if (touchesHazard(probe.collisionLevel, probe.box)) {
         return -1;
       }
       if (this.enteredWall(before)) {
@@ -847,10 +1266,13 @@ class MoveExplorer {
     let s = 0;
     while (!probe.grounded && s < this.maxAirSteps) {
       input.jumpPressed = glide && s === 0 && !probe.glideOpen;
+      if (!this.beforeStep(probe)) {
+        return -1;
+      }
       const before = probe.state;
       probe.step(input);
       this.airSteps++;
-      if (touchesHazard(this.level, probe.box)) {
+      if (touchesHazard(probe.collisionLevel, probe.box)) {
         return -1;
       }
       if (this.enteredWall(before)) {
@@ -866,7 +1288,7 @@ class MoveExplorer {
         break;
       }
       probe.step(input);
-      if (touchesHazard(this.level, probe.box)) {
+      if (touchesHazard(probe.collisionLevel, probe.box)) {
         return -1;
       }
     }
@@ -885,19 +1307,35 @@ class MoveExplorer {
   private surfaceOf(player: PlayerPhysics): number {
     const box = player.box;
     const row = Math.round((box.y + box.height) / T);
-    const width = this.level.width;
+    const level = player.collisionLevel;
+    const width = level.width;
+    const plane = level === this.levels[0] ? 0 : level.width * level.height;
     const center = Math.floor((box.x + box.width / 2) / T);
     for (const col of [center, Math.floor(box.x / T), Math.floor((box.x + box.width - 1e-6) / T)]) {
       if (col < 0 || col >= width) {
         continue;
       }
-      const id = this.map.idByTile[row * width + col];
+      const id = this.map.idByTile[plane + row * width + col];
       if (id !== undefined && id >= 0) {
         return id;
       }
     }
     return -1;
   }
+}
+
+/**
+ * Instant de bascule essayé (D-107) d'un essai journalisé (`log` : près d'une zone, pas par pas,
+ * connu jusqu'au pas `k`) : le premier pas, chaque changement entre près et loin, et tous les
+ * `sampleSteps` pas près des zones. Loin des zones, basculer plus tard revient au même.
+ */
+function isShiftCandidate(log: readonly boolean[], k: number): boolean {
+  const near = log[k] ?? false;
+  return k === 0 || near !== log[k - 1] || (near && k % SHIFT_SEARCH.sampleSteps === 0);
+}
+
+function defined<T>(items: readonly (T | undefined)[]): T[] {
+  return items.filter((item): item is T => item !== undefined);
 }
 
 /** Chemin dont le passage le plus dur a la plus grande fenêtre (variante de Dijkstra). */
@@ -961,8 +1399,58 @@ export interface AnalysisAbilities {
   readonly hook?: boolean;
   /** Glissade (D-84) : sous les obstacles bas, et sauts longs depuis la glissade. */
   readonly slide?: boolean;
+  /**
+   * La bascule (D-107), dans une salle à deux couches : au sol, en courant, en plein saut, contre un
+   * mur. Les surfaces des deux couches sont analysées ensemble (`presentCount`).
+   */
+  readonly shift?: boolean;
   /** Hitbox de Céleste (croissance, D-43) ; par défaut, celle de la première phase. */
   readonly hitbox?: Readonly<{ width: number; height: number }>;
+}
+
+/**
+ * Surfaces des deux couches d'une salle (D-107) : celles du présent, puis celles du souvenir ;
+ * `idByTile` a deux plans (présent, souvenir).
+ */
+function layeredSurfaces(
+  present: LevelData,
+  memory: LevelData,
+  playerHeight: number,
+): SurfaceMap & { readonly presentCount: number } {
+  const p = findSurfaces(present, playerHeight);
+  const m = findSurfaces(memory, playerHeight);
+  const offset = p.surfaces.length;
+  const plane = present.width * present.height;
+  const idByTile = new Int32Array(plane * 2);
+  idByTile.set(p.idByTile, 0);
+  for (let i = 0; i < plane; i++) {
+    const id = m.idByTile[i] ?? -1;
+    idByTile[plane + i] = id >= 0 ? id + offset : -1;
+  }
+  return {
+    surfaces: [
+      ...p.surfaces,
+      ...m.surfaces.map((surface) => ({ ...surface, id: surface.id + offset })),
+    ],
+    idByTile,
+    presentCount: offset,
+  };
+}
+
+/** Surface sous une tuile de marqueur dans une couche (D-107) d'une analyse à deux couches. */
+export function layerSurfaceUnder(
+  level: LevelData,
+  analysis: LevelAnalysis,
+  layer: Layer,
+  col: number,
+  row: number,
+): number {
+  if (row + 1 >= level.height) {
+    return -1;
+  }
+  const plane =
+    analysis.presentCount !== undefined && layer === 'memory' ? level.width * level.height : 0;
+  return analysis.map.idByTile[plane + (row + 1) * level.width + col] ?? -1;
 }
 
 /**
@@ -975,9 +1463,14 @@ export function analyzeLevel(
   abilities: AnalysisAbilities = {},
 ): LevelAnalysis {
   const hitbox = abilities.hitbox ?? PLAYER_HITBOX;
-  const map = findSurfaces(level, hitbox.height);
+  const layered = abilities.shift === true && level.layers !== null;
+  const present = atLayer(level, 'present');
+  const memory = atLayer(level, 'memory');
+  const two = layered ? layeredSurfaces(present, memory, hitbox.height) : null;
+  const map: SurfaceMap = two ?? findSurfaces(level, hitbox.height);
+  const presentCount = two?.presentCount;
   const explorer = new MoveExplorer(
-    level,
+    layered ? present : level,
     params,
     map,
     abilities.climb ?? false,
@@ -986,18 +1479,62 @@ export function analyzeLevel(
     abilities.glide ?? false,
     abilities.hook ?? false,
     abilities.slide ?? false,
+    layered && presentCount !== undefined ? { levels: [present, memory], presentCount } : null,
   );
   const moves = exploreAll(explorer, map);
-  const start = surfaceUnder(level, map, level.spawn.col, level.spawn.row);
-  const goal = level.goal ? surfaceUnder(level, map, level.goal.col, level.goal.row) : -1;
-  const path = start >= 0 && goal >= 0 ? widestPath(map.surfaces.length, moves, start, goal) : null;
+  const base = { map, ...(presentCount !== undefined ? { presentCount } : {}) };
+  const startLayer: Layer = level.layers?.active === 'memory' ? 'memory' : 'present';
+  const start = layered
+    ? layerSurfaceUnder(level, base as LevelAnalysis, startLayer, level.spawn.col, level.spawn.row)
+    : surfaceUnder(level, map, level.spawn.col, level.spawn.row);
+  const goals = level.goal
+    ? layered
+      ? (['present', 'memory'] as const).map((layer) =>
+          layerSurfaceUnder(
+            level,
+            base as LevelAnalysis,
+            layer,
+            level.goal?.col ?? 0,
+            level.goal?.row ?? 0,
+          ),
+        )
+      : [surfaceUnder(level, map, level.goal.col, level.goal.row)]
+    : [];
+  let goal = -1;
+  let path: Move[] | null = null;
+  for (const candidate of goals) {
+    if (start < 0 || candidate < 0) {
+      continue;
+    }
+    const found = widestPath(map.surfaces.length, moves, start, candidate);
+    if (found && (!path || pathWidth(found) > pathWidth(path))) {
+      path = found;
+      goal = candidate;
+    } else if (goal < 0) {
+      goal = candidate;
+    }
+  }
   let critical: Move | null = null;
   for (const move of path ?? []) {
     if (Number.isFinite(move.windowMs) && (!critical || move.windowMs < critical.windowMs)) {
       critical = move;
     }
   }
-  return { map, moves, start, goal, path, critical, wallNodeCount: explorer.wallNodes.length };
+  return {
+    map,
+    moves,
+    start,
+    goal,
+    path,
+    critical,
+    wallNodeCount: explorer.wallNodes.length,
+    ...(presentCount !== undefined ? { presentCount } : {}),
+  };
+}
+
+/** Fenêtre du passage le plus dur d'un chemin. */
+function pathWidth(path: readonly Move[]): number {
+  return path.reduce((w, move) => Math.min(w, move.windowMs), Number.POSITIVE_INFINITY);
 }
 
 /** Passages depuis une seule surface (plus rapide qu'une analyse complète). */
@@ -1024,7 +1561,7 @@ export function movesFrom(
     abilities.slide ?? false,
   );
   const moves = explorer.explore(surface);
-  if (explorer.wallNodes.length === 0) {
+  if (explorer.nodeTotal === 0) {
     return moves;
   }
   return exploreAll(explorer, map).filter((move) => move.from === surfaceId);
@@ -1041,7 +1578,7 @@ function exploreAll(explorer: MoveExplorer, map: SurfaceMap): Move[] {
   for (const surface of map.surfaces) {
     direct.push(...explorer.explore(surface));
   }
-  if (explorer.wallNodes.length === 0) {
+  if (explorer.nodeTotal === 0) {
     return direct;
   }
   for (let node = explorer.nextWallNode(); node; node = explorer.nextWallNode()) {
@@ -1053,7 +1590,7 @@ function exploreAll(explorer: MoveExplorer, map: SurfaceMap): Move[] {
       best.set(`${String(move.from)}:${String(move.to)}`, move);
     }
   }
-  for (const move of wallWindows(explorer.records, surfaceCount, explorer.wallNodes.length)) {
+  for (const move of wallWindows(explorer.records, surfaceCount, explorer.nodeTotal)) {
     const key = `${String(move.from)}:${String(move.to)}`;
     const current = best.get(key);
     if (!current || move.windowMs > current.windowMs) {
@@ -1210,6 +1747,7 @@ function wallWindows(
           windowMs,
           durationMs: fastest(record, windowMs),
           start: record.kind,
+          ...(record.shift ? { shift: true } : {}),
         });
       }
     }
@@ -1227,6 +1765,7 @@ const KIND_LABEL: Readonly<Record<MoveKind, string>> = {
   'wall-let-go': 'glissade contre le mur',
   slide: 'glissade au sol',
   'slide-jump': 'saut depuis la glissade',
+  shift: 'bascule',
 };
 
 /** Description lisible d'un passage (rapports de test, debug). Colonnes et lignes comptées depuis 1. */
@@ -1242,10 +1781,14 @@ export function describeMove(move: Move, map: SurfaceMap): string {
     (move.glide ? ', parapluie' : '') +
     (move.cableExit === 'drop' ? ', lâche le câble' : '') +
     (move.cableExit === 'jump' ? ', saute du câble' : '') +
-    (move.slideJumpAfter !== undefined ? `, saut ${String(move.slideJumpAfter)} pas après` : '');
+    (move.slideJumpAfter !== undefined ? `, saut ${String(move.slideJumpAfter)} pas après` : '') +
+    (move.shift ? ', bascule en plein vol' : '');
   if (move.start) {
     const timing = Number.isFinite(move.windowMs) ? `, fenêtre ${move.windowMs.toFixed(0)} ms` : '';
-    return `${where(move.from)} → ${where(move.to)} : ${KIND_LABEL[move.start]} ${arrow} puis appuis sur les murs${timing}`;
+    const via = move.shift
+      ? 'puis appuis sur les murs ou bascule en plein vol'
+      : 'puis appuis sur les murs';
+    return `${where(move.from)} → ${where(move.to)} : ${KIND_LABEL[move.start]} ${arrow} ${via}${timing}`;
   }
   const timing =
     move.kind === MoveKind.WalkOff || move.kind === MoveKind.Drop || !Number.isFinite(move.windowMs)

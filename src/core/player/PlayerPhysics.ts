@@ -297,6 +297,68 @@ export class PlayerPhysics {
     this.slideCooldownSteps = other.slideCooldownSteps;
   }
 
+  /** Salle (variante de couche ou de marée) contre laquelle Céleste se cogne. */
+  get collisionLevel(): LevelData {
+    return this.level;
+  }
+
+  /**
+   * La bascule (D-107) : même état, même élan, autre collision (l'autre couche de la salle). Si la
+   * place manque, Céleste est décalée d'au plus `nudgePx` (vers le haut, les côtés, puis le bas) ;
+   * au-delà, la bascule est refusée (retourne false, rien ne change). Refusée aussi suspendue à un
+   * rebord, ou accrochée à un câble qui n'existe pas dans l'autre couche. Aucune allocation.
+   */
+  shiftTo(level: LevelData, nudgePx = 0): boolean {
+    if (this.ledge !== Ledge.None) {
+      return false;
+    }
+    let cable = -1;
+    if (this.cable >= 0) {
+      const c = this.level.cables[this.cable];
+      const cables = level.cables;
+      for (let i = 0; i < cables.length && c; i++) {
+        const o = cables[i];
+        if (o && o.x1 === c.x1 && o.y1 === c.y1 && o.x2 === c.x2 && o.y2 === c.y2) {
+          cable = i;
+          break;
+        }
+      }
+      if (cable < 0) {
+        return false;
+      }
+    }
+    const box = this.box;
+    const x = box.x;
+    const y = box.y;
+    let found = false;
+    for (let d = 0; d <= nudgePx && !found; d++) {
+      for (let k = 0; k < 4 && !found; k++) {
+        if (d === 0 && k > 0) {
+          break;
+        }
+        box.x = x + (k === 1 ? -d : k === 2 ? d : 0);
+        box.y = y + (k === 0 ? -d : k === 3 ? d : 0);
+        found = isBoxFree(level, box);
+      }
+    }
+    if (!found) {
+      box.x = x;
+      box.y = y;
+      return false;
+    }
+    this.prevX += box.x - x;
+    this.prevY += box.y - y;
+    this.level = level;
+    this.cable = cable;
+    this.grounded = this.vy >= 0 && isGrounded(level, box, !box.passOneWay);
+    // Le dernier mur touché peut ne plus exister : plus de tolérance du saut mural contre lui.
+    const row = Math.floor((box.y + WALL_GRIP_FROM_TOP_PX) / T);
+    if (this.stepsSinceWall < NEVER && tileAt(level, this.lastWallCol, row) !== Tile.Solid) {
+      this.clearWall();
+    }
+    return true;
+  }
+
   /** Debout tout de suite, sans glissade en cours (la hitbox reprend sa hauteur, pieds en place). */
   private clearSlide(): void {
     const box = this.box;
