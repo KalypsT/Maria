@@ -41,6 +41,8 @@ import seaPromenade from '../sea/promenade.txt?raw';
 import seaCentre from '../sea/centre.txt?raw';
 import seaBeach from '../sea/beach.txt?raw';
 import seaRocks from '../sea/rocks.txt?raw';
+import seaLighthouse from '../sea/lighthouse.txt?raw';
+import seaPort from '../sea/port.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -125,6 +127,10 @@ export const HOUSE: ZoneSource = {
     { id: 'sea-beach', text: seaBeach },
     // Les rochers (D-99), jusqu'au pied du phare : une salle de marée, les vagues à marée haute.
     { id: 'sea-rocks', text: seaRocks },
+    // Le phare (D-100), par sa porte au pied des rochers ; la galerie mène au port.
+    { id: 'sea-lighthouse', text: seaLighthouse },
+    // Le port (D-100), une salle de marée : la passerelle du phare, les bateaux, le quai.
+    { id: 'sea-port', text: seaPort },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -186,6 +192,11 @@ export const HOUSE: ZoneSource = {
     ['sea-promenade:2', 'sea-centre:1'],
     ['sea-promenade:3', 'sea-beach:1'],
     ['sea-beach:2', 'sea-rocks:1'],
+    // La boucle de la baie (D-100) : la porte du phare, sa galerie et la passerelle du port, puis
+    // la grille du port sur la promenade.
+    ['sea-rocks:2', 'sea-lighthouse:1'],
+    ['sea-lighthouse:2', 'sea-port:2'],
+    ['sea-port:1', 'sea-promenade:4'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur
@@ -235,5 +246,7 @@ export const HOUSE: ZoneSource = {
     'sea-centre': { x: 10.4, y: 0.2, w: 4.6, h: 2.0, page: 'sea' },
     'sea-beach': { x: 2.2, y: 4.3, w: 13.4, h: 1.6, page: 'sea' },
     'sea-rocks': { x: -9.4, y: 4.0, w: 11.2, h: 2.2, page: 'sea' },
+    'sea-lighthouse': { x: -11.6, y: -2.6, w: 2.0, h: 6.4, page: 'sea' },
+    'sea-port': { x: -9.4, y: 1.0, w: 9.0, h: 1.6, page: 'sea' },
   },
 };

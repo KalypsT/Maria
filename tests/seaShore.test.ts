@@ -195,7 +195,7 @@ describe('la première marée et le banc des marées (D-99)', () => {
 
   it('le banc : après la première marée, rejouable, retourne la marée dans le noir, au sec aux deux marées', () => {
     const found = benches(HOUSE_STORY);
-    expect(found.map((b) => b.room)).toEqual(['sea-promenade']);
+    expect(found.map((b) => b.room)).toEqual(['sea-promenade', 'sea-port']);
     const bench = trigger('sea-bench-promenade');
     expect(bench.repeat).toBe(true);
     expect(bench.when).toEqual({ all: [F.SeaFirstTide] });

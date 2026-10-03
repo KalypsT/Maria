@@ -16,6 +16,7 @@
 ; @tide: 28 22
 ; @sea: 1 1 139 31
 ; @waves: 20 right
+; @door: 2 6 19
 ; @leg: 144,17 8,19 easy wall-jump
 ; @leg: 144,17 8,19 hard wall-jump high
 ; @leg: 8,19 53,27 hard slide

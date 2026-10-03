@@ -565,6 +565,26 @@ export const DECOR_KINDS: Readonly<
   beacon: { furniture: true },
   searock: { furniture: true },
   lighthousefoot: { furniture: false },
+  // Le phare et le port (D-100).
+  lighthousecore: { furniture: false },
+  lighthousestair: { furniture: true },
+  keeperfloor: { furniture: true },
+  lampfloor: { furniture: true },
+  lighthousewall: { furniture: true },
+  lamproom: { furniture: false },
+  lens: { furniture: true },
+  seachart: { furniture: false },
+  breakwaterwalk: { furniture: true },
+  harbourmud: { furniture: true },
+  sailboat: { furniture: true },
+  fishingboat: { furniture: true },
+  pontoon: { furniture: true },
+  harbourquay: { furniture: true },
+  quayladder: { furniture: true },
+  drainpipe: { furniture: false },
+  harbouroffice: { furniture: false },
+  harbourcrane: { furniture: true },
+  frozengull: { furniture: false, sky: true },
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */

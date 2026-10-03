@@ -115,6 +115,11 @@ export const StoryFlag = {
    */
   SeaFirstTide: 'sea.first-tide',
   /**
+   * Du haut du phare (D-100), Céleste a vu la lueur sous le carrousel bâché, au bout de la jetée : la
+   * fête du soir viendra (PR 5).
+   */
+  SeaSawCarousel: 'sea.saw-carousel',
+  /**
    * La marée est haute (D-95), à la station balnéaire : la seule étape réversible (les bancs des
    * marées la posent et la retirent). Les salles de marée prennent leur variante haute.
    */

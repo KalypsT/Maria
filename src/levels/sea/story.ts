@@ -23,8 +23,9 @@ const FISHING = { all: [F.SeaArrived], none: [F.SeaFirstTide] };
 const AFTER_TIDE = { all: [F.SeaFirstTide] };
 /** La maîtresse sur le sable, pendant la pêche à pied. */
 const TEACHER_BEACH = { col: 134, row: 23 };
-/** Le banc des marées de la promenade : on s'y assoit (debout sur la tuile du dessus). */
+/** Les bancs des marées (on s'y assoit, debout sur la tuile du dessus) : la promenade, le port. */
 const PROMENADE_BENCH = { col: 61, row: 23 };
+const PORT_BENCH = { col: 141, row: 16 };
 
 /**
  * Le banc des marées (D-95, D-99) : Agir, Céleste s'assoit et regarde la mer ; le noir ; la marée a
@@ -133,31 +134,25 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'teacher-promenade' },
     ],
   },
-  // Le banc des marées de la promenade (D-95) ; celui du port viendra avec le port (PR 4).
+  // Les bancs des marées (D-95) : sur la promenade, face à la plage ; devant la capitainerie du port.
   tideBench('sea-bench-promenade', 'sea-promenade', PROMENADE_BENCH),
+  tideBench('sea-bench-port', 'sea-port', PORT_BENCH),
   {
-    // La porte du phare, au bout des rochers (PLACEHOLDER jusqu'à la PR 4) : « ? ».
-    id: 'sea-lighthouse-door',
-    room: 'sea-rocks',
-    on: 'interact',
-    area: { col: 4, row: 17, w: 6, h: 3 },
-    mark: { col: 6, row: 15 },
-    when: {},
-    lock: false,
-    repeat: true,
-    steps: [{ do: 'thought', icon: 'question', ms: S.thoughtMs }],
-  },
-  {
-    // La grille du port, fermée (PLACEHOLDER jusqu'à la PR 4) : « ? ».
-    id: 'sea-port-gate',
-    room: 'sea-promenade',
-    on: 'interact',
-    area: { col: 1, row: 22, w: 5, h: 3 },
-    mark: { col: 3, row: 20 },
-    when: {},
-    lock: false,
-    repeat: true,
-    steps: [{ do: 'thought', icon: 'question', ms: S.thoughtMs }],
+    // La galerie du phare (D-100) : tout au bout de la jetée, une lueur turquoise sous le carrousel
+    // bâché ; Céleste regarde (« ? »). La fête du soir viendra (PR 5).
+    id: 'sea-carousel-seen',
+    room: 'sea-lighthouse',
+    on: 'touch',
+    area: { col: 28, row: 8, w: 5, h: 4 },
+    when: { all: [F.SeaFirstTide], none: [F.SeaSawCarousel] },
+    lock: true,
+    steps: [
+      { do: 'sparkle', area: { col: 30, row: 4, w: 3, h: 4 }, ms: S.cradleSparkleMs },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'thought', icon: 'question', ms: S.thoughtMs },
+      { do: 'flag', id: F.SeaSawCarousel },
+      { do: 'wait', ms: S.thoughtMs },
+    ],
   },
 ];
 
@@ -216,8 +211,12 @@ const PROPS: StoryProp[] = [
   },
 ];
 
-/** La sortie de la gare de la mer : on part ensemble, avec la classe (la maîtresse le rappelle). */
+/**
+ * La sortie de la gare de la mer : on part ensemble, avec la classe (la maîtresse le rappelle). La
+ * grille du port (D-100) : ouverte après la première marée (le temps libre).
+ */
 const LOCKED: StoryData['lockedRooms'] = [
+  { room: 'sea-promenade', exit: 4, when: { none: [F.SeaFirstTide] }, icon: 'question' },
   {
     room: 'sea-station',
     exit: 2,
