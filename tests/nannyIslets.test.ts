@@ -8,7 +8,13 @@ import { storyProblems } from '../src/core/story/storyProblems';
 import { isMappedRoom, isStrangeRoom, mapPage } from '../src/core/world/zone';
 import { mapProblems } from '../src/core/world/mapModel';
 import { HOUSE_STORY } from '../src/levels/house/story';
-import { ISLET_ROGER, ISLET_SHAPE_BOX, NAP_LIGHTS, NANNY_ARRIVAL } from '../src/levels/nanny/story';
+import {
+  ISLET_PINK_KITCHEN,
+  ISLET_ROGER,
+  ISLET_SHAPE_BOX,
+  NAP_LIGHTS,
+  NANNY_ARRIVAL,
+} from '../src/levels/nanny/story';
 import {
   lanternNodes,
   reachableNodes,
@@ -84,6 +90,26 @@ const ISLETS: readonly Islet[] = [
     secrets: 3,
     closed: ['nanny-school'],
   },
+  {
+    name: 'la gare et le train d’autrefois (D-114)',
+    rooms: ['nanny-station', 'nanny-train'],
+    entry: [6, 'nanny-station', 1],
+    done: F.NannyStationDone,
+    trigger: 'nanny-pink-kitchen',
+    object: { id: 'nanny-pink-kitchen', kind: 'pink-kitchen', room: 'nanny-train' },
+    at: ISLET_PINK_KITCHEN,
+    flashback: null,
+    light: 'nap-light-station',
+    lightIndex: 2,
+    shortcuts: [
+      ['nanny-train', 2],
+      ['nanny-house', 7],
+      ['nanny-train', 3],
+      ['nanny-street', 4],
+    ],
+    secrets: 3,
+    closed: ['nanny-station', 'nanny-train'],
+  },
 ];
 const ALL = ['nanny-entry', 'nanny-house', ...ISLETS.flatMap((i) => i.rooms)];
 
@@ -125,6 +151,9 @@ describe('les îlots de mémoire de la maison de la nounou (D-112, D-113)', () =
     expect(zone.destination('nanny-street', 2)).toEqual({ room: 'nanny-house', exit: 4 });
     // Le raccourci vers l'îlot voisin (D-113) : de la rue à la chambre d'autrefois.
     expect(zone.destination('nanny-street', 3)).toEqual({ room: 'nanny-bed', exit: 3 });
+    expect(zone.destination('nanny-station', 2)).toEqual({ room: 'nanny-train', exit: 1 });
+    expect(zone.destination('nanny-train', 2)).toEqual({ room: 'nanny-house', exit: 7 });
+    expect(zone.destination('nanny-train', 3)).toEqual({ room: 'nanny-street', exit: 4 });
     // Les passages dessinés en PR 3 : l'étagère de gauche, le haut de la bibliothèque.
     const house = level('nanny-house');
     expect(house.decor.some((d) => d.kind === 'passagebed' && d.col === 1)).toBe(true);

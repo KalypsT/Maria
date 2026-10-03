@@ -278,6 +278,23 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
       ctx.lineTo(cx + r.w * 0.09, cy);
       ctx.stroke();
     },
+    stationgate(a, r) {
+      // Le raccourci de l'îlot 3 (D-114) : la même petite arche, l'horloge de quai pendue et un rail.
+      arch(a, r);
+      const { ctx } = a;
+      const cx = r.x + r.w / 2;
+      const cy = r.y + r.h * 0.45;
+      ctx.strokeStyle = GLOW_SOFT;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(cx, r.y + r.w * 0.25);
+      ctx.lineTo(cx, cy - r.w * 0.16);
+      ctx.moveTo(cx + r.w * 0.16, cy);
+      ctx.arc(cx, cy, r.w * 0.16, 0, Math.PI * 2);
+      ctx.moveTo(r.x + 3, r.y + r.h - 3);
+      ctx.lineTo(r.x + r.w - 3, r.y + r.h - 3);
+      ctx.stroke();
+    },
     cantower(a, r) {
       // L'arrosoir de papa (D-49), géant, debout cette fois (D-112) : son corps est la collision ;
       // l'anse dessinée sur le haut, le bec qui part vers la droite, des bandes. On passe dessous.

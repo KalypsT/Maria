@@ -4,7 +4,8 @@
 ; vol. Au bout, sur l'abribus, la boîte à formes (D-64). Tombée dans la rue, l'échafaudage ramène
 ; au toit. Défi : derrière deux rideaux, le rebord du lampadaire et sa trouvaille. Sortie (1) vers
 ; l'école ; portes (2) vers la maison et (3) vers la chambre d'autrefois, ouvertes une fois la
-; boîte à formes retrouvée.
+; boîte à formes retrouvée ; porte (4), sous l'abribus, vers le train d'autrefois (îlot 3), ouverte
+; une fois la cuisine rose retrouvée.
 ; @name: La rue d'autrefois
 ; @world: strange
 ; @mapped: yes
@@ -13,6 +14,7 @@
 ; @ambient: #1a1d2c
 ; @door: 2 72 19
 ; @door: 3 79 19
+; @door: 4 83 26
 ; @shift: memory 22 1 1 14
 ; @shift: present 25 1 1 14
 ; @shift: memory 30 12 9 1
@@ -34,6 +36,7 @@
 ; @decor: lamppost 88 17 3 10
 ; @decor: schoolgate 71 15 3 5
 ; @decor: bedgate 78 16 3 4
+; @decor: stationgate 82 22 3 5
 ; Légende : # mur/sol, b bois (plein), - étagère et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S trouvaille, 1-9 sorties.
 ############################################################################################
 #.....................!..!..................!...................!..!................!.!....#

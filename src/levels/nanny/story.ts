@@ -24,6 +24,8 @@ export const ISLET_ROGER = { col: 20, row: 6 };
 const BED_DOOR = { col: 24, row: 6 };
 /** La boîte à formes (D-113), sur l'abribus de la rue d'autrefois (îlot 2). */
 export const ISLET_SHAPE_BOX = { col: 76, row: 19 };
+/** La cuisine rose (D-114), sur le toit de la dernière voiture du train d'autrefois (îlot 3). */
+export const ISLET_PINK_KITCHEN = { col: 74, row: 8 };
 /**
  * Les veilleuses de la porte de la sieste (D-107, D-110), une par îlot, dans l'ordre des îlots :
  * la tuile où chacune est posée (dessinée par `napdoor`, allumée par l'objet de l'îlot).
@@ -136,6 +138,32 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
+    // L'îlot 3 (D-114) : sur le toit de la dernière voiture du train d'autrefois, la cuisine rose
+    // (D-88). On la regarde (son souvenir jouable est trop long au milieu d'un îlot, D-107 : un
+    // cœur). Les deux passages près d'elle s'ouvrent, vers la maison et vers la rue d'autrefois ;
+    // une veilleuse s'allume sur la porte de la sieste.
+    id: 'nanny-pink-kitchen',
+    room: 'nanny-train',
+    on: 'interact',
+    area: { col: ISLET_PINK_KITCHEN.col - 2, row: ISLET_PINK_KITCHEN.row - 2, w: 5, h: 3 },
+    mark: { col: ISLET_PINK_KITCHEN.col, row: ISLET_PINK_KITCHEN.row - 3 },
+    when: { all: [F.NannyHouse], none: [F.NannyStationDone] },
+    lock: true,
+    steps: [
+      {
+        do: 'sparkle',
+        area: { col: ISLET_PINK_KITCHEN.col - 1, row: ISLET_PINK_KITCHEN.row - 2, w: 3, h: 3 },
+        ms: S.cradleSparkleMs + 600,
+      },
+      { do: 'wait', ms: S.cradleSparkleMs },
+      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs },
+      { do: 'flag', id: F.NannyStationDone },
+      { do: 'sparkle', area: { col: 70, row: 4, w: 9, h: 5 }, ms: S.lookMs },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
+  {
     // Dans la maison (D-110) : tout est immense. Céleste regarde ; le reflet n'est plus là.
     id: 'nanny-house',
     room: 'nanny-house',
@@ -178,6 +206,22 @@ const PROPS: StoryData['props'] = [
     kind: 'nap-light-school',
     ...NAP_LIGHTS[1],
     when: { all: [F.NannySchoolDone] },
+  },
+  // La cuisine rose (D-114), sur le toit du train : elle y reste.
+  {
+    id: 'nanny-pink-kitchen',
+    room: 'nanny-train',
+    kind: 'pink-kitchen',
+    ...ISLET_PINK_KITCHEN,
+    when: {},
+  },
+  // La veilleuse de l'îlot 3, turquoise, une fois la cuisine rose retrouvée.
+  {
+    id: 'nap-light-station',
+    room: 'nanny-house',
+    kind: 'nap-light-station',
+    ...NAP_LIGHTS[2],
+    when: { all: [F.NannyStationDone] },
   },
   // Le reflet (D-110) : Céleste toute petite dans la vitre du miroir, puis de l'autre côté.
   {
@@ -225,6 +269,11 @@ const LOCKED: StoryData['lockedRooms'] = [
   { room: 'nanny-house', exit: 4, when: { none: [F.NannySchoolDone] }, hidden: true },
   { room: 'nanny-street', exit: 3, when: { none: [F.NannySchoolDone] }, hidden: true },
   { room: 'nanny-bed', exit: 3, when: { none: [F.NannySchoolDone] }, hidden: true },
+  // Ceux de l'îlot 3 (D-114), près de la cuisine rose : vers la maison et vers l'îlot 2.
+  { room: 'nanny-train', exit: 2, when: { none: [F.NannyStationDone] }, hidden: true },
+  { room: 'nanny-house', exit: 7, when: { none: [F.NannyStationDone] }, hidden: true },
+  { room: 'nanny-train', exit: 3, when: { none: [F.NannyStationDone] }, hidden: true },
+  { room: 'nanny-street', exit: 4, when: { none: [F.NannyStationDone] }, hidden: true },
 ];
 
 /** Morceaux de l'histoire de la maison de la nounou, ajoutés à ceux de la maison (`HOUSE_STORY`). */

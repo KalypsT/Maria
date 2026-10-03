@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**L'avant-dernier niveau** (niveau 7, « la maison de la nounou », D-107) : plan validé en 12 PR (la bascule, la maison et le miroir, l'effacement, quatre îlots de mémoire, le torchon blanc, le boss, Eden, le réveil et la phase 4). **PR 1 faite : la bascule (moteur, analyse, parcours d'essai 15)** (D-108) , **PR 2 faite : le dessin des deux couches, le bouton « Basculer », l'aide** (D-109), **PR 3 faite : la porte du couloir, l'entrée et le miroir, la maison, la carte** (D-110) **PR 4 faite : l'effacement (le système) et le parcours d'essai 16** (D-111, fusionnées), **PR 5 faite : l'îlot 1, la chambre d'autrefois et le jardin renversé (Roger)** (D-112) et **PR 6 faite : l'îlot 2, l'école et la rue d'autrefois (la boîte à formes)** (D-113), sur `ccr-3d597f8d-070zee`. Suite : les îlots 3 et 4 (PR 7 et 8) ; **essai sur téléphone** (parcours 15 et 16, l'entrée, la maison, les îlots 1 et 2).
+**L'avant-dernier niveau** (niveau 7, « la maison de la nounou », D-107) : plan validé en 12 PR (la bascule, la maison et le miroir, l'effacement, quatre îlots de mémoire, le torchon blanc, le boss, Eden, le réveil et la phase 4). **PR 1 faite : la bascule (moteur, analyse, parcours d'essai 15)** (D-108) , **PR 2 faite : le dessin des deux couches, le bouton « Basculer », l'aide** (D-109), **PR 3 faite : la porte du couloir, l'entrée et le miroir, la maison, la carte** (D-110) **PR 4 faite : l'effacement (le système) et le parcours d'essai 16** (D-111, fusionnées), **PR 5 faite : l'îlot 1, la chambre d'autrefois et le jardin renversé (Roger)** (D-112) **PR 6 faite : l'îlot 2, l'école et la rue d'autrefois (la boîte à formes)** (D-113) et **PR 7 faite : l'îlot 3, la gare et le train d'autrefois (la cuisine rose)** (D-114), sur `ccr-3d597f8d-070zee`. Suite : l'îlot 4 (PR 8) ; **essai sur téléphone** (parcours 15 et 16, l'entrée, la maison, les îlots 1 à 3).
 
 **La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101, fusionnées) et **PR 6 faite : la fête engloutie** (D-102) **PR 7 faite : le rythme de la vague, parcours d'essai 14** (D-103) **PR 8 faite : la vague dans le niveau, le livre musical** (D-104) et **PR 9 faite : le court souvenir, la nuit, le couloir en boucle, la fin** (D-105), sur `ccr-014503d9-cj0c7a`. **Le niveau 6 est complet** (sa fin reste un PLACEHOLDER jusqu'au niveau 7). Suite : essais sur téléphone, puis le niveau 7. Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
 
@@ -19,6 +19,17 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### L'avant-dernier niveau, PR 7 : l'îlot 3, la gare et le train d'autrefois (D-114)
+
+- **Le mur de droite de la maison** mène à **la gare d'autrefois** : sous la façade, une fente qu'on ne passe qu'en glissant, deux murs de couches opposées ; du quai haut, le crochet sur **des caténaires d'une seule couche**. Dans le souvenir, le kiosque disparaît : une trouvaille.
+- **Le train d'autrefois** : sur le toit des voitures, le soufflet (on glisse), une caténaire du souvenir derrière un rideau de ronces ; au bout, **la cuisine rose** (un cœur). Défi : le rebord du signal (une trouvaille) ; dans la première voiture, ouverte dans le souvenir, une trouvaille.
+- Après la cuisine rose : **une porte vers la maison**, **une vers la rue d'autrefois**, **une veilleuse turquoise**.
+- Correction : les câbles d'une seule couche s'affichent dans leur couche (l'autre couche en fil fantôme).
+- DEBUG → Histoire : « les îlots de la chambre, de l'école et de la gare faits ».
+- Tests : TESTS_PR7. Vérifié dans Chromium : la gare et le train dans les deux couches, les câbles de chaque couche, la cuisine rose, la porte vers la rue, les trois veilleuses.
+- [ ] À vérifier sur téléphone : la fente sous la façade se comprend-elle (glisser) ? Le fil fantôme d'une caténaire de l'autre couche se voit-il assez pour prévoir ?
+- [ ] Le vol de la gare (moyen, deux caténaires de couches opposées) : agréable ou trop chargé au pouce (Saut tenu, Basculer) ?
 
 ### L'avant-dernier niveau, PR 6 : l'îlot 2, l'école et la rue d'autrefois (D-113)
 

@@ -37,7 +37,7 @@ import {
   type Layer,
   type LevelData,
 } from '../core/level/LevelData';
-import { atLayer, commonLayer, layerOf } from '../core/level/layers';
+import { atLayer, commonLayer, layerOf, otherLayer } from '../core/level/layers';
 import { LayerShift, ShiftEvent, type ShiftHost } from '../core/player/LayerShift';
 import { EraseState, type EraseHost } from '../core/boss/Erase';
 import { eraseRoot, erasedLevel } from '../core/level/erase';
@@ -478,7 +478,7 @@ export class GameScene extends Phaser.Scene {
     this.combatView.setArt(this.artScale, this.palette());
     this.worldView = new WorldView(this, this.run, this.pickups);
     this.worldView.setArt(this.artScale, this.strangeWorld || isStrangeRoom(this.level));
-    this.worldView.setCables(this.level.cables);
+    this.showCables();
     this.trainView = new TrainView(this, this.combat);
     this.trainView.setArt(this.artScale);
     this.trainView.rebuild();
@@ -1300,6 +1300,7 @@ export class GameScene extends Phaser.Scene {
     this.run.setLayer(target);
     this.combat.setLayer(target);
     this.shiftView.show(to, this.erase?.masks ?? null);
+    this.showCables();
     return true;
   }
 
@@ -1348,6 +1349,7 @@ export class GameScene extends Phaser.Scene {
     this.run.setLayer(target);
     this.combat.setLayer(target);
     this.shiftView.show(layer, erase.masks);
+    this.showCables();
   }
 
   /** Un groupe peut prendre ces couches : il n'apparaît pas sur Céleste, dans sa couche (D-111). */
@@ -1382,6 +1384,21 @@ export class GameScene extends Phaser.Scene {
     this.combat.setLayer(target);
     this.layerShift.layer = layer;
     this.shiftView.show(layer, this.erase?.masks ?? null);
+    this.showCables();
+  }
+
+  /** Les câbles de la couche active, et en fantôme ceux de l'autre couche (D-107). */
+  private showCables(): void {
+    const level = this.level;
+    if (!level.layers) {
+      this.worldView.setCables(level.cables);
+      return;
+    }
+    const other = atLayer(level, otherLayer(layerOf(level))).cables;
+    this.worldView.setCables(
+      level.cables,
+      other.filter((c) => !level.cables.includes(c)),
+    );
   }
 
   /** La variante d'une salle à la marée du moment (D-95) ; une salle sans marée est inchangée. */
@@ -1432,7 +1449,7 @@ export class GameScene extends Phaser.Scene {
     this.pickups.load(level, abilities, collectibles);
     this.applyAbilities();
     this.worldView.rebuild();
-    this.worldView.setCables(level.cables);
+    this.showCables();
     this.props.load(this.story.data.props, level.id, this.story.flags);
     this.storyView.rebuild();
     this.storyView.clearThought();
