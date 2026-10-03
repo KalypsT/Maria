@@ -67,7 +67,8 @@ describe.each([false, true])('maison (D-25), escalade %s', (climb) => {
           mapPage(zone, room) !== 'station' &&
           !room.startsWith('station-') &&
           !room.startsWith('train-') &&
-          !room.startsWith('sea-'),
+          !room.startsWith('sea-') &&
+          !room.startsWith('nanny-'),
       );
       expect(missing).toEqual(climb ? [] : ['attic', 'living-strange', 'shadows']);
       expect([...seen].filter((n) => roomOf(n).startsWith('garden-'))).toEqual([]);
