@@ -5,7 +5,8 @@ import type { LevelChase } from '../level/LevelData';
 import type { Box } from '../physics/gridCollision';
 
 /** Événements du dernier pas de la poursuite (masque de bits). */
-export const ChaseEvent = { None: 0, Contact: 1, Trip: 2, End: 4 } as const;
+/** `Wake` : la fin de l'attente du départ (ou d'une réapparition) : il se met en marche. */
+export const ChaseEvent = { None: 0, Contact: 1, Trip: 2, End: 4, Wake: 8 } as const;
 
 /** Le dos de Céleste (ses pieds, vers le haut) doit passer derrière le front de cette profondeur pour le toucher (px). */
 const CONTACT_DEPTH_PX = 3;
@@ -41,6 +42,8 @@ export class Chase {
   readonly sign: number;
   private pauseSteps = 0;
   private needsRestart = true;
+  /** Attente du départ en cours (et non d'un contact ou d'un croc-en-jambe). */
+  private waking = false;
   private readonly tripsUsed: Uint8Array;
   private readonly dt: number;
   /** Ligne d'arrivée et limites des phases sur l'axe de la course (px). */
@@ -128,6 +131,10 @@ export class Chase {
         this.stepHz,
       );
       this.tripsUsed.fill(0);
+      this.waking = this.pauseSteps > 0;
+      if (!this.waking) {
+        this.events |= ChaseEvent.Wake;
+      }
     }
     if (this.done) {
       this.axis -= SINK_SPEED * this.dt;
@@ -151,6 +158,10 @@ export class Chase {
     this.phase = phase;
     if (this.pauseSteps > 0) {
       this.pauseSteps--;
+      if (this.pauseSteps === 0 && this.waking) {
+        this.waking = false;
+        this.events |= ChaseEvent.Wake;
+      }
     } else {
       let speed = (data.phases[phase]?.speed ?? 0) * p.chaseSpeedScale;
       const behind = (rear - this.axis) / T - p.chaseCatchUpGapTiles;
@@ -178,12 +189,14 @@ export class Chase {
       this.tripsUsed[i] = 1;
       this.axis -= trip.recoil * T;
       this.pauseSteps = msToSteps(p.chaseTripPauseMs, this.stepHz);
+      this.waking = false;
       this.events |= ChaseEvent.Trip;
       this.jolts++;
     }
     if (!invulnerable && this.axis > rear + CONTACT_DEPTH_PX) {
       this.axis = Math.min(this.axis, rear) - p.chaseContactRecoilTiles * T;
       this.pauseSteps = msToSteps(p.chaseContactPauseMs, this.stepHz);
+      this.waking = false;
       this.events |= ChaseEvent.Contact;
       this.jolts++;
       return true;

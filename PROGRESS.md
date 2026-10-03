@@ -18,6 +18,14 @@
 
 ## Fait
 
+### Retours de partie : la chevillette, le boss de la tour, des paliers (D-60, D-102)
+
+- **Papa au potager** montre d'abord la ficelle rouge et la chevillette (nouveau pictogramme `cord`), puis le portillon : on savait où aller, pas quoi faire.
+- **Le boss de la tour** se voit maintenant : sous le bas de l'écran, sa crête turquoise et la casquette dépassent (plus pâles s'il est loin) ; il se met en marche avec une secousse. Difficulté inchangée.
+- **Paliers de repos** à mi-hauteur de trois cheminées à saut mural : jardin renversé, objets perdus (monde étrange de la gare), objets trouvés (gare).
+- Vérifié dans Chromium : la crête du boss au bas de l'écran à l'arrivée dans la tour, les trois paliers.
+- [ ] À vérifier sur téléphone : la bulle « ficelle » de papa se comprend-elle ? Voit-on le boss arriver, sans qu'il gêne la vue ? Les paliers suffisent-ils, ou faut-il resserrer les cheminées d'une case ?
+
 ### La station balnéaire, PR 5 : la jetée, la fête, le soir (D-101)
 
 - **Le soir** : après le carrousel vu du phare, la maîtresse emmène la classe à la fête ; toute la baie passe au soir.

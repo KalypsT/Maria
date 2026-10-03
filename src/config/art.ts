@@ -1007,6 +1007,24 @@ export const TRAIN_RIDE = {
 } as const;
 
 /**
+ * Poursuite vers le haut (boss de la tour) : il est souvent sous le bas de l'écran (la vue monte au-
+ * dessus de Céleste). Il dépasse alors au bas de l'écran (sa crête et la casquette), plus pâle
+ * quand il est loin ; il se met en marche avec une secousse. Visuel seulement : la collision reste
+ * celle du vrai front. PROVISOIRE.
+ */
+export const CHASE_VIEW = {
+  /** Hauteur du liseré au-dessus du bas de l'écran quand il est dessous (px logiques). */
+  peekPx: 10,
+  /** Distance sous l'écran (tuiles) à laquelle la crête est la plus pâle. */
+  peekFadeTiles: 10,
+  /** Opacité la plus faible de la crête (au plus loin). */
+  peekMinAlpha: 0.45,
+  /** Secousse quand il se met en marche (ms, force en fraction de `STRANGE_FX.shakePx`). */
+  wakeShakeMs: 700,
+  wakeShakeStrength: 0.6,
+} as const;
+
+/**
  * Avant-plan (D-72) : herbes et fleurs posées au bas de l'écran, dehors seulement (dedans, des
  * jouets flous se lisaient comme des taches). PROVISOIRE.
  */

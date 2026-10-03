@@ -1266,6 +1266,20 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Tests** (`seaFair.test.ts`) : l'arche ouverte le soir, le soir sur la baie, le script du soir, **les chaises volantes** (une fois par passage, couchée en dessous), le carrousel et son présage, **toute la baie avec la jetée, aux deux marées : jamais coincée**, le carrousel atteint. Les tronçons (`legs.test.ts`) : trois.
 - **Sauvegarde** : aucune migration (étape `sea.evening`, une trouvaille neuve).
 
+## D-102 — Retours de partie : le boss de la tour visible, des paliers dans trois cheminées
+
+- **Le boss de la tour ne se voyait jamais** (retour de l'utilisateur : « jamais vu le boss ») : la poursuite marchait (testé en simulation et dans le jeu), mais la vue montre environ 7 tuiles sous Céleste (`; @camera: up`), il part 9 tuiles sous ses pieds (sous le sol à l'arrivée) et ne rattrape qu'au-delà de 12 tuiles : un joueur correct le garde toujours sous le bas de l'écran. Choix de l'utilisateur, **visuel seulement, difficulté inchangée** :
+  - **il dépasse au bas de l'écran** quand il est dessous : sa crête, son liseré turquoise et la casquette, à `CHASE_VIEW.peekPx` (10 px) du bas, plus pâle quand il est loin (jusqu'à `peekMinAlpha` à `peekFadeTiles` tuiles) ; la collision reste celle du vrai front ;
+  - **il se met en marche avec une secousse** (nouvel événement `ChaseEvent.Wake`, à la fin de l'attente du départ ou d'une réapparition ; poursuite vers le haut seulement, le chariot du train ne change pas).
+  - Réglages `CHASE_VIEW` dans `src/config/art.ts`, PROVISOIRES.
+- **Cheminées à saut mural trop exigeantes** (retour : « timing trop serré, précision quasi parfaite ; j'aime la difficulté mais c'est frustrant ») : les plus larges, au seuil « moyen ». Choix de l'utilisateur : **des paliers de repos**, sans toucher à la largeur ni à la physique. Une planche traversable de 2 cases contre le mur de gauche, à mi-hauteur : une erreur ne fait plus tout recommencer, chaque moitié demande toujours le saut mural.
+  - Jardin renversé (cheminée de 4, entre les tuteurs) : une branche, ligne 13 ;
+  - Objets perdus (monde étrange de la gare, cheminée de 5) : une valise qui flotte, ligne 15 ;
+  - Objets trouvés (gare, cheminée de 5 entre l'armoire et les casiers) : une étagère à chapeau (`hatshelf`, un chapeau oublié), ligne 19.
+  - Si ce n'est pas assez, l'étape suivante proposée : resserrer ces cheminées d'une case.
+- **Tests** : `chase.test.ts` (le réveil, une fois au départ, une fois à la réapparition) ; les difficultés exactes des trois salles et les tests de ces salles sont inchangés.
+- **Sauvegarde** : aucune migration.
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

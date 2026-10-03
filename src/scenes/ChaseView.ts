@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { CHASE_VIEW } from '../config/art';
 import { TILE_SIZE as T } from '../config/display';
 import type { CombatWorld } from '../core/combat/CombatWorld';
 import { Tile, tileAt, type LevelData } from '../core/level/LevelData';
@@ -146,7 +147,8 @@ export class ChaseView {
       .setDepth(9);
   }
 
-  render(): void {
+  /** `viewBottom` : bas de la vue de la caméra dans le monde (px). */
+  render(viewBottom: number): void {
     const chase = this.combat.chase;
     if (!chase) {
       return;
@@ -177,7 +179,15 @@ export class ChaseView {
       return;
     }
     const breath = Math.sin((now / BREATH_MS) * Math.PI * 2) * BREATH_PX;
-    const y = chase.front + breath;
+    // Sous le bas de l'écran, sa crête dépasse quand même (plus pâle s'il est loin) : on sait qu'il
+    // est là, et d'où il vient. Une fois la poursuite finie, il redescend hors de la vue.
+    const peek = chase.done ? chase.front : viewBottom - CHASE_VIEW.peekPx;
+    const below = Math.max(0, chase.front - peek);
+    const alpha = Math.max(CHASE_VIEW.peekMinAlpha, 1 - below / (CHASE_VIEW.peekFadeTiles * T));
+    this.top.setAlpha(alpha);
+    this.body.setAlpha(alpha);
+    this.cap.setAlpha(alpha);
+    const y = Math.min(chase.front, peek) + breath;
     // Le bord haut dépasse un peu au-dessus du front (les valises empilées) : le contact se fait au
     // niveau du front lui-même, sous le liseré.
     this.top.setPosition(0, y - T);
