@@ -17,8 +17,10 @@ interface Kid {
   legs: string;
   legsDark: string;
   shoe: string;
-  /** Coiffure : deux macarons, une casquette, un carré. */
-  style: 'puffs' | 'cap' | 'bob';
+  /** Coiffure : deux macarons, une casquette, un carré, deux couettes. */
+  style: 'puffs' | 'cap' | 'bob' | 'pigtails';
+  /** Lunettes rondes (Céleste, spec §2). */
+  glasses?: boolean;
 }
 
 /** La camarade (une fille, D-83). */
@@ -55,6 +57,24 @@ const KID_BOB: Kid = {
   shoe: '#f1b9c7',
   style: 'bob',
 };
+/**
+ * Céleste toute petite (D-110), le reflet du miroir de la nounou : couettes courtes, lunettes rondes
+ * roses, le pyjama du début (PLACEHOLDER, comme `TODDLER_LOOK`).
+ */
+const TODDLER: Kid = {
+  skin: '#f0c7a5',
+  skinDark: '#d8ab88',
+  hair: '#6b4630',
+  top: '#8fb3e0',
+  topDark: '#7a9cc8',
+  legs: '#8fb3e0',
+  legsDark: '#7a9cc8',
+  shoe: '#f1b9c7',
+  style: 'pigtails',
+  glasses: true,
+};
+/** Céleste toute petite est dessinée comme un enfant de la classe, en plus petit. */
+const TODDLER_SCALE = 0.8;
 const EYE = '#2b1d18';
 const BLUSH = 'rgba(230,120,130,0.35)';
 const BLANKETS = ['#7a8fc4', '#c48a9a', '#8fb08a'] as const;
@@ -91,6 +111,11 @@ function kidHead(
     ctx.fillStyle = kid.hair;
     disc(ctx, x - r * 0.75, y - r * 0.95, r * 0.62);
     disc(ctx, x + r * 0.45, y - r * 1.05, r * 0.58);
+  } else if (kid.style === 'pigtails') {
+    // Deux petites couettes, de part et d'autre de la tête.
+    ctx.fillStyle = kid.hair;
+    disc(ctx, x - r * 1.1, y - r * 0.2, r * 0.42);
+    disc(ctx, x + r * 0.95, y - r * 0.35, r * 0.38);
   } else if (kid.style === 'bob') {
     ctx.fillStyle = kid.hair;
     round(ctx, x - r * 1.15, y - r * 1.1, r * 2.1, r * 2, r * 0.9);
@@ -123,6 +148,14 @@ function kidHead(
   }
   ctx.fillStyle = BLUSH;
   disc(ctx, x + r * 0.35, y + r * 0.45, r * 0.26);
+  if (kid.glasses) {
+    // Les lunettes rondes roses (spec §2).
+    ctx.strokeStyle = '#e05a8a';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.arc(x + r * 0.5, y + r * 0.05, r * 0.32, 0, Math.PI * 2);
+    ctx.stroke();
+  }
 }
 
 /** Enfant debout ; `wave` : le bras avant levé (0 : le long du corps). */
@@ -262,6 +295,35 @@ export function drawClassCharacter(
   switch (kind) {
     case 'classmate':
       kidStanding(ctx, CLASSMATE, w, h, frame === 0 ? 2.4 : 2.8, false);
+      return true;
+    case 'reflection':
+      // Le reflet du miroir (D-110) : Céleste toute petite, un peu pâle, comme derrière une vitre.
+      ctx.save();
+      ctx.globalAlpha = 0.8;
+      ctx.scale(TODDLER_SCALE, TODDLER_SCALE);
+      kidStanding(
+        ctx,
+        TODDLER,
+        w / TODDLER_SCALE,
+        h / TODDLER_SCALE,
+        frame === 0 ? 0.3 : 0.5,
+        false,
+      );
+      ctx.restore();
+      return true;
+    case 'reflection-through':
+      // De l'autre côté du miroir, elle fait signe.
+      ctx.save();
+      ctx.scale(TODDLER_SCALE, TODDLER_SCALE);
+      kidStanding(
+        ctx,
+        TODDLER,
+        w / TODDLER_SCALE,
+        h / TODDLER_SCALE,
+        frame === 0 ? 2.4 : 2.8,
+        false,
+      );
+      ctx.restore();
       return true;
     case 'classmate-slid':
       kidSlid(ctx, CLASSMATE, w, h, frame);

@@ -76,6 +76,7 @@ import { RunEvent, RunState } from '../core/world/RunState';
 import {
   arrivalPosition,
   isGardenRoom,
+  isMappedRoom,
   isStrangeRoom,
   isStreetRoom,
   mapPage,
@@ -169,6 +170,8 @@ const MAP_TITLES: Readonly<Record<string, string>> = {
   station: 'La gare',
   train: 'Le train',
   sea: 'La mer',
+  // L'avant-dernier niveau (D-107) : la maison de la nounou et ses îlots de mémoire.
+  nanny: 'Chez la nounou',
 };
 
 /** Boîte englobant toutes les salles d'une page de la carte (disposition stable). */
@@ -1326,7 +1329,7 @@ export class GameScene extends Phaser.Scene {
     this.level = level;
     this.layerShift.reset();
     this.zone = zone;
-    if (zone && !isStrangeRoom(level)) {
+    if (zone && isMappedRoom(level)) {
       void this.session.revealRoom(level.id);
     }
     if (isStrangeRoom(level) !== this.drawnStrange) {

@@ -51,6 +51,8 @@ import seaCorridorSand from '../sea/corridor-sand.txt?raw';
 import seaCorridorRoom from '../sea/corridor-room.txt?raw';
 import seaCorridorStation from '../sea/corridor-station.txt?raw';
 import seaCorridorSea from '../sea/corridor-sea.txt?raw';
+import nannyEntry from '../nanny/entry.txt?raw';
+import nannyHouse from '../nanny/house.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -148,6 +150,10 @@ export const HOUSE: ZoneSource = {
     { id: 'sea-corridor-room', text: seaCorridorRoom },
     { id: 'sea-corridor-station', text: seaCorridorStation },
     { id: 'sea-corridor-sea', text: seaCorridorSea },
+    // L'avant-dernier niveau (D-107, D-110) : la maison de la nounou, derrière la porte du couloir,
+    // par l'histoire ; l'entrée et son miroir, puis la maison (salle centrale).
+    { id: 'nanny-entry', text: nannyEntry },
+    { id: 'nanny-house', text: nannyHouse },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -222,6 +228,8 @@ export const HOUSE: ZoneSource = {
     ['sea-corridor-room:2', 'sea-corridor-station:1'],
     ['sea-corridor-station:2', 'sea-corridor-sea:1'],
     ['sea-corridor-sea:2', 'sea-corridor:1'],
+    // La maison de la nounou (D-110).
+    ['nanny-entry:1', 'nanny-house:1'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur
@@ -274,5 +282,8 @@ export const HOUSE: ZoneSource = {
     'sea-lighthouse': { x: -11.6, y: -2.6, w: 2.0, h: 6.4, page: 'sea' },
     'sea-port': { x: -9.4, y: 1.0, w: 9.0, h: 1.6, page: 'sea' },
     'sea-jetty': { x: -9.4, y: -0.8, w: 9.0, h: 1.2, page: 'sea' },
+    // Chez la nounou (D-107) : l'entrée, puis la maison, plus grande ; les îlots viendront autour.
+    'nanny-entry': { x: 0, y: 2.6, w: 4.2, h: 1.3, page: 'nanny' },
+    'nanny-house': { x: 4.6, y: 0.4, w: 6.6, h: 3.5, page: 'nanny' },
   },
 };

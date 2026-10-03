@@ -3,6 +3,7 @@ import type { StoryData, StoryStep, TileArea } from '../../core/story/story';
 import { STATION_STORY } from '../station/story';
 import { TRAIN_STORY } from '../train/story';
 import { SEA_STORY } from '../sea/story';
+import { NANNY_STORY } from '../nanny/story';
 
 /** Haut de la bibliothèque du salon, là où Maria était assise. */
 const LIVING_TOP: TileArea = { col: 46, row: 5, w: 10, h: 3 };
@@ -915,6 +916,8 @@ export const HOUSE_STORY: StoryData = {
     ...TRAIN_STORY.triggers,
     // La station balnéaire (D-98).
     ...SEA_STORY.triggers,
+    // La maison de la nounou (D-110).
+    ...NANNY_STORY.triggers,
   ],
   props: [
     // La gare (D-68).
@@ -923,6 +926,8 @@ export const HOUSE_STORY: StoryData = {
     ...TRAIN_STORY.props,
     // La station balnéaire (D-98).
     ...SEA_STORY.props,
+    // La maison de la nounou (D-110).
+    ...NANNY_STORY.props,
     // La toise de la chambre (D-43), au mur près de la porte.
     {
       id: 'height-chart',
@@ -1285,6 +1290,7 @@ export const HOUSE_STORY: StoryData = {
     ...TRAIN_STORY.omens,
     // La station balnéaire (D-101).
     ...SEA_STORY.omens,
+    ...NANNY_STORY.omens,
   ],
   // Le train en route (D-85).
   moving: TRAIN_STORY.moving,

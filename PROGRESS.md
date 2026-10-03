@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**L'avant-dernier niveau** (niveau 7, « la maison de la nounou », D-107) : plan validé en 12 PR (la bascule, la maison et le miroir, l'effacement, quatre îlots de mémoire, le torchon blanc, le boss, Eden, le réveil et la phase 4). **PR 1 faite : la bascule (moteur, analyse, parcours d'essai 15)** (D-108) et **PR 2 faite : le dessin des deux couches, le bouton « Basculer », l'aide** (D-109), sur `ccr-3d597f8d-070zee`. Suite : **essai sur téléphone** du parcours 15, puis la PR 3 (la porte, l'entrée, le miroir, la maison).
+**L'avant-dernier niveau** (niveau 7, « la maison de la nounou », D-107) : plan validé en 12 PR (la bascule, la maison et le miroir, l'effacement, quatre îlots de mémoire, le torchon blanc, le boss, Eden, le réveil et la phase 4). **PR 1 faite : la bascule (moteur, analyse, parcours d'essai 15)** (D-108) , **PR 2 faite : le dessin des deux couches, le bouton « Basculer », l'aide** (D-109) et **PR 3 faite : la porte du couloir, l'entrée et le miroir, la maison, la carte** (D-110), sur `ccr-3d597f8d-070zee`. Suite : **essai sur téléphone** (parcours 15, l'entrée et la maison), puis la PR 4 (l'effacement et le parcours d'essai 16).
 
 **La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101, fusionnées) et **PR 6 faite : la fête engloutie** (D-102) **PR 7 faite : le rythme de la vague, parcours d'essai 14** (D-103) **PR 8 faite : la vague dans le niveau, le livre musical** (D-104) et **PR 9 faite : le court souvenir, la nuit, le couloir en boucle, la fin** (D-105), sur `ccr-014503d9-cj0c7a`. **Le niveau 6 est complet** (sa fin reste un PLACEHOLDER jusqu'au niveau 7). Suite : essais sur téléphone, puis le niveau 7. Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
 
@@ -19,6 +19,18 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### L'avant-dernier niveau, PR 3 : la porte, l'entrée et le miroir, la maison, la carte (D-110)
+
+- **La porte du couloir** mène, la même nuit, à **l'entrée de la maison de la nounou** (le « ? » provisoire est retiré).
+- **L'entrée** : une fente sur la nuit du dortoir (veilleuse) ; **le grand miroir** : le reflet de Céleste toute petite passe de l'autre côté, Céleste apprend **la bascule** ; la vitre n'existe que dans le présent. Défi : les patères du souvenir jusqu'à l'étagère à chapeaux (une trouvaille).
+- **La maison** : le pouf et le canapé (dessous, dans le souvenir, on glisse jusqu'à une trouvaille), la table basse géante, la porte de la sieste et ses quatre veilleuses éteintes, **la grande bibliothèque** aux étagères alternées (on monte en basculant), le défi du mobile et de la lampe (moyen, une trouvaille). Les passages des quatre îlots sont dessinés (ils s'ouvriront avec leurs PR).
+- **La carte** : une page « Chez la nounou ».
+- DEBUG → Histoire : « la maison de la nounou, l'entrée et le miroir », « la bascule apprise, la maison de la nounou ».
+- Tests : TESTS_PR3. Vérifié dans Chromium : la porte, l'entrée, le miroir et le reflet, la bascule apprise, le passage du miroir, la maison, la bibliothèque dans les deux couches.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « la fin de la station balnéaire », puis la porte du dernier couloir) : l'entrée se comprend-elle ? Le reflet dans le miroir se reconnaît-il comme Céleste toute petite ? Comprend-on qu'il faut l'imiter (basculer) ?
+- [ ] Les patères en contour fantôme donnent-elles envie de revenir ? La bibliothèque (étagères alternées) est-elle agréable ?
+- [ ] La maison paraît-elle immense, à hauteur de tout-petit ? Voit-on les quatre passages des îlots ?
 
 ### L'avant-dernier niveau, PR 2 : le dessin des couches, le bouton « Basculer », l'aide (D-109)
 
