@@ -1255,6 +1255,7 @@ export const HOUSE_STORY: StoryData = {
     ...STATION_STORY.lockedRooms,
     ...TRAIN_STORY.lockedRooms,
     ...SEA_STORY.lockedRooms,
+    ...NANNY_STORY.lockedRooms,
   ],
   omens: [
     // L'oculus de l'école (D-64) : en montant les étagères, tant que la fin n'est pas vécue.

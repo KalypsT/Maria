@@ -630,6 +630,8 @@ export const DECOR_KINDS: Readonly<
   passageschool: { furniture: false },
   passagestation: { furniture: false },
   passagesea: { furniture: false },
+  bedgate: { furniture: false },
+  cantower: { furniture: true },
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */

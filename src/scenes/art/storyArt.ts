@@ -438,6 +438,24 @@ function drawContained(
   ctx.drawImage(image, (w - iw * k) / 2, h - ih * k, iw * k, ih * k);
 }
 
+/** Couleurs des veilleuses de la porte de la sieste, une par îlot (D-112). PLACEHOLDER. */
+const NAP_LIGHT_COLORS = { bed: '255, 170, 200' } as const;
+
+/** Une veilleuse allumée (D-112) : une lueur ronde, centrée 16 px au-dessus du bas du cadre. */
+function drawNapLight(ctx: CanvasRenderingContext2D, w: number, h: number, rgb: string): void {
+  const cx = w / 2;
+  const cy = h - 16;
+  const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, w / 2);
+  glow.addColorStop(0, `rgba(${rgb}, 0.9)`);
+  glow.addColorStop(1, `rgba(${rgb}, 0)`);
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, cy - w / 2, w, w);
+  ctx.fillStyle = `rgb(${rgb})`;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 2.6, 0, Math.PI * 2);
+  ctx.fill();
+}
+
 export function drawProp(
   ctx: CanvasRenderingContext2D,
   kind: PropKind,
@@ -541,6 +559,9 @@ export function drawProp(
       ctx.translate(w / 2, h / 2);
       teaCup(ctx, Math.min(w, h));
       ctx.restore();
+      break;
+    case 'nap-light-bed':
+      drawNapLight(ctx, w, h, NAP_LIGHT_COLORS.bed);
       break;
     case 'site-gap':
       drawSiteGap(ctx, w, h);

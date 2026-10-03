@@ -1,0 +1,96 @@
+; L'avant-dernier niveau (D-107, D-112), îlot de mémoire 1 : la chambre d'autrefois, démesurée,
+; où la haie du jardin renversé a poussé. Le lit, puis la cheminée entre l'armoire et la tête de
+; lit, qui n'existe que dans le souvenir (on y descend dans le présent, on la monte en basculant).
+; En haut, la traversée des ronces : des rideaux de ronces d'une seule couche, des branches de
+; l'autre ; on bascule en plein saut. Défi : la cheminée du pilier, des ronces d'une couche sur
+; chaque mur, jusqu'à l'étagère haute et sa trouvaille. Dans l'armoire, ouverte dans le souvenir,
+; une trouvaille. Sorties : (1) vers la maison, (2) vers le jardin renversé.
+; @name: La chambre d'autrefois
+; @world: strange
+; @mapped: yes
+; @music: strange
+; @difficulty: medium
+; @ambient: #1d1a2a
+; @shift: memory 44 13 1 18
+; @shift: present 35 34 5 3
+; @shift: memory 31 9 1 7
+; @shift: present 24 14 5 1
+; @shift: present 22 9 1 8
+; @shift: memory 15 13 6 1
+; @shift: memory 13 1 1 15
+; @shift: present 9 12 3 1
+; @shift: present 74 10 1 4
+; @shift: present 74 18 1 4
+; @shift: present 74 26 1 4
+; @shift: memory 74 14 1 4
+; @shift: memory 74 22 1 4
+; @shift: memory 74 30 1 4
+; @shift: present 68 1 1 9
+; @shift: memory 66 1 1 9
+; @shift: memory 71 14 1 4
+; @shift: memory 71 22 1 4
+; @shift: memory 71 30 1 3
+; @leg: 72,36 37,12 easy shift
+; @leg: 37,12 3,7 medium shift
+; @leg: 72,36 61,4 hard shift
+; @leg: 72,36 36,36 easy shift
+; @decor: mobile 50 1 5 10
+; @decor: window 56 3 9 7
+; @decor: wardrobe 34 13 6 24
+; @decor: headboard 44 13 1 18
+; @decor: bed 44 31 14 6
+; @decor: toybox 60 34 5 3
+; @decor: giantstake 70 8 1 25
+; @decor: giantstake 60 1 1 12
+; @decor: shelf 40 24 2 1
+; @decor: shelf 61 5 2 1
+; @decor: branch 30 19 4 1
+; @decor: branch 30 16 4 1
+; @decor: branch 24 14 5 1
+; @decor: branch 15 13 6 1
+; @decor: branch 9 12 3 1
+; @decor: hedge 1 23 33 14
+; @decor: hedge 1 8 6 2
+; @decor: hedge 14 1 20 8
+; @decor: rug 58 36 16 1
+; Légende : # mur/sol, b bois et v feuillage (pleins), - branche ou étagère et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S trouvaille, 1-9 sorties.
+############################################################################
+#............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#
+#............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#
+#............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#
+#............!vvvvvvvvvvvvvvvvvvvv..........................bS....!.!......#
+#............!vvvvvvvvvvvvvvvvvvvv..........................bbb...!.!......#
+2............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#
+2............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#
+#vvvvvv......!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!.b....#
+#vvvvvv......!........!........!............................b.....!.!.b....#
+#............!........!........!............................b.........b...!#
+#............!........!........!............................b.........b...!#
+#........---.!........!........!.....C......................b.........b...!#
+#............!.------.!........!..bbbbbb....b.........................b...!#
+#............!........!.-----..!..bbbbbb....b.........................b!..!#
+#............!........!........!..bbbbbb....b.........................b!..!#
+#.....................!.......----bbbbbb....b.........................b!..!#
+#.................................bbbbbb....b.........................b!..!#
+#.................................bbbbbb....b.........................b...!#
+#.............................----bbbbbb....b.........................b...!#
+#.................................bbbbbb....b.........................b...!#
+#.................................bbbbbb....b.........................b...!#
+#.................................bbbbbb....b.........................b!..!#
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbb....b.........................b!..!#
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbbbb..b.........................b!..!#
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbb....b.........................b!..!#
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbb....b.........................b...!#
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbb....b.........................b...!#
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbb....b.........................b...!#
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbb....b.........................b...!#
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbb....b.........................b!..!#
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbb....bbbbbbbbbbbbbb............b!..!#
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbb....bbbbbbbbbbbbbb............b!..!#
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbb....bbbbbbbbbbbbbb................!#
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbb....bbbbbbbbbbbbbb..bbbbb..........#
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbb....bbbbbbbbbbbbbb..bbbbb..........1
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbSbbb....bbbbbbbbbbbbbb..bbbbb...C...P..1
+############################################################################
+############################################################################
+############################################################################

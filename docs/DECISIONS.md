@@ -1481,3 +1481,27 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Sauvegarde iOS** (effacement après 7 jours sans visite hors installation) : export/import de code indispensable.
 - **Carte imparfaite** vs utilité de navigation.
 - **Volume de 15 h** en production solo : vertical slice d'abord.
+
+## D-112 — L'avant-dernier niveau, PR 5 : l'îlot de mémoire 1, la chambre d'autrefois et le jardin renversé (Roger)
+
+- **Plan validé** (D-107). Premier des quatre îlots, ouvert depuis la maison sans condition (ordre libre).
+- **L'accès** : l'étagère de gauche de la maison (son passage `passagebed`, dessiné en PR 3) devient la sortie 2 de la maison, vers **la chambre d'autrefois** (`nanny-bed`) ; sa sortie de gauche mène au **jardin renversé** (`nanny-garden`). Les deux salles sont `; @world: strange`, sur la page « Chez la nounou » (`; @mapped: yes`), musique `strange`, **moyennes**.
+- **La chambre d'autrefois** (76 × 40), la chambre de Céleste démesurée, où la haie du jardin renversé a poussé :
+  - l'arrivée en bas à droite (une lanterne), le coffre à jouets, **le lit** ;
+  - **la cheminée de l'armoire** : entre l'armoire et la tête de lit, qui n'existe que dans le souvenir. On y descend dans le présent (par le lit), on la monte en basculant (un palier à mi-hauteur), jusqu'au dessus de l'armoire (une lanterne) ;
+  - **la traversée des ronces**, sous le plafond bas de la haie : des rideaux de ronces d'une seule couche, des branches de l'autre ; à chaque saut, on bascule en plein vol entre le rideau et la branche (moyen, 167 ms) ; une dernière branche du présent mène au rebord de la sortie ;
+  - **dans l'armoire**, ouverte dans le souvenir, une trouvaille (facile) ;
+  - **le défi** (difficile, 67 ms) : la cheminée du pilier, aux ronces en bandes alternées sur les murs, puis en haut deux rideaux de couches opposées à une tuile d'écart, jusqu'à l'étagère de la trouvaille. Une lanterne à son pied (l'arrivée).
+- **Le jardin renversé** (72 × 32), le jardin renversé (D-49) revenu :
+  - la haie de l'arrivée (une lanterne), puis **trois pots géants** en escalier, dont les touffes de ronces n'existent que dans une couche (on atterrit dans l'autre ; facile, faisable aussi sans basculer en planant) ;
+  - **l'arrosoir géant**, debout cette fois (nouveau dessin `cantower`) : on passe dessous ; on grimpe ses prises d'une tuile, qui alternent de couche (moyen, 133 ms, la bascule exigée), une lanterne au pied ;
+  - **tout en haut, Roger** et une lanterne ; **dans le deuxième pot**, ouvert dans le souvenir, une trouvaille (facile) ;
+  - **le défi** (difficile, 67 ms) : vers la fleur géante, un rideau du présent puis un rideau du souvenir à une tuile d'écart, jusqu'au rebord de sa trouvaille.
+- **Roger** (`nanny-roger`, Agir) : on le regarde, il n'est pas pris (il ne redevient pas un souvenir à trouver) ; un cœur, **son court souvenir** (D-68) ; l'étape `nanny.bed-done` (en fin de liste) ; le passage près de lui scintille. Il reste en haut de l'arrosoir.
+- **Le raccourci** : une porte près de Roger et une porte dans la maison (entre le canapé et la table basse, nouvelle arche `bedgate`), **cachées tant que Roger n'est pas retrouvé** (`hidden`, D-90) : on ne coupe pas l'îlot. Le plan prévoyait aussi un passage vers l'îlot voisin : il viendra avec cet îlot (PR 6), qui n'existe pas encore.
+- **Signposting** : une **veilleuse rose** s'allume au-dessus de la porte de la sieste (nouvel objet `nap-light-bed`, à la place de la première veilleuse éteinte, D-110). Les trois autres viendront avec leurs îlots.
+- **Difficulté prouvée** (tronçons `; @leg:`, D-96, D-108) : chambre — l'arrivée au-dessus de l'armoire (facile, bascule), la traversée (moyen, bascule), le défi (difficile, bascule), l'armoire (facile, bascule) ; jardin — la descente des pots (facile), l'arrosoir (moyen, bascule), le défi (difficile, bascule), le pot (facile, bascule). Impossible sans la bascule : monter la chambre, monter l'arrosoir (testé). **Jamais coincée** (graphe à deux couches de l'entrée, la maison et l'îlot). Les touffes de ronces des pots sont coupées en segments de 5 au plus (D-70, `lowPlatforms`).
+- **Pendant la conception** (sonde de faisabilité temporaire, supprimée) : le défi du pilier rejoignait d'abord le dessus de l'armoire (une cloison l'en sépare) ; la traversée sautait sa première branche (un plafond bas) ; la cheminée du pilier passait de trop facile (un mur seul se grimpe) à impossible selon les ronces : la difficulté du défi est donc dans les deux rideaux du haut, la cheminée restant moyenne.
+- **Debug** : histoire « l'îlot de la chambre fait, Roger retrouvé ».
+- **Coût** : l'analyse de la chambre prend environ 25 s, celle du jardin 9 s (beaucoup de zones de couche) : à surveiller pour la durée de la suite de tests.
+- **Sauvegarde** : aucune migration (une étape en fin de liste, quatre trouvailles neuves ; aucune lanterne ni trouvaille existante n'a bougé).
