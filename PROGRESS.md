@@ -26,7 +26,7 @@
 - **L'effacement qui monte** (la poursuite, `; @chase-look: erasure`) : une décoloration grise et pâle, sans visage. **Le bassin de l'effacement** (`; @void: erasure`) : y tomber fait comme l'eau.
 - **Parcours d'essai 16 « Effacement »** : la fuite dans un puits aux planches alternées (on monte en basculant, l'effacement derrière), puis les vagues au-dessus du bassin.
 - Réglages `erase*` dans DEBUG → Combat.
-- Tests : TESTS_PR4. Vérifié dans Chromium : l'effacement qui monte, une bande qui quitte le présent, les vagues et leur annonce.
+- Tests : 763 tests (83 fichiers), tous verts. Vérifié dans Chromium : l'effacement qui monte, une bande qui quitte le présent, les vagues et leur annonce.
 - [ ] À vérifier sur téléphone (menu pause → Parcours d'essai → « 16. Effacement ») : la fuite est-elle difficile mais juste (3,5 tuiles/s) ? Voit-on la bande blanchir à temps pour basculer ?
 - [ ] Les vagues : l'annonce (le voile qui bat, la lueur où une planche va apparaître) suffit-elle ? Le rythme (`eraseWaveMs`, `eraseWarnMs`) ?
 - [ ] L'effacement fait-il peur sans faire horreur ? Se distingue-t-il bien du blanc ?
