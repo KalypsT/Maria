@@ -27,7 +27,7 @@
 - Après la cuisine rose : **une porte vers la maison**, **une vers la rue d'autrefois**, **une veilleuse turquoise**.
 - Correction : les câbles d'une seule couche s'affichent dans leur couche (l'autre couche en fil fantôme).
 - DEBUG → Histoire : « les îlots de la chambre, de l'école et de la gare faits ».
-- Tests : TESTS_PR7. Vérifié dans Chromium : la gare et le train dans les deux couches, les câbles de chaque couche, la cuisine rose, la porte vers la rue, les trois veilleuses.
+- Tests : 787 tests (84 fichiers), tous verts. Vérifié dans Chromium : la gare et le train dans les deux couches, les câbles de chaque couche, la cuisine rose, la porte vers la rue, les trois veilleuses.
 - [ ] À vérifier sur téléphone : la fente sous la façade se comprend-elle (glisser) ? Le fil fantôme d'une caténaire de l'autre couche se voit-il assez pour prévoir ?
 - [ ] Le vol de la gare (moyen, deux caténaires de couches opposées) : agréable ou trop chargé au pouce (Saut tenu, Basculer) ?
 
