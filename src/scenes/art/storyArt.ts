@@ -14,6 +14,7 @@ import {
   teaCup,
   roger,
   shapeBox,
+  whiteCloth,
 } from './memoryArt';
 
 /**
@@ -563,6 +564,13 @@ export function drawProp(
       ctx.save();
       ctx.translate(w / 2, h / 2);
       teaCup(ctx, Math.min(w, h));
+      ctx.restore();
+      break;
+    case 'white-cloth':
+      // Le torchon blanc (D-116), dans le petit lit de la sieste : on le regarde, on ne le prend pas.
+      ctx.save();
+      ctx.translate(w / 2, h / 2);
+      whiteCloth(ctx, Math.min(w, h), true);
       ctx.restore();
       break;
     case 'nap-light-bed':

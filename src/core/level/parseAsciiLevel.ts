@@ -68,8 +68,11 @@ const COMMENT = ';';
 const META = /^;\s*@([\w-]+)\s*:\s*(.*)$/;
 /** Élément d'habillage (D-28), répétable : `; @decor: bed 7 16 11 4` (nom, colonne, ligne, largeur, hauteur). */
 const DECOR = /^([a-z][\w-]*)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
-/** Porte de façade (D-61), répétable : `; @door: 2 50 27` (numéro, colonne, ligne où l'on se tient). */
-const DOOR = /^([1-9])\s+(\d+)\s+(\d+)$/;
+/**
+ * Porte de façade (D-61), répétable : `; @door: 2 50 27` (numéro, colonne, ligne où l'on se tient).
+ * Numéro de 1 à 99 (D-116) : les sorties, elles, sont un chiffre dans la carte.
+ */
+const DOOR = /^([1-9]\d?)\s+(\d+)\s+(\d+)$/;
 /** Câble (D-65), répétable : `; @cable: 4 10 30 14` (colonne et ligne de chaque bout, au centre des tuiles). */
 const CABLE = /^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
 /** Voie ferrée (D-66), répétable : `; @train: 26 right` (ligne des rails, sens du train). */

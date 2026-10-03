@@ -279,6 +279,8 @@ export const PROP_KINDS = [
   'nap-light-school',
   'nap-light-station',
   'nap-light-sea',
+  /** Le torchon blanc (D-116), dans le petit lit de la sieste. */
+  'white-cloth',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 

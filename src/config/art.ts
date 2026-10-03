@@ -634,6 +634,7 @@ export const DECOR_KINDS: Readonly<
   schoolgate: { furniture: false },
   stationgate: { furniture: false },
   seagate: { furniture: false },
+  napcot: { furniture: false },
   cantower: { furniture: true },
 };
 

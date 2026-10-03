@@ -1,5 +1,5 @@
 import type { FlashbackId } from '../../config/memories';
-import { musicBook, roger } from './memoryArt';
+import { musicBook, roger, whiteCloth } from './memoryArt';
 
 /**
  * Courts souvenirs (D-68), dessinés par le code, PLACEHOLDER : une vignette aux couleurs chaudes
@@ -43,7 +43,70 @@ const FLASHBACK_DRAWERS: Readonly<
   'music-book': (ctx, w, h) => {
     drawMusicBookMemory(ctx, w, h);
   },
+  'white-cloth': (ctx, w, h) => {
+    drawWhiteClothMemory(ctx, w, h);
+  },
 };
+
+/**
+ * Le torchon blanc (D-116) : la sieste chez la nounou. Céleste toute petite, couchée sur le côté
+ * dans le petit lit à barreaux, les yeux fermés, serre son torchon blanc contre sa joue. Le rideau
+ * tiré, une lumière douce d'après-midi. Personne d'autre.
+ */
+function drawWhiteClothMemory(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  const s = Math.min(w, h);
+  // Le rideau tiré : une lumière douce qui passe sur le côté.
+  const light = ctx.createLinearGradient(w * 0.2, -h * 0.5, w * 0.5, h * 0.2);
+  light.addColorStop(0, 'rgba(255, 228, 180, 0.55)');
+  light.addColorStop(1, 'rgba(255, 228, 180, 0)');
+  ctx.fillStyle = light;
+  ctx.fillRect(w * 0.15, -h * 0.5, w * 0.35, h);
+  // Le petit matelas et le drap.
+  ctx.fillStyle = 'rgba(190, 210, 230, 0.6)';
+  ctx.beginPath();
+  ctx.roundRect(-w * 0.4, h * 0.12, w * 0.8, h * 0.14, s * 0.04);
+  ctx.fill();
+  // Céleste couchée sur le côté, roulée en boule : le corps (un body rose pâle), les jambes repliées.
+  const skin = '#f0c19e';
+  ctx.fillStyle = '#f7d3dc';
+  ctx.beginPath();
+  ctx.ellipse(s * 0.06, s * 0.08, s * 0.2, s * 0.11, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = skin;
+  ctx.beginPath();
+  ctx.ellipse(s * 0.24, s * 0.12, s * 0.06, s * 0.04, 0.3, 0, Math.PI * 2);
+  ctx.fill();
+  // Le torchon, serré contre elle, sous la joue.
+  ctx.save();
+  ctx.translate(-s * 0.12, s * 0.04);
+  ctx.rotate(-0.2);
+  whiteCloth(ctx, s * 0.5);
+  ctx.restore();
+  // La main qui le tient.
+  ctx.fillStyle = skin;
+  ctx.beginPath();
+  ctx.arc(-s * 0.06, s * 0.05, s * 0.035, 0, Math.PI * 2);
+  ctx.fill();
+  // La tête posée, penchée sur le torchon : yeux fermés, lunettes roses.
+  ctx.save();
+  ctx.translate(-s * 0.2, -s * 0.03);
+  ctx.rotate(-0.5);
+  toddlerHeadAsleep(ctx, s);
+  ctx.restore();
+  // Les barreaux du lit, devant, très pâles.
+  ctx.strokeStyle = 'rgba(160, 120, 90, 0.35)';
+  ctx.lineWidth = s * 0.014;
+  ctx.beginPath();
+  ctx.moveTo(-w * 0.44, h * 0.28);
+  ctx.lineTo(w * 0.44, h * 0.28);
+  ctx.moveTo(-w * 0.44, -h * 0.2);
+  ctx.lineTo(w * 0.44, -h * 0.2);
+  for (let x = -w * 0.42; x < w * 0.44; x += s * 0.09) {
+    ctx.moveTo(x, -h * 0.2);
+    ctx.lineTo(x, h * 0.28);
+  }
+  ctx.stroke();
+}
 
 /**
  * Le livre musical (D-105) : Céleste toute petite, seule, assise sur un tapis, le livre ouvert
@@ -183,7 +246,6 @@ function drawRogerMemory(ctx: CanvasRenderingContext2D, w: number, h: number): v
   ctx.fill();
   // Céleste toute petite, assise : jambes courtes devant, corps rond (un body rose pâle).
   const skin = '#f0c19e';
-  const hair = '#6b4329';
   ctx.fillStyle = skin;
   ctx.beginPath();
   ctx.ellipse(-s * 0.1, s * 0.31, s * 0.07, s * 0.04, 0.1, 0, Math.PI * 2);
@@ -212,6 +274,17 @@ function drawRogerMemory(ctx: CanvasRenderingContext2D, w: number, h: number): v
   ctx.save();
   ctx.translate(-s * 0.02, -s * 0.07);
   ctx.rotate(-0.15);
+  toddlerHeadAsleep(ctx, s);
+  ctx.restore();
+}
+
+/**
+ * La tête de Céleste toute petite, les yeux fermés (D-68, D-116) : cheveux courts, deux petites
+ * touffes, ses lunettes rondes roses, les joues roses. Centrée en (0, 0), à l'échelle `s`.
+ */
+function toddlerHeadAsleep(ctx: CanvasRenderingContext2D, s: number): void {
+  const skin = '#f0c19e';
+  const hair = '#6b4329';
   ctx.fillStyle = skin;
   ctx.beginPath();
   ctx.arc(0, 0, s * 0.13, 0, Math.PI * 2);
@@ -245,5 +318,4 @@ function drawRogerMemory(ctx: CanvasRenderingContext2D, w: number, h: number): v
   ctx.arc(-s * 0.08, s * 0.05, s * 0.022, 0, Math.PI * 2);
   ctx.arc(s * 0.08, s * 0.05, s * 0.022, 0, Math.PI * 2);
   ctx.fill();
-  ctx.restore();
 }

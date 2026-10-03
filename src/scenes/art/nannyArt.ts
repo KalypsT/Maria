@@ -311,6 +311,26 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
       ctx.quadraticCurveTo(cx + r.w * 0.15, r.y + r.h, r.x + r.w - 3, r.y + r.h - 4);
       ctx.stroke();
     },
+    napcot(a, r) {
+      // Le petit lit de la sieste (D-116), à barreaux, au sommet de la chambre : son matelas est la
+      // dernière tuile (la collision) ; ses deux bouts à barreaux, et un drap qui pend.
+      const { ctx, palette: p } = a;
+      const top = r.y + r.h - T;
+      tileShape(a, { x: r.x, y: top, w: r.w, h: T }, p.wood, p.woodLight);
+      ctx.fillStyle = p.fabric;
+      ctx.fillRect(r.x + 2 * T, top - 2, r.w - 4 * T, 4);
+      ctx.strokeStyle = p.wood;
+      ctx.lineWidth = 2;
+      for (const x0 of [r.x + 2, r.x + r.w - 2 * T + 2]) {
+        ctx.strokeRect(x0, r.y + T, 2 * T - 4, top - r.y - T);
+        ctx.beginPath();
+        for (let x = x0 + 5; x < x0 + 2 * T - 4; x += 5) {
+          ctx.moveTo(x, r.y + T);
+          ctx.lineTo(x, top);
+        }
+        ctx.stroke();
+      }
+    },
     cantower(a, r) {
       // L'arrosoir de papa (D-49), géant, debout cette fois (D-112) : son corps est la collision ;
       // l'anse dessinée sur le haut, le bec qui part vers la droite, des bandes. On passe dessous.

@@ -194,6 +194,11 @@ export const StoryFlag = {
    * bleue s'allume.
    */
   NannySeaDone: 'nanny.sea-done',
+  /**
+   * Le torchon blanc (D-116) : dans le petit lit de la chambre de la sieste ; son court souvenir
+   * (Céleste toute petite le serre contre elle) ; un souvenir du monde étrange.
+   */
+  NannyClothDone: 'nanny.cloth-done',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -326,6 +331,8 @@ export const PROP_SIZE = {
   'nap-light-school': { w: 12, h: 24 },
   'nap-light-station': { w: 12, h: 24 },
   'nap-light-sea': { w: 12, h: 24 },
+  // Le torchon blanc (D-116), plié dans le petit lit de la sieste.
+  'white-cloth': { w: 20, h: 14 },
   'dad-garden': { w: 44 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // Le train (D-85) : sur le quai, la maîtresse et les parents (à hauteur d'enfant), les enfants
   // et leurs sacs ; dans la voiture-couchettes, des enfants de la taille de Céleste.

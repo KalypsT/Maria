@@ -61,6 +61,7 @@ import nannyStation from '../nanny/station.txt?raw';
 import nannyTrain from '../nanny/train.txt?raw';
 import nannyBeach from '../nanny/beach.txt?raw';
 import nannyCarousel from '../nanny/carousel.txt?raw';
+import nannyNap from '../nanny/nap.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -174,6 +175,8 @@ export const HOUSE: ZoneSource = {
     // L'îlot de mémoire 4 (D-115) : la plage d'autrefois, puis le carrousel et le livre musical.
     { id: 'nanny-beach', text: nannyBeach },
     { id: 'nanny-carousel', text: nannyCarousel },
+    // La chambre de la sieste (D-116), derrière la petite porte : le torchon blanc.
+    { id: 'nanny-nap', text: nannyNap },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -273,6 +276,8 @@ export const HOUSE: ZoneSource = {
     ['nanny-beach:2', 'nanny-carousel:1'],
     ['nanny-carousel:2', 'nanny-house:9'],
     ['nanny-carousel:3', 'nanny-train:4'],
+    // La petite porte de la sieste (D-116), une fois les quatre veilleuses allumées.
+    ['nanny-house:10', 'nanny-nap:1'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur
@@ -340,5 +345,7 @@ export const HOUSE: ZoneSource = {
     // L'îlot 4, sous la maison (on y descend par la trappe) : la plage, puis le carrousel.
     'nanny-beach': { x: 6.6, y: 4.3, w: 4.4, h: 1.4, page: 'nanny' },
     'nanny-carousel': { x: 11.4, y: 4.1, w: 3.0, h: 1.6, page: 'nanny' },
+    // La chambre de la sieste, derrière sa porte, au milieu de la maison.
+    'nanny-nap': { x: 7.0, y: 6.0, w: 4.0, h: 2.0, page: 'nanny' },
   },
 };

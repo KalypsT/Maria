@@ -28,6 +28,17 @@ export const ISLET_SHAPE_BOX = { col: 76, row: 19 };
 export const ISLET_PINK_KITCHEN = { col: 74, row: 8 };
 /** Le livre musical (D-115), sur le toit du carrousel d'autrefois (îlot 4). */
 export const ISLET_MUSIC_BOOK = { col: 34, row: 7 };
+/** Le torchon blanc (D-116), dans le petit lit, tout en haut de la chambre de la sieste. */
+export const WHITE_CLOTH = { col: 66, row: 4 };
+/** La petite porte de la sieste, dans la maison (sa porte 10). */
+export const NAP_DOOR = { col: 63, row: 36 };
+/** Les quatre îlots faits : les quatre veilleuses allumées, la porte de la sieste s'ouvre. */
+export const ISLETS_DONE = [
+  F.NannyBedDone,
+  F.NannySchoolDone,
+  F.NannyStationDone,
+  F.NannySeaDone,
+] as const;
 /**
  * Les veilleuses de la porte de la sieste (D-107, D-110), une par îlot, dans l'ordre des îlots :
  * la tuile où chacune est posée (dessinée par `napdoor`, allumée par l'objet de l'îlot).
@@ -194,6 +205,36 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
+    // Le torchon blanc (D-116) : au bout du chemin le plus dur, dans le petit lit de la sieste. Ce
+    // n'est pas un jouet, c'est le réconfort : Céleste le regarde, il reste là (un souvenir du
+    // monde étrange, ajouté à la fin de la rubrique) ; son court souvenir : Céleste toute petite le
+    // serre contre sa joue, à la sieste. Le monde étrange garde ce qui a compté pour elle.
+    id: 'nanny-cloth',
+    room: 'nanny-nap',
+    on: 'interact',
+    area: { col: WHITE_CLOTH.col - 3, row: WHITE_CLOTH.row - 2, w: 7, h: 3 },
+    mark: { col: WHITE_CLOTH.col, row: WHITE_CLOTH.row - 3 },
+    when: { all: [...ISLETS_DONE], none: [F.NannyClothDone] },
+    lock: true,
+    steps: [
+      { do: 'memory', id: 'white-cloth' },
+      {
+        do: 'sparkle',
+        area: { col: WHITE_CLOTH.col - 1, row: WHITE_CLOTH.row - 2, w: 3, h: 3 },
+        ms: S.cradleSparkleMs + 600,
+      },
+      { do: 'wait', ms: S.cradleSparkleMs },
+      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs },
+      { do: 'flashback', id: 'white-cloth', ms: S.flashbackMs },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'flag', id: F.NannyClothDone },
+      // La suite (le boss, l'effacement) viendra avec la PR 10 : PLACEHOLDER, Céleste pense à Maria.
+      { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs },
+    ],
+  },
+  {
     // Dans la maison (D-110) : tout est immense. Céleste regarde ; le reflet n'est plus là.
     id: 'nanny-house',
     room: 'nanny-house',
@@ -261,6 +302,14 @@ const PROPS: StoryData['props'] = [
     ...ISLET_MUSIC_BOOK,
     when: {},
   },
+  // Le torchon blanc (D-116), plié dans le petit lit : il y reste.
+  {
+    id: 'nanny-white-cloth',
+    room: 'nanny-nap',
+    kind: 'white-cloth',
+    ...WHITE_CLOTH,
+    when: {},
+  },
   // La veilleuse de l'îlot 4, bleue, une fois le livre musical retrouvé.
   {
     id: 'nap-light-sea',
@@ -291,8 +340,18 @@ const PROPS: StoryData['props'] = [
   },
 ];
 
-/** Le miroir, avant la bascule : la lumière vacille en approchant. */
+/**
+ * Le miroir, avant la bascule : la lumière vacille en approchant ; la porte de la sieste, une fois
+ * les quatre veilleuses allumées (D-116).
+ */
 const OMENS: StoryData['omens'] = [
+  {
+    room: 'nanny-house',
+    when: { all: [...ISLETS_DONE], none: [F.NannyClothDone] },
+    col: NAP_DOOR.col,
+    row: NAP_DOOR.row - 4,
+    radius: 10,
+  },
   {
     room: 'nanny-entry',
     when: { all: [F.NannyArrived], none: [F.NannyMirror] },
@@ -325,6 +384,13 @@ const LOCKED: StoryData['lockedRooms'] = [
   { room: 'nanny-house', exit: 9, when: { none: [F.NannySeaDone] }, hidden: true },
   { room: 'nanny-carousel', exit: 3, when: { none: [F.NannySeaDone] }, hidden: true },
   { room: 'nanny-train', exit: 4, when: { none: [F.NannySeaDone] }, hidden: true },
+  // La petite porte de la sieste (D-116) : fermée tant qu'une veilleuse est éteinte (un îlot reste).
+  ...ISLETS_DONE.map((flag) => ({
+    room: 'nanny-house',
+    exit: 10,
+    when: { none: [flag] },
+    icon: 'question' as const,
+  })),
 ];
 
 /** Morceaux de l'histoire de la maison de la nounou, ajoutés à ceux de la maison (`HOUSE_STORY`). */

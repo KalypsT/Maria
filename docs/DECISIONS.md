@@ -1572,3 +1572,23 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Coût** : environ 11 s d'analyse par salle.
 - **Debug** : histoire « les quatre îlots faits ».
 - **Sauvegarde** : aucune migration (une étape en fin de liste, quatre trouvailles neuves ; rien d'existant n'a bougé).
+
+## D-116 — L'avant-dernier niveau, PR 9 : la chambre de la sieste et le torchon blanc
+
+- **Plan validé** (D-107) : le torchon blanc dans le petit lit de la sieste, une fois les îlots faits ; le chemin le plus dur du niveau ; un souvenir à la fin de `STRANGE_THINGS` et un court souvenir.
+- **La petite porte de la sieste** (dans la maison, sa porte 10) ouvre sur **la chambre de la sieste** (`nanny-nap`). Elle reste fermée, avec une bulle « ? », tant qu'une des quatre veilleuses est éteinte : il faut avoir fait les quatre îlots, dans n'importe quel ordre. Une fois les quatre allumées, la lumière vacille près de la porte (un présage, D-70).
+  - Les numéros de porte de façade vont maintenant jusqu'à 99 : la maison avait déjà pris les numéros 1 à 9. Les sorties restent un chiffre dans la carte. Aucun effet sur la sauvegarde.
+- **La chambre de la sieste** (80 × 40), **difficile** : le chemin le plus dur du niveau.
+  - Trois sauts entre **deux rideaux de ronces de couches opposées**, chacun **difficile** (67 ms). Le deuxième se fait en planant. Une lanterne est posée juste avant chaque saut (testé).
+  - Puis **la cheminée du montant du lit**, aux ronces en bandes de chaque couche (**moyen**, 183 ms), jusqu'au petit lit.
+  - En bas, **une mare d'ombre** (de l'eau, D-97) : y tomber ramène au dernier appui, avec la peur d'un cran.
+  - **Écart avec la conception initiale** : il y avait d'abord des échelles de retour dans les fosses. La sonde a montré qu'elles ouvraient des chemins sous les rideaux, sans basculer ; la mare les remplace, et la règle de D-97 évite de tout refaire à chaque chute.
+- **Le torchon blanc** (Agir), dans le petit lit (nouveaux dessins `napcot` et `white-cloth`) :
+  - c'est un objet de réconfort, pas un jouet : on le regarde et il reste là ;
+  - il donne un souvenir du monde étrange, ajouté **à la fin** de `STRANGE_THINGS` ;
+  - **son court souvenir** (`white-cloth`, à la fin de `FLASHBACKS`) : la sieste chez la nounou, Céleste toute petite couchée sur le côté dans le petit lit à barreaux, les yeux fermés, serre son torchon contre sa joue. Personne d'autre. Il est rejouable depuis le cahier ;
+  - l'étape `nanny.cloth-done` est ajoutée en fin de liste.
+- **La suite** : après le court souvenir, Céleste pense à Maria. **PLACEHOLDER** : l'effacement (le boss) commencera ici avec la PR 10.
+- **Dessin** : la tête endormie de Céleste toute petite est maintenant commune à deux courts souvenirs (Roger et le torchon). PLACEHOLDER.
+- **Debug** : histoire « le torchon blanc retrouvé ».
+- **Sauvegarde** : aucune migration. Une étape, un souvenir et un court souvenir sont ajoutés en fin de liste ; rien d'existant n'a bougé ; pas de trouvaille dans cette salle.

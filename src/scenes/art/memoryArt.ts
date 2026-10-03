@@ -526,6 +526,61 @@ export function shapeBox(ctx: CanvasRenderingContext2D, s: number, glow = false)
  * `glow` : la lueur turquoise du monde étrange autour d'elle. PLACEHOLDER.
  */
 /**
+ * Le torchon blanc (D-116) : un carré de coton blanc, doux, plié en deux et un peu froissé, un
+ * liseré bleu pâle, un coin qui retombe. Un objet de réconfort, pas un jouet. Avec `glow`, une
+ * lueur douce (grise et chaude, pas turquoise : il n'est pas de l'effacement, D-111). PLACEHOLDER.
+ * Centré en (0, 0), de taille `s`.
+ */
+export function whiteCloth(ctx: CanvasRenderingContext2D, s: number, glow = false): void {
+  if (glow) {
+    const halo = ctx.createRadialGradient(0, 0, s * 0.1, 0, 0, s * 0.62);
+    halo.addColorStop(0, 'rgba(255,244,222,0.45)');
+    halo.addColorStop(1, 'rgba(255,244,222,0)');
+    ctx.fillStyle = halo;
+    ctx.fillRect(-s * 0.62, -s * 0.62, s * 1.24, s * 1.24);
+  }
+  // Le pli du dessous, un peu dans l'ombre.
+  ctx.fillStyle = '#e4e0d8';
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.4, -s * 0.08);
+  ctx.quadraticCurveTo(-s * 0.05, -s * 0.2, s * 0.38, -s * 0.1);
+  ctx.lineTo(s * 0.42, s * 0.22);
+  ctx.quadraticCurveTo(0, s * 0.3, -s * 0.38, s * 0.24);
+  ctx.closePath();
+  ctx.fill();
+  // Le dessus, plus blanc, froissé.
+  ctx.fillStyle = '#fbf9f4';
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.36, -s * 0.18);
+  ctx.quadraticCurveTo(0, -s * 0.28, s * 0.32, -s * 0.2);
+  ctx.quadraticCurveTo(s * 0.36, s * 0.02, s * 0.3, s * 0.14);
+  ctx.quadraticCurveTo(-s * 0.02, s * 0.2, -s * 0.34, s * 0.12);
+  ctx.closePath();
+  ctx.fill();
+  // Le liseré bleu pâle, et un pli.
+  ctx.strokeStyle = '#a9c4de';
+  ctx.lineWidth = s * 0.03;
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.33, s * 0.08);
+  ctx.quadraticCurveTo(-s * 0.02, s * 0.15, s * 0.28, s * 0.1);
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(160, 150, 140, 0.45)';
+  ctx.lineWidth = s * 0.015;
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.12, -s * 0.18);
+  ctx.quadraticCurveTo(-s * 0.06, -s * 0.02, -s * 0.14, s * 0.1);
+  ctx.stroke();
+  // Le coin qui retombe.
+  ctx.fillStyle = '#f2efe8';
+  ctx.beginPath();
+  ctx.moveTo(s * 0.3, s * 0.14);
+  ctx.quadraticCurveTo(s * 0.44, s * 0.26, s * 0.36, s * 0.38);
+  ctx.quadraticCurveTo(s * 0.26, s * 0.3, s * 0.22, s * 0.16);
+  ctx.closePath();
+  ctx.fill();
+}
+
+/**
  * Le livre musical (D-104) : un livre cartonné d'enfant, épais, aux coins arrondis ; une note sur la
  * couverture, une rangée de gros boutons ronds de couleur sur la tranche (on appuie, ça joue).
  * PLACEHOLDER. Centré en (0, 0), de taille `s`.
@@ -946,6 +1001,9 @@ export function drawMemory(
       break;
     case 'music-book':
       musicBook(ctx, size * 0.95);
+      break;
+    case 'white-cloth':
+      whiteCloth(ctx, size * 0.95);
       break;
   }
   ctx.restore();

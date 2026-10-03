@@ -109,7 +109,8 @@ describe('la vague, dans le niveau (D-104)', () => {
   );
 
   it('le livre musical : un souvenir du monde étrange ; le cercle se referme sur la couchette', () => {
-    expect(STRANGE_THINGS.at(-1)).toBe('music-book');
+    // Le quatrième de la rubrique ; le torchon blanc (D-116) vient après.
+    expect(STRANGE_THINGS.indexOf('music-book')).toBe(3);
     const t = trigger('sea-music-book');
     expect(t.room).toBe(WAVE);
     expect(t.when).toEqual({ all: [F.SeaStrange], none: [F.SeaStrangeDone] });
