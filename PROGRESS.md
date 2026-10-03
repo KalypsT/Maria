@@ -24,7 +24,7 @@
 - **Les rochers** (salle de marée) jusqu'au pied du phare : la cheminée (saut mural), le rocher de la lanterne, le câble du pêcheur ; à marée haute, **les vagues** et un saut bas difficile sous l'arche ; à marée basse, la grotte et sa trouvaille (difficile).
 - **La première marée** : la pêche à pied avec la classe ; la maîtresse montre la mer qui monte ; Céleste sur le banc de la promenade. **Le banc des marées** sert ensuite (rejouable).
 - DEBUG → Histoire : « la première marée, le banc ».
-- Tests : TESTCOUNT. Vérifié dans Chromium : la pêche à pied, la plage aux deux marées (pieux, bouées, balise, cabines, chaise), les rochers aux deux marées (la vague, la lanterne, la grotte, le pied du phare), le banc.
+- Tests : 670. Vérifié dans Chromium : la pêche à pied, la plage aux deux marées (pieux, bouées, balise, cabines, chaise), les rochers aux deux marées (la vague, la lanterne, la grotte, le pied du phare), le banc.
 - [ ] À vérifier sur téléphone (DEBUG → Histoire → « la classe de mer, au centre », puis la plage) : la pêche à pied et la mer qui monte se comprennent-elles ? Le banc se trouve-t-il, et comprend-on qu'il change la marée ?
 - [ ] La plage à marée haute : les planés entre les pieux et les bouées (moyen) sont-ils justes ? La drisse se voit-elle ? La balise donne-t-elle envie ?
 - [ ] Les vagues : l'annonce (la crête qui monte, `waveWarnMs`) laisse-t-elle le temps de s'abriter ? Trop souvent (`wavePeriodMs`) ? La poussée (`wavePushX`, `wavePushY`) jette-t-elle trop souvent à l'eau ?
