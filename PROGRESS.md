@@ -27,7 +27,7 @@
 - Après le livre : **une porte vers la maison**, **une vers le train d'autrefois**, **la quatrième veilleuse** (bleue).
 - L'eau d'une seule couche est dessinée dans sa couche (et ses vaguelettes changent à la bascule).
 - DEBUG → Histoire : « les quatre îlots faits ».
-- Tests : TESTS_PR8. Vérifié dans Chromium : la trappe, la plage aux deux marées, le carrousel, le livre musical et son court souvenir, la porte vers le train, les quatre veilleuses.
+- Tests : 795 tests (84 fichiers), tous verts. Vérifié dans Chromium : la trappe, la plage aux deux marées, le carrousel, le livre musical et son court souvenir, la porte vers le train, les quatre veilleuses.
 - [ ] À vérifier sur téléphone : comprend-on que le souvenir est la marée basse (l'eau en contour fantôme) ? L'arche (passer dessous à marée basse) se devine-t-elle ?
 - [ ] Les quatre îlots dans un ordre libre : la maison guide-t-elle assez (les passages, les veilleuses) ?
 
