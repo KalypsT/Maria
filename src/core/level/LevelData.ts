@@ -142,6 +142,13 @@ export interface LevelErase {
   readonly groups: readonly EraseGroup[];
   /** Étapes des vagues, dans l'ordre (en boucle) : les groupes qui changent de couche. */
   readonly steps: readonly (readonly string[])[];
+  /**
+   * Accélérations des vagues (D-117, `; @erase-speed: <étape d'histoire> <facteur>`) : avec cette
+   * étape vécue, les vagues vont ce facteur fois plus vite (la plus grande qui s'applique).
+   */
+  readonly speeds?: readonly { readonly flag: string; readonly scale: number }[];
+  /** Étape d'histoire qui dissout l'effacement (D-117, `; @erase-until:`) : plus rien ne change. */
+  readonly until?: string;
 }
 
 /** Marée d'un tronçon (`; @leg:`), basse par défaut (sans effet dans une salle sans marée). */

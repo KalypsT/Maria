@@ -86,10 +86,14 @@ describe('monde étrange (D-34)', () => {
       'nanny-beach',
       'nanny-carousel',
       'nanny-nap',
+      'nanny-stairs',
+      'nanny-playroom',
     ]);
-    // La maison de la nounou a sa page du cahier (D-107) ; les autres restent hors carte.
+    // La maison de la nounou a sa page du cahier (D-107) ; les autres restent hors carte, comme la
+    // cage d'escalier et la salle de jeux du boss (D-117).
+    const unmapped = new Set(['nanny-stairs', 'nanny-playroom']);
     for (const id of strange) {
-      expect(zone.map[id] === undefined, id).toBe(!id.startsWith('nanny-'));
+      expect(zone.map[id] === undefined, id).toBe(!id.startsWith('nanny-') || unmapped.has(id));
     }
   });
 

@@ -40,7 +40,7 @@ import {
 import { atLayer, commonLayer, layerOf, otherLayer } from '../core/level/layers';
 import { LayerShift, ShiftEvent, type ShiftHost } from '../core/player/LayerShift';
 import { EraseState, type EraseHost } from '../core/boss/Erase';
-import { eraseRoot, erasedLevel } from '../core/level/erase';
+import { eraseDissolved, eraseFactor, eraseRoot, erasedLevel } from '../core/level/erase';
 import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
 import { atTide } from '../core/level/tide';
 import { PlayerPhysics, type PlayerInput } from '../core/player/PlayerPhysics';
@@ -266,6 +266,8 @@ export class GameScene extends Phaser.Scene {
   private erase: EraseState | null = null;
   private eraseBase: LevelData | null = null;
   private eraseVersion = -1;
+  /** Facteur de vitesse des vagues appliqué (D-117). */
+  private eraseFactor = 1;
   private readonly eraseHost: EraseHost = {
     canApply: (group, mask) => this.eraseCanApply(group, mask),
   };
@@ -1152,6 +1154,7 @@ export class GameScene extends Phaser.Scene {
 
   respawn(): void {
     this.erase?.reset();
+    this.eraseFactor = 1;
     this.applyErase();
     this.showLayer('present');
     const { x, y } = this.respawnPosition();
@@ -1314,6 +1317,7 @@ export class GameScene extends Phaser.Scene {
       this.eraseBase = eraseRoot(level);
       this.erase = new EraseState(level.erase, this.combatParams, PHYSICS_STEP_HZ);
       this.eraseVersion = this.erase.version;
+      this.eraseFactor = 1;
       return atLayer(erasedLevel(level, this.erase.masks), 'present');
     }
     this.eraseBase = null;
@@ -1326,6 +1330,17 @@ export class GameScene extends Phaser.Scene {
     const erase = this.erase;
     if (!erase) {
       return;
+    }
+    // L'histoire (D-117) : chaque objet retrouvé fait reculer l'effacement, qui accélère ensuite ;
+    // dissous, plus rien ne change.
+    const flags = this.story.flags;
+    if (eraseDissolved(erase.data, flags)) {
+      return;
+    }
+    const factor = eraseFactor(erase.data, flags);
+    if (factor !== this.eraseFactor) {
+      this.eraseFactor = factor;
+      erase.recoil(factor);
     }
     const chase = this.combat.chase;
     const rising = chase && !chase.horizontal && !chase.done && chase.placed;

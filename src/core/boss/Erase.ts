@@ -41,6 +41,8 @@ export class EraseState {
   events = 0;
   /** Changements de motif depuis le chargement : la salle à jour se reconstruit quand il change. */
   version = 0;
+  /** Facteur de vitesse des vagues venu de l'histoire (D-117, `eraseFactor`). */
+  private factor = 1;
   /** Étape suivante des vagues, et pas avant elle. */
   private nextStep = 0;
   private stepTimer = 0;
@@ -71,8 +73,21 @@ export class EraseState {
     this.params = params;
   }
 
+  /**
+   * L'effacement recule (D-117) : les annonces en cours s'éteignent, la vague suivante repart d'une
+   * période entière, à la nouvelle vitesse (`factor`). Les couches ne changent pas (rien n'apparaît
+   * sur Céleste).
+   */
+  recoil(factor: number): void {
+    this.factor = factor;
+    this.target.fill(-1);
+    this.warn.fill(0);
+    this.stepTimer = this.waveSteps();
+  }
+
   /** Retour au départ (chargement de la salle, réapparition). */
   reset(): void {
+    this.factor = 1;
     this.masks.set(initialMasks(this.data));
     this.target.fill(-1);
     this.warn.fill(0);
@@ -84,7 +99,8 @@ export class EraseState {
 
   private waveSteps(): number {
     const p = this.params;
-    return Math.max(1, msToSteps(p.eraseWaveMs / Math.max(0.05, p.eraseSpeedScale), this.stepHz));
+    const scale = Math.max(0.05, p.eraseSpeedScale * this.factor);
+    return Math.max(1, msToSteps(p.eraseWaveMs / scale, this.stepHz));
   }
 
   /** Annonce du groupe : de 0 (rien) à 1 (il va changer à l'instant). */

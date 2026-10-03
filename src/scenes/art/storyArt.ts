@@ -439,6 +439,52 @@ function drawContained(
   ctx.drawImage(image, (w - iw * k) / 2, h - ih * k, iw * k, ih * k);
 }
 
+/** Les objets pâlis de la salle de jeux (D-117) et l'objet dont ils sont le pâle reflet. */
+const PALE_OF: Partial<Record<PropKind, PropKind>> = {
+  'shape-box-pale': 'shape-box',
+  'pink-kitchen-pale': 'pink-kitchen',
+  'roger-pale': 'roger',
+  'music-book-pale': 'music-book',
+};
+/** Le voile de l'effacement sur un objet pâli : gris et pâle, pas blanc (D-111). PLACEHOLDER. */
+const ERASURE_PALE = 'rgba(196, 196, 204, 0.8)';
+
+/**
+ * Les couleurs qui reviennent à une partie de la salle de jeux (D-117) : une lueur chaude et
+ * douce, posée sur le mur. PLACEHOLDER.
+ */
+function drawColorBloom(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  const g = ctx.createRadialGradient(w / 2, h * 0.55, 0, w / 2, h * 0.55, w * 0.5);
+  g.addColorStop(0, 'rgba(255, 196, 150, 0.55)');
+  g.addColorStop(0.5, 'rgba(240, 150, 170, 0.25)');
+  g.addColorStop(1, 'rgba(240, 150, 170, 0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+}
+
+/**
+ * L'effacement (D-111, D-117), au centre de la salle de jeux : une grande forme grise et pâle, sans
+ * visage, au bord en brume, comme une tache qui ronge le dessin. Inquiétant, jamais horreur
+ * (pilier 8). PLACEHOLDER.
+ */
+function drawErasureFigure(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  const g = ctx.createRadialGradient(w / 2, h * 0.6, 0, w / 2, h * 0.6, w * 0.5);
+  g.addColorStop(0, 'rgba(176, 176, 186, 0.75)');
+  g.addColorStop(0.6, 'rgba(160, 160, 172, 0.45)');
+  g.addColorStop(1, 'rgba(150, 150, 165, 0)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.ellipse(w / 2, h * 0.6, w * 0.48, h * 0.42, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Des formes de jouets sans couleur qui s'y défont (un cube, une balle), à peine visibles.
+  ctx.strokeStyle = 'rgba(220, 220, 228, 0.35)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(w * 0.28, h * 0.5, w * 0.12, w * 0.12);
+  ctx.beginPath();
+  ctx.arc(w * 0.66, h * 0.62, w * 0.07, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
 /** Couleurs des veilleuses de la porte de la sieste, une par îlot (D-112). PLACEHOLDER. */
 const NAP_LIGHT_COLORS = {
   bed: '255, 170, 200',
@@ -469,6 +515,17 @@ export function drawProp(
 ): void {
   const { w, h } = PROP_SIZE[kind];
   const maria = images.get('maria');
+  const pale = PALE_OF[kind];
+  if (pale) {
+    // Pâli par l'effacement (D-117) : le vrai objet, sous un voile gris et pâle.
+    drawProp(ctx, pale, images);
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-atop';
+    ctx.fillStyle = ERASURE_PALE;
+    ctx.fillRect(0, 0, w, h);
+    ctx.restore();
+    return;
+  }
   switch (kind) {
     case 'maria-sit':
       drawMariaSit(ctx, w, h, maria);
@@ -572,6 +629,12 @@ export function drawProp(
       ctx.translate(w / 2, h / 2);
       whiteCloth(ctx, Math.min(w, h), true);
       ctx.restore();
+      break;
+    case 'color-bloom':
+      drawColorBloom(ctx, w, h);
+      break;
+    case 'erasure-figure':
+      drawErasureFigure(ctx, w, h);
       break;
     case 'nap-light-bed':
       drawNapLight(ctx, w, h, NAP_LIGHT_COLORS.bed);

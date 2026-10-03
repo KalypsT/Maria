@@ -99,8 +99,14 @@ describe('la chambre de la sieste et le torchon blanc (D-116)', () => {
     expect(t.steps[0]).toEqual({ do: 'memory', id: 'white-cloth' });
     expect(t.steps.some((s) => s.do === 'flashback' && s.id === 'white-cloth')).toBe(true);
     expect(t.steps).toContainEqual({ do: 'flag', id: F.NannyClothDone });
-    // Il reste là ; Céleste aussi (la suite, le boss, vient avec la PR 10).
-    expect(t.steps.some((s) => s.do === 'room')).toBe(false);
+    // Il reste là. Puis l'effacement (D-117) : dans le noir, en bas de la cage d'escalier.
+    const order = t.steps.map((s) => s.do);
+    expect(order.indexOf('room')).toBeGreaterThan(order.indexOf('flashback'));
+    expect(order.indexOf('room')).toBeGreaterThan(order.indexOf('fadeOut'));
+    expect(t.steps.find((s) => s.do === 'room')).toMatchObject({
+      room: 'nanny-stairs',
+      returnPoint: true,
+    });
     const prop = need(
       HOUSE_STORY.props.find((p) => p.id === 'nanny-white-cloth'),
       'torchon',

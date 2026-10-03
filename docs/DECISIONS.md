@@ -1592,3 +1592,34 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Dessin** : la tête endormie de Céleste toute petite est maintenant commune à deux courts souvenirs (Roger et le torchon). PLACEHOLDER.
 - **Debug** : histoire « le torchon blanc retrouvé ».
 - **Sauvegarde** : aucune migration. Une étape, un souvenir et un court souvenir sont ajoutés en fin de liste ; rien d'existant n'a bougé ; pas de trouvaille dans cette salle.
+
+## D-117 — L'avant-dernier niveau, PR 10 : le boss, l'effacement (la fuite, la salle de jeux)
+
+- **Plan validé** (D-107) ; le système est celui de D-111.
+- **L'entrée** : après le court souvenir du torchon blanc, la lumière vacille et tout pâlit autour du petit lit. Dans le noir, Céleste est **en bas de la cage d'escalier** (point de retour), une bulle « ? ». Nouvelle étape `nanny.erasure`. Le PLACEHOLDER de D-116 est retiré.
+- **Phase 1, la fuite** (`nanny-stairs`, 34 × 60, hors carte) :
+  - c'est **la géométrie du parcours d'essai 16** (D-111), prouvée par son test de rythme : la poursuite à l'allure de l'effacement (3,5 tuiles/s), les marches qui alternent (présent, souvenir, bandes) ;
+  - quand l'effacement arrive sous une bande, elle blanchit, puis quitte le présent ;
+  - une veilleuse en bas, au milieu et en haut ; en haut, la sortie vers la salle de jeux ;
+  - **testé** : on monte en basculant (impossible sans) ; le joueur parfait n'est jamais touché (au moins 2 tuiles d'avance, du bas et du milieu) ; 50 % plus lent, il l'est.
+- **Phase 2, la salle de jeux** (`nanny-playroom`, 70 × 28, hors carte, moyenne) :
+  - **l'effacement est au centre** : en bas, son bassin (y tomber fait comme l'eau, D-97), et sa forme grise et pâle, sans visage (objet `erasure-figure`, PLACEHOLDER) ;
+  - sous un plafond bas, quatre plateformes changent de couche par vagues annoncées (`; @erase-step:`), entre le seuil (une veilleuse), le gros cube du milieu (une veilleuse) et le coffre à jouets ;
+  - **les quatre objets déjà vus sont pâlis** (un voile gris sur le vrai dessin, `*-pale`). Ils se rallument l'un après l'autre, en couleur : la boîte à formes sur le coffre, la cuisine rose sur le perchoir de gauche, Roger au-dessus du cube, le livre musical sur le perchoir de droite. **Céleste l'atteint et fait Agir** : c'est la fenêtre d'action, sans attaque (pilier 4) ;
+  - chaque objet rallumé fait revenir la couleur à une partie de la salle (`color-bloom`, PLACEHOLDER). **L'effacement recule** : les annonces s'éteignent, la vague suivante attend une période entière. **Puis il accélère** : vagues × 1,25, × 1,5, × 1,75 ;
+  - **au quatrième, il se dissout** : plus aucune vague, la forme grise disparaît, **la porte de la salle de jeux s'ouvre** (vers une nouvelle porte au pied de la bibliothèque de la maison, cachée avant). Nouvelles étapes `nanny.play-1` à `-3` et `nanny.erasure-gone`.
+- **Données** (nouvelles directives) :
+  - `; @erase-speed: <étape> <facteur>` (la plus grande qui s'applique) et `; @erase-until: <étape>` ;
+  - le moteur reste pur (`EraseState.recoil`, `eraseFactor`, `eraseDissolved`). Le recul ne change aucune couche : rien n'apparaît sur Céleste.
+- **Écarts avec le plan** :
+  - les perchoirs des objets servaient d'abord de marchepieds qui rendaient les vagues inutiles (la sonde l'a montré). Ils sont plus hauts, au-dessus des plateformes à vagues ;
+  - dans le motif de départ, des tronçons se font sans basculer. La difficulté vient du temps : les vagues obligent à basculer au bon moment. C'est prouvé par motif, pas par les tronçons ;
+  - « rendre sa couleur à une partie de la salle » est une lueur chaude PLACEHOLDER ; la salle elle-même reste en silhouettes ;
+  - la salle de jeux « rendue à ses couleurs » et Eden viendront avec la PR 11.
+- **Tests** (`nannyBoss.test.ts`) :
+  - la fuite : on y monte en basculant ; son rythme ;
+  - **dans chacun des quatre motifs des vagues**, chaque objet est atteint depuis le seuil, et on n'est jamais coincée ;
+  - **chaque vague est annoncée assez tôt** : l'annonce ne raccourcit pas quand les vagues accélèrent, seule leur période raccourcit ;
+  - l'ordre des objets, le recul et l'accélération, la dissolution, la porte.
+- **Debug** : les histoires « l'effacement, la cage d'escalier » et « l'effacement dissous ».
+- **Sauvegarde** : aucune migration. Cinq étapes sont ajoutées en fin de liste. La couche et l'état de l'effacement ne sont jamais sauvegardés : à la réapparition, il repart du départ ; les objets déjà rallumés restent rallumés (étapes).

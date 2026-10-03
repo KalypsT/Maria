@@ -109,6 +109,12 @@ const LEG_NEEDS: ReadonlySet<string> = new Set([
 const LEG_STATES: ReadonlySet<string> = new Set(['high', 'low', 'memory', 'present']);
 /** Groupe de l'effacement (D-111), répétable : `; @erase: a present 10 4 6 1`. */
 const ERASE = /^([a-z0-9-]+)\s+(present|memory|both)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
+/**
+ * Accélération des vagues (D-117), répétable : `; @erase-speed: nanny.play-1 1.25` (étape
+ * d'histoire, facteur) ; dissolution : `; @erase-until: nanny.erasure-gone`.
+ */
+const ERASE_SPEED = /^([\w.-]+)\s+(\d+(?:\.\d+)?)$/;
+const ERASE_UNTIL = /^([\w.-]+)$/;
 /** Étape des vagues de l'effacement (D-111), répétable, dans l'ordre : `; @erase-step: a,b`. */
 const ERASE_STEP = /^([a-z0-9-]+(?:\s*,\s*[a-z0-9-]+)*)$/;
 /** Zone d'une seule couche (D-107), répétable : `; @shift: memory 10 4 6 2`. */
@@ -147,6 +153,8 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   const shiftZones: { present: TileRect[]; memory: TileRect[] } = { present: [], memory: [] };
   const eraseRects: { id: string; mask: LayerMask; rect: TileRect }[] = [];
   const eraseSteps: string[][] = [];
+  const eraseSpeeds: { flag: string; scale: number }[] = [];
+  let eraseUntil = '';
   text.split('\n').forEach((raw, index) => {
     const line = raw.replace(/\r$/, '').trimEnd();
     if (!line.startsWith(COMMENT)) {
@@ -229,6 +237,18 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         );
       }
       eraseSteps.push((z[1] ?? '').split(',').map((g) => g.trim()));
+    } else if (match?.[1] === 'erase-speed' && match[2] !== undefined) {
+      const z = ERASE_SPEED.exec(match[2].trim());
+      if (!z) {
+        throw new Error(`Niveau ${id}, ligne ${index + 1} : @erase-speed attend « étape facteur »`);
+      }
+      eraseSpeeds.push({ flag: z[1] ?? '', scale: Number(z[2]) });
+    } else if (match?.[1] === 'erase-until' && match[2] !== undefined) {
+      const z = ERASE_UNTIL.exec(match[2].trim());
+      if (!z) {
+        throw new Error(`Niveau ${id}, ligne ${index + 1} : @erase-until attend « étape »`);
+      }
+      eraseUntil = z[1] ?? '';
     } else if (match?.[1] === 'shift' && match[2] !== undefined) {
       const z = SHIFT.exec(match[2].trim());
       if (!z) {
@@ -488,7 +508,12 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
     layers,
     erase:
       eraseRects.length > 0 || eraseSteps.length > 0
-        ? buildErase(id, width, height, { rects: eraseRects, steps: eraseSteps })
+        ? buildErase(id, width, height, {
+            rects: eraseRects,
+            steps: eraseSteps,
+            speeds: eraseSpeeds,
+            ...(eraseUntil ? { until: eraseUntil } : {}),
+          })
         : null,
     legs,
     sweeps,

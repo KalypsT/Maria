@@ -62,6 +62,8 @@ import nannyTrain from '../nanny/train.txt?raw';
 import nannyBeach from '../nanny/beach.txt?raw';
 import nannyCarousel from '../nanny/carousel.txt?raw';
 import nannyNap from '../nanny/nap.txt?raw';
+import nannyStairs from '../nanny/stairs.txt?raw';
+import nannyPlayroom from '../nanny/playroom.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -177,6 +179,9 @@ export const HOUSE: ZoneSource = {
     { id: 'nanny-carousel', text: nannyCarousel },
     // La chambre de la sieste (D-116), derrière la petite porte : le torchon blanc.
     { id: 'nanny-nap', text: nannyNap },
+    // Le boss, l'effacement (D-117) : la cage d'escalier (la fuite), puis la salle de jeux. Hors carte.
+    { id: 'nanny-stairs', text: nannyStairs },
+    { id: 'nanny-playroom', text: nannyPlayroom },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -278,6 +283,10 @@ export const HOUSE: ZoneSource = {
     ['nanny-carousel:3', 'nanny-train:4'],
     // La petite porte de la sieste (D-116), une fois les quatre veilleuses allumées.
     ['nanny-house:10', 'nanny-nap:1'],
+    // Le boss (D-117) : on arrive en bas de la cage d'escalier par l'histoire ; en haut, la salle de
+    // jeux ; sa porte ramène à la maison une fois l'effacement dissous.
+    ['nanny-stairs:1', 'nanny-playroom:1'],
+    ['nanny-playroom:2', 'nanny-house:11'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur

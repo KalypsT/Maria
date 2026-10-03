@@ -281,6 +281,16 @@ export const PROP_KINDS = [
   'nap-light-sea',
   /** Le torchon blanc (D-116), dans le petit lit de la sieste. */
   'white-cloth',
+  /**
+   * La salle de jeux (D-117) : les quatre objets pâlis par l'effacement, les couleurs qui reviennent
+   * à une partie de la salle, et l'effacement lui-même au centre (sans visage).
+   */
+  'shape-box-pale',
+  'pink-kitchen-pale',
+  'roger-pale',
+  'music-book-pale',
+  'color-bloom',
+  'erasure-figure',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 
@@ -309,6 +319,8 @@ export const WINDOW_PROP_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'nap-light-school',
   'nap-light-station',
   'nap-light-sea',
+  'color-bloom',
+  'erasure-figure',
 ]);
 
 /** Personnages : grands (les adultes), animés en boucle, ils peuvent avoir une bulle. */
