@@ -26,7 +26,7 @@
 - Rejouable depuis le cahier (« Monde étrange » : la tour de cubes).
 - La suite (le réveil) est un PLACEHOLDER jusqu'à la PR 12.
 - DEBUG : « Jouer le souvenir d'Eden » ; Histoire → « Eden, le souvenir joué ».
-- Tests : TESTS_PR11. Vérifié dans Chromium : Eden dans la salle de jeux, le souvenir joué en entier (la tour, les cachettes, Céleste seule), le retour.
+- Tests : 814 tests (87 fichiers), tous verts. Vérifié dans Chromium : Eden dans la salle de jeux, le souvenir joué en entier (la tour, les cachettes, Céleste seule), le retour.
 - [ ] À vérifier sur téléphone : le souvenir se comprend-il sans texte (la tour à deux, le cache-cache) ? Le moment où Eden n'est plus là est-il assez fort, sans être triste à l'excès ?
 - [ ] La nounou en silhouette : bienveillante, ou inquiétante ? Eden se reconnaît-il comme un vrai petit garçon ?
 
