@@ -75,6 +75,56 @@ const litBy = (k: number): string => (k === 0 ? F.NannyErasure : (PLAY_OBJECTS[k
 export const EDEN_SEAT = { col: 32, row: 14 };
 const EDEN_TOWER = { col: 37, row: 14 };
 
+/** Au dortoir de la classe de mer, assise sur sa couchette (D-105, D-119). */
+const DORM_BUNK = { col: 45, row: 9 };
+/** Dans le train du retour, assise près de la fenêtre de la voiture-couchettes (D-85, D-119). */
+const TRAIN_SEAT = { col: 13, row: 12 };
+/** Chez elle, dans sa chambre (la toise, D-43, D-69). */
+const BEDROOM_SEAT = { col: 12, row: 15 };
+
+/**
+ * Le réveil, le retour, la phase 4 (D-119), dans le noir après Eden. Au dortoir, à l'aube :
+ * Céleste se réveille sur sa couchette, la camarade dort encore, la mer à la fenêtre ; elle serre
+ * quelque chose qu'elle n'a pas (un cœur, puis Maria). Le train du retour, une courte scène : la mer
+ * qui défile, assise près de la fenêtre. Puis le noir le plus long : quelques mois plus tard, chez
+ * elle, elle a encore grandi (phase 4), la toise a un quatrième trait. La suite, le niveau 8 (le
+ * monde de Maria), reste un PLACEHOLDER : une bulle « ? ».
+ */
+const WAKE_AND_RETURN: readonly StoryStep[] = [
+  { do: 'flag', id: F.NannyWake },
+  { do: 'room', room: 'sea-centre', ...DORM_BUNK, facing: 1, returnPoint: true },
+  { do: 'pose', pose: 'sit' },
+  { do: 'wait', ms: S.nightBlackMs },
+  { do: 'fadeIn', ms: S.nightFadeInMs },
+  { do: 'wait', ms: S.lookMs },
+  { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+  { do: 'wait', ms: S.thoughtMs },
+  { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+  { do: 'wait', ms: S.thoughtMs + S.lookMs },
+  // Le train du retour.
+  { do: 'fadeOut', ms: S.nightFadeOutMs },
+  { do: 'room', room: 'train-couchettes', ...TRAIN_SEAT, facing: 1 },
+  { do: 'pose', pose: 'sit' },
+  { do: 'wait', ms: S.blinkBlackMs },
+  { do: 'fadeIn', ms: S.nightFadeInMs },
+  { do: 'wait', ms: S.holdMs },
+  { do: 'thought', icon: 'train', ms: S.thoughtMs },
+  { do: 'wait', ms: S.thoughtMs + S.lookMs },
+  // Quelques mois plus tard (comme D-43 et D-69) : le noir le plus long ; elle a encore grandi.
+  { do: 'fadeOut', ms: S.nightFadeOutMs },
+  { do: 'flag', id: F.GrownFourth },
+  { do: 'room', room: 'bedroom', ...BEDROOM_SEAT, facing: 1, returnPoint: true },
+  { do: 'pose', pose: 'sit' },
+  { do: 'wait', ms: S.monthsBlackMs },
+  { do: 'fadeIn', ms: S.monthsFadeInMs },
+  { do: 'wait', ms: 1400 },
+  { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs + 800 },
+  { do: 'wait', ms: S.lookMs },
+  // PLACEHOLDER : le niveau 8, le monde de Maria, commencera ici.
+  { do: 'thought', icon: 'question', ms: S.thoughtMs + 800 },
+  { do: 'wait', ms: S.lookMs },
+];
+
 /** La petite porte de la sieste, dans la maison (sa porte 10). */
 export const NAP_DOOR = { col: 63, row: 36 };
 /** Les quatre îlots faits : les quatre veilleuses allumées, la porte de la sieste s'ouvre. */
@@ -335,9 +385,11 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.blinkBlackMs },
       { do: 'fadeIn', ms: S.nightFadeInMs, shape: 'iris' },
       { do: 'wait', ms: S.lookMs },
-      // La suite (le réveil, la PR 12) : PLACEHOLDER, Céleste pense à Maria.
+      // La fin du niveau (D-119) : le cercle se referme sur la salle de jeux, Eden n'est plus là.
       { do: 'thought', icon: 'maria', ms: S.thoughtMs },
       { do: 'wait', ms: S.thoughtMs },
+      { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
+      ...WAKE_AND_RETURN,
     ],
   },
   {
@@ -552,10 +604,25 @@ const LOCKED: StoryData['lockedRooms'] = [
   })),
 ];
 
+/** Le réveil (D-119) : le jour revient, de l'aube au niveau 8. */
+const TIMES: StoryData['times'] = [{ when: { all: [F.NannyWake] }, time: 'morning' }];
+
+/** Le train du retour (D-119) : il roule, le temps de la scène. */
+const MOVING: NonNullable<StoryData['moving']> = [
+  { room: 'train-couchettes', when: { all: [F.NannyWake], none: [F.GrownFourth] } },
+];
+
 /** Morceaux de l'histoire de la maison de la nounou, ajoutés à ceux de la maison (`HOUSE_STORY`). */
-export const NANNY_STORY: Pick<StoryData, 'triggers' | 'props' | 'omens' | 'lockedRooms'> = {
+export const NANNY_STORY: Pick<
+  StoryData,
+  'triggers' | 'props' | 'omens' | 'lockedRooms' | 'times'
+> & {
+  readonly moving: NonNullable<StoryData['moving']>;
+} = {
   triggers: TRIGGERS,
   props: PROPS,
   omens: OMENS,
   lockedRooms: LOCKED,
+  times: TIMES,
+  moving: MOVING,
 };

@@ -424,6 +424,7 @@ const HEIGHT_MARKS = {
   'height-chart': 0,
   'height-chart-grown': 1,
   'height-chart-older': 2,
+  'height-chart-fourth': 3,
 } as const;
 
 /** Image fournie, entière, centrée en bas dans le cadre (w, h), sans déformation. */
@@ -703,6 +704,7 @@ export function drawProp(
     case 'height-chart':
     case 'height-chart-grown':
     case 'height-chart-older':
+    case 'height-chart-fourth':
       ctx.save();
       ctx.translate(w / 2, h / 2);
       heightChart(ctx, w, h, HEIGHT_MARKS[kind]);

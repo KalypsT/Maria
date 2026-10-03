@@ -215,6 +215,16 @@ export const StoryFlag = {
    * jouable ; puis Eden n'est plus là.
    */
   NannyEden: 'nanny.eden',
+  /**
+   * La fin du niveau 7 (D-119) : après Eden, le réveil au dortoir de la classe de mer, à l'aube ;
+   * puis le train du retour.
+   */
+  NannyWake: 'nanny.wake',
+  /**
+   * Quelques mois plus tard (D-119, comme D-43 et D-69) : Céleste a encore grandi (phase de
+   * croissance 4). Le niveau 8, le monde de Maria, commencera ainsi.
+   */
+  GrownFourth: 'growth.4',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -395,6 +405,7 @@ export const PROP_SIZE = {
   'height-chart': { w: 7, h: 40 },
   'height-chart-grown': { w: 7, h: 40 },
   'height-chart-older': { w: 7, h: 40 },
+  'height-chart-fourth': { w: 7, h: 40 },
   bonnet: { w: 14, h: 12 },
   // Le portillon au bout du passage sous le vieux mur (D-60), fermé puis ouvert.
   gate: { w: 14, h: 46 },

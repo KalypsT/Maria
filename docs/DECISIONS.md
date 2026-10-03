@@ -1644,3 +1644,23 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **La suite** : après Eden, Céleste pense à Maria. **PLACEHOLDER** : le réveil viendra avec la PR 12.
 - **Debug** : le bouton « Jouer le souvenir d'Eden » et l'histoire « Eden, le souvenir joué ».
 - **Sauvegarde** : aucune migration. Une étape et un souvenir sont ajoutés en fin de liste ; les étapes du souvenir (`memory.eden-*`) ne sont jamais sauvegardées (D-89).
+
+## D-119 — L'avant-dernier niveau, PR 12 : le réveil, le train du retour, la phase 4 (fin du niveau 7)
+
+- **Plan validé** (D-107). **Le niveau 7 est complet.**
+- **Après Eden**, dans le même script et toujours dans le noir :
+  - le cercle se referme sur la salle de jeux, Céleste pense à Maria ;
+  - **le réveil au dortoir de la classe de mer, à l'aube** (point de retour) : assise sur sa couchette, un cœur, puis Maria ;
+  - **le train du retour**, une courte scène sans commande : la voiture-couchettes roule, la mer défile à la fenêtre. Céleste est assise, seule dans la voiture : la classe n'est pas montrée, ce qui est un écart, PLACEHOLDER. Une bulle « train » ;
+  - **quelques mois plus tard** (comme D-43 et D-69) : le noir le plus long, puis Céleste chez elle, dans sa chambre (point de retour). Elle a encore grandi (**phase 4**), la toise a un quatrième trait, et une bulle « Maria qui manque ».
+- **La suite, le niveau 8 (le monde de Maria)**, reste un **PLACEHOLDER** : une bulle « ? », et rien d'autre n'est inventé (§45). Ni Maria ni parents à l'écran (testé).
+- Nouvelles étapes, en fin de liste : `nanny.wake` (le jour revient, `morning`, à partir de là) et `growth.4`. Le train roule le temps de la scène (`moving`).
+- **La phase 4** :
+  - **écart avec la proposition** (hitbox 12 × 30) : un seul px de plus (29) fait passer deux sauts de la chaîne de planches sous le toit du grenier sous la fenêtre du facile (217 → 192 ms), ce qui fermait la trouvaille du grenier. La **hitbox reste donc celle de la phase 3 (12 × 28)** ;
+  - Céleste grandit **à l'écran** : corps × 1,5, cheveux × 1,6 ;
+  - **course × 1,08** (phase 3 : × 1,06), saut × 1,2 inchangé ;
+  - allure PLACEHOLDER : une queue de cheval plus longue, la même veste. **Signalé** (pilier 7) : l'influence de la croissance est cette fois surtout visuelle ;
+  - **testé** : rien d'atteignable en phase 3 ne se ferme en phase 4, sur le graphe de toute la zone (salles réelles, escalade, saut mural, parapluie, crochet, aux fenêtres de difficulté de chaque salle).
+- **Debug** : histoire « quelques mois plus tard, phase 4 ».
+- **Vérifié dans Chromium** : d'Eden au dortoir de jour, le train qui roule devant la mer, la chambre et la bulle « ? ».
+- **Sauvegarde** : aucune migration (deux étapes en fin de liste ; la phase se déduit des étapes, D-43).

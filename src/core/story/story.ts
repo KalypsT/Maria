@@ -228,8 +228,9 @@ export const PROP_KINDS = [
   /** Toise au mur de la chambre (D-43) ; un trait de plus quand Céleste a grandi. */
   'height-chart',
   'height-chart-grown',
-  /** La toise, un troisième trait (D-69). */
+  /** La toise, un troisième trait (D-69), puis un quatrième (D-119). */
   'height-chart-older',
+  'height-chart-fourth',
   /** Le bonnet de Maria (D-49) : au bout de la ronce, puis dans l'herbe au pied du grand arbre. */
   'bonnet',
   /** Le portillon au bout de l'allée (D-60), fermé puis ouvert. */
@@ -319,6 +320,7 @@ export const WALL_PROP_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'height-chart',
   'height-chart-grown',
   'height-chart-older',
+  'height-chart-fourth',
   'gate',
   'gate-open',
   'site-gap',
