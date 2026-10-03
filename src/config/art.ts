@@ -552,6 +552,19 @@ export const DECOR_KINDS: Readonly<
   servinghatch: { furniture: false },
   colonybunk: { furniture: true },
   schoolbags: { furniture: false },
+  // La plage et les rochers (D-99).
+  wetsand: { furniture: true },
+  upperbeach: { furniture: true },
+  sandstep: { furniture: true },
+  cave: { furniture: false },
+  beachcabin: { furniture: true },
+  beachstairsfoot: { furniture: false },
+  lifeguardchair: { furniture: true },
+  groynepost: { furniture: true },
+  buoy: { furniture: true },
+  beacon: { furniture: true },
+  searock: { furniture: true },
+  lighthousefoot: { furniture: false },
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */
@@ -1088,6 +1101,8 @@ export const WATER_LIFE = {
   foam: 0xffffff,
   strangeCrest: 0x7fe9da,
   strangeFoam: 0xc8fff6,
+  /** Les vagues des rochers (D-99) : l'opacité de la bande d'écume quand elle balaie. */
+  waveBandAlpha: 0.55,
 } as const;
 
 export const LAMP_LIGHT_RADIUS = 110;

@@ -1006,6 +1006,29 @@ function drawIcon(
       ctx.stroke();
       break;
     }
+    case 'tide': {
+      // La marée (D-99) : deux vagues bleues, une flèche qui monte à côté.
+      ctx.strokeStyle = '#4f86b8';
+      ctx.lineWidth = 1.4;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (const y of [cy + 1, cy + 5]) {
+        ctx.moveTo(cx - 9, y);
+        ctx.quadraticCurveTo(cx - 6, y - 3, cx - 3, y);
+        ctx.quadraticCurveTo(cx, y + 3, cx + 3, y);
+      }
+      ctx.stroke();
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(cx + 7, cy + 6);
+      ctx.lineTo(cx + 7, cy - 5);
+      ctx.moveTo(cx + 5, cy - 3);
+      ctx.lineTo(cx + 7, cy - 5);
+      ctx.lineTo(cx + 9, cy - 3);
+      ctx.stroke();
+      break;
+    }
     case 'question':
       // « ? » seul, au crayon : un parent qui ne sait pas (D-37).
       ctx.strokeStyle = INK;

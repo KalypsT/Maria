@@ -5,7 +5,7 @@ import {
   MEMORY_CAMERA_ZOOM,
   type CameraParams,
 } from '../config/camera';
-import { DEFAULT_COMBAT, type CombatParams } from '../config/combat';
+import { DEFAULT_COMBAT, TrainPhase, type CombatParams } from '../config/combat';
 import { DEFAULT_FEEL, type FeelParams } from '../config/feel';
 import {
   GAME_HEIGHT,
@@ -22,7 +22,7 @@ import {
   type MovementParams,
 } from '../config/movement';
 import { CameraController } from '../core/camera/CameraController';
-import { CombatWorld } from '../core/combat/CombatWorld';
+import { CombatWorld, wavesOf } from '../core/combat/CombatWorld';
 import { FixedStepClock } from '../core/FixedStepClock';
 import { InputController } from '../core/input/InputController';
 import { KeyboardSource } from '../core/input/KeyboardSource';
@@ -771,6 +771,13 @@ export class GameScene extends Phaser.Scene {
     artView.h = view.height;
     this.roomArt.update(artView, Math.max(this.story.veil, this.transition.veil) >= 1);
     this.water.update(this.time.now);
+    if (this.combat.waveRow >= 0) {
+      this.water.updateWaves(
+        this.time.now,
+        this.combat.waveWarnProgress,
+        this.combat.wavePhase === TrainPhase.Passing,
+      );
+    }
     this.worldLife.update(
       this.time.now,
       this.game.loop.delta,
@@ -1409,7 +1416,8 @@ export class GameScene extends Phaser.Scene {
     this.levelImages.length = 0;
     const level = this.level;
     const palette = this.palette();
-    this.water.load(level, palette.silhouettes);
+    const waves = wavesOf(level);
+    this.water.load(level, palette.silhouettes, waves?.row ?? -1, level.tide?.highRow ?? -1);
     this.finishView.setPalette(palette, this.artFinish);
     // Salle habillée (D-28) : dessinée par l'habillage, pas tuile par tuile.
     const images = this.artImages();

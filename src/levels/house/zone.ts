@@ -39,6 +39,8 @@ import trainStrangeDishes from '../train/strange-dishes.txt?raw';
 import seaStation from '../sea/station.txt?raw';
 import seaPromenade from '../sea/promenade.txt?raw';
 import seaCentre from '../sea/centre.txt?raw';
+import seaBeach from '../sea/beach.txt?raw';
+import seaRocks from '../sea/rocks.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -119,6 +121,10 @@ export const HOUSE: ZoneSource = {
     // la classe de mer, derrière sa porte.
     { id: 'sea-promenade', text: seaPromenade },
     { id: 'sea-centre', text: seaCentre },
+    // La plage (D-99), par l'escalier de la promenade : une salle de marée.
+    { id: 'sea-beach', text: seaBeach },
+    // Les rochers (D-99), jusqu'au pied du phare : une salle de marée, les vagues à marée haute.
+    { id: 'sea-rocks', text: seaRocks },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -178,6 +184,8 @@ export const HOUSE: ZoneSource = {
     // La station balnéaire (D-98) : la gare de la mer s'ouvre sur la promenade, la porte du centre.
     ['sea-station:2', 'sea-promenade:1'],
     ['sea-promenade:2', 'sea-centre:1'],
+    ['sea-promenade:3', 'sea-beach:1'],
+    ['sea-beach:2', 'sea-rocks:1'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur
@@ -225,5 +233,7 @@ export const HOUSE: ZoneSource = {
     'sea-station': { x: 16.4, y: 2.4, w: 3.6, h: 1.6, page: 'sea' },
     'sea-promenade': { x: 0, y: 2.6, w: 16, h: 1.4, page: 'sea' },
     'sea-centre': { x: 10.4, y: 0.2, w: 4.6, h: 2.0, page: 'sea' },
+    'sea-beach': { x: 2.2, y: 4.3, w: 13.4, h: 1.6, page: 'sea' },
+    'sea-rocks': { x: -9.4, y: 4.0, w: 11.2, h: 2.2, page: 'sea' },
   },
 };

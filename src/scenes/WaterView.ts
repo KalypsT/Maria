@@ -8,7 +8,7 @@ const STRANGE_WAVE_TEXTURE = 'water-wave-strange';
 /** Au-dessus du fond et de l'eau dessinée avec lui, sous la lumière et les personnages. */
 const WATER_DEPTH = -4.5;
 
-/** Ligne de surface d'une nappe d'eau : une suite de tuiles d'eau sans eau au-dessus. */
+/** Ligne de surface d'une nappe d'eau : une suite de tuiles d'eau sous de l'air. */
 export interface WaterSurface {
   readonly row: number;
   readonly colStart: number;
@@ -22,8 +22,9 @@ export function waterSurfaces(level: LevelData): WaterSurface[] {
   for (let row = 0; row < level.height; row++) {
     let col = 0;
     while (col < level.width) {
+      // Une surface est sous de l'air : sous une planche ou un rocher, l'eau n'a pas de vaguelettes.
       const top = (c: number) =>
-        tileAt(level, c, row) === Tile.Water && tileAt(level, c, row - 1) !== Tile.Water;
+        tileAt(level, c, row) === Tile.Water && tileAt(level, c, row - 1) === Tile.Empty;
       if (!top(col)) {
         col++;
         continue;
@@ -64,15 +65,37 @@ function makeWaveTexture(scene: Phaser.Scene, key: string, crest: number, foam: 
  */
 export class WaterView {
   private readonly layers: Phaser.GameObjects.TileSprite[] = [];
+  /** Les vagues (D-99) : la bande d'écume qui balaie, la crête qui monte pendant l'annonce. */
+  private waveBand: Phaser.GameObjects.Rectangle | null = null;
+  private waveCrest: Phaser.GameObjects.TileSprite | null = null;
+  private waveTop = 0;
+  private waterTop = 0;
 
   constructor(private readonly scene: Phaser.Scene) {
     makeWaveTexture(scene, WAVE_TEXTURE, WATER_LIFE.crest, WATER_LIFE.foam);
     makeWaveTexture(scene, STRANGE_WAVE_TEXTURE, WATER_LIFE.strangeCrest, WATER_LIFE.strangeFoam);
   }
 
-  load(level: LevelData, strange: boolean): void {
+  /** `waveRow` : la ligne des vagues (-1 sans vagues), `waterRow` : la première ligne d'eau. */
+  load(level: LevelData, strange: boolean, waveRow = -1, waterRow = -1): void {
     this.clear();
     const key = strange ? STRANGE_WAVE_TEXTURE : WAVE_TEXTURE;
+    if (waveRow >= 0 && waterRow > waveRow) {
+      const width = level.width * T;
+      this.waveTop = waveRow * T;
+      this.waterTop = waterRow * T;
+      this.waveBand = this.scene.add
+        .rectangle(0, this.waveTop, width, this.waterTop - this.waveTop, WATER_LIFE.foam)
+        .setOrigin(0, 0)
+        .setDepth(WATER_DEPTH + 0.1)
+        .setAlpha(0);
+      this.waveCrest = this.scene.add
+        .tileSprite(0, this.waterTop - 3, width, WATER_LIFE.heightPx, key)
+        .setOrigin(0, 0)
+        .setDepth(WATER_DEPTH + 0.2)
+        .setScale(1, 1.6)
+        .setVisible(false);
+    }
     for (const s of waterSurfaces(level)) {
       const width = (s.colEnd - s.colStart + 1) * T;
       for (let layer = 0; layer < 2; layer++) {
@@ -91,6 +114,27 @@ export class WaterView {
       sprite.destroy();
     }
     this.layers.length = 0;
+    this.waveBand?.destroy();
+    this.waveCrest?.destroy();
+    this.waveBand = null;
+    this.waveCrest = null;
+  }
+
+  /**
+   * Les vagues (D-99), une fois par image : pendant l'annonce (`warn` de 0 à 1), la crête d'écume
+   * monte de l'eau jusqu'à la ligne des vagues ; quand elle balaie, la bande d'écume (`passing`).
+   */
+  updateWaves(nowMs: number, warn: number, passing: boolean): void {
+    const band = this.waveBand;
+    const crest = this.waveCrest;
+    if (!band || !crest) {
+      return;
+    }
+    band.setAlpha(passing ? WATER_LIFE.waveBandAlpha : 0);
+    const k = passing ? 1 : warn;
+    crest.setVisible(passing || warn >= 0);
+    crest.y = this.waterTop - 3 - (this.waterTop - this.waveTop) * Math.max(0, k);
+    crest.tilePositionX = (nowMs / 1000) * WATER_LIFE.speedPxPerS * 4;
   }
 
   /** Une fois par image : les vaguelettes défilent (deux couches en sens contraires). */

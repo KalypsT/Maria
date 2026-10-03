@@ -116,6 +116,19 @@ export interface CombatParams {
   tunnelPushX: number;
   tunnelPushY: number;
   /**
+   * Les vagues sur les rochers (D-99), à marée haute seulement : toutes les `wavePeriodMs`, annoncées
+   * pendant `waveWarnMs` (la mer se retire, l'écume monte), puis le paquet de mer balaie pendant
+   * `wavePassMs` tout ce qui a les pieds sous la ligne des vagues (`; @waves: ligne sens`) : Céleste
+   * est repoussée vers la terre et un peu soulevée, la peur monte (une fois par vague). Plus haut,
+   * rien.
+   */
+  wavePeriodMs: number;
+  waveWarnMs: number;
+  wavePassMs: number;
+  /** Poussée de la vague : vers la terre (px/s) et vers le haut (px/s). */
+  wavePushX: number;
+  wavePushY: number;
+  /**
    * Valises qui tombent des filets dans les virages (D-86) : toutes les `luggagePeriodMs`, la
    * valise tremble sur son filet pendant `luggageWarnMs`, puis tombe (gravité `luggageGravity`),
    * reste un instant au sol (`luggageLieMs`) et disparaît. Touchée en tombant : recul, la peur monte.
@@ -178,6 +191,11 @@ export const DEFAULT_COMBAT: Readonly<CombatParams> = {
   tunnelPassMs: 2400,
   tunnelPushX: 220,
   tunnelPushY: 60,
+  wavePeriodMs: 7000,
+  waveWarnMs: 2200,
+  wavePassMs: 1100,
+  wavePushX: 140,
+  wavePushY: 160,
   luggagePeriodMs: 6500,
   luggageWarnMs: 1400,
   luggageGravity: 1100,
@@ -238,6 +256,11 @@ export const COMBAT_PARAM_RANGES: Readonly<
   tunnelPassMs: { min: 300, max: 6000, step: 100 },
   tunnelPushX: { min: 0, max: 600, step: 10 },
   tunnelPushY: { min: 0, max: 400, step: 10 },
+  wavePeriodMs: { min: 3000, max: 30000, step: 500 },
+  waveWarnMs: { min: 500, max: 6000, step: 100 },
+  wavePassMs: { min: 300, max: 6000, step: 100 },
+  wavePushX: { min: 0, max: 600, step: 10 },
+  wavePushY: { min: 0, max: 600, step: 10 },
   luggagePeriodMs: { min: 2000, max: 20000, step: 250 },
   luggageWarnMs: { min: 200, max: 4000, step: 100 },
   luggageGravity: { min: 300, max: 3000, step: 50 },

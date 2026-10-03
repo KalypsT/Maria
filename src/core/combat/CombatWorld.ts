@@ -4,6 +4,7 @@ import {
   TUNNEL_CLEAR_PX,
   TrainPhase,
   cyclePhase,
+  cycleWarnProgress,
   luggageState,
   TRAIN_GUST_AHEAD_PX,
   TRAIN_GUST_TILES,
@@ -38,6 +39,18 @@ function groundBelow(level: LevelData, col: number, row: number): number {
     }
   }
   return level.height;
+}
+
+/**
+ * Les vagues d'une salle (`; @waves: ligne left|right`, D-99) : la ligne et le sens de la terre, à
+ * marée haute seulement ; null sinon.
+ */
+export function wavesOf(level: LevelData): { readonly row: number; readonly dir: 1 | -1 } | null {
+  const waves = /^(\d+)\s+(left|right)$/.exec(level.meta.waves?.trim() ?? '');
+  if (!waves || !level.tide?.high) {
+    return null;
+  }
+  return { row: Number(waves[1]), dir: waves[2] === 'left' ? -1 : 1 };
 }
 
 /** Événements du dernier pas (masque de bits), pour le feedback. */
@@ -98,6 +111,14 @@ export class CombatWorld {
   still = false;
   /** Le tunnel en cours a déjà repoussé Céleste (une fois par tunnel). */
   private tunnelHit = false;
+  /**
+   * Ligne des vagues (`; @waves:`, D-99), -1 sans vagues ou à marée basse ; `waveDir` : le sens de
+   * la terre (où la vague repousse Céleste).
+   */
+  waveRow = -1;
+  waveDir: 1 | -1 = 1;
+  /** La vague en cours a déjà repoussé Céleste (une fois par vague). */
+  private waveHit = false;
   /** Ligne du toit sous les tunnels (`; @tunnel:`), -1 sans tunnel. */
   tunnelRow = -1;
   /** Valises qui tombent des filets (`; @decor: fallingcase`). */
@@ -161,6 +182,10 @@ export class CombatWorld {
     this.chase = level.chase ? new Chase(level.chase, this.params, this.stepHz) : null;
     const tunnel = Number(level.meta.tunnel);
     this.tunnelRow = level.meta.tunnel !== undefined && Number.isFinite(tunnel) ? tunnel : -1;
+    // Les vagues (D-99) : seulement à marée haute.
+    const waves = wavesOf(level);
+    this.waveRow = waves?.row ?? -1;
+    this.waveDir = waves?.dir ?? 1;
     // Une valise par `fallingcase` : posée sur le filet (sa tuile), elle tombe jusqu'au sol dessous.
     this.luggage = level.decor
       .filter((d) => d.kind === 'fallingcase')
@@ -214,6 +239,7 @@ export class CombatWorld {
     this.trainGusted = -1;
     this.hazardSteps = 0;
     this.tunnelHit = false;
+    this.waveHit = false;
     this.chase?.restart();
   }
 
@@ -310,6 +336,44 @@ export class CombatWorld {
     return true;
   }
 
+  /** Avancement de l'annonce de la vague (0 → 1), -1 hors de l'annonce (D-99, pour le dessin). */
+  get waveWarnProgress(): number {
+    const p = this.params;
+    return cycleWarnProgress(this.hazardMs, p.wavePeriodMs, p.waveWarnMs, p.wavePassMs);
+  }
+
+  /** Moment de la vague (D-99) : calme, annonce, elle balaie. */
+  get wavePhase(): TrainPhase {
+    const p = this.params;
+    return cyclePhase(this.hazardMs, p.wavePeriodMs, p.waveWarnMs, p.wavePassMs);
+  }
+
+  /**
+   * Vague (D-99) : pendant qu'elle balaie, Céleste qui a les pieds sous la ligne des vagues est
+   * repoussée vers la terre et un peu soulevée, la peur monte, une fois par vague. Vrai si elle
+   * vient d'être repoussée.
+   */
+  private stepWave(player: PlayerPhysics): boolean {
+    if (this.waveRow < 0) {
+      return false;
+    }
+    if (this.wavePhase !== TrainPhase.Passing) {
+      this.waveHit = false;
+      return false;
+    }
+    if (this.waveHit || player.box.y + player.box.height <= this.waveRow * TILE_SIZE) {
+      return false;
+    }
+    this.waveHit = true;
+    player.vx = this.waveDir * this.params.wavePushX;
+    player.vy = -this.params.wavePushY;
+    player.startHurt(this.hurtSteps);
+    this.invulnerableSteps = Math.max(this.invulnerableSteps, this.invulnerableTotal);
+    this.events |= CombatEvent.Hurt;
+    this.lastEnemy = -1;
+    return true;
+  }
+
   /** Boîte de la valise `index` en ce moment (px), ou null si elle n'est pas en train de tomber. */
   fallingBox(index: number): Box | null {
     const drop = this.luggage[index];
@@ -382,7 +446,8 @@ export class CombatWorld {
     }
     if (
       this.stepTrains(player) ||
-      (!this.still && (this.stepTunnel(player) || this.stepLuggage(player)))
+      (!this.still &&
+        (this.stepTunnel(player) || this.stepLuggage(player) || this.stepWave(player)))
     ) {
       return;
     }

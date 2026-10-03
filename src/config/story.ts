@@ -110,6 +110,11 @@ export const StoryFlag = {
    */
   SeaArrived: 'sea.arrived',
   /**
+   * La première marée (D-99) : pendant la pêche à pied, la mer monte, la maîtresse rappelle la
+   * classe sur la promenade ; les bancs des marées servent ensuite.
+   */
+  SeaFirstTide: 'sea.first-tide',
+  /**
    * La marée est haute (D-95), à la station balnéaire : la seule étape réversible (les bancs des
    * marées la posent et la retirent). Les salles de marée prennent leur variante haute.
    */

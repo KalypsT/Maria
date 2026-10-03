@@ -18,6 +18,43 @@ const TEACHER_CENTRE = { col: 57, row: 23 };
 
 const ON_QUAY = { all: [F.TrainArrived], none: [F.SeaArrived] };
 const SETTLED = { all: [F.SeaArrived] };
+/** La pêche à pied (D-99) : la classe sur la plage, à marée basse, jusqu'à la première marée. */
+const FISHING = { all: [F.SeaArrived], none: [F.SeaFirstTide] };
+const AFTER_TIDE = { all: [F.SeaFirstTide] };
+/** La maîtresse sur le sable, pendant la pêche à pied. */
+const TEACHER_BEACH = { col: 134, row: 23 };
+/** Le banc des marées de la promenade : on s'y assoit (debout sur la tuile du dessus). */
+const PROMENADE_BENCH = { col: 61, row: 23 };
+
+/**
+ * Le banc des marées (D-95, D-99) : Agir, Céleste s'assoit et regarde la mer ; le noir ; la marée a
+ * tourné. Rejouable ; au sec aux deux marées (testé).
+ */
+function tideBench(id: string, room: string, seat: { col: number; row: number }): StoryTrigger {
+  return {
+    id,
+    room,
+    on: 'interact',
+    area: { col: seat.col - 3, row: seat.row - 1, w: 7, h: 3 },
+    mark: { col: seat.col, row: seat.row - 2 },
+    when: AFTER_TIDE,
+    lock: true,
+    repeat: true,
+    steps: [
+      { do: 'fadeOut', ms: S.fadeMs },
+      { do: 'place', ...seat, facing: -1 },
+      { do: 'pose', pose: 'sit' },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'fadeIn', ms: S.fadeMs },
+      { do: 'wait', ms: S.holdMs },
+      { do: 'fadeOut', ms: S.nightFadeOutMs },
+      { do: 'toggle', id: F.TideHigh },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'fadeIn', ms: S.nightFadeInMs },
+      { do: 'thought', icon: 'tide', ms: S.thoughtMs },
+    ],
+  };
+}
 
 const TRIGGERS: StoryTrigger[] = [
   {
@@ -68,12 +105,43 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // L'escalier de la plage, fermé par une chaîne (PLACEHOLDER jusqu'à la PR 3) : « ? ».
-    id: 'sea-beach-chain',
-    room: 'sea-promenade',
+    // La pêche à pied (D-99) : la classe sur le sable, à marée basse. Agir près de la maîtresse :
+    // elle montre la mer qui monte ; dans le noir, la marée monte, la classe remonte sur la
+    // promenade, près du banc ; Céleste regarde la mer.
+    id: 'sea-tide-rises',
+    room: 'sea-beach',
     on: 'interact',
-    area: { col: 38, row: 22, w: 7, h: 3 },
-    mark: { col: 41, row: 21 },
+    area: { col: TEACHER_BEACH.col - 3, row: TEACHER_BEACH.row - 2, w: 7, h: 3 },
+    mark: { col: TEACHER_BEACH.col, row: TEACHER_BEACH.row - 4 },
+    when: FISHING,
+    lock: true,
+    steps: [
+      { do: 'thought', icon: 'question', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs },
+      { do: 'thought', icon: 'tide', ms: S.thoughtMs, by: 'teacher-beach' },
+      { do: 'wait', ms: S.thoughtMs },
+      { do: 'fadeOut', ms: S.nightFadeOutMs },
+      { do: 'flag', id: F.SeaFirstTide },
+      { do: 'toggle', id: F.TideHigh },
+      { do: 'room', room: 'sea-promenade', ...PROMENADE_BENCH, facing: -1, returnPoint: true },
+      { do: 'pose', pose: 'sit' },
+      { do: 'wait', ms: S.nightBlackMs },
+      { do: 'fadeIn', ms: S.nightFadeInMs },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'thought', icon: 'tide', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs },
+      { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'teacher-promenade' },
+    ],
+  },
+  // Le banc des marées de la promenade (D-95) ; celui du port viendra avec le port (PR 4).
+  tideBench('sea-bench-promenade', 'sea-promenade', PROMENADE_BENCH),
+  {
+    // La porte du phare, au bout des rochers (PLACEHOLDER jusqu'à la PR 4) : « ? ».
+    id: 'sea-lighthouse-door',
+    room: 'sea-rocks',
+    on: 'interact',
+    area: { col: 4, row: 17, w: 6, h: 3 },
+    mark: { col: 6, row: 15 },
     when: {},
     lock: false,
     repeat: true,
@@ -94,6 +162,36 @@ const TRIGGERS: StoryTrigger[] = [
 ];
 
 const PROPS: StoryProp[] = [
+  // La pêche à pied (D-99) : la maîtresse, la camarade et des enfants sur le sable.
+  { id: 'teacher-beach', room: 'sea-beach', kind: 'teacher', ...TEACHER_BEACH, when: FISHING },
+  {
+    id: 'classmate-beach',
+    room: 'sea-beach',
+    kind: 'classmate',
+    col: 126,
+    row: 23,
+    flip: true,
+    when: FISHING,
+  },
+  { id: 'kids-beach', room: 'sea-beach', kind: 'kids-quay', col: 140, row: 23, when: FISHING },
+  // Après la première marée : la classe sur la promenade, près du banc, regarde la mer.
+  {
+    id: 'teacher-promenade',
+    room: 'sea-promenade',
+    kind: 'teacher',
+    col: 68,
+    row: 24,
+    flip: true,
+    when: AFTER_TIDE,
+  },
+  {
+    id: 'kids-promenade',
+    room: 'sea-promenade',
+    kind: 'kids-quay',
+    col: 52,
+    row: 24,
+    when: AFTER_TIDE,
+  },
   // Au centre (D-98), une fois arrivés : la maîtresse au réfectoire ; la camarade et deux enfants au
   // dortoir, assis sur les couchettes.
   { id: 'teacher-centre', room: 'sea-centre', kind: 'teacher', ...TEACHER_CENTRE, when: SETTLED },

@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98), sur `ccr-014503d9-cj0c7a`. Suite : PR 3, la plage et les rochers (la pêche à pied, la première marée, les bancs). Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
+**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) et **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99), sur `ccr-014503d9-cj0c7a`. Suite : PR 4, le port et le phare (la boucle de la baie, le banc du port, les mouettes). Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
 
 **Le train** (niveau 5, D-83 à D-91) : complet et fusionné. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
@@ -17,6 +17,20 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### La station balnéaire, PR 3 : la plage, les rochers, la première marée (D-99)
+
+- **La plage** (salle de marée) : marée basse, le sable, les flaques, les crabes, l'arche du gros rocher, une grotte où l'on entre couchée ; marée haute, des cabines à la chaise du maître-nageur, la drisse (crochet), le haut des pieux, les bouées qui ont monté. La balise au large et sa trouvaille, à marée haute seulement.
+- **Les rochers** (salle de marée) jusqu'au pied du phare : la cheminée (saut mural), le rocher de la lanterne, le câble du pêcheur ; à marée haute, **les vagues** et un saut bas difficile sous l'arche ; à marée basse, la grotte et sa trouvaille (difficile).
+- **La première marée** : la pêche à pied avec la classe ; la maîtresse montre la mer qui monte ; Céleste sur le banc de la promenade. **Le banc des marées** sert ensuite (rejouable).
+- DEBUG → Histoire : « la première marée, le banc ».
+- Tests : TESTCOUNT. Vérifié dans Chromium : la pêche à pied, la plage aux deux marées (pieux, bouées, balise, cabines, chaise), les rochers aux deux marées (la vague, la lanterne, la grotte, le pied du phare), le banc.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « la classe de mer, au centre », puis la plage) : la pêche à pied et la mer qui monte se comprennent-elles ? Le banc se trouve-t-il, et comprend-on qu'il change la marée ?
+- [ ] La plage à marée haute : les planés entre les pieux et les bouées (moyen) sont-ils justes ? La drisse se voit-elle ? La balise donne-t-elle envie ?
+- [ ] Les vagues : l'annonce (la crête qui monte, `waveWarnMs`) laisse-t-elle le temps de s'abriter ? Trop souvent (`wavePeriodMs`) ? La poussée (`wavePushX`, `wavePushY`) jette-t-elle trop souvent à l'eau ?
+- [ ] Le saut sous l'arche à marée haute (difficile) : juste, ou frustrant ? Prend-on le réflexe de revenir au banc pour passer à marée basse ?
+- [ ] La grotte des rochers (difficile, la flaque sous le plafond bas) : juste ?
+- [ ] Les crabes se lisent-ils comme des crabes ? Les rochers, comme des rochers ?
 
 ### La station balnéaire, PR 2 : l'arrivée, la promenade, le centre (D-98)
 

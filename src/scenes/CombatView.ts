@@ -14,6 +14,8 @@ import type { DustPool } from './DustPool';
 const PATROLLER_TEXTURE = 'patroller-placeholder';
 const SPIDER_TEXTURE = 'spider-placeholder';
 const SNAIL_TEXTURE = 'snail-placeholder';
+/** Crabe de la plage et des rochers (D-99), à la place de la souris mécanique (`; @enemies: crab`). */
+const CRAB_TEXTURE = 'crab-placeholder';
 const THREAD_TEXTURE = 'spider-thread';
 const STICK_TEXTURE = 'stick-placeholder';
 const SLASH_TEXTURE = 'slash-placeholder';
@@ -70,6 +72,7 @@ export class CombatView {
       thread?.destroy();
     }
     const level = this.world.room;
+    const walker = level.meta.enemies === 'crab' ? CRAB_TEXTURE : PATROLLER_TEXTURE;
     this.enemySprites = this.world.enemies.map((enemy) =>
       this.scene.add
         .image(
@@ -79,7 +82,7 @@ export class CombatView {
             ? SPIDER_TEXTURE
             : enemy.kind === EnemyKind.Snail
               ? SNAIL_TEXTURE
-              : PATROLLER_TEXTURE,
+              : walker,
         )
         .setOrigin(0.5, 1)
         .setScale(1 / this.artScale)
@@ -293,6 +296,7 @@ export class CombatView {
     textures.addCanvas(PATROLLER_TEXTURE, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
     this.drawSpider(scale, dark, palette);
     this.drawSnail(scale, dark, palette);
+    this.drawCrab(scale, dark, palette);
     this.rebuild();
   }
 
@@ -300,6 +304,62 @@ export class CombatView {
    * Escargot de derrière la haie (D-49), placeholder : collé au mur (dessiné à droite), la tête
    * vers le haut, une coquille en spirale. Retourné selon son mur et son sens.
    */
+  /**
+   * Crabe (D-99), placeholder : carapace ronde orangée, deux pinces levées, les yeux sur leurs
+   * tiges, des pattes fines. Il marche de côté ; touché, il s'enfouit (l'éclat, comme les autres).
+   */
+  private drawCrab(scale: number, dark: boolean, palette: Readonly<ArtPalette>): void {
+    const { width: w, height: h } = PATROLLER_HITBOX;
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.ceil(w * scale);
+    canvas.height = Math.ceil(h * scale);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
+    ctx.scale(scale, scale);
+    const shell = dark ? '#2a3140' : '#e0764e';
+    ctx.strokeStyle = dark ? palette.rim : '#b2543a';
+    ctx.lineWidth = 0.7;
+    ctx.beginPath();
+    for (const x of [w * 0.25, w * 0.4, w * 0.6, w * 0.75]) {
+      ctx.moveTo(x, h * 0.7);
+      ctx.lineTo(x + (x < w / 2 ? -2 : 2), h);
+    }
+    ctx.stroke();
+    ctx.fillStyle = shell;
+    ctx.beginPath();
+    ctx.ellipse(w / 2, h * 0.68, w * 0.36, h * 0.26, 0, 0, Math.PI * 2);
+    ctx.fill();
+    for (const side of [-1, 1]) {
+      const cx = w / 2 + side * w * 0.38;
+      ctx.beginPath();
+      ctx.arc(cx, h * 0.38, 2.1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = dark ? palette.rim : '#f4efe4';
+      ctx.fillRect(cx - 0.4, h * 0.3, 0.8, 1.6);
+      ctx.fillStyle = shell;
+    }
+    ctx.strokeStyle = shell;
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.42, h * 0.5);
+    ctx.lineTo(w * 0.42, h * 0.3);
+    ctx.moveTo(w * 0.58, h * 0.5);
+    ctx.lineTo(w * 0.58, h * 0.3);
+    ctx.stroke();
+    ctx.fillStyle = dark ? '#ffb36a' : '#2b2530';
+    ctx.beginPath();
+    ctx.arc(w * 0.42, h * 0.28, 0.8, 0, Math.PI * 2);
+    ctx.arc(w * 0.58, h * 0.28, 0.8, 0, Math.PI * 2);
+    ctx.fill();
+    const textures = this.scene.textures;
+    if (textures.exists(CRAB_TEXTURE)) {
+      textures.remove(CRAB_TEXTURE);
+    }
+    textures.addCanvas(CRAB_TEXTURE, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
+  }
+
   private drawSnail(scale: number, dark: boolean, palette: Readonly<ArtPalette>): void {
     const { width: w, height: h } = SNAIL_HITBOX;
     const canvas = document.createElement('canvas');
@@ -407,6 +467,14 @@ export class CombatView {
       g.fillRect(width - 6, 3, 2, 3);
       g.fillRect(width - 10, 3, 2, 3);
       g.generateTexture(PATROLLER_TEXTURE, width, height);
+      g.destroy();
+    }
+    if (!textures.exists(CRAB_TEXTURE)) {
+      const { width, height } = PATROLLER_HITBOX;
+      const g = this.scene.make.graphics({}, false);
+      g.fillStyle(0xe0764e);
+      g.fillEllipse(width / 2, height * 0.68, width * 0.72, height * 0.52);
+      g.generateTexture(CRAB_TEXTURE, width, height);
       g.destroy();
     }
     if (!textures.exists(SPIDER_TEXTURE)) {
