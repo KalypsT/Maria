@@ -27,7 +27,7 @@
 - **La maison** : le pouf et le canapé (dessous, dans le souvenir, on glisse jusqu'à une trouvaille), la table basse géante, la porte de la sieste et ses quatre veilleuses éteintes, **la grande bibliothèque** aux étagères alternées (on monte en basculant), le défi du mobile et de la lampe (moyen, une trouvaille). Les passages des quatre îlots sont dessinés (ils s'ouvriront avec leurs PR).
 - **La carte** : une page « Chez la nounou ».
 - DEBUG → Histoire : « la maison de la nounou, l'entrée et le miroir », « la bascule apprise, la maison de la nounou ».
-- Tests : TESTS_PR3. Vérifié dans Chromium : la porte, l'entrée, le miroir et le reflet, la bascule apprise, le passage du miroir, la maison, la bibliothèque dans les deux couches.
+- Tests : 748, tous verts. Vérifié dans Chromium : la porte, l'entrée, le miroir et le reflet, la bascule apprise, le passage du miroir, la maison, la bibliothèque dans les deux couches.
 - [ ] À vérifier sur téléphone (DEBUG → Histoire → « la fin de la station balnéaire », puis la porte du dernier couloir) : l'entrée se comprend-elle ? Le reflet dans le miroir se reconnaît-il comme Céleste toute petite ? Comprend-on qu'il faut l'imiter (basculer) ?
 - [ ] Les patères en contour fantôme donnent-elles envie de revenir ? La bibliothèque (étagères alternées) est-elle agréable ?
 - [ ] La maison paraît-elle immense, à hauteur de tout-petit ? Voit-on les quatre passages des îlots ?

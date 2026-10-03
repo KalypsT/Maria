@@ -75,9 +75,12 @@ describe('monde étrange (D-34)', () => {
       'sea-corridor-room',
       'sea-corridor-station',
       'sea-corridor-sea',
+      'nanny-entry',
+      'nanny-house',
     ]);
+    // La maison de la nounou a sa page du cahier (D-107) ; les autres restent hors carte.
     for (const id of strange) {
-      expect(zone.map[id], id).toBeUndefined();
+      expect(zone.map[id] === undefined, id).toBe(!id.startsWith('nanny-'));
     }
   });
 
