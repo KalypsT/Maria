@@ -135,6 +135,11 @@ export const StoryFlag = {
    */
   SeaStrangeDone: 'sea.strange-done',
   /**
+   * La fin de la station balnéaire (D-105) : au bout du couloir en boucle, la porte qui n'était pas
+   * là ; le noir. La suite (le niveau 7) reste à venir.
+   */
+  SeaEnd: 'sea.end',
+  /**
    * La marée est haute (D-95), à la station balnéaire : la seule étape réversible (les bancs des
    * marées la posent et la retirent). Les salles de marée prennent leur variante haute.
    */

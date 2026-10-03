@@ -68,7 +68,7 @@ export function isMemory(id: string): id is MemoryId {
  * Courts souvenirs (D-68) : une vignette de quelques secondes, non jouable, sans texte, montrée
  * quand on trouve certains objets, et rejouée en touchant leur case dans le cahier.
  */
-export const FLASHBACKS = ['roger'] as const;
+export const FLASHBACKS = ['roger', 'music-book'] as const;
 export type FlashbackId = (typeof FLASHBACKS)[number];
 
 /** Le court souvenir lié à un souvenir du cahier, s'il en a un. */

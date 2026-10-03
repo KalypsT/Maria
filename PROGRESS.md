@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101, fusionnées) et **PR 6 faite : la fête engloutie** (D-102) **PR 7 faite : le rythme de la vague, parcours d'essai 14** (D-103) et **PR 8 faite : la vague dans le niveau, le livre musical** (D-104), sur `ccr-014503d9-cj0c7a`. Suite : PR 9, le court souvenir, la nuit, le couloir en boucle, la fin. Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
+**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101, fusionnées) et **PR 6 faite : la fête engloutie** (D-102) **PR 7 faite : le rythme de la vague, parcours d'essai 14** (D-103) **PR 8 faite : la vague dans le niveau, le livre musical** (D-104) et **PR 9 faite : le court souvenir, la nuit, le couloir en boucle, la fin** (D-105), sur `ccr-014503d9-cj0c7a`. **Le niveau 6 est complet** (sa fin reste un PLACEHOLDER jusqu'au niveau 7). Suite : essais sur téléphone, puis le niveau 7. Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
 
 **Le train** (niveau 5, D-83 à D-91) : complet et fusionné. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
@@ -17,6 +17,18 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### La station balnéaire, PR 9 : le court souvenir, la nuit, le couloir en boucle, la fin (D-105)
+
+- **Le court souvenir** du livre musical : Céleste toute petite, seule, appuie sur un bouton, des notes s'en échappent (rejouable dans le cahier).
+- **La nuit au dortoir** : les enfants dorment ; la mélodie du livre ; une lueur sous la porte du dortoir.
+- **Le couloir en boucle** : cinq couloirs pareils en anneau, le décor change à chaque tour (ordinaire, le sable, la chambre et la toise, l'horloge et les valises, la mer en bas et le ciel à l'envers) ; au dernier, une porte qui n'était pas là ; le noir, la fin du niveau 6 (la suite : « ? », PLACEHOLDER).
+- DEBUG → Histoire : « le livre musical trouvé, la nuit au dortoir », « la fin de la station balnéaire ».
+- Tests : TESTCOUNT. Vérifié dans Chromium : le court souvenir, le dortoir la nuit (enfants endormis, la porte), les cinq couloirs, la porte et la fin.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « le livre musical trouvé, la nuit au dortoir », puis la porte du dortoir) : comprend-on qu'il faut ouvrir la porte ? La mélodie (bulle) suffit-elle ?
+- [ ] Le couloir : remarque-t-on qu'il revient sur lui-même et qu'il change ? Cinq tours, trop long ou juste ? Inquiétant sans faire peur ?
+- [ ] Le court souvenir du livre : se reconnaît-on Céleste toute petite ? Le livre ?
+- [ ] La fin (le noir, puis « ? ») : acceptable comme attente du niveau 7 ?
 
 ### La station balnéaire, PR 8 : la vague dans le niveau, le livre musical (D-104)
 
