@@ -585,6 +585,19 @@ export const DECOR_KINDS: Readonly<
   harbouroffice: { furniture: false },
   harbourcrane: { furniture: true },
   frozengull: { furniture: false, sky: true },
+  // La jetée et la fête foraine (D-101).
+  jettydeck: { furniture: true },
+  piling: { furniture: true },
+  jettyladder: { furniture: true },
+  jettygate: { furniture: false },
+  fairstall: { furniture: true },
+  candystall: { furniture: true },
+  ticketbooth: { furniture: true },
+  duckstall: { furniture: true },
+  swingride: { furniture: false },
+  garlandpoles: { furniture: false },
+  bigwheel: { furniture: false, far: true },
+  carousel: { furniture: false },
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */
@@ -1123,6 +1136,14 @@ export const WATER_LIFE = {
   strangeFoam: 0xc8fff6,
   /** Les vagues des rochers (D-99) : l'opacité de la bande d'écume quand elle balaie. */
   waveBandAlpha: 0.55,
+} as const;
+
+/** Les chaises volantes (D-101, `RideView`) : leur nombre, leur vitesse, leur hauteur au calme. */
+export const RIDE_LOOK = {
+  chairs: 6,
+  turnsPerS: 0.35,
+  /** Au calme, elles tournent tant de tuiles au-dessus de leur zone. */
+  raisedTiles: 5,
 } as const;
 
 export const LAMP_LIGHT_RADIUS = 110;

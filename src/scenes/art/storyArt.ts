@@ -1006,6 +1006,32 @@ function drawIcon(
       ctx.stroke();
       break;
     }
+    case 'carousel': {
+      // Le carrousel (D-101) : un toit rayé pointu, le mât, un cheval de bois.
+      ctx.fillStyle = PINK;
+      ctx.beginPath();
+      ctx.moveTo(cx - 9, cy - 2);
+      ctx.lineTo(cx, cy - 9);
+      ctx.lineTo(cx + 9, cy - 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx - 9, cy - 2);
+      ctx.lineTo(cx + 9, cy - 2);
+      ctx.moveTo(cx, cy - 2);
+      ctx.lineTo(cx, cy + 7);
+      ctx.moveTo(cx - 9, cy + 7);
+      ctx.lineTo(cx + 9, cy + 7);
+      ctx.stroke();
+      ctx.fillStyle = WOOD;
+      ctx.beginPath();
+      ctx.ellipse(cx + 3, cy + 3, 4, 2.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(cx + 5, cy - 1, 2, 3);
+      break;
+    }
     case 'tide': {
       // La marée (D-99) : deux vagues bleues, une flèche qui monte à côté.
       ctx.strokeStyle = '#4f86b8';

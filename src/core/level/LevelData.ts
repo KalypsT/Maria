@@ -59,6 +59,11 @@ export interface LevelData {
   readonly tide: LevelTide | null;
   /** Tronçons dont la difficulté est vérifiée par les tests (`; @leg:`, D-96). */
   readonly legs: readonly LevelLeg[];
+  /**
+   * Zones balayées à intervalles réguliers (`; @sweep: col ligne l h`, D-101) : les chaises volantes
+   * de la fête foraine.
+   */
+  readonly sweeps: readonly TileRect[];
 }
 
 /** Rectangle en tuiles (coin haut gauche, largeur, hauteur). */

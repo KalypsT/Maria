@@ -111,6 +111,7 @@ import { BackdropView } from './BackdropView';
 import { ForegroundView } from './ForegroundView';
 import { WorldLifeView } from './WorldLifeView';
 import { WaterView } from './WaterView';
+import { RideView } from './RideView';
 import { MapPage } from '../ui/MapPage';
 import { buildMapModel } from '../core/world/mapModel';
 import { DEFAULT_PUPPET, type PuppetParams } from '../config/puppet';
@@ -248,6 +249,7 @@ export class GameScene extends Phaser.Scene {
   /** Vie du monde réel : feuilles et linge au vent (D-73), feu et balancier (D-74). */
   private worldLife!: WorldLifeView;
   private water!: WaterView;
+  private ride!: RideView;
   /** Échelle des textures dessinées (habillage, Céleste) : celle de l'écran, plafonnée. */
   private artScale = 1;
   /** Carte (§24) et salles déjà dessinées lors d'une ouverture précédente (tracé animé). */
@@ -416,6 +418,7 @@ export class GameScene extends Phaser.Scene {
     this.foreground = new ForegroundView(this);
     this.worldLife = new WorldLifeView(this);
     this.water = new WaterView(this);
+    this.ride = new RideView(this);
     const save = this.session.data;
     const { room, checkpointId } = savedReturn(this.session);
     this.level = this.atTide(room.level);
@@ -435,6 +438,7 @@ export class GameScene extends Phaser.Scene {
     this.puppet.redraw(this.artScale, this.celestePalette(), this.artImages(), this.growth);
     this.dust = new DustPool(this, this.feelParams);
     this.combat = new CombatWorld(this.level, this.combatParams);
+    this.ride.load(this.combat.sweeps);
     this.combatView = new CombatView(this, this.combat, this.combatParams, this.dust);
     this.combatView.setArt(this.artScale, this.palette());
     this.worldView = new WorldView(this, this.run, this.pickups);
@@ -771,6 +775,11 @@ export class GameScene extends Phaser.Scene {
     artView.h = view.height;
     this.roomArt.update(artView, Math.max(this.story.veil, this.transition.veil) >= 1);
     this.water.update(this.time.now);
+    this.ride.update(
+      this.time.now,
+      this.combat.sweepWarnProgress,
+      this.combat.sweepPhase === TrainPhase.Passing,
+    );
     if (this.combat.waveRow >= 0) {
       this.water.updateWaves(
         this.time.now,
@@ -1246,6 +1255,7 @@ export class GameScene extends Phaser.Scene {
       this.drawLevel();
     }
     this.combat.load(level);
+    this.ride.load(this.combat.sweeps);
     this.combatView.rebuild();
     this.trainView.rebuild();
     this.rideView.rebuild();

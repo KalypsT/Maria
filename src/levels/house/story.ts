@@ -1219,6 +1219,8 @@ export const HOUSE_STORY: StoryData = {
   ],
   // La nuit après le câlin de maman (D-58), puis le matin quelques mois plus tard.
   times: [
+    // Le soir de la fête, à la station balnéaire (D-101) : avant le matin du train.
+    ...SEA_STORY.times,
     // Le soir du départ du train et la nuit dans le train (D-85).
     ...TRAIN_STORY.times,
     // La nuit après la gare (D-69), jusqu'au matin, quelques mois plus tard.
@@ -1278,6 +1280,8 @@ export const HOUSE_STORY: StoryData = {
     ...STATION_STORY.omens,
     // Le train (D-85).
     ...TRAIN_STORY.omens,
+    // La station balnéaire (D-101).
+    ...SEA_STORY.omens,
   ],
   // Le train en route (D-85).
   moving: TRAIN_STORY.moving,
