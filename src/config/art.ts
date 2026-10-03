@@ -608,6 +608,8 @@ export const DECOR_KINDS: Readonly<
   balloons: { furniture: false },
   sunkenhorses: { furniture: false },
   drownedwheel: { furniture: false, far: true },
+  drowneddeck: { furniture: true },
+  strangeseawall: { furniture: true },
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */

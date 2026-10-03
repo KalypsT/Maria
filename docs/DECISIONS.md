@@ -1300,6 +1300,26 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Test de rythme** (phase 3, rejeu du vrai `Chase` le long du chemin le plus rapide, D-70, D-87) : le joueur parfait n'est **jamais touché** (au moins 2,4 tuiles d'avance) ; **sans le reflux** (une vague qui ne se retire jamais), il est touché à chaque tronçon : le rythme compte ; **50 % plus lent**, il est touché à chaque tronçon. 25 % plus lent passe les deux premiers tronçons, pas le troisième. En phase 1 : le joueur parfait n'est jamais touché.
 - **Sauvegarde** : aucun changement (parcours d'essai hors partie).
 
+## D-104 — La station balnéaire, PR 8 : la vague dans le niveau, le livre musical
+
+- **Plan validé** (D-95) ; même schéma que le train (D-88) : le monde étrange finit sur un objet d'enfance, un souvenir de la rubrique « Monde étrange », puis une fin provisoire sur la couchette.
+- **La fête engloutie** (D-102) s'ouvre à droite (sortie 1, au bout du toit du dernier stand) sur **la vague** ; sa fin provisoire est retirée. Ses veilleuses n'ont pas bougé.
+- **La vague** (`sea-strange-wave`, 190 × 22, `; @world: strange`, dehors, hors carte, musique `strange` PLACEHOLDER) : la poursuite horizontale à l'allure de vague (D-103, `; @chase-look: wave`, 13 tuiles/s quand elle déferle), sur le platelage englouti de la fête. **Quatre tronçons, une veilleuse au début de chacun** :
+  - le comptoir d'un stand (glisser dessous), un bassin, **la cheminée des chevaux** à pied sec (saut mural, pendant le reflux) ;
+  - du haut du stand, **le grand bassin** et sa guirlande, la grande roue noyée au fond, une poutre basse (glisser dessous) ;
+  - **la cheminée au-dessus de l'eau** ;
+  - les chevaux dans l'eau, une caisse, **la digue où la vague se brise** (la ligne d'arrivée, colonne 160) ; après la digue, **le toit du carrousel étrange** et le livre.
+  - Difficulté statique : facile (tronçons `; @leg:` vérifiés : glissade et saut mural exigés au premier, glissade au deuxième, saut mural au troisième). La difficulté est celle de la poursuite.
+  - **Test de rythme** (phase 3, toutes les capacités) : le joueur parfait n'est **jamais touché** (plus de 2 tuiles d'avance) ; **sans le reflux**, ou **50 % plus lent**, il est touché à chaque tronçon. Pendant la conception, 25 % plus lent, il l'était à trois tronçons sur quatre (plus dur que le parcours 14 : la « poursuite difficile » du plan).
+  - Jamais coincée de la fête engloutie au livre (testé). Une bande de platelage d'une colonne au pied du stand du deuxième tronçon était un cul-de-sac (détecté par le test) : le stand est élargi.
+  - **Écart avec le plan** : les guirlandes et les chevaux dans l'eau servent peu à la poursuite (le plané passe au-dessus du grand bassin et des chevaux) ; ils restent pour l'image et comme appuis.
+- **Le livre musical** (`music-book`, PLACEHOLDER) : un livre cartonné d'enfant, une note sur la couverture, quatre gros boutons ronds de couleur ; la lueur turquoise autour. Agir : un souvenir de la rubrique « Monde étrange » (ajouté **à la fin** de `STRANGE_THINGS`), une lueur, un cœur ; le cercle se referme (`sea.strange-done`) ; Céleste est assise sur sa couchette, au dortoir (point de retour) ; une bulle Maria (la fin d'un monde étrange, D-70), puis une bulle lit. **Fin provisoire** : le court souvenir (Céleste toute petite et le livre) et la nuit viennent avec la PR 9 ; en attendant, le dortoir garde la lumière du jour.
+- Le carrousel ne ramène plus dans le monde étrange et la lumière ne vacille plus une fois le livre trouvé.
+- **Dessin** (`seaStrangeArt.ts`) : `drowneddeck` (le platelage), `strangeseawall` (la digue), et les éléments de la fête engloutie.
+- **Debug** : histoire « le livre musical trouvé (fin de la mer étrange) ».
+- **Tests** (`seaStrangeWave.test.ts`) : la liaison, hors carte, la poursuite et sa digue, le rythme des quatre tronçons, jamais coincée, le livre et sa fin ; `seaStrangeFair.test.ts` mis à jour (la sortie vers la vague).
+- **Sauvegarde** : aucune migration (étape `sea.strange-done`, souvenir `music-book` ajouté en dernier).
+
 ## Risques identifiés à suivre
 
 - **Croissance vs collisions** : hitbox par paliers alignés sur la grille, changement de phase uniquement en lieu sûr, hauteur de saut mesurée en tuiles, chemin critique praticable à toutes les phases suivantes, test automatique d'accessibilité par phase.

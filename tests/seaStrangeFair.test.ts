@@ -19,6 +19,7 @@ import { ANALYSIS_TIMEOUT_MS } from './timeouts';
 /** La station balnéaire, PR 6 (D-102) : le monde étrange, la fête engloutie. */
 const FAIR = 'sea-strange-fair';
 const ARRIVAL = { col: 6, row: 18 };
+/** Le toit du dernier stand, devant la sortie vers la vague. */
 const END = { col: 168, row: 6 };
 
 const trigger = (id: string) => {
@@ -35,21 +36,29 @@ describe('la fête engloutie (D-102)', () => {
     expect(isStrangeRoom(fair)).toBe(true);
     expect(fair.meta.music).toBe('strange');
     expect(mapPage(zone, FAIR)).toBeNull();
-    expect(fair.exits).toHaveLength(0);
+    // Une seule sortie, vers la vague (D-104), jamais de porte.
+    expect(fair.exits.map((e) => e.id)).toEqual([1]);
     expect(fair.doors).toHaveLength(0);
+    expect(zone.destination(FAIR, 1)).toEqual({ room: 'sea-strange-wave', exit: 1 });
     // Le « ? » provisoire de la PR 5 est remplacé.
     expect(HOUSE_STORY.triggers.some((t) => t.id === 'sea-carousel')).toBe(false);
     expect(trigger('sea-strange-enter').when).toEqual({
       all: [F.SeaEvening],
       none: [F.SeaStrange],
     });
-    expect(trigger('sea-strange-reenter').when).toEqual({ all: [F.SeaStrange] });
+    expect(trigger('sea-strange-reenter').when).toEqual({
+      all: [F.SeaStrange],
+      none: [F.SeaStrangeDone],
+    });
     const passages = storyPassages().filter(([, to]) => to.startsWith(`${FAIR}#`));
     expect(passages.length).toBeGreaterThan(0);
     expect(passages.every(([from]) => from.startsWith('sea-jetty#'))).toBe(true);
     // La lumière vacille toujours près du carrousel, le soir.
     const omen = HOUSE_STORY.omens.find((o) => o.room === 'sea-jetty');
     expect(omen && checkCondition(new Set([F.SeaEvening, F.SeaStrange]), omen.when)).toBe(true);
+    // Elle s'arrête une fois le livre musical trouvé (D-104).
+    const done = new Set([F.SeaEvening, F.SeaStrange, F.SeaStrangeDone]);
+    expect(omen && checkCondition(done, omen.when)).toBe(false);
   });
 
   it('l’entrée : la lueur, le tremblement, le noir, puis le cercle sur le toit du carrousel englouti', () => {
@@ -62,22 +71,14 @@ describe('la fête engloutie (D-102)', () => {
     expect(standOn(level(FAIR), ARRIVAL)).toBeGreaterThanOrEqual(0);
   });
 
-  it('la fin provisoire : au toit du dernier stand, le cercle se referme devant le carrousel', () => {
-    const end = trigger('sea-strange-fair-end');
-    expect(end.room).toBe(FAIR);
-    expect(end.on).toBe('touch');
-    // Elle reste disponible : le script emmène Céleste hors de la salle.
-    expect(end.repeat).toBeUndefined();
-    const room = end.steps.find((s) => s.do === 'room');
-    expect(room).toMatchObject({ room: 'sea-jetty', returnPoint: true });
-    const order = end.steps.map((s) => s.do);
-    expect(order.indexOf('room')).toBeGreaterThan(order.indexOf('fadeOut'));
-    // Ni Maria ni parents (piliers 5, D-95) : aucun personnage dans la fête engloutie.
+  it('la fin provisoire de la PR 6 est remplacée par la sortie vers la vague ; aucun personnage', () => {
+    expect(HOUSE_STORY.triggers.some((t) => t.id === 'sea-strange-fair-end')).toBe(false);
+    // Ni Maria ni parents (pilier 5, D-95) : aucun personnage dans la fête engloutie.
     expect(HOUSE_STORY.props.filter((p) => p.room === FAIR)).toEqual([]);
-    expect(end.steps.some((s) => s.do === 'thought' && s.icon === 'maria')).toBe(false);
-    if (room?.do === 'room') {
-      expect(standOn(level('sea-jetty'), room)).toBeGreaterThanOrEqual(0);
-    }
+    const exit = level(FAIR).exits[0];
+    expect(exit && standOn(level(FAIR), { col: exit.col - 1, row: exit.rowMax })).toBe(
+      standOn(level(FAIR), END),
+    );
   });
 
   it('difficile ; deux veilleuses, la seconde avant le saut long ; l’eau partout dessous', () => {
@@ -99,7 +100,7 @@ describe('la fête engloutie (D-102)', () => {
   });
 
   it(
-    'jamais coincée : de partout, une veilleuse ou le bout de la fête ; le bout atteint',
+    'jamais coincée : de partout, une veilleuse ou la sortie vers la vague ; la sortie atteinte',
     { timeout: ANALYSIS_TIMEOUT_MS },
     () => {
       const fair = level(FAIR);

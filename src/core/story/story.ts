@@ -250,6 +250,8 @@ export const PROP_KINDS = [
   'dog-sleep',
   /** La cuisine rose (D-88), la dînette d'enfance de Céleste, au bout du train de la vaisselle. */
   'pink-kitchen',
+  /** Le livre musical (D-104), sur le toit du carrousel étrange, au bout de la vague. */
+  'music-book',
   // Le souvenir jouable de la cuisine (D-89), dans sa propre salle : la dînette (sans la lueur), la
   // petite table où sont assis Roger, un panda roux et un lapin, la tasse.
   'toy-kitchen',

@@ -46,6 +46,8 @@ export const STRANGE_THINGS = [
   'roger',
   /** La cuisine rose, la dînette d'enfance de Céleste, au bout du train de la vaisselle (D-88). */
   'pink-kitchen',
+  /** Le livre musical, sur le toit du carrousel étrange, au bout de la vague (D-104). */
+  'music-book',
 ] as const;
 
 export type MemoryId =

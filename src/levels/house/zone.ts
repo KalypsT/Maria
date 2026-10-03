@@ -45,6 +45,7 @@ import seaLighthouse from '../sea/lighthouse.txt?raw';
 import seaPort from '../sea/port.txt?raw';
 import seaJetty from '../sea/jetty.txt?raw';
 import seaStrangeFair from '../sea/strange-fair.txt?raw';
+import seaStrangeWave from '../sea/strange-wave.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -136,6 +137,7 @@ export const HOUSE: ZoneSource = {
     // La jetée et la fête foraine (D-101), par l'arche du quai du port : une salle de marée.
     { id: 'sea-jetty', text: seaJetty },
     { id: 'sea-strange-fair', text: seaStrangeFair },
+    { id: 'sea-strange-wave', text: seaStrangeWave },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -203,6 +205,7 @@ export const HOUSE: ZoneSource = {
     ['sea-lighthouse:2', 'sea-port:2'],
     ['sea-port:1', 'sea-promenade:4'],
     ['sea-port:3', 'sea-jetty:1'],
+    ['sea-strange-fair:1', 'sea-strange-wave:1'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur

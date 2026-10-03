@@ -1,0 +1,65 @@
+; La station balnéaire (D-95), PR 8 : le monde étrange, « la vague » (D-104). Au sortir de la fête
+; engloutie, une vague immense, de toute la hauteur, se lève derrière Céleste et la poursuit de gauche
+; à droite (D-103) : elle déferle, puis se retire un instant. Quatre tronçons, une veilleuse au début
+; de chacun : le comptoir d'un stand (glisser dessous), un bassin, la cheminée des chevaux (saut
+; mural, pendant le reflux) ; du haut du stand, le grand bassin et sa guirlande, une poutre basse ; la
+; cheminée au-dessus de l'eau ; les chevaux dans l'eau, puis la digue où la vague se brise. Après la
+; digue, le toit du carrousel étrange et le livre musical.
+; @name: La vague
+; @world: strange
+; @outdoor: yes
+; @music: strange
+; @difficulty: easy
+; @ambient: #14202c
+; @chase: right 160
+; @chase-phase: 160 13
+; @chase-look: wave
+; @leg: 6,18 43,8 easy slide wall-jump
+; @leg: 43,8 90,18 easy slide
+; @leg: 90,18 120,8 easy wall-jump
+; @leg: 120,8 181,13 easy
+; @cable: 50 9 70 12
+; @decor: drownedwheel 52 0 26 18
+; @decor: balloons 60 2 6 9
+; @decor: balloons 140 3 6 8
+; @decor: sunkenhorses 48 17 24 2
+; @decor: sunkenhorses 126 17 31 2
+; @decor: eyes 96 6 1 1
+; @decor: bigtop 1 0 188 1
+; @decor: drowneddeck 0 19 190 2
+; @decor: fairawning 14 1 3 17
+; @decor: fairawning 80 1 3 17
+; @decor: horsepole 31 1 1 14
+; @decor: horsepole 105 1 1 14
+; @decor: drownedstall 36 9 12 10
+; @decor: drownedstall 110 9 15 10
+; @decor: drownedstall 130 17 2 2
+; @decor: drownedstall 136 16 2 3
+; @decor: drownedstall 142 17 2 2
+; @decor: drownedstall 148 16 2 3
+; @decor: drownedstall 157 16 3 3
+; @decor: strangeseawall 160 11 11 8
+; @decor: drownedcarousel 173 12 16 7
+; Légende : # pierre (la digue), t toile et b bois (pleins), ~ eau (ramène au dernier appui), C veilleuse (checkpoint), P repère de départ, 1 sortie (liaisons dans zone.ts).
+##############################################################################################################################################################################################
+#.............ttt..............b................................................ttt......................b...................................................................................#
+#.............ttt..............b................................................ttt......................b...................................................................................#
+#.............ttt..............b................................................ttt......................b...................................................................................#
+#.............ttt..............b................................................ttt......................b...................................................................................#
+#.............ttt..............b................................................ttt......................b...................................................................................#
+#.............ttt..............b................................................ttt......................b...................................................................................#
+#.............ttt..............b................................................ttt......................b...................................................................................#
+#.............ttt..............b...........C....................................ttt......................b..............C....................................................................#
+#.............ttt..............b....bbbbbbbbbbbb................................ttt......................b....bbbbbbbbbbbbbbb................................................................#
+#.............ttt..............b....bbbbbbbbbbbb................................ttt......................b....bbbbbbbbbbbbbbb................................................................#
+#.............ttt..............b....bbbbbbbbbbbb................................ttt......................b....bbbbbbbbbbbbbbb...................................###########..................#
+#.............ttt..............b....bbbbbbbbbbbb................................ttt......................b....bbbbbbbbbbbbbbb...................................###########..................#
+#.............ttt..............b....bbbbbbbbbbbb................................ttt......................b....bbbbbbbbbbbbbbb...................................###########..................#
+#.............ttt..............b....bbbbbbbbbbbb................................ttt......................b....bbbbbbbbbbbbbbb...................................###########..tttttttttttttttt#
+#.............ttt...................bbbbbbbbbbbb................................ttt...........................bbbbbbbbbbbbbbb...................................###########..tttttttttttttttt#
+1.............ttt...................bbbbbbbbbbbb................................ttt...........................bbbbbbbbbbbbbbb...........bb..........bb.......bbb###########..tttttttttttttttt#
+1.............ttt...................bbbbbbbbbbbb................................ttt...........................bbbbbbbbbbbbbbb.....bb....bb....bb....bb.......bbb###########..tttttttttttttttt#
+1..P..C.............................bbbbbbbbbbbb..........................................C...................bbbbbbbbbbbbbbb.....bb....bb....bb....bb.......bbb###########..tttttttttttttttt#
+bbbbbbbbbbbbbbbbbbbbbb~~~~~bbbbbbbbbbbbbbbbbbbbb~~~~~~~~~~~~~~~~~~~~~~~~bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb~~~~bbbbbbbbbbbbbbbb~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~bbbbbbbbbbbbbb~~bbbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbbbbbbbb~~~~~bbbbbbbbbbbbbbbbbbbbb~~~~~~~~~~~~~~~~~~~~~~~~bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb~~~~bbbbbbbbbbbbbbbb~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~bbbbbbbbbbbbbb~~bbbbbbbbbbbbbbbbb
+##############################################################################################################################################################################################

@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101, fusionnées) et **PR 6 faite : la fête engloutie** (D-102) et **PR 7 faite : le rythme de la vague, parcours d'essai 14** (D-103), sur `ccr-014503d9-cj0c7a`. Suite : PR 8, la vague dans le niveau et le livre musical. Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
+**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101, fusionnées) et **PR 6 faite : la fête engloutie** (D-102) **PR 7 faite : le rythme de la vague, parcours d'essai 14** (D-103) et **PR 8 faite : la vague dans le niveau, le livre musical** (D-104), sur `ccr-014503d9-cj0c7a`. Suite : PR 9, le court souvenir, la nuit, le couloir en boucle, la fin. Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
 
 **Le train** (niveau 5, D-83 à D-91) : complet et fusionné. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
@@ -17,6 +17,17 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### La station balnéaire, PR 8 : la vague dans le niveau, le livre musical (D-104)
+
+- **La vague** : au sortir de la fête engloutie, une vague immense poursuit Céleste sur le platelage englouti ; quatre tronçons, une veilleuse au début de chacun (le comptoir, la cheminée des chevaux, le grand bassin et la poutre basse, la cheminée au-dessus de l'eau, les chevaux dans l'eau) ; elle se brise contre la digue.
+- **Le livre musical**, sur le toit du carrousel étrange : un souvenir du monde étrange ; le cercle se referme, Céleste est assise sur sa couchette au dortoir ; Maria, puis le lit (fin provisoire : le court souvenir et la nuit avec la PR 9).
+- DEBUG → Histoire : « le livre musical trouvé (fin de la mer étrange) ».
+- Tests : TESTCOUNT. Vérifié dans Chromium : la vague au départ, la cheminée, la digue, le livre sur le toit du carrousel, la fin sur la couchette.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « la fête engloutie (le carrousel) », puis traverser la fête engloutie) : la poursuite est-elle difficile mais juste ? Les veilleuses sont-elles assez proches ?
+- [ ] Le reflux se voit-il assez pour qu'on pense à monter les cheminées à ce moment-là ?
+- [ ] La digue et la vague qui s'y brise : se comprend-il qu'on est sauvée ?
+- [ ] Le livre musical : se reconnaît-il comme un livre d'enfant ? Le dessin dans le cahier ?
 
 ### La station balnéaire, PR 7 : le rythme de la vague (D-103)
 
