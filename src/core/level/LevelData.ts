@@ -62,6 +62,11 @@ export interface LevelData {
    * « présent » ; sa variante « souvenir » est construite par `atLayer`. Null sans couches.
    */
   readonly layers: LevelLayers | null;
+  /**
+   * L'effacement (D-111), déclaré par `; @erase:` et `; @erase-step:` : des groupes de tuiles qui
+   * changent de couche pendant le jeu (annoncés, jamais en mouvement). Null sans effacement.
+   */
+  readonly erase: LevelErase | null;
   /** Tronçons dont la difficulté est vérifiée par les tests (`; @leg:`, D-96). */
   readonly legs: readonly LevelLeg[];
   /**
@@ -116,6 +121,29 @@ export interface LevelLayers {
   readonly active: Layer | 'common';
 }
 
+/** Couches où une tuile existe (D-111) : bits du présent (1) et du souvenir (2). */
+export const LayerMask = { None: 0, Present: 1, Memory: 2, Both: 3 } as const;
+export type LayerMask = (typeof LayerMask)[keyof typeof LayerMask];
+
+/** Un groupe de l'effacement (D-111) : ses zones, et les couches où il existe au départ. */
+export interface EraseGroup {
+  readonly id: string;
+  readonly rects: readonly TileRect[];
+  readonly initial: LayerMask;
+}
+
+/**
+ * L'effacement d'une salle (D-111). Un groupe cité par une étape (`steps`) est une **vague** : à
+ * chaque étape, annoncée, il passe d'une couche à l'autre (présent ↔ souvenir). Les autres sont des
+ * **bandes** (avec une poursuite vers le haut) : quand l'effacement monte assez près, elles
+ * quittent le présent (elles restent dans le souvenir).
+ */
+export interface LevelErase {
+  readonly groups: readonly EraseGroup[];
+  /** Étapes des vagues, dans l'ordre (en boucle) : les groupes qui changent de couche. */
+  readonly steps: readonly (readonly string[])[];
+}
+
 /** Marée d'un tronçon (`; @leg:`), basse par défaut (sans effet dans une salle sans marée). */
 export type LegTide = 'low' | 'high';
 
@@ -138,9 +166,10 @@ export type ChaseDir = 'up' | 'right' | 'left';
 
 /**
  * Allure du poursuivant : celle de son sens (le tas des objets perdus, le chariot de vaisselle), ou
- * la vague (D-103, horizontale seulement), qui déferle puis se retire (`surgeMs`, `backwashMs`).
+ * la vague (D-103, horizontale seulement), qui déferle puis se retire (`surgeMs`, `backwashMs`), ou
+ * l'effacement (D-111, vers le haut seulement), une décoloration grise et pâle.
  */
-export type ChaseLook = 'default' | 'wave';
+export type ChaseLook = 'default' | 'wave' | 'erasure';
 
 /**
  * Poursuite (D-67, D-87) : quelque chose de grand avance derrière Céleste, dans le sens `dir`. Par

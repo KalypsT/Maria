@@ -113,6 +113,16 @@ export interface CombatParams {
   backwashMs: number;
   backwashSpeed: number;
   /**
+   * L'effacement (D-111) : une plateforme qui va quitter une couche blanchit pendant `eraseWarnMs`,
+   * puis s'efface. Les vagues se suivent toutes les `eraseWaveMs` (divisé par `eraseSpeedScale`,
+   * que le boss augmente quand il accélère). Une bande quitte le présent quand l'effacement qui monte
+   * arrive à `eraseLeadTiles` tuiles sous elle.
+   */
+  eraseWarnMs: number;
+  eraseWaveMs: number;
+  eraseSpeedScale: number;
+  eraseLeadTiles: number;
+  /**
    * Tunnels sur le toit du train (D-86), danger simple : un tunnel arrive toutes les
    * `tunnelPeriodMs`, annoncé pendant `tunnelWarnMs` (sa bouche approche, l'image s'assombrit),
    * puis le train est dedans pendant `tunnelPassMs`. Debout sur le toit, Céleste est repoussée vers
@@ -210,6 +220,10 @@ export const DEFAULT_COMBAT: Readonly<CombatParams> = {
   surgeMs: 2000,
   backwashMs: 1500,
   backwashSpeed: 3,
+  eraseWarnMs: 1200,
+  eraseWaveMs: 4000,
+  eraseSpeedScale: 1,
+  eraseLeadTiles: 5,
   tunnelPeriodMs: 10000,
   tunnelWarnMs: 2600,
   tunnelPassMs: 2400,
@@ -282,6 +296,10 @@ export const COMBAT_PARAM_RANGES: Readonly<
   chaseTripPauseMs: { min: 0, max: 8000, step: 100 },
   surgeMs: { min: 500, max: 8000, step: 100 },
   backwashMs: { min: 0, max: 5000, step: 100 },
+  eraseWarnMs: { min: 200, max: 4000, step: 50 },
+  eraseWaveMs: { min: 1000, max: 12000, step: 100 },
+  eraseSpeedScale: { min: 0.3, max: 3, step: 0.05 },
+  eraseLeadTiles: { min: 0, max: 20, step: 0.5 },
   backwashSpeed: { min: 0, max: 10, step: 0.5 },
   tunnelPeriodMs: { min: 3000, max: 30000, step: 500 },
   tunnelWarnMs: { min: 500, max: 6000, step: 100 },

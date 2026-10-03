@@ -193,6 +193,48 @@ export function presentOf(level: LevelData): LevelData {
   return result;
 }
 
+/**
+ * La même salle avec d'autres zones de couches (l'effacement, D-111) : `present` et `memory` sont
+ * les nouvelles zones, `rawTiles` et `rawMaterials` les tuiles des deux couches ensemble. Le décor
+ * et les câbles déclarés suivent leurs zones. Retourne la salle du présent (ses variantes par
+ * `atLayer`), qui garde l'identifiant, les entités et le reste.
+ */
+export function rezoned(
+  level: LevelData,
+  zones: {
+    readonly present: readonly TileRect[];
+    readonly memory: readonly TileRect[];
+    readonly rawTiles: Uint8Array;
+    readonly rawMaterials: Uint8Array;
+  },
+): LevelData {
+  const base = siblings.get(level)?.get('present') ?? level;
+  const tiles = zones.rawTiles.slice();
+  const materials = zones.rawMaterials.slice();
+  erase(tiles, materials, level.width, zones.memory);
+  return presentOf({
+    ...base,
+    tiles,
+    materials,
+    decor: allDecor.get(base) ?? base.decor,
+    cables: allCables.get(base) ?? base.cables,
+    layers: {
+      present: zones.present,
+      memory: zones.memory,
+      rawTiles: zones.rawTiles,
+      rawMaterials: zones.rawMaterials,
+      active: 'present',
+    },
+  });
+}
+
+/** Tuiles et matériaux des deux couches ensemble (une salle sans couches : les siens). */
+export function rawOf(level: LevelData): { tiles: Uint8Array; materials: Uint8Array } {
+  return level.layers
+    ? { tiles: level.layers.rawTiles, materials: level.layers.rawMaterials }
+    : { tiles: level.tiles, materials: level.materials };
+}
+
 /** La variante d'une salle dans une couche (une salle sans couches est la même dans les deux). */
 export function atLayer(level: LevelData, layer: Layer): LevelData {
   return variant(level, layer);

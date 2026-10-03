@@ -5,6 +5,7 @@ import {
   type WallStyle,
   MOON_LIGHT_RADIUS,
   WATER_COLORS,
+  ERASURE_COLORS,
   type ArtPalette,
   type ArtFinish,
 } from '../../config/art';
@@ -1785,13 +1786,28 @@ function drawStructure(a: ArtContext, floorY: number): void {
           depth++;
         }
         const k = depth / WATER_COLORS.deepRows;
-        const top = p.silhouettes ? WATER_COLORS.strangeBody : WATER_COLORS.body;
-        const deep = p.silhouettes ? WATER_COLORS.strangeDeep : WATER_COLORS.deep;
+        // L'effacement (D-111) : une décoloration grise et pâle à la place de l'eau.
+        const erasure = level.meta.void === 'erasure';
+        const top = erasure
+          ? ERASURE_COLORS.body
+          : p.silhouettes
+            ? WATER_COLORS.strangeBody
+            : WATER_COLORS.body;
+        const deep = erasure
+          ? ERASURE_COLORS.deep
+          : p.silhouettes
+            ? WATER_COLORS.strangeDeep
+            : WATER_COLORS.deep;
         const mix = (i: 0 | 1 | 2) => Math.round(top[i] + (deep[i] - top[i]) * k);
-        ctx.fillStyle = `rgba(${String(mix(0))},${String(mix(1))},${String(mix(2))},${String(WATER_COLORS.alpha)})`;
+        const alpha = erasure ? ERASURE_COLORS.alpha : WATER_COLORS.alpha;
+        ctx.fillStyle = `rgba(${String(mix(0))},${String(mix(1))},${String(mix(2))},${String(alpha)})`;
         ctx.fillRect(x, y, T, T);
         if (depth === 0 && tileAt(level, col, row - 1) === Tile.Empty) {
-          ctx.fillStyle = p.silhouettes ? WATER_COLORS.strangeSurface : WATER_COLORS.surface;
+          ctx.fillStyle = erasure
+            ? ERASURE_COLORS.surface
+            : p.silhouettes
+              ? WATER_COLORS.strangeSurface
+              : WATER_COLORS.surface;
           ctx.fillRect(x, y + 2, T, 1.5);
         }
       } else if (tile === Tile.Thorns) {

@@ -96,7 +96,9 @@ export class WaterView {
         .setScale(1, 1.6)
         .setVisible(false);
     }
-    for (const s of waterSurfaces(level)) {
+    // L'effacement (D-111) : pas de vaguelettes, il ne bouge pas.
+    const erasure = level.meta.void === 'erasure';
+    for (const s of erasure ? [] : waterSurfaces(level)) {
       const width = (s.colEnd - s.colStart + 1) * T;
       for (let layer = 0; layer < 2; layer++) {
         const sprite = this.scene.add
