@@ -23,7 +23,7 @@
 - **La vague** : au sortir de la fête engloutie, une vague immense poursuit Céleste sur le platelage englouti ; quatre tronçons, une veilleuse au début de chacun (le comptoir, la cheminée des chevaux, le grand bassin et la poutre basse, la cheminée au-dessus de l'eau, les chevaux dans l'eau) ; elle se brise contre la digue.
 - **Le livre musical**, sur le toit du carrousel étrange : un souvenir du monde étrange ; le cercle se referme, Céleste est assise sur sa couchette au dortoir ; Maria, puis le lit (fin provisoire : le court souvenir et la nuit avec la PR 9).
 - DEBUG → Histoire : « le livre musical trouvé (fin de la mer étrange) ».
-- Tests : TESTCOUNT. Vérifié dans Chromium : la vague au départ, la cheminée, la digue, le livre sur le toit du carrousel, la fin sur la couchette.
+- Tests : 706. Vérifié dans Chromium : la vague au départ, la cheminée, la digue, le livre sur le toit du carrousel, la fin sur la couchette.
 - [ ] À vérifier sur téléphone (DEBUG → Histoire → « la fête engloutie (le carrousel) », puis traverser la fête engloutie) : la poursuite est-elle difficile mais juste ? Les veilleuses sont-elles assez proches ?
 - [ ] Le reflux se voit-il assez pour qu'on pense à monter les cheminées à ce moment-là ?
 - [ ] La digue et la vague qui s'y brise : se comprend-il qu'on est sauvée ?
