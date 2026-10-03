@@ -70,6 +70,8 @@ export const THOUGHT_ICONS = [
   'slide',
   /** Une vague, sa flèche qui monte : la marée monte (la pêche à pied, D-99) ; le banc des marées. */
   'tide',
+  /** Un petit carrousel, son toit rayé et un cheval (la fête du soir, D-101). */
+  'carousel',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 

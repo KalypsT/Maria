@@ -21,6 +21,13 @@ const SETTLED = { all: [F.SeaArrived] };
 /** La pêche à pied (D-99) : la classe sur la plage, à marée basse, jusqu'à la première marée. */
 const FISHING = { all: [F.SeaArrived], none: [F.SeaFirstTide] };
 const AFTER_TIDE = { all: [F.SeaFirstTide] };
+/** Le jour, après la première marée, jusqu'au soir de la fête (D-101). */
+const DAYTIME = { all: [F.SeaFirstTide], none: [F.SeaEvening] };
+const EVENING = { all: [F.SeaEvening] };
+/** Arrivée sur la jetée, le soir, près de la lanterne de l'entrée. */
+const JETTY_ARRIVAL = { col: 206, row: 15 };
+/** Le carrousel, au bout de la jetée. */
+const CAROUSEL = { col: 21, row: 15 };
 /** La maîtresse sur le sable, pendant la pêche à pied. */
 const TEACHER_BEACH = { col: 134, row: 23 };
 /** Les bancs des marées (on s'y assoit, debout sur la tuile du dessus) : la promenade, le port. */
@@ -134,6 +141,64 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'teacher-promenade' },
     ],
   },
+  {
+    // La maîtresse sur la promenade, le jour : Céleste demande ; la maîtresse montre le soleil (on a le
+    // temps de jouer). Rejouable, jusqu'à ce que Céleste ait vu le carrousel du haut du phare.
+    id: 'sea-teacher-promenade',
+    room: 'sea-promenade',
+    on: 'interact',
+    area: { col: 65, row: 22, w: 7, h: 3 },
+    mark: { col: 68, row: 20 },
+    when: { all: [F.SeaFirstTide], none: [F.SeaSawCarousel] },
+    lock: true,
+    repeat: true,
+    steps: [
+      { do: 'thought', icon: 'question', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs },
+      { do: 'thought', icon: 'sun', ms: S.thoughtMs, by: 'teacher-promenade' },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
+  {
+    // Le soir de la fête (D-101) : Céleste a vu le carrousel du haut du phare. Agir près de la
+    // maîtresse : elle montre la fête (le carrousel) ; dans le noir, le soir tombe sur la baie, la
+    // classe est sur la jetée, les lumières de la fête s'allument.
+    id: 'sea-evening',
+    room: 'sea-promenade',
+    on: 'interact',
+    area: { col: 65, row: 22, w: 7, h: 3 },
+    mark: { col: 68, row: 20 },
+    when: { all: [F.SeaSawCarousel], none: [F.SeaEvening] },
+    lock: true,
+    steps: [
+      { do: 'thought', icon: 'question', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs },
+      { do: 'thought', icon: 'carousel', ms: S.thoughtMs, by: 'teacher-promenade' },
+      { do: 'wait', ms: S.thoughtMs },
+      { do: 'fadeOut', ms: S.nightFadeOutMs },
+      { do: 'flag', id: F.SeaEvening },
+      { do: 'room', room: 'sea-jetty', ...JETTY_ARRIVAL, facing: -1, returnPoint: true },
+      { do: 'wait', ms: S.nightBlackMs },
+      { do: 'fadeIn', ms: S.nightFadeInMs },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'classmate-jetty' },
+      { do: 'wait', ms: S.thoughtMs },
+      { do: 'thought', icon: 'carousel', ms: S.thoughtMs },
+    ],
+  },
+  {
+    // Le carrousel, au bout de la jetée, le soir : la lueur sous les chevaux (PLACEHOLDER jusqu'au
+    // monde étrange, PR 6) : « ? ».
+    id: 'sea-carousel',
+    room: 'sea-jetty',
+    on: 'interact',
+    area: { col: CAROUSEL.col - 4, row: CAROUSEL.row - 2, w: 9, h: 3 },
+    mark: { col: CAROUSEL.col, row: CAROUSEL.row - 4 },
+    when: EVENING,
+    lock: false,
+    repeat: true,
+    steps: [{ do: 'thought', icon: 'question', ms: S.thoughtMs }],
+  },
   // Les bancs des marées (D-95) : sur la promenade, face à la plage ; devant la capitainerie du port.
   tideBench('sea-bench-promenade', 'sea-promenade', PROMENADE_BENCH),
   tideBench('sea-bench-port', 'sea-port', PORT_BENCH),
@@ -177,7 +242,7 @@ const PROPS: StoryProp[] = [
     col: 68,
     row: 24,
     flip: true,
-    when: AFTER_TIDE,
+    when: DAYTIME,
   },
   {
     id: 'kids-promenade',
@@ -185,8 +250,20 @@ const PROPS: StoryProp[] = [
     kind: 'kids-quay',
     col: 52,
     row: 24,
-    when: AFTER_TIDE,
+    when: DAYTIME,
   },
+  // Le soir (D-101) : la maîtresse et la classe à la fête, près de l'entrée de la jetée.
+  {
+    id: 'teacher-jetty',
+    room: 'sea-jetty',
+    kind: 'teacher',
+    col: 197,
+    row: 15,
+    flip: true,
+    when: EVENING,
+  },
+  { id: 'classmate-jetty', room: 'sea-jetty', kind: 'classmate', col: 182, row: 15, when: EVENING },
+  { id: 'kids-jetty', room: 'sea-jetty', kind: 'kids-quay', col: 166, row: 15, when: EVENING },
   // Au centre (D-98), une fois arrivés : la maîtresse au réfectoire ; la camarade et deux enfants au
   // dortoir, assis sur les couchettes.
   { id: 'teacher-centre', room: 'sea-centre', kind: 'teacher', ...TEACHER_CENTRE, when: SETTLED },
@@ -216,6 +293,8 @@ const PROPS: StoryProp[] = [
  * grille du port (D-100) : ouverte après la première marée (le temps libre).
  */
 const LOCKED: StoryData['lockedRooms'] = [
+  // L'arche de la jetée (D-101) : la fête s'installe le jour, on n'y entre que le soir.
+  { room: 'sea-port', exit: 3, when: { none: [F.SeaEvening] }, icon: 'question' },
   { room: 'sea-promenade', exit: 4, when: { none: [F.SeaFirstTide] }, icon: 'question' },
   {
     room: 'sea-station',
@@ -227,8 +306,19 @@ const LOCKED: StoryData['lockedRooms'] = [
 ];
 
 /** Morceaux de l'histoire de la station balnéaire, ajoutés à ceux de la maison (`HOUSE_STORY`). */
-export const SEA_STORY: Pick<StoryData, 'triggers' | 'props' | 'lockedRooms'> = {
-  triggers: TRIGGERS,
-  props: PROPS,
-  lockedRooms: LOCKED,
-};
+/** Le soir de la fête (D-101) : toute la baie passe au soir. */
+const TIMES: StoryData['times'] = [{ when: EVENING, time: 'evening' }];
+
+/** Le carrousel, le soir : la lumière vacille en approchant (la lueur sous les chevaux). */
+const OMENS: StoryData['omens'] = [
+  { room: 'sea-jetty', when: EVENING, col: CAROUSEL.col, row: CAROUSEL.row, radius: 14 },
+];
+
+export const SEA_STORY: Pick<StoryData, 'triggers' | 'props' | 'lockedRooms' | 'times' | 'omens'> =
+  {
+    triggers: TRIGGERS,
+    props: PROPS,
+    lockedRooms: LOCKED,
+    times: TIMES,
+    omens: OMENS,
+  };

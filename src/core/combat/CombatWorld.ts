@@ -119,6 +119,10 @@ export class CombatWorld {
   waveDir: 1 | -1 = 1;
   /** La vague en cours a déjà repoussé Céleste (une fois par vague). */
   private waveHit = false;
+  /** Zones des chaises volantes (`; @sweep:`, D-101), en px. */
+  sweeps: Box[] = [];
+  /** Le passage en cours des chaises a déjà renversé Céleste (une fois par passage). */
+  private sweepHit = false;
   /** Ligne du toit sous les tunnels (`; @tunnel:`), -1 sans tunnel. */
   tunnelRow = -1;
   /** Valises qui tombent des filets (`; @decor: fallingcase`). */
@@ -182,6 +186,13 @@ export class CombatWorld {
     this.chase = level.chase ? new Chase(level.chase, this.params, this.stepHz) : null;
     const tunnel = Number(level.meta.tunnel);
     this.tunnelRow = level.meta.tunnel !== undefined && Number.isFinite(tunnel) ? tunnel : -1;
+    // Les chaises volantes (D-101).
+    this.sweeps = level.sweeps.map((r) => ({
+      x: r.col * TILE_SIZE,
+      y: r.row * TILE_SIZE,
+      width: r.width * TILE_SIZE,
+      height: r.height * TILE_SIZE,
+    }));
     // Les vagues (D-99) : seulement à marée haute.
     const waves = wavesOf(level);
     this.waveRow = waves?.row ?? -1;
@@ -240,6 +251,7 @@ export class CombatWorld {
     this.hazardSteps = 0;
     this.tunnelHit = false;
     this.waveHit = false;
+    this.sweepHit = false;
     this.chase?.restart();
   }
 
@@ -329,6 +341,51 @@ export class CombatWorld {
     this.tunnelHit = true;
     player.vx = -this.params.tunnelPushX;
     player.vy = this.params.tunnelPushY;
+    player.startHurt(this.hurtSteps);
+    this.invulnerableSteps = Math.max(this.invulnerableSteps, this.invulnerableTotal);
+    this.events |= CombatEvent.Hurt;
+    this.lastEnemy = -1;
+    return true;
+  }
+
+  /** Moment des chaises volantes (D-101) : elles tournent haut, descendent, elles balaient. */
+  get sweepPhase(): TrainPhase {
+    const p = this.params;
+    return cyclePhase(this.hazardMs, p.sweepPeriodMs, p.sweepWarnMs, p.sweepPassMs);
+  }
+
+  /** Avancement de la descente des chaises (0 → 1), -1 hors de l'annonce (pour le dessin). */
+  get sweepWarnProgress(): number {
+    const p = this.params;
+    return cycleWarnProgress(this.hazardMs, p.sweepPeriodMs, p.sweepWarnMs, p.sweepPassMs);
+  }
+
+  /**
+   * Chaises volantes (D-101) : pendant qu'elles balaient, Céleste dans leur zone est renversée en
+   * arrière (à l'opposé de sa course) et un peu soulevée, la peur monte, une fois par passage.
+   * Couchée, sa hitbox passe sous la zone. Vrai si elle vient d'être renversée.
+   */
+  private stepSweep(player: PlayerPhysics): boolean {
+    if (this.sweeps.length === 0) {
+      return false;
+    }
+    if (this.sweepPhase !== TrainPhase.Passing) {
+      this.sweepHit = false;
+      return false;
+    }
+    if (this.sweepHit) {
+      return false;
+    }
+    let inside = false;
+    for (const zone of this.sweeps) {
+      inside ||= overlaps(player.box, zone);
+    }
+    if (!inside) {
+      return false;
+    }
+    this.sweepHit = true;
+    player.vx = (player.vx > 0 ? -1 : 1) * this.params.sweepPushX;
+    player.vy = -this.params.sweepPushY;
     player.startHurt(this.hurtSteps);
     this.invulnerableSteps = Math.max(this.invulnerableSteps, this.invulnerableTotal);
     this.events |= CombatEvent.Hurt;
@@ -447,7 +504,10 @@ export class CombatWorld {
     if (
       this.stepTrains(player) ||
       (!this.still &&
-        (this.stepTunnel(player) || this.stepLuggage(player) || this.stepWave(player)))
+        (this.stepTunnel(player) ||
+          this.stepLuggage(player) ||
+          this.stepWave(player) ||
+          this.stepSweep(player)))
     ) {
       return;
     }

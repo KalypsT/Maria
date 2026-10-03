@@ -120,6 +120,11 @@ export const StoryFlag = {
    */
   SeaSawCarousel: 'sea.saw-carousel',
   /**
+   * Le soir de la fête (D-101) : la maîtresse emmène la classe sur la jetée ; toute la baie passe au
+   * soir.
+   */
+  SeaEvening: 'sea.evening',
+  /**
    * La marée est haute (D-95), à la station balnéaire : la seule étape réversible (les bancs des
    * marées la posent et la retirent). Les salles de marée prennent leur variante haute.
    */

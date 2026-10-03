@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) et **PR 4 faite : le phare, le port, la boucle de la baie** (D-100), sur `ccr-014503d9-cj0c7a`. Suite : PR 5, la jetée et la fête foraine (le soir, le carrousel). Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
+**La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) et **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101), sur `ccr-014503d9-cj0c7a`. Suite : PR 6, la fête engloutie (le monde étrange, par le carrousel). Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
 
 **Le train** (niveau 5, D-83 à D-91) : complet et fusionné. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
@@ -17,6 +17,18 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### La station balnéaire, PR 5 : la jetée, la fête, le soir (D-101)
+
+- **Le soir** : après le carrousel vu du phare, la maîtresse emmène la classe à la fête ; toute la baie passe au soir.
+- **La jetée** (salle de marée) : les stands où l'on glisse sous le comptoir, **les chaises volantes** (elles balaient à hauteur de tête : on se couche ou on attend), le saut long sous le toit bas de la pêche aux canards, les guirlandes (le crochet), la grande roue, le carrousel. Sous la jetée, à marée basse, les pilotis et une trouvaille.
+- Le carrousel : la lumière vacille ; Agir : « ? » (le monde étrange viendra).
+- DEBUG → Histoire : « le soir de la fête, la jetée ».
+- Tests : TESTCOUNT. Vérifié dans Chromium : la jetée le soir (stands, chaises volantes qui descendent, guirlandes allumées, grande roue, carrousel), la promenade le soir, la jetée à marée haute.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « le soir de la fête, la jetée ») : les chaises volantes se lisent-elles ? L'annonce (`sweepWarnMs`) suffit-elle ? Pense-t-on à se coucher ?
+- [ ] Le saut long sous le toit bas (moyen) : juste ? Les guirlandes : les voit-on comme un chemin ?
+- [ ] Le soir sur la baie (palette du crépuscule) : agréable ? Les ampoules de la fête suffisent-elles ?
+- [ ] Le carrousel et ses chevaux tournés à l'envers : inquiétant sans faire peur ?
 
 ### La station balnéaire, PR 4 : le phare, le port (D-100)
 

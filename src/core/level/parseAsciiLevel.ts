@@ -119,6 +119,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   const seas: TileRect[] = [];
   const rises: TileRect[] = [];
   const legs: LevelLeg[] = [];
+  const sweeps: TileRect[] = [];
   text.split('\n').forEach((raw, index) => {
     const line = raw.replace(/\r$/, '').trimEnd();
     if (!line.startsWith(COMMENT)) {
@@ -169,6 +170,13 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         );
       }
       tideRows = { low: Number(t[1]), high: Number(t[2]) };
+    } else if (match?.[1] === 'sweep' && match[2] !== undefined) {
+      const r = RECT.exec(match[2].trim());
+      if (!r) {
+        throw new Error(`Niveau ${id}, ligne ${index + 1} : @sweep attend « col ligne l h »`);
+      }
+      const [col = 0, row = 0, w = 0, h = 0] = r.slice(1, 5).map(Number);
+      sweeps.push({ col, row, width: w, height: h });
     } else if ((match?.[1] === 'sea' || match?.[1] === 'rise') && match[2] !== undefined) {
       const r = RECT.exec(match[2].trim());
       if (!r) {
@@ -310,6 +318,11 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
     tide = built.tide;
     tiles = built.tiles;
   }
+  for (const r of sweeps) {
+    if (r.width < 1 || r.height < 1 || r.col + r.width > width || r.row + r.height > height) {
+      throw new Error(`Niveau ${id} : @sweep ${String(r.col)} ${String(r.row)} hors de la salle`);
+    }
+  }
   for (const leg of legs) {
     for (const p of [leg.from, leg.to]) {
       if (p.col >= width || p.row >= height) {
@@ -394,6 +407,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         : null,
     tide,
     legs,
+    sweeps,
   };
   checkTide(level);
   return level;

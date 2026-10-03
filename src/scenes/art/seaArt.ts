@@ -1035,6 +1035,258 @@ export function seaDrawers({ rounded, tileShape }: ShapeTools): Record<string, D
       ctx.arc(r.x + 16, r.y + 8, 3, 0, Math.PI * 2);
       ctx.fill();
     },
+    // ——— La jetée et la fête foraine (D-101) ———
+    jettydeck(a, r) {
+      // Le platelage de la jetée (on y marche) : des planches, leurs clous.
+      tileShape(a, r, WOOD, WOOD_LIGHT);
+      const { ctx } = a;
+      if (a.palette.silhouettes) {
+        return;
+      }
+      ctx.fillStyle = WOOD_DARK;
+      for (let x = r.x + 6; x < r.x + r.w; x += 12) {
+        ctx.fillRect(x, r.y + 3, 1, r.h - 3);
+      }
+    },
+    piling(a, r) {
+      // Un pilotis sous la jetée (du platelage au fond) : bois sombre, des algues en bas.
+      const { ctx } = a;
+      const ground = groundRow(a, r.x + T / 2, r.y / T) * T;
+      ctx.fillStyle = WOOD_DARK;
+      ctx.fillRect(r.x + 4, r.y, T - 8, ground - r.y);
+      ctx.fillStyle = 'rgba(95,138,78,0.7)';
+      ctx.fillRect(r.x + 4, ground - 14, T - 8, 14);
+    },
+    jettyladder(a, r) {
+      // La trappe et l'échelle vers le dessous de la jetée (barreaux : on s'y pose).
+      const { ctx } = a;
+      ctx.fillStyle = IRON;
+      ctx.fillRect(r.x + 2, r.y + 2 * T, 2, r.h - 2 * T);
+      ctx.fillRect(r.x + r.w - 4, r.y + 2 * T, 2, r.h - 2 * T);
+      for (let row = r.y / T; row < (r.y + r.h) / T; row++) {
+        if (tileAt(a.level, r.x / T, row) === Tile.OneWay) {
+          ctx.fillStyle = IRON_LIGHT;
+          ctx.fillRect(r.x, row * T, r.w, 3);
+        }
+      }
+    },
+    jettygate(a, r) {
+      const { ctx } = a;
+      // L'arche de la jetée (fond), sur le quai : deux poteaux, un fronton d'ampoules, sans texte.
+      const lit = a.palette.darkness > 0;
+      ctx.fillStyle = WHITE;
+      ctx.fillRect(r.x, r.y + T, 4, r.h - T);
+      ctx.fillRect(r.x + r.w - 4, r.y + T, 4, r.h - T);
+      ctx.fillStyle = STRIPE_RED;
+      rounded(ctx, { x: r.x - 4, y: r.y, w: r.w + 8, h: T }, [8, 8, 0, 0]);
+      ctx.fill();
+      ctx.fillStyle = lit ? '#ffe9a0' : '#f4efe4';
+      for (let x = r.x; x <= r.x + r.w; x += 6) {
+        ctx.beginPath();
+        ctx.arc(x, r.y + 4, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    },
+    fairstall(a, r) {
+      // Un stand fermé devant (on glisse sous son comptoir) : les parois rayées, l'auvent festonné,
+      // des boîtes de conserve en pyramide (le chamboule-tout) ou des peluches ; ses ampoules.
+      const { ctx } = a;
+      const lit = a.palette.darkness > 0;
+      for (let row = r.y / T; row < (r.y + r.h) / T; row++) {
+        for (let col = r.x / T; col < (r.x + r.w) / T; col++) {
+          if (tileAt(a.level, col, row) === Tile.Solid) {
+            ctx.fillStyle = col % 2 === 0 ? STRIPE_BLUE : WHITE;
+            ctx.fillRect(col * T, row * T, T, T);
+          }
+        }
+      }
+      const counter = r.y + r.h - 2 * T;
+      // Les pieds du stand, du comptoir au platelage (on glisse entre eux).
+      ctx.fillStyle = WOOD_DARK;
+      ctx.fillRect(r.x + T, counter, 3, r.y + r.h - counter);
+      ctx.fillRect(r.x + r.w - T - 3, counter, 3, r.y + r.h - counter);
+      ctx.fillStyle = WOOD;
+      ctx.fillRect(r.x, counter, r.w, 4);
+      ctx.fillStyle = 'rgba(30,26,22,0.55)';
+      ctx.fillRect(r.x + T, counter + 4, r.w - 2 * T, T - 4);
+      for (let k = 0; k < r.w / 8; k++) {
+        ctx.fillStyle = k % 2 === 0 ? STRIPE_RED : WHITE;
+        ctx.beginPath();
+        ctx.arc(r.x + 4 + k * 8, r.y + 2 * T, 4, 0, Math.PI);
+        ctx.fill();
+      }
+      ctx.fillStyle = lit ? '#ffe9a0' : '#f4efe4';
+      for (let x = r.x + 2; x < r.x + r.w; x += 7) {
+        ctx.beginPath();
+        ctx.arc(x, r.y + 2 * T - 2, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    },
+    ticketbooth(a, r) {
+      // La guérite de la grande roue (on monte dessus) : des planches peintes, un guichet, un toit plat.
+      const body = { x: r.x, y: r.y + 2 * T, w: r.w, h: r.h - 2 * T };
+      tileShape(a, body, '#7fa8c9', '#a8c8e0');
+      const { ctx } = a;
+      ctx.fillStyle = a.palette.darkness > 0 ? '#ffe3a0' : '#bcd9e6';
+      ctx.fillRect(r.x + 10, body.y + 20, r.w - 20, 14);
+      ctx.fillStyle = WHITE;
+      ctx.fillRect(r.x - 3, body.y - 3, r.w + 6, 4);
+    },
+    candystall(a, r) {
+      // Le stand de berlingots (on monte dessus) : des bocaux de bonbons, un toit en pointe.
+      const body = { x: r.x, y: r.y + 4 * T, w: r.w, h: r.h - 4 * T };
+      tileShape(a, body, PINK, '#f8c7d2');
+      const { ctx } = a;
+      ctx.fillStyle = MINT;
+      ctx.beginPath();
+      ctx.moveTo(r.x - 3, body.y);
+      ctx.lineTo(r.x + r.w / 2, r.y + T);
+      ctx.lineTo(r.x + r.w + 3, body.y);
+      ctx.fill();
+      for (let k = 0; k < 3; k++) {
+        ctx.fillStyle = BAGS[k] ?? STRIPE_RED;
+        ctx.beginPath();
+        ctx.arc(r.x + 12 + k * 18, body.y + 14, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    },
+    duckstall(a, r) {
+      // La pêche aux canards : un long toit bas (plein), le bassin et ses canards dessous, dans le trou
+      // du platelage, et des lampions.
+      const roof = { x: r.x, y: r.y + 3 * T, w: r.w, h: 5 * T };
+      tileShape(a, roof, MINT, '#c6eee2');
+      const { ctx } = a;
+      ctx.fillStyle = STRIPE_RED;
+      for (let x = roof.x; x < roof.x + roof.w; x += 10) {
+        ctx.beginPath();
+        ctx.arc(x + 5, roof.y + roof.h, 5, 0, Math.PI);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#f2c14e';
+      for (let x = roof.x + 12; x < roof.x + roof.w - 8; x += 22) {
+        ctx.beginPath();
+        ctx.ellipse(x, roof.y - 6, 4, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    },
+    swingride(a, r) {
+      const { ctx } = a;
+      // Les chaises volantes (fond) : le mât, le chapeau rayé qui tourne ; les chaises sont dessinées à
+      // part (`RideView`).
+      const cx = r.x + r.w / 2;
+      const deck = groundRow(a, cx, r.y / T + 2) * T;
+      ctx.fillStyle = IRON;
+      ctx.fillRect(cx - 3, r.y + 2 * T, 6, deck - r.y - 2 * T);
+      for (let k = 0; k < 8; k++) {
+        ctx.fillStyle = k % 2 === 0 ? STRIPE_RED : '#f2c14e';
+        ctx.beginPath();
+        ctx.moveTo(cx, r.y + T);
+        ctx.lineTo(cx - r.w / 2 + (k * r.w) / 8, r.y + 3 * T);
+        ctx.lineTo(cx - r.w / 2 + ((k + 1) * r.w) / 8, r.y + 3 * T);
+        ctx.fill();
+      }
+    },
+    garlandpoles(a, r) {
+      const { ctx } = a;
+      // Les mâts des guirlandes (fond), et les ampoules le long de leurs fils (le crochet).
+      const lit = a.palette.darkness > 0;
+      for (const c of a.level.cables) {
+        if (c.x2 < r.x || c.x1 > r.x + r.w) {
+          continue;
+        }
+        ctx.fillStyle = IRON;
+        ctx.fillRect(c.x1 - 1.5, c.y1 - 4, 3, r.y + r.h - c.y1 + 4);
+        ctx.fillRect(c.x2 - 1.5, c.y2 - 4, 3, r.y + r.h - c.y2 + 4);
+        for (let k = 1; k < 12; k++) {
+          const t = k / 12;
+          const x = c.x1 + (c.x2 - c.x1) * t;
+          const y = c.y1 + (c.y2 - c.y1) * t + 3;
+          ctx.fillStyle = lit ? (['#ffe28a', '#ff9db0', '#9fe8ff'][k % 3] ?? '#ffe28a') : '#e9e2cf';
+          ctx.beginPath();
+          ctx.arc(x, y, 1.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    },
+    bigwheel(a, r) {
+      const { ctx } = a;
+      // La grande roue, au fond (sans collision) : ses rayons, ses nacelles ; une nacelle éclairée en
+      // turquoise le soir (une étrangeté, jamais expliquée).
+      const lit = a.palette.darkness > 0;
+      const cx = r.x + r.w / 2;
+      const cy = r.y + r.h * 0.45;
+      const rad = Math.min(r.w, r.h) * 0.42;
+      ctx.strokeStyle = 'rgba(80,80,90,0.55)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+      for (let k = 0; k < 12; k++) {
+        const t = (k / 12) * Math.PI * 2;
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(t) * rad, cy + Math.sin(t) * rad);
+      }
+      ctx.moveTo(cx - 6, cy);
+      ctx.lineTo(cx - 14, r.y + r.h);
+      ctx.moveTo(cx + 6, cy);
+      ctx.lineTo(cx + 14, r.y + r.h);
+      ctx.stroke();
+      for (let k = 0; k < 12; k++) {
+        const t = (k / 12) * Math.PI * 2;
+        ctx.fillStyle = k === 7 && lit ? '#7ff0dd' : (BAGS[k % BAGS.length] ?? STRIPE_RED);
+        rounded(ctx, { x: cx + Math.cos(t) * rad - 4, y: cy + Math.sin(t) * rad, w: 8, h: 6 }, 2);
+        ctx.fill();
+      }
+    },
+    carousel(a, r) {
+      const { ctx } = a;
+      // Le carrousel, au bout de la jetée (fond) : le toit rayé en chapiteau, le mât, les chevaux de
+      // bois ; le jour, une bâche ; le soir, ses ampoules, et les chevaux tournés dans le mauvais sens
+      // (une étrangeté). Une lueur turquoise sous les chevaux.
+      const lit = a.palette.darkness > 0;
+      const cx = r.x + r.w / 2;
+      const deck = r.y + r.h;
+      const roofY = r.y + 2 * T;
+      ctx.fillStyle = 'rgba(120,240,220,0.35)';
+      ctx.beginPath();
+      ctx.ellipse(cx, deck - 3, r.w / 2 - 6, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      if (!lit) {
+        ctx.fillStyle = '#8f9a8a';
+        ctx.beginPath();
+        ctx.moveTo(r.x + 6, deck);
+        ctx.lineTo(cx, r.y);
+        ctx.lineTo(r.x + r.w - 6, deck);
+        ctx.fill();
+        return;
+      }
+      ctx.fillStyle = '#d9c38a';
+      ctx.fillRect(cx - 3, roofY, 6, deck - roofY);
+      for (let k = 0; k < 10; k++) {
+        ctx.fillStyle = k % 2 === 0 ? STRIPE_RED : WHITE;
+        ctx.beginPath();
+        ctx.moveTo(cx, r.y);
+        ctx.lineTo(r.x + (k * r.w) / 10, roofY + T);
+        ctx.lineTo(r.x + ((k + 1) * r.w) / 10, roofY + T);
+        ctx.fill();
+      }
+      for (let k = 0; k < 4; k++) {
+        const x = r.x + 4 * T + k * 6 * T;
+        ctx.fillStyle = '#c9a05a';
+        ctx.fillRect(x, roofY + T, 1.5, deck - roofY - 2 * T);
+        ctx.fillStyle = WHITE;
+        ctx.beginPath();
+        ctx.ellipse(x, deck - 3 * T, 9, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // La tête, tournée vers la gauche (les autres chevaux de carrousel regardent ailleurs).
+        ctx.fillRect(x - 12, deck - 3 * T - 9, 5, 9);
+      }
+      ctx.fillStyle = '#ffe9a0';
+      for (let x = r.x + 4; x < r.x + r.w; x += 8) {
+        ctx.beginPath();
+        ctx.arc(x, roofY + T + 2, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    },
     // ——— Le centre de la classe de mer ———
     colonyfloor(a, r) {
       // Le plancher du dortoir, vu par la tranche : des lattes, une poutre dessous.

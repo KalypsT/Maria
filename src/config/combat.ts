@@ -129,6 +129,18 @@ export interface CombatParams {
   wavePushX: number;
   wavePushY: number;
   /**
+   * Les chaises volantes de la fête (D-101), `; @sweep:` : elles tournent haut, descendent pendant
+   * `sweepWarnMs`, puis balaient leur zone pendant `sweepPassMs` (toutes les `sweepPeriodMs`) :
+   * Céleste qui y est (debout) est renversée en arrière, la peur monte, une fois par passage.
+   * Couchée (glissade), elle passe dessous.
+   */
+  sweepPeriodMs: number;
+  sweepWarnMs: number;
+  sweepPassMs: number;
+  /** Poussée des chaises : vers l'arrière (px/s) et vers le haut (px/s). */
+  sweepPushX: number;
+  sweepPushY: number;
+  /**
    * Valises qui tombent des filets dans les virages (D-86) : toutes les `luggagePeriodMs`, la
    * valise tremble sur son filet pendant `luggageWarnMs`, puis tombe (gravité `luggageGravity`),
    * reste un instant au sol (`luggageLieMs`) et disparaît. Touchée en tombant : recul, la peur monte.
@@ -196,6 +208,11 @@ export const DEFAULT_COMBAT: Readonly<CombatParams> = {
   wavePassMs: 1100,
   wavePushX: 140,
   wavePushY: 160,
+  sweepPeriodMs: 4200,
+  sweepWarnMs: 1000,
+  sweepPassMs: 1500,
+  sweepPushX: 170,
+  sweepPushY: 120,
   luggagePeriodMs: 6500,
   luggageWarnMs: 1400,
   luggageGravity: 1100,
@@ -261,6 +278,11 @@ export const COMBAT_PARAM_RANGES: Readonly<
   wavePassMs: { min: 300, max: 6000, step: 100 },
   wavePushX: { min: 0, max: 600, step: 10 },
   wavePushY: { min: 0, max: 600, step: 10 },
+  sweepPeriodMs: { min: 1500, max: 20000, step: 100 },
+  sweepWarnMs: { min: 200, max: 4000, step: 100 },
+  sweepPassMs: { min: 200, max: 6000, step: 100 },
+  sweepPushX: { min: 0, max: 600, step: 10 },
+  sweepPushY: { min: 0, max: 600, step: 10 },
   luggagePeriodMs: { min: 2000, max: 20000, step: 250 },
   luggageWarnMs: { min: 200, max: 4000, step: 100 },
   luggageGravity: { min: 300, max: 3000, step: 50 },
