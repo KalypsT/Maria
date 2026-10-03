@@ -65,6 +65,11 @@ function makeWaveTexture(scene: Phaser.Scene, key: string, crest: number, foam: 
  */
 export class WaterView {
   private readonly layers: Phaser.GameObjects.TileSprite[] = [];
+  /** Vaguelettes d'une seule couche (D-115). */
+  private readonly layered: {
+    readonly sprite: Phaser.GameObjects.TileSprite;
+    readonly layer: 'present' | 'memory';
+  }[] = [];
   /** Les vagues (D-99) : la bande d'écume qui balaie, la crête qui monte pendant l'annonce. */
   private waveBand: Phaser.GameObjects.Rectangle | null = null;
   private waveCrest: Phaser.GameObjects.TileSprite | null = null;
@@ -111,11 +116,53 @@ export class WaterView {
     }
   }
 
+  /**
+   * L'eau d'une seule couche (D-115, la marée haute du présent) : les vaguelettes des nappes qui
+   * n'existent que dans le présent ou que dans le souvenir, montrées selon la couche active
+   * (`showLayer`). Après `load` (la salle sans ses zones).
+   */
+  loadLayers(present: LevelData, memory: LevelData, strange: boolean): void {
+    const key = strange ? STRANGE_WAVE_TEXTURE : WAVE_TEXTURE;
+    const keyOf = (s: WaterSurface) => `${String(s.row)}:${String(s.colStart)}:${String(s.colEnd)}`;
+    const inPresent = waterSurfaces(present);
+    const inMemory = waterSurfaces(memory);
+    const both = new Set(inPresent.map(keyOf).filter((k) => inMemory.some((m) => keyOf(m) === k)));
+    for (const [layer, surfaces] of [
+      ['present', inPresent],
+      ['memory', inMemory],
+    ] as const) {
+      for (const s of surfaces) {
+        if (both.has(keyOf(s))) {
+          continue;
+        }
+        const width = (s.colEnd - s.colStart + 1) * T;
+        for (let k = 0; k < 2; k++) {
+          const sprite = this.scene.add
+            .tileSprite(s.colStart * T, s.row * T - 2 + k, width, WATER_LIFE.heightPx, key)
+            .setOrigin(0, 0)
+            .setDepth(WATER_DEPTH)
+            .setAlpha(k === 0 ? 1 : 0.5)
+            .setVisible(layer === 'present');
+          this.layers.push(sprite);
+          this.layered.push({ sprite, layer });
+        }
+      }
+    }
+  }
+
+  /** Montre les vaguelettes de la couche active (D-115). */
+  showLayer(layer: 'present' | 'memory'): void {
+    for (const { sprite, layer: of } of this.layered) {
+      sprite.setVisible(of === layer);
+    }
+  }
+
   clear(): void {
     for (const sprite of this.layers) {
       sprite.destroy();
     }
     this.layers.length = 0;
+    this.layered.length = 0;
     this.waveBand?.destroy();
     this.waveCrest?.destroy();
     this.waveBand = null;

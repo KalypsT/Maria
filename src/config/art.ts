@@ -633,6 +633,7 @@ export const DECOR_KINDS: Readonly<
   bedgate: { furniture: false },
   schoolgate: { furniture: false },
   stationgate: { furniture: false },
+  seagate: { furniture: false },
   cantower: { furniture: true },
 };
 

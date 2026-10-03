@@ -1542,3 +1542,33 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Coût** : l'analyse de la gare prend environ 30 s (la façade est une grande zone), celle du train 16 s.
 - **Debug** : l'histoire « les îlots de la chambre, de l'école et de la gare faits ».
 - **Sauvegarde** : aucune migration. Une étape en fin de liste, trois trouvailles neuves ; rien d'existant n'a bougé.
+
+## D-115 — L'avant-dernier niveau, PR 8 : l'îlot de mémoire 4, la plage et le carrousel d'autrefois (le livre musical)
+
+- **Plan validé** (D-107). Quatrième et dernier îlot, ouvert depuis la maison sans condition (ordre libre).
+- **L'accès** : la trappe du plancher de la maison (son dessin `passagesea`, PR 3) est une porte (Agir). Elle mène à **la plage d'autrefois** (`nanny-beach`), puis au **carrousel d'autrefois** (`nanny-carousel`). Deux salles `; @world: strange`, sur la page « Chez la nounou », musique `strange`, **moyennes**.
+- **L'idée de l'îlot** : **le présent est la marée haute, le souvenir la marée basse**. L'eau (`~`, D-97 : y tomber ramène au dernier appui) n'existe que dans le présent, par des zones `; @shift: present` ; à marée basse, on marche au fond de la baie. Ce n'est pas la marée de D-95 (pas de `; @tide:`) : ce sont les deux couches de la bascule, rien ne bouge.
+- **La plage d'autrefois** (96 × 30) :
+  - la dune (une lanterne), puis le ponton cassé ;
+  - **l'arche de rocher** : à marée haute, son pied ferme le passage ; à marée basse, on passe dessous ;
+  - derrière, **la cheminée des rochers** (saut mural) remonte au second ponton (une lanterne). Ce passage est **moyen** (133 ms, bascule et saut mural exigés) ;
+  - pour rejoindre le quai, à marée haute **une flèche de rocher coupe le chemin**. On le rejoint à marée basse, en planant, ou par le fond et les rochers (facile, la bascule exigée) ;
+  - **dans le corail**, ouvert à marée basse, une trouvaille ;
+  - **défi** (difficile, 67 ms) : au-dessus de la dune, deux rideaux de ronces, l'étagère de la trouvaille ;
+  - jamais coincée au fond : des rochers ramènent aux pontons et au quai. Sous l'eau à marée haute, ils ne servent pas.
+  - **Écart avec le plan** : une caténaire devait mener au quai. Le plané suffisait sans elle (la sonde l'a trouvé), elle est retirée. Le crochet n'est pas exigé dans cet îlot ; le saut mural, le plané et la glissade restent utiles.
+- **Le carrousel d'autrefois** (64 × 34) :
+  - au milieu de la baie (l'eau du présent autour). On grimpe ses chevaux, qui alternent de couche, jusqu'au toit : moyen, 167 ms, la bascule exigée. Le mât central, d'abord plein, barrait le plancher ; il s'arrête maintenant au-dessus de la tête ;
+  - **sous le plancher**, ouvert à marée basse, une trouvaille ;
+  - **défi** (difficile, 67 ms) : deux rideaux, le rebord de la trouvaille.
+- **Le livre musical** (`nanny-music-book`, Agir), sur le toit du carrousel : on le regarde (il reste là), un cœur, **son court souvenir** (D-105) ; l'étape `nanny.sea-done` (en fin de liste).
+- **Les raccourcis**, cachés tant que le livre n'est pas retrouvé : une porte vers la maison (arche à la vague, `seagate`) et une **vers l'îlot voisin**, le train d'autrefois. Les quatre îlots forment ainsi une boucle de raccourcis : chambre ← rue ← train ← carrousel. **La quatrième veilleuse** s'allume, **bleue** : les quatre sont allumées une fois les îlots faits (la suite, le torchon blanc, PR 9).
+- **Dessin** :
+  - l'eau d'une seule couche est dessinée dans sa couche : remplissage dans le dessin des zones en tuiles (`ShiftLayerView`), habillage sinon ;
+  - les vaguelettes de chaque couche (`WaterView.loadLayers`, `showLayer`) changent à la bascule ;
+  - à marée basse, la limite de la marée haute se voit en contour fantôme ;
+  - repris du monde étrange de la mer : la grande roue noyée, les ballons, le carrousel. PLACEHOLDER.
+- **Jamais coincée** (graphe à deux couches de l'entrée, la maison et les quatre îlots). Les quatre îlots sont faisables dans n'importe quel ordre.
+- **Coût** : environ 11 s d'analyse par salle.
+- **Debug** : histoire « les quatre îlots faits ».
+- **Sauvegarde** : aucune migration (une étape en fin de liste, quatre trouvailles neuves ; rien d'existant n'a bougé).

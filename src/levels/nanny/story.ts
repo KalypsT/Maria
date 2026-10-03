@@ -26,6 +26,8 @@ const BED_DOOR = { col: 24, row: 6 };
 export const ISLET_SHAPE_BOX = { col: 76, row: 19 };
 /** La cuisine rose (D-114), sur le toit de la dernière voiture du train d'autrefois (îlot 3). */
 export const ISLET_PINK_KITCHEN = { col: 74, row: 8 };
+/** Le livre musical (D-115), sur le toit du carrousel d'autrefois (îlot 4). */
+export const ISLET_MUSIC_BOOK = { col: 34, row: 7 };
 /**
  * Les veilleuses de la porte de la sieste (D-107, D-110), une par îlot, dans l'ordre des îlots :
  * la tuile où chacune est posée (dessinée par `napdoor`, allumée par l'objet de l'îlot).
@@ -164,6 +166,34 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
+    // L'îlot 4 (D-115) : sur le toit du carrousel d'autrefois, le livre musical (D-104). On le
+    // regarde (il reste là) ; son court souvenir revient. Les deux passages près de lui s'ouvrent,
+    // vers la maison et vers le train d'autrefois ; une veilleuse s'allume sur la porte de la
+    // sieste.
+    id: 'nanny-music-book',
+    room: 'nanny-carousel',
+    on: 'interact',
+    area: { col: ISLET_MUSIC_BOOK.col - 2, row: ISLET_MUSIC_BOOK.row - 2, w: 5, h: 3 },
+    mark: { col: ISLET_MUSIC_BOOK.col, row: ISLET_MUSIC_BOOK.row - 3 },
+    when: { all: [F.NannyHouse], none: [F.NannySeaDone] },
+    lock: true,
+    steps: [
+      {
+        do: 'sparkle',
+        area: { col: ISLET_MUSIC_BOOK.col - 1, row: ISLET_MUSIC_BOOK.row - 2, w: 3, h: 3 },
+        ms: S.cradleSparkleMs + 600,
+      },
+      { do: 'wait', ms: S.cradleSparkleMs },
+      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs },
+      { do: 'flashback', id: 'music-book', ms: S.flashbackMs },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'flag', id: F.NannySeaDone },
+      { do: 'sparkle', area: { col: 26, row: 3, w: 15, h: 5 }, ms: S.lookMs },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
+  {
     // Dans la maison (D-110) : tout est immense. Céleste regarde ; le reflet n'est plus là.
     id: 'nanny-house',
     room: 'nanny-house',
@@ -223,6 +253,22 @@ const PROPS: StoryData['props'] = [
     ...NAP_LIGHTS[2],
     when: { all: [F.NannyStationDone] },
   },
+  // Le livre musical (D-115), sur le toit du carrousel : il y reste.
+  {
+    id: 'nanny-music-book',
+    room: 'nanny-carousel',
+    kind: 'music-book',
+    ...ISLET_MUSIC_BOOK,
+    when: {},
+  },
+  // La veilleuse de l'îlot 4, bleue, une fois le livre musical retrouvé.
+  {
+    id: 'nap-light-sea',
+    room: 'nanny-house',
+    kind: 'nap-light-sea',
+    ...NAP_LIGHTS[3],
+    when: { all: [F.NannySeaDone] },
+  },
   // Le reflet (D-110) : Céleste toute petite dans la vitre du miroir, puis de l'autre côté.
   {
     id: 'nanny-reflection',
@@ -274,6 +320,11 @@ const LOCKED: StoryData['lockedRooms'] = [
   { room: 'nanny-house', exit: 7, when: { none: [F.NannyStationDone] }, hidden: true },
   { room: 'nanny-train', exit: 3, when: { none: [F.NannyStationDone] }, hidden: true },
   { room: 'nanny-street', exit: 4, when: { none: [F.NannyStationDone] }, hidden: true },
+  // Ceux de l'îlot 4 (D-115), près du livre musical : vers la maison et vers l'îlot 3.
+  { room: 'nanny-carousel', exit: 2, when: { none: [F.NannySeaDone] }, hidden: true },
+  { room: 'nanny-house', exit: 9, when: { none: [F.NannySeaDone] }, hidden: true },
+  { room: 'nanny-carousel', exit: 3, when: { none: [F.NannySeaDone] }, hidden: true },
+  { room: 'nanny-train', exit: 4, when: { none: [F.NannySeaDone] }, hidden: true },
 ];
 
 /** Morceaux de l'histoire de la maison de la nounou, ajoutés à ceux de la maison (`HOUSE_STORY`). */

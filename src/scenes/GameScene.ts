@@ -1387,13 +1387,17 @@ export class GameScene extends Phaser.Scene {
     this.showCables();
   }
 
-  /** Les câbles de la couche active, et en fantôme ceux de l'autre couche (D-107). */
+  /**
+   * Les câbles de la couche active, et en fantôme ceux de l'autre couche (D-107) ; les vaguelettes
+   * de l'eau d'une seule couche (D-115).
+   */
   private showCables(): void {
     const level = this.level;
     if (!level.layers) {
       this.worldView.setCables(level.cables);
       return;
     }
+    this.water.showLayer(layerOf(level));
     const other = atLayer(level, otherLayer(layerOf(level))).cables;
     this.worldView.setCables(
       level.cables,
@@ -1625,6 +1629,11 @@ export class GameScene extends Phaser.Scene {
     const palette = this.palette();
     const waves = wavesOf(level);
     this.water.load(level, palette.silhouettes, waves?.row ?? -1, level.tide?.highRow ?? -1);
+    if (base.layers) {
+      const root = base.erase ? eraseRoot(base) : base;
+      this.water.loadLayers(atLayer(root, 'present'), atLayer(root, 'memory'), palette.silhouettes);
+      this.water.showLayer(layerOf(this.level));
+    }
     this.finishView.setPalette(palette, this.artFinish);
     // Salle habillée (D-28) : dessinée par l'habillage, pas tuile par tuile.
     const images = this.artImages();

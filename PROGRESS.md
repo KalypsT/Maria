@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**L'avant-dernier niveau** (niveau 7, « la maison de la nounou », D-107) : plan validé en 12 PR (la bascule, la maison et le miroir, l'effacement, quatre îlots de mémoire, le torchon blanc, le boss, Eden, le réveil et la phase 4). **PR 1 faite : la bascule (moteur, analyse, parcours d'essai 15)** (D-108) , **PR 2 faite : le dessin des deux couches, le bouton « Basculer », l'aide** (D-109), **PR 3 faite : la porte du couloir, l'entrée et le miroir, la maison, la carte** (D-110) **PR 4 faite : l'effacement (le système) et le parcours d'essai 16** (D-111, fusionnées), **PR 5 faite : l'îlot 1, la chambre d'autrefois et le jardin renversé (Roger)** (D-112) **PR 6 faite : l'îlot 2, l'école et la rue d'autrefois (la boîte à formes)** (D-113) et **PR 7 faite : l'îlot 3, la gare et le train d'autrefois (la cuisine rose)** (D-114), sur `ccr-3d597f8d-070zee`. Suite : l'îlot 4 (PR 8) ; **essai sur téléphone** (parcours 15 et 16, l'entrée, la maison, les îlots 1 à 3).
+**L'avant-dernier niveau** (niveau 7, « la maison de la nounou », D-107) : plan validé en 12 PR (la bascule, la maison et le miroir, l'effacement, quatre îlots de mémoire, le torchon blanc, le boss, Eden, le réveil et la phase 4). **PR 1 faite : la bascule (moteur, analyse, parcours d'essai 15)** (D-108) , **PR 2 faite : le dessin des deux couches, le bouton « Basculer », l'aide** (D-109), **PR 3 faite : la porte du couloir, l'entrée et le miroir, la maison, la carte** (D-110) **PR 4 faite : l'effacement (le système) et le parcours d'essai 16** (D-111, fusionnées), **PR 5 faite : l'îlot 1, la chambre d'autrefois et le jardin renversé (Roger)** (D-112) **PR 6 faite : l'îlot 2, l'école et la rue d'autrefois (la boîte à formes)** (D-113) **PR 7 faite : l'îlot 3, la gare et le train d'autrefois (la cuisine rose)** (D-114) et **PR 8 faite : l'îlot 4, la plage et le carrousel d'autrefois (le livre musical)** (D-115), sur `ccr-3d597f8d-070zee`. **Les quatre îlots sont faits.** Suite : le torchon blanc (PR 9) ; **essai sur téléphone** (parcours 15 et 16, l'entrée, la maison, les quatre îlots).
 
 **La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101, fusionnées) et **PR 6 faite : la fête engloutie** (D-102) **PR 7 faite : le rythme de la vague, parcours d'essai 14** (D-103) **PR 8 faite : la vague dans le niveau, le livre musical** (D-104) et **PR 9 faite : le court souvenir, la nuit, le couloir en boucle, la fin** (D-105), sur `ccr-014503d9-cj0c7a`. **Le niveau 6 est complet** (sa fin reste un PLACEHOLDER jusqu'au niveau 7). Suite : essais sur téléphone, puis le niveau 7. Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
 
@@ -19,6 +19,17 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### L'avant-dernier niveau, PR 8 : l'îlot 4, la plage et le carrousel d'autrefois (D-115)
+
+- **La trappe du plancher** de la maison (Agir) mène à **la plage d'autrefois** : **le présent est la marée haute, le souvenir la marée basse**. L'arche de rocher ne se passe qu'à marée basse, par en dessous ; la cheminée des rochers (saut mural) remonte au ponton ; à marée haute, une flèche de rocher coupe le chemin du quai. Défi : deux rideaux au-dessus de la dune (une trouvaille) ; dans le corail, à marée basse, une trouvaille.
+- **Le carrousel d'autrefois** : ses chevaux alternent de couche jusqu'au toit ; **le livre musical** et son court souvenir. Défi : deux rideaux (une trouvaille) ; sous le plancher, à marée basse, une trouvaille.
+- Après le livre : **une porte vers la maison**, **une vers le train d'autrefois**, **la quatrième veilleuse** (bleue).
+- L'eau d'une seule couche est dessinée dans sa couche (et ses vaguelettes changent à la bascule).
+- DEBUG → Histoire : « les quatre îlots faits ».
+- Tests : TESTS_PR8. Vérifié dans Chromium : la trappe, la plage aux deux marées, le carrousel, le livre musical et son court souvenir, la porte vers le train, les quatre veilleuses.
+- [ ] À vérifier sur téléphone : comprend-on que le souvenir est la marée basse (l'eau en contour fantôme) ? L'arche (passer dessous à marée basse) se devine-t-elle ?
+- [ ] Les quatre îlots dans un ordre libre : la maison guide-t-elle assez (les passages, les veilleuses) ?
 
 ### L'avant-dernier niveau, PR 7 : l'îlot 3, la gare et le train d'autrefois (D-114)
 

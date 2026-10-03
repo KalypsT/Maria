@@ -188,6 +188,12 @@ export const StoryFlag = {
    * vers la maison et la rue d'autrefois s'ouvrent, une veilleuse turquoise s'allume.
    */
   NannyStationDone: 'nanny.station-done',
+  /**
+   * L'îlot de mémoire 4 (D-115) : sur le toit du carrousel d'autrefois, le livre musical et son
+   * court souvenir ; les passages vers la maison et le train d'autrefois s'ouvrent, une veilleuse
+   * bleue s'allume.
+   */
+  NannySeaDone: 'nanny.sea-done',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -319,6 +325,7 @@ export const PROP_SIZE = {
   'nap-light-bed': { w: 12, h: 24 },
   'nap-light-school': { w: 12, h: 24 },
   'nap-light-station': { w: 12, h: 24 },
+  'nap-light-sea': { w: 12, h: 24 },
   'dad-garden': { w: 44 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // Le train (D-85) : sur le quai, la maîtresse et les parents (à hauteur d'enfant), les enfants
   // et leurs sacs ; dans la voiture-couchettes, des enfants de la taille de Céleste.

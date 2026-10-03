@@ -443,6 +443,7 @@ const NAP_LIGHT_COLORS = {
   bed: '255, 170, 200',
   school: '255, 220, 120',
   station: '120, 240, 220',
+  sea: '130, 170, 255',
 } as const;
 
 /** Une veilleuse allumée (D-112) : une lueur ronde, centrée 16 px au-dessus du bas du cadre. */
@@ -572,6 +573,9 @@ export function drawProp(
       break;
     case 'nap-light-station':
       drawNapLight(ctx, w, h, NAP_LIGHT_COLORS.station);
+      break;
+    case 'nap-light-sea':
+      drawNapLight(ctx, w, h, NAP_LIGHT_COLORS.sea);
       break;
     case 'site-gap':
       drawSiteGap(ctx, w, h);

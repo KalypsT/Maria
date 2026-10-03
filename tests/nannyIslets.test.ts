@@ -9,6 +9,7 @@ import { isMappedRoom, isStrangeRoom, mapPage } from '../src/core/world/zone';
 import { mapProblems } from '../src/core/world/mapModel';
 import { HOUSE_STORY } from '../src/levels/house/story';
 import {
+  ISLET_MUSIC_BOOK,
   ISLET_PINK_KITCHEN,
   ISLET_ROGER,
   ISLET_SHAPE_BOX,
@@ -110,6 +111,26 @@ const ISLETS: readonly Islet[] = [
     secrets: 3,
     closed: ['nanny-station', 'nanny-train'],
   },
+  {
+    name: 'la plage et le carrousel d’autrefois (D-115)',
+    rooms: ['nanny-beach', 'nanny-carousel'],
+    entry: [8, 'nanny-beach', 1],
+    done: F.NannySeaDone,
+    trigger: 'nanny-music-book',
+    object: { id: 'nanny-music-book', kind: 'music-book', room: 'nanny-carousel' },
+    at: ISLET_MUSIC_BOOK,
+    flashback: 'music-book',
+    light: 'nap-light-sea',
+    lightIndex: 3,
+    shortcuts: [
+      ['nanny-carousel', 2],
+      ['nanny-house', 9],
+      ['nanny-carousel', 3],
+      ['nanny-train', 4],
+    ],
+    secrets: 4,
+    closed: ['nanny-beach', 'nanny-carousel'],
+  },
 ];
 const ALL = ['nanny-entry', 'nanny-house', ...ISLETS.flatMap((i) => i.rooms)];
 
@@ -154,6 +175,9 @@ describe('les îlots de mémoire de la maison de la nounou (D-112, D-113)', () =
     expect(zone.destination('nanny-station', 2)).toEqual({ room: 'nanny-train', exit: 1 });
     expect(zone.destination('nanny-train', 2)).toEqual({ room: 'nanny-house', exit: 7 });
     expect(zone.destination('nanny-train', 3)).toEqual({ room: 'nanny-street', exit: 4 });
+    expect(zone.destination('nanny-beach', 2)).toEqual({ room: 'nanny-carousel', exit: 1 });
+    expect(zone.destination('nanny-carousel', 2)).toEqual({ room: 'nanny-house', exit: 9 });
+    expect(zone.destination('nanny-carousel', 3)).toEqual({ room: 'nanny-train', exit: 4 });
     // Les passages dessinés en PR 3 : l'étagère de gauche, le haut de la bibliothèque.
     const house = level('nanny-house');
     expect(house.decor.some((d) => d.kind === 'passagebed' && d.col === 1)).toBe(true);
@@ -202,6 +226,16 @@ describe('les îlots de mémoire de la maison de la nounou (D-112, D-113)', () =
       );
     },
   );
+
+  it('l’îlot 4 : le présent est la marée haute, le souvenir la marée basse (D-115)', () => {
+    for (const room of ['nanny-beach', 'nanny-carousel']) {
+      const present = level(room);
+      const memory = atLayer(present, 'memory');
+      const water = present.tiles.filter((t) => t === Tile.Water).length;
+      expect(water, room).toBeGreaterThan(50);
+      expect(memory.tiles.some((t) => t === Tile.Water)).toBe(false);
+    }
+  });
 
   for (const islet of ISLETS) {
     describe(islet.name, () => {

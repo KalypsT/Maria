@@ -5,7 +5,8 @@
 ; bascule en plein vol. Au bout, la cuisine rose (D-88). Tombée sur la voie, l'échelle ramène au
 ; toit. Défi : derrière deux rideaux, le rebord du signal et sa trouvaille. Dans la première
 ; voiture, ouverte dans le souvenir, une trouvaille. Sortie (1) vers la gare ; portes (2) vers la
-; maison et (3) vers la rue d'autrefois, ouvertes une fois la cuisine rose retrouvée.
+; maison et (3) vers la rue d'autrefois, ouvertes une fois la cuisine rose retrouvée ; porte (4) vers
+; le carrousel d'autrefois (îlot 4), ouverte une fois le livre musical retrouvé.
 ; @name: Le train d'autrefois
 ; @world: strange
 ; @mapped: yes
@@ -14,6 +15,7 @@
 ; @ambient: #1b1a2b
 ; @door: 2 71 8
 ; @door: 3 77 8
+; @door: 4 79 8
 ; @shift: present 10 12 5 3
 ; @shift: present 21 1 3 10
 ; @shift: present 25 1 2 10
@@ -34,6 +36,7 @@
 ; @decor: eyes 40 21 1 1
 ; @decor: stationgate 70 4 3 5
 ; @decor: schoolgate 76 4 3 5
+; @decor: seagate 79 4 1 5
 ; Légende : # mur/sol, - quai et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S trouvaille, 1-9 sorties.
 ##########################################################################################
 #....................######....................!................................!.!......#
