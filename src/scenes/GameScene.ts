@@ -28,7 +28,16 @@ import { FixedStepClock } from '../core/FixedStepClock';
 import { InputController } from '../core/input/InputController';
 import { KeyboardSource } from '../core/input/KeyboardSource';
 import { TouchSource } from '../core/input/TouchSource';
-import { EntityType, Material, Tile, tileAt, type LevelData } from '../core/level/LevelData';
+import {
+  EntityType,
+  Material,
+  Tile,
+  tileAt,
+  type Layer,
+  type LevelData,
+} from '../core/level/LevelData';
+import { atLayer, commonLayer, layerOf } from '../core/level/layers';
+import { LayerShift, ShiftEvent, type ShiftHost } from '../core/player/LayerShift';
 import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
 import { atTide } from '../core/level/tide';
 import { PlayerPhysics, type PlayerInput } from '../core/player/PlayerPhysics';
@@ -113,6 +122,7 @@ import { BackdropView } from './BackdropView';
 import { ForegroundView } from './ForegroundView';
 import { WorldLifeView } from './WorldLifeView';
 import { WaterView } from './WaterView';
+import { ShiftLayerView } from './ShiftLayerView';
 import { RideView } from './RideView';
 import { MapPage } from '../ui/MapPage';
 import { buildMapModel } from '../core/world/mapModel';
@@ -237,6 +247,14 @@ export class GameScene extends Phaser.Scene {
   debugHook = false;
   /** Glissade débloquée par l'overlay (D-84). */
   debugSlide = false;
+  /** Bascule débloquée par l'overlay (D-107). */
+  debugShift = false;
+  /** La bascule est acquise (sauvegarde, overlay ou parcours d'essai). */
+  private canShift = false;
+  /** La couche active d'une salle à deux couches (D-107), jamais sauvegardée. */
+  private readonly layerShift = new LayerShift();
+  private readonly shiftHost: ShiftHost = { tryShift: (to) => this.tryShiftTo(to) };
+  private shiftView!: ShiftLayerView;
   /** Aperçu du monde étrange (D-28, overlay) : mêmes formes, autre palette. */
   strangeWorld = false;
   private roomArt!: RoomArtView;
@@ -420,6 +438,7 @@ export class GameScene extends Phaser.Scene {
     this.foreground = new ForegroundView(this);
     this.worldLife = new WorldLifeView(this);
     this.water = new WaterView(this);
+    this.shiftView = new ShiftLayerView(this);
     this.ride = new RideView(this);
     const save = this.session.data;
     const { room, checkpointId } = savedReturn(this.session);
@@ -464,6 +483,7 @@ export class GameScene extends Phaser.Scene {
       this.palette(),
       this.story.timeOfDay() === 'morning',
     );
+    this.shiftView.load(this.level);
     this.hud = new Hud();
     this.flashbackView = new FlashbackView();
     this.cupImage = this.createCupImage();
@@ -676,6 +696,7 @@ export class GameScene extends Phaser.Scene {
       ) {
         this.poser.sitting = false; // Céleste se relève dès qu'on la fait bouger.
       }
+      this.stepShift(this.controls.consumePressed('Shift') && !locked);
       this.player.step(input);
       combat.step(this.player, action && !near && !locked);
       const chase = combat.chase;
@@ -755,6 +776,7 @@ export class GameScene extends Phaser.Scene {
     );
     this.chaseView.render(camera.prevY + (camera.y - camera.prevY) * alpha + camera.viewHeight / 2);
     this.storyView.render(this.puppet.x, this.puppet.y, box.height);
+    this.shiftView.render(this.time.now, this.puppet.x, this.puppet.y - box.height / 2);
     this.worldView.render();
     this.dust.update();
     const main = this.cameras.main;
@@ -1066,6 +1088,8 @@ export class GameScene extends Phaser.Scene {
    */
   private returnToFooting(): void {
     const footing = this.run.footing;
+    // L'appui retenu dans l'autre couche (D-107) : Céleste y revient.
+    this.showLayer(footing ? layerOf(footing.level) : 'present');
     const { x, y } = footing ?? this.respawnPosition();
     this.player.reset(x, y, this.level);
     this.feel.reset(this.player);
@@ -1112,6 +1136,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   respawn(): void {
+    this.showLayer('present');
     const { x, y } = this.respawnPosition();
     this.player.reset(x, y, this.level);
     this.feel.reset(this.player);
@@ -1226,6 +1251,54 @@ export class GameScene extends Phaser.Scene {
     this.resetCamera();
   }
 
+  /**
+   * La bascule (D-107), à chaque pas : une pression de Basculer, gardée tant que la place manque.
+   * Sans la capacité, rien ; dans une salle sans couches, le petit signe du refus.
+   */
+  private stepShift(pressed: boolean): void {
+    if (!this.canShift) {
+      return;
+    }
+    if (!this.level.layers) {
+      if (pressed) {
+        this.shiftView.refuse(this.time.now);
+      }
+      return;
+    }
+    const event = this.layerShift.step(pressed, this.player.movement, this.shiftHost);
+    if (event === ShiftEvent.Shifted) {
+      this.shiftView.flash(this.time.now);
+    } else if (event === ShiftEvent.Refused) {
+      this.shiftView.refuse(this.time.now);
+    }
+  }
+
+  /** Passe Céleste dans la couche `to` si la place le permet (D-107) ; rien ne bouge. */
+  private tryShiftTo(to: Layer): boolean {
+    const target = atLayer(this.level, to);
+    if (!this.player.shiftTo(target, this.player.movement.shiftNudgePx)) {
+      return false;
+    }
+    this.level = target;
+    this.run.setLayer(target);
+    this.combat.setLayer(target);
+    this.shiftView.show(to);
+    return true;
+  }
+
+  /** Affiche une couche sans rien vérifier (réapparition, retour au dernier appui, D-107). */
+  private showLayer(layer: Layer): void {
+    if (layerOf(this.level) === layer) {
+      return;
+    }
+    const target = atLayer(this.level, layer);
+    this.level = target;
+    this.run.setLayer(target);
+    this.combat.setLayer(target);
+    this.layerShift.layer = layer;
+    this.shiftView.show(layer);
+  }
+
   /** La variante d'une salle à la marée du moment (D-95) ; une salle sans marée est inchangée. */
   private atTide(level: LevelData): LevelData {
     return atTide(level, this.story.flags.has(StoryFlag.TideHigh));
@@ -1249,8 +1322,11 @@ export class GameScene extends Phaser.Scene {
    * carte révélée. Céleste est replacée ensuite.
    */
   private setRoom(source: LevelData, zone: Zone | null, checkpointId: string | null): void {
-    const level = this.atTide(source);
+    // Une salle à deux couches se charge toujours dans le présent (D-107).
+    const level = atLayer(this.atTide(source), 'present');
     this.level = level;
+    this.layerShift.reset();
+    this.shiftView.load(level);
     this.zone = zone;
     if (zone && !isStrangeRoom(level)) {
       void this.session.revealRoom(level.id);
@@ -1293,6 +1369,7 @@ export class GameScene extends Phaser.Scene {
       ...(player.canGlide ? [Ability.Umbrella] : []),
       ...(player.canHook ? [Ability.Hook] : []),
       ...(player.canSlide ? [Ability.Slide] : []),
+      ...(this.canShift ? [Ability.Shift] : []),
     ];
   }
 
@@ -1310,6 +1387,7 @@ export class GameScene extends Phaser.Scene {
     // Le crochet (D-65) s'ajoute au parapluie : il ne sert qu'en planant.
     this.player.canHook = this.debugHook || has(Ability.Hook);
     this.player.canSlide = this.debugSlide || has(Ability.Slide);
+    this.canShift = this.debugShift || has(Ability.Shift);
     // Le bouton Capacité n'apparaît qu'avec la glissade (D-84).
     this.touch?.setAbilityVisible(this.player.canSlide);
   }
@@ -1430,7 +1508,8 @@ export class GameScene extends Phaser.Scene {
       this.textures.remove(key);
     }
     this.levelImages.length = 0;
-    const level = this.level;
+    // Une salle à deux couches (D-107) : seulement ce qui est commun ; les couches à part.
+    const level = commonLayer(this.level);
     const palette = this.palette();
     const waves = wavesOf(level);
     this.water.load(level, palette.silhouettes, waves?.row ?? -1, level.tide?.highRow ?? -1);
@@ -1459,8 +1538,14 @@ export class GameScene extends Phaser.Scene {
         for (let row = row0; row < row0 + rows; row++) {
           for (let col = col0; col < col0 + cols; col++) {
             drawn =
-              this.drawTile(g, col, row, (col - col0) * TILE_SIZE, (row - row0) * TILE_SIZE) ||
-              drawn;
+              this.drawTile(
+                g,
+                level,
+                col,
+                row,
+                (col - col0) * TILE_SIZE,
+                (row - row0) * TILE_SIZE,
+              ) || drawn;
           }
         }
         if (!drawn) {
@@ -1482,12 +1567,12 @@ export class GameScene extends Phaser.Scene {
   /** Dessine une tuile à (x, y) dans le bloc ; retourne faux si elle est vide. */
   private drawTile(
     g: Phaser.GameObjects.Graphics,
+    level: LevelData,
     col: number,
     row: number,
     x: number,
     y: number,
   ): boolean {
-    const level = this.level;
     const tile = tileAt(level, col, row);
     const material = level.materials[row * level.width + col];
     if (tile === Tile.Solid) {

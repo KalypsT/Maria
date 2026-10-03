@@ -1082,6 +1082,10 @@ export function installDebugOverlay(scene: GameScene): void {
     scene.debugSlide = checked;
     scene.applyAbilities();
   });
+  addCheck(panel, 'Capacité : bascule', scene.debugShift, (checked) => {
+    scene.debugShift = checked;
+    scene.applyAbilities();
+  });
 
   const refreshMovement = addSliders<MovementParams>(panel, {
     title: 'Mouvement',

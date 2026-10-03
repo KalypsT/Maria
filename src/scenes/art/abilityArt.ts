@@ -116,6 +116,24 @@ export function drawAbility(
       arrow(ctx, -9, 3.5, -3, 3.5);
       ctx.setLineDash([]);
       break;
+    case 'shift':
+      // La bascule (D-107) : une planche pleine (la couche où l'on est), une autre en contour
+      // pointillé (l'autre couche), et la flèche qui passe de l'une à l'autre.
+      ctx.beginPath();
+      ctx.rect(-9, 2, 8, 4);
+      ctx.stroke();
+      ctx.setLineDash([1.5, 1.5]);
+      ctx.beginPath();
+      ctx.rect(1, -6, 8, 4);
+      ctx.stroke();
+      ctx.strokeStyle = rose;
+      ctx.beginPath();
+      ctx.moveTo(-5, 0);
+      ctx.quadraticCurveTo(-4, -7, 1, -8);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      arrow(ctx, -1, -7.6, 1.5, -8);
+      break;
   }
   ctx.restore();
 }

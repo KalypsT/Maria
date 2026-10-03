@@ -61,7 +61,7 @@ export class RunState {
    * Dernier appui sec (D-97) : coin haut gauche de la hitbox la dernière fois que Céleste se tenait
    * au sol, sans toucher ni danger ni eau ; null depuis l'arrivée dans la salle ou la réapparition.
    */
-  footing: { x: number; y: number } | null = null;
+  footing: { x: number; y: number; level: LevelData } | null = null;
   private decaySteps = 0;
   private decayTotal = 0;
   private faintTotal = 1;
@@ -170,6 +170,14 @@ export class RunState {
   }
 
   /**
+   * La bascule (D-107) : la même salle dans l'autre couche. Rien d'autre ne change (lanternes,
+   * peur, dernier appui et sa couche).
+   */
+  setLayer(level: LevelData): void {
+    this.level = level;
+  }
+
+  /**
    * Un pas de jeu, après Céleste et le combat. `grounded` : Céleste se tient au sol (son dernier
    * appui sec est retenu).
    */
@@ -196,9 +204,11 @@ export class RunState {
       this.bothFeetDown(player) &&
       !touchesHazard(this.level, player)
     ) {
-      const footing = (this.footing ??= { x: 0, y: 0 });
+      const footing = (this.footing ??= { x: 0, y: 0, level: this.level });
       footing.x = player.x;
       footing.y = player.y;
+      // La couche de l'appui (D-107) : Céleste y revient.
+      footing.level = this.level;
     }
     if ((combatEvents & CombatEvent.Hurt) !== 0) {
       this.fear++;
