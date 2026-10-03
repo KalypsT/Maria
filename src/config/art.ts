@@ -632,6 +632,7 @@ export const DECOR_KINDS: Readonly<
   passagesea: { furniture: false },
   bedgate: { furniture: false },
   schoolgate: { furniture: false },
+  stationgate: { furniture: false },
   cantower: { furniture: true },
 };
 
@@ -1232,6 +1233,8 @@ export const SHIFT_LAYER_VIEW = {
   /** Contour fantôme de la couche inactive : épaisseur (px logiques) et opacité. */
   ghostLine: 1,
   ghostAlpha: 0.55,
+  /** Câbles de la couche inactive (D-114) : un fil fin, à cette opacité. */
+  ghostCableAlpha: 0.35,
   /** Voile très léger à l'intérieur du contour fantôme (opacité). */
   ghostFillAlpha: 0.12,
   /** Dans le souvenir, un voile chaud recouvre la vue (couleur, opacité). */

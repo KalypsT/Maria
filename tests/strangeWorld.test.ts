@@ -81,6 +81,8 @@ describe('monde étrange (D-34)', () => {
       'nanny-garden',
       'nanny-school',
       'nanny-street',
+      'nanny-station',
+      'nanny-train',
     ]);
     // La maison de la nounou a sa page du cahier (D-107) ; les autres restent hors carte.
     for (const id of strange) {

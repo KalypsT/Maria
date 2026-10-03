@@ -1522,3 +1522,23 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Coût** : l'analyse de l'école prend environ 14 s, celle de la rue 11 s (une première école à barrières pleines prenait 46 s).
 - **Debug** : histoire « les îlots de la chambre et de l'école faits ».
 - **Sauvegarde** : aucune migration (une étape en fin de liste, trois trouvailles neuves ; rien d'existant n'a bougé).
+
+## D-114 — L'avant-dernier niveau, PR 7 : l'îlot de mémoire 3, la gare et le train d'autrefois (la cuisine rose)
+
+- **Plan validé** (D-107). Troisième îlot, ouvert depuis la maison sans condition (ordre libre).
+- **L'accès** : le mur de droite de la maison (son passage `passagestation`, dessiné en PR 3) devient la sortie 6, vers **la gare d'autrefois** (`nanny-station`), puis **le train d'autrefois** (`nanny-train`). Deux salles `; @world: strange`, sur la page « Chez la nounou », musique `strange`, **moyennes**.
+- **L'idée de l'îlot** (le crochet, la glissade et la bascule) : **des plafonds bas du présent**, sous lesquels on ne passe qu'en glissant, et **des caténaires d'une seule couche** (`; @cable:` aux deux bouts dans une zone, D-108).
+- **La gare d'autrefois** (90 × 30) : sous la façade de la gare (présent), une fente d'une tuile qu'on ne passe qu'en glissant ; derrière, un mur du souvenir puis un mur du présent : on bascule entre les deux. La montée jusqu'au quai haut (une lanterne) est **facile** (glissade et bascule exigées). Du quai haut, on plane et le crochet attrape les caténaires, l'une du souvenir, l'autre du présent, jusqu'au quai d'arrivée (**moyen**, 100 ms, crochet et bascule exigés). Sur la voie, **le kiosque** n'existe que dans le présent : dans le souvenir, sa trouvaille est au sol (facile).
+  - Pendant la conception, la façade ne descendait que de six tuiles : on la contournait par le dessus, sans glisser (la sonde l'a trouvé) ; elle monte maintenant jusqu'au plafond.
+- **Le train d'autrefois** (90 × 26) : on court sur le toit des voitures, à l'arrêt.
+  - **Le soufflet** : dans le présent, une fente d'une tuile (on glisse) ; dans le souvenir, un mur. Facile, la glissade exigée.
+  - **Entre la deuxième et la troisième voiture**, plus haute : un rideau de ronces du souvenir, puis une caténaire du souvenir. On bascule en plein vol, puis le crochet. Facile (367 ms), crochet et bascule exigés : resserrer le rideau ne changeait pas la fenêtre ; la difficulté moyenne de l'îlot est dans la gare.
+  - **Dans la première voiture**, ouverte dans le souvenir (le toit aussi), une trouvaille (facile). **Défi** (difficile, 67 ms) : derrière deux rideaux, le rebord du signal et sa trouvaille.
+  - Tombée sur la voie : l'échelle du bout ramène au toit.
+- **La cuisine rose** (`nanny-pink-kitchen`, Agir), sur le toit de la dernière voiture. On la regarde (elle reste là) : **un cœur**, sans souvenir jouable, trop long au milieu d'un îlot (D-107). L'étape `nanny.station-done` est ajoutée en fin de liste.
+- **Les raccourcis**, cachés tant que la cuisine rose n'est pas retrouvée : une porte vers la maison (une arche à l'horloge de quai, `stationgate`, près du mur de droite) et **une porte vers l'îlot voisin**, la rue d'autrefois (sous l'abribus). **Signposting** : la troisième veilleuse de la porte de la sieste s'allume, **turquoise**.
+- **Correction d'un défaut de la PR 1** : les câbles ne suivaient pas la couche à l'écran. Seuls ceux du présent étaient dessinés, même dans le souvenir. La collision, elle, était juste. Maintenant, les câbles de la couche active sont dessinés pleins, ceux de l'autre couche en fil fantôme (`ghostCableAlpha`), et ils changent à chaque bascule (et à chaque vague de l'effacement).
+- **Jamais coincée** (graphe à deux couches de l'entrée, la maison et les trois îlots). Toutes les difficultés sont prouvées par les tronçons.
+- **Coût** : l'analyse de la gare prend environ 30 s (la façade est une grande zone), celle du train 16 s.
+- **Debug** : l'histoire « les îlots de la chambre, de l'école et de la gare faits ».
+- **Sauvegarde** : aucune migration. Une étape en fin de liste, trois trouvailles neuves ; rien d'existant n'a bougé.

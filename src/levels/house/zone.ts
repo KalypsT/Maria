@@ -57,6 +57,8 @@ import nannyBed from '../nanny/bed.txt?raw';
 import nannyGarden from '../nanny/garden.txt?raw';
 import nannySchool from '../nanny/school.txt?raw';
 import nannyStreet from '../nanny/street.txt?raw';
+import nannyStation from '../nanny/station.txt?raw';
+import nannyTrain from '../nanny/train.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
@@ -164,6 +166,9 @@ export const HOUSE: ZoneSource = {
     // L'îlot de mémoire 2 (D-113) : l'école d'autrefois, puis la rue et la boîte à formes.
     { id: 'nanny-school', text: nannySchool },
     { id: 'nanny-street', text: nannyStreet },
+    // L'îlot de mémoire 3 (D-114) : la gare d'autrefois, puis le train et la cuisine rose.
+    { id: 'nanny-station', text: nannyStation },
+    { id: 'nanny-train', text: nannyTrain },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -251,6 +256,12 @@ export const HOUSE: ZoneSource = {
     ['nanny-school:2', 'nanny-street:1'],
     ['nanny-street:2', 'nanny-house:4'],
     ['nanny-street:3', 'nanny-bed:3'],
+    // L'îlot 3 (D-114) : le mur de droite de la maison mène à la gare d'autrefois, puis au train.
+    ['nanny-house:6', 'nanny-station:1'],
+    ['nanny-station:2', 'nanny-train:1'],
+    // Près de la cuisine rose, une porte vers la maison et une vers la rue d'autrefois (l'îlot voisin).
+    ['nanny-train:2', 'nanny-house:7'],
+    ['nanny-train:3', 'nanny-street:4'],
   ],
   // Coupe de la maison dessinée par Céleste : l'étage à gauche, l'escalier, puis le
   // rez-de-chaussée et le grenier à droite (dans l'ordre des portes : un mur droit mène à un mur
@@ -312,5 +323,8 @@ export const HOUSE: ZoneSource = {
     // L'îlot 2, au-dessus de la maison (on y monte par la bibliothèque) : l'école, puis la rue.
     'nanny-school': { x: 4.6, y: -2.0, w: 4.4, h: 1.6, page: 'nanny' },
     'nanny-street': { x: 9.4, y: -2.0, w: 4.2, h: 1.4, page: 'nanny' },
+    // L'îlot 3, à droite de la maison (son mur de droite) : la gare, puis le train.
+    'nanny-station': { x: 11.6, y: 1.6, w: 4.2, h: 1.4, page: 'nanny' },
+    'nanny-train': { x: 16.2, y: 1.8, w: 4.2, h: 1.2, page: 'nanny' },
   },
 };

@@ -439,7 +439,11 @@ function drawContained(
 }
 
 /** Couleurs des veilleuses de la porte de la sieste, une par îlot (D-112). PLACEHOLDER. */
-const NAP_LIGHT_COLORS = { bed: '255, 170, 200', school: '255, 220, 120' } as const;
+const NAP_LIGHT_COLORS = {
+  bed: '255, 170, 200',
+  school: '255, 220, 120',
+  station: '120, 240, 220',
+} as const;
 
 /** Une veilleuse allumée (D-112) : une lueur ronde, centrée 16 px au-dessus du bas du cadre. */
 function drawNapLight(ctx: CanvasRenderingContext2D, w: number, h: number, rgb: string): void {
@@ -565,6 +569,9 @@ export function drawProp(
       break;
     case 'nap-light-school':
       drawNapLight(ctx, w, h, NAP_LIGHT_COLORS.school);
+      break;
+    case 'nap-light-station':
+      drawNapLight(ctx, w, h, NAP_LIGHT_COLORS.station);
       break;
     case 'site-gap':
       drawSiteGap(ctx, w, h);

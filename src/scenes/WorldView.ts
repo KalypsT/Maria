@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { SHIFT_LAYER_VIEW } from '../config/art';
 import { PLACEHOLDER_COLORS, TILE_SIZE as T } from '../config/display';
 import type { LevelCable } from '../core/level/LevelData';
 import { PickupKind, type Pickups } from '../core/world/Pickups';
@@ -54,6 +55,8 @@ export class WorldView {
   /** Câbles de la salle (D-65), dessinés une fois par salle. */
   private readonly cables: Phaser.GameObjects.Graphics;
   private cableData: readonly LevelCable[] = [];
+  /** Câbles de l'autre couche (D-107) : en contour fantôme, pour prévoir. */
+  private ghostCables: readonly LevelCable[] = [];
   private artScale = 1;
   /** Monde étrange (D-34) : veilleuse turquoise. */
   private strange = false;
@@ -68,15 +71,23 @@ export class WorldView {
     this.rebuild();
   }
 
-  /** Câbles de la salle (D-65), redessinés aussitôt. */
-  setCables(cables: readonly LevelCable[]): void {
+  /**
+   * Câbles de la salle (D-65), redessinés aussitôt : ceux de la couche active, et ceux de l'autre
+   * couche (D-107, `ghost`), à peine visibles.
+   */
+  setCables(cables: readonly LevelCable[], ghost: readonly LevelCable[] = []): void {
     this.cableData = cables;
+    this.ghostCables = ghost;
     this.drawCables();
   }
 
   private drawCables(): void {
     const g = this.cables.clear();
     const c = this.strange ? CABLE_STRANGE : CABLE_REAL;
+    for (const cable of this.ghostCables) {
+      g.lineStyle(1, c.line, SHIFT_LAYER_VIEW.ghostCableAlpha);
+      g.lineBetween(cable.x1, cable.y1, cable.x2, cable.y2);
+    }
     for (const cable of this.cableData) {
       g.lineStyle(2.5, c.halo, 0.55);
       g.lineBetween(cable.x1, cable.y1, cable.x2, cable.y2);
