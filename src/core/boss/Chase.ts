@@ -10,8 +10,8 @@ export const ChaseEvent = { None: 0, Contact: 1, Trip: 2, End: 4, Wake: 8 } as c
 
 /** Le dos de Céleste (ses pieds, vers le haut) doit passer derrière le front de cette profondeur pour le toucher (px). */
 const CONTACT_DEPTH_PX = 3;
-/** Une fois la poursuite finie, il recule à cette vitesse (px/s). */
-const SINK_SPEED = 90;
+/** Une fois la poursuite finie, il s'arrête au plus tard à cette distance derrière Céleste (px). */
+const END_GAP_PX = T;
 
 /**
  * Poursuite (boss, D-67, D-70, D-87), pure et indépendante de Phaser : un « front » (le bord d'une
@@ -19,11 +19,14 @@ const SINK_SPEED = 90;
  * seule en général) : vers le haut sous ses pieds, ou vers la droite ou la gauche dans son dos.
  * S'il prend trop de retard, il accélère peu à peu (rattrapage doux, jamais de saut) : il reste
  * présent sans devenir injuste. Le toucher fait monter la peur (l'appelant pousse Céleste) ; il
- * recule alors un peu et s'arrête un instant. Passer par un croc-en-jambe le fait reculer et
- * s'arrêter. La poursuite s'arrête quand Céleste atteint la ligne d'arrivée ; il recule alors.
+ * s'arrête alors un instant. Passer par un croc-en-jambe le fait s'arrêter. La poursuite s'arrête
+ * quand Céleste atteint la ligne d'arrivée ; il avance encore jusqu'à cette ligne (sans jamais la
+ * toucher), puis s'immobilise.
+ *
+ * Il ne recule jamais (D-120) : seule une réapparition (`restart`) le replace derrière Céleste.
  *
  * La vague (D-103, `; @chase-look: wave`) a un rythme : elle déferle à la vitesse de la salle
- * pendant `surgeMs`, puis se retire pendant `backwashMs` en reculant de `backwashSpeed` tuiles/s.
+ * pendant `surgeMs`, puis reste sur place pendant `backwashMs` (le reflux, sans recul, D-120).
  *
  * Toutes les distances se comptent sur un axe orienté dans le sens de la course (`sign` × la
  * coordonnée du monde) : le même code sert aux trois sens. Aucune allocation dans `step`.
@@ -169,14 +172,20 @@ export class Chase {
         this.events |= ChaseEvent.Wake;
       }
     }
-    if (this.done) {
-      this.axis -= SINK_SPEED * this.dt;
-      return false;
-    }
     const data = this.data;
-    if (rear >= this.endAxis) {
+    if (!this.done && rear >= this.endAxis) {
       this.done = true;
       this.events |= ChaseEvent.End;
+    }
+    if (this.done) {
+      // Il finit sa course jusqu'à la ligne d'arrivée, sans rejoindre Céleste, puis s'immobilise.
+      const last = data.phases[data.phases.length - 1]?.speed ?? 0;
+      const stop = Math.min(this.endAxis, rear - END_GAP_PX);
+      if (this.pauseSteps > 0) {
+        this.pauseSteps--;
+      } else if (this.axis < stop) {
+        this.axis = Math.min(stop, this.axis + last * p.chaseSpeedScale * T * this.dt);
+      }
       return false;
     }
     // Phase : la première dont la limite est encore devant Céleste.
@@ -196,8 +205,7 @@ export class Chase {
         this.events |= ChaseEvent.Wake;
       }
     } else if (this.wave && this.stepCycle()) {
-      // Le reflux : elle recule un instant, sans rattrapage.
-      this.axis -= p.backwashSpeed * T * this.dt;
+      // Le reflux : elle reste sur place un instant, sans rattrapage.
     } else {
       let speed = (data.phases[phase]?.speed ?? 0) * p.chaseSpeedScale;
       const behind = (rear - this.axis) / T - p.chaseCatchUpGapTiles;
@@ -223,14 +231,12 @@ export class Chase {
         continue;
       }
       this.tripsUsed[i] = 1;
-      this.axis -= trip.recoil * T;
       this.pauseSteps = msToSteps(p.chaseTripPauseMs, this.stepHz);
       this.waking = false;
       this.events |= ChaseEvent.Trip;
       this.jolts++;
     }
     if (!invulnerable && !this.backwash && this.axis > rear + CONTACT_DEPTH_PX) {
-      this.axis = Math.min(this.axis, rear) - p.chaseContactRecoilTiles * T;
       this.pauseSteps = msToSteps(p.chaseContactPauseMs, this.stepHz);
       this.waking = false;
       this.events |= ChaseEvent.Contact;

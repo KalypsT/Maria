@@ -78,7 +78,7 @@ describe('le rythme de la vague (D-103)', () => {
     expect(parseAsciiLevel('p', other.text).chase?.look).toBe('default');
   });
 
-  it('elle déferle à la vitesse de la salle, puis se retire un instant, et recommence', () => {
+  it('elle déferle à la vitesse de la salle, puis s’arrête un instant (sans reculer), et recommence', () => {
     const level = course();
     const speed = need(level.chase?.phases[0], 'phase').speed;
     const chase = new Chase(need(level.chase, 'poursuite'), P, HZ);
@@ -92,7 +92,7 @@ describe('le rythme de la vague (D-103)', () => {
       chase.step(b, false);
     }
     expect(chase.wave).toBe(true);
-    // Une vague complète : on compte les pas où elle avance, puis ceux où elle recule.
+    // Une vague complète : on compte les pas où elle avance, puis ceux du reflux.
     let surge = 0;
     let back = 0;
     let advanced = 0;
@@ -113,7 +113,8 @@ describe('le rythme de la vague (D-103)', () => {
     expect(Math.abs(surge - (P.surgeMs / 1000) * HZ)).toBeLessThanOrEqual(1);
     expect(Math.abs(back - (P.backwashMs / 1000) * HZ)).toBeLessThanOrEqual(1);
     expect(advanced).toBeCloseTo((speed * T * surge) / HZ, 3);
-    expect(retreated).toBeCloseTo((P.backwashSpeed * T * back) / HZ, 3);
+    // Le reflux : elle reste sur place, sans reculer (D-120).
+    expect(retreated).toBe(0);
     expect(maxSwell).toBeGreaterThan(0.99);
     // Elle recommence à déferler.
     expect(chase.backwash).toBe(false);
@@ -184,9 +185,15 @@ describe('parcours 14 « La vague » (D-103)', () => {
         const perfect = chaseRun(level, a, from, to, easy, 1, P, P3.hitbox, run);
         expect(perfect.contacts, label).toBe(0);
         expect(perfect.margin, label).toBeGreaterThan(2);
-        // Le reflux est nécessaire : une vague qui ne se retire jamais rattrape le joueur parfait.
-        expect(chaseRun(level, a, from, to, easy, 1, flat, P3.hitbox, run).contacts, label).toBe(1);
-        expect(chaseRun(level, a, from, to, easy, 1.5, P, P3.hitbox, run).contacts, label).toBe(1);
+        // Le reflux est nécessaire : une vague qui ne s'arrête jamais rattrape le joueur parfait.
+        expect(
+          chaseRun(level, a, from, to, easy, 1, flat, P3.hitbox, run).contacts,
+          label,
+        ).toBeGreaterThan(0);
+        expect(
+          chaseRun(level, a, from, to, easy, 1.5, P, P3.hitbox, run).contacts,
+          label,
+        ).toBeGreaterThan(0);
       }
     },
   );

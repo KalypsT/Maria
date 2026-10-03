@@ -9,7 +9,7 @@
 ; @camera: up
 ; @chase: 7
 ; @chase-phase: 7 2.8
-; @chase-trip: 17 53 6 6 6
+; @chase-trip: 17 53 6 6
 ; @cable: 37 55 7 57
 ; Légende : # plein, b bois (plein), - planche (traversable), . vide, P départ, C lanterne, G arrivée.
 ########################################

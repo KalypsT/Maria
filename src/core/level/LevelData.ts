@@ -195,13 +195,12 @@ export interface LevelChase {
    * ou la colonne `until` (même convention que `end`).
    */
   readonly phases: readonly { readonly until: number; readonly speed: number }[];
-  /** Passages qui le font trébucher : il recule de `recoil` tuiles et s'arrête un moment. */
+  /** Passages qui le font trébucher : il s'arrête un moment, sans reculer (D-120). */
   readonly trips: readonly {
     readonly col: number;
     readonly row: number;
     readonly width: number;
     readonly height: number;
-    readonly recoil: number;
   }[];
   /** Allure (`; @chase-look: wave`) ; la vague a un rythme (D-103). */
   readonly look: ChaseLook;

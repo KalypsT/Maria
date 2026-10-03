@@ -40,7 +40,7 @@ const LEFT = parseAsciiLevel(
   [
     '; @chase: left 3',
     '; @chase-phase: 3 4',
-    '; @chase-trip: 20 6 3 2 5',
+    '; @chase-trip: 20 6 3 2',
     '#'.repeat(40),
     ...Array.from({ length: 6 }, () => `#${'.'.repeat(38)}#`),
     `#${'.'.repeat(36)}P.#`,
@@ -92,7 +92,7 @@ describe('poursuite horizontale (boss, D-87)', () => {
     expect(chase.dir).toBe('right');
     expect(chase.end).toBe(117);
     expect(chase.phases).toEqual([{ until: 117, speed: 6.5 }]);
-    expect(chase.trips).toEqual([{ col: 56, row: 11, width: 8, height: 1, recoil: 6 }]);
+    expect(chase.trips).toEqual([{ col: 56, row: 11, width: 8, height: 1 }]);
     expect(LEFT.chase?.dir).toBe('left');
     const bad = (extra: string) => () => parseAsciiLevel('c', `${extra}\n######\n#P...#\n######`);
     expect(bad('; @chase: right 4\n; @chase-phase: 3 1\n; @chase-phase: 2 1')).toThrow(
@@ -133,14 +133,22 @@ describe('poursuite horizontale (boss, D-87)', () => {
     }
     expect(x0 - chase.front).toBeCloseTo(4 * T, 3);
     // Arrivée : le dos de Céleste passe le bord droit de la colonne 3.
-    chase.step(box(4 * T - 12, 8 * T), false);
+    const end = box(4 * T - 12, 8 * T);
+    chase.step(end, false);
     expect(chase.done).toBe(true);
-    const x = chase.front;
-    chase.step(box(4 * T - 12, 8 * T), false);
-    expect(chase.front).toBeGreaterThan(x);
+    // Il finit sa course vers la ligne d'arrivée (le bord droit de la colonne 3), puis s'arrête.
+    let x = chase.front;
+    for (let s = 0; s < HZ * 10; s++) {
+      chase.step(end, false);
+      expect(chase.front).toBeLessThanOrEqual(x);
+      x = chase.front;
+    }
+    // Céleste est juste sur la ligne : il s'arrête une tuile derrière elle, sans la toucher.
+    expect(x).toBe(5 * T);
+    expect(chase.lead(end)).toBeGreaterThan(0);
   });
 
-  it('le toucher : quand le front passe son dos ; il recule et s’arrête ; invulnérable, rien', () => {
+  it('le toucher : quand le front passe son dos ; il s’arrête sans reculer ; invulnérable, rien', () => {
     const chase = new Chase(need(course().chase, 'poursuite'), P, HZ);
     const b = box(30 * T, FEET);
     chase.step(b, false);
@@ -149,7 +157,7 @@ describe('poursuite horizontale (boss, D-87)', () => {
     chase.front = b.x + 10;
     expect(chase.step(b, false)).toBe(true);
     expect(chase.events & ChaseEvent.Contact).toBeTruthy();
-    expect(chase.front).toBeLessThanOrEqual(b.x - P.chaseContactRecoilTiles * T);
+    expect(chase.front).toBe(b.x + 10);
     expect(chase.paused).toBe(true);
     expect(chase.jolts).toBe(1);
     chase.front = b.x + 10;
@@ -166,7 +174,9 @@ describe('poursuite horizontale (boss, D-87)', () => {
     const before = chase.front;
     chase.step(low, false);
     expect(chase.events & ChaseEvent.Trip).toBeTruthy();
-    expect(chase.front).toBeCloseTo(before - trip.recoil * T, 3);
+    // Il s'arrête sur place, sans reculer (D-120).
+    expect(chase.front).toBe(before);
+    expect(chase.paused).toBe(true);
     chase.step(low, false);
     expect(chase.events & ChaseEvent.Trip).toBeFalsy();
     chase.restart();

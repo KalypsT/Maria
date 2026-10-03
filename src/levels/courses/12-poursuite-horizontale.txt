@@ -10,7 +10,7 @@
 ; @abilities: climb wall-jump slide
 ; @chase: right 117
 ; @chase-phase: 117 6.5
-; @chase-trip: 56 11 8 1 6
+; @chase-trip: 56 11 8 1
 ; Légende : # plein, b bois (plein), - filet (traversable), ^ vaisselle cassée (danger), . vide,
 ; P départ, C lanterne, G arrivée.
 ##########################################################################################################################

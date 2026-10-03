@@ -107,20 +107,26 @@ describe('poursuite verticale (boss, D-67, D-70)', () => {
     }
   });
 
-  it('le toucher : contact une fois, il recule et s’arrête ; invulnérable, rien', () => {
+  it('le toucher : contact une fois, il s’arrête sans reculer ; invulnérable, rien', () => {
     const chase = new Chase(need(course().chase, 'poursuite'), P, HZ);
     const feet = 90 * T;
     chase.step(box(40, feet), false);
     chase.front = feet - 10;
     expect(chase.step(box(40, feet), false)).toBe(true);
     expect(chase.events & ChaseEvent.Contact).toBeTruthy();
-    expect(chase.front).toBeGreaterThanOrEqual(feet + P.chaseContactRecoilTiles * T);
+    expect(chase.front).toBe(feet - 10);
     expect(chase.paused).toBe(true);
+    // Même si Céleste est tombée loin dans la masse, il ne redescend pas jusqu'à elle (D-120).
+    chase.restart();
+    chase.step(box(40, feet), false);
+    chase.front = feet - 4 * T;
+    expect(chase.step(box(40, feet), false)).toBe(true);
+    expect(chase.front).toBe(feet - 4 * T);
     chase.front = feet - 10;
     expect(chase.step(box(40, feet), true)).toBe(false);
   });
 
-  it('le croc-en-jambe le fait reculer et s’arrêter, une fois par essai', () => {
+  it('le croc-en-jambe le fait s’arrêter sans reculer, une fois par essai', () => {
     const level = course();
     const trip = need(need(level.chase, 'poursuite').trips[0], 'croc-en-jambe');
     const chase = new Chase(need(level.chase, 'poursuite'), P, HZ);
@@ -130,7 +136,8 @@ describe('poursuite verticale (boss, D-67, D-70)', () => {
     const before = chase.front;
     chase.step(box(trip.col * T + 4, feet), false);
     expect(chase.events & ChaseEvent.Trip).toBeTruthy();
-    expect(chase.front).toBeCloseTo(before + trip.recoil * T, 3);
+    expect(chase.front).toBe(before);
+    expect(chase.paused).toBe(true);
     const after = chase.front;
     chase.step(box(trip.col * T + 4, feet), false);
     expect(chase.events & ChaseEvent.Trip).toBeFalsy();
@@ -140,13 +147,25 @@ describe('poursuite verticale (boss, D-67, D-70)', () => {
     expect(chase.events & ChaseEvent.Trip).toBeTruthy();
   });
 
-  it('la ligne d’arrivée l’arrête : il redescend', () => {
+  it('la ligne d’arrivée : il monte jusqu’à elle, sans jamais redescendre, puis s’arrête', () => {
     const chase = new Chase(need(course().chase, 'poursuite'), P, HZ);
-    chase.step(box(40, 8 * T), false);
+    chase.step(box(40, 20 * T), false);
+    // Céleste debout sur la dernière plateforme (pieds au haut de la ligne 7).
+    const top = box(40, 7 * T);
+    chase.step(top, false);
     expect(chase.done).toBe(true);
-    const y = chase.front;
-    chase.step(box(40, 8 * T), false);
-    expect(chase.front).toBeGreaterThan(y);
+    expect(chase.events & ChaseEvent.End).toBeTruthy();
+    let y = chase.front;
+    for (let s = 0; s < HZ * 20; s++) {
+      expect(chase.step(top, false)).toBe(false);
+      expect(chase.front).toBeLessThanOrEqual(y);
+      y = chase.front;
+    }
+    // Arrêté sur la ligne d'arrivée (le bas de la ligne 7), sous ses pieds.
+    expect(y).toBe(8 * T);
+    // Elle saute plus bas que la ligne : il ne bouge plus, ne la touche pas.
+    expect(chase.step(box(40, 10 * T), false)).toBe(false);
+    expect(chase.front).toBe(y);
   });
 
   it('dans le combat : le toucher fait rebondir Céleste et monter la peur', () => {
