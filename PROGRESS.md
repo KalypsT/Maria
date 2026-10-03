@@ -26,7 +26,7 @@
 - **Le torchon blanc**, dans le petit lit : un souvenir du monde étrange (le dernier de la rubrique) et **son court souvenir** (Céleste toute petite le serre contre sa joue, à la sieste), rejouable dans le cahier.
 - La suite (l'effacement) est un PLACEHOLDER jusqu'à la PR 10 : Céleste pense à Maria.
 - DEBUG → Histoire : « le torchon blanc retrouvé ».
-- Tests : TESTS_PR9. Vérifié dans Chromium : la porte fermée à trois veilleuses, ouverte à quatre, la chambre, le torchon et son court souvenir.
+- Tests : 801 tests (85 fichiers), tous verts. Vérifié dans Chromium : la porte fermée à trois veilleuses, ouverte à quatre, la chambre, le torchon et son court souvenir.
 - [ ] À vérifier sur téléphone (DEBUG → Histoire → « les quatre îlots faits », puis la petite porte) : les trois sauts difficiles sont-ils durs mais justes ? La mare d'ombre (retour au dernier appui) est-elle claire ?
 - [ ] Le court souvenir du torchon : lit-on le torchon, la sieste ? Le moment est-il assez doux ?
 
