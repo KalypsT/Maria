@@ -24,7 +24,7 @@
 - **La nuit au dortoir** : les enfants dorment ; la mélodie du livre ; une lueur sous la porte du dortoir.
 - **Le couloir en boucle** : cinq couloirs pareils en anneau, le décor change à chaque tour (ordinaire, le sable, la chambre et la toise, l'horloge et les valises, la mer en bas et le ciel à l'envers) ; au dernier, une porte qui n'était pas là ; le noir, la fin du niveau 6 (la suite : « ? », PLACEHOLDER).
 - DEBUG → Histoire : « le livre musical trouvé, la nuit au dortoir », « la fin de la station balnéaire ».
-- Tests : TESTCOUNT. Vérifié dans Chromium : le court souvenir, le dortoir la nuit (enfants endormis, la porte), les cinq couloirs, la porte et la fin.
+- Tests : 712. Vérifié dans Chromium : le court souvenir, le dortoir la nuit (enfants endormis, la porte), les cinq couloirs, la porte et la fin.
 - [ ] À vérifier sur téléphone (DEBUG → Histoire → « le livre musical trouvé, la nuit au dortoir », puis la porte du dortoir) : comprend-on qu'il faut ouvrir la porte ? La mélodie (bulle) suffit-elle ?
 - [ ] Le couloir : remarque-t-on qu'il revient sur lui-même et qu'il change ? Cinq tours, trop long ou juste ? Inquiétant sans faire peur ?
 - [ ] Le court souvenir du livre : se reconnaît-on Céleste toute petite ? Le livre ?
