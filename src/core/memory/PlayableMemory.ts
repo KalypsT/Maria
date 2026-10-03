@@ -22,7 +22,16 @@ export const MemoryEvent = {
 } as const;
 
 /** Moments du souvenir. */
-const Phase = { Intro: 0, Play: 1, Gesture: 2, Heart: 3, FadeOut: 4, Alone: 5, End: 6 } as const;
+const Phase = {
+  Intro: 0,
+  Play: 1,
+  Gesture: 2,
+  Heart: 3,
+  FadeOut: 4,
+  Alone: 5,
+  End: 6,
+  Blink: 7,
+} as const;
 type Phase = (typeof Phase)[keyof typeof Phase];
 
 type Timing = typeof PLAYABLE_MEMORY_TIMING;
@@ -52,6 +61,10 @@ export class PlayableMemory {
   events = 0;
   private phase: Phase = Phase.Intro;
   private elapsed = 0;
+  /** L'étape qui viendra au noir du clignement en cours (D-118). */
+  private pending: string | null = null;
+  /** La salle seule a déjà été montrée (deux fondus : avant, puis la fin). */
+  private aloneShown = false;
   private readonly steps: Readonly<Record<keyof Timing, number>>;
 
   constructor(
@@ -65,6 +78,7 @@ export class PlayableMemory {
       heartMs: msToSteps(timing.heartMs, stepHz),
       fadeMs: msToSteps(timing.fadeMs, stepHz),
       aloneMs: msToSteps(timing.aloneMs, stepHz),
+      blinkMs: msToSteps(timing.blinkMs, stepHz),
     };
   }
 
@@ -100,7 +114,9 @@ export class PlayableMemory {
         if (action && this.interactable >= 0 && interact) {
           this.lastAction = this.next;
           this.carrying = action.carry;
-          if (action.sets !== undefined) {
+          if (action.sets !== undefined && action.blink) {
+            this.pending = action.sets;
+          } else if (action.sets !== undefined) {
             this.flags.add(action.sets);
           }
           this.next++;
@@ -112,14 +128,30 @@ export class PlayableMemory {
       }
       case Phase.Gesture:
         if (this.elapsed >= s.gestureMs) {
-          if (this.next < this.data.actions.length) {
-            this.enter(Phase.Play);
+          if (this.pending !== null) {
+            this.enter(Phase.Blink);
           } else {
-            this.events |= MemoryEvent.Heart;
-            this.enter(Phase.Heart);
+            this.afterAction();
           }
         }
         break;
+      case Phase.Blink: {
+        // Un clignement (D-118) : le noir monte, l'étape vient au noir, puis il redescend.
+        const half = Math.max(1, Math.floor(s.blinkMs / 2));
+        if (this.elapsed === half && this.pending !== null) {
+          this.flags.add(this.pending);
+          this.pending = null;
+        }
+        this.veil =
+          this.elapsed <= half
+            ? this.progress(half)
+            : 1 - Math.min(1, (this.elapsed - half) / Math.max(1, s.blinkMs - half));
+        if (this.elapsed >= s.blinkMs) {
+          this.veil = 0;
+          this.afterAction();
+        }
+        break;
+      }
       case Phase.Heart:
         if (this.elapsed >= s.heartMs) {
           this.enter(Phase.FadeOut);
@@ -129,8 +161,14 @@ export class PlayableMemory {
         // Deux fondus au noir : avant la salle seule (Céleste encore là), puis à la fin.
         this.veil = this.progress(s.fadeMs);
         if (this.elapsed >= s.fadeMs) {
-          if (this.celesteVisible) {
-            this.celesteVisible = false;
+          if (!this.aloneShown) {
+            this.aloneShown = true;
+            // La salle seule ; ou Céleste seule, quelqu'un n'est plus là (D-118).
+            const alone = this.data.alone;
+            this.celesteVisible = alone?.keepCeleste ?? false;
+            if (alone?.sets !== undefined) {
+              this.flags.add(alone.sets);
+            }
             this.events |= MemoryEvent.Alone;
             this.enter(Phase.Alone);
           } else {
@@ -151,6 +189,16 @@ export class PlayableMemory {
         break;
     }
     return this.events;
+  }
+
+  /** Une action finie : la suivante, ou le cœur après la dernière. */
+  private afterAction(): void {
+    if (this.next < this.data.actions.length) {
+      this.enter(Phase.Play);
+    } else {
+      this.events |= MemoryEvent.Heart;
+      this.enter(Phase.Heart);
+    }
   }
 
   private progress(total: number): number {

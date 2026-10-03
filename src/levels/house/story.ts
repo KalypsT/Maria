@@ -952,7 +952,16 @@ export const HOUSE_STORY: StoryData = {
       kind: 'height-chart-older',
       col: 42,
       row: 19,
-      when: { all: [F.GrownOlder] },
+      when: { all: [F.GrownOlder], none: [F.GrownFourth] },
+    },
+    {
+      // Quelques mois après la classe de mer (D-119) : un quatrième trait.
+      id: 'height-chart-fourth',
+      room: 'bedroom',
+      kind: 'height-chart-fourth',
+      col: 42,
+      row: 19,
+      when: { all: [F.GrownFourth] },
     },
     {
       id: 'maria-rug',
@@ -1227,6 +1236,8 @@ export const HOUSE_STORY: StoryData = {
   ],
   // La nuit après le câlin de maman (D-58), puis le matin quelques mois plus tard.
   times: [
+    // Le réveil au dortoir, à l'aube, après la maison de la nounou (D-119) : le jour revient.
+    ...NANNY_STORY.times,
     // Le soir de la fête, à la station balnéaire (D-101) : avant le matin du train.
     ...SEA_STORY.times,
     // Le soir du départ du train et la nuit dans le train (D-85).
@@ -1294,7 +1305,7 @@ export const HOUSE_STORY: StoryData = {
     ...NANNY_STORY.omens,
   ],
   // Le train en route (D-85).
-  moving: TRAIN_STORY.moving,
+  moving: [...TRAIN_STORY.moving, ...NANNY_STORY.moving],
   // La nuit dans le train, lumières éteintes (D-85).
   dim: TRAIN_STORY.dim,
 };

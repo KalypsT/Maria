@@ -40,7 +40,7 @@ import {
 import { atLayer, commonLayer, layerOf, otherLayer } from '../core/level/layers';
 import { LayerShift, ShiftEvent, type ShiftHost } from '../core/player/LayerShift';
 import { EraseState, type EraseHost } from '../core/boss/Erase';
-import { eraseRoot, erasedLevel } from '../core/level/erase';
+import { eraseDissolved, eraseFactor, eraseRoot, erasedLevel } from '../core/level/erase';
 import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
 import { atTide } from '../core/level/tide';
 import { PlayerPhysics, type PlayerInput } from '../core/player/PlayerPhysics';
@@ -62,7 +62,7 @@ import {
   type PlayableMemoryId,
 } from '../config/playableMemories';
 import { MemoryEvent, PlayableMemory } from '../core/memory/PlayableMemory';
-import { teaCup } from './art/memoryArt';
+import { cubeTower, teaCup } from './art/memoryArt';
 import { DEFAULT_WORLD, type WorldParams } from '../config/world';
 import { checkpointId } from '../core/save/saveData';
 import type { SaveSession } from '../core/save/SaveSession';
@@ -266,6 +266,8 @@ export class GameScene extends Phaser.Scene {
   private erase: EraseState | null = null;
   private eraseBase: LevelData | null = null;
   private eraseVersion = -1;
+  /** Facteur de vitesse des vagues appliqué (D-117). */
+  private eraseFactor = 1;
   private readonly eraseHost: EraseHost = {
     canApply: (group, mask) => this.eraseCanApply(group, mask),
   };
@@ -1152,6 +1154,7 @@ export class GameScene extends Phaser.Scene {
 
   respawn(): void {
     this.erase?.reset();
+    this.eraseFactor = 1;
     this.applyErase();
     this.showLayer('present');
     const { x, y } = this.respawnPosition();
@@ -1314,6 +1317,7 @@ export class GameScene extends Phaser.Scene {
       this.eraseBase = eraseRoot(level);
       this.erase = new EraseState(level.erase, this.combatParams, PHYSICS_STEP_HZ);
       this.eraseVersion = this.erase.version;
+      this.eraseFactor = 1;
       return atLayer(erasedLevel(level, this.erase.masks), 'present');
     }
     this.eraseBase = null;
@@ -1326,6 +1330,17 @@ export class GameScene extends Phaser.Scene {
     const erase = this.erase;
     if (!erase) {
       return;
+    }
+    // L'histoire (D-117) : chaque objet retrouvé fait reculer l'effacement, qui accélère ensuite ;
+    // dissous, plus rien ne change.
+    const flags = this.story.flags;
+    if (eraseDissolved(erase.data, flags)) {
+      return;
+    }
+    const factor = eraseFactor(erase.data, flags);
+    if (factor !== this.eraseFactor) {
+      this.eraseFactor = factor;
+      erase.recoil(factor);
     }
     const chase = this.combat.chase;
     const rising = chase && !chase.horizontal && !chase.done && chase.placed;
@@ -2102,23 +2117,39 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** La tasse tenue devant Céleste, les deux mains (souvenir de la cuisine, D-89). */
+  /** Ce que Céleste porte dans un souvenir jouable (D-89, D-118) : la tasse, ou un cube. */
   private createCupImage(): Phaser.GameObjects.Image {
-    const key = 'memory-cup';
     const scale = 4;
-    const canvas = document.createElement('canvas');
-    canvas.width = 8 * scale;
-    canvas.height = 7 * scale;
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.scale(scale, scale);
-      ctx.translate(4, 3.5);
-      teaCup(ctx, 6);
-    }
-    if (!this.textures.exists(key)) {
+    for (const [key, draw] of [
+      [
+        'memory-cup',
+        (ctx: CanvasRenderingContext2D) => {
+          teaCup(ctx, 6);
+        },
+      ],
+      [
+        'memory-cube',
+        (ctx: CanvasRenderingContext2D) => {
+          cubeTower(ctx, 7);
+        },
+      ],
+    ] as const) {
+      if (this.textures.exists(key)) {
+        continue;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = 8 * scale;
+      canvas.height = 7 * scale;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.scale(scale, scale);
+        ctx.translate(4, 3.5);
+        draw(ctx);
+      }
       this.textures.addCanvas(key, canvas);
     }
     return this.add
-      .image(0, 0, key)
+      .image(0, 0, 'memory-cup')
       .setScale(1 / scale)
       .setDepth(10.5)
       .setVisible(false);
@@ -2129,6 +2160,10 @@ export class GameScene extends Phaser.Scene {
     const visible = memory !== null && memory.carrying && memory.celesteVisible;
     this.cupImage.setVisible(visible);
     if (visible) {
+      const key = memory.data.carried === 'cube' ? 'memory-cube' : 'memory-cup';
+      if (this.cupImage.texture.key !== key) {
+        this.cupImage.setTexture(key);
+      }
       const facing = this.player.facing;
       this.cupImage.setPosition(
         this.puppet.x + facing * 6,

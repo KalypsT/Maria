@@ -48,6 +48,8 @@ export interface EraseSpec {
     readonly rect: TileRect;
   }[];
   readonly steps: readonly (readonly string[])[];
+  readonly speeds?: readonly { readonly flag: string; readonly scale: number }[];
+  readonly until?: string;
 }
 
 /** Groupes et étapes d'une salle qui vient d'être lue ; erreurs explicites. */
@@ -89,10 +91,31 @@ export function buildErase(id: string, width: number, height: number, spec: Eras
       }
     }
   }
+  if ((spec.speeds?.length || spec.until) && spec.steps.length === 0) {
+    throw new Error(`Niveau ${id} : @erase-speed et @erase-until vont avec des @erase-step`);
+  }
   return {
     groups: [...groups].map(([group, g]) => ({ id: group, rects: g.rects, initial: g.initial })),
     steps: spec.steps,
+    ...(spec.speeds?.length ? { speeds: spec.speeds } : {}),
+    ...(spec.until ? { until: spec.until } : {}),
   };
+}
+
+/** Le facteur de vitesse des vagues avec ces étapes d'histoire (D-117) : 1 sans accélération. */
+export function eraseFactor(erase: LevelErase, flags: ReadonlySet<string>): number {
+  let factor = 1;
+  for (const s of erase.speeds ?? []) {
+    if (flags.has(s.flag)) {
+      factor = Math.max(factor, s.scale);
+    }
+  }
+  return factor;
+}
+
+/** L'effacement est dissous (D-117) : plus aucune vague. */
+export function eraseDissolved(erase: LevelErase, flags: ReadonlySet<string>): boolean {
+  return erase.until !== undefined && flags.has(erase.until);
 }
 
 /** Le groupe est une vague (cité par une étape) ; sinon, une bande de la poursuite. */

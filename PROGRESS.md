@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**L'avant-dernier niveau** (niveau 7, « la maison de la nounou », D-107) : plan validé en 12 PR (la bascule, la maison et le miroir, l'effacement, quatre îlots de mémoire, le torchon blanc, le boss, Eden, le réveil et la phase 4). **PR 1 faite : la bascule (moteur, analyse, parcours d'essai 15)** (D-108) , **PR 2 faite : le dessin des deux couches, le bouton « Basculer », l'aide** (D-109), **PR 3 faite : la porte du couloir, l'entrée et le miroir, la maison, la carte** (D-110) **PR 4 faite : l'effacement (le système) et le parcours d'essai 16** (D-111, fusionnées), **PR 5 faite : l'îlot 1, la chambre d'autrefois et le jardin renversé (Roger)** (D-112) **PR 6 faite : l'îlot 2, l'école et la rue d'autrefois (la boîte à formes)** (D-113) **PR 7 faite : l'îlot 3, la gare et le train d'autrefois (la cuisine rose)** (D-114) et **PR 8 faite : l'îlot 4, la plage et le carrousel d'autrefois (le livre musical)** (D-115), sur `ccr-3d597f8d-070zee`. **Les quatre îlots sont faits.** Suite : le torchon blanc (PR 9) ; **essai sur téléphone** (parcours 15 et 16, l'entrée, la maison, les quatre îlots).
+**L'avant-dernier niveau** (niveau 7, « la maison de la nounou », D-107) : plan validé en 12 PR (la bascule, la maison et le miroir, l'effacement, quatre îlots de mémoire, le torchon blanc, le boss, Eden, le réveil et la phase 4). **PR 1 faite : la bascule (moteur, analyse, parcours d'essai 15)** (D-108) , **PR 2 faite : le dessin des deux couches, le bouton « Basculer », l'aide** (D-109), **PR 3 faite : la porte du couloir, l'entrée et le miroir, la maison, la carte** (D-110) **PR 4 faite : l'effacement (le système) et le parcours d'essai 16** (D-111, fusionnées), **PR 5 faite : l'îlot 1, la chambre d'autrefois et le jardin renversé (Roger)** (D-112) **PR 6 faite : l'îlot 2, l'école et la rue d'autrefois (la boîte à formes)** (D-113) **PR 7 faite : l'îlot 3, la gare et le train d'autrefois (la cuisine rose)** (D-114) **PR 8 faite : l'îlot 4, la plage et le carrousel d'autrefois (le livre musical)** (D-115, fusionnées) **PR 9 faite : la chambre de la sieste et le torchon blanc** (D-116) **PR 10 faite : le boss, l'effacement** (D-117) **PR 11 faite : Eden et son souvenir jouable** (D-118) et **PR 12 faite : le réveil, le train du retour, la phase 4** (D-119), sur `ccr-3d597f8d-070zee`. **Le niveau 7 est complet** (sa suite, le niveau 8, reste un PLACEHOLDER). Suite : **essai sur téléphone** (parcours 15 et 16, l'entrée, la maison, les îlots, la chambre de la sieste, le boss, Eden, la fin), puis le niveau 8.
 
 **La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101, fusionnées) et **PR 6 faite : la fête engloutie** (D-102) **PR 7 faite : le rythme de la vague, parcours d'essai 14** (D-103) **PR 8 faite : la vague dans le niveau, le livre musical** (D-104) et **PR 9 faite : le court souvenir, la nuit, le couloir en boucle, la fin** (D-105), sur `ccr-014503d9-cj0c7a`. **Le niveau 6 est complet** (sa fin reste un PLACEHOLDER jusqu'au niveau 7). Suite : essais sur téléphone, puis le niveau 7. Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
 
@@ -20,6 +20,45 @@
 
 ## Fait
 
+### L'avant-dernier niveau, PR 12 : le réveil, le train du retour, la phase 4 (D-119)
+
+- Après Eden : **le réveil au dortoir à l'aube** ; **le train du retour** (une courte scène, la mer à la fenêtre) ; **quelques mois plus tard**, chez elle : Céleste a encore grandi (**phase 4** : plus grande à l'écran, course un peu plus rapide ; la hitbox reste celle de la phase 3, le grenier l'exige), la toise a un quatrième trait.
+- **Le niveau 8** (le monde de Maria) reste un PLACEHOLDER : une bulle « ? ».
+- DEBUG → Histoire : « quelques mois plus tard, phase 4 ».
+- Tests : TESTS_PR12. Vérifié dans Chromium : la fin entière, d'Eden à la chambre.
+- [ ] À vérifier sur téléphone : la fin (dortoir, train, chambre) est-elle assez lente pour s'en imprégner ? La phase 4 se voit-elle (corps, cheveux) ? La course × 1,08 change-t-elle quelque chose au toucher ?
+- [ ] Le train du retour sans la classe : manque-t-elle ?
+
+### L'avant-dernier niveau, PR 11 : Eden et son souvenir jouable (D-118)
+
+- Dans la salle de jeux, l'effacement dissous : **Eden**, tout petit, assis près d'une tour de cubes. Céleste le reconnaît (un cœur) ; dans le noir, **le souvenir jouable** : la tour de cubes à deux, puis un cache-cache (Eden change de place dans le noir, sa tête dépasse du pouf, du coffre ; trouvé, il rit) ; la nounou regarde depuis son fauteuil. À la fin, Eden n'est plus là, Céleste reste seule. Quand la lumière revient, Eden n'est plus dans la salle.
+- Rejouable depuis le cahier (« Monde étrange » : la tour de cubes).
+- La suite (le réveil) est un PLACEHOLDER jusqu'à la PR 12.
+- DEBUG : « Jouer le souvenir d'Eden » ; Histoire → « Eden, le souvenir joué ».
+- Tests : 814 tests (87 fichiers), tous verts. Vérifié dans Chromium : Eden dans la salle de jeux, le souvenir joué en entier (la tour, les cachettes, Céleste seule), le retour.
+- [ ] À vérifier sur téléphone : le souvenir se comprend-il sans texte (la tour à deux, le cache-cache) ? Le moment où Eden n'est plus là est-il assez fort, sans être triste à l'excès ?
+- [ ] La nounou en silhouette : bienveillante, ou inquiétante ? Eden se reconnaît-il comme un vrai petit garçon ?
+
+### L'avant-dernier niveau, PR 10 : le boss, l'effacement (D-117)
+
+- Après le torchon blanc : **la fuite dans la cage d'escalier**. L'effacement monte derrière Céleste et pâlit des bandes du présent (elles restent dans le souvenir) ; on monte en basculant. Une veilleuse en bas, au milieu, en haut.
+- **La salle de jeux** : l'effacement au centre, des plateformes qui changent de couche par vagues annoncées. Les quatre objets déjà vus, pâlis, se rallument l'un après l'autre ; Céleste les atteint et fait Agir. La couleur revient à une partie de la salle ; l'effacement recule, puis accélère. Au quatrième, il se dissout, la porte s'ouvre.
+- DEBUG → Histoire : « l'effacement, la cage d'escalier », « l'effacement dissous ».
+- Tests : 810 tests (86 fichiers), tous verts (un tronçon de la salle de jeux corrigé après la suite : il exigeait à tort la bascule). Vérifié dans Chromium : du torchon à la cage d'escalier (l'effacement qui monte), la salle de jeux (objets pâlis, puis rallumés), la dissolution et la porte.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « le torchon blanc retrouvé », ou « l'effacement, la cage d'escalier ») : la fuite fait-elle peur sans faire horreur ? Voit-on à temps la bande blanchir ?
+- [ ] La salle de jeux : comprend-on quel objet est rallumé (en couleur parmi les pâles) ? Le rythme des vagues qui accélèrent (× 1,25 à × 1,75) est-il juste ?
+- [ ] Le retour des couleurs (une lueur chaude, PLACEHOLDER) suffit-il, ou faut-il redessiner une partie de la salle ?
+
+### L'avant-dernier niveau, PR 9 : la chambre de la sieste et le torchon blanc (D-116)
+
+- **La petite porte de la sieste** s'ouvre une fois les quatre veilleuses allumées (sinon « ? ») : **la chambre de la sieste**, le chemin le plus dur du niveau. Trois sauts entre deux rideaux de couches opposées (difficiles, une lanterne avant chacun), puis la cheminée du montant du lit ; en bas, une mare d'ombre ramène au dernier appui.
+- **Le torchon blanc**, dans le petit lit : un souvenir du monde étrange (le dernier de la rubrique) et **son court souvenir** (Céleste toute petite le serre contre sa joue, à la sieste), rejouable dans le cahier.
+- La suite (l'effacement) est un PLACEHOLDER jusqu'à la PR 10 : Céleste pense à Maria.
+- DEBUG → Histoire : « le torchon blanc retrouvé ».
+- Tests : 801 tests (85 fichiers), tous verts. Vérifié dans Chromium : la porte fermée à trois veilleuses, ouverte à quatre, la chambre, le torchon et son court souvenir.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « les quatre îlots faits », puis la petite porte) : les trois sauts difficiles sont-ils durs mais justes ? La mare d'ombre (retour au dernier appui) est-elle claire ?
+- [ ] Le court souvenir du torchon : lit-on le torchon, la sieste ? Le moment est-il assez doux ?
+
 ### L'avant-dernier niveau, PR 8 : l'îlot 4, la plage et le carrousel d'autrefois (D-115)
 
 - **La trappe du plancher** de la maison (Agir) mène à **la plage d'autrefois** : **le présent est la marée haute, le souvenir la marée basse**. L'arche de rocher ne se passe qu'à marée basse, par en dessous ; la cheminée des rochers (saut mural) remonte au ponton ; à marée haute, une flèche de rocher coupe le chemin du quai. Défi : deux rideaux au-dessus de la dune (une trouvaille) ; dans le corail, à marée basse, une trouvaille.
@@ -27,7 +66,7 @@
 - Après le livre : **une porte vers la maison**, **une vers le train d'autrefois**, **la quatrième veilleuse** (bleue).
 - L'eau d'une seule couche est dessinée dans sa couche (et ses vaguelettes changent à la bascule).
 - DEBUG → Histoire : « les quatre îlots faits ».
-- Tests : TESTS_PR8. Vérifié dans Chromium : la trappe, la plage aux deux marées, le carrousel, le livre musical et son court souvenir, la porte vers le train, les quatre veilleuses.
+- Tests : 795 tests (84 fichiers), tous verts. Vérifié dans Chromium : la trappe, la plage aux deux marées, le carrousel, le livre musical et son court souvenir, la porte vers le train, les quatre veilleuses.
 - [ ] À vérifier sur téléphone : comprend-on que le souvenir est la marée basse (l'eau en contour fantôme) ? L'arche (passer dessous à marée basse) se devine-t-elle ?
 - [ ] Les quatre îlots dans un ordre libre : la maison guide-t-elle assez (les passages, les veilleuses) ?
 

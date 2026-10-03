@@ -5,6 +5,8 @@ import { EraseEvent, EraseState } from '../src/core/boss/Erase';
 import { LayerMask, Tile, tileAt } from '../src/core/level/LevelData';
 import {
   bandsGone,
+  eraseDissolved,
+  eraseFactor,
   erasedLevel,
   initialMasks,
   isWave,
@@ -126,6 +128,44 @@ describe('l’effacement : des groupes qui changent de couche (D-111)', () => {
     expect(state.masks[2]).toBe(LayerMask.Memory);
     state.reset();
     expect(state.masks[2]).toBe(LayerMask.Both);
+  });
+
+  it('l’histoire accélère les vagues, puis les dissout (D-117)', () => {
+    const fast = parseAsciiLevel(
+      'fast',
+      room([
+        'erase: a present 3 2 3 1',
+        'erase: b memory 7 3 3 1',
+        'erase-step: a,b',
+        'erase-speed: s.one 1.25',
+        'erase-speed: s.two 1.5',
+        'erase-until: s.end',
+      ]),
+    );
+    const data = fast.erase;
+    if (!data) {
+      throw new Error('effacement absent');
+    }
+    expect(eraseFactor(data, new Set())).toBe(1);
+    expect(eraseFactor(data, new Set(['s.one']))).toBe(1.25);
+    expect(eraseFactor(data, new Set(['s.one', 's.two']))).toBe(1.5);
+    expect(eraseDissolved(data, new Set(['s.two']))).toBe(false);
+    expect(eraseDissolved(data, new Set(['s.end']))).toBe(true);
+    // Plus vite : la vague suivante arrive plus tôt ; le recul éteint les annonces en cours.
+    const until = (factor: number) => {
+      const state = new EraseState(data, DEFAULT_COMBAT, HZ);
+      state.recoil(factor);
+      for (let s = 1; s < HZ * 12; s++) {
+        if (state.step(null, { canApply: () => true }) & EraseEvent.Announced) {
+          return s;
+        }
+      }
+      return -1;
+    };
+    expect(until(1.5)).toBeLessThan(until(1));
+    expect(() => parseAsciiLevel('bad', room(['erase: a both 3 2 3 1', 'erase-until: x']))).toThrow(
+      /@erase-step/,
+    );
   });
 
   it('erreurs explicites', () => {

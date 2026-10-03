@@ -48,6 +48,13 @@ export const STRANGE_THINGS = [
   'pink-kitchen',
   /** Le livre musical, sur le toit du carrousel étrange, au bout de la vague (D-104). */
   'music-book',
+  /** Le torchon blanc, dans le petit lit de la sieste chez la nounou (D-116). */
+  'white-cloth',
+  /**
+   * La tour de cubes d'Eden, dans la salle de jeux de la nounou (D-118) : on y rejoue le souvenir
+   * d'Eden.
+   */
+  'eden-tower',
 ] as const;
 
 export type MemoryId =
@@ -68,7 +75,7 @@ export function isMemory(id: string): id is MemoryId {
  * Courts souvenirs (D-68) : une vignette de quelques secondes, non jouable, sans texte, montrée
  * quand on trouve certains objets, et rejouée en touchant leur case dans le cahier.
  */
-export const FLASHBACKS = ['roger', 'music-book'] as const;
+export const FLASHBACKS = ['roger', 'music-book', 'white-cloth'] as const;
 export type FlashbackId = (typeof FLASHBACKS)[number];
 
 /** Le court souvenir lié à un souvenir du cahier, s'il en a un. */

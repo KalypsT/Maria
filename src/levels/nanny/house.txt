@@ -13,7 +13,9 @@
 ; bibliothèque, le passage de l'école (îlot 2) ; sortie (6) : le mur de droite, vers la gare
 ; d'autrefois (îlot 3) ; porte (7) : le raccourci du train, ouvert une fois la cuisine rose retrouvée ;
 ; porte (8) : la trappe du plancher, vers la plage d'autrefois (îlot 4) ; porte (9) : le raccourci du
-; carrousel, ouvert une fois le livre musical retrouvé.
+; carrousel, ouvert une fois le livre musical retrouvé ; porte (10) : la petite porte de la sieste,
+; ouverte une fois les quatre veilleuses allumées ; porte (11) : au pied de la bibliothèque, la porte
+; de la salle de jeux, ouverte une fois l'effacement dissous.
 ; @name: La maison de la nounou
 ; @world: strange
 ; @mapped: yes
@@ -26,6 +28,8 @@
 ; @door: 7 120 36
 ; @door: 8 104 36
 ; @door: 9 112 36
+; @door: 10 63 36
+; @door: 11 85 36
 ; @shift: present 13 36 25 1
 ; @shift: memory 7 25 4 1
 ; @shift: memory 76 33 7 1
@@ -66,6 +70,7 @@
 ; @decor: schoolgate 96 32 3 5
 ; @decor: stationgate 119 32 3 5
 ; @decor: seagate 111 32 3 5
+; @decor: strangedoor 84 31 3 6
 ; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), C veilleuse, P départ, S trouvaille, 1-9 sorties.
 ####################################################################################################################################
 #..................................................................................................................................#

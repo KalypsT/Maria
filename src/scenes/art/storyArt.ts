@@ -14,6 +14,7 @@ import {
   teaCup,
   roger,
   shapeBox,
+  whiteCloth,
 } from './memoryArt';
 
 /**
@@ -423,6 +424,7 @@ const HEIGHT_MARKS = {
   'height-chart': 0,
   'height-chart-grown': 1,
   'height-chart-older': 2,
+  'height-chart-fourth': 3,
 } as const;
 
 /** Image fournie, entière, centrée en bas dans le cadre (w, h), sans déformation. */
@@ -436,6 +438,87 @@ function drawContained(
   const ih = image instanceof HTMLImageElement ? image.naturalHeight : h;
   const k = Math.min(w / iw, h / ih);
   ctx.drawImage(image, (w - iw * k) / 2, h - ih * k, iw * k, ih * k);
+}
+
+/** Les cubes du souvenir d'Eden (D-118), couleurs passées. PLACEHOLDER. */
+const CUBE_COLORS = ['#d9788f', '#6f8fc4', '#e6c27a', '#7fa37a'] as const;
+const CUBES_IN: Readonly<Record<'cube-tower-1' | 'cube-tower-2' | 'cube-tower-4', number>> = {
+  'cube-tower-1': 1,
+  'cube-tower-2': 2,
+  'cube-tower-4': 4,
+};
+
+function drawCube(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, k: number): void {
+  ctx.fillStyle = CUBE_COLORS[k % CUBE_COLORS.length] ?? '#d9788f';
+  ctx.beginPath();
+  ctx.roundRect(x, y, s, s, 1.2);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+  ctx.lineWidth = 0.6;
+  ctx.strokeRect(x + 1.6, y + 1.6, s - 3.2, s - 3.2);
+}
+
+/** La tour de cubes (D-118) : `n` cubes empilés, un peu de travers. */
+function drawCubeTower(ctx: CanvasRenderingContext2D, w: number, h: number, n: number): void {
+  const s = 8;
+  for (let k = 0; k < n; k++) {
+    drawCube(ctx, (w - s) / 2 + (k % 2 === 0 ? 0 : 0.8), h - s * (k + 1), s, k);
+  }
+}
+
+/** Le tas de cubes (D-118), par terre. */
+function drawCubePile(ctx: CanvasRenderingContext2D, h: number): void {
+  const s = 7;
+  drawCube(ctx, 2, h - s, s, 1);
+  drawCube(ctx, 9, h - s, s, 2);
+  drawCube(ctx, 16, h - s, s, 3);
+  drawCube(ctx, 5.5, h - 2 * s, s, 0);
+}
+
+/** Les objets pâlis de la salle de jeux (D-117) et l'objet dont ils sont le pâle reflet. */
+const PALE_OF: Partial<Record<PropKind, PropKind>> = {
+  'shape-box-pale': 'shape-box',
+  'pink-kitchen-pale': 'pink-kitchen',
+  'roger-pale': 'roger',
+  'music-book-pale': 'music-book',
+};
+/** Le voile de l'effacement sur un objet pâli : gris et pâle, pas blanc (D-111). PLACEHOLDER. */
+const ERASURE_PALE = 'rgba(196, 196, 204, 0.8)';
+
+/**
+ * Les couleurs qui reviennent à une partie de la salle de jeux (D-117) : une lueur chaude et
+ * douce, posée sur le mur. PLACEHOLDER.
+ */
+function drawColorBloom(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  const g = ctx.createRadialGradient(w / 2, h * 0.55, 0, w / 2, h * 0.55, w * 0.5);
+  g.addColorStop(0, 'rgba(255, 196, 150, 0.55)');
+  g.addColorStop(0.5, 'rgba(240, 150, 170, 0.25)');
+  g.addColorStop(1, 'rgba(240, 150, 170, 0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+}
+
+/**
+ * L'effacement (D-111, D-117), au centre de la salle de jeux : une grande forme grise et pâle, sans
+ * visage, au bord en brume, comme une tache qui ronge le dessin. Inquiétant, jamais horreur
+ * (pilier 8). PLACEHOLDER.
+ */
+function drawErasureFigure(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  const g = ctx.createRadialGradient(w / 2, h * 0.6, 0, w / 2, h * 0.6, w * 0.5);
+  g.addColorStop(0, 'rgba(176, 176, 186, 0.75)');
+  g.addColorStop(0.6, 'rgba(160, 160, 172, 0.45)');
+  g.addColorStop(1, 'rgba(150, 150, 165, 0)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.ellipse(w / 2, h * 0.6, w * 0.48, h * 0.42, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Des formes de jouets sans couleur qui s'y défont (un cube, une balle), à peine visibles.
+  ctx.strokeStyle = 'rgba(220, 220, 228, 0.35)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(w * 0.28, h * 0.5, w * 0.12, w * 0.12);
+  ctx.beginPath();
+  ctx.arc(w * 0.66, h * 0.62, w * 0.07, 0, Math.PI * 2);
+  ctx.stroke();
 }
 
 /** Couleurs des veilleuses de la porte de la sieste, une par îlot (D-112). PLACEHOLDER. */
@@ -468,6 +551,17 @@ export function drawProp(
 ): void {
   const { w, h } = PROP_SIZE[kind];
   const maria = images.get('maria');
+  const pale = PALE_OF[kind];
+  if (pale) {
+    // Pâli par l'effacement (D-117) : le vrai objet, sous un voile gris et pâle.
+    drawProp(ctx, pale, images);
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-atop';
+    ctx.fillStyle = ERASURE_PALE;
+    ctx.fillRect(0, 0, w, h);
+    ctx.restore();
+    return;
+  }
   switch (kind) {
     case 'maria-sit':
       drawMariaSit(ctx, w, h, maria);
@@ -565,6 +659,27 @@ export function drawProp(
       teaCup(ctx, Math.min(w, h));
       ctx.restore();
       break;
+    case 'white-cloth':
+      // Le torchon blanc (D-116), dans le petit lit de la sieste : on le regarde, on ne le prend pas.
+      ctx.save();
+      ctx.translate(w / 2, h / 2);
+      whiteCloth(ctx, Math.min(w, h), true);
+      ctx.restore();
+      break;
+    case 'cube-pile':
+      drawCubePile(ctx, h);
+      break;
+    case 'cube-tower-1':
+    case 'cube-tower-2':
+    case 'cube-tower-4':
+      drawCubeTower(ctx, w, h, CUBES_IN[kind]);
+      break;
+    case 'color-bloom':
+      drawColorBloom(ctx, w, h);
+      break;
+    case 'erasure-figure':
+      drawErasureFigure(ctx, w, h);
+      break;
     case 'nap-light-bed':
       drawNapLight(ctx, w, h, NAP_LIGHT_COLORS.bed);
       break;
@@ -589,6 +704,7 @@ export function drawProp(
     case 'height-chart':
     case 'height-chart-grown':
     case 'height-chart-older':
+    case 'height-chart-fourth':
       ctx.save();
       ctx.translate(w / 2, h / 2);
       heightChart(ctx, w, h, HEIGHT_MARKS[kind]);

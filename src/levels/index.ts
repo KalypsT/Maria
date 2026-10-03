@@ -16,6 +16,7 @@ import bascule from './courses/15-bascule.txt?raw';
 import effacement from './courses/16-effacement.txt?raw';
 import testRoomText from './test-room.txt?raw';
 import memoryKitchen from './memories/kitchen.txt?raw';
+import memoryEden from './memories/eden.txt?raw';
 import type { LevelData } from '../core/level/LevelData';
 import { buildZone, type Zone } from '../core/world/zone';
 import { HOUSE } from './house/zone';
@@ -54,7 +55,10 @@ export const LEVELS: readonly LevelSource[] = [
  * Salles des souvenirs jouables (D-89) : hors de la zone et des parcours, chargées le temps d'un
  * souvenir (la sauvegarde n'est jamais modifiée).
  */
-export const MEMORY_ROOMS: readonly LevelSource[] = [{ id: 'memory-kitchen', text: memoryKitchen }];
+export const MEMORY_ROOMS: readonly LevelSource[] = [
+  { id: 'memory-kitchen', text: memoryKitchen },
+  { id: 'memory-eden', text: memoryEden },
+];
 
 /** Parcours d'essai de la Phase 2 : salles avec une arrivée et une difficulté déclarée. */
 export const COURSE_IDS: readonly string[] = [

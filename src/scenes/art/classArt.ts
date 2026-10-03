@@ -18,7 +18,7 @@ interface Kid {
   legsDark: string;
   shoe: string;
   /** Coiffure : deux macarons, une casquette, un carré, deux couettes. */
-  style: 'puffs' | 'cap' | 'bob' | 'pigtails';
+  style: 'puffs' | 'cap' | 'bob' | 'pigtails' | 'short';
   /** Lunettes rondes (Céleste, spec §2). */
   glasses?: boolean;
 }
@@ -72,6 +72,21 @@ const TODDLER: Kid = {
   shoe: '#f1b9c7',
   style: 'pigtails',
   glasses: true,
+};
+/**
+ * Eden tout petit (D-118), l'ami de Céleste chez la nounou : cheveux courts et bruns, un pull
+ * jaune, une salopette bleue. Un vrai petit garçon. PLACEHOLDER.
+ */
+const EDEN: Kid = {
+  skin: '#c99068',
+  skinDark: '#b07a56',
+  hair: '#2e2018',
+  top: '#e9b949',
+  topDark: '#d0a038',
+  legs: '#5a7cb8',
+  legsDark: '#4a6aa0',
+  shoe: '#8a5a3a',
+  style: 'short',
 };
 /** Céleste toute petite est dessinée comme un enfant de la classe, en plus petit. */
 const TODDLER_SCALE = 0.8;
@@ -311,6 +326,29 @@ export function drawClassCharacter(
       );
       ctx.restore();
       return true;
+    case 'eden-small':
+      // Assis par terre, près de la tour de cubes (il ne bouge qu'à peine).
+      ctx.save();
+      ctx.scale(TODDLER_SCALE, TODDLER_SCALE);
+      kidSitting(ctx, EDEN, w / TODDLER_SCALE, h / TODDLER_SCALE, frame);
+      ctx.restore();
+      return true;
+    case 'eden-laugh':
+      // Trouvé : debout, il rit, un bras levé.
+      ctx.save();
+      ctx.scale(TODDLER_SCALE, TODDLER_SCALE);
+      kidStanding(ctx, EDEN, w / TODDLER_SCALE, h / TODDLER_SCALE, frame === 0 ? 2.2 : 2.7, false);
+      ctx.restore();
+      return true;
+    case 'eden-peek': {
+      // Caché derrière le pouf ou le rideau : seule sa tête dépasse, les yeux rieurs.
+      const r = 3.6;
+      kidHead(ctx, EDEN, w / 2, h - r - 2 - (frame === 0 ? 0 : 0.6), r);
+      return true;
+    }
+    case 'nanny-shadow':
+      nannyShadow(ctx, w, h, frame);
+      return true;
     case 'reflection-through':
       // De l'autre côté du miroir, elle fait signe.
       ctx.save();
@@ -355,4 +393,35 @@ export function drawClassCharacter(
     default:
       return false;
   }
+}
+
+/**
+ * La nounou (D-118), dans le souvenir d'Eden : une silhouette douce assise dans son fauteuil, qui
+ * regarde les enfants ; pas de visage net, des couleurs chaudes et passées. Bienveillante. Elle ne
+ * parle pas. PLACEHOLDER.
+ */
+function nannyShadow(ctx: CanvasRenderingContext2D, w: number, h: number, frame: number): void {
+  // Le fauteuil.
+  ctx.fillStyle = 'rgba(150, 110, 90, 0.55)';
+  round(ctx, w * 0.1, h * 0.45, w * 0.8, h * 0.55, w * 0.12);
+  // Elle : une forme ronde et calme, la tête un peu penchée vers les enfants.
+  ctx.fillStyle = 'rgba(120, 92, 82, 0.75)';
+  round(ctx, w * 0.25, h * 0.32, w * 0.5, h * 0.5, w * 0.2);
+  ctx.beginPath();
+  ctx.ellipse(
+    w * 0.46,
+    h * 0.24 + (frame === 0 ? 0 : 0.6),
+    w * 0.15,
+    h * 0.12,
+    -0.25,
+    0,
+    Math.PI * 2,
+  );
+  ctx.fill();
+  // Ses mains posées sur les genoux, et un tricot.
+  ctx.fillStyle = 'rgba(214, 170, 150, 0.6)';
+  disc(ctx, w * 0.4, h * 0.62, w * 0.05);
+  disc(ctx, w * 0.56, h * 0.62, w * 0.05);
+  ctx.fillStyle = 'rgba(200, 120, 130, 0.55)';
+  round(ctx, w * 0.4, h * 0.58, w * 0.2, h * 0.06, 2);
 }

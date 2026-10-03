@@ -63,9 +63,10 @@ export interface Zone {
 }
 
 function parseRef(zoneId: string, text: string): ExitRef {
-  const match = /^([\w-]+):([1-9])$/.exec(text);
+  // Une sortie est un chiffre ; une porte de façade, jusqu'à 99 (D-116).
+  const match = /^([\w-]+):([1-9]\d?)$/.exec(text);
   if (!match?.[1] || !match[2]) {
-    throw new Error(`Zone ${zoneId} : liaison « ${text} » invalide (attendu salle:chiffre)`);
+    throw new Error(`Zone ${zoneId} : liaison « ${text} » invalide (attendu salle:numéro)`);
   }
   return { room: match[1], exit: Number(match[2]) };
 }

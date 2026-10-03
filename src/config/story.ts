@@ -194,6 +194,37 @@ export const StoryFlag = {
    * bleue s'allume.
    */
   NannySeaDone: 'nanny.sea-done',
+  /**
+   * Le torchon blanc (D-116) : dans le petit lit de la chambre de la sieste ; son court souvenir
+   * (Céleste toute petite le serre contre elle) ; un souvenir du monde étrange.
+   */
+  NannyClothDone: 'nanny.cloth-done',
+  /**
+   * Le boss, l'effacement (D-117) : après le torchon, Céleste est en bas de la cage d'escalier, la
+   * décoloration monte derrière elle ; puis la salle de jeux.
+   */
+  NannyErasure: 'nanny.erasure',
+  /** La salle de jeux (D-117) : le premier, le deuxième, le troisième objet rallumé. */
+  NannyPlay1: 'nanny.play-1',
+  NannyPlay2: 'nanny.play-2',
+  NannyPlay3: 'nanny.play-3',
+  /** Le quatrième objet : l'effacement se dissout, la porte de la salle de jeux s'ouvre (D-117). */
+  NannyErasureGone: 'nanny.erasure-gone',
+  /**
+   * Eden (D-118) : dans la salle de jeux rendue à ses couleurs, Céleste l'a reconnu ; le souvenir
+   * jouable ; puis Eden n'est plus là.
+   */
+  NannyEden: 'nanny.eden',
+  /**
+   * La fin du niveau 7 (D-119) : après Eden, le réveil au dortoir de la classe de mer, à l'aube ;
+   * puis le train du retour.
+   */
+  NannyWake: 'nanny.wake',
+  /**
+   * Quelques mois plus tard (D-119, comme D-43 et D-69) : Céleste a encore grandi (phase de
+   * croissance 4). Le niveau 8, le monde de Maria, commencera ainsi.
+   */
+  GrownFourth: 'growth.4',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -326,6 +357,25 @@ export const PROP_SIZE = {
   'nap-light-school': { w: 12, h: 24 },
   'nap-light-station': { w: 12, h: 24 },
   'nap-light-sea': { w: 12, h: 24 },
+  // Le torchon blanc (D-116), plié dans le petit lit de la sieste.
+  'white-cloth': { w: 20, h: 14 },
+  // La salle de jeux (D-117) : les objets pâlis (même taille que les vrais), les couleurs qui
+  // reviennent, l'effacement au centre.
+  'shape-box-pale': { w: 40, h: 32 },
+  'pink-kitchen-pale': { w: 32, h: 32 },
+  'roger-pale': { w: 16, h: 18 },
+  'music-book-pale': { w: 24, h: 24 },
+  'color-bloom': { w: 112, h: 80 },
+  'erasure-figure': { w: 96, h: 72 },
+  // Le souvenir d'Eden (D-118), à l'échelle de Céleste toute petite ; la nounou, à hauteur d'enfant.
+  'eden-small': { w: 16, h: 20 },
+  'eden-peek': { w: 16, h: 20 },
+  'eden-laugh': { w: 16, h: 22 },
+  'nanny-shadow': { w: 40 * PARENT_SCALE, h: 46 * PARENT_SCALE },
+  'cube-pile': { w: 24, h: 14 },
+  'cube-tower-1': { w: 10, h: 10 },
+  'cube-tower-2': { w: 10, h: 18 },
+  'cube-tower-4': { w: 10, h: 32 },
   'dad-garden': { w: 44 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // Le train (D-85) : sur le quai, la maîtresse et les parents (à hauteur d'enfant), les enfants
   // et leurs sacs ; dans la voiture-couchettes, des enfants de la taille de Céleste.
@@ -355,6 +405,7 @@ export const PROP_SIZE = {
   'height-chart': { w: 7, h: 40 },
   'height-chart-grown': { w: 7, h: 40 },
   'height-chart-older': { w: 7, h: 40 },
+  'height-chart-fourth': { w: 7, h: 40 },
   bonnet: { w: 14, h: 12 },
   // Le portillon au bout du passage sous le vieux mur (D-60), fermé puis ouvert.
   gate: { w: 14, h: 46 },

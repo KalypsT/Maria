@@ -71,6 +71,21 @@ export const GROWTH_PHASES: readonly GrowthPhase[] = [
     hair: 'ponytail',
     outfit: 'jacket',
   },
+  {
+    // Quelques mois après la classe de mer (D-119) : plus grande à l'écran (le corps, les cheveux),
+    // une course un peu plus rapide. La hitbox reste celle de la phase 3 : un seul px de plus
+    // fermait la chaîne de planches sous le toit du grenier (rien ne se ferme en grandissant,
+    // testé). Le saut reste celui des phases 2 et 3. L'allure (une queue de cheval plus longue, la
+    // même veste) est PLACEHOLDER faute d'illustration.
+    id: 4,
+    flag: StoryFlag.GrownFourth,
+    hitbox: { width: 12, height: 28 },
+    movementScale: { jumpHeightTiles: 1.2, maxRunSpeed: 1.08 },
+    bodyScale: 1.5,
+    hairScale: 1.6,
+    hair: 'ponytail',
+    outfit: 'jacket',
+  },
 ];
 
 /** Phase atteinte d'après les drapeaux de l'histoire (la plus avancée dont le drapeau est posé). */
