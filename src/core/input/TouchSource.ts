@@ -10,6 +10,7 @@ const LABELS: Readonly<Record<ButtonAction, string>> = {
   Interact: 'Agir',
   Pause: 'II',
   Map: 'Carte',
+  Shift: 'Basculer',
 };
 
 /** Attribut posé sur l'interface par-dessus le jeu : ses touches ne sont pas des commandes. */

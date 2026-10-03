@@ -59,3 +59,31 @@ export const WALL_SEARCH = {
   /** Garde-fou : nombre maximal d'appuis dans une salle. */
   maxNodes: 4000,
 } as const;
+
+/**
+ * Recherche des passages par la bascule (D-107). Le présent et le souvenir ne diffèrent que dans
+ * leurs zones : loin d'elles, basculer un peu plus tôt ou un peu plus tard revient au même ; près
+ * d'elles, un essai de bascule est fait tous les `sampleSteps` pas du vol.
+ */
+export const SHIFT_SEARCH = {
+  /** Intervalle entre deux instants de bascule essayés près des zones (pas de 1/120 s). */
+  sampleSteps: 4,
+  /** Près d'une zone : à moins de ce nombre de tuiles sur les côtés, au-dessus et au-dessous. */
+  nearTiles: 1,
+  nearTilesAbove: 2,
+  /**
+   * Les sauts en courant avec bascule sont essayés tous les `launchSteps` pas de course (la
+   * fenêtre du saut est donc comptée à cette résolution près).
+   */
+  launchSteps: 4,
+  /** Durée maximale comptée pour un instant de bascule loin des zones (ms) : déjà « facile ». */
+  farCapMs: 250,
+  /**
+   * Sauts essayés avec une bascule en plein vol (sous-ensemble prudent, pour le temps de calcul) :
+   * maintiens du saut, direction jamais relâchée, sauts depuis la glissade après ces pas.
+   */
+  jumpHoldSteps: [0] as readonly number[],
+  slideJumpAfterSteps: [8] as readonly number[],
+  /** Rebonds (saut mural) avec bascule : essayés tous les `kickSteps` pas de la glissade. */
+  kickSteps: 4,
+} as const;

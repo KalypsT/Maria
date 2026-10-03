@@ -11,6 +11,8 @@ export const InputAction = {
   Interact: 'Interact',
   Pause: 'Pause',
   Map: 'Map',
+  /** La bascule (D-107) : passer de la couche du présent à celle du souvenir, et retour. */
+  Shift: 'Shift',
 } as const;
 export type InputAction = (typeof InputAction)[keyof typeof InputAction];
 
@@ -23,6 +25,7 @@ export const BUTTON_BIT: Readonly<Record<ButtonAction, number>> = {
   Interact: 1 << 3,
   Pause: 1 << 4,
   Map: 1 << 5,
+  Shift: 1 << 6,
 };
 
 /** Ce qu'une source d'entrée écrit à chaque lecture. Les sources se cumulent. */

@@ -57,6 +57,11 @@ export interface LevelData {
    * marée haute est construite par `highTide`. Null sans marée.
    */
   readonly tide: LevelTide | null;
+  /**
+   * Couches de la bascule (D-107), déclarées par `; @shift:` : la salle telle quelle est le
+   * « présent » ; sa variante « souvenir » est construite par `atLayer`. Null sans couches.
+   */
+  readonly layers: LevelLayers | null;
   /** Tronçons dont la difficulté est vérifiée par les tests (`; @leg:`, D-96). */
   readonly legs: readonly LevelLeg[];
   /**
@@ -93,6 +98,24 @@ export interface LevelTide {
   readonly high: boolean;
 }
 
+/** Couche d'une salle à deux couches (D-107) : le présent (silhouettes) ou le souvenir. */
+export type Layer = 'present' | 'memory';
+
+/**
+ * Couches d'une salle (la bascule, D-107) : deux variantes statiques de la même salle. Ce qui est
+ * dans une zone `present` n'existe que dans le présent, ce qui est dans une zone `memory` que dans
+ * le souvenir ; le reste est commun. Rien ne bouge (D-86).
+ */
+export interface LevelLayers {
+  readonly present: readonly TileRect[];
+  readonly memory: readonly TileRect[];
+  /** Tuiles et matériaux tels que dessinés (les deux couches ensemble). */
+  readonly rawTiles: Uint8Array;
+  readonly rawMaterials: Uint8Array;
+  /** Couche de cette variante ; `common` : seulement ce qui est commun (dessin de la salle). */
+  readonly active: Layer | 'common';
+}
+
 /** Marée d'un tronçon (`; @leg:`), basse par défaut (sans effet dans une salle sans marée). */
 export type LegTide = 'low' | 'high';
 
@@ -106,6 +129,8 @@ export interface LevelLeg {
   readonly difficulty: 'easy' | 'medium' | 'hard';
   readonly needs: readonly string[];
   readonly tide: LegTide;
+  /** Couche de départ (D-107), le présent par défaut ; l'arrivée compte dans les deux couches. */
+  readonly layer: Layer;
 }
 
 /** Sens d'une poursuite : vers le haut (D-67), vers la droite ou vers la gauche (D-87). */

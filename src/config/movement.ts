@@ -140,6 +140,15 @@ export interface MovementParams {
   slideCooldownMs: number;
   /** Pression du bouton Capacité mémorisée avant l'atterrissage (ms). */
   slideBufferMs: number;
+  /**
+   * Bascule (D-107) : si la place manque dans l'autre couche, Céleste peut y être décalée d'au
+   * plus ce nombre de px (vers le haut, les côtés, puis le bas) ; au-delà, la bascule est refusée.
+   */
+  shiftNudgePx: number;
+  /** Pression de Basculer gardée tant que la place manque (ms) : la bascule se fait dès qu'elle suffit. */
+  shiftBufferMs: number;
+  /** Délai entre deux bascules (ms). */
+  shiftCooldownMs: number;
 }
 
 export const DEFAULT_MOVEMENT: Readonly<MovementParams> = {
@@ -196,6 +205,9 @@ export const DEFAULT_MOVEMENT: Readonly<MovementParams> = {
   slideJumpSpeedX: 190,
   slideCooldownMs: 250,
   slideBufferMs: 100,
+  shiftNudgePx: 3,
+  shiftBufferMs: 100,
+  shiftCooldownMs: 150,
 };
 
 /** Bornes des réglages en direct de l'overlay de debug. */
@@ -255,6 +267,9 @@ export const MOVEMENT_PARAM_RANGES: Readonly<
   slideJumpSpeedX: { min: 60, max: 400, step: 5 },
   slideCooldownMs: { min: 0, max: 1000, step: 10 },
   slideBufferMs: { min: 0, max: 250, step: 5 },
+  shiftNudgePx: { min: 0, max: 8, step: 1 },
+  shiftBufferMs: { min: 0, max: 300, step: 10 },
+  shiftCooldownMs: { min: 0, max: 1000, step: 10 },
 };
 
 /** Hissé sur un rebord, Céleste se tient à cette distance du bord (px), bien posée. */

@@ -3,14 +3,20 @@ import { GROWTH_PHASES, phaseMovement, type GrowthPhase } from '../src/config/gr
 import { DIFFICULTY_MIN_WINDOW_MS, type Difficulty } from '../src/config/levelDesign';
 import { DEFAULT_MOVEMENT } from '../src/config/movement';
 import { StoryFlag } from '../src/config/story';
-import { analyzeLevel, type LevelAnalysis } from '../src/core/analysis/analyzeLevel';
+import {
+  analyzeLevel,
+  layerSurfaceUnder,
+  type LevelAnalysis,
+} from '../src/core/analysis/analyzeLevel';
 import { surfaceUnder } from '../src/core/analysis/surfaces';
 import {
   EntityType,
+  type Layer,
   type LevelData,
   type LevelLeg,
   type TilePos,
 } from '../src/core/level/LevelData';
+import { atLayer } from '../src/core/level/layers';
 import { atTide } from '../src/core/level/tide';
 import type { StoryData } from '../src/core/story/story';
 import type { Zone } from '../src/core/world/zone';
@@ -18,7 +24,9 @@ import type { Zone } from '../src/core/world/zone';
 /**
  * Faisabilité de la station balnéaire (D-95, D-96) : Céleste en phase 3, ses cinq capacités, la
  * glissade analysée (D-84) ; la marée comme un état de plus du graphe (une salle par marée, les
- * bancs passent d'un état à l'autre) ; les tronçons `; @leg:` d'une salle.
+ * bancs passent d'un état à l'autre) ; les tronçons `; @leg:` d'une salle. Avec la bascule (D-107),
+ * une salle à deux couches est analysée en une fois : ses surfaces du souvenir sont numérotées après
+ * celles du présent.
  */
 
 function phase3(): GrowthPhase {
@@ -39,6 +47,7 @@ const WITHOUT: Readonly<Record<string, Readonly<Record<string, boolean>>>> = {
   [Ability.Umbrella]: { glide: false, hook: false },
   [Ability.Hook]: { hook: false },
   [Ability.Slide]: { slide: false },
+  [Ability.Shift]: { shift: false },
 };
 
 const cache = new WeakMap<LevelData, Map<string, LevelAnalysis>>();
@@ -59,6 +68,7 @@ export function seaAnalysis(level: LevelData, without: string | null = null): Le
       glide: true,
       hook: true,
       slide: true,
+      shift: true,
       hitbox: P3.hitbox,
       ...(without ? WITHOUT[without] : {}),
     });
@@ -67,9 +77,30 @@ export function seaAnalysis(level: LevelData, without: string | null = null): Le
   return result;
 }
 
-/** Surface où l'on se tient debout sur la tuile (col, row) (-1 : aucune). */
-export function standOn(level: LevelData, at: TilePos, without: string | null = null): number {
-  return surfaceUnder(level, seaAnalysis(level, without).map, at.col, at.row);
+/**
+ * Surface où l'on se tient debout sur la tuile (col, row) (-1 : aucune), dans une couche (D-107 ;
+ * le présent par défaut, sans effet dans une salle à une couche).
+ */
+export function standOn(
+  level: LevelData,
+  at: TilePos,
+  without: string | null = null,
+  layer: Layer = 'present',
+): number {
+  const a = seaAnalysis(level, without);
+  return a.presentCount === undefined
+    ? surfaceUnder(level, a.map, at.col, at.row)
+    : layerSurfaceUnder(level, a, layer, at.col, at.row);
+}
+
+/** Surfaces où l'on se tient sur la tuile, dans chaque couche (une seule sans couches). */
+export function standOnAny(level: LevelData, at: TilePos, without: string | null = null): number[] {
+  const found = new Set([
+    standOn(level, at, without, 'present'),
+    standOn(level, at, without, 'memory'),
+  ]);
+  found.delete(-1);
+  return [...found];
 }
 
 function reach(a: LevelAnalysis, from: number, minWindow: number): Set<number> {
@@ -107,23 +138,25 @@ export function legProblems(level: LevelData, leg: LevelLeg): string[] {
   const what = `${level.id} ${String(leg.from.col)},${String(leg.from.row)} → ${String(leg.to.col)},${String(leg.to.row)} (${leg.tide})`;
   const problems: string[] = [];
   const a = seaAnalysis(variant);
-  const from = standOn(variant, leg.from);
-  const to = standOn(variant, leg.to);
-  if (from < 0 || to < 0) {
+  const from = standOn(variant, leg.from, null, leg.layer);
+  const to = standOnAny(variant, leg.to);
+  if (from < 0 || to.length === 0) {
     return [`${what} : on ne s'y tient pas debout`];
   }
-  if (!reach(a, from, DIFFICULTY_MIN_WINDOW_MS[leg.difficulty]).has(to)) {
+  const reaches = (set: Set<number>, targets: readonly number[]) => targets.some((t) => set.has(t));
+  if (!reaches(reach(a, from, DIFFICULTY_MIN_WINDOW_MS[leg.difficulty]), to)) {
     problems.push(`${what} : plus dur que ${leg.difficulty}`);
   }
   const easier = EASIER[leg.difficulty];
-  if (easier && reach(a, from, DIFFICULTY_MIN_WINDOW_MS[easier]).has(to)) {
+  if (easier && reaches(reach(a, from, DIFFICULTY_MIN_WINDOW_MS[easier]), to)) {
     problems.push(`${what} : aussi faisable en ${easier}`);
   }
   for (const ability of leg.needs) {
-    const without = seaAnalysis(variant, ability);
-    if (
-      reach(without, standOn(variant, leg.from, ability), 0).has(standOn(variant, leg.to, ability))
-    ) {
+    // Sans la bascule, Céleste reste dans la couche de départ du tronçon.
+    const alone = ability === Ability.Shift ? atLayer(variant, leg.layer) : variant;
+    const without = seaAnalysis(alone, ability);
+    const start = standOn(alone, leg.from, ability, leg.layer);
+    if (start >= 0 && reaches(reach(without, start, 0), standOnAny(alone, leg.to, ability))) {
       problems.push(`${what} : faisable sans ${ability}`);
     }
   }
@@ -266,7 +299,10 @@ export function lanternNodes(zone: Zone, rooms: readonly string[]): Set<TideNode
       const level = base && atTide(base, high);
       for (const e of level?.entities ?? []) {
         if (level && e.type === EntityType.Checkpoint) {
-          nodes.add(tideNode(room, high, standOn(level, e)));
+          // Le sol d'une lanterne est commun aux deux couches (D-107).
+          for (const s of standOnAny(level, e)) {
+            nodes.add(tideNode(room, high, s));
+          }
         }
       }
     }
