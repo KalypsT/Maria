@@ -27,7 +27,7 @@
 - Après la boîte à formes : **une porte vers la maison** et **une vers la chambre d'autrefois** (l'îlot voisin), **une veilleuse jaune** sur la porte de la sieste.
 - Les meubles repris de l'école et de la rue ont maintenant une version en silhouette dans un monde étrange.
 - DEBUG → Histoire : « les îlots de la chambre et de l'école faits ».
-- Tests : TESTS_PR6. Vérifié dans Chromium : la porte de la bibliothèque, l'école et la rue dans les deux couches, la boîte à formes, les deux portes (maison, chambre), la veilleuse jaune.
+- Tests : 780 tests (84 fichiers), tous verts. Vérifié dans Chromium : la porte de la bibliothèque, l'école et la rue dans les deux couches, la boîte à formes, les deux portes (maison, chambre), la veilleuse jaune.
 - [ ] À vérifier sur téléphone : comprend-on qu'il faut Agir en haut de la bibliothèque (la porte) ? Basculer entre deux rideaux en planant est-il agréable, ou trop exigeant au pouce ?
 - [ ] Les auvents d'une seule couche se voient-ils assez en contour fantôme pendant le vol ?
 
