@@ -173,6 +173,11 @@ export const StoryFlag = {
   NannyMirror: 'nanny.mirror',
   /** La maison de la nounou (D-110) : Céleste y est entrée (le reflet n'est plus là). */
   NannyHouse: 'nanny.house',
+  /**
+   * L'îlot de mémoire 1 (D-112) : en haut de l'arrosoir du jardin renversé, Roger ; son court
+   * souvenir ; le passage vers la maison s'ouvre, une veilleuse s'allume sur la porte de la sieste.
+   */
+  NannyBedDone: 'nanny.bed-done',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -299,6 +304,9 @@ export const PROP_SIZE = {
   // Le reflet du miroir de la nounou (D-110) : Céleste toute petite, plus petite qu'elle.
   reflection: { w: 16, h: 26 },
   'reflection-through': { w: 16, h: 26 },
+  // Une veilleuse de la porte de la sieste (D-112) : la lueur en haut, à la place de la veilleuse
+  // éteinte dessinée sur la porte.
+  'nap-light-bed': { w: 12, h: 24 },
   'dad-garden': { w: 44 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // Le train (D-85) : sur le quai, la maîtresse et les parents (à hauteur d'enfant), les enfants
   // et leurs sacs ; dans la voiture-couchettes, des enfants de la taille de Céleste.

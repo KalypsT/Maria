@@ -233,6 +233,58 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
         ctx.fill();
       }
     },
+    bedgate(a, r) {
+      // Le raccourci de l'îlot 1 (D-112) : une petite arche basse, à hauteur de tout-petit, la tête
+      // d'un lit dessinée dessus, des feuilles de haie au pied. Elle ne mène nulle part tant que Roger
+      // n'est pas retrouvé (la porte n'existe pas encore).
+      arch(a, r);
+      const { ctx } = a;
+      ctx.strokeStyle = GLOW_SOFT;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(r.x + r.w * 0.28, r.y + r.h * 0.75);
+      ctx.lineTo(r.x + r.w * 0.28, r.y + r.h * 0.5);
+      ctx.quadraticCurveTo(r.x + r.w / 2, r.y + r.h * 0.38, r.x + r.w * 0.72, r.y + r.h * 0.5);
+      ctx.lineTo(r.x + r.w * 0.72, r.y + r.h * 0.75);
+      ctx.stroke();
+      ctx.fillStyle = GLOW_SOFT;
+      for (let i = 0; i < 4; i++) {
+        ctx.beginPath();
+        ctx.ellipse(
+          r.x + 3 + hash(i, 7) * (r.w - 6),
+          r.y + r.h - 2,
+          2.6,
+          1.3,
+          hash(i, 8) * 3,
+          0,
+          Math.PI * 2,
+        );
+        ctx.fill();
+      }
+    },
+    cantower(a, r) {
+      // L'arrosoir de papa (D-49), géant, debout cette fois (D-112) : son corps est la collision ;
+      // l'anse dessinée sur le haut, le bec qui part vers la droite, des bandes. On passe dessous.
+      const { ctx, palette: p } = a;
+      tileShape(a, r, p.wood, p.woodLight);
+      ctx.strokeStyle = p.rim;
+      ctx.globalAlpha = 0.35;
+      ctx.lineWidth = 2;
+      for (const f of [0.18, 0.82]) {
+        ctx.beginPath();
+        ctx.moveTo(r.x + 2, r.y + r.h * f);
+        ctx.lineTo(r.x + r.w - 2, r.y + r.h * f);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 0.6;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(r.x + r.w * 0.35, r.y + r.h * 0.3, r.w * 0.18, Math.PI * 1.1, Math.PI * 1.9);
+      ctx.moveTo(r.x + r.w - 4, r.y + r.h * 0.55);
+      ctx.lineTo(r.x + r.w - 4 - r.w * 0.2, r.y + r.h * 0.4);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    },
     passageschool(a, r) {
       // Vers l'école et la rue : l'horloge ronde de l'école, un crayon géant.
       arch(a, r);

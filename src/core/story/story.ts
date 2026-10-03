@@ -270,6 +270,11 @@ export const PROP_KINDS = [
    */
   'reflection',
   'reflection-through',
+  /**
+   * Les veilleuses de la porte de la sieste chez la nounou (D-112), une par îlot de mémoire,
+   * allumées quand on y a retrouvé son objet : rose pour la chambre et le jardin renversé.
+   */
+  'nap-light-bed',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 
@@ -292,7 +297,10 @@ export const WALL_PROP_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
 ]);
 
 /** Vus par une fenêtre (D-64) : posés sur le mur, sans surface sous eux. */
-export const WINDOW_PROP_KINDS: ReadonlySet<PropKind> = new Set<PropKind>(['far-crane']);
+export const WINDOW_PROP_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
+  'far-crane',
+  'nap-light-bed',
+]);
 
 /** Personnages : grands (les adultes), animés en boucle, ils peuvent avoir une bulle. */
 export const CHARACTER_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([

@@ -1,0 +1,77 @@
+; L'avant-dernier niveau (D-107, D-112), îlot de mémoire 1 : le jardin renversé (D-49), revenu
+; dans le monde de la nounou. Des pots géants dont les ronces n'existent que dans une couche (on
+; atterrit dans l'autre), puis l'arrosoir géant : on grimpe ses prises, qui alternent de couche.
+; Tout en haut, Roger (D-68) : son court souvenir ; un passage s'ouvre vers la maison (raccourci).
+; Défi : la fleur géante, jusqu'au rebord de sa trouvaille. Dans le deuxième pot, ouvert dans le
+; souvenir, une trouvaille. Sortie (1) vers la chambre ; porte (2) vers la maison.
+; @name: Le jardin renversé
+; @world: strange
+; @mapped: yes
+; @music: strange
+; @difficulty: medium
+; @ambient: #1a1f2c
+; @door: 2 24 6
+; @shift: present 50 10 10 1
+; @shift: memory 40 14 10 1
+; @shift: present 31 20 9 1
+; @shift: present 40 19 6 2
+; @shift: present 28 24 1 1
+; @shift: memory 28 20 1 1
+; @shift: present 28 16 1 1
+; @shift: memory 28 12 1 1
+; @shift: memory 12 1 1 14
+; @shift: present 7 4 1 1
+; @shift: present 14 1 1 12
+; @leg: 66,6 30,28 easy
+; @leg: 30,28 22,6 medium shift
+; @leg: 22,6 2,2 hard shift
+; @leg: 66,6 43,20 easy shift
+; @decor: canopy 0 0 72 1
+; @decor: hedge 60 7 11 22
+; @decor: planter 50 11 10 18
+; @decor: planter 40 15 10 14
+; @decor: planter 31 21 9 8
+; @decor: cantower 16 7 12 19
+; @decor: branch 28 24 1 1
+; @decor: branch 28 20 1 1
+; @decor: branch 28 16 1 1
+; @decor: branch 28 12 1 1
+; @decor: giantflower 3 9 8 16
+; @decor: branch 7 4 1 1
+; @decor: hedge 1 3 3 2
+; @decor: bedgate 23 3 3 4
+; @decor: eyes 36 6 1 1
+; @decor: eyes 8 20 1 1
+; Légende : # mur/sol, b bois et v feuillage (pleins), - branche ou étagère et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S trouvaille, 1-9 sorties.
+########################################################################
+#...........!.!........................................................#
+#.S.........!.!........................................................#
+#vvv........!.!........................................................#
+#vvv...-....!.!........................................................#
+#...........!.!........................................................1
+#...........!.!..C................................................P.C..1
+#...........!.!.bbbbbbbbbbbb................................vvvvvvvvvvv#
+#...........!.!.bbbbbbbbbbbb................................vvvvvvvvvvv#
+#...........!.!.bbbbbbbbbbbb................................vvvvvvvvvvv#
+#...........!.!.bbbbbbbbbbbb......................!!!!!.!!!!vvvvvvvvvvv#
+#...........!.!.bbbbbbbbbbbb......................bbbbbbbbbbvvvvvvvvvvv#
+#...........!.!.bbbbbbbbbbbbb.....................bbbbbbbbbbvvvvvvvvvvv#
+#...........!...bbbbbbbbbbbb......................bbbbbbbbbbvvvvvvvvvvv#
+#...........!...bbbbbbbbbbbb............!!!!!.!!!!bbbbbbbbbbvvvvvvvvvvv#
+#...............bbbbbbbbbbbb............bbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
+#...............bbbbbbbbbbbbb...........bbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
+#...............bbbbbbbbbbbb............bbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
+#...............bbbbbbbbbbbb............bbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
+#...............bbbbbbbbbbbb............bbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
+#...............bbbbbbbbbbbbb..!!!!!.!!!bbbSbbbbbbbbbbbbbbbbvvvvvvvvvvv#
+#...............bbbbbbbbbbbb...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
+#...............bbbbbbbbbbbb...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
+#...............bbbbbbbbbbbb...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
+#...............bbbbbbbbbbbbb..bbbbbbbbbbbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
+#...............bbbbbbbbbbbb...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
+#..............................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
+#..............................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
+#.............................Cbbbbbbbbbbbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
+########################################################################
+########################################################################
+########################################################################

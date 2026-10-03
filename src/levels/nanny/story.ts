@@ -18,6 +18,20 @@ export const MIRROR = { col: 49, row: 22 };
 const MIRROR_FRONT = { col: 43, row: 20, w: 6, h: 3 };
 /** Arrivée dans la maison, par l'entrée : on regarde autour de soi, une fois. */
 const HOUSE_ARRIVAL = { col: 1, row: 34, w: 6, h: 3 };
+/** Roger (D-112), en haut de l'arrosoir géant du jardin renversé (îlot 1). */
+export const ISLET_ROGER = { col: 20, row: 6 };
+/** La porte près de Roger, et celle de la maison où elle mène (le raccourci de l'îlot 1). */
+const BED_DOOR = { col: 24, row: 6 };
+/**
+ * Les veilleuses de la porte de la sieste (D-107, D-110), une par îlot, dans l'ordre des îlots :
+ * la tuile où chacune est posée (dessinée par `napdoor`, allumée par l'objet de l'îlot).
+ */
+export const NAP_LIGHTS = [
+  { col: 62, row: 29 },
+  { col: 63, row: 29 },
+  { col: 64, row: 29 },
+  { col: 65, row: 29 },
+] as const;
 
 /** La porte du couloir mène dans l'entrée de la nounou, dans le noir (D-110). */
 export const NANNY_ENTER: readonly StoryStep[] = [
@@ -62,6 +76,38 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
+    // L'îlot 1 (D-112) : en haut de l'arrosoir géant du jardin renversé, Roger, qu'on avait
+    // laissé dans la tour des objets perdus (D-68). On le regarde, on ne le prend pas (il n'est plus
+    // un souvenir à trouver) ; son court souvenir revient. Le passage près de lui s'ouvre vers la
+    // maison, et une veilleuse s'allume sur la porte de la sieste.
+    id: 'nanny-roger',
+    room: 'nanny-garden',
+    on: 'interact',
+    area: { col: ISLET_ROGER.col - 3, row: ISLET_ROGER.row - 2, w: 6, h: 3 },
+    mark: { col: ISLET_ROGER.col, row: ISLET_ROGER.row - 2 },
+    when: { all: [F.NannyHouse], none: [F.NannyBedDone] },
+    lock: true,
+    steps: [
+      {
+        do: 'sparkle',
+        area: { col: ISLET_ROGER.col - 1, row: ISLET_ROGER.row - 2, w: 3, h: 3 },
+        ms: S.cradleSparkleMs + 600,
+      },
+      { do: 'wait', ms: S.cradleSparkleMs },
+      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs },
+      { do: 'flashback', id: 'roger', ms: S.flashbackMs },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'flag', id: F.NannyBedDone },
+      {
+        do: 'sparkle',
+        area: { col: BED_DOOR.col - 1, row: BED_DOOR.row - 3, w: 3, h: 4 },
+        ms: S.lookMs,
+      },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
+  {
     // Dans la maison (D-110) : tout est immense. Céleste regarde ; le reflet n'est plus là.
     id: 'nanny-house',
     room: 'nanny-house',
@@ -79,6 +125,16 @@ const TRIGGERS: StoryTrigger[] = [
 ];
 
 const PROPS: StoryData['props'] = [
+  // Roger (D-112), en haut de l'arrosoir : il y reste, même après son souvenir.
+  { id: 'nanny-roger', room: 'nanny-garden', kind: 'roger', ...ISLET_ROGER, when: {} },
+  // La veilleuse de l'îlot 1 sur la porte de la sieste, rose, une fois Roger retrouvé.
+  {
+    id: 'nap-light-bed',
+    room: 'nanny-house',
+    kind: 'nap-light-bed',
+    ...NAP_LIGHTS[0],
+    when: { all: [F.NannyBedDone] },
+  },
   // Le reflet (D-110) : Céleste toute petite dans la vitre du miroir, puis de l'autre côté.
   {
     id: 'nanny-reflection',
@@ -112,9 +168,19 @@ const OMENS: StoryData['omens'] = [
   },
 ];
 
+/**
+ * Le raccourci de l'îlot 1 (D-112) : la porte près de Roger et celle de la maison n'existent qu'une
+ * fois Roger retrouvé (avant, rien ne les montre : on ne coupe pas l'îlot).
+ */
+const LOCKED: StoryData['lockedRooms'] = [
+  { room: 'nanny-garden', exit: 2, when: { none: [F.NannyBedDone] }, hidden: true },
+  { room: 'nanny-house', exit: 3, when: { none: [F.NannyBedDone] }, hidden: true },
+];
+
 /** Morceaux de l'histoire de la maison de la nounou, ajoutés à ceux de la maison (`HOUSE_STORY`). */
-export const NANNY_STORY: Pick<StoryData, 'triggers' | 'props' | 'omens'> = {
+export const NANNY_STORY: Pick<StoryData, 'triggers' | 'props' | 'omens' | 'lockedRooms'> = {
   triggers: TRIGGERS,
   props: PROPS,
   omens: OMENS,
+  lockedRooms: LOCKED,
 };
