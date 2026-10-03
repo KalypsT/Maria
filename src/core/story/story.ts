@@ -56,6 +56,8 @@ export const THOUGHT_ICONS = [
   'mom',
   /** Le portillon du jardin (fermé, ou montré par papa, D-60). */
   'gate',
+  /** La ficelle rouge et la chevillette, pendue en haut (papa la montre avant le portillon, D-60). */
+  'cord',
   /** Aide du parapluie (D-62, D-65) : Saut tenu (longue flèche), puis le parapluie ouvert. */
   'umbrella',
   /** Aide du crochet (D-65) : le parapluie accroché à un câble, et la glissade le long. */

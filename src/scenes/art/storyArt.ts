@@ -907,6 +907,34 @@ function drawIcon(
       ctx.fillStyle = '#7a7066';
       ctx.fillRect(cx + 2, cy - 3.5, 2.2, 1);
       break;
+    case 'cord':
+      // La ficelle rouge (D-60) : elle monte le long du mur jusqu'à la chevillette, pendue en haut.
+      ctx.fillStyle = '#a89478';
+      ctx.fillRect(cx - 7, cy - 6, 2.5, 12);
+      ctx.strokeStyle = '#b5534a';
+      ctx.lineWidth = 1.2;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx + 6, cy + 6);
+      ctx.lineTo(cx + 6, cy + 3);
+      ctx.lineTo(cx - 3, cy + 3);
+      ctx.lineTo(cx - 3, cy - 2.5);
+      ctx.stroke();
+      ctx.fillStyle = WOOD_DARK;
+      ctx.beginPath();
+      ctx.roundRect(cx - 4.5, cy - 6.5, 3, 5, 1.5);
+      ctx.fill();
+      // Une petite flèche : c'est en haut qu'il faut aller.
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(cx + 2, cy - 1);
+      ctx.lineTo(cx + 2, cy - 6);
+      ctx.moveTo(cx + 0.4, cy - 4.4);
+      ctx.lineTo(cx + 2, cy - 6);
+      ctx.lineTo(cx + 3.6, cy - 4.4);
+      ctx.stroke();
+      break;
     case 'umbrella': {
       // Aide du parapluie (D-62, D-70) : deux flèches de saut (une nouvelle pression en l'air),
       // puis le parapluie ouvert.

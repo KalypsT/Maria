@@ -486,7 +486,8 @@ export const HOUSE_STORY: StoryData = {
       ],
     },
     {
-      // Après le bonnet (D-60), papa montre le portillon au bout de l'allée : la suite.
+      // Après le bonnet (D-60), papa montre la ficelle rouge et sa chevillette, puis le portillon
+      // au bout de l'allée : ce qu'il faut tirer, puis la suite.
       id: 'garden-dad-gate',
       room: 'garden-vegetables',
       on: 'interact',
@@ -496,6 +497,8 @@ export const HOUSE_STORY: StoryData = {
       lock: true,
       steps: [
         { do: 'flag', id: F.GardenDadGate },
+        { do: 'thought', icon: 'cord', ms: S.thoughtMs, by: 'dad-garden' },
+        { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'gate', ms: S.thoughtMs, by: 'dad-garden' },
         { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'dad-garden' },
