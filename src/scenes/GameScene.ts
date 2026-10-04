@@ -130,6 +130,8 @@ import { WaterView } from './WaterView';
 import { ShiftLayerView } from './ShiftLayerView';
 import { RideView } from './RideView';
 import { MapPage } from '../ui/MapPage';
+import { RecordPicker } from '../ui/RecordPicker';
+import { canPlayRecords, recordShelf, type RecordChoice } from '../core/audio/records';
 import { buildMapModel } from '../core/world/mapModel';
 import { DEFAULT_PUPPET, type PuppetParams } from '../config/puppet';
 import { CelestePoser, PoseAttack } from '../core/player/celestePose';
@@ -299,6 +301,17 @@ export class GameScene extends Phaser.Scene {
       this.playMemory(id, false);
     },
   );
+  /** Le tourne-disque du grenier (D-121) : le jeu est arrêté pendant le choix, comme la carte. */
+  private readonly recordPicker = new RecordPicker(
+    (choice) => {
+      this.chooseRecord(choice);
+    },
+    () => {
+      this.closeRecords();
+    },
+  );
+  /** Dernier sens du joystick ou des flèches devant le tourne-disque (un pas par poussée). */
+  private recordMoveDir = 0;
   /** Souvenir jouable en cours (D-89), null sinon ; et ce qu'il faut retrouver à sa fin. */
   private memoryPlay: PlayableMemory | null = null;
   private memoryReturn: {
@@ -443,6 +456,9 @@ export class GameScene extends Phaser.Scene {
       },
       play: (id) => {
         this.playMemory(id, true);
+      },
+      records: () => {
+        this.openRecords();
       },
     });
     this.story.setFlags(this.session.data.story.flags);
@@ -603,6 +619,7 @@ export class GameScene extends Phaser.Scene {
       document.removeEventListener('visibilitychange', onVisibility);
       this.pauseMenu?.destroy();
       this.mapPage.destroy();
+      this.recordPicker.destroy();
       this.hud.destroy();
       this.flashbackView.destroy();
       this.scale.off(Phaser.Scale.Events.RESIZE, this.onResize);
@@ -624,6 +641,10 @@ export class GameScene extends Phaser.Scene {
       if (mapPressed || this.controls.consumePressed('Pause')) {
         this.closeMap();
       }
+      return;
+    }
+    if (this.recordPicker.isOpen()) {
+      this.stepRecordPicker(mapPressed);
       return;
     }
     if (this.controls.consumePressed('Pause') && !this.memoryPlay) {
@@ -694,6 +715,11 @@ export class GameScene extends Phaser.Scene {
       const action = this.controls.consumePressed('Attack');
       const pressed = interact || (near && action);
       story.step(this.level.id, this.player.box, pressed);
+      if (this.recordPicker.isOpen()) {
+        // Le tourne-disque s'est ouvert (D-121) : le jeu s'arrête jusqu'au choix.
+        this.freezeInterpolation();
+        break;
+      }
       this.nearDoor = story.interactable < 0 && !story.busy ? door : 0;
       if (this.nearDoor !== 0 && pressed && this.player.grounded) {
         this.openDoor(this.nearDoor);
@@ -940,6 +966,63 @@ export class GameScene extends Phaser.Scene {
       data.progression.memories,
       this.ownedAbilities(),
     );
+  }
+
+  /**
+   * Le tourne-disque du grenier (D-121) : les pochettes des disques trouvés, ou, sans disque, une
+   * bulle (le plateau vide). Rien de sauvegardé.
+   */
+  private openRecords(): void {
+    const shelf = recordShelf(this.session.data.progression.memories, (slot) =>
+      this.audio.has(slot),
+    );
+    if (!canPlayRecords(shelf)) {
+      this.storyView.think('record', STORY_TIMING.thoughtMs);
+      return;
+    }
+    this.clock.reset();
+    this.touch?.releaseAll();
+    this.recordMoveDir = 0;
+    this.recordPicker.open(shelf, this.audio.record);
+  }
+
+  /** Devant le tourne-disque : gauche et droite, Agir, Action ou Saut ; Pause ou Carte referment. */
+  private stepRecordPicker(mapPressed: boolean): void {
+    const controls = this.controls;
+    if (mapPressed || controls.consumePressed('Pause')) {
+      this.closeRecords();
+      return;
+    }
+    const dir = controls.moveX > 0.5 ? 1 : controls.moveX < -0.5 ? -1 : 0;
+    if (dir !== 0 && dir !== this.recordMoveDir) {
+      this.recordPicker.move(dir);
+    }
+    this.recordMoveDir = dir;
+    const confirm = controls.consumePressed('Interact');
+    const attack = controls.consumePressed('Attack');
+    const jump = controls.consumePressed('Jump');
+    if (confirm || attack || jump) {
+      this.recordPicker.confirm();
+    }
+  }
+
+  /** Un disque choisi joue une fois en entier, où que soit Céleste ; ou le disque s'arrête. */
+  private chooseRecord(choice: RecordChoice): void {
+    if (choice === 'stop') {
+      this.audio.stopRecord();
+    } else {
+      this.audio.playRecord(choice);
+    }
+    this.closeRecords();
+  }
+
+  private closeRecords(): void {
+    this.recordPicker.close();
+    this.clock.reset();
+    this.touch?.releaseAll();
+    this.controls.consumePressed('Jump');
+    this.controls.consumePressed('Interact');
+    this.controls.consumePressed('Attack');
   }
 
   private closeMap(): void {

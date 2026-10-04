@@ -40,6 +40,8 @@ export interface StoryHost {
   ability(id: string): void;
   /** Souvenir jouable (D-89) : la scène le joue, puis appelle `endPlay`. */
   play(id: PlayableMemoryId): void;
+  /** Le tourne-disque (D-121) : le choix des disques, ou une bulle s'il n'y en a aucun. */
+  records?(): void;
 }
 
 /**
@@ -335,6 +337,9 @@ export class StoryDirector {
         break;
       case 'ability':
         this.host.ability(step.id);
+        break;
+      case 'records':
+        this.host.records?.();
         break;
       default:
         break;
