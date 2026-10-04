@@ -35,7 +35,10 @@ export function isMusicTrack(id: string | undefined): id is MusicTrack {
   return id !== undefined && (MUSIC_TRACKS as readonly string[]).includes(id);
 }
 
-/** Courts jingles, joués une fois par-dessus la musique (baissée pendant ce temps). */
+/**
+ * Courts jingles, joués une fois par-dessus la musique, sans la baisser (D-121) ; seule
+ * l'apparition de Maria la baisse (`hushWithJingle`).
+ */
 export const JINGLES = [
   /** Une capacité ou une trouvaille ramassée. */
   'found',
@@ -71,12 +74,12 @@ export const AUDIO_MIX = {
   /** …puis revient lentement. */
   hushInMs: 3500,
   /**
-   * Volume de la musique pendant l'apparition de Maria quand son jingle existe (D-94) : on entend
-   * encore le thème, baissé comme pour les autres jingles. Sans fichier `maria`, c'est le silence.
+   * Volume de la musique pendant l'apparition de Maria quand son jingle existe (D-94, D-121) : on
+   * entend encore le thème (ou le disque), baissé. Sans fichier `maria`, c'est le silence. Les
+   * autres jingles se jouent par-dessus la musique, sans la baisser (D-121).
    */
-  hushWithJingle: 1,
-  /** Volume de la musique pendant un jingle, et vitesse de la baisse et du retour. */
-  jingleDuck: 0.8,
+  hushWithJingle: 0.8,
+  /** Vitesse de la baisse et du retour pendant la pause. */
   duckMs: 400,
   /** Volume de la musique pendant la pause. */
   pausedDuck: 0.45,

@@ -20,7 +20,8 @@ export function equalPower(k: number): number {
 
 /**
  * Mixage (D-57), pur et indépendant du navigateur : présence de chaque thème (fondus enchaînés),
- * silence de Maria (`hush`), baisse pendant un jingle ou la pause, volume général. Le lecteur lit
+ * silence de Maria (`hush`), baisse pendant la pause, volume général (les jingles ne baissent
+ * plus la musique, D-121). Le lecteur lit
  * les volumes calculés ici et les applique aux morceaux. Aucune allocation dans `update`.
  */
 export class AudioMix {
@@ -28,7 +29,6 @@ export class AudioMix {
   track: MusicTrack | null = null;
   settings: AudioSettings = { ...DEFAULT_AUDIO_SETTINGS };
   paused = false;
-  jinglePlaying = false;
   private readonly presence = new Map<MusicTrack, number>(MUSIC_TRACKS.map((t) => [t, 0]));
   /** Silence de Maria : niveau (1 = musique normale) et temps restant tout bas. */
   private hushLevel = 1;
@@ -78,13 +78,7 @@ export class AudioMix {
     } else {
       this.hushLevel = approach(this.hushLevel, 1, dtMs / Math.max(1, p.hushInMs));
     }
-    let duckTarget = 1;
-    if (this.jinglePlaying) {
-      duckTarget = Math.min(duckTarget, p.jingleDuck);
-    }
-    if (this.paused) {
-      duckTarget = Math.min(duckTarget, p.pausedDuck);
-    }
+    const duckTarget = this.paused ? p.pausedDuck : 1;
     this.duck = approach(this.duck, duckTarget, dtMs / Math.max(1, p.duckMs));
   }
 
