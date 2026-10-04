@@ -1,6 +1,7 @@
 import { TILE_SIZE } from '../../config/display';
 import { isAbility } from '../../config/abilities';
 import { isMemory } from '../../config/memories';
+import { isRecordSlot } from '../../config/records';
 import { EntityType, Tile, tileAt, type LevelData } from '../level/LevelData';
 import type { Zone } from '../world/zone';
 import { propBox } from './PropStage';
@@ -120,7 +121,7 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
     let dark = false;
     let room = t.room;
     for (const step of t.steps) {
-      if (step.do === 'memory' && !isMemory(step.id)) {
+      if (step.do === 'memory' && !isMemory(step.id) && !isRecordSlot(step.id)) {
         problems.push(`${what} : souvenir inconnu ${step.id}`);
       } else if (step.do === 'ability' && !isAbility(step.id)) {
         problems.push(`${what} : capacité inconnue ${step.id}`);

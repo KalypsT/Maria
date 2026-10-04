@@ -17,7 +17,9 @@ import { PROP_SIZE } from '../src/config/story';
 import { StoryDirector, type StoryHost } from '../src/core/story/StoryDirector';
 import { storyProblems } from '../src/core/story/storyProblems';
 import { HOUSE_STORY } from '../src/levels/house/story';
-import { level, zone } from './zoneGraph';
+import { analysis, level, node, nodeAt, reachable, zone } from './zoneGraph';
+import { ANALYSIS_TIMEOUT_MS } from './timeouts';
+import { DIFFICULTY_MIN_WINDOW_MS } from '../src/config/levelDesign';
 import { createNewSave, deserializeSave, serializeSave } from '../src/core/save/saveData';
 
 /** Avance le mixage de `ms` par pas de 10 ms. */
@@ -255,4 +257,72 @@ describe('le tourne-disque du grenier (D-121)', () => {
     director.step('attic', standing(20, 19), true);
     expect(calls).toHaveLength(3);
   });
+});
+
+describe('le disque aux objets trouvés de la gare (D-121)', () => {
+  const room = 'station-lost';
+
+  it('sur l’étagère à chapeaux du mur de gauche ; Agir le ramasse, il quitte la salle', () => {
+    const prop = HOUSE_STORY.props.find((p) => p.kind === 'record-adventures');
+    expect(prop).toMatchObject({ room, col: 1, row: 11, instant: true });
+    const trigger = HOUSE_STORY.triggers.find((t) => t.id === 'take-record-adventures');
+    expect(trigger?.room).toBe(room);
+    expect(trigger?.steps).toContainEqual({ do: 'memory', id: recordSlot('adventures') });
+    const flag = trigger?.steps.find((s) => s.do === 'flag');
+    expect(flag?.do === 'flag' && prop?.when.none?.includes(flag.id)).toBe(true);
+    // Le disque a sa musique : sans elle, il ne serait pas dans le monde.
+    expect(Object.keys(import.meta.glob('../src/assets/audio/record-adventures.*'))).toHaveLength(
+      1,
+    );
+    const memories: string[] = [];
+    const host: StoryHost = {
+      flagSet: () => undefined,
+      place: () => undefined,
+      room: () => undefined,
+      pose: () => undefined,
+      think: () => undefined,
+      sparkle: () => undefined,
+      shake: () => undefined,
+      memory: (id) => memories.push(id),
+      hush: () => undefined,
+      ability: () => undefined,
+      play: () => undefined,
+    };
+    const director = new StoryDirector(HOUSE_STORY, host);
+    const box = {
+      x: 1.5 * T - PLAYER_HITBOX.width / 2,
+      y: 12 * T - PLAYER_HITBOX.height,
+      width: PLAYER_HITBOX.width,
+      height: PLAYER_HITBOX.height,
+    };
+    director.step(room, box, true);
+    expect(memories).toEqual(['record-adventures']);
+    expect(canPlayRecords(recordShelf(memories, () => true))).toBe(true);
+  });
+
+  it(
+    'moyen exactement depuis le sol (on plane depuis le haut de l’armoire), et on en redescend',
+    { timeout: ANALYSIS_TIMEOUT_MS },
+    () => {
+      const a = analysis(room, true, 2, true, true);
+      const floor = nodeAt(room, 20, 27);
+      const shelf = nodeAt(room, 1, 11);
+      const graph = (min: number) => {
+        const g = new Map<string, Set<string>>();
+        for (const m of a.moves) {
+          if (m.windowMs >= min) {
+            const set = g.get(node(room, m.from)) ?? new Set<string>();
+            set.add(node(room, m.to));
+            g.set(node(room, m.from), set);
+          }
+        }
+        return g;
+      };
+      expect(reachable(graph(DIFFICULTY_MIN_WINDOW_MS.medium), floor).has(shelf)).toBe(true);
+      expect(reachable(graph(DIFFICULTY_MIN_WINDOW_MS.easy), floor).has(shelf), 'trop facile').toBe(
+        false,
+      );
+      expect(reachable(graph(DIFFICULTY_MIN_WINDOW_MS.medium), shelf).has(floor)).toBe(true);
+    },
+  );
 });
