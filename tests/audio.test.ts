@@ -93,17 +93,20 @@ describe('mixage (D-57)', () => {
     expect(mix.musicVolume('garden')).toBeCloseTo(full, 5);
   });
 
-  it('Maria avec son jingle : le thème reste audible, baissé comme pour un jingle (D-94)', () => {
+  it('Maria avec son jingle : le thème reste audible, baissé, puis revient (D-94, D-121)', () => {
     const mix = new AudioMix();
     mix.setTrack('strange');
     run(mix, AUDIO_MIX.crossfadeMs);
     const full = mix.musicVolume('strange');
     mix.hush(2000, AUDIO_MIX.hushWithJingle);
-    mix.jinglePlaying = true;
-    run(mix, AUDIO_MIX.hushOutMs + AUDIO_MIX.duckMs);
+    run(mix, AUDIO_MIX.hushOutMs);
     expect(mix.hushing).toBe(true);
-    expect(mix.musicVolume('strange')).toBeCloseTo(full * AUDIO_MIX.jingleDuck, 5);
-    expect(AUDIO_MIX.jingleDuck).toBeGreaterThanOrEqual(0.7);
+    const low = mix.musicVolume('strange');
+    expect(low).toBeCloseTo(full * equalPower(AUDIO_MIX.hushWithJingle), 5);
+    expect(low).toBeLessThan(full);
+    expect(low).toBeGreaterThan(full * 0.7);
+    run(mix, 2000 + AUDIO_MIX.hushInMs + 100);
+    expect(mix.musicVolume('strange')).toBeCloseTo(full, 5);
   });
 
   it('silence de Maria : la musique se tait, reste tue, puis revient lentement', () => {
@@ -129,15 +132,12 @@ describe('mixage (D-57)', () => {
     );
   });
 
-  it('baisse pendant un jingle et la pause, coupure et volume', () => {
+  it('baisse pendant la pause, coupure et volume ; les jingles ne baissent rien (D-121)', () => {
     const mix = new AudioMix();
     mix.setTrack('garden');
     run(mix, AUDIO_MIX.crossfadeMs);
     const full = mix.musicVolume('garden');
-    mix.jinglePlaying = true;
-    run(mix, AUDIO_MIX.duckMs);
-    expect(mix.musicVolume('garden')).toBeCloseTo(full * AUDIO_MIX.jingleDuck, 5);
-    mix.jinglePlaying = false;
+    expect(Object.keys(AUDIO_MIX)).not.toContain('jingleDuck');
     mix.paused = true;
     run(mix, AUDIO_MIX.duckMs);
     expect(mix.musicVolume('garden')).toBeCloseTo(full * AUDIO_MIX.pausedDuck, 5);

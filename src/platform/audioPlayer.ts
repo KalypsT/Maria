@@ -212,7 +212,10 @@ export class AudioPlayer {
     this.mix.paused = paused;
   }
 
-  /** Maria apparaît : son jingle par-dessus le thème s'il existe, sinon le silence (D-94). */
+  /**
+   * Maria apparaît : son jingle par-dessus la musique baissée s'il existe, sinon le silence (D-94,
+   * D-121).
+   */
   hush(ms: number): void {
     this.mix.hush(ms, this.files.has('maria') ? AUDIO_MIX.hushWithJingle : 0);
     this.playJingle('maria');
@@ -230,7 +233,6 @@ export class AudioPlayer {
       player.addEventListener('ended', () => {
         if (this.activeJingle === player) {
           this.activeJingle = null;
-          this.mix.jinglePlaying = false;
         }
       });
       this.jingles.set(jingle, player);
@@ -239,10 +241,8 @@ export class AudioPlayer {
     this.activeJingle = player;
     player.currentTime = 0;
     player.volume = clampVolume(this.mix.jingleVolume);
-    this.mix.jinglePlaying = true;
     player.play().catch(() => {
       this.activeJingle = null;
-      this.mix.jinglePlaying = false;
     });
   }
 
