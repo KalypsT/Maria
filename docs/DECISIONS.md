@@ -1676,3 +1676,22 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Vitesses** : la tour (2,8 tuiles/s) et le train de la vaisselle (7) passent tels quels leurs tests de rythme (le joueur parfait devance le boss de plus de 2 tuiles depuis chaque veilleuse ; un joueur 50 % plus lent est rattrapé). **La vague de la station balnéaire passe de 13 à 12,5 tuiles/s** : à 13, sans le recul du reflux, la marge du dernier tronçon tombait à 1,2 tuile ; à 12,5 elle est de 2,8 à 3,6 tuiles par tronçon, et un joueur 50 % plus lent est rattrapé sur chaque tronçon. Le parcours d'essai 14 garde 13.
 - **Non concerné** : l'effacement de la salle de jeux (D-117) qui « recule » après chaque objet rallumé (une récompense, pas une poursuite) ; la cage d'escalier (une poursuite) suit la nouvelle règle.
 - **Sauvegarde** : aucune migration.
+
+## D-121 — Les disques et le tourne-disque du grenier (easter egg), PR 1 : le système et le premier morceau
+
+- **Demande de l'utilisateur** : un tourne-disque au grenier, vide au départ ; des disques trouvés au fil de l'aventure ; de retour au grenier, on choisit un disque à écouter. Plan validé en 3 PR (1 : le système et le morceau ; 2 : le tourne-disque ; 3 : le disque aux objets trouvés).
+- **Choix validés** :
+  - **trois disques, inédits et secrets** (ni onglet dans le cahier ni compteur) : le premier au jardin ou au quartier (choisi quand sa musique existera), **« Les Aventures de Céleste »** au bureau des objets trouvés de la gare (niveau 4 : un disque perdu parmi les choses perdues, Roger juste au-dessus dans la tour), le troisième chez la nounou (niveau 7), dans le souvenir, près de son tourne-disque d'autrefois, idéalement une berceuse. **Un disque sans fichier est caché** (ni pochette ni objet) ;
+  - le tourne-disque est au grenier dès le début ; sans disque, Agir montre un petit signe sans texte ; avec des disques, des pochettes (une vide en pointillés par disque qui a une musique mais n'est pas trouvé) et une pochette « arrêter » ;
+  - **un disque joue une fois en entier, où que soit Céleste**, à la place des thèmes ; à sa fin (ou arrêté), le thème de la salle revient en fondu. Recharger la page ou revenir à l'accueil l'arrête (la lecture n'est pas sauvegardée).
+- **Les jingles par-dessus la musique** (demande de l'utilisateur, pour les disques comme pour les thèmes) : `found` et `memory` ne baissent plus la musique (`jingleDuck` retiré, 0,8 avant, D-94). **Seule l'apparition de Maria la baisse** : `hushWithJingle` passe de 1 à 0,8 (avant, la baisse venait de `jingleDuck`, Maria étant un jingle comme les autres), le temps du silence de l'histoire, puis la musique revient. Sans fichier `maria`, le silence de D-57 est inchangé. La pause baisse toujours la musique.
+- **Mise en œuvre** :
+  - `src/config/records.ts` : `RECORDS` (identifiant, couleur de pochette PLACEHOLDER), dans l'ordre des pochettes ; `early` et `lullaby` sont des PLACEHOLDERS sans musique (leur identifiant peut changer tant qu'ils ne sont pas placés) ;
+  - le fichier d'un disque est `record-<id>` dans `src/assets/audio/` ; le même nom sert d'identifiant dans les **souvenirs de la sauvegarde** (comme les affaires de Maria, D-58) : **aucune migration** ;
+  - `AudioMix` : un disque (`playRecord`, `stopRecord`, `recordEnded`) passe avant le thème ; il arrive et s'éteint en `recordFadeMs` (600 ms, on l'entend presque dès le début), le thème part et revient en `crossfadeMs`. Un disque en remplace un autre ; la fin du premier ne coupe pas le second ;
+  - le lecteur : un seul lecteur par disque, sans boucle ; à la fin, ou si le fichier est illisible ou la lecture refusée, le thème revient. Rejouer le disque en cours le relance du début ;
+  - `src/core/audio/records.ts` : les pochettes (`recordShelf`) et « au moins un disque à jouer » (`canPlayRecords`), pures, pour la PR 2.
+- **Le morceau** : `record-adventures.m4a`, préparé par `audio:prepare` (Suno, 3 min 17 → 3 min 15 sans le silence de la fin, −14,3 → −18 LUFS, 2,3 Mo). Morceau gardé tel quel.
+- **Poids de la musique** : la limite passe de 25 à **32 Mo** (9,4 Mo pris) pour trois disques et les quatre thèmes encore attendus ; seul le premier chargement s'allonge.
+- **Vérifié dans Chromium** (copie Opus du morceau, ce Chromium ne lit pas l'AAC) : le disque à la place du thème, la salle qui change pendant le disque, la fin et le retour du thème, la relance, l'arrêt ; un fichier illisible laisse le thème.
+- **Rien dans le jeu pour l'instant** : le tourne-disque vient avec la PR 2, le disque avec la PR 3.

@@ -5,10 +5,11 @@ import {
   type Jingle,
   type MusicTrack,
 } from '../../config/audio';
+import { RECORD_SLOTS, type RecordSlot } from '../../config/records';
 
-export type AudioSlot = MusicTrack | Jingle;
+export type AudioSlot = MusicTrack | Jingle | RecordSlot;
 
-const SLOTS: readonly string[] = [...MUSIC_TRACKS, ...JINGLES];
+const SLOTS: readonly string[] = [...MUSIC_TRACKS, ...JINGLES, ...RECORD_SLOTS];
 
 /**
  * Fichiers audio trouvés (chemin → adresse) rangés par emplacement : le nom du fichier sans
