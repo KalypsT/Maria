@@ -81,6 +81,11 @@ export const THOUGHT_ICONS = [
   'shift',
   /** Le tourne-disque du grenier sans disque (D-121) : le plateau vide, le bras levé, un « ? ». */
   'record',
+  /**
+   * Les quatre cubes de la tour d'Eden (D-122) : un creux par îlot, plein une fois son cube trouvé
+   * (dessiné selon les étapes, `towerCubesMask`).
+   */
+  'cubes',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
@@ -157,6 +162,11 @@ export type StoryStep =
    * là où était Céleste, toujours dans le noir. À placer après un fondu au noir.
    */
   | { readonly do: 'play'; readonly id: PlayableMemoryId }
+  /**
+   * Regard (D-122, non bloquant) : la vue glisse vers une tuile de la salle et y reste ; sans tuile,
+   * elle revient sur Céleste. À suivre d'une attente ; la vue revient toujours à la fin du script.
+   */
+  | { readonly do: 'look'; readonly col?: number; readonly row?: number }
   /**
    * Le tourne-disque du grenier (D-121, non bloquant) : le choix des disques trouvés, ou une bulle
    * (le plateau vide) s'il n'y en a aucun.
@@ -279,24 +289,29 @@ export const PROP_KINDS = [
   'reflection',
   'reflection-through',
   /**
-   * Les veilleuses de la porte de la sieste chez la nounou (D-112), une par îlot de mémoire,
-   * allumées quand on y a retrouvé son objet : rose pour la chambre et le jardin renversé, jaune
-   * pour l'école et la rue, turquoise pour la gare et le train, bleue pour la plage et le carrousel.
+   * Les cubes de la tour d'Eden (D-122), un par îlot de mémoire (`TOWER_CUBES`) : rose pour la
+   * chambre et le jardin renversé, jaune pour l'école et la rue, turquoise pour la gare et le train,
+   * bleu pour la plage et le carrousel. Dans l'îlot, avec la lueur du monde étrange ; puis dans son
+   * creux, sur la porte de la sieste.
    */
-  'nap-light-bed',
-  'nap-light-school',
-  'nap-light-station',
-  'nap-light-sea',
+  'islet-cube-bed',
+  'islet-cube-school',
+  'islet-cube-station',
+  'islet-cube-sea',
+  'nap-cube-bed',
+  'nap-cube-school',
+  'nap-cube-station',
+  'nap-cube-sea',
   /** Le torchon blanc (D-116), dans le petit lit de la sieste. */
   'white-cloth',
   /**
-   * La salle de jeux (D-117) : les quatre objets pâlis par l'effacement, les couleurs qui reviennent
-   * à une partie de la salle, et l'effacement lui-même au centre (sans visage).
+   * La salle de jeux (D-117, D-122) : les quatre cubes pâlis par l'effacement, les couleurs qui
+   * reviennent à une partie de la salle, et l'effacement lui-même au centre (sans visage).
    */
-  'shape-box-pale',
-  'pink-kitchen-pale',
-  'roger-pale',
-  'music-book-pale',
+  'islet-cube-bed-pale',
+  'islet-cube-school-pale',
+  'islet-cube-station-pale',
+  'islet-cube-sea-pale',
   'color-bloom',
   'erasure-figure',
   /**
@@ -306,13 +321,24 @@ export const PROP_KINDS = [
   'eden-small',
   'eden-peek',
   'eden-laugh',
-  /** La nounou, dans le souvenir d'Eden (D-118) : une silhouette bienveillante dans son fauteuil. */
+  /** Assis près de la tour, les deux bras levés : il vient de poser son cube (D-122). */
+  'eden-cheer',
+  /**
+   * La nounou, dans le souvenir d'Eden (D-118) : une silhouette bienveillante dans son fauteuil ;
+   * `nanny-look` : la tête tournée vers la cachette d'Eden, pour aider Céleste (D-122).
+   */
   'nanny-shadow',
-  /** Les cubes du souvenir d'Eden (D-118) : le tas, la tour (un, deux, quatre cubes). */
+  'nanny-look',
+  /**
+   * Les cubes de la tour d'Eden (D-118, D-122) : le tas, la tour (un à quatre cubes, dans l'ordre
+   * des îlots), la tour tombée (les quatre cubes par terre).
+   */
   'cube-pile',
   'cube-tower-1',
   'cube-tower-2',
+  'cube-tower-3',
   'cube-tower-4',
+  'cube-tower-fallen',
   /** Le tourne-disque du grenier (D-121), posé sur la malle : une valise ouverte, le plateau. */
   'record-player',
   /** « Les Aventures de Céleste » (D-121), un disque perdu dans sa pochette rose, debout. */
@@ -342,10 +368,10 @@ export const WALL_PROP_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
 /** Vus par une fenêtre (D-64) : posés sur le mur, sans surface sous eux. */
 export const WINDOW_PROP_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'far-crane',
-  'nap-light-bed',
-  'nap-light-school',
-  'nap-light-station',
-  'nap-light-sea',
+  'nap-cube-bed',
+  'nap-cube-school',
+  'nap-cube-station',
+  'nap-cube-sea',
   'color-bloom',
   'erasure-figure',
 ]);
@@ -383,7 +409,9 @@ export const CHARACTER_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'eden-small',
   'eden-peek',
   'eden-laugh',
+  'eden-cheer',
   'nanny-shadow',
+  'nanny-look',
 ]);
 
 export interface StoryProp {

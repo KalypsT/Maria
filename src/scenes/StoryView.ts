@@ -1,6 +1,13 @@
 import Phaser from 'phaser';
 import { TILE_SIZE as T } from '../config/display';
-import { CHARACTER_LOOP_MS, PROP_SIZE, STORY_TIMING, THOUGHT_SCALE } from '../config/story';
+import {
+  CHARACTER_LOOP_MS,
+  PROP_SIZE,
+  STORY_TIMING,
+  THOUGHT_SCALE,
+  TOWER_CUBES,
+  towerCubesMask,
+} from '../config/story';
 import type { PropStage } from '../core/story/PropStage';
 import type { StoryDirector } from '../core/story/StoryDirector';
 import {
@@ -26,6 +33,11 @@ const THOUGHT_DEPTH = 12;
 const SPARKLE_KEY = 'story-sparkle';
 /** Pulsation de l'étincelle (ms). */
 const SPARKLE_MS = 1300;
+
+/** Texture de la bulle des cubes (D-122) pour une combinaison de cubes trouvés. */
+function cubesKey(mask: number): string {
+  return `thought-cubes-${String(mask)}`;
+}
 
 /**
  * Affichage de l'histoire (D-31) : objets de mise en scène de la salle, bulle de pensée au-dessus
@@ -93,11 +105,18 @@ export class StoryView {
         drawProp(ctx, kind, images);
       });
     }
+    const k = THOUGHT_SCALE;
     for (const icon of THOUGHT_ICONS) {
-      const k = THOUGHT_SCALE;
       this.texture(`thought-${icon}`, THOUGHT_SIZE.w * k, THOUGHT_SIZE.h * k, (ctx) => {
         ctx.scale(k, k);
         drawThought(ctx, icon, images);
+      });
+    }
+    // La bulle des cubes de la tour d'Eden (D-122) : une image par combinaison de cubes trouvés.
+    for (let mask = 0; mask < 1 << TOWER_CUBES.length; mask++) {
+      this.texture(cubesKey(mask), THOUGHT_SIZE.w * k, THOUGHT_SIZE.h * k, (ctx) => {
+        ctx.scale(k, k);
+        drawThought(ctx, 'cubes', images, mask);
       });
     }
     this.texture(SPARKLE_KEY, SPARKLE_SIZE, SPARKLE_SIZE, drawSparkle);
@@ -149,17 +168,20 @@ export class StoryView {
 
   /** Bulle de Céleste, ou du personnage `by` s'il est dans la salle et visible. */
   think(icon: ThoughtIcon, ms: number, by?: string): void {
+    // Les cubes (D-122) : ceux déjà trouvés, d'après les étapes vécues.
+    const key =
+      icon === 'cubes' ? cubesKey(towerCubesMask(this.director.flags)) : `thought-${icon}`;
     if (by !== undefined) {
       const index = this.stage.props.findIndex((p) => p.id === by);
       if (index >= 0 && this.stage.shown[index]) {
         this.speechProp = index;
-        this.speech.setTexture(`thought-${icon}`);
+        this.speech.setTexture(key);
         this.speechStart = this.scene.time.now;
         this.speechEnd = this.speechStart + ms;
       }
       return;
     }
-    this.thoughtKey = `thought-${icon}`;
+    this.thoughtKey = key;
     this.thought.setTexture(this.thoughtKey);
     this.thoughtStart = this.scene.time.now;
     this.thoughtEnd = this.thoughtStart + ms;

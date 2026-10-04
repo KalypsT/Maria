@@ -1,9 +1,9 @@
 ; L'avant-dernier niveau (D-107, D-115), îlot de mémoire 4 : le carrousel d'autrefois, au milieu de
 ; la baie. Le présent est la marée haute. On grimpe ses chevaux, qui alternent de couche, jusqu'au
-; toit ; en haut, le livre musical (D-104) et son court souvenir. Défi : derrière deux rideaux de
+; toit ; en haut, le cube bleu de la tour d'Eden (D-122). Défi : derrière deux rideaux de
 ; ronces, le rebord de la trouvaille. Sous le plancher, ouvert à marée basse, une trouvaille.
 ; Sortie (1) vers la plage ; portes (2) vers la maison et (3) vers le train d'autrefois, ouvertes
-; une fois le livre musical retrouvé.
+; une fois le cube bleu trouvé.
 ; @name: Le carrousel d'autrefois
 ; @world: strange
 ; @mapped: yes

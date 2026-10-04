@@ -458,6 +458,17 @@ export class MapPage {
         }
         ctx.fill();
       }
+      // Les cubes de la tour d'Eden trouvés (D-122) : un petit carré de leur couleur, cerné d'encre.
+      for (const cube of room.cubes) {
+        const p = px(cube);
+        ctx.fillStyle = cube.color;
+        ctx.strokeStyle = ink;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.roundRect(p.x - 5, p.y - 5, 10, 10, 2);
+        ctx.fill();
+        ctx.stroke();
+      }
     }
     if (model.celeste) {
       const p = px(model.celeste);

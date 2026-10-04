@@ -1,4 +1,5 @@
 import type { CameraParams } from '../../config/camera';
+import { STORY_LOOK_TIME_MS } from '../../config/camera';
 import { PHYSICS_STEP_HZ } from '../../config/movement';
 import type { Box } from '../physics/gridCollision';
 
@@ -57,6 +58,15 @@ export class CameraController {
   private kLook = 1;
   private lookAheadDelaySteps = 0;
   private lookDelaySteps = 0;
+  /**
+   * Regard de l'histoire (D-122) : la vue glisse vers un point de la salle (`focusing`), puis
+   * revient en douceur sur Céleste (`returning`) avant de la suivre à nouveau.
+   */
+  private focusing = false;
+  private returning = false;
+  private focusX = 0;
+  private focusY = 0;
+  private readonly kFocus: number;
   private readonly params: CameraParams;
 
   constructor(
@@ -65,6 +75,28 @@ export class CameraController {
   ) {
     this.params = { ...params };
     this.setParams(params);
+    this.kFocus = smoothingFactor(STORY_LOOK_TIME_MS, stepHz);
+  }
+
+  /** La vue glisse vers ce point du monde (px) et y reste, jusqu'à `release`. */
+  focus(x: number, y: number): void {
+    this.focusing = true;
+    this.returning = false;
+    this.focusX = x;
+    this.focusY = y;
+  }
+
+  /** Fin du regard : la vue revient en douceur sur Céleste. */
+  release(): void {
+    if (this.focusing) {
+      this.focusing = false;
+      this.returning = true;
+    }
+  }
+
+  /** Un regard de l'histoire est en cours (aller ou retour). */
+  get looking(): boolean {
+    return this.focusing || this.returning;
   }
 
   get settings(): Readonly<CameraParams> {
@@ -103,6 +135,8 @@ export class CameraController {
   reset(subject: CameraSubject): void {
     const box = subject.box;
     const feet = box.y + box.height;
+    this.focusing = false;
+    this.returning = false;
     this.runDir = 0;
     this.runSteps = 0;
     this.lookAheadTarget = 0;
@@ -128,6 +162,19 @@ export class CameraController {
     const feet = box.y + box.height;
     this.prevX = this.x;
     this.prevY = this.y;
+    if (this.focusing || this.returning) {
+      // Le regard (D-122) : Céleste ne bouge pas (script) ; au retour, la cible est sa place de
+      // repos, et le suivi normal reprend une fois la vue revenue.
+      const tx = this.focusing ? this.focusX : centerX + this.lookAheadOffset;
+      const ty = this.focusing ? this.focusY : this.refFeetY - this.params.verticalOffsetPx;
+      this.x += (tx - this.x) * this.kFocus;
+      this.y += (ty - this.y) * this.kFocus;
+      this.clampToBounds();
+      if (this.returning && Math.abs(tx - this.x) < 2 && Math.abs(ty - this.y) < 2) {
+        this.returning = false;
+      }
+      return;
+    }
 
     // Anticipation horizontale : seulement après une course soutenue dans un même sens. À l'arrêt,
     // elle reste en place (pas de recentrage parasite quand Céleste s'arrête).

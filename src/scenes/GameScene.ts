@@ -111,11 +111,12 @@ import {
   TRAIN_RIDE,
   CHASE_VIEW,
 } from '../config/art';
-import { STORY_TIMING, StoryFlag } from '../config/story';
+import { STORY_TIMING, StoryFlag, TOWER_CUBES } from '../config/story';
 import { PropStage } from '../core/story/PropStage';
 import { StoryDirector } from '../core/story/StoryDirector';
 import type { TimeOfDay } from '../core/story/story';
 import { HOUSE_STORY } from '../levels/house/story';
+import { ISLET_CUBES } from '../levels/nanny/story';
 import type { Box } from '../core/physics/gridCollision';
 import { StoryView } from './StoryView';
 import { StrangeFxView } from './StrangeFxView';
@@ -462,6 +463,13 @@ export class GameScene extends Phaser.Scene {
       records: () => {
         this.openRecords();
       },
+      look: (col, row) => {
+        if (col === null || row === null) {
+          this.camera.release();
+        } else {
+          this.camera.focus((col + 0.5) * TILE_SIZE, (row + 0.5) * TILE_SIZE);
+        }
+      },
     });
     this.story.setFlags(this.session.data.story.flags);
     this.growth = growthPhase(this.story.flags);
@@ -776,6 +784,10 @@ export class GameScene extends Phaser.Scene {
         }
       }
       camera.lookInput = input.moveY;
+      if (!story.busy) {
+        // Un regard de l'histoire (D-122) ne survit pas à son script.
+        camera.release();
+      }
       camera.step(this.player);
       feel.step(this.player);
       this.stepPose();
@@ -953,6 +965,11 @@ export class GameScene extends Phaser.Scene {
         checkpoint: data.checkpoint,
         collectibles: data.progression.collectibles,
         celeste: { room: this.level.id, x: box.x + box.width / 2, y: box.y + box.height },
+        cubes: ISLET_CUBES.flatMap((cube, k) =>
+          this.story.flags.has(cube.flag)
+            ? [{ room: cube.room, ...cube.at, color: TOWER_CUBES[k]?.color ?? '#ec8fab' }]
+            : [],
+        ),
       },
       page,
     );

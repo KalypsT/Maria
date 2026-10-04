@@ -116,7 +116,7 @@ describe('CameraController', () => {
     r.input.moveX = 1;
     r.run(8);
     r.input.moveX = 0;
-    r.run(240);
+    r.run(720);
     expect(r.camera.lookAheadOffset).toBe(0);
     expect(r.camera.x).toBe(x);
   });
@@ -332,5 +332,37 @@ describe('CameraController', () => {
     on.input.moveY = 0;
     on.run(360);
     expect(on.camera.y).toBeCloseTo(y0, 2);
+  });
+
+  it('regard de l’histoire (D-122) : la vue glisse vers un point, y reste, puis revient sur Céleste', () => {
+    const r = rig(room(200, 60));
+    const restX = r.camera.x;
+    const restY = r.camera.y;
+    const target = { x: 150 * T, y: 30 * T };
+    r.camera.focus(target.x, target.y);
+    expect(r.camera.looking).toBe(true);
+    // Pas de saut : la vue glisse.
+    r.run(1);
+    expect(Math.abs(r.camera.x - restX)).toBeLessThan(50 * T);
+    r.run(720);
+    expect(r.camera.x).toBeCloseTo(target.x, 0);
+    expect(r.camera.y).toBeCloseTo(target.y, 0);
+    r.camera.release();
+    r.run(1);
+    expect(Math.abs(r.camera.x - target.x)).toBeLessThan(50 * T);
+    r.run(720);
+    expect(r.camera.looking).toBe(false);
+    // Revenue à moins de 2 px, puis le suivi ordinaire (sa zone morte) reprend.
+    expect(Math.abs(r.camera.x - restX)).toBeLessThan(3);
+    expect(Math.abs(r.camera.y - restY)).toBeLessThan(3);
+  });
+
+  it('le regard s’arrête en changeant de salle (reset)', () => {
+    const r = rig(room(200, 60));
+    r.camera.focus(150 * T, 30 * T);
+    r.run(30);
+    r.camera.reset(r.player);
+    expect(r.camera.looking).toBe(false);
+    expect(r.camera.x).toBeCloseTo(centerX(r.player));
   });
 });

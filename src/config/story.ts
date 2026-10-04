@@ -174,24 +174,24 @@ export const StoryFlag = {
   /** La maison de la nounou (D-110) : Céleste y est entrée (le reflet n'est plus là). */
   NannyHouse: 'nanny.house',
   /**
-   * L'îlot de mémoire 1 (D-112) : en haut de l'arrosoir du jardin renversé, Roger ; son court
-   * souvenir ; le passage vers la maison s'ouvre, une veilleuse s'allume sur la porte de la sieste.
+   * L'îlot de mémoire 1 (D-112, D-122) : en haut de l'arrosoir du jardin renversé, le cube rose de
+   * la tour d'Eden ; le passage vers la maison s'ouvre, le cube prend sa place sur la porte de la
+   * sieste.
    */
   NannyBedDone: 'nanny.bed-done',
   /**
-   * L'îlot de mémoire 2 (D-113) : sur l'abribus de la rue d'autrefois, la boîte à formes ; les
-   * passages vers la maison et la chambre d'autrefois s'ouvrent, une veilleuse jaune s'allume.
+   * L'îlot de mémoire 2 (D-113, D-122) : sur l'abribus de la rue d'autrefois, le cube jaune ; les
+   * passages vers la maison et la chambre d'autrefois s'ouvrent.
    */
   NannySchoolDone: 'nanny.school-done',
   /**
-   * L'îlot de mémoire 3 (D-114) : sur le toit du train d'autrefois, la cuisine rose ; les passages
-   * vers la maison et la rue d'autrefois s'ouvrent, une veilleuse turquoise s'allume.
+   * L'îlot de mémoire 3 (D-114, D-122) : sur le toit du train d'autrefois, le cube turquoise ; les
+   * passages vers la maison et la rue d'autrefois s'ouvrent.
    */
   NannyStationDone: 'nanny.station-done',
   /**
-   * L'îlot de mémoire 4 (D-115) : sur le toit du carrousel d'autrefois, le livre musical et son
-   * court souvenir ; les passages vers la maison et le train d'autrefois s'ouvrent, une veilleuse
-   * bleue s'allume.
+   * L'îlot de mémoire 4 (D-115, D-122) : sur le toit du carrousel d'autrefois, le cube bleu ; les
+   * passages vers la maison et le train d'autrefois s'ouvrent.
    */
   NannySeaDone: 'nanny.sea-done',
   /**
@@ -204,11 +204,11 @@ export const StoryFlag = {
    * décoloration monte derrière elle ; puis la salle de jeux.
    */
   NannyErasure: 'nanny.erasure',
-  /** La salle de jeux (D-117) : le premier, le deuxième, le troisième objet rallumé. */
+  /** La salle de jeux (D-117, D-122) : le premier, le deuxième, le troisième cube rallumé. */
   NannyPlay1: 'nanny.play-1',
   NannyPlay2: 'nanny.play-2',
   NannyPlay3: 'nanny.play-3',
-  /** Le quatrième objet : l'effacement se dissout, la porte de la salle de jeux s'ouvre (D-117). */
+  /** Le quatrième cube : l'effacement se dissout, la porte de la salle de jeux s'ouvre (D-117). */
   NannyErasureGone: 'nanny.erasure-gone',
   /**
    * Eden (D-118) : dans la salle de jeux rendue à ses couleurs, Céleste l'a reconnu ; le souvenir
@@ -232,6 +232,31 @@ export const StoryFlag = {
   RecordAdventures: 'record.adventures',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
+
+/**
+ * Les quatre cubes de la tour d'Eden (D-122), un par îlot de mémoire, dans l'ordre des îlots (la
+ * chambre, l'école, la gare, la plage) : l'étape de l'îlot et la couleur du cube. Les mêmes cubes
+ * partout : dans l'îlot, sur la porte de la sieste, sur la carte, dans la salle de jeux et dans le
+ * souvenir d'Eden. PLACEHOLDER pour les couleurs.
+ */
+export const TOWER_CUBES = [
+  { islet: 'bed', flag: StoryFlag.NannyBedDone, color: '#ec8fab' },
+  { islet: 'school', flag: StoryFlag.NannySchoolDone, color: '#f0c654' },
+  { islet: 'station', flag: StoryFlag.NannyStationDone, color: '#4fc4b2' },
+  { islet: 'sea', flag: StoryFlag.NannySeaDone, color: '#6e8fe0' },
+] as const;
+export type TowerCubeIslet = (typeof TOWER_CUBES)[number]['islet'];
+
+/** Les cubes déjà trouvés, un bit par îlot (dans l'ordre de `TOWER_CUBES`). */
+export function towerCubesMask(flags: ReadonlySet<string>): number {
+  let mask = 0;
+  TOWER_CUBES.forEach((cube, k) => {
+    if (flags.has(cube.flag)) {
+      mask |= 1 << k;
+    }
+  });
+  return mask;
+}
 
 /**
  * Drapeaux donnés à une partie commencée avant l'histoire (migration v1 → v2 de la sauvegarde) :
@@ -356,31 +381,39 @@ export const PROP_SIZE = {
   // Le reflet du miroir de la nounou (D-110) : Céleste toute petite, plus petite qu'elle.
   reflection: { w: 16, h: 26 },
   'reflection-through': { w: 16, h: 26 },
-  // Une veilleuse de la porte de la sieste (D-112) : la lueur en haut, à la place de la veilleuse
-  // éteinte dessinée sur la porte.
-  'nap-light-bed': { w: 12, h: 24 },
-  'nap-light-school': { w: 12, h: 24 },
-  'nap-light-station': { w: 12, h: 24 },
-  'nap-light-sea': { w: 12, h: 24 },
+  // Les cubes de la tour d'Eden (D-122) : dans les îlots (un jouet de tout-petit, sa lueur
+  // turquoise), puis dans leur creux sur la porte de la sieste, en haut du cadre.
+  'islet-cube-bed': { w: 24, h: 22 },
+  'islet-cube-school': { w: 24, h: 22 },
+  'islet-cube-station': { w: 24, h: 22 },
+  'islet-cube-sea': { w: 24, h: 22 },
+  'nap-cube-bed': { w: 12, h: 24 },
+  'nap-cube-school': { w: 12, h: 24 },
+  'nap-cube-station': { w: 12, h: 24 },
+  'nap-cube-sea': { w: 12, h: 24 },
   // Le torchon blanc (D-116), plié dans le petit lit de la sieste.
   'white-cloth': { w: 20, h: 14 },
-  // La salle de jeux (D-117) : les objets pâlis (même taille que les vrais), les couleurs qui
+  // La salle de jeux (D-117, D-122) : les cubes pâlis (même taille que les vrais), les couleurs qui
   // reviennent, l'effacement au centre.
-  'shape-box-pale': { w: 40, h: 32 },
-  'pink-kitchen-pale': { w: 32, h: 32 },
-  'roger-pale': { w: 16, h: 18 },
-  'music-book-pale': { w: 24, h: 24 },
+  'islet-cube-bed-pale': { w: 24, h: 22 },
+  'islet-cube-school-pale': { w: 24, h: 22 },
+  'islet-cube-station-pale': { w: 24, h: 22 },
+  'islet-cube-sea-pale': { w: 24, h: 22 },
   'color-bloom': { w: 112, h: 80 },
   'erasure-figure': { w: 96, h: 72 },
   // Le souvenir d'Eden (D-118), à l'échelle de Céleste toute petite ; la nounou, à hauteur d'enfant.
   'eden-small': { w: 16, h: 20 },
   'eden-peek': { w: 16, h: 20 },
   'eden-laugh': { w: 16, h: 22 },
+  'eden-cheer': { w: 16, h: 20 },
   'nanny-shadow': { w: 40 * PARENT_SCALE, h: 46 * PARENT_SCALE },
+  'nanny-look': { w: 40 * PARENT_SCALE, h: 46 * PARENT_SCALE },
   'cube-pile': { w: 24, h: 14 },
-  'cube-tower-1': { w: 10, h: 10 },
-  'cube-tower-2': { w: 10, h: 18 },
+  'cube-tower-1': { w: 10, h: 8 },
+  'cube-tower-2': { w: 10, h: 16 },
+  'cube-tower-3': { w: 10, h: 24 },
   'cube-tower-4': { w: 10, h: 32 },
+  'cube-tower-fallen': { w: 32, h: 12 },
   'dad-garden': { w: 44 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // Le train (D-85) : sur le quai, la maîtresse et les parents (à hauteur d'enfant), les enfants
   // et leurs sacs ; dans la voiture-couchettes, des enfants de la taille de Céleste.

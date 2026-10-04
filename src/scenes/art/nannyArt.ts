@@ -151,7 +151,7 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
     },
     napdoor(a, r) {
       // La petite porte de la chambre de la sieste, à hauteur de tout-petit ; au-dessus, quatre
-      // veilleuses éteintes (une par îlot de mémoire).
+      // creux en forme de cube (un par îlot de mémoire, D-122), que les cubes trouvés remplissent.
       const { ctx, palette: p } = a;
       const doorH = Math.min(r.h, 5 * T);
       ctx.fillStyle = p.structure;
@@ -162,12 +162,17 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
       ctx.lineWidth = 1;
       ctx.stroke();
       ctx.globalAlpha = 1;
+      const s = 10;
       for (let i = 0; i < 4; i++) {
         const x = r.x + ((i + 0.5) * r.w) / 4;
-        ctx.fillStyle = 'rgba(160, 160, 190, 0.45)';
-        ctx.beginPath();
-        ctx.arc(x, r.y + T, 3, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(40, 30, 60, 0.45)';
+        rounded(ctx, { x: x - s / 2, y: r.y + T - s / 2, w: s, h: s }, 2);
         ctx.fill();
+        ctx.strokeStyle = 'rgba(190, 190, 220, 0.7)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 1.5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
       }
     },
     toyblocks(a, r) {

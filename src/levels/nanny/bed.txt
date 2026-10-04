@@ -5,7 +5,7 @@
 ; l'autre ; on bascule en plein saut. Défi : la cheminée du pilier, des ronces d'une couche sur
 ; chaque mur, jusqu'à l'étagère haute et sa trouvaille. Dans l'armoire, ouverte dans le souvenir,
 ; une trouvaille. Sorties : (1) vers la maison, (2) vers le jardin renversé ; porte (3) vers la
-; rue d'autrefois (îlot 2), ouverte une fois la boîte à formes retrouvée.
+; rue d'autrefois (îlot 2), ouverte une fois le cube jaune trouvé.
 ; @name: La chambre d'autrefois
 ; @world: strange
 ; @mapped: yes
