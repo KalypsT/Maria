@@ -1,12 +1,13 @@
+import { AUDIO_MIX, type AudioSettings, type Jingle, type MusicTrack } from '../config/audio';
 import {
-  AUDIO_MIX,
-  MUSIC_TRACKS,
-  type AudioSettings,
-  type Jingle,
-  type MusicTrack,
-} from '../config/audio';
-import { AudioMix, equalPower, loopOverlapSec } from '../core/audio/AudioMix';
+  AudioMix,
+  MUSIC_SLOTS,
+  equalPower,
+  loopOverlapSec,
+  type MusicSlot,
+} from '../core/audio/AudioMix';
 import { audioFileMap, type AudioSlot } from '../core/audio/audioFiles';
+import { isRecordSlot, recordSlot, type RecordId } from '../config/records';
 
 /**
  * Fichiers de `src/assets/audio/` : Vite les publie (nom avec empreinte, donc un morceau remplacé
@@ -18,12 +19,34 @@ const FILES = import.meta.glob<string>('../assets/audio/*.{ogg,opus,m4a,mp3}', {
   import: 'default',
 });
 
+/** Un morceau en lecture : un thème en boucle ou un disque (D-121). */
+interface Voice {
+  readonly ready: boolean;
+  playing: boolean;
+  /** Disque arrivé au bout, ou fichier illisible : le thème doit revenir. */
+  readonly over: boolean;
+  load(): void;
+  start(): void;
+  stop(): void;
+  suspend(): void;
+  resume(): void;
+  update(volume: number, now: number): void;
+}
+
+/** Lit un fichier une fois en mémoire (blob) et renvoie son adresse locale. */
+function loadBlobUrl(url: string): Promise<string> {
+  return fetch(url)
+    .then((response) => (response.ok ? response.blob() : Promise.reject(new Error('audio'))))
+    .then((blob) => URL.createObjectURL(blob));
+}
+
 /**
  * Un thème : deux lecteurs qui se relaient pour boucler en fondu enchaîné avec la fin du morceau
  * (D-57). Le fichier est lu une fois en mémoire (blob) : pas de requêtes partielles à servir par
  * le service worker, et les deux lecteurs partagent la même copie.
  */
-class TrackVoice {
+class TrackVoice implements Voice {
+  readonly over = false;
   private readonly players: HTMLAudioElement[] = [];
   private active = 0;
   /** Heure (ms) du début du fondu de boucle ; -1 hors fondu. */
@@ -42,10 +65,8 @@ class TrackVoice {
       return;
     }
     this.loading = true;
-    void fetch(this.url)
-      .then((response) => (response.ok ? response.blob() : Promise.reject(new Error('audio'))))
-      .then((blob) => {
-        const src = URL.createObjectURL(blob);
+    void loadBlobUrl(this.url)
+      .then((src) => {
         for (let i = 0; i < 2; i++) {
           const player = new Audio(src);
           player.preload = 'auto';
@@ -129,6 +150,88 @@ class TrackVoice {
   }
 }
 
+/**
+ * Un disque (D-121) : un seul lecteur, joué une fois du début à la fin, sans boucle. Même lecture
+ * en mémoire que les thèmes.
+ */
+class RecordVoice implements Voice {
+  private player: HTMLAudioElement | null = null;
+  private loading = false;
+  private failed = false;
+  private ended = false;
+  playing = false;
+
+  constructor(private readonly url: string) {}
+
+  get ready(): boolean {
+    return this.player !== null;
+  }
+
+  get over(): boolean {
+    return this.failed || this.ended;
+  }
+
+  load(): void {
+    if (this.loading) {
+      return;
+    }
+    this.loading = true;
+    void loadBlobUrl(this.url)
+      .then((src) => {
+        const player = new Audio(src);
+        player.preload = 'auto';
+        player.addEventListener('ended', () => {
+          this.ended = true;
+        });
+        this.player = player;
+      })
+      .catch(() => {
+        this.failed = true;
+      });
+  }
+
+  start(): void {
+    const player = this.player;
+    if (!player) {
+      return;
+    }
+    player.loop = false;
+    player.currentTime = 0;
+    player.volume = 0;
+    this.ended = false;
+    this.playing = true;
+    player.play().catch(() => {
+      // Lecture refusée : le disque est abandonné, le thème revient.
+      this.playing = false;
+      this.failed = true;
+    });
+  }
+
+  stop(): void {
+    this.player?.pause();
+    this.playing = false;
+    this.ended = false;
+    // Un disque illisible le reste ; un disque refusé peut être relancé.
+    this.failed = this.player === null && this.failed;
+  }
+
+  suspend(): void {
+    this.player?.pause();
+  }
+
+  resume(): void {
+    if (this.playing && !this.ended) {
+      this.player?.play().catch(() => undefined);
+    }
+  }
+
+  update(volume: number): void {
+    if (this.playing && this.player) {
+      this.player.volume = clampVolume(volume);
+    }
+  }
+}
+
 function clampVolume(v: number): number {
   return Math.min(1, Math.max(0, v));
 }
@@ -141,7 +244,7 @@ function clampVolume(v: number): number {
 export class AudioPlayer {
   readonly mix = new AudioMix();
   private readonly files: Map<AudioSlot, string>;
-  private readonly voices = new Map<MusicTrack, TrackVoice>();
+  private readonly voices = new Map<MusicSlot, Voice>();
   private readonly jingles = new Map<Jingle, HTMLAudioElement>();
   private activeJingle: HTMLAudioElement | null = null;
   private unlocked = false;
@@ -185,9 +288,9 @@ export class AudioPlayer {
     return this.files.has(slot);
   }
 
-  /** Résumé pour l'outil de debug : thème voulu, fichier, lecture, volume, silence. */
+  /** Résumé pour l'outil de debug : thème voulu (ou disque), fichier, lecture, volume, silence. */
   status(): string {
-    const track = this.mix.track;
+    const track = this.mix.record ?? this.mix.track;
     if (!track) {
       return 'musique aucune';
     }
@@ -202,6 +305,33 @@ export class AudioPlayer {
 
   setMusic(track: MusicTrack | null): void {
     this.mix.setTrack(track);
+  }
+
+  /**
+   * Joue un disque une fois en entier (D-121), à la place des thèmes ; le reprendre le relance du
+   * début. Faux si le disque n'a pas de fichier.
+   */
+  playRecord(id: RecordId): boolean {
+    const slot = recordSlot(id);
+    if (!this.files.has(slot)) {
+      return false;
+    }
+    if (this.mix.record === slot) {
+      this.voices.get(slot)?.stop();
+    }
+    this.mix.playRecord(slot);
+    return true;
+  }
+
+  /** Arrête le disque en cours : le thème revient en fondu. */
+  stopRecord(): void {
+    this.mix.stopRecord();
+  }
+
+  /** Disque en cours, ou null. */
+  get record(): RecordId | null {
+    const slot = this.mix.record;
+    return slot ? (slot.slice('record-'.length) as RecordId) : null;
   }
 
   setSettings(settings: AudioSettings): void {
@@ -254,28 +384,37 @@ export class AudioPlayer {
     if (this.activeJingle) {
       this.activeJingle.volume = clampVolume(mix.jingleVolume);
     }
-    for (const track of MUSIC_TRACKS) {
-      const presence = mix.presenceOf(track);
-      let voice = this.voices.get(track);
+    for (const slot of MUSIC_SLOTS) {
+      const presence = mix.presenceOf(slot);
+      const record = isRecordSlot(slot);
+      let voice = this.voices.get(slot);
       if (!voice) {
-        const url = this.files.get(track);
-        if (presence <= 0 || !url) {
+        const url = this.files.get(slot);
+        if ((presence <= 0 && mix.record !== slot) || !url) {
           continue;
         }
-        voice = new TrackVoice(url);
-        this.voices.set(track, voice);
+        voice = record ? new RecordVoice(url) : new TrackVoice(url);
+        this.voices.set(slot, voice);
       }
-      if (presence <= 0) {
+      if (record && voice.over) {
+        // Disque fini (ou illisible) : il s'arrête, le thème revient.
+        mix.recordEnded(slot);
+        voice.stop();
+        continue;
+      }
+      if (presence <= 0 && mix.record !== slot) {
         if (voice.playing) {
           voice.stop();
         }
         continue;
       }
       voice.load();
-      if (!voice.playing && voice.ready && this.unlocked && !document.hidden) {
+      // Un disque ne repart que s'il est demandé (pas pendant son fondu de sortie).
+      const wanted = !record || mix.record === slot;
+      if (wanted && !voice.playing && voice.ready && this.unlocked && !document.hidden) {
         voice.start();
       }
-      voice.update(mix.musicVolume(track), now);
+      voice.update(mix.musicVolume(slot), now);
     }
   }
 }

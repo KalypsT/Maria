@@ -57,13 +57,19 @@ export const AUDIO_EXTENSIONS = ['ogg', 'opus', 'm4a', 'mp3'] as const;
 
 /**
  * Poids maximal de l'ensemble des fichiers audio (précachés pour le hors ligne, D-23) : vérifié
- * par `check:pwa`. Les thèmes et les jingles en AAC 96 kbit/s (D-92).
+ * par les tests. Les thèmes, les jingles et les disques en AAC 96 kbit/s (D-92) ; 32 Mo depuis les
+ * disques (D-121), 25 Mo avant.
  */
-export const AUDIO_BUDGET_BYTES = 25 * 1024 * 1024;
+export const AUDIO_BUDGET_BYTES = 32 * 1024 * 1024;
 
 export const AUDIO_MIX = {
-  /** Fondu enchaîné entre deux thèmes. */
+  /** Fondu enchaîné entre deux thèmes (et retour du thème après un disque). */
   crossfadeMs: 2500,
+  /**
+   * Un disque (D-121) arrive vite (on l'entend presque dès le début) et s'éteint aussi vite quand on
+   * l'arrête ; le thème, lui, s'éteint en `crossfadeMs`.
+   */
+  recordFadeMs: 600,
   /**
    * Boucle : le morceau repart du début en fondu enchaîné avec sa propre fin (les morceaux ne sont
    * pas forcément composés pour boucler). 0 : boucle sèche.
