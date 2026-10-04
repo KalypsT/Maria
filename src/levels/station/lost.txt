@@ -2,6 +2,8 @@
 ; Des étagères pleines de choses perdues (parapluies, chapeaux, valises, gants) montent jusqu'en
 ; haut de l'armoire, où la poignée-crochet attend (elle s'ajoute au parapluie). Tout en haut des
 ; casiers, une lueur turquoise passe par une porte entrouverte : le monde étrange (plus tard).
+; Tout en haut du mur de gauche, une étagère à chapeaux et un disque perdu (D-121) : on y plane
+; depuis le haut de l'armoire.
 ; @name: Objets trouvés
 ; @icon: umbrella
 ; @world: street
@@ -20,6 +22,7 @@
 ; @decor: tallcabinet 31 6 2 18
 ; @decor: lockers 38 10 5 18
 ; @decor: hatshelf 33 19 2 1
+; @decor: hatshelf 1 12 2 1
 ; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
 ############################################
 ##################.........................#
@@ -33,7 +36,7 @@
 #..............................bb..........#
 #..............................bb.....bbbbb#
 #..............................bb.....bbbbb#
-#..................--..........bb.....bbbbb#
+#--................--..........bb.....bbbbb#
 #..............................bb.....bbbbb#
 #..............................bb.....bbbbb#
 #..............................bb.....bbbbb#

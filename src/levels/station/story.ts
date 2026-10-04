@@ -34,6 +34,22 @@ const STRANGE_ARRIVAL: StoryStep = {
 
 const TRIGGERS: StoryTrigger[] = [
   {
+    // Le disque perdu (D-121) : Agir le ramasse ; il ira sur le tourne-disque du grenier.
+    id: 'take-record-adventures',
+    room: 'station-lost',
+    on: 'interact',
+    area: { col: 1, row: 9, w: 2, h: 3 },
+    mark: { col: 1, row: 10 },
+    when: { none: [F.RecordAdventures] },
+    lock: true,
+    steps: [
+      { do: 'flag', id: F.RecordAdventures },
+      { do: 'memory', id: 'record-adventures' },
+      { do: 'thought', icon: 'music', ms: S.thoughtMs },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
+  {
     // En arrivant sur les voies : loin de la maison, Céleste pense à Maria.
     id: 'station-arrived',
     room: 'station-tracks',
@@ -201,6 +217,16 @@ const OMENS: StoryOmen[] = [
 ];
 
 const PROPS: StoryProp[] = [
+  // Le disque perdu (D-121), sur l'étagère à chapeaux en haut du mur de gauche.
+  {
+    id: 'record-adventures',
+    room: 'station-lost',
+    kind: 'record-adventures',
+    col: 1,
+    row: 11,
+    instant: true,
+    when: { none: [F.RecordAdventures] },
+  },
   // Roger reste dans le monde étrange (D-68) : on le regarde, on ne le prend pas.
   { id: 'roger', room: 'station-tower', kind: 'roger', col: 27, row: 6, when: {} },
   {

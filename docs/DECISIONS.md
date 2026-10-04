@@ -1708,3 +1708,14 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Tests** (`records.test.ts`) : les choix, le tour au clavier, le tourne-disque posé sur la malle, Agir depuis la malle et les deux côtés du plancher, rien plus loin ; `storyProblems` accepte l'étape `records` dans un déclencheur rejouable.
 - **Vérifié dans Chromium** : la bulle sans disque, les pochettes, le choix au clavier, au toucher (`?touch`), la pochette qui tourne, l'arrêt.
 - **Sauvegarde** : rien de nouveau (les disques trouvés sont dans les souvenirs depuis la PR 1).
+
+### D-121, PR 3 : le disque aux objets trouvés de la gare
+
+- **« Les Aventures de Céleste »** (`record-adventures`, objet de mise en scène : un disque dans sa pochette rose, debout), **sur une étagère à chapeaux tout en haut du mur de gauche** du bureau des objets trouvés (`station-lost`, une planche traversable de deux tuiles, colonnes 1 et 2, ligne 12, `hatshelf`). Un disque perdu parmi les choses perdues ; Roger est juste au-dessus, dans la tour du monde étrange.
+- **Le chemin** : depuis le haut de l'armoire (là où l'on trouve le crochet), ou l'étagère la plus haute, **un long plané au-dessus de la salle** jusqu'au mur de gauche. **Moyen exactement** (passage le plus dur : 128 ms depuis l'étagère haute), jamais facile ; on en redescend sans peine. Testé. On l'aperçoit depuis le sol, au-dessus du comptoir.
+- **Agir** (`take-record-adventures`) : l'étape `record.adventures` (nouvelle, en fin de liste), le disque rangé dans les souvenirs de la sauvegarde (`record-adventures`), le jingle `found` (une trouvaille), une bulle « musique ». Le disque quitte la salle.
+- `storyProblems` accepte un disque comme souvenir.
+- **Écarts avec le plan** : pas d'entrée nouvelle dans DEBUG → Histoire (« Débloquer les disques », PR 2, suffit pour essayer le tourne-disque) ; difficulté choisie : moyenne (une étagère plus haute, ligne 10, aurait été difficile exactement).
+- **Tests** : `records.test.ts` (l'objet, Agir, la difficulté exacte, le retour au sol) ; les tests de la gare (crochet moyen exactement, trouvailles, jamais coincée) restent verts.
+- **Vérifié dans Chromium** : l'étagère et le disque au mur de gauche.
+- **Sauvegarde** : aucune migration (une étape en fin de liste ; le disque dans les souvenirs).

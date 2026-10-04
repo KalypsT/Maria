@@ -225,6 +225,11 @@ export const StoryFlag = {
    * croissance 4). Le niveau 8, le monde de Maria, commencera ainsi.
    */
   GrownFourth: 'growth.4',
+  /**
+   * Le disque « Les Aventures de Céleste » ramassé (D-121), au bureau des objets trouvés de la
+   * gare : il quitte la salle pour le tourne-disque du grenier.
+   */
+  RecordAdventures: 'record.adventures',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -402,6 +407,8 @@ export const PROP_SIZE = {
   'music-box': { w: 10, h: 11 },
   // Le tourne-disque du grenier (D-121), sur la malle.
   'record-player': { w: 20, h: 12 },
+  // Un disque perdu dans sa pochette (D-121).
+  'record-adventures': { w: 10, h: 10 },
   plant: { w: 10, h: 16 },
   'baby-photo': { w: 11, h: 10 },
   'height-chart': { w: 7, h: 40 },

@@ -131,6 +131,7 @@ import { ShiftLayerView } from './ShiftLayerView';
 import { RideView } from './RideView';
 import { MapPage } from '../ui/MapPage';
 import { RecordPicker } from '../ui/RecordPicker';
+import { isRecordSlot } from '../config/records';
 import { canPlayRecords, recordShelf, type RecordChoice } from '../core/audio/records';
 import { buildMapModel } from '../core/world/mapModel';
 import { DEFAULT_PUPPET, type PuppetParams } from '../config/puppet';
@@ -442,7 +443,8 @@ export class GameScene extends Phaser.Scene {
       },
       memory: (id) => {
         if (!this.session.data.progression.memories.includes(id)) {
-          this.audio.playJingle('memory');
+          // Un disque trouvé (D-121) sonne comme une trouvaille.
+          this.audio.playJingle(isRecordSlot(id) ? 'found' : 'memory');
         }
         void this.session.addMemory(id);
       },

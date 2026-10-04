@@ -315,6 +315,8 @@ export const PROP_KINDS = [
   'cube-tower-4',
   /** Le tourne-disque du grenier (D-121), posé sur la malle : une valise ouverte, le plateau. */
   'record-player',
+  /** « Les Aventures de Céleste » (D-121), un disque perdu dans sa pochette rose, debout. */
+  'record-adventures',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 

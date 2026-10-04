@@ -593,6 +593,28 @@ function drawRecordPlayer(
   ctx.stroke();
 }
 
+/** Un disque dans sa pochette, debout (D-121) : le disque dépasse en haut à droite. */
+function drawRecordSleeve(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  color: string,
+): void {
+  ctx.fillStyle = '#2b2630';
+  ctx.beginPath();
+  ctx.arc(w * 0.62, h * 0.42, w * 0.36, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#f2e6c9';
+  ctx.beginPath();
+  ctx.arc(w * 0.62, h * 0.42, w * 0.1, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = color;
+  ctx.fillRect(0, h * 0.3, w * 0.7, h * 0.7);
+  ctx.strokeStyle = 'rgba(59,51,48,0.55)';
+  ctx.lineWidth = 0.6;
+  ctx.strokeRect(0.3, h * 0.3 + 0.3, w * 0.7 - 0.6, h * 0.7 - 0.6);
+}
+
 export function drawProp(
   ctx: CanvasRenderingContext2D,
   kind: PropKind,
@@ -761,6 +783,9 @@ export function drawProp(
       break;
     case 'record-player':
       drawRecordPlayer(ctx, 0, 0, w, h);
+      break;
+    case 'record-adventures':
+      drawRecordSleeve(ctx, w, h, '#e38aa0');
       break;
     default:
       break;
