@@ -544,6 +544,55 @@ function drawNapLight(ctx: CanvasRenderingContext2D, w: number, h: number, rgb: 
   ctx.fill();
 }
 
+/**
+ * Le tourne-disque du grenier (D-121), PLACEHOLDER : une valise rose ancien, le couvercle ouvert
+ * derrière, le plateau sans disque, le bras levé. Vu de côté, un peu d'en haut.
+ */
+function drawRecordPlayer(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+): void {
+  const top = y + h * 0.5;
+  // Le couvercle ouvert, derrière.
+  ctx.fillStyle = '#9c5468';
+  ctx.fillRect(x + w * 0.08, y, w * 0.84, top - y);
+  ctx.fillStyle = '#e8cdb4';
+  ctx.fillRect(x + w * 0.14, y + h * 0.08, w * 0.72, top - y - h * 0.08);
+  // La valise.
+  ctx.fillStyle = '#b5677a';
+  ctx.fillRect(x, top, w, y + h - top);
+  ctx.fillStyle = '#8a4a5c';
+  ctx.fillRect(x, y + h - h * 0.12, w, h * 0.12);
+  ctx.fillStyle = '#f0dcc4';
+  ctx.fillRect(x + w * 0.05, top, w * 0.9, h * 0.16);
+  // Les deux boutons de la façade.
+  ctx.fillStyle = '#f2e6c9';
+  for (const k of [0.72, 0.86]) {
+    ctx.beginPath();
+    ctx.arc(x + w * k, top + (y + h - top) * 0.55, Math.max(0.6, h * 0.07), 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Le plateau vide et son axe.
+  ctx.fillStyle = '#3b3340';
+  ctx.beginPath();
+  ctx.ellipse(x + w * 0.4, top + h * 0.06, w * 0.28, h * 0.12, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#d9d2c8';
+  ctx.fillRect(x + w * 0.4 - 0.4, top - h * 0.1, 0.8, h * 0.14);
+  // Le bras, levé.
+  ctx.strokeStyle = '#d9d2c8';
+  ctx.lineWidth = Math.max(0.7, h * 0.08);
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(x + w * 0.86, top + h * 0.04);
+  ctx.lineTo(x + w * 0.84, top - h * 0.14);
+  ctx.lineTo(x + w * 0.6, top - h * 0.22);
+  ctx.stroke();
+}
+
 export function drawProp(
   ctx: CanvasRenderingContext2D,
   kind: PropKind,
@@ -709,6 +758,9 @@ export function drawProp(
       ctx.translate(w / 2, h / 2);
       heightChart(ctx, w, h, HEIGHT_MARKS[kind]);
       ctx.restore();
+      break;
+    case 'record-player':
+      drawRecordPlayer(ctx, 0, 0, w, h);
       break;
     default:
       break;
@@ -1266,6 +1318,21 @@ function drawIcon(
       ctx.stroke();
       break;
     }
+    case 'record':
+      // Le tourne-disque sans disque (D-121), et un petit « ? » au crayon.
+      drawRecordPlayer(ctx, cx - 9, cy - 3, 12, 8);
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 1.2;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.arc(cx + 6, cy - 3, 2.2, Math.PI * 1.1, Math.PI * 2.4);
+      ctx.lineTo(cx + 6, cy + 0.5);
+      ctx.stroke();
+      ctx.fillStyle = INK;
+      ctx.beginPath();
+      ctx.arc(cx + 6, cy + 3, 0.8, 0, Math.PI * 2);
+      ctx.fill();
+      break;
     case 'question':
       // « ? » seul, au crayon : un parent qui ne sait pas (D-37).
       ctx.strokeStyle = INK;

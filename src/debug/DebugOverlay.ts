@@ -1,3 +1,4 @@
+import { RECORDS, recordSlot } from '../config/records';
 import { StoryFlag } from '../config/story';
 import Phaser from 'phaser';
 import { CAMERA_PARAM_RANGES, DEFAULT_CAMERA, type CameraParams } from '../config/camera';
@@ -1642,6 +1643,30 @@ export function installDebugOverlay(scene: GameScene): void {
       (event.currentTarget as HTMLElement).blur();
     },
   );
+  // Les disques (D-121) : trouvés (sauvegardé), ou joués sans passer par le grenier.
+  const records = RECORDS.filter((r) => scene.audio.has(recordSlot(r.id)));
+  element('button', panel, undefined, 'Débloquer les disques').addEventListener(
+    'click',
+    (event) => {
+      for (const r of records) {
+        void scene.session.addMemory(recordSlot(r.id));
+      }
+      (event.currentTarget as HTMLElement).blur();
+    },
+  );
+  for (const r of records) {
+    element('button', panel, undefined, `Jouer le disque « ${r.title} »`).addEventListener(
+      'click',
+      (event) => {
+        scene.audio.playRecord(r.id);
+        (event.currentTarget as HTMLElement).blur();
+      },
+    );
+  }
+  element('button', panel, undefined, 'Arrêter le disque').addEventListener('click', (event) => {
+    scene.audio.stopRecord();
+    (event.currentTarget as HTMLElement).blur();
+  });
   // Phase de croissance (D-43) : le drapeau de l'histoire, sans sauvegarde.
   addCheck(panel, 'Croissance : Céleste a grandi', scene.story.flags.has(F.Grown), (checked) => {
     const flags = new Set(scene.story.flags);

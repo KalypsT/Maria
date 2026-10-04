@@ -79,6 +79,8 @@ export const THOUGHT_ICONS = [
    * de l'une à l'autre.
    */
   'shift',
+  /** Le tourne-disque du grenier sans disque (D-121) : le plateau vide, le bras levé, un « ? ». */
+  'record',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
@@ -154,7 +156,12 @@ export type StoryStep =
    * Souvenir jouable (D-89, bloquant) : la scène met le jeu de côté, joue le souvenir, puis revient
    * là où était Céleste, toujours dans le noir. À placer après un fondu au noir.
    */
-  | { readonly do: 'play'; readonly id: PlayableMemoryId };
+  | { readonly do: 'play'; readonly id: PlayableMemoryId }
+  /**
+   * Le tourne-disque du grenier (D-121, non bloquant) : le choix des disques trouvés, ou une bulle
+   * (le plateau vide) s'il n'y en a aucun.
+   */
+  | { readonly do: 'records' };
 
 export interface StoryTrigger {
   readonly id: string;
@@ -306,6 +313,8 @@ export const PROP_KINDS = [
   'cube-tower-1',
   'cube-tower-2',
   'cube-tower-4',
+  /** Le tourne-disque du grenier (D-121), posé sur la malle : une valise ouverte, le plateau. */
+  'record-player',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 

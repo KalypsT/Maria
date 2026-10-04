@@ -103,6 +103,7 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
           step.do === 'thought' ||
           step.do === 'wait' ||
           step.do === 'memory' ||
+          step.do === 'records' ||
           (reversible &&
             (step.do === 'toggle' ||
               step.do === 'fadeOut' ||

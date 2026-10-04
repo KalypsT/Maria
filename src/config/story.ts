@@ -400,6 +400,8 @@ export const PROP_SIZE = {
   'cat-sit': { w: 12 * CAT_SCALE, h: 14 * CAT_SCALE },
   // Objets à regarder (D-38).
   'music-box': { w: 10, h: 11 },
+  // Le tourne-disque du grenier (D-121), sur la malle.
+  'record-player': { w: 20, h: 12 },
   plant: { w: 10, h: 16 },
   'baby-photo': { w: 11, h: 10 },
   'height-chart': { w: 7, h: 40 },

@@ -590,3 +590,97 @@ body {
   width: 100%;
   min-height: 0;
 }
+
+/* Le tourne-disque du grenier (D-121) : une rangée de pochettes, sans texte. */
+#record-picker {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  background: var(--scrim);
+}
+#record-picker[hidden] {
+  display: none;
+}
+.record-row {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  padding: 18px 22px;
+  border: 2px solid var(--pencil);
+  border-radius: var(--sketch-radius-panel);
+  background: var(--paper);
+  box-shadow: 3px 4px 0 var(--drop-shadow);
+}
+.record-sleeve,
+.record-stop {
+  position: relative;
+  box-sizing: border-box;
+  width: 72px;
+  height: 72px;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid var(--ink-soft);
+  border-radius: 6px;
+  background: var(--sleeve, var(--paper-deep));
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.record-sleeve.empty {
+  border: 2px dashed var(--pencil);
+  background: transparent;
+  cursor: default;
+}
+.record-sleeve.selected,
+.record-stop.selected {
+  outline: 3px solid var(--crayon-rose);
+  outline-offset: 3px;
+}
+/* Le disque sur sa pochette ; il tourne quand il joue. */
+.record-disc {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, var(--paper-light) 0 2px, var(--sleeve) 3px 9px, transparent 10px),
+    repeating-radial-gradient(circle, #2b2630 0 2px, #3b3340 2px 4px);
+}
+.record-disc::after {
+  position: absolute;
+  top: 18px;
+  left: 30px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--paper-light);
+  content: '';
+}
+.record-sleeve.playing .record-disc {
+  animation: record-spin 2.4s linear infinite;
+}
+@keyframes record-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.record-stop {
+  background: var(--paper-deep);
+}
+.record-stop::after {
+  position: absolute;
+  inset: 24px;
+  border-radius: 3px;
+  background: var(--ink);
+  content: '';
+}
+@media (prefers-reduced-motion: reduce) {
+  .record-sleeve.playing .record-disc {
+    animation: none;
+  }
+}

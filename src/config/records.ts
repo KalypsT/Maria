@@ -6,7 +6,7 @@
  * Le fichier d'un disque est `record-<id>` dans `src/assets/audio/` ; un disque sans fichier est
  * caché (ni pochette ni objet dans le monde). Trouvé, il est enregistré dans les souvenirs de la
  * sauvegarde sous ce même nom (`record-<id>`), sans onglet dans le cahier. L'ordre est celui des
- * pochettes.
+ * pochettes. Les pochettes sont sans texte (pilier 6) ; `title` ne sert qu'à l'accessibilité.
  */
 export const RECORDS = [
   {
@@ -15,11 +15,13 @@ export const RECORDS = [
      * quand le morceau existera. L'identifiant peut changer tant qu'il n'est pas placé.
      */
     id: 'early',
+    title: 'Disque',
     sleeve: 0x7fb3a6,
   },
   {
     /** « Les Aventures de Céleste » : au bureau des objets trouvés de la gare (niveau 4). */
     id: 'adventures',
+    title: 'Les Aventures de Céleste',
     sleeve: 0xe38aa0,
   },
   {
@@ -28,6 +30,7 @@ export const RECORDS = [
      * d'autrefois, dans le souvenir ; idéalement une berceuse.
      */
     id: 'lullaby',
+    title: 'Disque',
     sleeve: 0xb7a3d6,
   },
 ] as const;

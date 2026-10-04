@@ -4,7 +4,20 @@ import { isMemory } from '../src/config/memories';
 import { RECORDS, RECORD_SLOTS, isRecordSlot, recordSlot } from '../src/config/records';
 import { AudioMix, equalPower } from '../src/core/audio/AudioMix';
 import { audioFileMap } from '../src/core/audio/audioFiles';
-import { canPlayRecords, recordShelf } from '../src/core/audio/records';
+import {
+  canPlayRecords,
+  firstChoice,
+  moveChoice,
+  recordChoices,
+  recordShelf,
+} from '../src/core/audio/records';
+import { TILE_SIZE as T } from '../src/config/display';
+import { PLAYER_HITBOX } from '../src/config/movement';
+import { PROP_SIZE } from '../src/config/story';
+import { StoryDirector, type StoryHost } from '../src/core/story/StoryDirector';
+import { storyProblems } from '../src/core/story/storyProblems';
+import { HOUSE_STORY } from '../src/levels/house/story';
+import { level, zone } from './zoneGraph';
 import { createNewSave, deserializeSave, serializeSave } from '../src/core/save/saveData';
 
 /** Avance le mixage de `ms` par pas de 10 ms. */
@@ -172,5 +185,74 @@ describe('le mixage d’un disque (D-121)', () => {
     mix.paused = true;
     run(mix, AUDIO_MIX.duckMs);
     expect(mix.musicVolume('record-adventures')).toBeCloseTo(FULL * AUDIO_MIX.pausedDuck, 5);
+  });
+});
+
+describe('le tourne-disque du grenier (D-121)', () => {
+  const shelf = recordShelf([recordSlot('early'), recordSlot('lullaby')], () => true);
+
+  it('les choix : les disques trouvés, puis « arrêter » si un disque joue', () => {
+    expect(recordChoices(shelf, null)).toEqual(['early', 'lullaby']);
+    expect(recordChoices(shelf, 'lullaby')).toEqual(['early', 'lullaby', 'stop']);
+    expect(firstChoice(recordChoices(shelf, 'lullaby'), 'lullaby')).toBe(1);
+    expect(firstChoice(recordChoices(shelf, null), null)).toBe(0);
+    // Un disque qui joue sans être trouvé (debug) : le premier choix.
+    expect(firstChoice(recordChoices(shelf, 'adventures'), 'adventures')).toBe(0);
+  });
+
+  it('gauche et droite font le tour des choix', () => {
+    expect(moveChoice(0, 1, 3)).toBe(1);
+    expect(moveChoice(2, 1, 3)).toBe(0);
+    expect(moveChoice(0, -1, 3)).toBe(2);
+    expect(moveChoice(0, 1, 0)).toBe(0);
+  });
+
+  it('posé sur la malle, rejouable avec Agir, depuis la malle ou le plancher à côté', () => {
+    expect(storyProblems(HOUSE_STORY, zone)).toEqual([]);
+    const prop = HOUSE_STORY.props.find((p) => p.kind === 'record-player');
+    expect(prop).toMatchObject({ room: 'attic', col: 11, row: 17, when: {} });
+    expect(PROP_SIZE['record-player'].h).toBeLessThan(T);
+    const trigger = HOUSE_STORY.triggers.find((t) => t.id === 'record-player');
+    expect(trigger).toMatchObject({ room: 'attic', on: 'interact', repeat: true, when: {} });
+    expect(trigger?.steps).toEqual([{ do: 'records' }]);
+    const attic = level('attic');
+    const at = (col: number, row: number) => attic.tiles[row * attic.width + col];
+    // La malle : pleine sur deux tuiles, libre au-dessus.
+    expect(at(11, 18)).not.toBe(at(11, 17));
+    const calls: string[] = [];
+    const host: StoryHost = {
+      flagSet: () => undefined,
+      place: () => undefined,
+      room: () => undefined,
+      pose: () => undefined,
+      think: () => undefined,
+      sparkle: () => undefined,
+      shake: () => undefined,
+      memory: () => undefined,
+      hush: () => undefined,
+      ability: () => undefined,
+      play: () => undefined,
+      records: () => calls.push('records'),
+    };
+    const standing = (col: number, row: number) => ({
+      x: (col + 0.5) * T - PLAYER_HITBOX.width / 2,
+      y: (row + 1) * T - PLAYER_HITBOX.height,
+      width: PLAYER_HITBOX.width,
+      height: PLAYER_HITBOX.height,
+    });
+    const director = new StoryDirector(HOUSE_STORY, host);
+    for (const [col, row] of [
+      [11, 17],
+      [7, 19],
+      [15, 19],
+    ] as const) {
+      director.step('attic', standing(col, row), true);
+      for (let i = 0; i < 10; i++) {
+        director.step('attic', standing(col, row), false);
+      }
+    }
+    expect(calls).toEqual(['records', 'records', 'records']);
+    director.step('attic', standing(20, 19), true);
+    expect(calls).toHaveLength(3);
   });
 });

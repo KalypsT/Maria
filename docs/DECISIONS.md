@@ -1695,3 +1695,16 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Poids de la musique** : la limite passe de 25 à **32 Mo** (9,4 Mo pris) pour trois disques et les quatre thèmes encore attendus ; seul le premier chargement s'allonge.
 - **Vérifié dans Chromium** (copie Opus du morceau, ce Chromium ne lit pas l'AAC) : le disque à la place du thème, la salle qui change pendant le disque, la fin et le retour du thème, la relance, l'arrêt ; un fichier illisible laisse le thème.
 - **Rien dans le jeu pour l'instant** : le tourne-disque vient avec la PR 2, le disque avec la PR 3.
+
+### D-121, PR 2 : le tourne-disque au grenier
+
+- **Le tourne-disque** (`record-player`, objet de mise en scène dessiné par le code, PLACEHOLDER) : une valise rose ancien, le couvercle ouvert, le plateau vide, le bras levé, **posé sur la malle du grenier** (colonne 11). Toujours là, dès le début. La géométrie du grenier ne change pas (la phase 4 passe toujours).
+- **Agir** (déclencheur rejouable `record-player`, nouvelle étape `records`) depuis la malle ou le plancher de part et d'autre (colonnes 7 à 15) :
+  - **sans disque trouvé**, une bulle sans texte : le tourne-disque au plateau vide et un petit « ? » (`record`) ;
+  - **avec un disque**, le choix (`RecordPicker`, en DOM) : une rangée de pochettes sans texte, une par disque qui a une musique ; trouvée, elle porte son disque (qui tourne s'il joue) ; pas encore trouvée, elle est vide, en pointillés ; un carré « arrêter » seulement si un disque joue. Toucher une pochette joue son disque et referme ; toucher à côté, Pause ou Carte referment.
+  - **Clavier et manette** : gauche et droite (un pas par poussée, en faisant le tour), Agir, Action ou Saut pour choisir. Le choix s'ouvre sur le disque qui joue.
+- **Écart avec le plan** (« Céleste reste libre ») : **le jeu s'arrête pendant le choix**, comme la carte ; sinon les flèches déplaceraient Céleste en même temps que la sélection. Elle repart dès le disque choisi, et le disque continue où qu'elle aille.
+- **Debug** (Histoire) : « Débloquer les disques » (sauvegardé), « Jouer le disque … », « Arrêter le disque ».
+- **Tests** (`records.test.ts`) : les choix, le tour au clavier, le tourne-disque posé sur la malle, Agir depuis la malle et les deux côtés du plancher, rien plus loin ; `storyProblems` accepte l'étape `records` dans un déclencheur rejouable.
+- **Vérifié dans Chromium** : la bulle sans disque, les pochettes, le choix au clavier, au toucher (`?touch`), la pochette qui tourne, l'arrêt.
+- **Sauvegarde** : rien de nouveau (les disques trouvés sont dans les souvenirs depuis la PR 1).

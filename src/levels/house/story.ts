@@ -880,6 +880,19 @@ export const HOUSE_STORY: StoryData = {
       ],
     },
     {
+      // Le tourne-disque du grenier (D-121), sur la malle : on choisit un disque trouvé, ou, sans
+      // disque, une bulle (le plateau vide). Agir depuis la malle ou depuis le plancher à côté.
+      id: 'record-player',
+      room: 'attic',
+      on: 'interact',
+      area: { col: 7, row: 15, w: 9, h: 5 },
+      mark: { col: 11, row: 15 },
+      when: {},
+      lock: true,
+      repeat: true,
+      steps: [{ do: 'records' }],
+    },
+    {
       id: 'look-plant',
       room: 'kitchen',
       on: 'interact',
@@ -1109,6 +1122,7 @@ export const HOUSE_STORY: StoryData = {
     },
     { id: 'cat-sit', room: 'living', kind: 'cat-sit', col: 44, row: 21, when: { all: [F.Slept] } },
     { id: 'music-box', room: 'bedroom', kind: 'music-box', col: 12, row: 12, when: {} },
+    { id: 'record-player', room: 'attic', kind: 'record-player', col: 11, row: 17, when: {} },
     { id: 'plant', room: 'kitchen', kind: 'plant', col: 52, row: 16, when: {} },
     // Derrière la haie (D-49) : Maria de l'autre côté du vide, hors d'atteinte ; elle est là dès
     // l'arrivée dans la ronce et ne bouge jamais (pilier 5). Le bonnet, au bout du chemin, puis
