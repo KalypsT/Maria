@@ -2,11 +2,11 @@
 ; le monde de la nounou. On court sur le toit des voitures. Le soufflet : dans le présent, un
 ; plafond si bas qu'on n'y passe qu'en glissant ; dans le souvenir, un mur. Entre la deuxième et
 ; la troisième voiture, une caténaire du souvenir, derrière un rideau de ronces du souvenir : on
-; bascule en plein vol. Au bout, la cuisine rose (D-88). Tombée sur la voie, l'échelle ramène au
+; bascule en plein vol. Au bout, le cube turquoise (D-122). Tombée sur la voie, l'échelle ramène au
 ; toit. Défi : derrière deux rideaux, le rebord du signal et sa trouvaille. Dans la première
 ; voiture, ouverte dans le souvenir, une trouvaille. Sortie (1) vers la gare ; portes (2) vers la
-; maison et (3) vers la rue d'autrefois, ouvertes une fois la cuisine rose retrouvée ; porte (4) vers
-; le carrousel d'autrefois (îlot 4), ouverte une fois le livre musical retrouvé.
+; maison et (3) vers la rue d'autrefois, ouvertes une fois le cube turquoise trouvé ; porte (4) vers
+; le carrousel d'autrefois (îlot 4), ouverte une fois le cube bleu trouvé.
 ; @name: Le train d'autrefois
 ; @world: strange
 ; @mapped: yes

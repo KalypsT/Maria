@@ -22,6 +22,8 @@ export interface MapRoom {
   readonly lamps: readonly (MapPoint & { readonly current: boolean })[];
   /** Trouvailles déjà ramassées (les autres ne sont jamais révélées, §24). */
   readonly stars: readonly MapPoint[];
+  /** Cubes de la tour d'Eden trouvés dans cette salle (D-122), de leur couleur. */
+  readonly cubes: readonly (MapPoint & { readonly color: string })[];
   /** Icône de la salle (`; @icon:`), dessinée par la carte. */
   readonly icon: string | null;
 }
@@ -53,6 +55,13 @@ export interface MapProgress {
   readonly collectibles: readonly string[];
   /** Salle et position de Céleste (px), ou null. */
   readonly celeste: { readonly room: string; readonly x: number; readonly y: number } | null;
+  /** Cubes de la tour d'Eden trouvés (D-122) : leur salle, leur tuile, leur couleur. */
+  readonly cubes?: readonly {
+    readonly room: string;
+    readonly col: number;
+    readonly row: number;
+    readonly color: string;
+  }[];
 }
 
 /** Écart maximal entre deux salles pour que leur passage soit « direct » (unités de carte). */
@@ -115,6 +124,14 @@ export function buildMapModel(zone: Zone, progress: MapProgress, page: string = 
         }
       }
     }
+    const cubes: (MapPoint & { color: string })[] = [];
+    for (const cube of progress.cubes ?? []) {
+      const center =
+        isVisited && cube.room === id ? at(id, (cube.col + 0.5) * T, cube.row * T) : null;
+      if (center) {
+        cubes.push({ ...center, color: cube.color });
+      }
+    }
     rooms.push({
       id,
       name: level.meta.name ?? id,
@@ -123,6 +140,7 @@ export function buildMapModel(zone: Zone, progress: MapProgress, page: string = 
       fresh: isVisited && !progress.seen.has(id),
       lamps,
       stars,
+      cubes,
       icon: level.meta.icon ?? null,
     });
   }

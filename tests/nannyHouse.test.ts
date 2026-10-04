@@ -3,7 +3,7 @@ import { Ability } from '../src/config/abilities';
 import { TILE_SIZE as T } from '../src/config/display';
 import { phaseMovement } from '../src/config/growth';
 import { DEFAULT_MOVEMENT } from '../src/config/movement';
-import { StoryFlag as F } from '../src/config/story';
+import { StoryFlag as F, TOWER_CUBES, towerCubesMask } from '../src/config/story';
 import { EntityType, Tile, tileAt } from '../src/core/level/LevelData';
 import { atLayer } from '../src/core/level/layers';
 import { PlayerPhysics, type PlayerInput } from '../src/core/player/PlayerPhysics';
@@ -13,7 +13,7 @@ import { isMappedRoom, isStrangeRoom, mapPage } from '../src/core/world/zone';
 import { Pickups } from '../src/core/world/Pickups';
 import { mapProblems } from '../src/core/world/mapModel';
 import { HOUSE_STORY } from '../src/levels/house/story';
-import { MIRROR, NANNY_ARRIVAL } from '../src/levels/nanny/story';
+import { ISLETS_DONE, MIRROR, NANNY_ARRIVAL, NAP_DOOR, NAP_SLOTS } from '../src/levels/nanny/story';
 import {
   lanternNodes,
   reachableNodes,
@@ -78,12 +78,12 @@ describe('la maison de la nounou : l’entrée, le miroir, la maison (D-110)', (
 
   it('aucun personnage réel dans la maison de la nounou, ni Maria', () => {
     const kinds = HOUSE_STORY.props.filter((p) => ROOMS.includes(p.room)).map((p) => p.kind);
-    // Les veilleuses des îlots sur la porte de la sieste (D-112, D-113) sont des objets.
+    // Les cubes des îlots sur la porte de la sieste (D-122) sont des objets.
     expect(kinds.sort()).toEqual([
-      'nap-light-bed',
-      'nap-light-school',
-      'nap-light-sea',
-      'nap-light-station',
+      'nap-cube-bed',
+      'nap-cube-school',
+      'nap-cube-sea',
+      'nap-cube-station',
       'reflection',
       'reflection-through',
     ]);
@@ -210,5 +210,31 @@ describe('la maison de la nounou : l’entrée, le miroir, la maison (D-110)', (
     expect(attempt('memory', true)).toBe(true);
     expect(attempt('memory', false)).toBe(false);
     expect(attempt('present', true)).toBe(false);
+  });
+
+  it('à l’arrivée dans la maison, la vue montre la porte de la sieste et ses quatre creux (D-122)', () => {
+    const t = trigger('nanny-house');
+    const looks = t.steps.flatMap((s) => (s.do === 'look' ? [s] : []));
+    expect(looks).toHaveLength(2);
+    const [there, back] = looks;
+    expect(there?.col).toBe(NAP_DOOR.col);
+    // Les creux sont dans la vue (une demi-hauteur d'écran : 11 tuiles).
+    for (const slot of NAP_SLOTS) {
+      expect(Math.abs(slot.row - (there?.row ?? 0))).toBeLessThan(11);
+    }
+    expect(back).toEqual({ do: 'look' });
+    // La bulle des cubes vient après le retour de la vue sur Céleste.
+    const backAt = t.steps.findIndex((s) => s.do === 'look' && s.col === undefined);
+    expect(backAt).toBeGreaterThan(0);
+    const bubble = t.steps.findIndex((s) => s.do === 'thought' && s.icon === 'cubes');
+    expect(bubble).toBeGreaterThan(backAt);
+  });
+
+  it('la bulle des cubes : un bit par îlot fait, dans l’ordre des îlots (D-122)', () => {
+    expect(TOWER_CUBES.map((c) => c.flag)).toEqual([...ISLETS_DONE]);
+    expect(towerCubesMask(new Set())).toBe(0);
+    expect(towerCubesMask(new Set([F.NannySchoolDone]))).toBe(2);
+    expect(towerCubesMask(new Set([F.NannyBedDone, F.NannySeaDone]))).toBe(9);
+    expect(towerCubesMask(new Set(ISLETS_DONE))).toBe(15);
   });
 });

@@ -1,5 +1,5 @@
 ; L'avant-dernier niveau (D-107, D-116) : la chambre de la sieste chez la nounou, derrière la petite
-; porte, une fois les quatre veilleuses allumées. Le chemin le plus dur du niveau : trois sauts
+; porte, une fois les quatre cubes trouvés. Le chemin le plus dur du niveau : trois sauts
 ; entre deux rideaux de ronces de couches opposées (on bascule en plein vol, la deuxième fois en
 ; planant), puis la cheminée du montant du lit, aux ronces en bandes de chaque couche. Une lanterne
 ; avant chaque passage ; tomber dans la mare d'ombre ramène au dernier appui (D-97). Tout en

@@ -1087,7 +1087,7 @@ export function installDebugOverlay(scene: GameScene): void {
       ],
     ],
     [
-      'Histoire : l’îlot de la chambre fait, Roger retrouvé (D-112)',
+      'Histoire : l’îlot de la chambre fait, le cube rose trouvé (D-112, D-122)',
       [
         F.EveningPlayed,
         F.EveningBlanket,

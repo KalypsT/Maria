@@ -122,4 +122,21 @@ describe('carte dessinée par Céleste (§24)', () => {
     );
     expect(model.rooms.filter((room) => room.fresh).map((room) => room.id)).toEqual(['hall']);
   });
+
+  it('les cubes de la tour d’Eden trouvés (D-122) : dans leur salle visitée, de leur couleur', () => {
+    const model = buildMapModel(zone, {
+      ...progress(),
+      cubes: [
+        { room: 'bedroom', col: 4, row: 6, color: '#ec8fab' },
+        { room: 'kitchen', col: 4, row: 6, color: '#f0c654' },
+      ],
+    });
+    const bedroom = model.rooms.find((room) => room.id === 'bedroom');
+    expect(bedroom?.cubes.map((c) => c.color)).toEqual(['#ec8fab']);
+    // Une salle jamais visitée ne montre rien.
+    expect(model.rooms.flatMap((room) => (room.id === 'bedroom' ? [] : room.cubes))).toEqual([]);
+    expect(buildMapModel(zone, progress()).rooms.every((room) => room.cubes.length === 0)).toBe(
+      true,
+    );
+  });
 });

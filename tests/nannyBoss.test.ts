@@ -190,7 +190,7 @@ describe('le boss, l’effacement (D-117)', () => {
     },
   );
 
-  it('les objets se rallument l’un après l’autre ; l’effacement recule, accélère, puis se dissout', () => {
+  it('les cubes se rallument l’un après l’autre et montent la tour d’Eden ; l’effacement recule, accélère, puis se dissout', () => {
     const erase = need(level(PLAY).erase, 'effacement');
     const flags = new Set<string>([F.NannyErasure]);
     let factor = eraseFactor(erase, flags);
@@ -213,6 +213,12 @@ describe('le boss, l’effacement (D-117)', () => {
       expect(t.on).toBe('interact');
       expect(t.steps).toContainEqual({ do: 'flag', id: o.flag });
       flags.add(o.flag);
+      // Le cube rejoint la tour d'Eden (D-122) : il quitte sa place, la tour a un cube de plus.
+      expect(lit(o.kind), o.kind).toBe(false);
+      const towers = HOUSE_STORY.props.filter(
+        (p) => p.room === PLAY && p.kind.startsWith('cube-tower') && checkCondition(flags, p.when),
+      );
+      expect(towers.map((p) => p.kind)).toEqual([`cube-tower-${String(k + 1)}`]);
       if (k < PLAY_OBJECTS.length - 1) {
         const next = eraseFactor(erase, flags);
         expect(next).toBeGreaterThan(factor);

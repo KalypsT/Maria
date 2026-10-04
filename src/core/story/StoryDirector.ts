@@ -42,6 +42,8 @@ export interface StoryHost {
   play(id: PlayableMemoryId): void;
   /** Le tourne-disque (D-121) : le choix des disques, ou une bulle s'il n'y en a aucun. */
   records?(): void;
+  /** Regard (D-122) : la vue va vers cette tuile ; null : elle revient sur Céleste. */
+  look?(col: number | null, row: number | null): void;
 }
 
 /**
@@ -340,6 +342,9 @@ export class StoryDirector {
         break;
       case 'records':
         this.host.records?.();
+        break;
+      case 'look':
+        this.host.look?.(step.col ?? null, step.row ?? null);
         break;
       default:
         break;

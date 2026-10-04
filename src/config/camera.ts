@@ -115,3 +115,9 @@ export const CHASE_CAMERA_UP_PX = 30;
  * l'écran et Céleste toute petite se voit bien. PROVISOIRE.
  */
 export const MEMORY_CAMERA_ZOOM = 1.7;
+
+/**
+ * Regard de l'histoire (D-122) : constante de temps du glissement de la vue vers un point de la
+ * salle, puis de son retour sur Céleste (ms). PROVISOIRE.
+ */
+export const STORY_LOOK_TIME_MS = 420;

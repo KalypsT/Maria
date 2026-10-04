@@ -1,11 +1,11 @@
 ; L'avant-dernier niveau (D-107, D-113), îlot de mémoire 2 : la rue d'autrefois. Du toit de la
 ; première maison, on plane d'auvent en auvent, au-dessus de la rue : chaque auvent n'existe que
 ; dans une couche, et des rideaux de ronces de l'autre couche coupent le vol ; on bascule en plein
-; vol. Au bout, sur l'abribus, la boîte à formes (D-64). Tombée dans la rue, l'échafaudage ramène
+; vol. Au bout, sur l'abribus, le cube jaune de la tour d'Eden (D-122). Tombée dans la rue, l'échafaudage ramène
 ; au toit. Défi : derrière deux rideaux, le rebord du lampadaire et sa trouvaille. Sortie (1) vers
 ; l'école ; portes (2) vers la maison et (3) vers la chambre d'autrefois, ouvertes une fois la
 ; boîte à formes retrouvée ; porte (4), sous l'abribus, vers le train d'autrefois (îlot 3), ouverte
-; une fois la cuisine rose retrouvée.
+; une fois le cube turquoise trouvé.
 ; @name: La rue d'autrefois
 ; @world: strange
 ; @mapped: yes

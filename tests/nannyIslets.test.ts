@@ -8,14 +8,8 @@ import { storyProblems } from '../src/core/story/storyProblems';
 import { isMappedRoom, isStrangeRoom, mapPage } from '../src/core/world/zone';
 import { mapProblems } from '../src/core/world/mapModel';
 import { HOUSE_STORY } from '../src/levels/house/story';
-import {
-  ISLET_MUSIC_BOOK,
-  ISLET_PINK_KITCHEN,
-  ISLET_ROGER,
-  ISLET_SHAPE_BOX,
-  NAP_LIGHTS,
-  NANNY_ARRIVAL,
-} from '../src/levels/nanny/story';
+import { TOWER_CUBES } from '../src/config/story';
+import { ISLET_CUBES, NAP_SLOTS, NANNY_ARRIVAL } from '../src/levels/nanny/story';
 import {
   lanternNodes,
   reachableNodes,
@@ -29,9 +23,9 @@ import { level, zone } from './zoneGraph';
 import { ANALYSIS_TIMEOUT_MS } from './timeouts';
 
 /**
- * L'avant-dernier niveau, les îlots de mémoire (D-112, D-113) : chacun, deux salles ; au bout, son
- * objet (déjà vu), des passages vers la maison (et l'îlot voisin), une veilleuse sur la porte de la
- * sieste.
+ * L'avant-dernier niveau, les îlots de mémoire (D-112 à D-115, D-122) : chacun, deux salles ; au
+ * bout, un cube de la tour d'Eden, des passages vers la maison (et l'îlot voisin), le cube dans son
+ * creux sur la porte de la sieste.
  */
 interface Islet {
   readonly name: string;
@@ -42,10 +36,9 @@ interface Islet {
   readonly trigger: string;
   readonly object: { readonly id: string; readonly kind: string; readonly room: string };
   readonly at: { readonly col: number; readonly row: number };
-  /** Court souvenir rejoué (null : un cœur seulement, D-107). */
-  readonly flashback: string | null;
-  readonly light: string;
-  readonly lightIndex: number;
+  /** Le cube dans son creux, sur la porte de la sieste ; son rang dans `TOWER_CUBES`. */
+  readonly nap: string;
+  readonly index: number;
   /** Portes cachées tant que l'objet n'est pas retrouvé. */
   readonly shortcuts: readonly (readonly [string, number])[];
   /** Trouvailles neuves, dont celles enfermées dans le présent (ouvertes dans le souvenir). */
@@ -58,12 +51,11 @@ const ISLETS: readonly Islet[] = [
     rooms: ['nanny-bed', 'nanny-garden'],
     entry: [2, 'nanny-bed', 1],
     done: F.NannyBedDone,
-    trigger: 'nanny-roger',
-    object: { id: 'nanny-roger', kind: 'roger', room: 'nanny-garden' },
-    at: ISLET_ROGER,
-    flashback: 'roger',
-    light: 'nap-light-bed',
-    lightIndex: 0,
+    trigger: 'nanny-islet-cube-bed',
+    object: { id: 'nanny-islet-cube-bed', kind: 'islet-cube-bed', room: 'nanny-garden' },
+    at: ISLET_CUBES[0].at,
+    nap: 'nap-cube-bed',
+    index: 0,
     shortcuts: [
       ['nanny-garden', 2],
       ['nanny-house', 3],
@@ -76,12 +68,11 @@ const ISLETS: readonly Islet[] = [
     rooms: ['nanny-school', 'nanny-street'],
     entry: [5, 'nanny-school', 1],
     done: F.NannySchoolDone,
-    trigger: 'nanny-shape-box',
-    object: { id: 'nanny-shape-box', kind: 'shape-box', room: 'nanny-street' },
-    at: ISLET_SHAPE_BOX,
-    flashback: null,
-    light: 'nap-light-school',
-    lightIndex: 1,
+    trigger: 'nanny-islet-cube-school',
+    object: { id: 'nanny-islet-cube-school', kind: 'islet-cube-school', room: 'nanny-street' },
+    at: ISLET_CUBES[1].at,
+    nap: 'nap-cube-school',
+    index: 1,
     shortcuts: [
       ['nanny-street', 2],
       ['nanny-house', 4],
@@ -96,12 +87,11 @@ const ISLETS: readonly Islet[] = [
     rooms: ['nanny-station', 'nanny-train'],
     entry: [6, 'nanny-station', 1],
     done: F.NannyStationDone,
-    trigger: 'nanny-pink-kitchen',
-    object: { id: 'nanny-pink-kitchen', kind: 'pink-kitchen', room: 'nanny-train' },
-    at: ISLET_PINK_KITCHEN,
-    flashback: null,
-    light: 'nap-light-station',
-    lightIndex: 2,
+    trigger: 'nanny-islet-cube-station',
+    object: { id: 'nanny-islet-cube-station', kind: 'islet-cube-station', room: 'nanny-train' },
+    at: ISLET_CUBES[2].at,
+    nap: 'nap-cube-station',
+    index: 2,
     shortcuts: [
       ['nanny-train', 2],
       ['nanny-house', 7],
@@ -116,12 +106,11 @@ const ISLETS: readonly Islet[] = [
     rooms: ['nanny-beach', 'nanny-carousel'],
     entry: [8, 'nanny-beach', 1],
     done: F.NannySeaDone,
-    trigger: 'nanny-music-book',
-    object: { id: 'nanny-music-book', kind: 'music-book', room: 'nanny-carousel' },
-    at: ISLET_MUSIC_BOOK,
-    flashback: 'music-book',
-    light: 'nap-light-sea',
-    lightIndex: 3,
+    trigger: 'nanny-islet-cube-sea',
+    object: { id: 'nanny-islet-cube-sea', kind: 'islet-cube-sea', room: 'nanny-carousel' },
+    at: ISLET_CUBES[3].at,
+    nap: 'nap-cube-sea',
+    index: 3,
     shortcuts: [
       ['nanny-carousel', 2],
       ['nanny-house', 9],
@@ -220,7 +209,7 @@ describe('les îlots de mémoire de la maison de la nounou (D-112, D-113)', () =
         false,
       );
       const garden = level('nanny-garden');
-      const top = standOn(garden, ISLET_ROGER, Ability.Shift);
+      const top = standOn(garden, ISLET_CUBES[0].at, Ability.Shift);
       expect(reachWithout('nanny-garden', Ability.Shift, { col: 30, row: 28 }).has(top)).toBe(
         false,
       );
@@ -256,22 +245,29 @@ describe('les îlots de mémoire de la maison de la nounou (D-112, D-113)', () =
         ).toBe(false);
       });
 
-      it('son objet : on le regarde, il n’est plus à trouver ; il reste là', () => {
+      it('son cube : un cœur, il rejoint la tour (la bulle des cubes) ; aucun objet déjà vu', () => {
         const t = trigger(islet.trigger);
         expect(t.room).toBe(islet.object.room);
         expect(t.on).toBe('interact');
         expect(t.when).toEqual({ all: [F.NannyHouse], none: [islet.done] });
-        const flashbacks = t.steps.flatMap((s) => (s.do === 'flashback' ? [s.id] : []));
-        expect(flashbacks).toEqual(islet.flashback ? [islet.flashback] : []);
+        // Les anciens souvenirs (Roger, la boîte à formes…) ne sont plus rejoués (D-122).
+        expect(t.steps.some((s) => s.do === 'flashback')).toBe(false);
         expect(t.steps.some((s) => s.do === 'thought' && s.icon === 'heart')).toBe(true);
-        // Il ne redevient pas un souvenir à trouver, et Céleste reste là.
+        // L'étape vient avant la bulle : elle montre le nouveau cube déjà en place.
+        const flag = t.steps.findIndex((s) => s.do === 'flag' && s.id === islet.done);
+        const cubes = t.steps.findIndex((s) => s.do === 'thought' && s.icon === 'cubes');
+        expect(flag).toBeGreaterThanOrEqual(0);
+        expect(cubes).toBeGreaterThan(flag);
         expect(t.steps.some((s) => s.do === 'memory' || s.do === 'room')).toBe(false);
-        expect(t.steps).toContainEqual({ do: 'flag', id: islet.done });
+        expect(TOWER_CUBES[islet.index]?.flag).toBe(islet.done);
         const prop = need(
           HOUSE_STORY.props.find((p) => p.id === islet.object.id),
           islet.object.id,
         );
-        expect(prop).toMatchObject({ ...islet.object, ...islet.at, when: {} });
+        expect(prop).toMatchObject({ ...islet.object, ...islet.at, instant: true });
+        // Pris, il quitte l'îlot.
+        expect(checkCondition(new Set([F.NannyHouse]), prop.when)).toBe(true);
+        expect(checkCondition(new Set([F.NannyHouse, islet.done]), prop.when)).toBe(false);
         expect(tileAt(level(islet.object.room), islet.at.col, islet.at.row + 1)).toBe(Tile.Solid);
       });
 
@@ -290,21 +286,26 @@ describe('les îlots de mémoire de la maison de la nounou (D-112, D-113)', () =
         }
       });
 
-      it('une veilleuse s’allume sur la porte de la sieste', () => {
-        const light = need(
-          HOUSE_STORY.props.find((p) => p.id === islet.light),
-          'veilleuse',
+      it('le cube prend sa place sur la porte de la sieste', () => {
+        const nap = need(
+          HOUSE_STORY.props.find((p) => p.id === islet.nap),
+          'cube de la porte',
         );
-        expect(light).toMatchObject({ room: 'nanny-house', ...NAP_LIGHTS[islet.lightIndex] });
-        expect(checkCondition(new Set([F.NannyHouse]), light.when)).toBe(false);
-        expect(checkCondition(new Set([F.NannyHouse, islet.done]), light.when)).toBe(true);
+        expect(nap).toMatchObject({
+          room: 'nanny-house',
+          kind: islet.nap,
+          ...NAP_SLOTS[islet.index],
+        });
+        expect(checkCondition(new Set([F.NannyHouse]), nap.when)).toBe(false);
+        expect(checkCondition(new Set([F.NannyHouse, islet.done]), nap.when)).toBe(true);
         const door = need(
           level('nanny-house').decor.find((d) => d.kind === 'napdoor'),
           'porte de la sieste',
         );
-        for (const l of NAP_LIGHTS) {
+        for (const l of NAP_SLOTS) {
           expect(l.col).toBeGreaterThanOrEqual(door.col);
           expect(l.col).toBeLessThan(door.col + door.width);
+          expect(l.row).toBe(door.row + 1);
         }
       });
 

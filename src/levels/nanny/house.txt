@@ -1,20 +1,20 @@
 ; L'avant-dernier niveau (D-107, D-110) : la maison de la nounou, salle centrale, démesurée, à
 ; hauteur de tout-petit. Le canapé (dessous, dans le souvenir, un passage d'une tuile et une
-; trouvaille, on y glisse), la table basse, la petite porte de la sieste et ses quatre veilleuses
-; éteintes, la grande bibliothèque : ses étagères d'aujourd'hui (le présent) et d'autrefois (le
-; souvenir) alternent, on monte en basculant. Les passages vers les îlots de mémoire, chacun
+; trouvaille, on y glisse), la table basse, la petite porte de la sieste et ses quatre creux
+; en forme de cube (D-122), la grande bibliothèque : ses étagères d'aujourd'hui (le présent) et
+; d'autrefois (le souvenir) alternent, on monte en basculant. Les passages vers les îlots de mémoire, chacun
 ; encadré d'une silhouette de son îlot, s'ouvriront avec leurs PR : l'étagère de gauche (la chambre
 ; et le jardin renversé), le haut de la bibliothèque (l'école et la rue), le mur de droite (la gare
 ; et le train), la trappe du plancher (la plage et le carrousel). Défi : le mobile du souvenir et la
 ; lampe du présent jusqu'à l'étagère haute et sa trouvaille. Deux fentes sur la nuit du dortoir
 ; servent de veilleuses. Sortie (1) vers l'entrée, (2) vers la chambre d'autrefois (îlot 1) ;
-; porte (3) : le raccourci du jardin renversé, ouvert une fois Roger retrouvé ; porte (4) : celui de
-; la rue (îlot 2), ouvert une fois la boîte à formes retrouvée ; porte (5) : en haut de la
+; porte (3) : le raccourci du jardin renversé, ouvert une fois le cube rose trouvé ; porte (4) : celui de
+; la rue (îlot 2), ouvert une fois le cube jaune trouvé ; porte (5) : en haut de la
 ; bibliothèque, le passage de l'école (îlot 2) ; sortie (6) : le mur de droite, vers la gare
-; d'autrefois (îlot 3) ; porte (7) : le raccourci du train, ouvert une fois la cuisine rose retrouvée ;
+; d'autrefois (îlot 3) ; porte (7) : le raccourci du train, ouvert une fois le cube turquoise trouvé ;
 ; porte (8) : la trappe du plancher, vers la plage d'autrefois (îlot 4) ; porte (9) : le raccourci du
-; carrousel, ouvert une fois le livre musical retrouvé ; porte (10) : la petite porte de la sieste,
-; ouverte une fois les quatre veilleuses allumées ; porte (11) : au pied de la bibliothèque, la porte
+; carrousel, ouvert une fois le cube bleu trouvé ; porte (10) : la petite porte de la sieste,
+; ouverte une fois les quatre cubes trouvés ; porte (11) : au pied de la bibliothèque, la porte
 ; de la salle de jeux, ouverte une fois l'effacement dissous.
 ; @name: La maison de la nounou
 ; @world: strange

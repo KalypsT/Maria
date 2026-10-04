@@ -1,4 +1,4 @@
-import { PROP_SIZE } from '../../config/story';
+import { PROP_SIZE, TOWER_CUBES } from '../../config/story';
 import type { PropKind, ThoughtIcon } from '../../core/story/story';
 import {
   bonnet,
@@ -440,30 +440,91 @@ function drawContained(
   ctx.drawImage(image, (w - iw * k) / 2, h - ih * k, iw * k, ih * k);
 }
 
-/** Les cubes du souvenir d'Eden (D-118), couleurs passées. PLACEHOLDER. */
-const CUBE_COLORS = ['#d9788f', '#6f8fc4', '#e6c27a', '#7fa37a'] as const;
-const CUBES_IN: Readonly<Record<'cube-tower-1' | 'cube-tower-2' | 'cube-tower-4', number>> = {
+/**
+ * Les cubes de la tour d'Eden (D-118, D-122) : les quatre couleurs des îlots (`TOWER_CUBES`), une
+ * forme simple sur la face (un rond, un triangle, un losange, une étoile), sans lettre. PLACEHOLDER.
+ */
+const CUBES_IN: Readonly<
+  Record<'cube-tower-1' | 'cube-tower-2' | 'cube-tower-3' | 'cube-tower-4', number>
+> = {
   'cube-tower-1': 1,
   'cube-tower-2': 2,
+  'cube-tower-3': 3,
   'cube-tower-4': 4,
 };
 
-function drawCube(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, k: number): void {
-  ctx.fillStyle = CUBE_COLORS[k % CUBE_COLORS.length] ?? '#d9788f';
+/** La forme en relief sur la face d'un cube (`k` : l'îlot), centrée en (cx, cy), de rayon `r`. */
+function cubeShape(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  r: number,
+  k: number,
+): void {
   ctx.beginPath();
-  ctx.roundRect(x, y, s, s, 1.2);
+  switch (k % TOWER_CUBES.length) {
+    case 0:
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      break;
+    case 1:
+      ctx.moveTo(cx, cy - r);
+      ctx.lineTo(cx + r, cy + r * 0.8);
+      ctx.lineTo(cx - r, cy + r * 0.8);
+      break;
+    case 2:
+      ctx.moveTo(cx, cy - r);
+      ctx.lineTo(cx + r, cy);
+      ctx.lineTo(cx, cy + r);
+      ctx.lineTo(cx - r, cy);
+      break;
+    default:
+      for (let i = 0; i < 10; i++) {
+        const a = -Math.PI / 2 + (i * Math.PI) / 5;
+        const d = i % 2 === 0 ? r * 1.1 : r * 0.45;
+        ctx.lineTo(cx + Math.cos(a) * d, cy + Math.sin(a) * d);
+      }
+  }
+  ctx.closePath();
   ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-  ctx.lineWidth = 0.6;
-  ctx.strokeRect(x + 1.6, y + 1.6, s - 3.2, s - 3.2);
 }
 
-/** La tour de cubes (D-118) : `n` cubes empilés, un peu de travers. */
+/** Un cube de la tour (`k` : l'îlot, dans l'ordre de `TOWER_CUBES`), coin haut gauche (x, y). */
+function drawCube(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, k: number): void {
+  ctx.fillStyle = TOWER_CUBES[k % TOWER_CUBES.length]?.color ?? '#ec8fab';
+  ctx.beginPath();
+  ctx.roundRect(x, y, s, s, Math.max(1, s * 0.15));
+  ctx.fill();
+  // Le dessus, un peu plus clair ; le bord, un trait sombre.
+  ctx.fillStyle = 'rgba(255,255,255,0.28)';
+  ctx.fillRect(x + s * 0.12, y + s * 0.06, s * 0.76, s * 0.14);
+  ctx.strokeStyle = 'rgba(59,51,48,0.45)';
+  ctx.lineWidth = Math.max(0.5, s * 0.06);
+  ctx.beginPath();
+  ctx.roundRect(x, y, s, s, Math.max(1, s * 0.15));
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,0.75)';
+  cubeShape(ctx, x + s / 2, y + s * 0.56, s * 0.24, k);
+}
+
+/** La tour de cubes (D-118, D-122) : `n` cubes empilés, un peu de travers, dans l'ordre des îlots. */
 function drawCubeTower(ctx: CanvasRenderingContext2D, w: number, h: number, n: number): void {
   const s = 8;
   for (let k = 0; k < n; k++) {
     drawCube(ctx, (w - s) / 2 + (k % 2 === 0 ? 0 : 0.8), h - s * (k + 1), s, k);
   }
+}
+
+/** La tour tombée (D-122) : les quatre cubes par terre, éparpillés, l'un sur la tranche. */
+function drawFallenTower(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  const s = 8;
+  drawCube(ctx, 1, h - s, s, 0);
+  drawCube(ctx, w * 0.32, h - s, s, 2);
+  drawCube(ctx, w - s - 1, h - s, s, 3);
+  ctx.save();
+  ctx.translate(w * 0.62, h - s * 0.75);
+  ctx.rotate(0.5);
+  drawCube(ctx, -s / 2, -s / 2, s, 1);
+  ctx.restore();
 }
 
 /** Le tas de cubes (D-118), par terre. */
@@ -475,12 +536,59 @@ function drawCubePile(ctx: CanvasRenderingContext2D, h: number): void {
   drawCube(ctx, 5.5, h - 2 * s, s, 0);
 }
 
-/** Les objets pâlis de la salle de jeux (D-117) et l'objet dont ils sont le pâle reflet. */
+/**
+ * Un cube d'îlot (D-122), posé au bout de l'îlot : plus gros que ceux de la tour (on le voit de
+ * loin), la lueur turquoise du monde étrange autour.
+ */
+function drawIsletCube(ctx: CanvasRenderingContext2D, w: number, h: number, k: number): void {
+  const s = 12;
+  const cx = w / 2;
+  const cy = h - s / 2;
+  const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, w / 2);
+  glow.addColorStop(0, 'rgba(120, 240, 220, 0.45)');
+  glow.addColorStop(1, 'rgba(120, 240, 220, 0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, w, h);
+  drawCube(ctx, cx - s / 2, h - s, s, k);
+}
+
+/** Les cubes d'îlot, dans l'ordre de `TOWER_CUBES`. */
+const ISLET_CUBE_INDEX: Partial<Record<PropKind, number>> = {
+  'islet-cube-bed': 0,
+  'islet-cube-school': 1,
+  'islet-cube-station': 2,
+  'islet-cube-sea': 3,
+};
+/** Les cubes dans leur creux, sur la porte de la sieste. */
+const NAP_CUBE_INDEX: Partial<Record<PropKind, number>> = {
+  'nap-cube-bed': 0,
+  'nap-cube-school': 1,
+  'nap-cube-station': 2,
+  'nap-cube-sea': 3,
+};
+
+/**
+ * Un cube dans son creux, sur la porte de la sieste (D-122) : centré 16 px au-dessus du bas du
+ * cadre (là où `napdoor` dessine le creux), une petite lueur de sa couleur.
+ */
+function drawNapCube(ctx: CanvasRenderingContext2D, w: number, h: number, k: number): void {
+  const s = 8;
+  const cx = w / 2;
+  const cy = h - 16;
+  const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, w / 2);
+  glow.addColorStop(0, 'rgba(255, 240, 200, 0.6)');
+  glow.addColorStop(1, 'rgba(255, 240, 200, 0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, cy - w / 2, w, w);
+  drawCube(ctx, cx - s / 2, cy - s / 2, s, k);
+}
+
+/** Les cubes pâlis de la salle de jeux (D-117, D-122) et le cube dont ils sont le pâle reflet. */
 const PALE_OF: Partial<Record<PropKind, PropKind>> = {
-  'shape-box-pale': 'shape-box',
-  'pink-kitchen-pale': 'pink-kitchen',
-  'roger-pale': 'roger',
-  'music-book-pale': 'music-book',
+  'islet-cube-bed-pale': 'islet-cube-bed',
+  'islet-cube-school-pale': 'islet-cube-school',
+  'islet-cube-station-pale': 'islet-cube-station',
+  'islet-cube-sea-pale': 'islet-cube-sea',
 };
 /** Le voile de l'effacement sur un objet pâli : gris et pâle, pas blanc (D-111). PLACEHOLDER. */
 const ERASURE_PALE = 'rgba(196, 196, 204, 0.8)';
@@ -522,28 +630,6 @@ function drawErasureFigure(ctx: CanvasRenderingContext2D, w: number, h: number):
 }
 
 /** Couleurs des veilleuses de la porte de la sieste, une par îlot (D-112). PLACEHOLDER. */
-const NAP_LIGHT_COLORS = {
-  bed: '255, 170, 200',
-  school: '255, 220, 120',
-  station: '120, 240, 220',
-  sea: '130, 170, 255',
-} as const;
-
-/** Une veilleuse allumée (D-112) : une lueur ronde, centrée 16 px au-dessus du bas du cadre. */
-function drawNapLight(ctx: CanvasRenderingContext2D, w: number, h: number, rgb: string): void {
-  const cx = w / 2;
-  const cy = h - 16;
-  const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, w / 2);
-  glow.addColorStop(0, `rgba(${rgb}, 0.9)`);
-  glow.addColorStop(1, `rgba(${rgb}, 0)`);
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, cy - w / 2, w, w);
-  ctx.fillStyle = `rgb(${rgb})`;
-  ctx.beginPath();
-  ctx.arc(cx, cy, 2.6, 0, Math.PI * 2);
-  ctx.fill();
-}
-
 /**
  * Le tourne-disque du grenier (D-121), PLACEHOLDER : une valise rose ancien, le couvercle ouvert
  * derrière, le plateau sans disque, le bras levé. Vu de côté, un peu d'en haut.
@@ -742,26 +828,30 @@ export function drawProp(
       break;
     case 'cube-tower-1':
     case 'cube-tower-2':
+    case 'cube-tower-3':
     case 'cube-tower-4':
       drawCubeTower(ctx, w, h, CUBES_IN[kind]);
+      break;
+    case 'cube-tower-fallen':
+      drawFallenTower(ctx, w, h);
+      break;
+    case 'islet-cube-bed':
+    case 'islet-cube-school':
+    case 'islet-cube-station':
+    case 'islet-cube-sea':
+      drawIsletCube(ctx, w, h, ISLET_CUBE_INDEX[kind] ?? 0);
+      break;
+    case 'nap-cube-bed':
+    case 'nap-cube-school':
+    case 'nap-cube-station':
+    case 'nap-cube-sea':
+      drawNapCube(ctx, w, h, NAP_CUBE_INDEX[kind] ?? 0);
       break;
     case 'color-bloom':
       drawColorBloom(ctx, w, h);
       break;
     case 'erasure-figure':
       drawErasureFigure(ctx, w, h);
-      break;
-    case 'nap-light-bed':
-      drawNapLight(ctx, w, h, NAP_LIGHT_COLORS.bed);
-      break;
-    case 'nap-light-school':
-      drawNapLight(ctx, w, h, NAP_LIGHT_COLORS.school);
-      break;
-    case 'nap-light-station':
-      drawNapLight(ctx, w, h, NAP_LIGHT_COLORS.station);
-      break;
-    case 'nap-light-sea':
-      drawNapLight(ctx, w, h, NAP_LIGHT_COLORS.sea);
       break;
     case 'site-gap':
       drawSiteGap(ctx, w, h);
@@ -805,6 +895,8 @@ export function drawThought(
   ctx: CanvasRenderingContext2D,
   icon: ThoughtIcon,
   images: ReadonlyMap<string, CanvasImageSource>,
+  /** Bulle `cubes` : les cubes déjà trouvés (`towerCubesMask`). */
+  cubes = 0,
 ): void {
   const cx = 19;
   const cy = 12.5;
@@ -834,8 +926,36 @@ export function drawThought(
   ctx.translate(cx, cy);
   ctx.scale(ICON_SCALE, ICON_SCALE);
   ctx.translate(-cx, -cy);
-  drawIcon(ctx, icon, images, cx, cy);
+  if (icon === 'cubes') {
+    drawCubeSlots(ctx, cx, cy, cubes);
+  } else {
+    drawIcon(ctx, icon, images, cx, cy);
+  }
   ctx.restore();
+}
+
+/**
+ * Les quatre cubes de la tour d'Eden (D-122), en rang : un cube plein pour chaque îlot fait, un
+ * creux en pointillés pour les autres. Sans chiffre ni texte.
+ */
+function drawCubeSlots(ctx: CanvasRenderingContext2D, cx: number, cy: number, mask: number): void {
+  const s = 4.4;
+  const gap = 0.9;
+  const x0 = cx - (TOWER_CUBES.length * s + (TOWER_CUBES.length - 1) * gap) / 2;
+  TOWER_CUBES.forEach((_, k) => {
+    const x = x0 + k * (s + gap);
+    const y = cy - s / 2 + 0.5;
+    if ((mask & (1 << k)) !== 0) {
+      drawCube(ctx, x, y, s, k);
+      return;
+    }
+    ctx.save();
+    ctx.strokeStyle = 'rgba(91,74,68,0.6)';
+    ctx.lineWidth = 0.5;
+    ctx.setLineDash([0.9, 0.7]);
+    ctx.strokeRect(x + 0.25, y + 0.25, s - 0.5, s - 0.5);
+    ctx.restore();
+  });
 }
 
 function drawIcon(

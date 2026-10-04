@@ -18,62 +18,111 @@ export const MIRROR = { col: 49, row: 22 };
 const MIRROR_FRONT = { col: 43, row: 20, w: 6, h: 3 };
 /** Arrivée dans la maison, par l'entrée : on regarde autour de soi, une fois. */
 const HOUSE_ARRIVAL = { col: 1, row: 34, w: 6, h: 3 };
-/** Roger (D-112), en haut de l'arrosoir géant du jardin renversé (îlot 1). */
-export const ISLET_ROGER = { col: 20, row: 6 };
-/** La porte près de Roger, et celle de la maison où elle mène (le raccourci de l'îlot 1). */
+/** La porte près du cube rose, et celle de la maison où elle mène (le raccourci de l'îlot 1). */
 const BED_DOOR = { col: 24, row: 6 };
-/** La boîte à formes (D-113), sur l'abribus de la rue d'autrefois (îlot 2). */
-export const ISLET_SHAPE_BOX = { col: 76, row: 19 };
-/** La cuisine rose (D-114), sur le toit de la dernière voiture du train d'autrefois (îlot 3). */
-export const ISLET_PINK_KITCHEN = { col: 74, row: 8 };
-/** Le livre musical (D-115), sur le toit du carrousel d'autrefois (îlot 4). */
-export const ISLET_MUSIC_BOOK = { col: 34, row: 7 };
+/**
+ * Les quatre cubes de la tour d'Eden (D-122), un au bout de chaque îlot, dans l'ordre de
+ * `TOWER_CUBES` : la salle, la tuile où il est posé, le cube (dans l'îlot, puis dans son creux sur
+ * la porte de la sieste), et les passages qui s'ouvrent (où ils scintillent). Ils remplacent les
+ * objets déjà vus (Roger, la boîte à formes, la cuisine rose, le livre musical) : chaque îlot donne
+ * une chose neuve, et le but se voit (la tour d'Eden). Mêmes places, mêmes étapes.
+ */
+export const ISLET_CUBES = [
+  {
+    flag: F.NannyBedDone,
+    room: 'nanny-garden',
+    // En haut de l'arrosoir géant du jardin renversé (D-112).
+    at: { col: 20, row: 6 },
+    kind: 'islet-cube-bed',
+    nap: 'nap-cube-bed',
+    slot: { col: 62, row: 29 },
+    opens: { col: BED_DOOR.col - 1, row: BED_DOOR.row - 3, w: 3, h: 4 },
+  },
+  {
+    flag: F.NannySchoolDone,
+    room: 'nanny-street',
+    // Sur l'abribus de la rue d'autrefois (D-113).
+    at: { col: 76, row: 19 },
+    kind: 'islet-cube-school',
+    nap: 'nap-cube-school',
+    slot: { col: 63, row: 29 },
+    opens: { col: 71, row: 15, w: 10, h: 5 },
+  },
+  {
+    flag: F.NannyStationDone,
+    room: 'nanny-train',
+    // Sur le toit de la dernière voiture du train d'autrefois (D-114).
+    at: { col: 74, row: 8 },
+    kind: 'islet-cube-station',
+    nap: 'nap-cube-station',
+    slot: { col: 64, row: 29 },
+    opens: { col: 70, row: 4, w: 9, h: 5 },
+  },
+  {
+    flag: F.NannySeaDone,
+    room: 'nanny-carousel',
+    // Sur le toit du carrousel d'autrefois (D-115).
+    at: { col: 34, row: 7 },
+    kind: 'islet-cube-sea',
+    nap: 'nap-cube-sea',
+    slot: { col: 65, row: 29 },
+    opens: { col: 26, row: 3, w: 15, h: 5 },
+  },
+] as const;
 /** Le torchon blanc (D-116), dans le petit lit, tout en haut de la chambre de la sieste. */
 export const WHITE_CLOTH = { col: 66, row: 4 };
 /** En bas de la cage d'escalier (D-117) : là où Céleste se retrouve après le torchon. */
 export const STAIRS_BOTTOM = { col: 4, row: 55 };
 /**
- * Les quatre objets de la salle de jeux (D-117), dans l'ordre où ils se rallument : la boîte à
- * formes sur le coffre à jouets, la cuisine rose sur le perchoir de gauche, Roger au-dessus du gros
- * cube, le livre musical sur le perchoir de droite. Chacun : son étape, son objet pâli, l'endroit
- * où la couleur revient.
+ * Les quatre cubes de la salle de jeux (D-117, D-122), pâlis par l'effacement, dans l'ordre où ils
+ * se rallument (celui des îlots) : sur le coffre à jouets, sur le perchoir de gauche, au-dessus du
+ * gros cube, sur le perchoir de droite. Chacun : son étape, le cube et son reflet pâli, l'endroit
+ * où la couleur revient. Touché, il rejoint la tour d'Eden, sur le gros cube.
  */
 export const PLAY_OBJECTS = [
   {
     flag: F.NannyPlay1,
-    kind: 'shape-box',
-    pale: 'shape-box-pale',
+    kind: 'islet-cube-bed',
+    pale: 'islet-cube-bed-pale',
     at: { col: 62, row: 14 },
     bloom: { col: 63, row: 14 },
   },
   {
     flag: F.NannyPlay2,
-    kind: 'pink-kitchen',
-    pale: 'pink-kitchen-pale',
+    kind: 'islet-cube-school',
+    pale: 'islet-cube-school-pale',
     at: { col: 22, row: 9 },
     bloom: { col: 22, row: 14 },
   },
   {
     flag: F.NannyPlay3,
-    kind: 'roger',
-    pale: 'roger-pale',
+    kind: 'islet-cube-station',
+    pale: 'islet-cube-station-pale',
     at: { col: 35, row: 10 },
     bloom: { col: 35, row: 10 },
   },
   {
     flag: F.NannyErasureGone,
-    kind: 'music-book',
-    pale: 'music-book-pale',
+    kind: 'islet-cube-sea',
+    pale: 'islet-cube-sea-pale',
     at: { col: 47, row: 9 },
     bloom: { col: 47, row: 14 },
   },
 ] as const;
+/** La tour d'Eden dans la salle de jeux : un cube de plus à chaque cube rallumé (D-122). */
+const PLAY_TOWER = ['cube-tower-1', 'cube-tower-2', 'cube-tower-3', 'cube-tower-4'] as const;
+/** La tour de `k + 1` cubes jusqu'au cube suivant. */
+const nextPlay = (k: number): string[] => {
+  const next = PLAY_OBJECTS[k + 1];
+  return next ? [next.flag] : [];
+};
 /** L'étape qui rallume chaque objet : le début de la salle de jeux, puis l'objet d'avant. */
 const litBy = (k: number): string => (k === 0 ? F.NannyErasure : (PLAY_OBJECTS[k - 1]?.flag ?? ''));
 
 /** Eden (D-118), assis sur le gros cube de la salle de jeux, près de sa tour de cubes. */
 export const EDEN_SEAT = { col: 32, row: 14 };
-const EDEN_TOWER = { col: 37, row: 14 };
+/** La tour d'Eden, sur le gros cube : elle monte à chaque cube rallumé (D-122). */
+export const EDEN_TOWER = { col: 37, row: 14 };
 
 /** Au dortoir de la classe de mer, assise sur sa couchette (D-105, D-119). */
 const DORM_BUNK = { col: 45, row: 9 };
@@ -127,23 +176,15 @@ const WAKE_AND_RETURN: readonly StoryStep[] = [
 
 /** La petite porte de la sieste, dans la maison (sa porte 10). */
 export const NAP_DOOR = { col: 63, row: 36 };
-/** Les quatre îlots faits : les quatre veilleuses allumées, la porte de la sieste s'ouvre. */
-export const ISLETS_DONE = [
-  F.NannyBedDone,
-  F.NannySchoolDone,
-  F.NannyStationDone,
-  F.NannySeaDone,
-] as const;
+/** Le temps que la vue glisse jusqu'à la porte de la sieste, ou en revienne (D-122). */
+const NAP_LOOK_MS = 2200;
+/** Les quatre îlots faits : les quatre cubes trouvés, la porte de la sieste s'ouvre. */
+export const ISLETS_DONE = ISLET_CUBES.map((c) => c.flag);
 /**
- * Les veilleuses de la porte de la sieste (D-107, D-110), une par îlot, dans l'ordre des îlots :
- * la tuile où chacune est posée (dessinée par `napdoor`, allumée par l'objet de l'îlot).
+ * Les creux de la porte de la sieste (D-110, D-122), un par îlot, dans l'ordre des îlots : la tuile
+ * où chacun est posé (dessiné vide par `napdoor`, rempli par le cube de l'îlot).
  */
-export const NAP_LIGHTS = [
-  { col: 62, row: 29 },
-  { col: 63, row: 29 },
-  { col: 64, row: 29 },
-  { col: 65, row: 29 },
-] as const;
+export const NAP_SLOTS = ISLET_CUBES.map((c) => c.slot);
 
 /** La porte du couloir mène dans l'entrée de la nounou, dans le noir (D-110). */
 export const NANNY_ENTER: readonly StoryStep[] = [
@@ -187,118 +228,34 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.lookMs },
     ],
   },
-  {
-    // L'îlot 1 (D-112) : en haut de l'arrosoir géant du jardin renversé, Roger, qu'on avait
-    // laissé dans la tour des objets perdus (D-68). On le regarde, on ne le prend pas (il n'est plus
-    // un souvenir à trouver) ; son court souvenir revient. Le passage près de lui s'ouvre vers la
-    // maison, et une veilleuse s'allume sur la porte de la sieste.
-    id: 'nanny-roger',
-    room: 'nanny-garden',
+  ...ISLET_CUBES.map((c): StoryTrigger => ({
+    // Au bout de chaque îlot (D-112 à D-115, D-122) : un cube de la tour d'Eden. Céleste le
+    // reconnaît (un cœur) et le prend : il rejoint son creux sur la porte de la sieste, et la
+    // bulle montre les cubes déjà trouvés (ceux qui restent, en creux). Les passages près de lui
+    // s'ouvrent, vers la maison et vers l'îlot voisin.
+    id: `nanny-${c.kind}`,
+    room: c.room,
     on: 'interact',
-    area: { col: ISLET_ROGER.col - 3, row: ISLET_ROGER.row - 2, w: 6, h: 3 },
-    mark: { col: ISLET_ROGER.col, row: ISLET_ROGER.row - 2 },
-    when: { all: [F.NannyHouse], none: [F.NannyBedDone] },
+    area: { col: c.at.col - 3, row: c.at.row - 2, w: 6, h: 3 },
+    mark: { col: c.at.col, row: c.at.row - 3 },
+    when: { all: [F.NannyHouse], none: [c.flag] },
     lock: true,
     steps: [
       {
         do: 'sparkle',
-        area: { col: ISLET_ROGER.col - 1, row: ISLET_ROGER.row - 2, w: 3, h: 3 },
+        area: { col: c.at.col - 1, row: c.at.row - 2, w: 3, h: 3 },
         ms: S.cradleSparkleMs + 600,
       },
       { do: 'wait', ms: S.cradleSparkleMs },
       { do: 'thought', icon: 'heart', ms: S.thoughtMs },
       { do: 'wait', ms: S.thoughtMs },
-      { do: 'flashback', id: 'roger', ms: S.flashbackMs },
-      { do: 'wait', ms: S.lookMs },
-      { do: 'flag', id: F.NannyBedDone },
-      {
-        do: 'sparkle',
-        area: { col: BED_DOOR.col - 1, row: BED_DOOR.row - 3, w: 3, h: 4 },
-        ms: S.lookMs,
-      },
+      { do: 'flag', id: c.flag },
+      { do: 'thought', icon: 'cubes', ms: S.thoughtMs + 1200 },
+      { do: 'wait', ms: S.thoughtMs + 1200 },
+      { do: 'sparkle', area: c.opens, ms: S.lookMs },
       { do: 'wait', ms: S.lookMs },
     ],
-  },
-  {
-    // L'îlot 2 (D-113) : sur l'abribus de la rue d'autrefois, la boîte à formes (D-64). On la
-    // regarde (elle n'a pas de court souvenir : un cœur). Les deux passages près d'elle s'ouvrent,
-    // vers la maison et vers la chambre d'autrefois ; une veilleuse s'allume sur la porte de la
-    // sieste.
-    id: 'nanny-shape-box',
-    room: 'nanny-street',
-    on: 'interact',
-    area: { col: ISLET_SHAPE_BOX.col - 2, row: ISLET_SHAPE_BOX.row - 2, w: 5, h: 3 },
-    mark: { col: ISLET_SHAPE_BOX.col, row: ISLET_SHAPE_BOX.row - 3 },
-    when: { all: [F.NannyHouse], none: [F.NannySchoolDone] },
-    lock: true,
-    steps: [
-      {
-        do: 'sparkle',
-        area: { col: ISLET_SHAPE_BOX.col - 1, row: ISLET_SHAPE_BOX.row - 2, w: 3, h: 3 },
-        ms: S.cradleSparkleMs + 600,
-      },
-      { do: 'wait', ms: S.cradleSparkleMs },
-      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
-      { do: 'wait', ms: S.thoughtMs },
-      { do: 'flag', id: F.NannySchoolDone },
-      { do: 'sparkle', area: { col: 71, row: 15, w: 10, h: 5 }, ms: S.lookMs },
-      { do: 'wait', ms: S.lookMs },
-    ],
-  },
-  {
-    // L'îlot 3 (D-114) : sur le toit de la dernière voiture du train d'autrefois, la cuisine rose
-    // (D-88). On la regarde (son souvenir jouable est trop long au milieu d'un îlot, D-107 : un
-    // cœur). Les deux passages près d'elle s'ouvrent, vers la maison et vers la rue d'autrefois ;
-    // une veilleuse s'allume sur la porte de la sieste.
-    id: 'nanny-pink-kitchen',
-    room: 'nanny-train',
-    on: 'interact',
-    area: { col: ISLET_PINK_KITCHEN.col - 2, row: ISLET_PINK_KITCHEN.row - 2, w: 5, h: 3 },
-    mark: { col: ISLET_PINK_KITCHEN.col, row: ISLET_PINK_KITCHEN.row - 3 },
-    when: { all: [F.NannyHouse], none: [F.NannyStationDone] },
-    lock: true,
-    steps: [
-      {
-        do: 'sparkle',
-        area: { col: ISLET_PINK_KITCHEN.col - 1, row: ISLET_PINK_KITCHEN.row - 2, w: 3, h: 3 },
-        ms: S.cradleSparkleMs + 600,
-      },
-      { do: 'wait', ms: S.cradleSparkleMs },
-      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
-      { do: 'wait', ms: S.thoughtMs },
-      { do: 'flag', id: F.NannyStationDone },
-      { do: 'sparkle', area: { col: 70, row: 4, w: 9, h: 5 }, ms: S.lookMs },
-      { do: 'wait', ms: S.lookMs },
-    ],
-  },
-  {
-    // L'îlot 4 (D-115) : sur le toit du carrousel d'autrefois, le livre musical (D-104). On le
-    // regarde (il reste là) ; son court souvenir revient. Les deux passages près de lui s'ouvrent,
-    // vers la maison et vers le train d'autrefois ; une veilleuse s'allume sur la porte de la
-    // sieste.
-    id: 'nanny-music-book',
-    room: 'nanny-carousel',
-    on: 'interact',
-    area: { col: ISLET_MUSIC_BOOK.col - 2, row: ISLET_MUSIC_BOOK.row - 2, w: 5, h: 3 },
-    mark: { col: ISLET_MUSIC_BOOK.col, row: ISLET_MUSIC_BOOK.row - 3 },
-    when: { all: [F.NannyHouse], none: [F.NannySeaDone] },
-    lock: true,
-    steps: [
-      {
-        do: 'sparkle',
-        area: { col: ISLET_MUSIC_BOOK.col - 1, row: ISLET_MUSIC_BOOK.row - 2, w: 3, h: 3 },
-        ms: S.cradleSparkleMs + 600,
-      },
-      { do: 'wait', ms: S.cradleSparkleMs },
-      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
-      { do: 'wait', ms: S.thoughtMs },
-      { do: 'flashback', id: 'music-book', ms: S.flashbackMs },
-      { do: 'wait', ms: S.lookMs },
-      { do: 'flag', id: F.NannySeaDone },
-      { do: 'sparkle', area: { col: 26, row: 3, w: 15, h: 5 }, ms: S.lookMs },
-      { do: 'wait', ms: S.lookMs },
-    ],
-  },
+  })),
   {
     // Le torchon blanc (D-116) : au bout du chemin le plus dur, dans le petit lit de la sieste. Ce
     // n'est pas un jouet, c'est le réconfort : Céleste le regarde, il reste là (un souvenir du
@@ -338,8 +295,8 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   ...PLAY_OBJECTS.map((o, k): StoryTrigger => ({
-    // La salle de jeux (D-117) : l'objet rallumé ; Céleste l'atteint et fait Agir. La couleur
-    // revient à une partie de la salle ; l'effacement recule (ses vagues repartent), puis
+    // La salle de jeux (D-117, D-122) : le cube rallumé ; Céleste l'atteint et fait Agir, il
+    // rejoint la tour d'Eden. La couleur revient à une partie de la salle ; l'effacement recule (ses vagues repartent), puis
     // accélère (`; @erase-speed:`). Au quatrième, il se dissout (`; @erase-until:`).
     id: `nanny-play-${String(k + 1)}`,
     room: 'nanny-playroom',
@@ -352,6 +309,12 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'sparkle', area: { col: o.at.col - 1, row: o.at.row - 2, w: 3, h: 3 }, ms: S.lookMs },
       { do: 'thought', icon: 'heart', ms: S.thoughtMs },
       { do: 'flag', id: o.flag },
+      // Le cube rejoint la tour d'Eden, sur le gros cube (D-122).
+      {
+        do: 'sparkle',
+        area: { col: EDEN_TOWER.col - 1, row: EDEN_TOWER.row - 3, w: 3, h: 4 },
+        ms: S.lookMs,
+      },
       ...(k === PLAY_OBJECTS.length - 1
         ? ([
             { do: 'shake', ms: S.omenPeakMs, strength: 0.6 },
@@ -393,7 +356,9 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // Dans la maison (D-110) : tout est immense. Céleste regarde ; le reflet n'est plus là.
+    // Dans la maison (D-110) : tout est immense. Céleste regarde ; le reflet n'est plus là. La vue
+    // glisse jusqu'à la petite porte de la sieste et ses quatre creux en forme de cube, qui
+    // scintillent, puis revient : la bulle montre les quatre cubes à trouver (D-122).
     id: 'nanny-house',
     room: 'nanny-house',
     on: 'touch',
@@ -405,61 +370,42 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.lookMs },
       { do: 'thought', icon: 'question', ms: S.thoughtMs },
       { do: 'wait', ms: S.thoughtMs },
+      { do: 'look', col: NAP_DOOR.col, row: NAP_DOOR.row - 5 },
+      { do: 'wait', ms: NAP_LOOK_MS },
+      {
+        do: 'sparkle',
+        area: { col: NAP_DOOR.col - 1, row: NAP_DOOR.row - 8, w: 4, h: 2 },
+        ms: 1800,
+      },
+      { do: 'wait', ms: 2000 },
+      { do: 'look' },
+      { do: 'wait', ms: NAP_LOOK_MS },
+      { do: 'thought', icon: 'cubes', ms: S.thoughtMs + 1200 },
+      { do: 'wait', ms: S.thoughtMs + 1200 },
     ],
   },
 ];
 
 const PROPS: StoryData['props'] = [
-  // Roger (D-112), en haut de l'arrosoir : il y reste, même après son souvenir.
-  { id: 'nanny-roger', room: 'nanny-garden', kind: 'roger', ...ISLET_ROGER, when: {} },
-  // La veilleuse de l'îlot 1 sur la porte de la sieste, rose, une fois Roger retrouvé.
-  {
-    id: 'nap-light-bed',
-    room: 'nanny-house',
-    kind: 'nap-light-bed',
-    ...NAP_LIGHTS[0],
-    when: { all: [F.NannyBedDone] },
-  },
-  // La boîte à formes (D-113), sur l'abribus : elle y reste.
-  {
-    id: 'nanny-shape-box',
-    room: 'nanny-street',
-    kind: 'shape-box',
-    ...ISLET_SHAPE_BOX,
-    when: {},
-  },
-  // La veilleuse de l'îlot 2, jaune, une fois la boîte à formes retrouvée.
-  {
-    id: 'nap-light-school',
-    room: 'nanny-house',
-    kind: 'nap-light-school',
-    ...NAP_LIGHTS[1],
-    when: { all: [F.NannySchoolDone] },
-  },
-  // La cuisine rose (D-114), sur le toit du train : elle y reste.
-  {
-    id: 'nanny-pink-kitchen',
-    room: 'nanny-train',
-    kind: 'pink-kitchen',
-    ...ISLET_PINK_KITCHEN,
-    when: {},
-  },
-  // La veilleuse de l'îlot 3, turquoise, une fois la cuisine rose retrouvée.
-  {
-    id: 'nap-light-station',
-    room: 'nanny-house',
-    kind: 'nap-light-station',
-    ...NAP_LIGHTS[2],
-    when: { all: [F.NannyStationDone] },
-  },
-  // Le livre musical (D-115), sur le toit du carrousel : il y reste.
-  {
-    id: 'nanny-music-book',
-    room: 'nanny-carousel',
-    kind: 'music-book',
-    ...ISLET_MUSIC_BOOK,
-    when: {},
-  },
+  // Les cubes de la tour d'Eden (D-122) : au bout de l'îlot tant qu'il n'est pas pris, puis dans
+  // son creux, sur la porte de la sieste.
+  ...ISLET_CUBES.flatMap((c): StoryProp[] => [
+    {
+      id: `nanny-${c.kind}`,
+      room: c.room,
+      kind: c.kind,
+      ...c.at,
+      when: { none: [c.flag] },
+      instant: true,
+    },
+    {
+      id: c.nap,
+      room: 'nanny-house',
+      kind: c.nap,
+      ...c.slot,
+      when: { all: [c.flag] },
+    },
+  ]),
   // Le torchon blanc (D-116), plié dans le petit lit : il y reste.
   {
     id: 'nanny-white-cloth',
@@ -468,8 +414,9 @@ const PROPS: StoryData['props'] = [
     ...WHITE_CLOTH,
     when: {},
   },
-  // La salle de jeux (D-117) : chaque objet pâli tant qu'il n'est pas rallumé, en couleur ensuite ;
-  // la couleur qui revient à une partie de la salle ; l'effacement au centre, jusqu'à sa dissolution.
+  // La salle de jeux (D-117, D-122) : chaque cube pâli tant qu'il n'est pas rallumé, en couleur
+  // ensuite ; touché, il rejoint la tour d'Eden sur le gros cube, qui monte d'un cube. La couleur
+  // revient à une partie de la salle ; l'effacement au centre, jusqu'à sa dissolution.
   ...PLAY_OBJECTS.flatMap((o, k): StoryProp[] => [
     {
       id: `play-${o.kind}-pale`,
@@ -483,7 +430,16 @@ const PROPS: StoryData['props'] = [
       room: 'nanny-playroom',
       kind: o.kind,
       ...o.at,
-      when: { all: [litBy(k)] },
+      when: { all: [litBy(k)], none: [o.flag] },
+      instant: true,
+    },
+    {
+      id: `play-tower-${String(k + 1)}`,
+      room: 'nanny-playroom',
+      kind: PLAY_TOWER[k] ?? 'cube-tower-4',
+      ...EDEN_TOWER,
+      when: { all: [o.flag], none: nextPlay(k) },
+      instant: true,
     },
     {
       id: `play-bloom-${String(k + 1)}`,
@@ -501,29 +457,14 @@ const PROPS: StoryData['props'] = [
     row: 20,
     when: { none: [F.NannyErasureGone] },
   },
-  // Eden (D-118), dans la salle de jeux rendue à ses couleurs, près de sa tour de cubes ; la tour
-  // reste après lui.
+  // Eden (D-118), dans la salle de jeux rendue à ses couleurs, près de sa tour de cubes (la tour
+  // reste après lui).
   {
     id: 'nanny-eden',
     room: 'nanny-playroom',
     kind: 'eden-small',
     ...EDEN_SEAT,
     when: { all: [F.NannyErasureGone], none: [F.NannyEden] },
-  },
-  {
-    id: 'nanny-eden-tower',
-    room: 'nanny-playroom',
-    kind: 'cube-tower-4',
-    ...EDEN_TOWER,
-    when: { all: [F.NannyErasureGone] },
-  },
-  // La veilleuse de l'îlot 4, bleue, une fois le livre musical retrouvé.
-  {
-    id: 'nap-light-sea',
-    room: 'nanny-house',
-    kind: 'nap-light-sea',
-    ...NAP_LIGHTS[3],
-    when: { all: [F.NannySeaDone] },
   },
   // Le reflet (D-110) : Céleste toute petite dans la vitre du miroir, puis de l'autre côté.
   {

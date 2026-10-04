@@ -1,7 +1,7 @@
 ; L'avant-dernier niveau (D-107, D-112), îlot de mémoire 1 : le jardin renversé (D-49), revenu
 ; dans le monde de la nounou. Des pots géants dont les ronces n'existent que dans une couche (on
 ; atterrit dans l'autre), puis l'arrosoir géant : on grimpe ses prises, qui alternent de couche.
-; Tout en haut, Roger (D-68) : son court souvenir ; un passage s'ouvre vers la maison (raccourci).
+; Tout en haut, le cube rose de la tour d'Eden (D-122) ; un passage s'ouvre vers la maison (raccourci).
 ; Défi : la fleur géante, jusqu'au rebord de sa trouvaille. Dans le deuxième pot, ouvert dans le
 ; souvenir, une trouvaille. Sortie (1) vers la chambre ; porte (2) vers la maison.
 ; @name: Le jardin renversé
