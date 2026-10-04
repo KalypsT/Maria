@@ -23,7 +23,7 @@ import { level, zone } from './zoneGraph';
 const HZ = 120;
 const DATA = PLAYABLE_MEMORIES.eden;
 const ms = (value: number) => Math.ceil((value / 1000) * HZ);
-const EDEN_KINDS = new Set(['eden-small', 'eden-peek', 'eden-laugh']);
+const EDEN_KINDS = new Set(['eden-small', 'eden-cheer', 'eden-peek', 'eden-laugh']);
 
 function inside(area: TileArea) {
   const { width, height } = TODDLER_LOOK.hitbox;
@@ -65,6 +65,11 @@ describe('Eden et son souvenir jouable (D-118)', () => {
     let before = edens(flags);
     expect(before.length).toBe(1);
     for (const action of DATA.actions) {
+      if (action.shows) {
+        // À l'écran, au geste : Eden ne change pas.
+        flags.add(action.shows);
+        expect(edens(flags)).toEqual(before);
+      }
       if (action.sets) {
         flags.add(action.sets);
       }
@@ -79,16 +84,34 @@ describe('Eden et son souvenir jouable (D-118)', () => {
       }
       before = after;
     }
-    // La tour : un cube, deux (Céleste), puis quatre (Eden pose le sien, dans le noir).
+    // La tour, chacun son tour (D-122) : rien, un cube (Céleste, à l'écran), deux (Eden, dans le
+    // noir), trois (Céleste), puis tombée (Eden pose le quatrième, dans le noir).
     const tower = (fs: Set<string>) =>
       DATA.props.filter((p) => p.kind.startsWith('cube-tower') && checkCondition(fs, p.when));
-    expect(tower(new Set()).map((p) => p.kind)).toEqual(['cube-tower-1']);
-    expect(tower(new Set([E.tower2])).map((p) => p.kind)).toEqual(['cube-tower-2']);
-    expect(tower(new Set([E.tower2, E.tower4])).map((p) => p.kind)).toEqual(['cube-tower-4']);
+    const seq = new Set<string>();
+    const kinds: string[][] = [tower(seq).map((p) => p.kind)];
+    for (const step of [E.tower1, E.tower2, E.tower3, E.fallen, E.hideA, E.gone]) {
+      seq.add(step);
+      kinds.push(tower(seq).map((p) => p.kind));
+    }
+    expect(kinds).toEqual([
+      [],
+      ['cube-tower-1'],
+      ['cube-tower-2'],
+      ['cube-tower-3'],
+      ['cube-tower-fallen'],
+      ['cube-tower-fallen'],
+      ['cube-tower-fallen'],
+    ]);
+    const towerActions = DATA.actions.filter((a) => a.shows);
+    expect(towerActions.map((a) => [a.shows, a.sets, a.blink])).toEqual([
+      [E.tower1, E.tower2, true],
+      [E.tower3, E.fallen, true],
+    ]);
     // La nounou regarde, toujours là, sans texte ; Maria n'y est pas.
-    expect(DATA.props.some((p) => p.kind === 'nanny-shadow' && checkCondition(flags, p.when))).toBe(
-      true,
-    );
+    expect(
+      DATA.props.filter((p) => p.kind.startsWith('nanny') && checkCondition(flags, p.when)),
+    ).toHaveLength(1);
     expect(DATA.props.some((p) => p.kind.startsWith('maria'))).toBe(false);
   });
 
@@ -108,6 +131,7 @@ describe('Eden et son souvenir jouable (D-118)', () => {
       const wait =
         ms(PLAYABLE_MEMORY_TIMING.gestureMs) +
         (action.blink ? ms(PLAYABLE_MEMORY_TIMING.blinkMs) : 0) +
+        (action.beats ?? 0) * ms(PLAYABLE_MEMORY_TIMING.beatMs) +
         2;
       for (let i = 0; i < wait; i++) {
         events |= memory.step(box, false);
@@ -129,6 +153,67 @@ describe('Eden et son souvenir jouable (D-118)', () => {
     }
     expect(sawAlone).toBe(true);
     expect(memory.done).toBe(true);
+  });
+
+  it('le cache-cache (D-122) : Céleste compte, Eden se cache ; on cherche seule avant l’étincelle', () => {
+    const counts = DATA.actions.filter((a) => a.gesture === 'count');
+    expect(counts).toHaveLength(2);
+    for (const c of counts) {
+      expect(c.blink).toBe(true);
+      expect(c.beats ?? 0).toBeGreaterThanOrEqual(3);
+    }
+    // Chaque compte est suivi d'une recherche dont l'étincelle attend.
+    DATA.actions.forEach((a, k) => {
+      if (a.gesture === 'count') {
+        expect(DATA.actions[k + 1]?.markDelayMs ?? 0).toBeGreaterThan(2000);
+      }
+    });
+    // La nounou tourne la tête vers la seconde cachette, le temps de la trouver.
+    const nanny = (fs: Set<string>) =>
+      DATA.props.filter((p) => p.kind.startsWith('nanny') && checkCondition(fs, p.when));
+    expect(nanny(new Set([E.hideA])).map((p) => p.kind)).toEqual(['nanny-shadow']);
+    expect(nanny(new Set([E.hideA, E.hideB])).map((p) => p.kind)).toEqual(['nanny-look']);
+    expect(nanny(new Set([E.hideA, E.hideB, E.found])).map((p) => p.kind)).toEqual([
+      'nanny-shadow',
+    ]);
+
+    // Joué : le compte tient le noir plus longtemps qu'un clignement ; l'étincelle attend.
+    const memory = new PlayableMemory(DATA, HZ);
+    for (let i = 0; i < ms(PLAYABLE_MEMORY_TIMING.introMs) + 1; i++) {
+      memory.step(away, false);
+    }
+    const countAt = DATA.actions.findIndex((a) => a.gesture === 'count');
+    for (const action of DATA.actions.slice(0, countAt)) {
+      memory.step(inside(action.area), true);
+      for (
+        let i = 0;
+        i < ms(PLAYABLE_MEMORY_TIMING.gestureMs + PLAYABLE_MEMORY_TIMING.blinkMs) + 2;
+        i++
+      ) {
+        memory.step(inside(action.area), false);
+      }
+    }
+    const count = DATA.actions[countAt];
+    if (!count) {
+      throw new Error('compte absent');
+    }
+    memory.step(inside(count.area), true);
+    const plain = ms(PLAYABLE_MEMORY_TIMING.gestureMs + PLAYABLE_MEMORY_TIMING.blinkMs) + 2;
+    for (let i = 0; i < plain; i++) {
+      memory.step(away, false);
+    }
+    // Encore dans le noir : on compte.
+    expect(memory.veil).toBeGreaterThan(0.5);
+    for (let i = 0; i < (count.beats ?? 0) * ms(PLAYABLE_MEMORY_TIMING.beatMs); i++) {
+      memory.step(away, false);
+    }
+    expect(memory.veil).toBeLessThan(0.05);
+    expect(memory.flags.has(E.hideA)).toBe(true);
+    expect(memory.markShown).toBe(false);
+    for (let i = 0; i < ms(DATA.actions[countAt + 1]?.markDelayMs ?? 0) + 1; i++) {
+      memory.step(away, false);
+    }
+    expect(memory.markShown).toBe(true);
   });
 
   it('dans la salle de jeux rendue à ses couleurs : Eden, un cœur, le souvenir, puis il n’est plus là', () => {
