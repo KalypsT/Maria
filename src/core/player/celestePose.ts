@@ -69,7 +69,7 @@ export class CelestePoser {
    * Souvenir jouable (D-89) : geste « les mains devant » en cours (remuer, verser, poser), jusqu'à
    * `gestureSteps` pas ; `carrying` : elle tient la tasse devant elle, les deux mains.
    */
-  gesture: 'stir' | 'pour' | 'serve' | null = null;
+  gesture: 'stir' | 'pour' | 'serve' | 'count' | null = null;
   gestureSteps = 0;
   carrying = false;
   private time = 0;
@@ -300,6 +300,11 @@ export class CelestePoser {
       } else if (this.gesture === 'pour') {
         t.armFront = 96 * DEG;
         t.armBack = 60 * DEG;
+      } else if (this.gesture === 'count') {
+        // Les mains sur les yeux, la tête baissée : elle compte (le cache-cache, D-122).
+        t.headTilt = 10 * DEG;
+        t.armFront = 118 * DEG;
+        t.armBack = 112 * DEG;
       } else {
         t.armFront = 48 * DEG;
         t.armBack = 44 * DEG;

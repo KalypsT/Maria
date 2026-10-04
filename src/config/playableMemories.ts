@@ -10,8 +10,11 @@ import type { StoryProp, TileArea } from '../core/story/story';
  * un autre souvenir (Eden, niveau 7) n'est qu'une autre salle et une autre liste. PLACEHOLDER.
  */
 
-/** Geste de Céleste pour une action (pose « les mains devant »). */
-export type MemoryGesture = 'stir' | 'pour' | 'serve';
+/**
+ * Geste de Céleste pour une action (pose « les mains devant ») ; `count` : les mains sur les yeux,
+ * elle compte (le cache-cache, D-122).
+ */
+export type MemoryGesture = 'stir' | 'pour' | 'serve' | 'count';
 
 export interface MemoryAction {
   /** Zone (tuiles) où Agir fait l'action. */
@@ -23,6 +26,18 @@ export interface MemoryAction {
   readonly carry: boolean;
   /** Étape du souvenir posée par l'action (objets qui changent ; jamais sauvegardée). */
   readonly sets?: string;
+  /**
+   * Étape posée dès le geste, à l'écran, quand `sets` attend le noir d'un clignement (D-122) : on
+   * voit Céleste poser son cube, puis, dans le noir, Eden pose le sien.
+   */
+  readonly shows?: string;
+  /**
+   * Le clignement dure `beats` battements de noir (D-122) : Céleste compte, les yeux cachés ; le
+   * noir respire à chaque battement. Sans : un clignement simple.
+   */
+  readonly beats?: number;
+  /** L'étincelle n'apparaît qu'après ce délai (ms) : on cherche d'abord seule (D-122). */
+  readonly markDelayMs?: number;
   /** Scintillement (vapeur, thé versé) au moment du geste. */
   readonly sparkle?: TileArea;
   /**
@@ -80,6 +95,8 @@ export const PLAYABLE_MEMORY_TIMING = {
   aloneMs: 2800,
   /** Un clignement dans le noir (D-118) : fondu, noir, retour. */
   blinkMs: 1400,
+  /** Un battement du noir quand Céleste compte (D-122), ajouté au clignement. */
+  beatMs: 650,
 };
 
 /** Étapes du souvenir de la cuisine (jamais sauvegardées). */
@@ -155,16 +172,24 @@ const KITCHEN: PlayableMemoryData = {
   ],
 };
 
-/** Étapes du souvenir d'Eden (D-118, jamais sauvegardées). */
+/** Étapes du souvenir d'Eden (D-118, D-122, jamais sauvegardées). */
 export const EDEN_MEMORY_STEP = {
-  /** Un cube pris dans le tas, puis posé sur la tour. */
+  /** Un cube pris dans le tas. */
   cube1: 'memory.eden-cube-1',
+  /** Céleste pose le premier cube (à l'écran). */
+  tower1: 'memory.eden-tower-1',
+  /** Dans le noir, Eden a posé le sien : deux cubes, il lève les bras. */
   tower2: 'memory.eden-tower-2',
   cube2: 'memory.eden-cube-2',
-  /** Dans le noir, Eden a posé le sien : la tour a quatre cubes. */
-  tower4: 'memory.eden-tower-4',
-  /** Cache-cache : Eden s'est caché derrière le pouf, puis derrière le rideau. */
+  /** Céleste pose le troisième (à l'écran). */
+  tower3: 'memory.eden-tower-3',
+  /** Dans le noir, Eden a posé le quatrième : la tour est tombée, il rit. */
+  fallen: 'memory.eden-fallen',
+  /** Céleste a compté : Eden s'est caché derrière le pouf (sa tête dépasse). */
   hideA: 'memory.eden-hide-a',
+  /** Trouvé : il rit, debout près du pouf. */
+  foundA: 'memory.eden-found-a',
+  /** Céleste a compté encore : Eden derrière le coffre à jouets ; la nounou regarde vers lui. */
   hideB: 'memory.eden-hide-b',
   /** Trouvé : il rit. */
   found: 'memory.eden-found',
@@ -178,7 +203,14 @@ const EDEN_AT = { col: 21, row: 19 };
 /** Les cachettes : derrière le pouf, derrière le coffre à jouets (sa tête dépasse, dessus). */
 const HIDE_A = { col: 31, row: 17 };
 const HIDE_B = { col: 4, row: 17 };
+/** Trouvé, Eden rit, debout près de sa cachette. */
+const FOUND_A = { col: 26, row: 19 };
+const FOUND_B = { col: 8, row: 19 };
 const NANNY = { col: 40, row: 19 };
+/** Le compte du cache-cache : trois battements de noir (D-122). */
+const COUNT_BEATS = 3;
+/** On cherche d'abord seule ; l'étincelle n'aide qu'après (ms). PROVISOIRE. */
+const SEEK_HINT_MS = 4000;
 /** Céleste se tient devant une cachette (par terre, à côté). */
 const beside = (p: { col: number; row: number }, side: -1 | 1) => ({
   area: { col: side < 0 ? p.col - 4 : p.col, row: p.row, w: 4, h: 3 },
@@ -192,14 +224,48 @@ const at = (p: { col: number; row: number }, w = 4) => ({
   mark: { col: p.col, row: p.row - 3 },
 });
 
+/** Eden selon le moment (un seul à la fois) : `kind`, où, et entre quelles étapes. */
+const EDEN_POSES: readonly {
+  readonly kind: 'eden-small' | 'eden-cheer' | 'eden-laugh' | 'eden-peek';
+  readonly at: { readonly col: number; readonly row: number };
+  readonly from: string | null;
+  readonly until: string;
+  readonly flip?: boolean;
+}[] = [
+  { kind: 'eden-small', at: EDEN_AT, from: null, until: E.tower2, flip: true },
+  { kind: 'eden-cheer', at: EDEN_AT, from: E.tower2, until: E.fallen, flip: true },
+  { kind: 'eden-laugh', at: EDEN_AT, from: E.fallen, until: E.hideA, flip: true },
+  { kind: 'eden-peek', at: HIDE_A, from: E.hideA, until: E.foundA },
+  { kind: 'eden-laugh', at: FOUND_A, from: E.foundA, until: E.hideB },
+  { kind: 'eden-peek', at: HIDE_B, from: E.hideB, until: E.found, flip: true },
+  { kind: 'eden-laugh', at: FOUND_B, from: E.found, until: E.gone, flip: true },
+];
+
+/** La tour selon le moment : rien, puis un à trois cubes, puis tombée. */
+const TOWER_STATES: readonly {
+  readonly kind: 'cube-tower-1' | 'cube-tower-2' | 'cube-tower-3' | 'cube-tower-fallen';
+  readonly from: string;
+  readonly until: string | null;
+}[] = [
+  { kind: 'cube-tower-1', from: E.tower1, until: E.tower2 },
+  { kind: 'cube-tower-2', from: E.tower2, until: E.tower3 },
+  { kind: 'cube-tower-3', from: E.tower3, until: E.fallen },
+  { kind: 'cube-tower-fallen', from: E.fallen, until: null },
+];
+
 /**
- * Le souvenir d'Eden (D-107, D-118) : chez la nounou, quand ils étaient tout petits. Céleste et
- * Eden construisent une tour de cubes à deux (elle prend un cube dans le tas et le pose ; dans le
- * noir d'un clignement, Eden a posé le sien), puis un cache-cache simple : Eden se cache (on ne le
- * voit jamais bouger, il change de place dans le noir), Céleste le trouve derrière le pouf, puis
- * derrière le rideau ; il rit. La nounou, une silhouette bienveillante, regarde depuis son fauteuil,
- * sans un mot. Un cœur ; dans le noir, Eden n'est plus là ; Céleste reste seule. Sans texte. Maria
- * n'y est pas (pilier 5). Plus long que celui de la cuisine.
+ * Le souvenir d'Eden (D-107, D-118, retravaillé en D-122) : chez la nounou, quand ils étaient tout
+ * petits. Sans texte, en deux jeux qu'on comprend sans mot :
+ * - **la tour, chacun son tour** : Céleste prend un cube dans le tas et le pose ; dans le noir d'un
+ *   clignement, Eden a posé le sien (il lève les bras) ; elle pose le troisième ; dans le noir,
+ *   Eden pose le quatrième, la tour est tombée et il rit. Les cubes sont ceux des îlots ;
+ * - **le cache-cache** : Céleste se cache les yeux et compte (le noir respire trois fois) ; Eden
+ *   n'est plus là, sa tête dépasse du pouf ; on le trouve, il rit. Elle compte encore : il est
+ *   derrière le coffre à jouets, et la nounou tourne la tête vers lui, pour aider. Trouvé, il rit.
+ *   L'étincelle n'aide qu'après quelques secondes.
+ * Eden ne bouge jamais à l'écran (il change de place dans le noir). La nounou, une silhouette
+ * bienveillante, regarde depuis son fauteuil. Un cœur ; dans le noir, Eden n'est plus là ; Céleste
+ * reste seule. Maria n'y est pas (pilier 5).
  */
 const EDEN: PlayableMemoryData = {
   room: 'memory-eden',
@@ -208,78 +274,88 @@ const EDEN: PlayableMemoryData = {
   alone: { keepCeleste: true, sets: E.gone },
   actions: [
     { ...at(PILE), gesture: 'serve', carry: true, sets: E.cube1 },
-    { ...at(TOWER), gesture: 'serve', carry: false, sets: E.tower2 },
+    { ...at(TOWER), gesture: 'serve', carry: false, shows: E.tower1, sets: E.tower2, blink: true },
     { ...at(PILE), gesture: 'serve', carry: true, sets: E.cube2 },
-    { ...at(TOWER), gesture: 'serve', carry: false, sets: E.tower4, blink: true },
-    // Le cache-cache : Céleste touche Eden (à lui de se cacher) ; dans le noir, il est caché.
-    { ...at(EDEN_AT), gesture: 'serve', carry: false, sets: E.hideA, blink: true },
-    { ...beside(HIDE_A, -1), gesture: 'serve', carry: false, sets: E.hideB, blink: true },
-    { ...beside(HIDE_B, 1), gesture: 'serve', carry: false, sets: E.found, blink: true },
+    { ...at(TOWER), gesture: 'serve', carry: false, shows: E.tower3, sets: E.fallen, blink: true },
+    // Le cache-cache : Céleste se cache les yeux et compte ; dans le noir, il se cache.
+    {
+      ...at(EDEN_AT),
+      gesture: 'count',
+      carry: false,
+      sets: E.hideA,
+      blink: true,
+      beats: COUNT_BEATS,
+    },
+    {
+      ...beside(HIDE_A, -1),
+      gesture: 'serve',
+      carry: false,
+      sets: E.foundA,
+      blink: true,
+      markDelayMs: SEEK_HINT_MS,
+    },
+    {
+      ...at(FOUND_A),
+      gesture: 'count',
+      carry: false,
+      sets: E.hideB,
+      blink: true,
+      beats: COUNT_BEATS,
+    },
+    {
+      ...beside(HIDE_B, 1),
+      gesture: 'serve',
+      carry: false,
+      sets: E.found,
+      blink: true,
+      markDelayMs: SEEK_HINT_MS,
+    },
   ],
   props: [
     { id: 'eden-pile', room: 'memory-eden', kind: 'cube-pile', ...PILE, when: {} },
-    {
-      id: 'eden-tower-1',
+    ...TOWER_STATES.map((t): StoryProp => ({
+      id: `eden-${t.kind}`,
       room: 'memory-eden',
-      kind: 'cube-tower-1',
+      kind: t.kind,
       ...TOWER,
-      when: { none: [E.tower2] },
+      when: { all: [t.from], none: t.until ? [t.until] : [] },
       instant: true,
-    },
-    {
-      id: 'eden-tower-2',
+    })),
+    ...EDEN_POSES.map((e, k): StoryProp => ({
+      id: `eden-${String(k)}-${e.kind}`,
       room: 'memory-eden',
-      kind: 'cube-tower-2',
-      ...TOWER,
-      when: { all: [E.tower2], none: [E.tower4] },
+      kind: e.kind,
+      ...e.at,
+      flip: e.flip ?? false,
+      when: { all: e.from ? [e.from] : [], none: [e.until] },
       instant: true,
-    },
+    })),
+    // La nounou, dans son fauteuil : une silhouette bienveillante qui regarde, sans visage net ;
+    // pendant la seconde cachette, elle tourne la tête vers le coffre à jouets.
     {
-      id: 'eden-tower-4',
+      id: 'eden-nanny',
       room: 'memory-eden',
-      kind: 'cube-tower-4',
-      ...TOWER,
-      when: { all: [E.tower4] },
-      instant: true,
-    },
-    // Eden : assis près de la tour, puis caché (on voit dépasser sa tête), puis trouvé, il rit.
-    {
-      id: 'eden-sit',
-      room: 'memory-eden',
-      kind: 'eden-small',
-      ...EDEN_AT,
+      kind: 'nanny-shadow',
+      ...NANNY,
       flip: true,
-      when: { none: [E.hideA] },
-      instant: true,
+      when: { none: [E.hideB] },
     },
     {
-      id: 'eden-hide-a',
+      id: 'eden-nanny-look',
       room: 'memory-eden',
-      kind: 'eden-peek',
-      ...HIDE_A,
-      when: { all: [E.hideA], none: [E.hideB] },
-      instant: true,
-    },
-    {
-      id: 'eden-hide-b',
-      room: 'memory-eden',
-      kind: 'eden-peek',
-      ...HIDE_B,
+      kind: 'nanny-look',
+      ...NANNY,
       flip: true,
       when: { all: [E.hideB], none: [E.found] },
-      instant: true,
     },
     {
-      id: 'eden-found',
+      id: 'eden-nanny-after',
       room: 'memory-eden',
-      kind: 'eden-laugh',
-      col: HIDE_B.col + 3,
-      row: 19,
-      when: { all: [E.found], none: [E.gone] },
-      instant: true,
+      kind: 'nanny-shadow',
+      ...NANNY,
+      flip: true,
+      when: { all: [E.found] },
     },
-    // La nounou, dans son fauteuil : une silhouette bienveillante qui regarde, sans visage net.
-    { id: 'eden-nanny', room: 'memory-eden', kind: 'nanny-shadow', ...NANNY, flip: true, when: {} },
   ],
 };
 

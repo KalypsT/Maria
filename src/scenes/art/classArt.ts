@@ -17,8 +17,8 @@ interface Kid {
   legs: string;
   legsDark: string;
   shoe: string;
-  /** Coiffure : deux macarons, une casquette, un carré, deux couettes. */
-  style: 'puffs' | 'cap' | 'bob' | 'pigtails' | 'short';
+  /** Coiffure : deux macarons, une casquette, un carré, deux couettes, courte, au bol. */
+  style: 'puffs' | 'cap' | 'bob' | 'pigtails' | 'short' | 'bowl';
   /** Lunettes rondes (Céleste, spec §2). */
   glasses?: boolean;
 }
@@ -74,19 +74,19 @@ const TODDLER: Kid = {
   glasses: true,
 };
 /**
- * Eden tout petit (D-118), l'ami de Céleste chez la nounou : cheveux courts et bruns, un pull
+ * Eden tout petit (D-118, D-122), l'ami de Céleste chez la nounou : blond, une coupe au bol, un pull
  * jaune, une salopette bleue. Un vrai petit garçon. PLACEHOLDER.
  */
 const EDEN: Kid = {
-  skin: '#c99068',
-  skinDark: '#b07a56',
-  hair: '#2e2018',
+  skin: '#f0c7a5',
+  skinDark: '#d8ab88',
+  hair: '#e6c46a',
   top: '#e9b949',
   topDark: '#d0a038',
   legs: '#5a7cb8',
   legsDark: '#4a6aa0',
   shoe: '#8a5a3a',
-  style: 'short',
+  style: 'bowl',
 };
 /** Céleste toute petite est dessinée comme un enfant de la classe, en plus petit. */
 const TODDLER_SCALE = 0.8;
@@ -142,7 +142,24 @@ function kidHead(
   ctx.fillStyle = kid.skinDark;
   disc(ctx, x - r * 0.15, y + r * 0.15, r * 0.22);
   ctx.fillStyle = kid.hair;
-  if (kid.style === 'cap') {
+  if (kid.style === 'bowl') {
+    // La coupe au bol : un casque de cheveux arrondi, la frange droite au-dessus des yeux, la nuque
+    // couverte jusqu'au bas de l'oreille.
+    ctx.beginPath();
+    ctx.moveTo(x - r * 1.08, y + r * 0.45);
+    ctx.arc(x, y - r * 0.08, r * 1.1, Math.PI * 0.97, Math.PI * 2.03);
+    ctx.lineTo(x + r * 1.08, y - r * 0.18);
+    ctx.lineTo(x - r * 0.15, y - r * 0.18);
+    ctx.lineTo(x - r * 0.15, y + r * 0.45);
+    ctx.closePath();
+    ctx.fill();
+    // Un reflet clair sur le dessus.
+    ctx.strokeStyle = 'rgba(255, 250, 225, 0.55)';
+    ctx.lineWidth = Math.max(0.5, r * 0.14);
+    ctx.beginPath();
+    ctx.arc(x, y - r * 0.08, r * 0.78, Math.PI * 1.25, Math.PI * 1.6);
+    ctx.stroke();
+  } else if (kid.style === 'cap') {
     // Casquette rouge, la visière vers l'avant.
     ctx.fillStyle = '#c8473f';
     ctx.beginPath();
@@ -217,13 +234,17 @@ function kidStanding(
   ctx.restore();
 }
 
-/** Enfant assis au bord d'une couchette, les jambes devant. */
+/**
+ * Enfant assis au bord d'une couchette, les jambes devant ; `cheer` : les deux bras levés, il est
+ * content (Eden vient de poser son cube, D-122).
+ */
 function kidSitting(
   ctx: CanvasRenderingContext2D,
   kid: Kid,
   w: number,
   h: number,
   frame: number,
+  cheer = false,
 ): void {
   const hip = w / 2 - 3;
   ctx.fillStyle = kid.legs;
@@ -233,12 +254,21 @@ function kidSitting(
   ctx.fillStyle = kid.top;
   round(ctx, hip - 3, h - 14, 8, 11, 3);
   kidHead(ctx, kid, hip + 1.5, h - 18.5, 5);
-  ctx.save();
-  ctx.translate(hip + 2, h - 12.5);
-  ctx.rotate(-(frame === 0 ? 0.6 : 0.75));
-  ctx.fillStyle = kid.skin;
-  round(ctx, -1.1, 0, 2.2, 6, 1);
-  ctx.restore();
+  // Les bras : un seul, posé ; ou les deux levés bien au-dessus de la tête (content).
+  const arms = cheer ? [2.4, 3.9] : [frame === 0 ? 0.6 : 0.75];
+  const length = cheer ? 9 : 6;
+  for (const angle of arms) {
+    ctx.save();
+    ctx.translate(hip + 1.5, h - 13);
+    ctx.rotate(-(angle + (cheer && frame === 1 ? 0.12 : 0)));
+    ctx.fillStyle = cheer ? kid.top : kid.skin;
+    round(ctx, -1.1, 0, 2.2, length, 1);
+    if (cheer) {
+      ctx.fillStyle = kid.skin;
+      disc(ctx, 0, length + 0.6, 1.4);
+    }
+    ctx.restore();
+  }
 }
 
 /** Assise par terre, juste après avoir glissé sous la grille : appuyée sur une main, elle rit. */
@@ -333,6 +363,13 @@ export function drawClassCharacter(
       kidSitting(ctx, EDEN, w / TODDLER_SCALE, h / TODDLER_SCALE, frame);
       ctx.restore();
       return true;
+    case 'eden-cheer':
+      // Il vient de poser son cube : assis, les deux bras levés.
+      ctx.save();
+      ctx.scale(TODDLER_SCALE, TODDLER_SCALE);
+      kidSitting(ctx, EDEN, w / TODDLER_SCALE, h / TODDLER_SCALE, frame, true);
+      ctx.restore();
+      return true;
     case 'eden-laugh':
       // Trouvé : debout, il rit, un bras levé.
       ctx.save();
@@ -348,6 +385,9 @@ export function drawClassCharacter(
     }
     case 'nanny-shadow':
       nannyShadow(ctx, w, h, frame);
+      return true;
+    case 'nanny-look':
+      nannyShadow(ctx, w, h, frame, true);
       return true;
     case 'reflection-through':
       // De l'autre côté du miroir, elle fait signe.
@@ -400,7 +440,17 @@ export function drawClassCharacter(
  * regarde les enfants ; pas de visage net, des couleurs chaudes et passées. Bienveillante. Elle ne
  * parle pas. PLACEHOLDER.
  */
-function nannyShadow(ctx: CanvasRenderingContext2D, w: number, h: number, frame: number): void {
+/**
+ * La nounou dans son fauteuil (D-118) ; `look` : elle tourne la tête vers la cachette d'Eden et la
+ * montre d'une main, pour aider Céleste (D-122). Dessinée tournée vers la droite.
+ */
+function nannyShadow(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  frame: number,
+  look = false,
+): void {
   // Le fauteuil.
   ctx.fillStyle = 'rgba(150, 110, 90, 0.55)';
   round(ctx, w * 0.1, h * 0.45, w * 0.8, h * 0.55, w * 0.12);
@@ -409,17 +459,30 @@ function nannyShadow(ctx: CanvasRenderingContext2D, w: number, h: number, frame:
   round(ctx, w * 0.25, h * 0.32, w * 0.5, h * 0.5, w * 0.2);
   ctx.beginPath();
   ctx.ellipse(
-    w * 0.46,
+    look ? w * 0.52 : w * 0.46,
     h * 0.24 + (frame === 0 ? 0 : 0.6),
     w * 0.15,
     h * 0.12,
-    -0.25,
+    look ? 0.35 : -0.25,
     0,
     Math.PI * 2,
   );
   ctx.fill();
-  // Ses mains posées sur les genoux, et un tricot.
   ctx.fillStyle = 'rgba(214, 170, 150, 0.6)';
+  if (look) {
+    // Une main tendue vers la cachette ; l'autre sur les genoux.
+    ctx.save();
+    ctx.translate(w * 0.62, h * 0.45);
+    ctx.rotate(-0.35 - (frame === 0 ? 0 : 0.06));
+    ctx.fillStyle = 'rgba(120, 92, 82, 0.75)';
+    round(ctx, 0, -w * 0.03, w * 0.26, w * 0.07, w * 0.03);
+    ctx.fillStyle = 'rgba(214, 170, 150, 0.6)';
+    disc(ctx, w * 0.27, 0, w * 0.05);
+    ctx.restore();
+    disc(ctx, w * 0.4, h * 0.62, w * 0.05);
+    return;
+  }
+  // Ses mains posées sur les genoux, et un tricot.
   disc(ctx, w * 0.4, h * 0.62, w * 0.05);
   disc(ctx, w * 0.56, h * 0.62, w * 0.05);
   ctx.fillStyle = 'rgba(200, 120, 130, 0.55)';

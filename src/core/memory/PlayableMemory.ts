@@ -36,6 +36,9 @@ type Phase = (typeof Phase)[keyof typeof Phase];
 
 type Timing = typeof PLAYABLE_MEMORY_TIMING;
 
+/** Un battement du compte (D-122) : le noir s'éclaircit à peine, puis revient. */
+const BEAT_DEPTH = 0.18;
+
 /**
  * Souvenir jouable (D-89), pur et indépendant de Phaser : les actions se font dans l'ordre, avec
  * Agir, dans leur zone ; pendant un geste, Céleste ne bouge pas. Après la dernière : un cœur, un
@@ -63,15 +66,19 @@ export class PlayableMemory {
   private elapsed = 0;
   /** L'étape qui viendra au noir du clignement en cours (D-118). */
   private pending: string | null = null;
+  /** Le noir du clignement en cours tient ce nombre de pas (les battements du compte, D-122). */
+  private hold = 0;
   /** La salle seule a déjà été montrée (deux fondus : avant, puis la fin). */
   private aloneShown = false;
   private readonly steps: Readonly<Record<keyof Timing, number>>;
+  private readonly msPerStep: number;
 
   constructor(
     readonly data: PlayableMemoryData,
     stepHz: number,
     timing: Readonly<Timing> = PLAYABLE_MEMORY_TIMING,
   ) {
+    this.msPerStep = 1000 / stepHz;
     this.steps = {
       introMs: msToSteps(timing.introMs, stepHz),
       gestureMs: msToSteps(timing.gestureMs, stepHz),
@@ -79,6 +86,7 @@ export class PlayableMemory {
       fadeMs: msToSteps(timing.fadeMs, stepHz),
       aloneMs: msToSteps(timing.aloneMs, stepHz),
       blinkMs: msToSteps(timing.blinkMs, stepHz),
+      beatMs: msToSteps(timing.beatMs, stepHz),
     };
   }
 
@@ -94,6 +102,16 @@ export class PlayableMemory {
   /** L'action à faire (son étincelle), null quand tout est fait. */
   get current(): MemoryAction | null {
     return this.data.actions[this.next] ?? null;
+  }
+
+  /** L'étincelle de l'action à faire est montrée (après son délai, D-122). */
+  get markShown(): boolean {
+    const action = this.current;
+    if (this.phase !== Phase.Play || !action) {
+      return false;
+    }
+    const delay = action.markDelayMs ?? 0;
+    return delay <= 0 || this.elapsed * this.msPerStep >= delay;
   }
 
   /** Un pas : `box` la hitbox de Céleste, `interact` Agir pressé à ce pas. */
@@ -114,8 +132,12 @@ export class PlayableMemory {
         if (action && this.interactable >= 0 && interact) {
           this.lastAction = this.next;
           this.carrying = action.carry;
+          if (action.shows !== undefined) {
+            this.flags.add(action.shows);
+          }
           if (action.sets !== undefined && action.blink) {
             this.pending = action.sets;
+            this.hold = (action.beats ?? 0) * s.beatMs;
           } else if (action.sets !== undefined) {
             this.flags.add(action.sets);
           }
@@ -136,18 +158,25 @@ export class PlayableMemory {
         }
         break;
       case Phase.Blink: {
-        // Un clignement (D-118) : le noir monte, l'étape vient au noir, puis il redescend.
+        // Un clignement (D-118) : le noir monte, l'étape vient au noir, puis il redescend. Quand
+        // Céleste compte (D-122), le noir tient quelques battements, il respire un peu à chacun.
         const half = Math.max(1, Math.floor(s.blinkMs / 2));
+        const hold = this.hold;
         if (this.elapsed === half && this.pending !== null) {
           this.flags.add(this.pending);
           this.pending = null;
         }
-        this.veil =
-          this.elapsed <= half
-            ? this.progress(half)
-            : 1 - Math.min(1, (this.elapsed - half) / Math.max(1, s.blinkMs - half));
-        if (this.elapsed >= s.blinkMs) {
+        if (this.elapsed <= half) {
+          this.veil = this.progress(half);
+        } else if (this.elapsed <= half + hold) {
+          const beat = ((this.elapsed - half) % s.beatMs) / s.beatMs;
+          this.veil = 1 - BEAT_DEPTH * Math.sin(beat * Math.PI);
+        } else {
+          this.veil = 1 - Math.min(1, (this.elapsed - half - hold) / Math.max(1, s.blinkMs - half));
+        }
+        if (this.elapsed >= s.blinkMs + hold) {
           this.veil = 0;
+          this.hold = 0;
           this.afterAction();
         }
         break;

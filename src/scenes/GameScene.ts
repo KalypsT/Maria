@@ -2023,7 +2023,7 @@ export class GameScene extends Phaser.Scene {
     const mark = this.storyView.doorMark;
     if (memory) {
       // Souvenir jouable : l'étincelle montre l'action à faire.
-      this.storyView.doorMark = memory.locked ? null : (memory.current?.mark ?? null);
+      this.storyView.doorMark = memory.markShown ? (memory.current?.mark ?? null) : null;
     } else if (!door) {
       this.storyView.doorMark = null;
     } else if (mark?.col !== door.col || mark.row !== door.row - 3) {

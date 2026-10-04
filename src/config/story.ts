@@ -405,7 +405,7 @@ export const PROP_SIZE = {
   'eden-small': { w: 16, h: 20 },
   'eden-peek': { w: 16, h: 20 },
   'eden-laugh': { w: 16, h: 22 },
-  'eden-cheer': { w: 16, h: 20 },
+  'eden-cheer': { w: 18, h: 26 },
   'nanny-shadow': { w: 40 * PARENT_SCALE, h: 46 * PARENT_SCALE },
   'nanny-look': { w: 40 * PARENT_SCALE, h: 46 * PARENT_SCALE },
   'cube-pile': { w: 24, h: 14 },
