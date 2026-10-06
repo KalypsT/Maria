@@ -1,5 +1,12 @@
 import type { AudioSettings } from '../config/audio';
-import { SFX_GAIN, SFX_MIX, SFX_SLOTS, TEST_TONES, type SfxSlot } from '../config/sfx';
+import {
+  SFX_GAIN,
+  SFX_LOOP_FADE_MS,
+  SFX_MIX,
+  SFX_SLOTS,
+  TEST_TONES,
+  type SfxSlot,
+} from '../config/sfx';
 import { pickVariant, sfxFileMap } from '../core/audio/sfx';
 
 /**
@@ -36,6 +43,8 @@ export class SfxPlayer {
   private settings: AudioSettings;
   private strange = false;
   private voices = 0;
+  /** Boucles en cours (glisser, poursuite, D-127) : de quoi les arrêter en fondu. */
+  private readonly loops = new Map<SfxSlot, () => void>();
 
   constructor(settings: AudioSettings) {
     this.settings = { ...settings };
@@ -126,6 +135,74 @@ export class SfxPlayer {
     source.connect(level);
     this.route(source, level);
     source.start();
+  }
+
+  /**
+   * Boucle (D-127) : démarre en fondu tant que `on` est vrai (appelé à chaque pas), s'arrête en
+   * fondu sinon. Sans fichier, rien (ou un son tenu, sons de test du build de debug).
+   */
+  loop(slot: SfxSlot, on: boolean): void {
+    const stop = this.loops.get(slot);
+    if (!on) {
+      if (stop) {
+        stop();
+        this.loops.delete(slot);
+      }
+      return;
+    }
+    const context = this.context;
+    const bus = this.strange ? this.strangeIn : this.dry;
+    if (stop || !context || !bus || context.state !== 'running' || document.hidden) {
+      return;
+    }
+    let gain = SFX_GAIN[slot] ?? 1;
+    let source: AudioScheduledSourceNode;
+    const urls = this.files.get(slot);
+    if (urls && urls.length > 0) {
+      const buffer = this.buffers.get(urls[pickVariant(urls.length, -1, Math.random())] ?? '');
+      if (!buffer) {
+        return;
+      }
+      const player = context.createBufferSource();
+      player.buffer = buffer;
+      player.loop = true;
+      source = player;
+    } else if (__DEBUG_TOOLS__ && this.testTones) {
+      const tone = TEST_TONES[slot];
+      const oscillator = context.createOscillator();
+      oscillator.type = tone.wave;
+      oscillator.frequency.value = tone.from;
+      source = oscillator;
+      gain *= TEST_TONE_GAIN / 2;
+    } else {
+      return;
+    }
+    const level = context.createGain();
+    const now = context.currentTime;
+    level.gain.setValueAtTime(0, now);
+    level.gain.linearRampToValueAtTime(gain, now + SFX_LOOP_FADE_MS.in / 1000);
+    source.connect(level);
+    level.connect(bus);
+    source.start();
+    this.loops.set(slot, () => {
+      const t = context.currentTime;
+      const end = t + SFX_LOOP_FADE_MS.out / 1000;
+      level.gain.cancelScheduledValues(t);
+      level.gain.setValueAtTime(level.gain.value, t);
+      level.gain.linearRampToValueAtTime(0, end);
+      source.onended = () => {
+        level.disconnect();
+      };
+      source.stop(end + 0.02);
+    });
+  }
+
+  /** Arrête toutes les boucles (pause, carte, changement de salle). */
+  stopLoops(): void {
+    for (const stop of this.loops.values()) {
+      stop();
+    }
+    this.loops.clear();
   }
 
   /** Crée le contexte audio au premier geste, le circuit (direct, étrange) et décode les sons. */

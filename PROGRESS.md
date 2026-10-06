@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Sensations, son, aide et mondes étranges** (D-124) : plan validé en quatre chantiers : **A** fluidité et sensations, **B** bruitages et vibrations, **C** le fil discret (activé par défaut), **D** mondes étranges reconnaissables. **Chantier A, PR 1 faite : le compteur de saccades** (fusionnée) et **PR 2 faite : les sensations proposées, la poussière en papier, la matière du sol** (D-125), sur `ccr-9d90352a-xuwhs1`. **Chantier B, PR 1 faite : les bruitages, le système et les premiers sons** (D-126), sur la même branche. Suite : **essai sur téléphone** (Android) du compteur, des sensations et des sons de test ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades ; **les sons à fournir** (`docs/BRUITAGES.md`) ; puis B2 (les sons des capacités, des poursuites, la voix) et B3 (vibrations).
+**Sensations, son, aide et mondes étranges** (D-124) : plan validé en quatre chantiers : **A** fluidité et sensations, **B** bruitages et vibrations, **C** le fil discret (activé par défaut), **D** mondes étranges reconnaissables. **Chantier A, PR 1 faite : le compteur de saccades** (fusionnée) et **PR 2 faite : les sensations proposées, la poussière en papier, la matière du sol** (D-125), sur `ccr-9d90352a-xuwhs1`. **Chantier B, PR 1 faite : les bruitages, le système et les premiers sons** (D-126) et **PR 2 faite : les sons des capacités, du combat, des dangers, la voix** (D-127), sur la même branche. Suite : **essai sur téléphone** (Android) du compteur, des sensations et des sons de test ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades ; **les sons à fournir** (`docs/BRUITAGES.md`) ; puis B3 (vibrations).
 
 **Les personnages illustrés** (D-123) : papa illustré (images de l'utilisateur générées avec ChatGPT, prompts dans `docs/PROMPTS_PERSONNAGES.md`) à la porte de la chambre, dans le hall de la gare, à la cuisine, à la supérette, sur `ccr-142ffd96-q5pgli`. Suite : papa au jardin et sur le quai, maman, puis Céleste en pièces illustrées.
 
@@ -27,6 +27,13 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Chantier B, PR 2 : les sons des capacités, du combat, des dangers, la voix (D-127)
+
+- Tous les emplacements de `docs/BRUITAGES.md` sont branchés : rebord, hissage, saut mural, parapluie, crochet, glissade, bascule ; deux boucles (contre un mur, le long d'un câble) ; coup de bâton, bâton qui touche, ennemi dispersé ; poursuivant (réveil, grondement en boucle) ; trains en gare, tunnel, vague, effacement ; porte, bulle de pensée ; la voix de Céleste, rarement.
+- Le saut en coyote time a maintenant son son.
+- Tests : `sfx.test.ts`. Vérifié dans Chromium (parcours « Parapluie », sons de test) : saut, saut mural, la boucle contre le mur, pas, réception, coup de bâton.
+- [ ] À vérifier sur téléphone (DEBUG → « Sons de test ») : les bips des capacités tombent-ils au bon moment (le rebord, le hissage, le parapluie, le crochet) ? Les boucles (contre un mur, sur un câble, le grondement de la tour) s'arrêtent-elles bien ? L'annonce du train en gare arrive-t-elle avant de le voir ?
 
 ### Chantier B, PR 1 : les bruitages, le système et les premiers sons (D-126)
 

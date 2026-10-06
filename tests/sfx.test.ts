@@ -7,9 +7,20 @@ import {
   TEST_TONES,
   isSfxSlot,
   LANDING_SOUND,
+  VOICE_EVERY,
 } from '../src/config/sfx';
 import { Surface } from '../src/config/surfaces';
-import { SfxCue, SfxDirector, pickVariant, sfxFileMap } from '../src/core/audio/sfx';
+import {
+  PhaseCue,
+  PhaseWatch,
+  SfxCue,
+  SfxDirector,
+  pickVariant,
+  sfxFileMap,
+  type SfxSubject,
+} from '../src/core/audio/sfx';
+import { TrainPhase } from '../src/config/combat';
+import { JumpKind } from '../src/core/player/PlayerPhysics';
 import { FeelEvent } from '../src/core/player/playerFeel';
 import { PlayerState } from '../src/core/player/playerState';
 
@@ -81,6 +92,15 @@ describe('choix des variantes', () => {
   });
 });
 
+/** Céleste vue par les bruitages : un état, le saut du pas, le parapluie. */
+function subject(
+  state: PlayerState,
+  jumpKind: JumpKind = JumpKind.None,
+  glideOpen = false,
+): SfxSubject {
+  return { state, jumpKind, glideOpen };
+}
+
 describe('bruitages du mouvement', () => {
   const stride = DEFAULT_PUPPET.strideLengthPx;
 
@@ -91,7 +111,7 @@ describe('bruitages du mouvement', () => {
     let steps = 0;
     for (let i = 0; i < seconds * 120; i++) {
       phase += (speed / 120 / stride) * Math.PI * 2;
-      director.step(PlayerState.Run, phase, speed / 136, FeelEvent.None, 0);
+      director.step(subject(PlayerState.Run), phase, speed / 136, FeelEvent.None, 0);
       if ((director.cues & SfxCue.Step) !== 0) {
         steps++;
       }
@@ -109,21 +129,84 @@ describe('bruitages du mouvement', () => {
   it('aucun pas en l’air ni à l’arrêt', () => {
     const director = new SfxDirector();
     for (let i = 0; i < 240; i++) {
-      director.step(i < 120 ? PlayerState.Fall : PlayerState.Idle, i * 0.3, 1, FeelEvent.None, 0);
+      const state = i < 120 ? PlayerState.Fall : PlayerState.Idle;
+      director.step(subject(state), i * 0.3, 1, FeelEvent.None, 0);
       expect(director.cues).toBe(SfxCue.None);
     }
   });
 
-  it('le décollage, et la réception selon la hauteur de la chute', () => {
+  it('les sauts, coyote compris, et la réception selon la hauteur de la chute', () => {
     const director = new SfxDirector();
-    director.step(PlayerState.Jump, 0, 0, FeelEvent.Takeoff, 0);
+    director.step(subject(PlayerState.Jump, JumpKind.Ground), 0, 0, FeelEvent.None, 0);
+    expect(director.cues).toBe(SfxCue.Jump);
+    director.step(subject(PlayerState.Jump, JumpKind.Cable), 0, 0, FeelEvent.None, 0);
     expect(director.cues).toBe(SfxCue.Jump);
     const land = (tiles: number) => {
-      director.step(PlayerState.Land, 0, 0, FeelEvent.Land, tiles * T);
+      director.step(subject(PlayerState.Land), 0, 0, FeelEvent.Land, tiles * T);
       return director.cues;
     };
     expect(land(LANDING_SOUND.quietFallTiles / 2)).toBe(SfxCue.Step);
     expect(land(3.5)).toBe(SfxCue.Step | SfxCue.Land);
     expect(land(LANDING_SOUND.bigFallTiles + 1)).toBe(SfxCue.Step | SfxCue.LandBig);
+  });
+
+  it('le rebord, le crochet, la glissade : une fois, en y entrant', () => {
+    const director = new SfxDirector();
+    const cues = (state: PlayerState) => {
+      director.step(subject(state), 0, 0, FeelEvent.None, 0);
+      return director.cues & ~SfxCue.VoiceEffort;
+    };
+    expect(cues(PlayerState.Hang)).toBe(SfxCue.LedgeGrab);
+    expect(cues(PlayerState.Hang)).toBe(SfxCue.None);
+    expect(cues(PlayerState.Climb)).toBe(SfxCue.LedgeClimb);
+    expect(cues(PlayerState.Cable)).toBe(SfxCue.HookCatch);
+    expect(director.cableSliding).toBe(true);
+    expect(cues(PlayerState.Slide)).toBe(SfxCue.Slide);
+    expect(director.cableSliding).toBe(false);
+    expect(cues(PlayerState.WallSlide)).toBe(SfxCue.None);
+    expect(director.wallSliding).toBe(true);
+  });
+
+  it('le parapluie s’ouvre et se referme ; le crochet remplace la fermeture', () => {
+    const director = new SfxDirector();
+    const glide = (state: PlayerState, open: boolean) => {
+      director.step(subject(state, JumpKind.None, open), 0, 0, FeelEvent.None, 0);
+      return director.cues;
+    };
+    expect(glide(PlayerState.Glide, true)).toBe(SfxCue.UmbrellaOpen);
+    expect(glide(PlayerState.Glide, true)).toBe(SfxCue.None);
+    expect(glide(PlayerState.Fall, false)).toBe(SfxCue.UmbrellaClose);
+    expect(glide(PlayerState.Glide, true)).toBe(SfxCue.UmbrellaOpen);
+    expect(glide(PlayerState.Cable, false)).toBe(SfxCue.HookCatch);
+  });
+
+  it('la voix, rarement : un « hop » tous les quelques sauts, un effort une fois sur deux', () => {
+    const director = new SfxDirector();
+    let hops = 0;
+    for (let i = 0; i < VOICE_EVERY.hop * 3; i++) {
+      director.step(subject(PlayerState.Jump, JumpKind.Ground), 0, 0, FeelEvent.None, 0);
+      hops += (director.cues & SfxCue.VoiceHop) !== 0 ? 1 : 0;
+    }
+    expect(hops).toBe(3);
+    let efforts = 0;
+    for (let i = 0; i < VOICE_EVERY.effort * 4; i++) {
+      director.step(subject(PlayerState.Jump, JumpKind.Wall), 0, 0, FeelEvent.None, 0);
+      expect(director.cues & SfxCue.WallJump).toBe(SfxCue.WallJump);
+      efforts += (director.cues & SfxCue.VoiceEffort) !== 0 ? 1 : 0;
+    }
+    expect(efforts).toBe(4);
+  });
+});
+
+describe('dangers à cycle', () => {
+  it('l’annonce et le passage, une fois chacun ; rien au premier moment observé', () => {
+    const watch = new PhaseWatch();
+    expect(watch.step(TrainPhase.Warning)).toBe(PhaseCue.None);
+    expect(watch.step(TrainPhase.Passing)).toBe(PhaseCue.Pass);
+    expect(watch.step(TrainPhase.Passing)).toBe(PhaseCue.None);
+    expect(watch.step(TrainPhase.Calm)).toBe(PhaseCue.None);
+    expect(watch.step(TrainPhase.Warning)).toBe(PhaseCue.Warn);
+    watch.reset();
+    expect(watch.step(TrainPhase.Passing)).toBe(PhaseCue.None);
   });
 });
