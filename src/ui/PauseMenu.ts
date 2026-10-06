@@ -85,6 +85,8 @@ export class PauseMenu {
     }
     this.addQuit(topRow);
     this.addAudio(panel);
+    element('h3', panel, undefined, 'Aide');
+    this.addChoice(panel, 'Aide discrète', 'hint');
 
     if (options.showTouchSettings) {
       element('h3', panel, undefined, 'Commandes tactiles');
@@ -94,7 +96,7 @@ export class PauseMenu {
         this.addModeChoice(panel);
       }
       if (options.canVibrate) {
-        this.addVibrationChoice(panel);
+        this.addChoice(panel, 'Vibrations', 'vibration');
       }
       const reset = element('button', panel, undefined, 'Réinitialiser les commandes');
       reset.addEventListener('click', () => {
@@ -186,10 +188,10 @@ export class PauseMenu {
     this.refreshers.push(refresh);
   }
 
-  /** Vibrations (D-128) : oui ou non. */
-  private addVibrationChoice(parent: HTMLElement): void {
+  /** Un réglage oui ou non : les vibrations (D-128), le fil discret (D-129). */
+  private addChoice(parent: HTMLElement, label: string, key: 'vibration' | 'hint'): void {
     const row = element('div', parent, 'pause-row');
-    element('span', row, undefined, 'Vibrations');
+    element('span', row, undefined, label);
     const group = element('div', row, 'pause-choice');
     const choices: readonly [boolean, string][] = [
       [true, 'Oui'],
@@ -198,7 +200,7 @@ export class PauseMenu {
     const buttons = choices.map(([on, text]) => {
       const button = element('button', group, undefined, text);
       button.addEventListener('click', () => {
-        this.settings.vibration = on;
+        this.settings[key] = on;
         this.commit();
         refresh();
       });
@@ -206,7 +208,7 @@ export class PauseMenu {
     });
     const refresh = () => {
       for (const { on, button } of buttons) {
-        button.classList.toggle('selected', on === this.settings.vibration);
+        button.classList.toggle('selected', on === this.settings[key]);
       }
     };
     refresh();

@@ -71,6 +71,8 @@ export const SFX_SLOTS = [
   'door',
   /** Une bulle de pensée apparaît. */
   'thought',
+  /** Le fil discret se montre (D-129) : un tintement très doux. */
+  'hint',
   // La voix de Céleste (facultative, jamais de mots, jouée rarement).
   /** Un petit « hop » à certains sauts. */
   'voice-hop',
@@ -115,6 +117,7 @@ export const SFX_GAIN: Readonly<Partial<Record<SfxSlot, number>>> = {
   'cable-slide': 0.5,
   'chase-rumble': 0.6,
   thought: 0.5,
+  hint: 0.5,
   'voice-hop': 0.7,
   'voice-effort': 0.7,
   'voice-ouch': 0.8,
@@ -224,6 +227,7 @@ export const TEST_TONES: Readonly<
   erase: { from: 1200, to: 200, ms: 400, wave: 'sine' },
   door: { from: 350, to: 250, ms: 120, wave: 'triangle' },
   thought: { from: 1200, to: 1500, ms: 50, wave: 'sine' },
+  hint: { from: 1500, to: 1900, ms: 180, wave: 'sine' },
   'voice-hop': { from: 600, to: 900, ms: 80, wave: 'triangle' },
   'voice-effort': { from: 400, to: 350, ms: 120, wave: 'triangle' },
   'voice-ouch': { from: 700, to: 450, ms: 120, wave: 'triangle' },

@@ -1998,6 +1998,13 @@ export function installDebugOverlay(scene: GameScene): void {
     scene.applyFinish();
     refreshFinish();
   });
+  // Le fil discret (D-129) : comme après un long moment sans progrès.
+  element('button', actions, undefined, 'Fil discret : maintenant').addEventListener(
+    'click',
+    () => {
+      scene.hintClock.skip();
+    },
+  );
   element('button', actions, undefined, 'Replacer Céleste').addEventListener('click', () => {
     scene.respawn();
   });
@@ -2129,6 +2136,10 @@ export function installDebugOverlay(scene: GameScene): void {
         `\npeur ${scene.run.fear}/${scene.worldParams.fearMax}  retour ${scene.run.currentKey ?? 'départ'}` +
         (scene.run.fainting ? '  évanouie' : '');
       stats.textContent += `\n${scene.audio.status()}\n${scene.audio.sfx.status()}`;
+      const hint = scene.hintClock;
+      stats.textContent +=
+        `\nfil palier ${String(hint.stage)}  sans progrès ${(hint.idleMs / 1000).toFixed(0)} s` +
+        (scene.hintGoalName ? `  → ${scene.hintGoalName}` : '');
       const touch = scene.touch;
       if (touch) {
         const stick = touch.controller.joystick;

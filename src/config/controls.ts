@@ -72,6 +72,8 @@ export interface ControlSettings {
   joystickMode: JoystickMode;
   /** Vibrations (D-128, Android) : quelques moments forts, réglables dans le menu pause. */
   vibration: boolean;
+  /** Le fil discret (D-129) : après un long moment sans progrès, une lueur montre où aller. */
+  hint: boolean;
 }
 
 export const DEFAULT_CONTROL_SETTINGS: Readonly<ControlSettings> = {
@@ -79,6 +81,7 @@ export const DEFAULT_CONTROL_SETTINGS: Readonly<ControlSettings> = {
   opacity: 0.7,
   joystickMode: 'digital',
   vibration: true,
+  hint: true,
 };
 
 export const CONTROL_SETTING_RANGES = {
