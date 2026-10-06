@@ -1,3 +1,4 @@
+import { CHARACTER_IMAGES, type CharacterImage } from '../../config/art';
 import { PROP_SIZE } from '../../config/story';
 import type { PropKind } from '../../core/story/story';
 import { drawClassCharacter } from './classArt';
@@ -503,14 +504,54 @@ const DRAWN_SIZE: Readonly<Partial<Record<PropKind, { w: number; h: number; pad:
   'dad-quay': { w: 42, h: 62, pad: 8 },
 };
 
-export function drawCharacter(ctx: CanvasRenderingContext2D, kind: PropKind, frame: number): void {
+export function drawCharacter(
+  ctx: CanvasRenderingContext2D,
+  kind: PropKind,
+  frame: number,
+  images?: ReadonlyMap<string, CanvasImageSource>,
+): void {
   const size = PROP_SIZE[kind];
+  const illustrated = CHARACTER_IMAGES[kind];
+  const image = illustrated && images?.get(illustrated.file);
+  if (illustrated && image instanceof HTMLImageElement) {
+    drawIllustrated(ctx, illustrated, image, size, frame);
+    return;
+  }
   const { w, h, pad } = DRAWN_SIZE[kind] ?? { ...size, pad: 0 };
   ctx.save();
   ctx.scale(size.w / w, size.h / h);
   ctx.translate(pad, 0);
   drawAt(ctx, kind, frame, w - 2 * pad, h);
   ctx.restore();
+}
+
+/** Taille de la vapeur au-dessus d'une tasse illustrée (le dessin par code est en ×2). */
+const STEAM_SCALE = 1.1;
+
+/**
+ * Personnage illustré (D-123) : l'image remplit la hauteur du cadre, l'axe des pieds au milieu (là où
+ * se tient le corps dessiné). Seule la vapeur de la tasse change d'une image à l'autre.
+ */
+function drawIllustrated(
+  ctx: CanvasRenderingContext2D,
+  character: CharacterImage,
+  image: HTMLImageElement,
+  size: { w: number; h: number },
+  frame: number,
+): void {
+  const { naturalWidth: width, naturalHeight: height } = image;
+  const scale = size.h / height;
+  const left = size.w / 2 - character.footX * width * scale;
+  ctx.drawImage(image, left, 0, width * scale, size.h);
+  if (character.steam) {
+    ctx.save();
+    ctx.translate(left + character.steam.x * width * scale, character.steam.y * size.h);
+    // Plus fine que celle du dessin par code, à l'échelle du trait de l'illustration.
+    ctx.scale(STEAM_SCALE, STEAM_SCALE);
+    ctx.globalAlpha = 0.8;
+    steam(ctx, 0, -1, frame);
+    ctx.restore();
+  }
 }
 
 function drawAt(
