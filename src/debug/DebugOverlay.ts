@@ -35,6 +35,8 @@ const COMBAT_STORAGE_KEY = 'maria.debug.combat';
 const WORLD_STORAGE_KEY = 'maria.debug.world';
 /** Cadre d'infos (FPS, position…) affiché ou masqué (D-59). */
 const STATS_STORAGE_KEY = 'maria.debug.stats';
+/** Sons de test des bruitages (D-126). */
+const SFX_TEST_STORAGE_KEY = 'maria.debug.sfxTest';
 const ATTACK_COLOR = 0xff5d5d;
 const ENEMY_BOX_COLOR = 0xffa24d;
 const ENEMY_STATE_LABEL = ['patrouille', 'étourdi', 'dispersé'] as const;
@@ -288,6 +290,16 @@ export function installDebugOverlay(scene: GameScene): void {
       refreshMovement();
     },
   );
+  // Sons de test (D-126) : un emplacement de bruitage sans fichier joue un petit son synthétisé.
+  try {
+    scene.audio.sfx.testTones = localStorage.getItem(SFX_TEST_STORAGE_KEY) === 'on';
+  } catch {
+    // Stockage indisponible : désactivés.
+  }
+  addCheck(panel, 'Sons de test (bruitages sans fichier)', scene.audio.sfx.testTones, (checked) => {
+    scene.audio.sfx.testTones = checked;
+    save(SFX_TEST_STORAGE_KEY, checked ? 'on' : 'off');
+  });
   // Étape de l'histoire (D-31) : pour la partie en cours seulement, sans sauvegarde.
   const storySelect = element('select', panel);
   const F = StoryFlag;
@@ -2116,7 +2128,7 @@ export function installDebugOverlay(scene: GameScene): void {
         (states ? `  ennemis ${states}` : '') +
         `\npeur ${scene.run.fear}/${scene.worldParams.fearMax}  retour ${scene.run.currentKey ?? 'départ'}` +
         (scene.run.fainting ? '  évanouie' : '');
-      stats.textContent += `\n${scene.audio.status()}`;
+      stats.textContent += `\n${scene.audio.status()}\n${scene.audio.sfx.status()}`;
       const touch = scene.touch;
       if (touch) {
         const stick = touch.controller.joystick;

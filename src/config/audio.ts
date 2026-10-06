@@ -1,3 +1,5 @@
+import { DEFAULT_SFX_VOLUME } from './sfx';
+
 /**
  * Musique (§39, D-57). Les morceaux sont des fichiers déposés dans `src/assets/audio/`, nommés
  * d'après leur emplacement (`garden.m4a`, `house.m4a`…). Un emplacement sans fichier reste
@@ -98,6 +100,12 @@ export interface AudioSettings {
   /** Volume général, de 0 à 1. */
   volume: number;
   muted: boolean;
+  /** Volume des bruitages (D-126), de 0 à 1, sous le volume général. */
+  sfxVolume: number;
 }
 
-export const DEFAULT_AUDIO_SETTINGS: Readonly<AudioSettings> = { volume: 0.7, muted: false };
+export const DEFAULT_AUDIO_SETTINGS: Readonly<AudioSettings> = {
+  volume: 0.7,
+  muted: false,
+  sfxVolume: DEFAULT_SFX_VOLUME,
+};

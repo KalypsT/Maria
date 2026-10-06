@@ -99,10 +99,10 @@ describe('saveData', () => {
 
   it('garde les réglages du son, et en donne par défaut à une sauvegarde plus ancienne (D-57)', () => {
     const data = sample();
-    data.settings.audio = { volume: 0.25, muted: true };
+    data.settings.audio = { volume: 0.25, muted: true, sfxVolume: 0.4 };
     expect(deserializeSave(serializeSave(data))).toMatchObject({
       ok: true,
-      data: { settings: { audio: { volume: 0.25, muted: true } } },
+      data: { settings: { audio: { volume: 0.25, muted: true, sfxVolume: 0.4 } } },
     });
     const older = { controls: data.settings.controls, display: data.settings.display };
     expect(validateSaveData({ ...data, settings: older })?.settings.audio).toEqual(
@@ -110,9 +110,19 @@ describe('saveData', () => {
     );
     const odd = validateSaveData({
       ...data,
-      settings: { ...data.settings, audio: { volume: 7, muted: 'oui' } },
+      settings: { ...data.settings, audio: { volume: 7, muted: 'oui', sfxVolume: -1 } },
     });
-    expect(odd?.settings.audio).toEqual({ volume: 1, muted: false });
+    expect(odd?.settings.audio).toEqual({ volume: 1, muted: false, sfxVolume: 0 });
+    // Une sauvegarde d'avant les bruitages (D-126) : leur volume par défaut.
+    const beforeSfx = validateSaveData({
+      ...data,
+      settings: { ...data.settings, audio: { volume: 0.5, muted: false } },
+    });
+    expect(beforeSfx?.settings.audio).toEqual({
+      volume: 0.5,
+      muted: false,
+      sfxVolume: DEFAULT_AUDIO_SETTINGS.sfxVolume,
+    });
   });
 
   it('exporte et réimporte un code de sauvegarde, et refuse un code abîmé', () => {

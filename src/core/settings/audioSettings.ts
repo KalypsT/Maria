@@ -2,7 +2,8 @@ import { DEFAULT_AUDIO_SETTINGS, type AudioSettings } from '../../config/audio';
 
 /**
  * Valide des réglages du son lus depuis la sauvegarde : une valeur absente (sauvegarde d'avant le
- * son) ou invalide retombe sur la valeur par défaut, le volume est borné entre 0 et 1.
+ * son ou les bruitages) ou invalide retombe sur la valeur par défaut, les volumes sont bornés entre
+ * 0 et 1.
  */
 export function sanitizeAudioSettings(raw: unknown): AudioSettings {
   const settings: AudioSettings = { ...DEFAULT_AUDIO_SETTINGS };
@@ -17,6 +18,11 @@ export function sanitizeAudioSettings(raw: unknown): AudioSettings {
   const muted = source['muted'];
   if (typeof muted === 'boolean') {
     settings.muted = muted;
+  }
+  // Absent d'une sauvegarde d'avant les bruitages (D-126) : la valeur par défaut.
+  const sfxVolume = source['sfxVolume'];
+  if (typeof sfxVolume === 'number' && Number.isFinite(sfxVolume)) {
+    settings.sfxVolume = Math.min(1, Math.max(0, sfxVolume));
   }
   return settings;
 }

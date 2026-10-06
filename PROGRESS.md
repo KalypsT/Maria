@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Sensations, son, aide et mondes étranges** (D-124) : plan validé en quatre chantiers : **A** fluidité et sensations, **B** bruitages et vibrations, **C** le fil discret (activé par défaut), **D** mondes étranges reconnaissables. **Chantier A, PR 1 faite : le compteur de saccades** (fusionnée) et **PR 2 faite : les sensations proposées, la poussière en papier, la matière du sol** (D-125), sur `ccr-9d90352a-xuwhs1`. Suite : **essai sur téléphone** (Android) du compteur et des sensations ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades ; puis le chantier B (bruitages).
+**Sensations, son, aide et mondes étranges** (D-124) : plan validé en quatre chantiers : **A** fluidité et sensations, **B** bruitages et vibrations, **C** le fil discret (activé par défaut), **D** mondes étranges reconnaissables. **Chantier A, PR 1 faite : le compteur de saccades** (fusionnée) et **PR 2 faite : les sensations proposées, la poussière en papier, la matière du sol** (D-125), sur `ccr-9d90352a-xuwhs1`. **Chantier B, PR 1 faite : les bruitages, le système et les premiers sons** (D-126), sur la même branche. Suite : **essai sur téléphone** (Android) du compteur, des sensations et des sons de test ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades ; **les sons à fournir** (`docs/BRUITAGES.md`) ; puis B2 (les sons des capacités, des poursuites, la voix) et B3 (vibrations).
 
 **Les personnages illustrés** (D-123) : papa illustré (images de l'utilisateur générées avec ChatGPT, prompts dans `docs/PROMPTS_PERSONNAGES.md`) à la porte de la chambre, dans le hall de la gare, à la cuisine, à la supérette, sur `ccr-142ffd96-q5pgli`. Suite : papa au jardin et sur le quai, maman, puis Céleste en pièces illustrées.
 
@@ -27,6 +27,17 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Chantier B, PR 1 : les bruitages, le système et les premiers sons (D-126)
+
+- **Les sons à fournir** : `docs/BRUITAGES.md` (noms, variantes, formats, licences). Un son manquant reste silencieux.
+- Déjà branchés : **les pas** (selon la matière du sol, au rythme de la foulée), **le saut**, **la réception** (petite ou grande chute), **touchée**, **chute dans l'eau**, **veilleuse**, **la carte**. Dans le monde étrange, les mêmes sons avec un écho.
+- **Menu pause → Son → Bruitages** : leur volume, sous le volume général (sauvegardé, sans migration).
+- **DEBUG → « Sons de test »** : un petit bip différent pour chaque son manquant.
+- Correction : la matière du sol de la première salle d'une partie (D-125).
+- Tests : `sfx.test.ts`, `saveData.test.ts`, `audio.test.ts`, `playerFeel.test.ts`. Vérifié dans Chromium : les sons au bon moment, la lecture, l'écho.
+- [ ] À vérifier sur téléphone (DEBUG → cocher « Sons de test ») : les bips des pas tombent-ils sur les pieds qui se posent ? Le bip du saut part-il sans retard sensible (Web Audio sur Android) ? La réception : petit bip pour un saut, grave pour une grande chute ? Le curseur « Bruitages » du menu pause agit-il ?
+- [ ] Puis, avec les vrais sons : volumes relatifs (pas, saut, réception), variantes, l'écho du monde étrange (agréable ou gênant ?).
 
 ### Chantier A, PR 2 : les sensations proposées, la poussière en papier, la matière du sol (D-125)
 

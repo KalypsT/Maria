@@ -207,7 +207,7 @@ export class PauseMenu {
     this.refreshers.push(refresh);
   }
 
-  /** Son (D-57) : volume général et coupure. */
+  /** Son (D-57) : volume général, volume des bruitages (D-126) et coupure. */
   private addAudio(parent: HTMLElement): void {
     element('h3', parent, undefined, 'Son');
     const audio = { ...this.options.audio };
@@ -219,10 +219,20 @@ export class PauseMenu {
     slider.min = '0';
     slider.max = '1';
     slider.step = '0.05';
+    const sfxRow = element('label', parent, 'pause-row');
+    element('span', sfxRow, undefined, 'Bruitages');
+    const sfxValue = element('span', sfxRow, 'pause-value');
+    const sfxSlider = element('input', sfxRow);
+    sfxSlider.type = 'range';
+    sfxSlider.min = '0';
+    sfxSlider.max = '1';
+    sfxSlider.step = '0.05';
     const mute = element('button', parent);
     const refresh = () => {
       slider.value = String(audio.volume);
       value.textContent = `${String(Math.round(audio.volume * 100))} %`;
+      sfxSlider.value = String(audio.sfxVolume);
+      sfxValue.textContent = `${String(Math.round(audio.sfxVolume * 100))} %`;
       mute.textContent = audio.muted ? 'Remettre le son' : 'Couper le son';
       mute.classList.toggle('selected', audio.muted);
     };
@@ -234,6 +244,14 @@ export class PauseMenu {
       this.options.onAudioChange({ ...audio }, false);
     });
     slider.addEventListener('change', () => {
+      this.options.onAudioChange({ ...audio }, true);
+    });
+    sfxSlider.addEventListener('input', () => {
+      audio.sfxVolume = Number(sfxSlider.value);
+      refresh();
+      this.options.onAudioChange({ ...audio }, false);
+    });
+    sfxSlider.addEventListener('change', () => {
       this.options.onAudioChange({ ...audio }, true);
     });
     mute.addEventListener('click', () => {
