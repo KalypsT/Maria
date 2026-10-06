@@ -153,7 +153,7 @@ function addCheck(
   label: string,
   initial: boolean,
   onChange: (checked: boolean) => void,
-): void {
+): HTMLInputElement {
   const row = element('label', parent, 'dbg-check');
   const input = element('input', row);
   input.type = 'checkbox';
@@ -162,6 +162,7 @@ function addCheck(
   input.addEventListener('change', () => {
     onChange(input.checked);
   });
+  return input;
 }
 
 /**
@@ -266,6 +267,27 @@ export function installDebugOverlay(scene: GameScene): void {
     scene.applyFinish();
     refreshFinish();
   });
+  // Sensations proposées (D-125) : écrasement, inclinaison, poussière et saut adouci d'un coup,
+  // pour comparer sur téléphone ; les valeurs par défaut du jeu ne changent pas.
+  const proposedFeel = addCheck(
+    panel,
+    'Sensations proposées',
+    scene.feelParams.squashEnabled >= 1 &&
+      scene.feelParams.dustEnabled >= 1 &&
+      scene.movement.jumpReleaseMode >= 1,
+    (checked) => {
+      const on = checked ? 1 : 0;
+      scene.feelParams.squashEnabled = on;
+      scene.feelParams.dustEnabled = on;
+      scene.movement.jumpReleaseMode = on;
+      scene.applyFeel();
+      scene.applyMovement();
+      save(FEEL_STORAGE_KEY, feelToJson(scene.feelParams));
+      save(STORAGE_KEY, movementToJson(scene.movement));
+      refreshFeel();
+      refreshMovement();
+    },
+  );
   // Étape de l'histoire (D-31) : pour la partie en cours seulement, sans sauvegarde.
   const storySelect = element('select', panel);
   const F = StoryFlag;
@@ -1936,6 +1958,7 @@ export function installDebugOverlay(scene: GameScene): void {
     }, 1500);
   });
   element('button', actions, undefined, 'Valeurs par défaut').addEventListener('click', () => {
+    proposedFeel.checked = false;
     Object.assign(scene.movement, DEFAULT_MOVEMENT);
     scene.applyMovement();
     save(STORAGE_KEY, movementToJson(scene.movement));

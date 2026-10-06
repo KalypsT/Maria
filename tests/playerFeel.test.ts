@@ -108,6 +108,30 @@ describe('PlayerFeel', () => {
     expect(big).toBeLessThanOrEqual(DEFAULT_FEEL.landSquash + 1e-9);
   });
 
+  it('retient la vitesse de chute de la réception, pour doser la poussière (D-125)', () => {
+    const landingSpeed = (fallFromLedge: boolean) => {
+      const r = rig({ squashEnabled: 0 });
+      if (fallFromLedge) {
+        r.input.moveX = 1;
+      } else {
+        r.input.jumpPressed = true;
+      }
+      let speed = 0;
+      r.run(240, () => {
+        if ((r.feel.events & FeelEvent.Land) !== 0) {
+          r.input.moveX = 0;
+          speed = r.feel.landingSpeed;
+        }
+      });
+      return speed;
+    };
+    const small = landingSpeed(false);
+    const big = landingSpeed(true);
+    expect(small).toBeGreaterThan(0);
+    expect(big).toBeGreaterThan(small);
+    expect(big).toBeLessThanOrEqual(DEFAULT_MOVEMENT.maxFallSpeed);
+  });
+
   it('penche dans le sens de la course, sans pencher en l’air', () => {
     const r = rig();
     r.input.moveX = 1;

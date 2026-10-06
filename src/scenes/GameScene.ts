@@ -140,6 +140,8 @@ import { DEFAULT_PUPPET, type PuppetParams } from '../config/puppet';
 import { CelestePoser, PoseAttack } from '../core/player/celestePose';
 import { AttackPhase } from '../core/combat/PlayerAttack';
 import { DustPool } from './DustPool';
+import { DEFAULT_GROUND, type Surface } from '../config/surfaces';
+import { roomGround, surfaceUnder } from '../core/level/surface';
 import { ChaseView } from './ChaseView';
 import { TrainView } from './TrainView';
 import { TrainRideView } from './TrainRideView';
@@ -360,6 +362,8 @@ export class GameScene extends Phaser.Scene {
     veiled: false,
   };
   level!: LevelData;
+  /** Sol de la salle courante (D-125), là où ni meuble ni matériau ne dit sa matière. */
+  private ground: Surface = DEFAULT_GROUND;
   /** Zone de la salle courante ; null dans un parcours d'essai (hors partie). */
   zone: Zone | null = null;
   player!: PlayerPhysics;
@@ -820,8 +824,16 @@ export class GameScene extends Phaser.Scene {
       feel.step(this.player);
       this.stepPose();
       this.stepStage();
-      if (feel.events !== 0) {
-        this.dust.emit(feel.events, this.player.box, this.player.facing);
+      if (feel.events !== 0 && this.feelParams.dustEnabled >= 1) {
+        // Poussière selon la matière du sol (D-125), aux couleurs du monde étrange.
+        this.dust.emit(
+          feel.events,
+          this.player.box,
+          this.player.facing,
+          surfaceUnder(this.level, this.player.box, this.ground),
+          this.strangeWorld || isStrangeRoom(this.level),
+          feel.landingSpeed / this.movement.maxFallSpeed,
+        );
       }
     }
     if (__DEBUG_TOOLS__) {
@@ -1584,6 +1596,7 @@ export class GameScene extends Phaser.Scene {
     // Une salle à deux couches se charge toujours dans le présent (D-107).
     const level = this.roomLevel(source);
     this.level = level;
+    this.ground = roomGround(level.id);
     this.layerShift.reset();
     this.zone = zone;
     if (zone && isMappedRoom(level)) {
