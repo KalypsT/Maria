@@ -68,6 +68,11 @@ export class PlayerFeel {
     this.lastAirVy = 0;
   }
 
+  /** Vitesse de chute juste avant la dernière réception (px/s), pour doser la poussière. */
+  get landingSpeed(): number {
+    return this.lastAirVy;
+  }
+
   /** Échelle horizontale d'affichage (aire à peu près conservée). */
   get scaleX(): number {
     return 1 - this.squash * 0.6;

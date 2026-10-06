@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Sensations, son, aide et mondes étranges** (D-124) : plan validé en quatre chantiers : **A** fluidité et sensations, **B** bruitages et vibrations, **C** le fil discret (activé par défaut), **D** mondes étranges reconnaissables. **Chantier A, PR 1 faite : le compteur de saccades**, sur `ccr-9d90352a-xuwhs1`. Suite : **essai sur téléphone** (Android) du compteur, puis A2 (les sensations).
+**Sensations, son, aide et mondes étranges** (D-124) : plan validé en quatre chantiers : **A** fluidité et sensations, **B** bruitages et vibrations, **C** le fil discret (activé par défaut), **D** mondes étranges reconnaissables. **Chantier A, PR 1 faite : le compteur de saccades** (fusionnée) et **PR 2 faite : les sensations proposées, la poussière en papier, la matière du sol** (D-125), sur `ccr-9d90352a-xuwhs1`. Suite : **essai sur téléphone** (Android) du compteur et des sensations ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades ; puis le chantier B (bruitages).
 
 **Les personnages illustrés** (D-123) : papa illustré (images de l'utilisateur générées avec ChatGPT, prompts dans `docs/PROMPTS_PERSONNAGES.md`) à la porte de la chambre, dans le hall de la gare, à la cuisine, à la supérette, sur `ccr-142ffd96-q5pgli`. Suite : papa au jardin et sur le quai, maman, puis Céleste en pièces illustrées.
 
@@ -27,6 +27,18 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Chantier A, PR 2 : les sensations proposées, la poussière en papier, la matière du sol (D-125)
+
+- **DEBUG → « Sensations proposées »** : écrasement et étirement, inclinaison en course, poussière et saut adouci, d'un coup. Les valeurs par défaut du jeu ne changent pas.
+- **Poussière en papier selon le sol** : copeaux sur le bois, petits nuages sur le tissu, la pierre et le métal, brins d'herbe, grains de sable, petites feuilles ; turquoise et violet dans le monde étrange ; plus de grains après une grande chute.
+- **Matière du sol** de chaque salle (`src/config/surfaces.ts`) : réutilisée pour les bruits de pas (chantier B).
+- Tests : `surface.test.ts`, `playerFeel.test.ts`. Vérifié dans Chromium : la poussière sur le parquet, le lit, la pierre du hall de la gare, dans le monde étrange.
+- [ ] À vérifier sur téléphone (DEBUG → cocher « Sensations proposées », puis comparer en décochant) :
+  - le **saut adouci** : les petits sauts sont-ils plus agréables, moins « coupés » ? Les sauts précis restent-ils aussi sûrs ?
+  - l'**écrasement** à la réception et l'**inclinaison** en course : agréables ou distrayants ?
+  - la **poussière** : se voit-elle sans gêner ? Assez, trop ? Les brins d'herbe se voient-ils au jardin, le sable à la plage ?
+  - ce qui est retenu devient la valeur par défaut (tout, une partie, ou rien).
 
 ### Chantier A, PR 1 : le compteur de saccades (D-124)
 
