@@ -1790,3 +1790,15 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Correction de D-125** : la matière du sol de la première salle d'une partie (reprise sans changement de salle) n'était pas lue.
 - **Rien ne touche à la physique** (pilier 1). **Sauvegarde** : un réglage de plus, sans migration.
 - **Vérifié dans Chromium** : les sons demandés au bon moment (pas sur l'herbe, saut, réception, veilleuse, carte), la lecture et l'écho. Le Chromium du conteneur ne décode pas l'AAC (`.m4a`) ; Chrome sur Android, si (comme pour la musique).
+
+## D-127 — Chantier B, PR 2 : les sons des capacités, du combat, des dangers, la voix
+
+- **Capacités** (`SfxDirector`, pur, testé) : le rebord attrapé, le hissage, le saut mural, le parapluie ouvert et refermé (pas de fermeture quand le crochet attrape un câble : son propre son), le crochet, la glissade ; **deux boucles** : contre un mur, le long d'un câble (fondu d'entrée et de sortie, `SfxPlayer.loop`).
+- **Les sauts** sont lus dans `PlayerPhysics.jumpKind` (nouveau, ne pilote rien : depuis le sol, mural, depuis un câble), à la place du décollage de `PlayerFeel` : **un saut en coyote time**, qui part après avoir quitté le sol, a maintenant son son (il n'en avait pas en D-126) ; une traversée par Bas + Saut n'en a pas.
+- **Combat** : le début du coup de bâton, le bâton qui touche, l'ennemi dispersé, Céleste touchée.
+- **Dangers et poursuites** : le réveil du poursuivant, son grondement en boucle tant qu'il avance ; l'annonce et le passage des trains en gare, le tunnel sur le toit du train, l'annonce de la vague (`PhaseWatch`, pur, testé : aucun son au premier moment observé en entrant dans une salle) ; l'annonce de l'effacement.
+- **Monde** : la porte de façade, la bulle de pensée.
+- **La voix de Céleste** (facultative, jamais de mots) : un « hop » un saut sur quatre, un effort une fois sur deux (hissage, saut mural), un souffle surpris quand elle est touchée, une surprise au réveil d'un poursuivant, une joie avec la trouvaille ou la capacité trouvée (`VOICE_EVERY`).
+- Les boucles s'arrêtent à la pause, sur la carte, devant le tourne-disque et au changement de salle.
+- **Écartés pour l'instant** : la marée (elle change dans le noir), le balayage du train de la vaisselle et les valises, les boutons du menu.
+- **Rien ne touche à la physique** : `jumpKind` est écrit, jamais lu par la simulation. **Sauvegarde** : aucun changement.

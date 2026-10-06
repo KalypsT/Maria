@@ -1,6 +1,8 @@
 import { AUDIO_EXTENSIONS } from '../../config/audio';
-import { LANDING_SOUND, STEP_SOUND, isSfxSlot, type SfxSlot } from '../../config/sfx';
+import { TrainPhase } from '../../config/combat';
+import { LANDING_SOUND, STEP_SOUND, VOICE_EVERY, isSfxSlot, type SfxSlot } from '../../config/sfx';
 import { TILE_SIZE } from '../../config/display';
+import { JumpKind } from '../player/PlayerPhysics';
 import { FeelEvent } from '../player/playerFeel';
 import { PlayerState } from '../player/playerState';
 
@@ -64,34 +66,68 @@ export function pickVariant(count: number, last: number, random: number): number
 }
 
 /** Bruitages du mouvement demandés au dernier pas (masque de bits). */
-export const SfxCue = { None: 0, Step: 1, Jump: 2, Land: 4, LandBig: 8 } as const;
+export const SfxCue = {
+  None: 0,
+  Step: 1,
+  Jump: 2,
+  Land: 4,
+  LandBig: 8,
+  WallJump: 16,
+  LedgeGrab: 32,
+  LedgeClimb: 64,
+  UmbrellaOpen: 128,
+  UmbrellaClose: 256,
+  HookCatch: 512,
+  Slide: 1024,
+  VoiceHop: 2048,
+  VoiceEffort: 4096,
+} as const;
+
+/** Ce que les bruitages observent de Céleste : `PlayerPhysics` convient tel quel. */
+export interface SfxSubject {
+  readonly state: PlayerState;
+  readonly jumpKind: JumpKind;
+  /** Parapluie ouvert (D-62). */
+  readonly glideOpen: boolean;
+}
 
 /**
- * Bruitages du mouvement de Céleste (D-126), purs : un pas chaque fois qu'un pied se pose pendant la
- * course (la foulée de la marionnette, `CelestePoser.runPhase` : un pied en avant au plus loin à
- * π/2, l'autre à 3π/2), le décollage, la réception selon la hauteur de la chute. Avancé au pas fixe
- * après les sensations et la pose. Aucune allocation.
+ * Bruitages du mouvement de Céleste (D-126, D-127), purs : un pas chaque fois qu'un pied se pose
+ * pendant la course (la foulée de la marionnette, `CelestePoser.runPhase` : un pied en avant au
+ * plus loin à π/2, l'autre à 3π/2) ; les sauts (depuis le sol, coyote compris, mural, depuis un
+ * câble) ; la réception selon la hauteur de la chute ; le rebord, le parapluie, le crochet, la
+ * glissade ; les boucles (contre un mur, le long d'un câble) ; la voix, rarement. Avancé au pas
+ * fixe après la physique, les sensations et la pose. Aucune allocation.
  */
 export class SfxDirector {
   /** Bruitages du dernier pas (`SfxCue`). */
   cues = 0;
   /** Volume du dernier pas (0–1), selon la vitesse. */
   stepVolume = 1;
+  /** Boucles en cours : contre un mur, le long d'un câble. */
+  wallSliding = false;
+  cableSliding = false;
   private lastFoot = 0;
   private running = false;
+  private lastState: PlayerState = PlayerState.Idle;
+  private wasGliding = false;
+  private jumps = 0;
+  private efforts = 0;
 
   /**
    * `speedRatio` : vitesse horizontale en part de la vitesse de course maximale ; `feelEvents` :
    * événements de `PlayerFeel` ; `fallHeight` : hauteur de la dernière chute (px).
    */
   step(
-    state: PlayerState,
+    subject: SfxSubject,
     runPhase: number,
     speedRatio: number,
     feelEvents: number,
     fallHeight: number,
   ): void {
     let cues = SfxCue.None;
+    const state = subject.state;
+    const entered = state !== this.lastState;
     if (state === PlayerState.Run) {
       const foot = Math.floor((runPhase - Math.PI / 2) / Math.PI);
       if (!this.running) {
@@ -106,8 +142,22 @@ export class SfxDirector {
     } else {
       this.running = false;
     }
-    if ((feelEvents & FeelEvent.Takeoff) !== 0) {
-      cues |= SfxCue.Jump;
+    switch (subject.jumpKind) {
+      case JumpKind.Ground:
+        cues |= SfxCue.Jump;
+        this.jumps++;
+        if (this.jumps % VOICE_EVERY.hop === 0) {
+          cues |= SfxCue.VoiceHop;
+        }
+        break;
+      case JumpKind.Cable:
+        cues |= SfxCue.Jump;
+        break;
+      case JumpKind.Wall:
+        cues |= SfxCue.WallJump | this.effort();
+        break;
+      default:
+        break;
     }
     if ((feelEvents & FeelEvent.Land) !== 0) {
       // Le pied qui se pose, toujours ; et le corps qui retombe, selon la hauteur de la chute.
@@ -120,11 +170,73 @@ export class SfxDirector {
         cues |= SfxCue.Land;
       }
     }
+    if (entered) {
+      if (state === PlayerState.Hang) {
+        cues |= SfxCue.LedgeGrab;
+      } else if (state === PlayerState.Climb) {
+        cues |= SfxCue.LedgeClimb | this.effort();
+      } else if (state === PlayerState.Cable) {
+        cues |= SfxCue.HookCatch;
+      } else if (state === PlayerState.Slide) {
+        cues |= SfxCue.Slide;
+      }
+    }
+    // Le parapluie : ouvert ; refermé, sauf quand le crochet attrape un câble (son propre son).
+    if (subject.glideOpen !== this.wasGliding) {
+      if (subject.glideOpen) {
+        cues |= SfxCue.UmbrellaOpen;
+      } else if (state !== PlayerState.Cable) {
+        cues |= SfxCue.UmbrellaClose;
+      }
+      this.wasGliding = subject.glideOpen;
+    }
+    this.wallSliding = state === PlayerState.WallSlide;
+    this.cableSliding = state === PlayerState.Cable;
+    this.lastState = state;
     this.cues = cues;
   }
 
-  reset(): void {
+  /** Remise au repos (changement de salle, réapparition) : ni son ni boucle. */
+  reset(subject: SfxSubject): void {
     this.cues = SfxCue.None;
     this.running = false;
+    this.wallSliding = false;
+    this.cableSliding = false;
+    this.lastState = subject.state;
+    this.wasGliding = subject.glideOpen;
+  }
+
+  /** L'effort de Céleste, une fois sur `VOICE_EVERY.effort`. */
+  private effort(): number {
+    this.efforts++;
+    return this.efforts % VOICE_EVERY.effort === 0 ? SfxCue.VoiceEffort : SfxCue.None;
+  }
+}
+
+/** Moment d'un danger à cycle : son annonce et son passage (trains, tunnel, vague). */
+export const PhaseCue = { None: 0, Warn: 1, Pass: 2 } as const;
+export type PhaseCue = (typeof PhaseCue)[keyof typeof PhaseCue];
+
+/**
+ * Suit le moment d'un danger à cycle (`TrainPhase` : calme, annonce, passage) et dit quand
+ * l'annonce et le passage commencent. Le premier moment observé ne fait aucun son.
+ */
+export class PhaseWatch {
+  private last = -1;
+
+  step(phase: TrainPhase): PhaseCue {
+    const last = this.last;
+    this.last = phase;
+    if (last < 0 || phase === last) {
+      return PhaseCue.None;
+    }
+    if (phase === TrainPhase.Warning) {
+      return PhaseCue.Warn;
+    }
+    return phase === TrainPhase.Passing ? PhaseCue.Pass : PhaseCue.None;
+  }
+
+  reset(): void {
+    this.last = -1;
   }
 }

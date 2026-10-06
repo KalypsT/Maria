@@ -5,7 +5,7 @@ import {
   MEMORY_CAMERA_ZOOM,
   type CameraParams,
 } from '../config/camera';
-import { DEFAULT_COMBAT, TrainPhase, type CombatParams } from '../config/combat';
+import { DEFAULT_COMBAT, TrainPhase, trainPhase, type CombatParams } from '../config/combat';
 import { DEFAULT_FEEL, DUST_FULL_FALL_TILES, type FeelParams } from '../config/feel';
 import {
   GAME_HEIGHT,
@@ -39,7 +39,7 @@ import {
 } from '../core/level/LevelData';
 import { atLayer, commonLayer, layerOf, otherLayer } from '../core/level/layers';
 import { LayerShift, ShiftEvent, type ShiftHost } from '../core/player/LayerShift';
-import { EraseState, type EraseHost } from '../core/boss/Erase';
+import { EraseEvent, EraseState, type EraseHost } from '../core/boss/Erase';
 import { eraseDissolved, eraseFactor, eraseRoot, erasedLevel } from '../core/level/erase';
 import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
 import { atTide } from '../core/level/tide';
@@ -142,8 +142,8 @@ import { AttackPhase } from '../core/combat/PlayerAttack';
 import { DustPool } from './DustPool';
 import { DEFAULT_GROUND, type Surface } from '../config/surfaces';
 import { roomGround, surfaceUnder } from '../core/level/surface';
-import { STEP_SLOT } from '../config/sfx';
-import { SfxCue, SfxDirector } from '../core/audio/sfx';
+import { STEP_SLOT, type SfxSlot } from '../config/sfx';
+import { PhaseCue, PhaseWatch, SfxCue, SfxDirector } from '../core/audio/sfx';
 import { ChaseView } from './ChaseView';
 import { TrainView } from './TrainView';
 import { TrainRideView } from './TrainRideView';
@@ -159,6 +159,20 @@ const MAX_FRAME_SECONDS = 0.25;
 export const SESSION_KEY = 'maria-session';
 /** Clé du registre où main.ts dépose le lecteur de musique (D-57). */
 export const AUDIO_KEY = 'maria-audio';
+
+/** Bruitages du mouvement qui ne dépendent que de leur signal (D-127). */
+const CUE_SOUNDS: readonly (readonly [number, SfxSlot])[] = [
+  [SfxCue.Jump, 'jump'],
+  [SfxCue.WallJump, 'wall-jump'],
+  [SfxCue.LedgeGrab, 'ledge-grab'],
+  [SfxCue.LedgeClimb, 'ledge-climb'],
+  [SfxCue.UmbrellaOpen, 'umbrella-open'],
+  [SfxCue.UmbrellaClose, 'umbrella-close'],
+  [SfxCue.HookCatch, 'hook-catch'],
+  [SfxCue.Slide, 'slide'],
+  [SfxCue.VoiceHop, 'voice-hop'],
+  [SfxCue.VoiceEffort, 'voice-effort'],
+];
 
 /** Couleurs des tuiles pleines selon le matériau (placeholders, D-24). */
 interface SolidColors {
@@ -366,8 +380,14 @@ export class GameScene extends Phaser.Scene {
   level!: LevelData;
   /** Sol de la salle courante (D-125), là où ni meuble ni matériau ne dit sa matière. */
   private ground: Surface = DEFAULT_GROUND;
-  /** Bruitages du mouvement (D-126) : pas, saut, réception. */
+  /** Bruitages du mouvement (D-126, D-127) : pas, sauts, réception, capacités, voix. */
   private readonly sfxDirector = new SfxDirector();
+  /** Annonce et passage des dangers à cycle (D-127) : trains en gare, tunnel, vague. */
+  private readonly trainWatches = [new PhaseWatch(), new PhaseWatch(), new PhaseWatch()];
+  private readonly tunnelWatch = new PhaseWatch();
+  private readonly waveWatch = new PhaseWatch();
+  /** Phase du coup de bâton au pas précédent : son au début du coup. */
+  private lastAttackPhase: number = AttackPhase.Idle;
   /** Zone de la salle courante ; null dans un parcours d'essai (hors partie). */
   zone: Zone | null = null;
   player!: PlayerPhysics;
@@ -468,6 +488,7 @@ export class GameScene extends Phaser.Scene {
       },
       think: (icon, ms, by) => {
         this.storyView.think(icon, ms, by);
+        this.audio.sfx.play('thought');
       },
       sparkle: (area, ms) => {
         this.fx.sparkle(area, ms);
@@ -795,10 +816,8 @@ export class GameScene extends Phaser.Scene {
       }
       if (combat.events !== 0) {
         this.combatView.onEvents(combat.events);
-        if ((combat.events & CombatEvent.Hurt) !== 0) {
-          this.audio.sfx.play('hurt');
-        }
       }
+      this.stepCombatSounds();
       run.step(this.player.box, combat.events, this.player.grounded);
       if ((run.events & RunEvent.Splashed) !== 0) {
         this.dust.splash(this.player.box);
@@ -1039,6 +1058,7 @@ export class GameScene extends Phaser.Scene {
     }
     this.clock.reset();
     this.touch?.releaseAll();
+    this.audio.sfx.stopLoops();
     this.mapPage.open(
       model,
       MAP_TITLES[page] ?? page,
@@ -1064,6 +1084,7 @@ export class GameScene extends Phaser.Scene {
     this.clock.reset();
     this.touch?.releaseAll();
     this.recordMoveDir = 0;
+    this.audio.sfx.stopLoops();
     this.recordPicker.open(shelf, this.audio.record);
   }
 
@@ -1120,6 +1141,7 @@ export class GameScene extends Phaser.Scene {
     }
     this.paused = paused;
     this.audio.setPaused(paused);
+    this.audio.sfx.stopLoops();
     this.clock.reset();
     this.touch?.releaseAll();
     if (paused) {
@@ -1405,6 +1427,7 @@ export class GameScene extends Phaser.Scene {
       this.lockedExitThought(door);
       return;
     }
+    this.audio.sfx.play('door');
     this.transition.start(target, 0);
   }
 
@@ -1453,6 +1476,7 @@ export class GameScene extends Phaser.Scene {
     const event = this.layerShift.step(pressed, this.player.movement, this.shiftHost);
     if (event === ShiftEvent.Shifted) {
       this.shiftView.flash(this.time.now);
+      this.audio.sfx.play('shift');
     } else if (event === ShiftEvent.Refused) {
       this.shiftView.refuse(this.time.now);
     }
@@ -1509,7 +1533,9 @@ export class GameScene extends Phaser.Scene {
     }
     const chase = this.combat.chase;
     const rising = chase && !chase.horizontal && !chase.done && chase.placed;
-    erase.step(rising ? chase.front : null, this.eraseHost);
+    if ((erase.step(rising ? chase.front : null, this.eraseHost) & EraseEvent.Announced) !== 0) {
+      this.audio.sfx.play('erase');
+    }
     this.applyErase();
   }
 
@@ -1614,7 +1640,13 @@ export class GameScene extends Phaser.Scene {
     this.level = level;
     this.ground = roomGround(level.id);
     this.audio.sfx.setStrange(this.strangeWorld || isStrangeRoom(level));
-    this.sfxDirector.reset();
+    this.audio.sfx.stopLoops();
+    this.sfxDirector.reset(this.player);
+    for (const watch of this.trainWatches) {
+      watch.reset();
+    }
+    this.tunnelWatch.reset();
+    this.waveWatch.reset();
     this.layerShift.reset();
     this.zone = zone;
     if (zone && isMappedRoom(level)) {
@@ -1697,6 +1729,7 @@ export class GameScene extends Phaser.Scene {
     }
     if (item.kind === PickupKind.Secret) {
       this.audio.playJingle('found');
+      this.audio.sfx.play('voice-laugh');
       void this.session.addCollectible(item.id);
       return;
     }
@@ -1711,6 +1744,7 @@ export class GameScene extends Phaser.Scene {
    */
   private learnAbility(id: Ability): void {
     this.audio.playJingle('found');
+    this.audio.sfx.play('voice-laugh');
     void this.session.unlockAbility(id);
     this.applyAbilities();
     this.hud.showHint(ABILITY_HINTS[id], ABILITY_HINT_MS);
@@ -1978,27 +2012,80 @@ export class GameScene extends Phaser.Scene {
     const director = this.sfxDirector;
     const player = this.player;
     director.step(
-      player.state,
+      player,
       this.poser.runPhase,
       Math.abs(player.vx) / this.movement.maxRunSpeed,
       this.feel.events,
       this.feel.fallHeight,
     );
+    const sfx = this.audio.sfx;
+    sfx.loop('wall-slide', director.wallSliding);
+    sfx.loop('cable-slide', director.cableSliding);
     const cues = director.cues;
     if (cues === SfxCue.None) {
       return;
     }
-    const sfx = this.audio.sfx;
     if ((cues & SfxCue.Step) !== 0) {
       sfx.play(STEP_SLOT[surfaceUnder(this.level, player.box, this.ground)], director.stepVolume);
-    }
-    if ((cues & SfxCue.Jump) !== 0) {
-      sfx.play('jump');
     }
     if ((cues & SfxCue.LandBig) !== 0) {
       sfx.play('land-big');
     } else if ((cues & SfxCue.Land) !== 0) {
       sfx.play('land');
+    }
+    for (const [cue, slot] of CUE_SOUNDS) {
+      if ((cues & cue) !== 0) {
+        sfx.play(slot);
+      }
+    }
+  }
+
+  /**
+   * Bruitages du combat et des dangers (D-127) : le coup de bâton, le bâton qui touche, l'ennemi
+   * dispersé, Céleste touchée ; le poursuivant (réveil, grondement) ; l'annonce et le passage des
+   * trains, le tunnel, la vague.
+   */
+  private stepCombatSounds(): void {
+    const combat = this.combat;
+    const sfx = this.audio.sfx;
+    const phase = combat.attack.phase;
+    if (phase === AttackPhase.Startup && this.lastAttackPhase !== AttackPhase.Startup) {
+      sfx.play('attack');
+    }
+    this.lastAttackPhase = phase;
+    const events = combat.events;
+    if ((events & CombatEvent.Hit) !== 0) {
+      sfx.play('hit');
+    }
+    if ((events & CombatEvent.Disperse) !== 0) {
+      sfx.play('enemy-scatter');
+    }
+    if ((events & CombatEvent.Hurt) !== 0) {
+      sfx.play('hurt');
+      sfx.play('voice-ouch');
+    }
+    const chase = combat.chase;
+    if (chase && (chase.events & ChaseEvent.Wake) !== 0) {
+      sfx.play('chase-wake');
+      sfx.play('voice-oh');
+    }
+    sfx.loop('chase-rumble', chase !== null && chase.placed && !chase.done && !chase.paused);
+    const trains = this.level.trains;
+    for (let i = 0; i < trains.length && i < this.trainWatches.length; i++) {
+      const cue = this.trainWatches[i]?.step(
+        trainPhase(combat.trainMs, combat.trainOffsetMs(i), this.combatParams),
+      );
+      if (cue === PhaseCue.Warn) {
+        sfx.play('train-warn');
+      } else if (cue === PhaseCue.Pass) {
+        sfx.play('train-pass');
+      }
+    }
+    if (combat.tunnelRow >= 0 && this.tunnelWatch.step(combat.tunnelPhase) === PhaseCue.Pass) {
+      sfx.play('tunnel');
+    }
+    if (combat.waveRow >= 0 && this.waveWatch.step(combat.wavePhase) === PhaseCue.Warn) {
+      sfx.play('wave-warn');
     }
   }
 

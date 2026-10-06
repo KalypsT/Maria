@@ -25,7 +25,9 @@ bon moment.
 Dans le monde étrange, les mêmes sons passent automatiquement par un filtre et un écho : pas de
 fichier en plus. **Pas d'ambiances pour l'instant** (décision de l'utilisateur).
 
-## Déjà branchés (chantier B, PR 1)
+## La liste (tous branchés, chantier B, PR 1 et 2)
+
+### Le mouvement
 
 | Emplacement   | Quand                                                       | Variantes |
 | ------------- | ----------------------------------------------------------- | --------- |
@@ -41,45 +43,57 @@ fichier en plus. **Pas d'ambiances pour l'instant** (décision de l'utilisateur)
 | `land-big`    | la réception d'une grande chute                             | 1–2       |
 | `hurt`        | Céleste touchée (piqûre, coup, poursuivant) : jamais un cri | 2         |
 | `splash`      | une chute dans l'eau                                        | 1–2       |
-| `checkpoint`  | une veilleuse s'allume                                      | 1         |
-| `map-open`    | la page du cahier s'ouvre (la carte)                        | 1         |
-| `map-close`   | la page du cahier se referme                                | 1         |
 
-## À venir (chantier B, PR 2)
+### Les capacités
 
-| Emplacement      | Quand                                                    |
-| ---------------- | -------------------------------------------------------- |
-| `ledge-grab`     | les mains attrapent un rebord                            |
-| `ledge-climb`    | Céleste se hisse                                         |
-| `wall-slide`     | glisse contre un mur (boucle, quelques secondes)         |
-| `wall-jump`      | saut mural                                               |
-| `umbrella-open`  | le parapluie s'ouvre                                     |
-| `umbrella-close` | le parapluie se referme                                  |
-| `hook-catch`     | le crochet du parapluie attrape un câble (métallique)    |
-| `cable-slide`    | glisse le long d'un câble (boucle)                       |
-| `slide`          | la glissade au sol (un frottement)                       |
-| `shift`          | la bascule entre les deux couches (un son étrange, doux) |
-| `attack`         | le coup de bâton qui fend l'air                          |
-| `hit`            | le bâton touche un ennemi (sourd, pas violent)           |
-| `enemy-scatter`  | un ennemi se disperse                                    |
-| `chase-wake`     | un poursuivant s'éveille                                 |
-| `chase-rumble`   | grondement du poursuivant (boucle)                       |
-| `wave-warn`      | la vague s'annonce                                       |
-| `train-warn`     | un train s'annonce en gare                               |
-| `train-pass`     | un train passe                                           |
-| `tide`           | la marée monte ou descend                                |
-| `erase`          | l'effacement avance (niveau 7)                           |
-| `door`           | une porte de façade s'ouvre                              |
-| `thought`        | une bulle de pensée apparaît (très doux)                 |
-| `ui-tap`         | un bouton du menu                                        |
+| Emplacement      | Quand                                                    | Variantes |
+| ---------------- | -------------------------------------------------------- | --------- |
+| `ledge-grab`     | les mains attrapent un rebord                            | 2         |
+| `ledge-climb`    | Céleste se hisse                                         | 1–2       |
+| `wall-slide`     | glisse contre un mur (**boucle**, 1 à 3 s, sans coupure) | 1         |
+| `wall-jump`      | le saut mural                                            | 2         |
+| `umbrella-open`  | le parapluie s'ouvre                                     | 1–2       |
+| `umbrella-close` | le parapluie se referme                                  | 1–2       |
+| `hook-catch`     | le crochet attrape un câble (métallique)                 | 1–2       |
+| `cable-slide`    | glisse le long d'un câble (**boucle**)                   | 1         |
+| `slide`          | la glissade au sol (un frottement)                       | 2         |
+| `shift`          | la bascule entre les deux couches (étrange, doux)        | 1–2       |
 
-**La voix de Céleste** (facultative, jamais de mots ; jouée rarement pour ne pas lasser) :
+### Le combat, les dangers, les poursuites
 
-| Emplacement    | Quand                                               |
-| -------------- | --------------------------------------------------- |
-| `voice-hop`    | un petit « hop » à certains sauts                   |
-| `voice-effort` | se hisser, saut mural                               |
-| `voice-ouch`   | touchée : un petit souffle surpris, jamais un cri   |
-| `voice-oh`     | surprise : un présage, un poursuivant qui s'éveille |
-| `voice-laugh`  | joie : une affaire de Maria, un souvenir            |
-| `voice-yawn`   | s'endormir                                          |
+| Emplacement     | Quand                                          | Variantes |
+| --------------- | ---------------------------------------------- | --------- |
+| `attack`        | le coup de bâton qui fend l'air                | 2–3       |
+| `hit`           | le bâton touche un ennemi (sourd, pas violent) | 2         |
+| `enemy-scatter` | un ennemi se disperse                          | 1–2       |
+| `chase-wake`    | un poursuivant s'éveille                       | 1         |
+| `chase-rumble`  | le grondement du poursuivant (**boucle**)      | 1         |
+| `train-warn`    | un train s'annonce en gare                     | 1         |
+| `train-pass`    | un train passe en gare                         | 1         |
+| `tunnel`        | le train entre dans un tunnel (sur le toit)    | 1         |
+| `wave-warn`     | la vague s'annonce                             | 1         |
+| `erase`         | l'effacement s'annonce (niveau 7)              | 1         |
+
+### Le monde
+
+| Emplacement  | Quand                                    | Variantes |
+| ------------ | ---------------------------------------- | --------- |
+| `checkpoint` | une veilleuse s'allume                   | 1         |
+| `door`       | une porte de façade s'ouvre              | 1–2       |
+| `thought`    | une bulle de pensée apparaît (très doux) | 1         |
+| `map-open`   | la page du cahier s'ouvre (la carte)     | 1         |
+| `map-close`  | la page du cahier se referme             | 1         |
+
+### La voix de Céleste
+
+Facultative, jamais de mots, jouée rarement pour ne pas lasser.
+
+| Emplacement    | Quand                                             |
+| -------------- | ------------------------------------------------- |
+| `voice-hop`    | un petit « hop », un saut sur quatre              |
+| `voice-effort` | se hisser, le saut mural (une fois sur deux)      |
+| `voice-ouch`   | touchée : un petit souffle surpris, jamais un cri |
+| `voice-oh`     | surprise : un poursuivant qui s'éveille           |
+| `voice-laugh`  | joie : une trouvaille, une capacité trouvée       |
+
+Une **boucle** doit pouvoir se répéter sans coupure audible (la fin rejoint le début).

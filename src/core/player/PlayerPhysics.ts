@@ -43,6 +43,13 @@ const NEVER = 1 << 30;
 const WALL_CONTACT_PX = 1;
 const WALL_GRIP_FROM_TOP_PX = 4;
 
+/**
+ * Saut lancé au dernier pas : aucun, depuis le sol (coyote compris), mural (D-44), depuis un câble
+ * (D-65). Lu par les bruitages (D-127) ; ne pilote rien.
+ */
+export const JumpKind = { None: 0, Ground: 1, Wall: 2, Cable: 3 } as const;
+export type JumpKind = (typeof JumpKind)[keyof typeof JumpKind];
+
 /** Rebord (D-26) : rien, suspendue, en train de se hisser. */
 const Ledge = { None: 0, Hang: 1, Climb: 2 } as const;
 type Ledge = (typeof Ledge)[keyof typeof Ledge];
@@ -65,6 +72,8 @@ export class PlayerPhysics {
   prevY = 0;
   grounded = false;
   state: PlayerState = PlayerState.Fall;
+  /** Saut lancé au dernier pas (`JumpKind`), pour les bruitages. */
+  jumpKind: JumpKind = JumpKind.None;
   /** 1 à droite, -1 à gauche. */
   facing = 1;
   /** Pas écoulés depuis le dernier contact avec le sol (coyote time). */
@@ -214,6 +223,7 @@ export class PlayerPhysics {
     this.box.x = this.prevX = x;
     this.box.y = this.prevY = y;
     this.vx = this.vy = 0;
+    this.jumpKind = JumpKind.None;
     this.stepsSinceJumpPressed = NEVER;
     this.jumpCutAvailable = false;
     this.releaseGravityActive = false;
@@ -457,6 +467,7 @@ export class PlayerPhysics {
     const box = this.box;
     this.prevX = box.x;
     this.prevY = box.y;
+    this.jumpKind = JumpKind.None;
     if (this.ledge !== Ledge.None) {
       this.stepLedge(input);
       return;
@@ -574,6 +585,7 @@ export class PlayerPhysics {
         }
       }
       this.vy = -d.jumpVelocity;
+      this.jumpKind = JumpKind.Ground;
       this.grounded = false;
       this.stepsSinceGrounded = NEVER;
       this.stepsSinceJumpPressed = NEVER;
@@ -589,6 +601,7 @@ export class PlayerPhysics {
       const away = -this.lastWallDir;
       this.vx = away * p.wallJumpSpeedX;
       this.vy = -d.wallJumpVelocity;
+      this.jumpKind = JumpKind.Wall;
       this.facing = away;
       this.wallLockSteps = d.wallJumpLockSteps;
       this.noCatchDir = this.lastWallDir;
@@ -603,6 +616,7 @@ export class PlayerPhysics {
       // le câble. L'élan de la glissade est gardé. Tenu, le parapluie se rouvre seul au sommet
       // (D-70) : on enchaîne les câbles.
       this.vy = -d.cableJumpVelocity;
+      this.jumpKind = JumpKind.Cable;
       this.stepsSinceCable = NEVER;
       this.stepsSinceJumpPressed = NEVER;
       this.jumpCutAvailable = true;

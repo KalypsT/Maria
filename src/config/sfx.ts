@@ -31,6 +31,57 @@ export const SFX_SLOTS = [
   /** La page du cahier s'ouvre et se referme (la carte, D-30). */
   'map-open',
   'map-close',
+  // Capacités (D-127).
+  /** Les mains attrapent un rebord ; Céleste se hisse (D-26). */
+  'ledge-grab',
+  'ledge-climb',
+  /** Glisse contre un mur (boucle) ; le saut mural (D-44). */
+  'wall-slide',
+  'wall-jump',
+  /** Le parapluie s'ouvre et se referme (D-62). */
+  'umbrella-open',
+  'umbrella-close',
+  /** Le crochet attrape un câble ; Céleste glisse le long (boucle, D-65). */
+  'hook-catch',
+  'cable-slide',
+  /** La glissade au sol (D-84). */
+  'slide',
+  /** La bascule entre les deux couches (D-107). */
+  'shift',
+  // Combat (D-20).
+  /** Le coup de bâton ; le bâton touche ; un ennemi se disperse. */
+  'attack',
+  'hit',
+  'enemy-scatter',
+  // Dangers et poursuites.
+  /** Un poursuivant s'éveille ; son grondement pendant la poursuite (boucle, D-67). */
+  'chase-wake',
+  'chase-rumble',
+  /** Un train s'annonce en gare, puis passe (D-66). */
+  'train-warn',
+  'train-pass',
+  /** Le train entre dans un tunnel (D-86). */
+  'tunnel',
+  /** La vague s'annonce (D-103). */
+  'wave-warn',
+  /** L'effacement s'annonce (D-111). */
+  'erase',
+  // Monde.
+  /** Une porte de façade s'ouvre (D-61). */
+  'door',
+  /** Une bulle de pensée apparaît. */
+  'thought',
+  // La voix de Céleste (facultative, jamais de mots, jouée rarement).
+  /** Un petit « hop » à certains sauts. */
+  'voice-hop',
+  /** L'effort : se hisser, le saut mural. */
+  'voice-effort',
+  /** Touchée : un petit souffle surpris, jamais un cri. */
+  'voice-ouch',
+  /** Surprise : un poursuivant qui s'éveille. */
+  'voice-oh',
+  /** Joie : une trouvaille, une capacité trouvée. */
+  'voice-laugh',
 ] as const;
 export type SfxSlot = (typeof SFX_SLOTS)[number];
 
@@ -60,7 +111,29 @@ export const SFX_GAIN: Readonly<Partial<Record<SfxSlot, number>>> = {
   'step-leaves': 0.55,
   jump: 0.6,
   land: 0.7,
+  'wall-slide': 0.5,
+  'cable-slide': 0.5,
+  'chase-rumble': 0.6,
+  thought: 0.5,
+  'voice-hop': 0.7,
+  'voice-effort': 0.7,
+  'voice-ouch': 0.8,
+  'voice-oh': 0.8,
+  'voice-laugh': 0.7,
 };
+
+/** Sons joués en boucle tant que dure leur situation (glisser, poursuite). */
+export const SFX_LOOPS: readonly SfxSlot[] = ['wall-slide', 'cable-slide', 'chase-rumble'];
+
+/** Fondu d'entrée et de sortie d'une boucle (ms). */
+export const SFX_LOOP_FADE_MS = { in: 60, out: 160 } as const;
+
+/**
+ * La voix de Céleste (D-127), jouée rarement pour ne pas lasser : un « hop » tous les N sauts
+ * depuis le sol, un effort toutes les N fois qu'elle se hisse ou saute contre un mur. Touchée,
+ * surprise et joie à chaque fois (rares).
+ */
+export const VOICE_EVERY = { hop: 4, effort: 2 } as const;
 
 export const SFX_MIX = {
   /** Volume de la famille des bruitages (avant le volume général et celui des réglages). */
@@ -109,7 +182,7 @@ export const SFX_BUDGET_BYTES = 4 * 1024 * 1024;
 /**
  * Sons de test (build de debug seulement) : un emplacement sans fichier joue un petit son synthétisé,
  * pour vérifier au téléphone que chaque bruitage tombe au bon moment. Fréquence de départ et
- * d'arrivée (Hz), durée (ms), forme d'onde.
+ * d'arrivée (Hz), durée (ms ; 0 pour une boucle : un son tenu tant qu'elle dure), forme d'onde.
  */
 export const TEST_TONES: Readonly<
   Record<SfxSlot, { from: number; to: number; ms: number; wave: OscillatorType }>
@@ -129,4 +202,31 @@ export const TEST_TONES: Readonly<
   checkpoint: { from: 660, to: 990, ms: 260, wave: 'sine' },
   'map-open': { from: 500, to: 650, ms: 70, wave: 'triangle' },
   'map-close': { from: 650, to: 500, ms: 70, wave: 'triangle' },
+  'ledge-grab': { from: 700, to: 600, ms: 40, wave: 'square' },
+  'ledge-climb': { from: 300, to: 500, ms: 120, wave: 'triangle' },
+  'wall-slide': { from: 240, to: 240, ms: 0, wave: 'sawtooth' },
+  'wall-jump': { from: 450, to: 800, ms: 90, wave: 'square' },
+  'umbrella-open': { from: 400, to: 900, ms: 110, wave: 'sine' },
+  'umbrella-close': { from: 900, to: 400, ms: 90, wave: 'sine' },
+  'hook-catch': { from: 1400, to: 1200, ms: 60, wave: 'square' },
+  'cable-slide': { from: 600, to: 600, ms: 0, wave: 'sine' },
+  slide: { from: 300, to: 150, ms: 160, wave: 'sawtooth' },
+  shift: { from: 300, to: 1200, ms: 140, wave: 'sine' },
+  attack: { from: 800, to: 300, ms: 60, wave: 'sawtooth' },
+  hit: { from: 200, to: 120, ms: 60, wave: 'square' },
+  'enemy-scatter': { from: 1000, to: 1600, ms: 120, wave: 'triangle' },
+  'chase-wake': { from: 90, to: 60, ms: 400, wave: 'sawtooth' },
+  'chase-rumble': { from: 55, to: 55, ms: 0, wave: 'sawtooth' },
+  'train-warn': { from: 880, to: 880, ms: 300, wave: 'square' },
+  'train-pass': { from: 200, to: 80, ms: 600, wave: 'sawtooth' },
+  tunnel: { from: 150, to: 60, ms: 400, wave: 'sawtooth' },
+  'wave-warn': { from: 120, to: 300, ms: 500, wave: 'sine' },
+  erase: { from: 1200, to: 200, ms: 400, wave: 'sine' },
+  door: { from: 350, to: 250, ms: 120, wave: 'triangle' },
+  thought: { from: 1200, to: 1500, ms: 50, wave: 'sine' },
+  'voice-hop': { from: 600, to: 900, ms: 80, wave: 'triangle' },
+  'voice-effort': { from: 400, to: 350, ms: 120, wave: 'triangle' },
+  'voice-ouch': { from: 700, to: 450, ms: 120, wave: 'triangle' },
+  'voice-oh': { from: 500, to: 650, ms: 150, wave: 'triangle' },
+  'voice-laugh': { from: 800, to: 1000, ms: 200, wave: 'triangle' },
 };
