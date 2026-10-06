@@ -16,44 +16,28 @@ anglais : le générateur les suit mieux.
   (si le fond n'est pas transparent), la mise à l'échelle, la silhouette du monde étrange et
   l'intégration.
 
-## Papa (conversation 1, joindre `celeste.png`)
+## Papa (fait en partie)
 
-### dad-stand.png
+Référence : la première image de l'utilisateur (avec lunettes de soleil), puis `dad-stand` (sans).
+Faites et intégrées : `dad-stand`, `dad-door`, `dad-kitchen`, `dad-shop` (D-123).
 
-```
-Using the attached image as a strict style reference (same children's picture-book style: soft
-gouache and colored-pencil texture, thin warm-brown outlines, rounded shapes, soft shading, rosy
-cheeks, same level of detail and same proportions logic), draw the father of this little girl.
-
-A young father in his thirties: wavy chestnut-brown hair with volume, swept back; short neat beard;
-kind brown eyes; slightly tanned skin; navy-blue short-sleeved V-neck t-shirt (bare forearms);
-dark-blue straight jeans rolled up at the ankle; light sneakers with a blue stripe and a white sole,
-no logo.
-
-Pose: standing relaxed, arms hanging naturally, gentle calm expression.
-
-Full body, strict side profile facing right (like the reference), nothing cropped. Transparent
-background (or plain pure white), no ground shadow, no text, no other element. Portrait format,
-high resolution.
-```
-
-### Poses suivantes (même conversation, un message par pose)
-
-Préfixe à chaque message :
+Début de chaque message (joindre `dad-stand.png`, ou l'image d'origine pour le jardin) :
 
 ```
-Same father, same style, same clothes, same colors, same scale, strict side profile facing right,
-full body, transparent background, no shadow, no text. New pose:
+Using the attached image as the strict reference, draw the SAME man: same face, same wavy chestnut
+hair, same short beard, same navy V-neck t-shirt, same rolled-up jeans, same style, same colors, same
+level of detail, same scale and framing (full body, same height in the image, feet near the bottom).
+Strict side profile facing right. His sneakers have a simple straight blue stripe instead of the
+wavy one (no brand marks). Plain pure white background, no ground shadow, no text, no other element.
+Portrait format, high resolution.
 ```
 
-| Fichier           | Fin du message                                                                                                                                                   |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dad-door.png`    | `leaning slightly forward, head tilted down with a tender smile, one arm reaching forward and down with an open hand, as if offering his hand to a small child.` |
-| `dad-kitchen.png` | `standing, holding a white mug with a thin pink stripe at chest height in one hand, relaxed, looking ahead calmly.`                                              |
-| `dad-garden.png`  | `standing, watering plants with a small green metal watering can held forward and tilted down, a few water drops falling. He wears simple dark sunglasses.`      |
-| `dad-shop.png`    | `standing, holding a wicker shopping basket with a baguette and apples by its handle at his side.`                                                               |
-| `dad-hall.png`    | `leaning slightly forward, one arm reaching forward and down with an open hand, soft relieved smile.`                                                            |
-| `dad-quay.png`    | `standing, one hand raised waving goodbye, soft wistful smile.`                                                                                                  |
+| Fichier          | Fin du message                                                                                                                                                                                                                                  |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dad-quay.png`   | `No sunglasses. Pose: standing, front hand raised at head height waving goodbye, soft wistful smile.`                                                                                                                                           |
+| `dad-garden.png` | `He wears the same dark sunglasses as in the reference. Pose: standing, watering plants with a small green metal watering can held forward in his front hand and tilted down, a few water drops falling from the spout, the other arm relaxed.` |
+
+`dad-hall` (la nuit, sous l'horloge de la gare) reprend `dad-door` : pas d'image à faire.
 
 ## Maman (conversation 2, joindre `celeste.png`)
 

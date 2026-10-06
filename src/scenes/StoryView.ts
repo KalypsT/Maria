@@ -95,7 +95,7 @@ export class StoryView {
             if (kind === 'music-box' || kind === 'plant') {
               drawLoopObject(ctx, kind, w, h, frame);
             } else {
-              drawCharacter(ctx, kind, frame);
+              drawCharacter(ctx, kind, frame, images);
             }
           });
         }

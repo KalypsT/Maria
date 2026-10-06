@@ -2,6 +2,8 @@
 
 ## Phase en cours
 
+**Les personnages illustrés** (D-123) : papa illustré (images de l'utilisateur générées avec ChatGPT, prompts dans `docs/PROMPTS_PERSONNAGES.md`) à la porte de la chambre, dans le hall de la gare, à la cuisine, à la supérette, sur `ccr-142ffd96-q5pgli`. Suite : papa au jardin et sur le quai, maman, puis Céleste en pièces illustrées.
+
 **Le niveau 7 plus lisible** (retour d'essai, D-122) : les quatre cubes de la tour d'Eden à la place des objets déjà vus, la porte de la sieste et ses creux, le regard vers la porte, la carte, la salle de jeux où la tour monte, le souvenir d'Eden retravaillé (la tour chacun son tour, le cache-cache avec un compte), Eden blond à la coupe au bol, sur `ccr-abfc1233-t31o4v`. Suite : **essai sur téléphone**.
 
 **Les disques et le tourne-disque du grenier** (easter egg secret, D-121) : plan validé en 3 PR (le système et le premier morceau, le tourne-disque, le disque aux objets trouvés de la gare). **PR 1 faite : le système, « Les Aventures de Céleste », les jingles par-dessus la musique** **PR 2 faite : le tourne-disque au grenier** et **PR 3 faite : le disque aux objets trouvés de la gare** (D-121), sur `ccr-97cf4444-9oirn1`. **Le système des disques est complet** avec un disque sur trois ; les deux autres (jardin ou quartier, chez la nounou) viendront avec leur musique. Suite : essai sur téléphone.
@@ -23,6 +25,13 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les personnages illustrés : papa (D-123)
+
+- `CHARACTER_IMAGES` : une pose → une image détourée de `public/art/` ; les poses sans image restent dessinées par le code.
+- Papa : `dad-door` (et `dad-hall`), `dad-kitchen` (avec la vapeur de la tasse), `dad-shop`. Détourage : `scripts/art-cutout.py`.
+- Vérifié dans Chromium : la chambre la nuit, la cuisine le matin, la supérette.
+- [ ] À vérifier sur téléphone : papa illustré se marie-t-il au décor (la nuit, il paraît plus clair que la chambre) ? Sa taille et sa minceur (plus mince que le dessin par code) conviennent-elles ?
 
 ### Le niveau 7 plus lisible : les cubes de la tour d'Eden, le souvenir d'Eden (D-122)
 

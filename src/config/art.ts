@@ -1,3 +1,4 @@
+import type { PropKind } from '../core/story/story';
 import type { CelesteOutfit } from './growth';
 
 /**
@@ -651,6 +652,27 @@ export const ART_IMAGES: Readonly<Record<string, string>> = {
   maria: 'maria.png',
   /** Roger, la peluche singe de Céleste (D-68, D-69) : image fournie par l'utilisateur, détourée. */
   roger: 'roger.png',
+};
+
+/**
+ * Personnage illustré (D-123) : image fournie sous `public/art/` (détourée, `scripts/art-cutout.py`),
+ * à la place du dessin par code. Elle remplit la hauteur du personnage ; `footX` (fraction de la
+ * largeur de l'image) est l'axe des pieds, posé au milieu du cadre comme le corps dessiné.
+ * `steam` : haut de la tasse (fractions de l'image), d'où monte la vapeur dessinée par le code.
+ */
+export interface CharacterImage {
+  file: string;
+  footX: number;
+  steam?: { x: number; y: number };
+}
+
+/** Personnages illustrés (D-123) ; les autres restent dessinés par le code (`familyArt`). */
+export const CHARACTER_IMAGES: Readonly<Partial<Record<PropKind, CharacterImage>>> = {
+  'dad-door': { file: 'dad-door.png', footX: 0.22 },
+  // Même geste, la main tendue : la nuit, sous l'horloge du hall de la gare (D-69).
+  'dad-hall': { file: 'dad-door.png', footX: 0.22 },
+  'dad-kitchen': { file: 'dad-kitchen.png', footX: 0.32, steam: { x: 0.896, y: 0.273 } },
+  'dad-shop': { file: 'dad-shop.png', footX: 0.31 },
 };
 
 /**

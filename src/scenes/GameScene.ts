@@ -95,6 +95,7 @@ import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
 import { PauseMenu } from '../ui/PauseMenu';
 import {
   ART_IMAGES,
+  CHARACTER_IMAGES,
   DAY_PALETTE,
   DEFAULT_ART_FINISH,
   type ArtFinish,
@@ -409,6 +410,12 @@ export class GameScene extends Phaser.Scene {
     // Images fournies (D-28) : elles remplacent le dessin par code de l'élément du même nom.
     for (const [key, file] of Object.entries(ART_IMAGES)) {
       this.load.image(`art:${key}`, `art/${file}`);
+    }
+    // Personnages illustrés (D-123) : une image peut servir à plusieurs poses.
+    for (const { file } of Object.values(CHARACTER_IMAGES)) {
+      if (!this.textures.exists(`art:${file}`)) {
+        this.load.image(`art:${file}`, `art/${file}`);
+      }
     }
   }
 
@@ -1704,7 +1711,11 @@ export class GameScene extends Phaser.Scene {
   /** Images fournies chargées (nom d'élément → image). */
   private artImages(): Map<string, CanvasImageSource> {
     const images = new Map<string, CanvasImageSource>();
-    for (const key of Object.keys(ART_IMAGES)) {
+    const keys = [
+      ...Object.keys(ART_IMAGES),
+      ...Object.values(CHARACTER_IMAGES).map((character) => character.file),
+    ];
+    for (const key of keys) {
       if (this.textures.exists(`art:${key}`)) {
         images.set(key, this.textures.get(`art:${key}`).getSourceImage() as CanvasImageSource);
       }
