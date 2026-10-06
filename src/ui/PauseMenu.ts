@@ -17,6 +17,8 @@ export interface PauseMenuOptions {
   onAudioChange: (settings: AudioSettings, persist: boolean) => void;
   /** Afficher les réglages tactiles (inutile sans commandes tactiles). */
   showTouchSettings: boolean;
+  /** Le navigateur sait vibrer (Android) : le réglage des vibrations est proposé (D-128). */
+  canVibrate: boolean;
   onResume: () => void;
   /** Ouvrir la carte (§24) ; absent : pas de bouton. */
   onOpenMap?: () => void;
@@ -90,6 +92,9 @@ export class PauseMenu {
       this.addSlider(panel, 'Opacité', 'opacity', (v) => `${Math.round(v * 100)} %`);
       if (options.debugTools) {
         this.addModeChoice(panel);
+      }
+      if (options.canVibrate) {
+        this.addVibrationChoice(panel);
       }
       const reset = element('button', panel, undefined, 'Réinitialiser les commandes');
       reset.addEventListener('click', () => {
@@ -177,6 +182,33 @@ export class PauseMenu {
       value.textContent = format(this.settings[key]);
       this.commit();
     });
+    refresh();
+    this.refreshers.push(refresh);
+  }
+
+  /** Vibrations (D-128) : oui ou non. */
+  private addVibrationChoice(parent: HTMLElement): void {
+    const row = element('div', parent, 'pause-row');
+    element('span', row, undefined, 'Vibrations');
+    const group = element('div', row, 'pause-choice');
+    const choices: readonly [boolean, string][] = [
+      [true, 'Oui'],
+      [false, 'Non'],
+    ];
+    const buttons = choices.map(([on, text]) => {
+      const button = element('button', group, undefined, text);
+      button.addEventListener('click', () => {
+        this.settings.vibration = on;
+        this.commit();
+        refresh();
+      });
+      return { on, button };
+    });
+    const refresh = () => {
+      for (const { on, button } of buttons) {
+        button.classList.toggle('selected', on === this.settings.vibration);
+      }
+    };
     refresh();
     this.refreshers.push(refresh);
   }

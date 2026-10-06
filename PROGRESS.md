@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Sensations, son, aide et mondes étranges** (D-124) : plan validé en quatre chantiers : **A** fluidité et sensations, **B** bruitages et vibrations, **C** le fil discret (activé par défaut), **D** mondes étranges reconnaissables. **Chantier A, PR 1 faite : le compteur de saccades** (fusionnée) et **PR 2 faite : les sensations proposées, la poussière en papier, la matière du sol** (D-125), sur `ccr-9d90352a-xuwhs1`. **Chantier B, PR 1 faite : les bruitages, le système et les premiers sons** (D-126) et **PR 2 faite : les sons des capacités, du combat, des dangers, la voix** (D-127), sur la même branche. Suite : **essai sur téléphone** (Android) du compteur, des sensations et des sons de test ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades ; **les sons à fournir** (`docs/BRUITAGES.md`) ; puis B3 (vibrations).
+**Sensations, son, aide et mondes étranges** (D-124) : plan validé en quatre chantiers : **A** fluidité et sensations, **B** bruitages et vibrations, **C** le fil discret (activé par défaut), **D** mondes étranges reconnaissables. **Chantier A, PR 1 faite : le compteur de saccades** (fusionnée) et **PR 2 faite : les sensations proposées, la poussière en papier, la matière du sol** (D-125), sur `ccr-9d90352a-xuwhs1`. **Chantier B, PR 1 faite : les bruitages, le système et les premiers sons** (D-126), **PR 2 faite : les sons des capacités, du combat, des dangers, la voix** (D-127) et **PR 3 faite : les vibrations** (D-128), sur la même branche. **Le chantier B est complet** (les sons restent à fournir). Suite : **essai sur téléphone** (Android) du compteur, des sensations et des sons de test ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades ; **les sons à fournir** (`docs/BRUITAGES.md`) ; puis le chantier C (le fil discret).
 
 **Les personnages illustrés** (D-123) : papa illustré (images de l'utilisateur générées avec ChatGPT, prompts dans `docs/PROMPTS_PERSONNAGES.md`) à la porte de la chambre, dans le hall de la gare, à la cuisine, à la supérette, sur `ccr-142ffd96-q5pgli`. Suite : papa au jardin et sur le quai, maman, puis Céleste en pièces illustrées.
 
@@ -27,6 +27,13 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Chantier B, PR 3 : les vibrations (D-128)
+
+- Sur Android : une courte vibration à la réception d'une grande chute, quand Céleste est touchée, quand le crochet attrape un câble, à la bascule, au réveil d'un poursuivant, à une veilleuse.
+- **Menu pause → Commandes tactiles → Vibrations : Oui / Non** (activées par défaut).
+- Tests : `haptics.test.ts`, `controlSettings.test.ts`. Vérifié dans Chromium : le réglage dans le menu pause.
+- [ ] À vérifier sur téléphone : les vibrations se sentent-elles sans gêner ? Trop, pas assez ? Lesquelles garder ? « Non » les coupe-t-il ?
 
 ### Chantier B, PR 2 : les sons des capacités, du combat, des dangers, la voix (D-127)
 

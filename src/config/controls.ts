@@ -70,12 +70,15 @@ export interface ControlSettings {
   /** Opacité des commandes au repos (0–1). */
   opacity: number;
   joystickMode: JoystickMode;
+  /** Vibrations (D-128, Android) : quelques moments forts, réglables dans le menu pause. */
+  vibration: boolean;
 }
 
 export const DEFAULT_CONTROL_SETTINGS: Readonly<ControlSettings> = {
   buttonScale: 1,
   opacity: 0.7,
   joystickMode: 'digital',
+  vibration: true,
 };
 
 export const CONTROL_SETTING_RANGES = {
