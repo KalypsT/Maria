@@ -14,6 +14,7 @@ export class Hud {
   private shownFear = -1;
   private shownMax = -1;
   private shownVeil = -1;
+  private veiledBlack = false;
   private shownBackground = '';
 
   constructor(parent: HTMLElement = document.body) {
@@ -53,6 +54,7 @@ export class Hud {
   /** Voile d'évanouissement (0 transparent → 1 noir), arrondi pour limiter les écritures. */
   setVeil(opacity: number, iris: { x: number; y: number } | null = null): void {
     const value = Math.round(Math.min(1, Math.max(0, opacity)) * 50) / 50;
+    this.veiledBlack = value >= 1;
     if (iris && value > 0 && value < 1) {
       // Fondu en cercle (D-35) : un trou autour de Céleste (coordonnées de l'écran, px CSS), qui
       // rétrécit quand le voile monte. Le voile est alors opaque autour du trou.
@@ -81,6 +83,11 @@ export class Hud {
     this.veil.style.opacity = String(value);
     this.veil.style.visibility = value > 0 ? 'visible' : 'hidden';
     this.shownVeil = value;
+  }
+
+  /** L'écran est entièrement noir (outil de debug : une saccade ne s'y voit pas, D-124). */
+  get black(): boolean {
+    return this.veiledBlack;
   }
 
   /** Indice discret en bas de l'écran, effacé après `durationMs`. */
