@@ -81,6 +81,7 @@ fichier en plus. **Pas d'ambiances pour l'instant** (décision de l'utilisateur)
 | `checkpoint` | une veilleuse s'allume                   | 1         |
 | `door`       | une porte de façade s'ouvre              | 1–2       |
 | `thought`    | une bulle de pensée apparaît (très doux) | 1         |
+| `hint`       | le fil discret se montre (un tintement)  | 1         |
 | `map-open`   | la page du cahier s'ouvre (la carte)     | 1         |
 | `map-close`  | la page du cahier se referme             | 1         |
 

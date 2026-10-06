@@ -40,6 +40,11 @@ export function sanitizeControlSettings(raw: unknown): ControlSettings {
   if (typeof vibration === 'boolean') {
     settings.vibration = vibration;
   }
+  // Le fil discret (D-129), activé par défaut : de même.
+  const hint = source['hint'];
+  if (typeof hint === 'boolean') {
+    settings.hint = hint;
+  }
   return settings;
 }
 

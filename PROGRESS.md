@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Sensations, son, aide et mondes étranges** (D-124) : plan validé en quatre chantiers : **A** fluidité et sensations, **B** bruitages et vibrations, **C** le fil discret (activé par défaut), **D** mondes étranges reconnaissables. **Chantier A, PR 1 faite : le compteur de saccades** (fusionnée) et **PR 2 faite : les sensations proposées, la poussière en papier, la matière du sol** (D-125), sur `ccr-9d90352a-xuwhs1`. **Chantier B, PR 1 faite : les bruitages, le système et les premiers sons** (D-126), **PR 2 faite : les sons des capacités, du combat, des dangers, la voix** (D-127) et **PR 3 faite : les vibrations** (D-128), sur la même branche. **Le chantier B est complet** (les sons restent à fournir). Suite : **essai sur téléphone** (Android) du compteur, des sensations et des sons de test ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades ; **les sons à fournir** (`docs/BRUITAGES.md`) ; puis le chantier C (le fil discret).
+**Sensations, son, aide et mondes étranges** (D-124) : plan validé en quatre chantiers : **A** fluidité et sensations, **B** bruitages et vibrations, **C** le fil discret (activé par défaut), **D** mondes étranges reconnaissables. **Chantier A, PR 1 faite : le compteur de saccades** (fusionnée) et **PR 2 faite : les sensations proposées, la poussière en papier, la matière du sol** (D-125), sur `ccr-9d90352a-xuwhs1`. **Chantier B, PR 1 faite : les bruitages, le système et les premiers sons** (D-126), **PR 2 faite : les sons des capacités, du combat, des dangers, la voix** (D-127) et **PR 3 faite : les vibrations** (D-128), sur la même branche. **Le chantier B est complet** (les sons restent à fournir). **Chantier C fait : le fil discret** (D-129), sur la même branche. Suite : **essai sur téléphone** (Android) du compteur, des sensations et des sons de test ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades ; **les sons à fournir** (`docs/BRUITAGES.md`) ; le fil discret à essayer ; puis le chantier D (mondes étranges : maquettes de la gare étrange).
 
 **Les personnages illustrés** (D-123) : papa illustré (images de l'utilisateur générées avec ChatGPT, prompts dans `docs/PROMPTS_PERSONNAGES.md`) à la porte de la chambre, dans le hall de la gare, à la cuisine, à la supérette, sur `ccr-142ffd96-q5pgli`. Suite : papa au jardin et sur le quai, maman, puis Céleste en pièces illustrées.
 
@@ -27,6 +27,16 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Chantier C : le fil discret (D-129)
+
+- Après **3 min sans progrès** (étape de l'histoire, capacité, salle découverte, veilleuse), une lueur (cœur doré, halo turquoise) part de Céleste dans la bonne direction ; après **5 min**, elle mène jusqu'à la sortie à prendre ou au but, et y attend. Tout progrès l'éteint. Jamais pendant une scène, une poursuite ou un souvenir ; jamais vers une trouvaille.
+- **Menu pause → Aide → Aide discrète : Oui / Non** (oui par défaut).
+- Le chemin principal (`src/levels/milestones.ts`) : 59 jalons, de la soirée du prologue au souvenir d'Eden.
+- DEBUG : INFOS montre le palier et le jalon visé ; DEBUG → « Fil discret : maintenant ».
+- Tests : `hint.test.ts` (le chemin principal suivi jusqu'à la fin), `controlSettings.test.ts`. Vérifié dans Chromium : la lueur va vers Maria dans la chambre au début, vers la sortie de la chambre depuis le couloir.
+- [ ] À vérifier sur téléphone (DEBUG → « Fil discret : maintenant », en plusieurs endroits du jeu) : la lueur se voit-elle sans être confondue avec autre chose ? Montre-t-elle le bon chemin (surtout là où l'on passe par le haut, en grimpant) ? 3 et 5 min : trop tôt, trop tard ? Le petit trajet du premier palier se comprend-il ?
+- [ ] Si un endroit guide mal : me dire la salle et l'étape (INFOS montre le jalon visé).
 
 ### Chantier B, PR 3 : les vibrations (D-128)
 

@@ -140,6 +140,17 @@ import { DEFAULT_PUPPET, type PuppetParams } from '../config/puppet';
 import { CelestePoser, PoseAttack } from '../core/player/celestePose';
 import { AttackPhase } from '../core/combat/PlayerAttack';
 import { DustPool } from './DustPool';
+import { HintView } from './HintView';
+import { HINT } from '../config/hint';
+import {
+  HintClock,
+  HintStage,
+  currentGoal,
+  hintPoint,
+  milestoneName,
+  type HintWorld,
+} from '../core/hint/hint';
+import { MILESTONES } from '../levels/milestones';
 import { DEFAULT_GROUND, type Surface } from '../config/surfaces';
 import { Haptics, canVibrate } from '../platform/haptics';
 import { roomGround, surfaceUnder } from '../core/level/surface';
@@ -389,6 +400,13 @@ export class GameScene extends Phaser.Scene {
   private readonly waveWatch = new PhaseWatch();
   /** Vibrations aux moments forts (D-128, Android). */
   private readonly haptics = new Haptics();
+  /** Le fil discret (D-129) : le temps sans progrès, la lueur, le point montré. */
+  readonly hintClock = new HintClock();
+  private hintView!: HintView;
+  private readonly hintTarget = { valid: false, x: 0, y: 0 };
+  private hintRetargetMs = 0;
+  /** Jalon montré par le fil (outil de debug). */
+  hintGoalName = '';
   /** Phase du coup de bâton au pas précédent : son au début du coup. */
   private lastAttackPhase: number = AttackPhase.Idle;
   /** Zone de la salle courante ; null dans un parcours d'essai (hors partie). */
@@ -560,6 +578,7 @@ export class GameScene extends Phaser.Scene {
     this.puppet = new CelestePuppet(this);
     this.puppet.redraw(this.artScale, this.celestePalette(), this.artImages(), this.growth);
     this.dust = new DustPool(this, this.feelParams);
+    this.hintView = new HintView(this);
     this.combat = new CombatWorld(this.level, this.combatParams);
     this.ride.load(this.combat.sweeps);
     this.combatView = new CombatView(this, this.combat, this.combatParams, this.dust);
@@ -876,6 +895,7 @@ export class GameScene extends Phaser.Scene {
       }
       this.stepMoveSounds();
     }
+    this.stepHint((steps * 1000) / PHYSICS_STEP_HZ);
     if (__DEBUG_TOOLS__) {
       this.frameStats.steps = steps;
       this.frameStats.simulationMs = performance.now() - start;
@@ -915,6 +935,16 @@ export class GameScene extends Phaser.Scene {
     this.shiftView.render(this.time.now, this.puppet.x, this.puppet.y - box.height / 2, this.erase);
     this.worldView.render();
     this.dust.update();
+    const hintTarget = this.hintTarget;
+    this.hintView.update(
+      this.time.now,
+      this.hintClock.stage,
+      this.puppet.x,
+      this.puppet.y - box.height,
+      hintTarget.valid,
+      hintTarget.x,
+      hintTarget.y,
+    );
     const main = this.cameras.main;
     main.centerOn(
       camera.prevX + (camera.x - camera.prevX) * alpha,
@@ -1650,6 +1680,8 @@ export class GameScene extends Phaser.Scene {
     this.audio.sfx.setStrange(this.strangeWorld || isStrangeRoom(level));
     this.audio.sfx.stopLoops();
     this.sfxDirector.reset(this.player);
+    this.hintView.reset();
+    this.hintRetargetMs = 0;
     for (const watch of this.trainWatches) {
       watch.reset();
     }
@@ -2012,6 +2044,75 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** Pose de la marionnette (D-29), un pas : état de Céleste et coup de bâton en cours. */
+  /**
+   * Le fil discret (D-129) : le temps de jeu sans progrès (étape de l'histoire, capacité, salle
+   * découverte, veilleuse) ; au-delà des paliers, le point à montrer dans la salle, recalculé de
+   * temps en temps. Seulement dans une zone, hors des scènes, poursuites et souvenirs.
+   */
+  private stepHint(dtMs: number): void {
+    const data = this.session.data;
+    const run = this.run;
+    const chase = this.combat.chase;
+    const active =
+      data.settings.controls.hint &&
+      this.zone !== null &&
+      !this.story.busy &&
+      !this.memoryPlay &&
+      !(chase && !chase.done) &&
+      !run.fainting &&
+      !run.splashing &&
+      !this.transition.leaving;
+    const { abilities, mapRevealed } = data.progression;
+    const progress =
+      this.story.flags.size +
+      1e3 * abilities.length +
+      1e5 * mapRevealed.length +
+      1e7 * data.activatedCheckpoints.length;
+    const before = this.hintClock.stage;
+    this.hintClock.step(dtMs, active, progress);
+    const stage = this.hintClock.stage;
+    if (stage > before) {
+      this.audio.sfx.play('hint');
+    }
+    const target = this.hintTarget;
+    if (stage === HintStage.None) {
+      target.valid = false;
+      this.hintGoalName = '';
+      return;
+    }
+    const now = this.time.now;
+    if (now < this.hintRetargetMs) {
+      return;
+    }
+    this.hintRetargetMs = now + HINT.retargetMs;
+    const world = this.hintWorld();
+    const current = world ? currentGoal(MILESTONES, world, this.level.id) : null;
+    const point =
+      world && current ? hintPoint(current.goal, world, this.level.id, this.level) : null;
+    target.valid = point !== null;
+    if (point) {
+      target.x = point.x;
+      target.y = point.y;
+    }
+    this.hintGoalName = current ? milestoneName(current.milestone) : '';
+  }
+
+  /** Ce que le fil sait de la partie en ce moment (D-129) ; null hors d'une zone. */
+  private hintWorld(): HintWorld | null {
+    const zone = this.zone;
+    if (!zone) {
+      return null;
+    }
+    const story = this.story;
+    return {
+      zone,
+      triggers: story.data.triggers,
+      flags: story.flags,
+      abilities: new Set(this.session.data.progression.abilities),
+      locked: (room, exit) => story.exitsLocked(room, exit),
+    };
+  }
+
   /**
    * Bruitages du mouvement (D-126), après les sensations et la pose : les pas selon la matière du
    * sol, au rythme de la foulée ; le saut ; la réception selon la hauteur de la chute.
