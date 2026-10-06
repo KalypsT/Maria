@@ -8,6 +8,7 @@ import {
 } from '../core/audio/AudioMix';
 import { audioFileMap, type AudioSlot } from '../core/audio/audioFiles';
 import { isRecordSlot, recordSlot, type RecordId } from '../config/records';
+import { SfxPlayer } from './sfxPlayer';
 
 /**
  * Fichiers de `src/assets/audio/` : Vite les publie (nom avec empreinte, donc un morceau remplacé
@@ -243,6 +244,8 @@ function clampVolume(v: number): number {
  */
 export class AudioPlayer {
   readonly mix = new AudioMix();
+  /** Bruitages (D-126), sous le même volume général. */
+  readonly sfx: SfxPlayer;
   private readonly files: Map<AudioSlot, string>;
   private readonly voices = new Map<MusicSlot, Voice>();
   private readonly jingles = new Map<Jingle, HTMLAudioElement>();
@@ -257,6 +260,7 @@ export class AudioPlayer {
       console.warn(`Audio : fichiers au nom inconnu ignorés (${unknown.join(', ')})`);
     }
     this.mix.settings = { ...settings };
+    this.sfx = new SfxPlayer(settings);
     const unlock = () => {
       this.unlocked = true;
       window.removeEventListener('pointerdown', unlock, true);
@@ -336,6 +340,7 @@ export class AudioPlayer {
 
   setSettings(settings: AudioSettings): void {
     this.mix.settings = { ...settings };
+    this.sfx.setSettings(settings);
   }
 
   setPaused(paused: boolean): void {

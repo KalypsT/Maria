@@ -2,6 +2,9 @@
 // coupés, volume ramené à la même sonie, AAC 96 kbit/s en .m4a, sans pochette ni métadonnées.
 // Usage : npm run audio:prepare -- [--max <secondes>] <fichiers ou dossier> ; nécessite ffmpeg.
 // `--max` raccourcit le son à cette durée, avec un fondu de sortie (D-94, jingle `memory`).
+// `--sfx` prépare des bruitages (D-126) dans `src/assets/sfx/` : mono, ramenés à la même crête (la
+// sonie se mesure mal sur un son très court), fondus de bord très courts (l'attaque d'un pas reste
+// nette) ; le nom (`step-wood-1`) doit être un emplacement de `src/config/sfx.ts`.
 // Le nom du fichier produit est le nom d'origine sans préfixe d'envoi (`f9d40126-garden.mp3` →
 // `garden.m4a`) ; il doit être un emplacement de `src/config/audio.ts`.
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -20,6 +23,11 @@ const TAIL_SILENCE_DB = -50;
 const EDGE_FADE_S = 0.02;
 /** Fondu de sortie quand `--max` raccourcit le son. */
 const MAX_FADE_S = 1.5;
+/** Bruitages (`--sfx`) : dossier, crête visée (dBFS), débit (mono), fondus de bord. */
+const SFX_DIR = 'src/assets/sfx';
+const SFX_PEAK_DB = -4;
+const SFX_BITRATE = '80k';
+const SFX_EDGE_FADE_S = 0.004;
 
 function ffmpeg(args) {
   return execFileSync('ffmpeg', ['-hide_banner', '-nostdin', ...args], {
@@ -61,6 +69,55 @@ function measure(file, filters) {
     { encoding: 'utf8', maxBuffer: 1 << 26 },
   );
   return JSON.parse(stderr.slice(stderr.lastIndexOf('{')));
+}
+
+/** Crête du son filtré (dBFS), mesurée par `volumedetect`. */
+function peakDb(file, filters) {
+  const { stderr } = spawnSync(
+    'ffmpeg',
+    ['-hide_banner', '-nostdin', '-i', file, '-af', `${filters},volumedetect`, '-f', 'null', '-'],
+    { encoding: 'utf8', maxBuffer: 1 << 26 },
+  );
+  const match = /max_volume: (-?[\d.]+) dB/.exec(stderr);
+  return match ? Number(match[1]) : 0;
+}
+
+/** Bruitage (D-126) : silences coupés, mono, même crête pour tous. */
+function prepareSfx(file) {
+  const name = basename(file, extname(file)).replace(/^[0-9a-f]{8}-/, '');
+  const out = join(SFX_DIR, `${name}.m4a`);
+  const { start, end } = audibleRange(file);
+  const trim =
+    `atrim=start=${start}:end=${end},asetpts=PTS-STARTPTS,` +
+    `afade=t=in:d=${SFX_EDGE_FADE_S},areverse,afade=t=in:d=${SFX_EDGE_FADE_S * 5},areverse`;
+  const gain = SFX_PEAK_DB - peakDb(file, trim);
+  ffmpeg([
+    '-v',
+    'error',
+    '-y',
+    '-i',
+    file,
+    '-vn',
+    '-map_metadata',
+    '-1',
+    '-af',
+    `${trim},volume=${gain.toFixed(2)}dB`,
+    '-ac',
+    '1',
+    '-ar',
+    '44100',
+    '-c:a',
+    'aac',
+    '-b:a',
+    SFX_BITRATE,
+    '-movflags',
+    '+faststart',
+    out,
+  ]);
+  const kb = Math.round(statSync(out).size / 1024);
+  console.log(
+    `${out} : ${((end - start) * 1000).toFixed(0)} ms, gain ${gain.toFixed(1)} dB, ${kb} Ko`,
+  );
 }
 
 function prepare(file, maxSec) {
@@ -110,6 +167,11 @@ function prepare(file, maxSec) {
 }
 
 const args = process.argv.slice(2);
+const sfxAt = args.indexOf('--sfx');
+const sfx = sfxAt >= 0;
+if (sfx) {
+  args.splice(sfxAt, 1);
+}
 const maxAt = args.indexOf('--max');
 const maxSec = maxAt >= 0 ? Number(args.splice(maxAt, 2)[1]) : 0;
 if (!(maxSec >= 0)) {
@@ -124,9 +186,15 @@ const inputs = args.flatMap((path) =>
     : [path],
 );
 if (inputs.length === 0) {
-  console.error('Usage : npm run audio:prepare -- [--max <secondes>] <fichiers ou dossier>');
+  console.error(
+    'Usage : npm run audio:prepare -- [--sfx] [--max <secondes>] <fichiers ou dossier>',
+  );
   process.exit(1);
 }
 for (const file of inputs) {
-  prepare(file, maxSec);
+  if (sfx) {
+    prepareSfx(file);
+  } else {
+    prepare(file, maxSec);
+  }
 }

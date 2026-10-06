@@ -96,5 +96,7 @@ export const DUST_LOOK: Readonly<Record<Surface, DustLook>> = {
 /** Dans le monde étrange, la poussière prend ses couleurs (turquoise et violet, D-36). */
 export const STRANGE_DUST_COLORS: readonly [number, number] = [0x7ff0dc, 0xb59ce6];
 
-/** Grains d'une réception ordinaire ; une réception à pleine vitesse de chute en donne deux fois plus. */
+/** Grains d'une réception sur place ; ils augmentent avec la hauteur de la chute… */
 export const DUST_LAND_COUNT = 4;
+/** …jusqu'au double pour une chute de cette hauteur (tuiles) ou plus. */
+export const DUST_FULL_FALL_TILES = 8;

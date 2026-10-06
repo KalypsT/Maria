@@ -1774,3 +1774,19 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Poussière en papier** (`DustPool`) : grains dessinés une fois en blanc puis teintés, sans rotation à l'affichage (D-73) : copeaux (bois), petits nuages (tissu, pierre, métal), brins (herbe), grains (sable), petites feuilles (feuillage) ; dans le monde étrange, les couleurs du monde étrange (turquoise, violet). Les grains retombent et se posent au sol, les nuages montent un peu en grossissant ; ils partent du bord des pieds. Plus de grains à une réception après une grande chute (`PlayerFeel.landingSpeed`). 16 images réutilisées (au lieu de 8), aucune création en jeu. L'éclat d'un ennemi dispersé devient des bouts de papier, les gouttes d'un éclaboussement retombent. Réglages : `DUST_LOOK`, `STRANGE_DUST_COLORS`, `DUST_LAND_COUNT` (`src/config/feel.ts`), PROVISOIRES.
 - **Rien ne touche à la collision** ; la marionnette (chantier des personnages) n'est pas modifiée : l'écrasement et l'inclinaison s'appliquent à Céleste entière et vaudront aussi pour ses pièces illustrées.
 - **Sauvegarde** : aucun changement.
+
+## D-126 — Chantier B, PR 1 : les bruitages (le système, les premiers sons)
+
+- **Décisions de l'utilisateur** : les sons sont fournis par l'utilisateur ; la voix de Céleste est prévue en emplacements facultatifs ; **pas d'ambiances pour l'instant** ; les bruitages restent des PLACEHOLDERS tant qu'ils ne sont pas fournis (§45).
+- **Lecteur** (`src/platform/sfxPlayer.ts`, tenu par `AudioPlayer`) : **Web Audio** (latence faible, plusieurs sons à la fois ; la musique garde ses lecteurs `<audio>`). Contexte créé au premier geste, sons décodés une fois, suspendu quand l'appli passe en arrière-plan. Chaque lecture tire une **variante** (jamais deux fois de suite la même, `pickVariant`) et varie la hauteur de ± 6 % ; un même emplacement ne se rejoue pas avant 60 ms ; 8 voix au plus. **Monde étrange** : les mêmes sons passent par un passe-bas et un écho (aucun fichier en plus).
+- **Fichiers** : `src/assets/sfx/<emplacement>[-N].{ogg,opus,m4a,mp3}` (`sfxFileMap`, testé) ; un emplacement sans fichier reste silencieux. Préparation : `npm run audio:prepare -- --sfx` (silences coupés, mono, même crête −4 dBFS, AAC 80 kbit/s). Budget : `SFX_BUDGET_BYTES` (4 Mo), testé. Liste des sons à fournir : `docs/BRUITAGES.md`.
+- **Sons de test** (build de debug, DEBUG → « Sons de test ») : un emplacement sans fichier joue un court glissando synthétisé, différent pour chacun, pour vérifier au téléphone que chaque son tombe au bon moment avant d'avoir les fichiers.
+- **Volume des bruitages** : nouveau réglage `sfxVolume` (menu pause → Son → Bruitages), sous le volume général et la coupure ; complété par défaut à la lecture d'une sauvegarde plus ancienne, **sans migration**.
+- **Premiers branchements** (`SfxDirector`, pur, testé) :
+  - **les pas** suivent la foulée de la marionnette (un pied posé à chaque demi-foulée, `CelestePoser.runPhase`), selon la **matière du sol** (D-125), plus doux en marchant lentement ;
+  - **le saut** au décollage ; **la réception** : le pas de la matière, plus `land` (chute d'une tuile ou plus) ou `land-big` (6 tuiles ou plus). La hauteur de chute (`PlayerFeel.fallHeight`) remplace la vitesse de réception de D-125 : un saut ordinaire retombe déjà à la vitesse maximale ;
+  - **touchée** (piqûre, coup, poursuivant), **chute dans l'eau**, **veilleuse allumée**, **carte** ouverte et refermée ;
+  - aussi pendant les souvenirs jouables.
+- **Correction de D-125** : la matière du sol de la première salle d'une partie (reprise sans changement de salle) n'était pas lue.
+- **Rien ne touche à la physique** (pilier 1). **Sauvegarde** : un réglage de plus, sans migration.
+- **Vérifié dans Chromium** : les sons demandés au bon moment (pas sur l'herbe, saut, réception, veilleuse, carte), la lecture et l'écho. Le Chromium du conteneur ne décode pas l'AAC (`.m4a`) ; Chrome sur Android, si (comme pour la musique).

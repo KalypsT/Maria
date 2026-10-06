@@ -6,7 +6,7 @@ import {
   type CameraParams,
 } from '../config/camera';
 import { DEFAULT_COMBAT, TrainPhase, type CombatParams } from '../config/combat';
-import { DEFAULT_FEEL, type FeelParams } from '../config/feel';
+import { DEFAULT_FEEL, DUST_FULL_FALL_TILES, type FeelParams } from '../config/feel';
 import {
   GAME_HEIGHT,
   LEVEL_CHUNK_TILES,
@@ -23,7 +23,7 @@ import {
 } from '../config/movement';
 import { CameraController } from '../core/camera/CameraController';
 import { ChaseEvent } from '../core/boss/Chase';
-import { CombatWorld, wavesOf } from '../core/combat/CombatWorld';
+import { CombatEvent, CombatWorld, wavesOf } from '../core/combat/CombatWorld';
 import { FixedStepClock } from '../core/FixedStepClock';
 import { InputController } from '../core/input/InputController';
 import { KeyboardSource } from '../core/input/KeyboardSource';
@@ -142,6 +142,8 @@ import { AttackPhase } from '../core/combat/PlayerAttack';
 import { DustPool } from './DustPool';
 import { DEFAULT_GROUND, type Surface } from '../config/surfaces';
 import { roomGround, surfaceUnder } from '../core/level/surface';
+import { STEP_SLOT } from '../config/sfx';
+import { SfxCue, SfxDirector } from '../core/audio/sfx';
 import { ChaseView } from './ChaseView';
 import { TrainView } from './TrainView';
 import { TrainRideView } from './TrainRideView';
@@ -364,6 +366,8 @@ export class GameScene extends Phaser.Scene {
   level!: LevelData;
   /** Sol de la salle courante (D-125), là où ni meuble ni matériau ne dit sa matière. */
   private ground: Surface = DEFAULT_GROUND;
+  /** Bruitages du mouvement (D-126) : pas, saut, réception. */
+  private readonly sfxDirector = new SfxDirector();
   /** Zone de la salle courante ; null dans un parcours d'essai (hors partie). */
   zone: Zone | null = null;
   player!: PlayerPhysics;
@@ -514,7 +518,9 @@ export class GameScene extends Phaser.Scene {
     const save = this.session.data;
     const { room, checkpointId } = savedReturn(this.session);
     this.level = this.roomLevel(room.level);
+    this.ground = roomGround(this.level.id);
     this.zone = room.zone;
+    this.audio.sfx.setStrange(this.strangeWorld || isStrangeRoom(this.level));
     this.artScale = this.computeArtScale();
     // Partie reprise dans le monde étrange (veilleuse du passage d'ombres, D-34).
     this.drawnStrange = isStrangeRoom(this.level);
@@ -789,14 +795,21 @@ export class GameScene extends Phaser.Scene {
       }
       if (combat.events !== 0) {
         this.combatView.onEvents(combat.events);
+        if ((combat.events & CombatEvent.Hurt) !== 0) {
+          this.audio.sfx.play('hurt');
+        }
       }
       run.step(this.player.box, combat.events, this.player.grounded);
       if ((run.events & RunEvent.Splashed) !== 0) {
         this.dust.splash(this.player.box);
+        this.audio.sfx.play('splash');
       }
       const picked = this.pickups.step(this.player.box);
       if (picked >= 0) {
         this.onPicked(picked);
+      }
+      if ((run.events & RunEvent.CheckpointActivated) !== 0) {
+        this.audio.sfx.play('checkpoint');
       }
       if ((run.events & RunEvent.CheckpointActivated) !== 0 && this.zone) {
         // Sauvegarde automatique au checkpoint (D-22), sans attendre l'écriture. Les parcours
@@ -832,9 +845,10 @@ export class GameScene extends Phaser.Scene {
           this.player.facing,
           surfaceUnder(this.level, this.player.box, this.ground),
           this.strangeWorld || isStrangeRoom(this.level),
-          feel.landingSpeed / this.movement.maxFallSpeed,
+          feel.fallHeight / (DUST_FULL_FALL_TILES * TILE_SIZE),
         );
       }
+      this.stepMoveSounds();
     }
     if (__DEBUG_TOOLS__) {
       this.frameStats.steps = steps;
@@ -1032,6 +1046,7 @@ export class GameScene extends Phaser.Scene {
       data.progression.memories,
       this.ownedAbilities(),
     );
+    this.audio.sfx.play('map-open');
   }
 
   /**
@@ -1093,6 +1108,7 @@ export class GameScene extends Phaser.Scene {
 
   private closeMap(): void {
     this.mapPage.close();
+    this.audio.sfx.play('map-close');
     this.clock.reset();
     this.controls.consumePressed('Jump');
   }
@@ -1597,6 +1613,8 @@ export class GameScene extends Phaser.Scene {
     const level = this.roomLevel(source);
     this.level = level;
     this.ground = roomGround(level.id);
+    this.audio.sfx.setStrange(this.strangeWorld || isStrangeRoom(level));
+    this.sfxDirector.reset();
     this.layerShift.reset();
     this.zone = zone;
     if (zone && isMappedRoom(level)) {
@@ -1735,6 +1753,7 @@ export class GameScene extends Phaser.Scene {
   /** Aperçu du monde étrange (overlay). */
   setStrangeWorld(strange: boolean): void {
     this.strangeWorld = strange;
+    this.audio.sfx.setStrange(strange || isStrangeRoom(this.level));
     this.redrawArt();
   }
 
@@ -1951,6 +1970,38 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** Pose de la marionnette (D-29), un pas : état de Céleste et coup de bâton en cours. */
+  /**
+   * Bruitages du mouvement (D-126), après les sensations et la pose : les pas selon la matière du
+   * sol, au rythme de la foulée ; le saut ; la réception selon la hauteur de la chute.
+   */
+  private stepMoveSounds(): void {
+    const director = this.sfxDirector;
+    const player = this.player;
+    director.step(
+      player.state,
+      this.poser.runPhase,
+      Math.abs(player.vx) / this.movement.maxRunSpeed,
+      this.feel.events,
+      this.feel.fallHeight,
+    );
+    const cues = director.cues;
+    if (cues === SfxCue.None) {
+      return;
+    }
+    const sfx = this.audio.sfx;
+    if ((cues & SfxCue.Step) !== 0) {
+      sfx.play(STEP_SLOT[surfaceUnder(this.level, player.box, this.ground)], director.stepVolume);
+    }
+    if ((cues & SfxCue.Jump) !== 0) {
+      sfx.play('jump');
+    }
+    if ((cues & SfxCue.LandBig) !== 0) {
+      sfx.play('land-big');
+    } else if ((cues & SfxCue.Land) !== 0) {
+      sfx.play('land');
+    }
+  }
+
   private stepPose(): void {
     const attack = this.combat.attack;
     let phase: number = PoseAttack.None;
@@ -2224,6 +2275,7 @@ export class GameScene extends Phaser.Scene {
     this.feel.step(player);
     this.stepPose();
     this.stepStage();
+    this.stepMoveSounds();
   }
 
   /** Fin du souvenir (dans le noir) : retour exact là où était Céleste. */
