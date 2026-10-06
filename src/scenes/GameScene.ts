@@ -209,10 +209,21 @@ function savedReturn(session: SaveSession): { room: ZoneRoom; checkpointId: stri
 /** Événement du jeu émis quand les réglages d'affichage changent (main.ts redimensionne le canvas). */
 export const DISPLAY_SETTINGS_EVENT = 'maria-display-settings';
 
-/** Mesures de la dernière image, lues par l'overlay de debug. */
+/**
+ * Mesures de la dernière image, lues par l'overlay de debug. Le travail (décor, salle) s'accumule
+ * jusqu'à ce que l'overlay le lise et le remette à zéro (compteur de saccades, D-124).
+ */
 export interface FrameStats {
   steps: number;
   simulationMs: number;
+  /** Dessin des blocs d'habillage (ms). */
+  artMs: number;
+  /** Chargement de salles (ms). */
+  roomMs: number;
+  /** Le jeu a avancé (faux : pause, carte, choix d'un disque). */
+  active: boolean;
+  /** L'écran était entièrement noir à la fin de l'image. */
+  veiled: boolean;
 }
 
 /**
@@ -340,7 +351,14 @@ export class GameScene extends Phaser.Scene {
   /** Zoom appliqué à la caméra (celui des réglages, ou rapproché dans un souvenir, D-89). */
   private appliedZoom = DEFAULT_CAMERA.zoom;
   readonly clock = new FixedStepClock(1 / PHYSICS_STEP_HZ, MAX_STEPS_PER_FRAME);
-  readonly frameStats: FrameStats = { steps: 0, simulationMs: 0 };
+  readonly frameStats: FrameStats = {
+    steps: 0,
+    simulationMs: 0,
+    artMs: 0,
+    roomMs: 0,
+    active: false,
+    veiled: false,
+  };
   level!: LevelData;
   /** Zone de la salle courante ; null dans un parcours d'essai (hors partie). */
   zone: Zone | null = null;
@@ -674,6 +692,9 @@ export class GameScene extends Phaser.Scene {
       this.openMap();
       return;
     }
+    if (__DEBUG_TOOLS__) {
+      this.frameStats.active = true;
+    }
     const steps = this.clock.advance(frameSeconds);
     const start = __DEBUG_TOOLS__ ? performance.now() : 0;
     const input = this.playerInput;
@@ -864,7 +885,11 @@ export class GameScene extends Phaser.Scene {
     artView.y = view.y;
     artView.w = view.width;
     artView.h = view.height;
+    const artStart = __DEBUG_TOOLS__ ? performance.now() : 0;
     this.roomArt.update(artView, Math.max(this.story.veil, this.transition.veil) >= 1);
+    if (__DEBUG_TOOLS__) {
+      this.frameStats.artMs += performance.now() - artStart;
+    }
     this.water.update(this.time.now);
     this.ride.update(
       this.time.now,
@@ -908,6 +933,9 @@ export class GameScene extends Phaser.Scene {
       this.game.loop.delta,
     );
     this.renderRunState();
+    if (__DEBUG_TOOLS__) {
+      this.frameStats.veiled = this.hud.black;
+    }
   }
 
   /**
@@ -1552,6 +1580,7 @@ export class GameScene extends Phaser.Scene {
    * carte révélée. Céleste est replacée ensuite.
    */
   private setRoom(source: LevelData, zone: Zone | null, checkpointId: string | null): void {
+    const roomStart = __DEBUG_TOOLS__ ? performance.now() : 0;
     // Une salle à deux couches se charge toujours dans le présent (D-107).
     const level = this.roomLevel(source);
     this.level = level;
@@ -1587,6 +1616,9 @@ export class GameScene extends Phaser.Scene {
     // Arrivée dans une salle qui roule déjà : à pleine vitesse (le départ, lui, se voit).
     this.motion = this.movingTarget();
     this.nextJoltMs = 0;
+    if (__DEBUG_TOOLS__) {
+      this.frameStats.roomMs += performance.now() - roomStart;
+    }
   }
 
   /** Capacités de Céleste en ce moment (sauvegarde, debug, parcours d'essai), pour le cahier. */

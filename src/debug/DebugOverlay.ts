@@ -8,6 +8,7 @@ import { DEFAULT_WORLD, WORLD_PARAM_RANGES, type WorldParams } from '../config/w
 import { DEFAULT_PUPPET, PUPPET_PARAM_RANGES, type PuppetParams } from '../config/puppet';
 import { ART_FINISH_RANGES, DEFAULT_ART_FINISH, type ArtFinish } from '../config/art';
 import { deserializeSave } from '../core/save/saveData';
+import { HitchMonitor, type FrameWork } from '../core/perf/hitchMonitor';
 import { DEFAULT_MOVEMENT, MOVEMENT_PARAM_RANGES, type MovementParams } from '../config/movement';
 import { LEVELS, ZONES, levelName } from '../levels';
 import type { GameScene } from '../scenes/GameScene';
@@ -1870,6 +1871,30 @@ export function installDebugOverlay(scene: GameScene): void {
     },
   );
 
+  // Saccades (D-124) : images en retard, leur cause probable, la salle et la position de Céleste.
+  const hitches = new HitchMonitor();
+  const hitchSection = element('details', panel);
+  element('summary', hitchSection, undefined, 'Saccades');
+  const hitchInfo = element('div', hitchSection, 'dbg-stats');
+  hitchInfo.style.whiteSpace = 'pre-wrap';
+  const refreshHitches = () => {
+    hitchInfo.textContent =
+      hitches.recent.length === 0
+        ? 'aucune'
+        : hitches.recent
+            .map(
+              (h) =>
+                `${h.ms.toFixed(0)} ms  ${h.cause}  ${h.room}  x ${h.x.toFixed(0)} y ${h.y.toFixed(0)}`,
+            )
+            .join('\n');
+  };
+  refreshHitches();
+  const hitchActions = element('div', hitchSection, 'dbg-actions');
+  element('button', hitchActions, undefined, 'Remettre à zéro').addEventListener('click', () => {
+    hitches.reset();
+    refreshHitches();
+  });
+
   // Actions.
   const actions = element('div', panel, 'dbg-actions');
   const exportButton = element('button', actions, undefined, 'Exporter JSON');
@@ -1882,6 +1907,13 @@ export function installDebugOverlay(scene: GameScene): void {
         combat: orderedParams(scene.combatParams, COMBAT_PARAM_RANGES),
         world: orderedParams(scene.worldParams, WORLD_PARAM_RANGES),
         finish: orderedParams(scene.artFinish, ART_FINISH_RANGES),
+        hitches: {
+          count: hitches.count,
+          big: hitches.big,
+          masked: hitches.masked,
+          worst: hitches.worst,
+          recent: hitches.recent,
+        },
       },
       null,
       2,
@@ -1950,9 +1982,31 @@ export function installDebugOverlay(scene: GameScene): void {
   let simMsSum = 0;
   let simMsMax = 0;
   let frames = 0;
+  // Travail de l'image (D-124) : la mise à jour est mesurée entre PRE_UPDATE et POST_UPDATE.
+  let updateStart = 0;
+  const frameWork: FrameWork = { updateMs: 0, artMs: 0, roomMs: 0, active: false, veiled: false };
+  const onPreUpdate = () => {
+    updateStart = performance.now();
+  };
   const onPostUpdate = (time: number) => {
     const player = scene.player;
     const camera = scene.camera;
+    const frame = scene.frameStats;
+    frameWork.updateMs = performance.now() - updateStart;
+    frameWork.artMs = frame.artMs;
+    frameWork.roomMs = frame.roomMs;
+    frameWork.active = frame.active;
+    frameWork.veiled = frame.veiled;
+    frame.artMs = 0;
+    frame.roomMs = 0;
+    frame.active = false;
+    hitches.frame(
+      scene.game.loop.rawDelta,
+      frameWork,
+      scene.level.meta.name ?? scene.level.id,
+      player.box.x,
+      player.box.y,
+    );
     graphics.clear();
     if (showHitbox) {
       graphics.lineStyle(1, HITBOX_COLOR, 1);
@@ -2024,6 +2078,14 @@ export function installDebugOverlay(scene: GameScene): void {
         `vue ${camera.viewWidth.toFixed(0)}×${camera.viewHeight.toFixed(0)} rendu ×${scene.renderScale.toFixed(2)}\n` +
         `simu ${((simMsSum / frames) * 1000).toFixed(0)} µs/img (max ${(simMsMax * 1000).toFixed(0)})  ` +
         `pas perdus ${scene.clock.droppedSteps}  blocs ${String(scene.artChunks)}`;
+      const worst = hitches.worst;
+      stats.textContent +=
+        `\nsaccades ${String(hitches.count)} (grosses ${String(hitches.big)}, ` +
+        `dans le noir ${String(hitches.masked)})` +
+        (worst ? `  pire ${worst.ms.toFixed(0)} ms ${worst.cause} · ${worst.room}` : '');
+      if (hitchSection.open) {
+        refreshHitches();
+      }
       const combat = scene.combat;
       const states = combat.enemies.map((enemy) => ENEMY_STATE_LABEL[enemy.state]).join(' ');
       stats.textContent +=
@@ -2045,8 +2107,10 @@ export function installDebugOverlay(scene: GameScene): void {
       frames = 0;
     }
   };
+  scene.events.on(Phaser.Scenes.Events.PRE_UPDATE, onPreUpdate);
   scene.events.on(Phaser.Scenes.Events.POST_UPDATE, onPostUpdate);
   scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+    scene.events.off(Phaser.Scenes.Events.PRE_UPDATE, onPreUpdate);
     scene.events.off(Phaser.Scenes.Events.POST_UPDATE, onPostUpdate);
     root.remove();
     style.remove();

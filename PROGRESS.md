@@ -2,6 +2,8 @@
 
 ## Phase en cours
 
+**Sensations, son, aide et mondes étranges** (D-124) : plan validé en quatre chantiers : **A** fluidité et sensations, **B** bruitages et vibrations, **C** le fil discret (activé par défaut), **D** mondes étranges reconnaissables. **Chantier A, PR 1 faite : le compteur de saccades**, sur `ccr-9d90352a-xuwhs1`. Suite : **essai sur téléphone** (Android) du compteur, puis A2 (les sensations).
+
 **Les personnages illustrés** (D-123) : papa illustré (images de l'utilisateur générées avec ChatGPT, prompts dans `docs/PROMPTS_PERSONNAGES.md`) à la porte de la chambre, dans le hall de la gare, à la cuisine, à la supérette, sur `ccr-142ffd96-q5pgli`. Suite : papa au jardin et sur le quai, maman, puis Céleste en pièces illustrées.
 
 **Le niveau 7 plus lisible** (retour d'essai, D-122) : les quatre cubes de la tour d'Eden à la place des objets déjà vus, la porte de la sieste et ses creux, le regard vers la porte, la carte, la salle de jeux où la tour monte, le souvenir d'Eden retravaillé (la tour chacun son tour, le cache-cache avec un compte), Eden blond à la coupe au bol, sur `ccr-abfc1233-t31o4v`. Suite : **essai sur téléphone**.
@@ -25,6 +27,13 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Chantier A, PR 1 : le compteur de saccades (D-124)
+
+- Build de debug : une ligne « saccades » dans INFOS (nombre, grosses, dans le noir, la pire avec sa cause et sa salle) et une section **DEBUG → Saccades** (les 8 dernières : durée, cause, salle, position de Céleste ; « Remettre à zéro »). Les saccades sont aussi dans **Exporter JSON**.
+- Causes : **décor** (dessin d'un bloc d'habillage), **salle** (chargement), **jeu**, **rendu** (rendu, ramasse-miettes, navigateur). Les saccades dans le noir d'un fondu sont comptées à part (invisibles).
+- Tests : `hitchMonitor.test.ts`. Vérifié dans Chromium (le conteneur, sans GPU, rend trop lentement pour des chiffres utiles : toutes ses images y sont des saccades « rendu »).
+- [ ] À vérifier sur téléphone (build de debug, INFOS affiché) : « Remettre à zéro », puis courir d'un bout à l'autre de **la rue**, de **la promenade**, du **port**, de **la gare** (voies, quais, hall), et faire un aller-retour dans la maison. Noter le nombre de saccades, les grosses, la pire et sa cause, ou **Exporter JSON** et me transmettre le fichier. Sent-on des à-coups en plein saut ?
 
 ### Les personnages illustrés : papa (D-123)
 
