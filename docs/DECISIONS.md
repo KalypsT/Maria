@@ -1802,3 +1802,9 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - Les boucles s'arrêtent à la pause, sur la carte, devant le tourne-disque et au changement de salle.
 - **Écartés pour l'instant** : la marée (elle change dans le noir), le balayage du train de la vaisselle et les valises, les boutons du menu.
 - **Rien ne touche à la physique** : `jumpKind` est écrit, jamais lu par la simulation. **Sauvegarde** : aucun changement.
+
+## D-128 — Chantier B, PR 3 : les vibrations (Android)
+
+- **Vibrations** (`src/platform/haptics.ts`, `navigator.vibrate` : Chrome sur Android ; l'iPhone n'a pas d'API fiable, rien n'y vibre) : un court motif à quelques **moments forts** seulement : la réception d'une grande chute, Céleste touchée, le crochet qui attrape un câble, la bascule, le réveil d'un poursuivant, une veilleuse qui s'allume. Jamais deux à moins de 80 ms d'écart. Motifs dans `src/config/haptics.ts`, PROVISOIRES.
+- **Réglage** : menu pause → Commandes tactiles → **Vibrations : Oui / Non** (spec §40), proposé seulement si le navigateur sait vibrer ; **activées par défaut**. Rangé avec les réglages des commandes de la sauvegarde, complété par défaut à la lecture d'une sauvegarde plus ancienne, **sans migration**.
+- **Rien ne touche à la physique.**

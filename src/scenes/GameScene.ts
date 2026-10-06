@@ -141,6 +141,7 @@ import { CelestePoser, PoseAttack } from '../core/player/celestePose';
 import { AttackPhase } from '../core/combat/PlayerAttack';
 import { DustPool } from './DustPool';
 import { DEFAULT_GROUND, type Surface } from '../config/surfaces';
+import { Haptics, canVibrate } from '../platform/haptics';
 import { roomGround, surfaceUnder } from '../core/level/surface';
 import { STEP_SLOT, type SfxSlot } from '../config/sfx';
 import { PhaseCue, PhaseWatch, SfxCue, SfxDirector } from '../core/audio/sfx';
@@ -386,6 +387,8 @@ export class GameScene extends Phaser.Scene {
   private readonly trainWatches = [new PhaseWatch(), new PhaseWatch(), new PhaseWatch()];
   private readonly tunnelWatch = new PhaseWatch();
   private readonly waveWatch = new PhaseWatch();
+  /** Vibrations aux moments forts (D-128, Android). */
+  private readonly haptics = new Haptics();
   /** Phase du coup de bâton au pas précédent : son au début du coup. */
   private lastAttackPhase: number = AttackPhase.Idle;
   /** Zone de la salle courante ; null dans un parcours d'essai (hors partie). */
@@ -537,6 +540,7 @@ export class GameScene extends Phaser.Scene {
     this.shiftView = new ShiftLayerView(this);
     this.ride = new RideView(this);
     const save = this.session.data;
+    this.haptics.enabled = save.settings.controls.vibration;
     const { room, checkpointId } = savedReturn(this.session);
     this.level = this.roomLevel(room.level);
     this.ground = roomGround(this.level.id);
@@ -617,6 +621,7 @@ export class GameScene extends Phaser.Scene {
         }
       },
       showTouchSettings: this.touch !== undefined,
+      canVibrate: canVibrate(),
       onResume: () => {
         this.setPaused(false);
       },
@@ -627,6 +632,7 @@ export class GameScene extends Phaser.Scene {
       onSettingsChange: (settings) => {
         void this.session.setControls(settings);
         this.touch?.setSettings(settings);
+        this.haptics.enabled = settings.vibration;
       },
       onExportSave: () => {
         showExportDialog(this.session.data);
@@ -829,6 +835,7 @@ export class GameScene extends Phaser.Scene {
       }
       if ((run.events & RunEvent.CheckpointActivated) !== 0) {
         this.audio.sfx.play('checkpoint');
+        this.haptics.pulse('checkpoint');
       }
       if ((run.events & RunEvent.CheckpointActivated) !== 0 && this.zone) {
         // Sauvegarde automatique au checkpoint (D-22), sans attendre l'écriture. Les parcours
@@ -1477,6 +1484,7 @@ export class GameScene extends Phaser.Scene {
     if (event === ShiftEvent.Shifted) {
       this.shiftView.flash(this.time.now);
       this.audio.sfx.play('shift');
+      this.haptics.pulse('shift');
     } else if (event === ShiftEvent.Refused) {
       this.shiftView.refuse(this.time.now);
     }
@@ -2030,6 +2038,7 @@ export class GameScene extends Phaser.Scene {
     }
     if ((cues & SfxCue.LandBig) !== 0) {
       sfx.play('land-big');
+      this.haptics.pulse('landBig');
     } else if ((cues & SfxCue.Land) !== 0) {
       sfx.play('land');
     }
@@ -2037,6 +2046,9 @@ export class GameScene extends Phaser.Scene {
       if ((cues & cue) !== 0) {
         sfx.play(slot);
       }
+    }
+    if ((cues & SfxCue.HookCatch) !== 0) {
+      this.haptics.pulse('hookCatch');
     }
   }
 
@@ -2063,11 +2075,13 @@ export class GameScene extends Phaser.Scene {
     if ((events & CombatEvent.Hurt) !== 0) {
       sfx.play('hurt');
       sfx.play('voice-ouch');
+      this.haptics.pulse('hurt');
     }
     const chase = combat.chase;
     if (chase && (chase.events & ChaseEvent.Wake) !== 0) {
       sfx.play('chase-wake');
       sfx.play('voice-oh');
+      this.haptics.pulse('chaseWake');
     }
     sfx.loop('chase-rumble', chase !== null && chase.placed && !chase.done && !chase.paused);
     const trains = this.level.trains;

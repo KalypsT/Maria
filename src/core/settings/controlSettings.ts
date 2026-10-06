@@ -35,6 +35,11 @@ export function sanitizeControlSettings(raw: unknown): ControlSettings {
   if (mode === 'digital' || mode === 'analog') {
     settings.joystickMode = mode;
   }
+  // Absent des réglages d'avant les vibrations (D-128) : la valeur par défaut, sans migration.
+  const vibration = source['vibration'];
+  if (typeof vibration === 'boolean') {
+    settings.vibration = vibration;
+  }
   return settings;
 }
 
