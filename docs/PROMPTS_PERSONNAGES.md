@@ -179,3 +179,101 @@ plain pure white background, no shadow, no text.
 
 Dernier recours : Céleste entière de profil, bras un peu écartés du corps et jambes un peu
 écartées ; je découpe les pièces moi-même (en redessinant les parties cachées).
+
+## Le chat, la nounou, Eden (d'après photos)
+
+Méthode : une conversation par personnage. Au premier message, joindre **la photo** (référence du
+personnage) **et une illustration du jeu** (référence du style). La photo ne sert qu'à
+l'apparence : on demande un personnage de livre illustré, pas un portrait réaliste. Ensuite, comme
+pour les parents, chaque pose est demandée avec la première image validée en référence.
+
+### Le chat (joindre la photo du chat et `celeste.png`)
+
+`cat-sit.png` (référence) :
+
+```
+Using the first attached photo as the reference for the cat (same fur colors, same markings, same
+eye color) and the second attached image as the strict reference for the style (same children's
+picture-book illustration style, soft texture, thin warm outlines, same level of detail), draw this
+cat as a picture-book character, not a realistic portrait.
+
+Pose: sitting upright, strict side profile facing right, tail curled around its front paws, calm
+and attentive, eyes open. Whole cat, nothing cropped. Plain pure white background, no ground
+shadow, no text, no other element. Square format, high resolution.
+```
+
+`cat-sleep.png` (joindre `cat-sit.png`) :
+
+```
+Using the attached image as the strict reference, draw the SAME cat (same fur, same markings, same
+style, same colors), now asleep: curled up in a round ball lying on its side, seen from the side,
+head resting on its paws, eyes closed, tail wrapped around its body. Whole cat, nothing cropped.
+Plain pure white background, no shadow, no text. Landscape format, high resolution.
+```
+
+### La nounou (joindre sa photo et `dad-stand.png`)
+
+Dans le jeu, elle n'apparaît que dans le souvenir d'Eden, assise dans son fauteuil : le code la
+rendra un peu passée et douce (souvenir), l'image peut être nette.
+
+`nanny-sit.png` (référence) :
+
+```
+Using the first attached photo as the reference for the woman (same face shape, same hair, same
+skin tone, same age) and the second attached image as the strict reference for the style (same
+picture-book illustration style, same rendering and level of detail), draw her as a gentle,
+kind nanny, a picture-book character, not a realistic portrait. Soft, warm, cosy clothes (a knitted
+cardigan).
+
+Pose: sitting in a cosy upholstered armchair, strict side profile facing right, head slightly
+tilted down toward small children playing in front of her, a tender smile, both hands resting on
+her knees holding a small pink knitting. Draw the armchair too, in side view. Full figure and
+armchair, nothing cropped. Plain pure white background, no ground shadow, no text. Portrait format,
+high resolution.
+```
+
+`nanny-look.png` (joindre `nanny-sit.png`) :
+
+```
+Using the attached image as the strict reference, draw the SAME woman in the SAME armchair, same
+clothes, same style, same colors. Pose: still sitting, she turns her head to look ahead and points
+forward with her front hand, arm outstretched, as if gently showing a child where to look; the other
+hand rests on her knee. Strict side profile facing right, nothing cropped, plain pure white
+background, no shadow, no text. Portrait format, high resolution.
+```
+
+### Eden (joindre sa photo et `celeste.png`)
+
+Un tout-petit (2-3 ans) : blond, coupe au bol, pull jaune, salopette bleue, petites chaussures
+marron (D-122). À l'échelle de Céleste toute petite.
+
+`eden-sit.png` (référence) :
+
+```
+Using the first attached photo as the reference for the little boy (same face, same features) and
+the second attached image as the strict reference for the style (same children's picture-book
+illustration style, same rendering and level of detail), draw him as a picture-book character, not
+a realistic portrait. A toddler, about 2 or 3 years old: blond hair with a bowl cut, mustard-yellow
+sweater, blue dungarees, small brown shoes.
+
+Pose: sitting on the floor, legs stretched forward, strict side profile facing right, holding a
+small wooden toy cube in both hands, looking at it with a calm, happy face. Whole child, nothing
+cropped. Plain pure white background, no ground shadow, no text. Square format, high resolution.
+```
+
+Poses suivantes (joindre `eden-sit.png`), début de chaque message :
+
+```
+Using the attached image as the strict reference, draw the SAME little boy: same face, same blond
+bowl cut, same yellow sweater, same blue dungarees, same shoes, same style, same colors. Strict
+side profile facing right, whole child, nothing cropped. Plain pure white background, no ground
+shadow, no text. Square format, high resolution.
+```
+
+| Fichier          | Fin du message                                                                                                                                                          |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `eden-cheer.png` | `Pose: sitting on the floor, legs stretched forward, both arms raised high in joy, big happy open-mouthed smile.`                                                       |
+| `eden-laugh.png` | `Pose: standing, a bit wobbly like a toddler, laughing out loud with his eyes squeezed shut, hands near his chest, as if he has just been found playing hide-and-seek.` |
+
+`eden-peek` (sa tête qui dépasse d'une cachette) : je la découpe dans `eden-laugh.png`, pas d'image
+à faire.
