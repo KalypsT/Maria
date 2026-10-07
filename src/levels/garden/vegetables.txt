@@ -1,10 +1,13 @@
 ; Jardin : le potager (D-46). Papa arrose ; bacs surélevés au-dessus des orties.
 ; Refait (D-76) : ciel ouvert, l'épouvantail planté dans le dernier bac, la brouette et le tonneau au fond.
+; Au loin, derrière (D-132) : l'allée du fond, sa clôture, sa remise et le vieux mur (on y passe par
+; le toit de la pergola de la terrasse).
 ; @name: Potager
 ; @icon: flower
 ; @world: garden
 ; @difficulty: medium
 ; @note: haut des tuteurs de haricots : trouvaille difficile.
+; @decor: alleybehind 3 10 60 9
 ; @decor: canopy 0 0 12 2
 ; @decor: canopy 52 0 14 2
 ; @decor: hedge 0 1 1 18

@@ -256,6 +256,10 @@ export const DECOR_KINDS: Readonly<
   oldwall: { furniture: true },
   /** Plancher de la cabane, sur les branches. */
   deck: { furniture: true },
+  /** Grosse branche du grand arbre qui porte la cabane, et les cordes du plancher (fond, D-132). */
+  limb: { furniture: false },
+  /** L'allée vue de loin, au fond du potager : clôture, remise, vieux mur (D-132). */
+  alleybehind: { furniture: false, far: true },
   crate: { furniture: true },
   /** Coffre suspendu au toit de la cabane. */
   hangingchest: { furniture: true },
@@ -368,7 +372,7 @@ export const DECOR_KINDS: Readonly<
   sorterlid: { furniture: true },
   cushions: { furniture: false },
   // Revisites avec le crochet (D-66).
-  /** Jardinière sous la fenêtre de la chambre (planche traversable), au bout du fil à linge. */
+  /** Jardinière sous la fenêtre de la buanderie (planche traversable), au bout du fil à linge. */
   windowbox: { furniture: true },
   /** Nid dans le platane de la rue (perchoir traversable), au bout du fil tendu depuis l'école. */
   nest: { furniture: true },
