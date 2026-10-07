@@ -896,8 +896,8 @@ export const HOUSE_STORY: StoryData = {
       id: 'look-plant',
       room: 'kitchen',
       on: 'interact',
-      area: { col: 49, row: 13, w: 6, h: 4 },
-      mark: { col: 52, row: 13 },
+      area: { col: 39, row: 13, w: 6, h: 4 },
+      mark: { col: 42, row: 13 },
       when: {},
       lock: true,
       repeat: true,
@@ -1123,7 +1123,7 @@ export const HOUSE_STORY: StoryData = {
     { id: 'cat-sit', room: 'living', kind: 'cat-sit', col: 44, row: 21, when: { all: [F.Slept] } },
     { id: 'music-box', room: 'bedroom', kind: 'music-box', col: 12, row: 12, when: {} },
     { id: 'record-player', room: 'attic', kind: 'record-player', col: 11, row: 17, when: {} },
-    { id: 'plant', room: 'kitchen', kind: 'plant', col: 52, row: 16, when: {} },
+    { id: 'plant', room: 'kitchen', kind: 'plant', col: 42, row: 16, when: {} },
     // Derrière la haie (D-49) : Maria de l'autre côté du vide, hors d'atteinte ; elle est là dès
     // l'arrivée dans la ronce et ne bouge jamais (pilier 5). Le bonnet, au bout du chemin, puis
     // accroché à une branche du grand arbre.

@@ -6,7 +6,7 @@
 ; @ability: climb
 ; @note: machine, étagère sur pieds, soupente sous la trappe (sortie 1) : chaîne d'escalade (D-26).
 ; @note-2: porte de derrière (sortie 3) vers le jardin : poignée trop haute avant que Céleste grandisse (D-46).
-; @note-3: armoire à linge sur pieds : cheminée entre elle et le mur, trouvaille sur le dessus (saut mural, D-46).
+; @note-3: haute étagère à linge (montants jusqu'au sol, paniers dessous) : cheminée entre elle et le mur, trouvaille sur le dessus (saut mural, D-46).
 ; @wall: tiles
 ; @decor: soffit 7 1 19 2
 ; @decor: window 28 4 6 5
