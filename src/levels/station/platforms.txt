@@ -1,7 +1,8 @@
 ; La gare (D-66) : les quais et la passerelle au-dessus des voies. Un train passe en contrebas
 ; (feu, souffle). La passerelle monte par un escalier, enjambe les voies et file jusqu'à la
 ; galerie du hall (sortie 3, en haut) ; au sol, le quai de droite mène au hall (sortie 2). Le
-; pilier de la marquise et le mur font une cheminée (saut mural) jusqu'à une trouvaille (difficile).
+; panneau d'affichage du quai (sur ses deux pieds, D-135) et le mur font une cheminée (saut mural)
+; jusqu'à une trouvaille (difficile).
 ; @name: Les quais
 ; @icon: train
 ; @world: street

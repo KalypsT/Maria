@@ -1878,3 +1878,13 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **La rue** : les panneaux verts au bout de la rue (la forme en L au-dessus de la trouvaille) flottaient ; ils sont **posés sur deux tréteaux**. Même collision.
 - **Gardé tel quel** : les lieux derrière les façades (portes en profondeur, même convention que l'allée du jardin) ; l'école vue de l'intérieur (ses deux portes mènent en profondeur) ; le grillage de l'école qui monte jusqu'en haut de l'aire de jeux (parti pris de jeu, il se lit bien).
 - **Sauvegarde** : aucun changement.
+
+## D-135 — La gare cohérente (niveau 4)
+
+- **Même méthode** (D-132 à D-134) : captures des cinq salles réelles (la gare étrange et la tour à part), relevé, propositions **validées** (« vas-y »), avec le choix recommandé pour le hall.
+- **La passerelle et la galerie du hall** : la passerelle des quais est à 14 tuiles au-dessus du quai, mais débouchait sur une galerie à 25 tuiles au-dessus du sol du hall (quai et hall de plain-pied). La **galerie descend à 14 tuiles** (sortie 3, lignes 22-23) ; le colimaçon garde ses trois marches du bas ; le **câble** du crochet (15,21 → 62,23) et le **balcon** (et sa trouvaille) descendent. Le balcon descend de 8 tuiles et non de 11 : à 11, il s'atteignait sans le crochet, d'un saut plané depuis l'auvent du kiosque (le test « avec le crochet seulement » l'a attrapé). L'horloge et le tableau des départs remontent au-dessus du câble.
+- **Le pilier des quais** (plein, au-dessus du passage) flottait sur une tige fine : il devient un **grand panneau d'affichage** (une affiche de la mer) sur deux pieds jusqu'au quai. Même collision : la cheminée du saut mural et sa trouvaille ne bougent pas.
+- **La haute armoire des objets trouvés** flottait sur deux petites équerres : elle est posée sur un **haut piètement ouvert** (deux montants, une traverse), le porte-parapluies dessous. Même collision.
+- **Gardé tel quel** : les voies (quais surélevés, poste d'aiguillage sur pilotis), le dépôt (wagons au-dessus des fosses, crochets du pont roulant), le reste du hall et des objets trouvés.
+- **Vérifié par les tests** : la gare (portes, difficultés, crochet seulement pour le rebord du hall et le toit du poste), les revisites en glissade, la fin de la gare, la gare étrange, le fil discret, l'histoire, l'habillage.
+- **Sauvegarde** : la trouvaille du balcon du hall change de ligne (`station-hall:s67-25`) ; pas de migration (pas encore de joueurs).

@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La cohérence des niveaux** (D-132 à D-134, demande de l'utilisateur) : **la maison** et **le jardin** faits et fusionnés ; **le quartier** fait (la porte de la réserve et l'escalier de secours du chantier, le pignon du gymnase dans la cour, les panneaux sur tréteaux, le feuillage seulement dans les haies), sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (la gare), même méthode.
+**La cohérence des niveaux** (D-132 à D-135, demande de l'utilisateur) : **la maison** et **le jardin** faits et fusionnés ; **le quartier** (escalier de secours du chantier, pignon du gymnase, panneaux sur tréteaux, feuillage seulement dans les haies) et **la gare** (galerie du hall à la hauteur de la passerelle, panneau d'affichage des quais, armoire sur son piètement) faits, sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (le train), même méthode.
 
 **Sensations, son, aide et mondes étranges** (D-124) : chantiers **A** (fluidité et sensations), **B** (bruitages et vibrations) et **C** (le fil discret) faits et fusionnés (D-124 à D-129). **Chantier D, PR 1 faite : trois maquettes de la gare étrange** (D-130), sur `ccr-9d90352a-xuwhs1`. Suite : **le choix de l'utilisateur** (A, B, C ou un mélange), puis la gare étrange refaite (D2) et les autres mondes étranges un par un. En attente : essais sur téléphone (compteur de saccades, sensations, sons de test, vibrations, fil discret) ; les sons à fournir (`docs/BRUITAGES.md`) ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades.
 
@@ -29,6 +29,13 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### La gare cohérente (D-135)
+
+- **Hall** : la galerie descend à la hauteur de la passerelle des quais ; le colimaçon, le câble du crochet et le balcon descendent avec elle ; l'horloge et le tableau des départs remontent au-dessus du câble.
+- **Quais** : le pilier flottant devient un grand panneau d'affichage sur deux pieds. **Objets trouvés** : la haute armoire sur un piètement ouvert.
+- Tests : gare, revisites en glissade, fin de la gare, gare étrange, fil discret, histoire, habillage. Vérifié dans Chromium : captures du hall, des quais, des objets trouvés.
+- [ ] À vérifier sur téléphone : passer de la passerelle à la galerie (même hauteur) ; le câble du crochet jusqu'au balcon.
 
 ### Le quartier cohérent (D-134)
 
