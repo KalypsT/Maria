@@ -65,6 +65,7 @@ import nannyNap from '../nanny/nap.txt?raw';
 import nannyStairs from '../nanny/stairs.txt?raw';
 import nannyPlayroom from '../nanny/playroom.txt?raw';
 import finaleBed from '../finale/bed.txt?raw';
+import finaleSky from '../finale/sky.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). L'étage (chambre, couloir) est à
@@ -188,6 +189,7 @@ export const HOUSE: ZoneSource = {
     // Le dernier niveau (D-138, D-141) : la chambre immense, le lit et le coffre ; on y entre par
     // le berceau vide de la chambre, la nuit (l'histoire). Hors carte.
     { id: 'finale-bed', text: finaleBed },
+    { id: 'finale-sky', text: finaleSky },
   ],
   links: [
     ['bedroom:1', 'hall:1'],

@@ -655,6 +655,20 @@ export const DECOR_KINDS: Readonly<
   giantmusicbox: { furniture: true },
   /** Une étoile de la berceuse (D-140) : dessinée par `LullabyView`, rien ici. */
   lullabystar: { furniture: true },
+  // Le ciel de la chambre (D-142).
+  giantframe: { furniture: true },
+  giantpicture: { furniture: false },
+  mobilethread: { furniture: false },
+  mobilestar: { furniture: false },
+  giantmoon: { furniture: true },
+  giantwindow: { furniture: false },
+  curtainrod: { furniture: false },
+  giantcurtain: { furniture: true },
+  tiedcurtain: { furniture: true },
+  casement: { furniture: true },
+  gianthutch: { furniture: true },
+  giantdesk: { furniture: true },
+  atticdoor: { furniture: false },
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */
@@ -1268,6 +1282,20 @@ export const ERASURE_COLORS = {
   surface: 'rgba(236,234,242,0.85)',
   /** Salles de tuiles (les parcours). */
   tile: 0xb4b0c4,
+} as const;
+
+/**
+ * Le vide de la nuit (D-142) : tout en bas du ciel de la chambre (`; @void: night`), les tuiles d'eau
+ * sont le noir de la chambre, loin dessous : un bleu de nuit qui s'assombrit, sans vaguelettes ni
+ * reflet. Y tomber ramène au dernier appui, sans peur. PLACEHOLDER.
+ */
+export const NIGHT_VOID_COLORS = {
+  body: [34, 40, 82] as const,
+  deep: [12, 14, 34] as const,
+  alpha: 0.82,
+  surface: 'rgba(150,170,230,0.18)',
+  /** Salles de tuiles (les parcours). */
+  tile: 0x1c2148,
 } as const;
 
 /** La surface animée de l'eau (D-97, `WaterView`) : vaguelettes qui défilent. PROVISOIRE. */

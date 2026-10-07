@@ -122,6 +122,13 @@ describe('parseAsciiLevel', () => {
     );
   });
 
+  it('lit le vide d’une salle @void : l’effacement (D-111) ou la nuit (D-142), rien d’autre', () => {
+    for (const kind of ['erasure', 'night']) {
+      expect(parseAsciiLevel('t', `; @void: ${kind}\n####\n#P.#\n#~~#\n####`).meta.void).toBe(kind);
+    }
+    expect(() => parseAsciiLevel('t', '; @void: mer\n####\n#P.#\n####')).toThrow(/@void/);
+  });
+
   it('charge la salle de test de la Phase 1', () => {
     const level = parseAsciiLevel('test-room', testRoom);
     expect(level.width).toBe(40);

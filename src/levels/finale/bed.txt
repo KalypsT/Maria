@@ -4,9 +4,9 @@
 ; (une veilleuse), le dessous du lit (on glisse sous la jupe du lit), la cheminée entre l'armoire
 ; et la tête de lit (deux paliers), l'oreiller et le lit, la cabane du lit : ses barreaux (le
 ; présent) et sa guirlande (le souvenir), on monte en basculant ; la traverse et la boîte à
-; musique. Les premières étoiles de la berceuse mènent au dessus de l'armoire (la suite : le ciel
-; de la chambre, PLACEHOLDER). Ni danger, ni ennemi, ni trouvaille. Facile (mesuré) : le
-; moyen viendra dans le ciel de la chambre.
+; musique. Les premières étoiles de la berceuse mènent au dessus de l'armoire : de là, le ciel de
+; la chambre (D-142, `finale-sky`). Ni danger, ni ennemi, ni trouvaille. Facile (mesuré) : le
+; moyen est dans le ciel de la chambre.
 ; @name: La chambre immense
 ; @world: strange
 ; @palette: nightlight

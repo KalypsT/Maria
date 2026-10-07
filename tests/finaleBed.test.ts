@@ -25,7 +25,7 @@ const EASY = DIFFICULTY_MIN_WINDOW_MS.easy;
 const CAP = { col: 70, row: 37 };
 const HEAD = { col: 22, row: 17 };
 const TRAVERSE = { col: 36, row: 12 };
-/** Le dessus de l'armoire, au bout des étoiles (la suite : le ciel de la chambre). */
+/** Le dessus de l'armoire, au bout des étoiles : de là, le ciel de la chambre (D-142). */
 const TOP = { col: 8, row: 3 };
 
 function need<V>(value: V | null | undefined, what: string): V {
@@ -51,7 +51,7 @@ describe('la chambre immense : le lit et le coffre (D-141)', () => {
     expect(room.entities).toHaveLength(3);
     const dangers = [Tile.Hazard, Tile.Thorns, Tile.Water] as number[];
     expect(Array.from(room.tiles).some((t) => dangers.includes(t))).toBe(false);
-    // Pas de sortie pour l'instant : le ciel de la chambre viendra (D-138).
+    // Pas de sortie : le dessus de l'armoire mène au ciel de la chambre (D-142), par l'histoire.
     expect(room.exits).toHaveLength(0);
   });
 

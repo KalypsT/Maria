@@ -103,6 +103,7 @@ import {
   MEMORY_PALETTE,
   NIGHTLIGHT_PALETTE,
   ERASURE_COLORS,
+  NIGHT_VOID_COLORS,
   STREET_DUSK_PALETTE,
   STREET_PALETTE,
   TRAIN_DAY_PALETTE,
@@ -856,7 +857,8 @@ export class GameScene extends Phaser.Scene {
       }
       this.stepCombatSounds();
       run.step(this.player.box, combat.events, this.player.grounded);
-      if ((run.events & RunEvent.Splashed) !== 0) {
+      // Le vide de la nuit (D-142) : ni gerbe ni bruit, Céleste s'efface dans le noir.
+      if ((run.events & RunEvent.Splashed) !== 0 && this.level.meta.void !== 'night') {
         this.dust.splash(this.player.box);
         this.audio.sfx.play('splash');
       }
@@ -2039,9 +2041,13 @@ export class GameScene extends Phaser.Scene {
       return true;
     }
     if (tile === Tile.Water) {
-      // L'effacement (D-111) : gris pâle à la place de l'eau.
+      // L'effacement (D-111) : gris pâle à la place de l'eau ; le vide de la nuit (D-142).
       g.fillStyle(
-        level.meta.void === 'erasure' ? ERASURE_COLORS.tile : PLACEHOLDER_COLORS.water,
+        level.meta.void === 'erasure'
+          ? ERASURE_COLORS.tile
+          : level.meta.void === 'night'
+            ? NIGHT_VOID_COLORS.tile
+            : PLACEHOLDER_COLORS.water,
         0.8,
       );
       g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
