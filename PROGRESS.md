@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La cohérence des niveaux** (D-132 à D-135, demande de l'utilisateur) : **la maison** et **le jardin** faits et fusionnés ; **le quartier** (escalier de secours du chantier, pignon du gymnase, panneaux sur tréteaux, feuillage seulement dans les haies) et **la gare** (galerie du hall à la hauteur de la passerelle, panneau d'affichage des quais, armoire sur son piètement) faits, sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (le train), même méthode.
+**La cohérence des niveaux** (D-132 à D-136, demande de l'utilisateur) : **la maison**, **le jardin**, **le quartier** et **la gare** faits et fusionnés ; **le train** fait (encadrements de porte sous les cloisons, creux du toit dessinés comme des logements, supports des vélos), sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (la station balnéaire), même méthode.
 
 **Sensations, son, aide et mondes étranges** (D-124) : chantiers **A** (fluidité et sensations), **B** (bruitages et vibrations) et **C** (le fil discret) faits et fusionnés (D-124 à D-129). **Chantier D, PR 1 faite : trois maquettes de la gare étrange** (D-130), sur `ccr-9d90352a-xuwhs1`. Suite : **le choix de l'utilisateur** (A, B, C ou un mélange), puis la gare étrange refaite (D2) et les autres mondes étranges un par un. En attente : essais sur téléphone (compteur de saccades, sensations, sons de test, vibrations, fil discret) ; les sons à fournir (`docs/BRUITAGES.md`) ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades.
 
@@ -29,6 +29,13 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le train cohérent (D-136)
+
+- Dessins seulement : sous chaque cloison des compartiments, l'encadrement de la porte jusqu'au plancher, la porte coulissante ouverte ; les creux du toit sont des logements creusés dans la caisse (plus de ciel à travers la voiture) ; les vélos du fourgon sur leur support, crochet et sangles.
+- Gardé : l'échelle du fourgon au bout de la voiture (on arrive au début de son toit).
+- Tests : le train, ses voitures, ses dangers, l'arrivée, l'habillage. Vérifié dans Chromium : captures des couchettes, des compartiments, du fourgon, du toit.
+- [ ] À vérifier sur téléphone : les portes ouvertes des compartiments se lisent-elles comme un passage ? Les creux du toit comme un abri ?
 
 ### La gare cohérente (D-135)
 

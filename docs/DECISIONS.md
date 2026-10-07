@@ -1888,3 +1888,14 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Gardé tel quel** : les voies (quais surélevés, poste d'aiguillage sur pilotis), le dépôt (wagons au-dessus des fosses, crochets du pont roulant), le reste du hall et des objets trouvés.
 - **Vérifié par les tests** : la gare (portes, difficultés, crochet seulement pour le rebord du hall et le toit du poste), les revisites en glissade, la fin de la gare, la gare étrange, le fil discret, l'histoire, l'habillage.
 - **Sauvegarde** : la trouvaille du balcon du hall change de ligne (`station-hall:s67-25`) ; pas de migration (pas encore de joueurs).
+
+## D-136 — Le train cohérent (niveau 5)
+
+- **Même méthode** (D-132 à D-135) : captures des cinq voitures réelles (le monde étrange de la cuisine à part), relevé, propositions **validées** (« vas-y »), avec le choix recommandé pour l'échelle du fourgon (la garder).
+- **Rien ne touche à la collision** : mêmes cases, mêmes sauts, mêmes difficultés ; seuls des dessins changent. Les portes entre voitures étaient déjà à la même hauteur des deux côtés.
+- **Les cloisons des compartiments** (couchettes, compartiments) descendaient du plafond et s'arrêtaient dans le vide, au-dessus du passage. Sous chacune, jusqu'au plancher, **l'encadrement de la porte du compartiment** (deux montants) et la porte coulissante ouverte, poussée contre le montant : on passe par la porte. Pas d'encadrement sous une cloison qui a sa grille en accordéon dessous.
+- **Les creux du toit** laissaient voir le ciel à travers la voiture : ce sont maintenant des **logements creusés dans la caisse** (fond de tôle sombre, grille d'aération, rebords). Ils protègent toujours des tunnels.
+- **Les vélos du fourgon** pendaient sans attache visible : un support vissé à la paroi, un crochet, deux sangles.
+- **Gardé tel quel** : l'échelle du fourgon est au bout de la voiture (à droite) alors qu'on arrive au début de son toit (à gauche). La déplacer viderait le fourgon de sa traversée, ou ferait sauter la moitié du parcours des tunnels ; on passe d'une salle à l'autre en fondu, l'écart se voit à peine.
+- **Vérifié par les tests** : le train, ses voitures (chacune moyenne au plus, sans coincer), ses dangers, l'arrivée, l'habillage.
+- **Sauvegarde** : aucun changement.
