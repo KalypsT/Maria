@@ -1899,3 +1899,17 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Gardé tel quel** : l'échelle du fourgon est au bout de la voiture (à droite) alors qu'on arrive au début de son toit (à gauche). La déplacer viderait le fourgon de sa traversée, ou ferait sauter la moitié du parcours des tunnels ; on passe d'une salle à l'autre en fondu, l'écart se voit à peine.
 - **Vérifié par les tests** : le train, ses voitures (chacune moyenne au plus, sans coincer), ses dangers, l'arrivée, l'habillage.
 - **Sauvegarde** : aucun changement.
+
+## D-137 — La station balnéaire cohérente (niveau 6)
+
+- **Même méthode** (D-132 à D-136) : captures des huit salles réelles (la fête engloutie, la vague et le couloir de la fin à part), relevé, propositions **validées** (« vas-y »). Les portes entre salles étaient déjà cohérentes.
+- **Rien ne touche à la collision** ni aux marées : seuls des dessins changent.
+- **Deux erreurs de dessin corrigées** :
+  - la promenade : l'**aile basse du centre** de la classe de mer avait une largeur nulle (le cadre du décor faisait juste la largeur du corps principal) ; ses deux fenêtres et le balcon de son toit flottaient dans le ciel. Le cadre s'élargit (30 tuiles), l'aile existe ;
+  - le port : les **pieds de la grue** ne descendaient pas jusqu'au quai (le sol était cherché depuis l'intérieur du pied). Ils y descendent.
+- **La pêche aux canards** (jetée) : son long toit flottait au-dessus du trou du platelage ; deux poteaux le portent jusqu'au platelage, et le **bassin aux canards** est dessiné dans le trou, comme prévu à D-101.
+- **Les rochers percés** (plage, rochers) : là où l'on passe sous la pierre (12 tuiles au plus), la pierre descend jusqu'au sable à l'image, **percée d'une arche sombre** (comme le vieux mur, D-133) ; contre une autre pierre, sans piédroit. L'arche du gros rocher, la faille, le bloc de la grotte, la pierre de la cheminée (« aiguille ») se lisent comme des passages.
+- **Le câble de la plage** s'accrochait 3 tuiles au-dessus du pieu de l'épi : un mince **mât d'amarrage** planté sur le pieu le rejoint (dessiné pour tout câble qui s'attache au-dessus d'un pieu).
+- **Gardé tel quel** : le phare (l'escalier en colimaçon cassé, des volées de part et d'autre du noyau, voulu), la gare de la mer, le centre.
+- **Vérifié par les tests** : l'habillage, l'arrivée, le rivage, le port, la fête foraine.
+- **Sauvegarde** : aucun changement.

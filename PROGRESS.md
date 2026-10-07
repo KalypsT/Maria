@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La cohérence des niveaux** (D-132 à D-136, demande de l'utilisateur) : **la maison**, **le jardin**, **le quartier** et **la gare** faits et fusionnés ; **le train** fait (encadrements de porte sous les cloisons, creux du toit dessinés comme des logements, supports des vélos), sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (la station balnéaire), même méthode.
+**La cohérence des niveaux** (D-132 à D-137, demande de l'utilisateur) : la maison, le jardin, le quartier et la gare faits et fusionnés ; **le train** (D-136) et **la station balnéaire** (D-137 : l'aile du centre, les pieds de la grue, la pêche aux canards, les rochers percés, le mât d'amarrage) faits, sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (la maison de la nounou), même méthode.
 
 **Sensations, son, aide et mondes étranges** (D-124) : chantiers **A** (fluidité et sensations), **B** (bruitages et vibrations) et **C** (le fil discret) faits et fusionnés (D-124 à D-129). **Chantier D, PR 1 faite : trois maquettes de la gare étrange** (D-130), sur `ccr-9d90352a-xuwhs1`. Suite : **le choix de l'utilisateur** (A, B, C ou un mélange), puis la gare étrange refaite (D2) et les autres mondes étranges un par un. En attente : essais sur téléphone (compteur de saccades, sensations, sons de test, vibrations, fil discret) ; les sons à fournir (`docs/BRUITAGES.md`) ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades.
 
@@ -29,6 +29,12 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### La station balnéaire cohérente (D-137)
+
+- Dessins seulement : l'aile basse du centre existe enfin (ses fenêtres et son balcon ne flottent plus) ; les pieds de la grue du port descendent jusqu'au quai ; le toit de la pêche aux canards sur deux poteaux, le bassin et ses canards ; les rochers où l'on passe dessous percés d'une arche ; un mât d'amarrage au bout du câble de la plage.
+- Tests : habillage, arrivée, rivage, port, fête foraine. Vérifié dans Chromium : captures de la promenade, de la plage, des rochers, du port, de la jetée.
+- [ ] À vérifier sur téléphone : les arches des rochers se lisent-elles comme des passages (surtout la faille, où l'on glisse) ?
 
 ### Le train cohérent (D-136)
 
