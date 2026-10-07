@@ -2,7 +2,7 @@ import type { CombatParams } from '../../config/combat';
 import { TILE_SIZE as T } from '../../config/display';
 import { msToSteps } from '../../config/movement';
 import { LayerMask, type LevelErase } from '../level/LevelData';
-import { groupBottom, initialMasks, isWave } from '../level/erase';
+import { groupBottom, initialMasks, isWave, toggledMask } from '../level/erase';
 
 /** Événements du dernier pas de l'effacement (masque de bits). */
 export const EraseEvent = { None: 0, Announced: 1, Changed: 2 } as const;
@@ -18,7 +18,9 @@ export interface EraseHost {
 
 /**
  * L'effacement (D-111), pur et sans Phaser : les couches de chaque groupe (`masks`), les annonces
- * en cours et leur cible. Deux mécanismes :
+ * en cours et leur cible. La berceuse (D-140) est faite de vagues seulement : des étoiles qui
+ * s'allument et s'éteignent, à leur propre rythme (`lullabyBeatMs`, `lullabyWarnMs`). Deux
+ * mécanismes :
  * - **les bandes** (salle avec une poursuite vers le haut) : quand l'effacement qui monte (le front
  *   de la poursuite) arrive à `eraseLeadTiles` sous une bande, elle blanchit pendant `eraseWarnMs`,
  *   puis quitte le présent (elle reste dans le souvenir) ;
@@ -50,6 +52,8 @@ export class EraseState {
   /** Groupes de chaque étape des vagues (indices). */
   private readonly stepGroups: readonly Int16Array[];
   private readonly bottoms: Float64Array;
+  /** Les étoiles de la berceuse (D-140) : leur rythme, pas celui de l'effacement. */
+  private readonly stars: boolean;
 
   constructor(
     readonly data: LevelErase,
@@ -66,6 +70,7 @@ export class EraseState {
     this.stepGroups = data.steps.map((step) =>
       Int16Array.from(step, (id) => data.groups.findIndex((g) => g.id === id)),
     );
+    this.stars = data.look === 'stars';
     this.reset();
   }
 
@@ -99,6 +104,9 @@ export class EraseState {
 
   private waveSteps(): number {
     const p = this.params;
+    if (this.stars) {
+      return Math.max(1, msToSteps(p.lullabyBeatMs, this.stepHz));
+    }
     const scale = Math.max(0.05, p.eraseSpeedScale * this.factor);
     return Math.max(1, msToSteps(p.eraseWaveMs / scale, this.stepHz));
   }
@@ -118,7 +126,8 @@ export class EraseState {
   step(front: number | null, host: EraseHost): number {
     this.events = 0;
     const p = this.params;
-    const warnSteps = Math.max(1, msToSteps(p.eraseWarnMs, this.stepHz));
+    const warnMs = this.stars ? p.lullabyWarnMs : p.eraseWarnMs;
+    const warnSteps = Math.max(1, msToSteps(warnMs, this.stepHz));
     const n = this.masks.length;
     // Les bandes : l'effacement qui monte arrive sous elles.
     if (front !== null) {
@@ -145,8 +154,7 @@ export class EraseState {
         const i = step[k] ?? -1;
         const mask = this.masks[i] ?? 0;
         if (i >= 0 && (this.target[i] ?? -1) < 0) {
-          const swapped = mask === LayerMask.Present ? LayerMask.Memory : LayerMask.Present;
-          this.begin(i, swapped, warnSteps);
+          this.begin(i, toggledMask(mask), warnSteps);
         }
       }
     }

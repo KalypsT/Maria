@@ -178,3 +178,89 @@ describe('l’effacement : des groupes qui changent de couche (D-111)', () => {
     expect(bad(['erase: a present 3 2 3 1', 'shift: memory 4 2 1 1'])).toThrow(/@shift/);
   });
 });
+
+describe('la berceuse : des étoiles qui s’allument et s’éteignent (D-140)', () => {
+  const level = parseAsciiLevel(
+    'lullaby',
+    room([
+      'erase-look: stars',
+      'erase: a both 3 2 3 1',
+      'erase: b none 7 3 3 1',
+      'erase-step: b',
+      'erase-step: a',
+    ]),
+  );
+  const erase = level.erase;
+  if (!erase) {
+    throw new Error('berceuse absente');
+  }
+
+  it('se lit : allumée dans les deux couches, ou éteinte ; toutes des vagues', () => {
+    expect(erase.look).toBe('stars');
+    expect(erase.groups.map((g) => [g.id, g.initial])).toEqual([
+      ['a', LayerMask.Both],
+      ['b', LayerMask.None],
+    ]);
+    expect(isWave(erase, 'a')).toBe(true);
+    expect(isWave(erase, 'b')).toBe(true);
+    // Au départ, l'étoile éteinte n'est nulle part ; l'allumée, dans les deux couches.
+    expect(tileAt(level, 7, 3)).toBe(Tile.Empty);
+    expect(tileAt(level, 3, 2)).toBe(Tile.OneWay);
+    expect(tileAt(atLayer(level, 'memory'), 3, 2)).toBe(Tile.OneWay);
+  });
+
+  it('les motifs : la lumière passe d’une étoile à l’autre, en boucle', () => {
+    expect(wavePatterns(erase).map((m) => Array.from(m))).toEqual([
+      [LayerMask.Both, LayerMask.None],
+      [LayerMask.Both, LayerMask.Both],
+      [LayerMask.None, LayerMask.Both],
+      [LayerMask.None, LayerMask.None],
+    ]);
+  });
+
+  it('à son propre rythme : une étape tous les temps, annoncée longtemps', () => {
+    const params = { ...DEFAULT_COMBAT, eraseWaveMs: 9000, eraseWarnMs: 300 };
+    const state = new EraseState(erase, params, HZ);
+    const host = { canApply: () => true };
+    let announced = -1;
+    let changed = -1;
+    for (let s = 1; s < HZ * 12 && changed < 0; s++) {
+      const events = state.step(null, host);
+      if (events & EraseEvent.Announced && announced < 0) {
+        announced = s;
+      }
+      if (events & EraseEvent.Changed) {
+        changed = s;
+      }
+    }
+    const steps = (ms: number) => Math.round((ms / 1000) * HZ);
+    expect(announced).toBe(steps(DEFAULT_COMBAT.lullabyBeatMs));
+    expect(changed - announced).toBeGreaterThanOrEqual(steps(DEFAULT_COMBAT.lullabyWarnMs) - 1);
+    expect(Array.from(state.masks)).toEqual([LayerMask.Both, LayerMask.Both]);
+  });
+
+  it('une étoile ne s’allume pas sur Céleste : elle attend', () => {
+    const state = new EraseState(erase, DEFAULT_COMBAT, HZ);
+    let free = false;
+    const host = { canApply: (group: number) => group !== 1 || free };
+    for (let s = 0; s < HZ * 4; s++) {
+      state.step(null, host);
+    }
+    expect(state.masks[1]).toBe(LayerMask.None);
+    free = true;
+    state.step(null, host);
+    expect(state.masks[1]).toBe(LayerMask.Both);
+  });
+
+  it('erreurs explicites', () => {
+    const bad = (d: string[]) => () => parseAsciiLevel('bad', room(d));
+    expect(bad(['erase-look: moon'])).toThrow(/@erase-look attend/);
+    expect(bad(['erase: a none 3 2 3 1'])).toThrow(/none ne va qu/);
+    expect(bad(['erase-look: stars', 'erase: a present 3 2 3 1', 'erase-step: a'])).toThrow(
+      /both \(allumée\) ou none/,
+    );
+    expect(
+      bad(['erase-look: stars', 'erase: a both 3 2 3 1', 'erase: b none 7 3 3 1', 'erase-step: a']),
+    ).toThrow(/aucune @erase-step/);
+  });
+});

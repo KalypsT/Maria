@@ -75,6 +75,10 @@ fichier en plus. **Pas d'ambiances pour l'instant** (décision de l'utilisateur)
 | `tunnel`        | le train entre dans un tunnel (sur le toit)    | 1         |
 | `wave-warn`     | la vague s'annonce                             | 1         |
 | `erase`         | l'effacement s'annonce (niveau 7)              | 1         |
+| `lullaby`       | une étoile de la berceuse s'annonce (niveau 8) | 4–6       |
+
+`lullaby` : une seule note de boîte à musique par fichier, chaque variante une note différente de la
+même gamme douce (tirées au hasard, elles font une petite mélodie).
 
 ### Le monde
 

@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139), sur `ccr-06b9800a-238lrq`. Suite : **le parcours de la chambre immense à proposer (plan et image, D-27)**, puis la PR 2 (la berceuse, parcours d'essai 17).
+**Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139) et **PR 2 faite : la berceuse, le moteur et le parcours d'essai 17** (D-140), sur `ccr-06b9800a-238lrq`. Le parcours de la chambre immense est validé (le lit et le coffre ; le ciel de la chambre, jusqu'à la petite porte du grenier). Suite : **essai sur téléphone du parcours 17**, puis la PR 3 (la chambre immense, le lit et le coffre).
 
 **La cohérence des niveaux** (D-132 à D-137, demande de l'utilisateur) : la maison, le jardin, le quartier et la gare faits et fusionnés ; **le train** (D-136) et **la station balnéaire** (D-137 : l'aile du centre, les pieds de la grue, la pêche aux canards, les rochers percés, le mât d'amarrage) faits, sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (la maison de la nounou), même méthode.
 
@@ -31,6 +31,15 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le dernier niveau, PR 2 : la berceuse (D-140)
+
+- **La berceuse** : des étoiles qui s'allument et s'éteignent par vagues lentes, au rythme de la boîte à musique (le moteur de l'effacement, avec `; @erase-look: stars`). Une étape toutes les 2 s ; une étoile qui va s'allumer s'éclaire peu à peu (1,2 s), une qui va s'éteindre vacille. Rien ne s'allume sur Céleste. Une note de boîte à musique à chaque fois (nouvel emplacement `lullaby`, à fournir).
+- **Parcours d'essai 17 « Berceuse »** : l'escalier d'étoiles (la lumière monte), puis la traversée (la lumière avance). Sans danger : une chute ramène au sol.
+- Réglages `lullabyBeatMs`, `lullabyWarnMs` dans DEBUG → Combat.
+- Tests : `erase.test.ts`, `lullabyCourse.test.ts` (le temps comme un graphe : on arrive en suivant la lumière, jamais dans un seul motif ; l'annonce laisse le temps), `courses.test.ts`. Vérifié dans Chromium.
+- [ ] À vérifier sur téléphone (menu pause → Parcours d'essai → « 17. Berceuse ») : le rythme est-il agréable, calme sans être lent (`lullabyBeatMs`) ? Voit-on venir l'étoile qui s'allume, et celle qui va s'éteindre (`lullabyWarnMs`) ? Attendre au pied de l'escalier : trop long ?
+- [ ] Les étoiles se lisent-elles comme des appuis (la planche de lumière), et éteintes comme « pas encore » (les pointillés) ? Le halo (terne pour l'instant) ?
 
 ### Le dernier niveau, PR 1 : le premier soir rejoué sans Maria, la nuit, le berceau vide (D-139)
 
