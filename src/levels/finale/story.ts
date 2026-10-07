@@ -6,8 +6,9 @@ import type { StoryData, StoryStep, StoryTrigger, TileArea } from '../../core/st
  * maison (une seule zone). Quelques mois après la classe de mer, un soir : le premier soir rejoué
  * sans Maria, dans la chambre. Papa à la porte rappelle l'heure du lit, le tapis est vide, le
  * berceau défait depuis le premier matin ; Céleste le refait, maman vient dire bonne nuit. La nuit,
- * les lumières éteintes, le berceau vide s'éclaire : l'entrée du monde de Maria (la PR 2 et les
- * suivantes). Maria n'est jamais à l'écran ; les parents ne bougent jamais à l'écran.
+ * les lumières éteintes, le berceau vide s'éclaire : l'entrée du monde de Maria, la chambre immense
+ * (D-141), puis son ciel (D-142). Maria n'est jamais à l'écran ; les parents ne bougent jamais à
+ * l'écran.
  */
 
 /** Le tapis, là où Maria était assise le premier soir (D-31) : Céleste s'y assoit, seule. */
@@ -36,6 +37,20 @@ const IMMENSE_ARRIVAL: StoryStep = {
   facing: -1,
   returnPoint: true,
 };
+/** Le ciel de la chambre (D-142) : on y arrive sur le dessus de l'armoire, dans le noir. */
+export const SKY_START = { col: 5, row: 26 };
+/** Le dessus de l'armoire de la chambre immense : les étoiles y continuent, vers le ciel. */
+const WARDROBE_TOP: TileArea = { col: 2, row: 1, w: 14, h: 3 };
+const WARDROBE_STARS: TileArea = { col: 4, row: 0, w: 10, h: 3 };
+const SKY_ARRIVAL: StoryStep = {
+  do: 'room',
+  room: 'finale-sky',
+  ...SKY_START,
+  facing: 1,
+  returnPoint: true,
+};
+/** La petite porte du grenier, en haut du mur de droite du ciel de la chambre. */
+const ATTIC_DOOR: TileArea = { col: 155, row: 15, w: 4, h: 5 };
 /** Le lit : Agir pour se coucher (le premier soir, D-37). */
 const BED_AREA: TileArea = { col: 7, row: 13, w: 11, h: 3 };
 const BED_SEAT = { col: 12, row: 15 };
@@ -190,13 +205,42 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // PLACEHOLDER : en haut de l'armoire, la suite (le ciel de la chambre, D-138) viendra. « ? ».
-    id: 'finale-wardrobe-later',
+    // Le dessus de l'armoire (D-142) : les étoiles continuent au-dessus, Céleste les suit ; le
+    // noir, et le ciel de la chambre.
+    id: 'finale-sky',
     room: 'finale-bed',
+    on: 'touch',
+    area: WARDROBE_TOP,
+    when: { all: [F.FinaleEntered], none: [F.FinaleSky] },
+    lock: true,
+    steps: [
+      { do: 'sparkle', area: WARDROBE_STARS, ms: S.cradleSparkleMs },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'fadeOut', ms: S.fadeMs },
+      { do: 'flag', id: F.FinaleSky },
+      SKY_ARRIVAL,
+      { do: 'fadeIn', ms: S.fadeMs },
+    ],
+  },
+  {
+    // Une partie reprise en bas après le ciel : le dessus de l'armoire y ramène.
+    id: 'finale-sky-again',
+    room: 'finale-bed',
+    on: 'touch',
+    area: WARDROBE_TOP,
+    when: { all: [F.FinaleSky] },
+    lock: true,
+    steps: [{ do: 'fadeOut', ms: S.fadeMs }, SKY_ARRIVAL, { do: 'fadeIn', ms: S.fadeMs }],
+  },
+  {
+    // PLACEHOLDER : la petite porte du grenier, au bout du ciel de la chambre ; la suite (la
+    // chambre grande, D-138) viendra. « ? ».
+    id: 'finale-door-later',
+    room: 'finale-sky',
     on: 'interact',
-    area: { col: 2, row: 1, w: 14, h: 3 },
-    mark: { col: 9, row: 2 },
-    when: { all: [F.FinaleEntered] },
+    area: ATTIC_DOOR,
+    mark: { col: 157, row: 14 },
+    when: { all: [F.FinaleSky] },
     lock: true,
     repeat: true,
     steps: [

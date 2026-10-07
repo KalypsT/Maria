@@ -248,6 +248,8 @@ export const StoryFlag = {
   FinaleEntered: 'finale.entered',
   /** Dans la chambre immense, la boîte à musique s'est mise à jouer : la berceuse (D-141). */
   FinaleMusicBox: 'finale.music-box',
+  /** Du dessus de l'armoire, Céleste a suivi les étoiles : le ciel de la chambre (D-142). */
+  FinaleSky: 'finale.sky',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 

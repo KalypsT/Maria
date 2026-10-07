@@ -431,6 +431,10 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
       }
     }
   }
+  // Les tuiles d'eau d'une salle (D-95) : l'effacement (D-111) ou le vide de la nuit (D-142).
+  if (meta.void !== undefined && meta.void !== 'erasure' && meta.void !== 'night') {
+    throw new Error(`Niveau ${id} : @void attend « erasure » ou « night » (« ${meta.void} »)`);
+  }
   const abilities = entities.filter((entity) => entity.type === EntityType.Ability).length;
   if (abilities > 1 || (abilities === 1) !== (meta.ability !== undefined)) {
     throw new Error(`Niveau ${id} : un objet « A » va de pair avec « ; @ability: » (un seul)`);

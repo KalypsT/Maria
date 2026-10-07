@@ -1665,7 +1665,7 @@ export function installDebugOverlay(scene: GameScene): void {
     ],
   ];
   // La dernière nuit (D-139) : le soir de la phase 4 vécu, le berceau vide s'éclaire ; puis la
-  // chambre immense (D-141).
+  // chambre immense (D-141) et son ciel (D-142).
   const phaseFour = steps.find(([, flags]) => flags.includes(F.GrownFourth));
   if (phaseFour) {
     const night = [...phaseFour[1], F.FinaleRug, F.FinaleCradle, F.FinaleGoodnight, F.FinaleNight];
@@ -1674,6 +1674,10 @@ export function installDebugOverlay(scene: GameScene): void {
       0,
       ['Histoire : la dernière nuit, le berceau vide (D-139)', night],
       ['Histoire : la chambre immense (D-141)', [...night, F.FinaleEntered]],
+      [
+        'Histoire : le ciel de la chambre (D-142)',
+        [...night, F.FinaleEntered, F.FinaleMusicBox, F.FinaleSky],
+      ],
     );
   }
   const current = [...scene.story.flags].sort().join();
