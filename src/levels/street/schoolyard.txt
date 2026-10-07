@@ -1,6 +1,7 @@
 ; Le quartier (D-64) : la cour de l'école. On y arrive en planant par le trou du grillage de l'aire
-; de jeux (le parapluie), sur le toit du local à vélos. Le préau, le panier de basket (trouvaille
-; moyenne, en planant), un banc, une lanterne ; la porte de l'école (porte de façade 2). Au
+; de jeux (le parapluie), sur le toit plat du gymnase (D-134 : son pignon de briques, un abri à
+; vélos à son pied). Le préau, le panier de basket (trouvaille moyenne, en planant), un banc, une
+; lanterne ; la porte de l'école (porte de façade 2). Au
 ; crépuscule, maman vient y chercher Céleste (fin du niveau).
 ; Refaite (D-79) : du ciel au-dessus (le feuillage seulement en haut du platane) ; une marelle, un
 ; ballon, un pigeon ; au crépuscule, quelques fenêtres de l'école allumées.
@@ -12,7 +13,7 @@
 ; @door: 2 52 23
 ; @decor: canopy 0 0 60 1
 ; @decor: schoolfacade 44 2 15 22
-; @decor: bikeshed 1 10 4 14
+; @decor: gymgable 1 10 4 14
 ; @decor: preau 14 16 13 8
 ; @decor: basketball 34 13 2 11
 ; @decor: bench 38 23 4 1

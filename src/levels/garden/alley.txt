@@ -3,7 +3,7 @@
 ; Au fond de cette cheminée, un passage sous le vieux mur mène au portillon (sortie 3, la rue, D-60) :
 ; il s'ouvre en tirant la chevillette, pendue haut dans la cheminée (saut mural), après le bonnet.
 ; Refaite (D-76) : feuillage irrégulier, du ciel au-dessus de la clôture ; une girouette sur la remise.
-; D-132 : l'allée court au fond du jardin, derrière le potager (on la voit de loin depuis le potager) ;
+; D-133 : l'allée court au fond du jardin, derrière le potager (on la voit de loin depuis le potager) ;
 ; le passage sous le vieux mur est une arche.
 ; @name: Allée
 ; @icon: fence

@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La cohérence des niveaux** (D-132, D-133, demande de l'utilisateur) : **la maison** (l'escalier jusqu'au sol, le grenier au-dessus du couloir, la porte de la cuisine au sol, la bibliothèque, la poutre, les briques, l'étagère à linge) et **le jardin** (le vieux mur percé d'arches, la branche qui porte la cabane, l'allée vue au fond du potager, les arches de verdure) sont faits, sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (le quartier), sur le même principe (analyse en captures, propositions, validation).
+**La cohérence des niveaux** (D-132 à D-134, demande de l'utilisateur) : **la maison** et **le jardin** faits et fusionnés ; **le quartier** fait (la porte de la réserve et l'escalier de secours du chantier, le pignon du gymnase dans la cour, les panneaux sur tréteaux, le feuillage seulement dans les haies), sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (la gare), même méthode.
 
 **Sensations, son, aide et mondes étranges** (D-124) : chantiers **A** (fluidité et sensations), **B** (bruitages et vibrations) et **C** (le fil discret) faits et fusionnés (D-124 à D-129). **Chantier D, PR 1 faite : trois maquettes de la gare étrange** (D-130), sur `ccr-9d90352a-xuwhs1`. Suite : **le choix de l'utilisateur** (A, B, C ou un mélange), puis la gare étrange refaite (D2) et les autres mondes étranges un par un. En attente : essais sur téléphone (compteur de saccades, sensations, sons de test, vibrations, fil discret) ; les sons à fournir (`docs/BRUITAGES.md`) ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades.
 
@@ -29,6 +29,14 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le quartier cohérent (D-134)
+
+- **Chantier** : la porte de la réserve à mi-hauteur de l'arrière de la supérette, au même niveau que dans la supérette ; un escalier de secours en zigzag y descend.
+- **Cour** : le pignon de briques du gymnase (on arrive sur son toit plat), un abri à vélos à son pied. **Rue** : les panneaux verts sur deux tréteaux.
+- Corrigé : le feuillage des arches de verdure (D-133) se dessinait aussi aux sorties dans un mur.
+- Tests : chantier, école, rue, plateformes basses, plané, aire de jeux, jardin. Vérifié dans Chromium : captures du chantier, de la cour, du bout de la rue, du grand arbre.
+- [ ] À vérifier sur téléphone : l'escalier de secours se monte-t-il bien (paliers traversables) ? La sortie vers la supérette se voit-elle en haut ?
 
 ### Le jardin cohérent (D-133)
 

@@ -256,9 +256,9 @@ export const DECOR_KINDS: Readonly<
   oldwall: { furniture: true },
   /** Plancher de la cabane, sur les branches. */
   deck: { furniture: true },
-  /** Grosse branche du grand arbre qui porte la cabane, et les cordes du plancher (fond, D-132). */
+  /** Grosse branche du grand arbre qui porte la cabane, et les cordes du plancher (fond, D-133). */
   limb: { furniture: false },
-  /** L'allée vue de loin, au fond du potager : clôture, remise, vieux mur (D-132). */
+  /** L'allée vue de loin, au fond du potager : clôture, remise, vieux mur (D-133). */
   alleybehind: { furniture: false, far: true },
   crate: { furniture: true },
   /** Coffre suspendu au toit de la cabane. */
@@ -350,8 +350,10 @@ export const DECOR_KINDS: Readonly<
   // L'école et son monde étrange (D-64), dessinés par le code (PLACEHOLDER).
   /** L'arrière de l'école, vu de la cour, avec sa porte (fond). */
   schoolfacade: { furniture: false },
-  /** Local à vélos (plein) : on arrive sur son toit. */
-  bikeshed: { furniture: true },
+  /** Pignon du gymnase (plein) : on arrive sur son toit plat ; un abri à vélos à son pied (D-134). */
+  gymgable: { furniture: true },
+  /** Escalier de secours du chantier : paliers (planches de la salle), volées, garde-corps (D-134). */
+  fireescape: { furniture: true },
   /** Préau : toit traversable, poteaux en fond. */
   preau: { furniture: true },
   /** Panier de basket : le haut du panneau est un perchoir traversable. */

@@ -12,6 +12,7 @@ import {
 import { TILE_SIZE as T } from '../../config/display';
 import {
   EntityType,
+  Material,
   Tile,
   tileAt,
   type LevelData,
@@ -1965,11 +1966,20 @@ function drawStructure(a: ArtContext, floorY: number): void {
       const h = (exit.rowMax - exit.rowMin + 1) * T;
       ctx.fillStyle = p.wallBottom;
       ctx.fillRect(x, y, T, h);
+      // Dans un mur (D-134) : une simple ouverture sous son linteau, sans feuillage.
+      const hedge =
+        level.materials[(exit.rowMin - 1) * level.width + exit.col] === Material.Leaf ||
+        level.materials[(exit.rowMax + 1) * level.width + exit.col] === Material.Leaf;
+      if (!hedge) {
+        ctx.fillStyle = p.structure;
+        ctx.fillRect(x, y - 3, T, 3);
+        continue;
+      }
       ctx.fillStyle = p.leafDark;
       ctx.beginPath();
       ctx.ellipse(x + T / 2, y, T * 0.9, 5, 0, 0, Math.PI * 2);
       ctx.fill();
-      // Une arche de verdure (D-132) : le feuillage arrondit les coins du haut et repousse en
+      // Une arche de verdure (D-133) : le feuillage arrondit les coins du haut et repousse en
       // touffes au pied de la trouée ; la haie ne pend pas au-dessus du vide.
       for (const [dx, dy, radius] of [
         [1, 4, 4],

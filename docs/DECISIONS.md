@@ -1868,3 +1868,13 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **La façade de la terrasse** : la fenêtre au bout du fil à poulie est celle de la **buanderie** (textes seulement ; la chambre est à l'étage, à l'autre bout de la maison).
 - **Gardé tel quel** : le tronc sur ses racines en arche (voulu, un arbre de conte) ; le monde étrange derrière la haie.
 - **Sauvegarde** : aucun changement.
+
+## D-134 — Le quartier cohérent (niveau 3)
+
+- **Même méthode** (D-132, D-133) : captures de chaque salle entière (la rue en quatre morceaux), relevé, propositions **validées** (« vas-y »), avec le choix recommandé pour la réserve (l'escalier de secours).
+- **Un défaut de D-133 corrigé** : les arches de verdure se dessinaient à toutes les sorties dehors, y compris dans un mur (l'arrière de la supérette au chantier, le haut de la cour, le bout de l'échafaudage de la rue). Le feuillage n'est plus dessiné que si la sortie traverse une haie (matière feuillage au-dessus ou au-dessous) ; dans un mur, une simple ouverture sous son linteau.
+- **La porte de la réserve** s'ouvrait à 10 tuiles du sol dans la supérette (au-dessus de l'étagère, le saut moyen de la salle) mais au ras du sol dans le chantier. Elle monte à la même hauteur sur l'arrière de la supérette, dans le chantier (sortie 1, lignes 30 à 32), et un **escalier de secours** en zigzag y descend : trois paliers traversables (3 tuiles de l'un à l'autre), dessinés en caillebotis, avec garde-corps, volées et poteaux (`fireescape`). La supérette ne change pas (son saut moyen reste). Les tests du chantier passent tels quels : la lanterne de l'échafaudage reste moyenne, le parapluie difficile, la sortie haute et la trouvaille seulement en planant, rien ne coince.
+- **La cour** : le « local à vélos » de 14 tuiles de haut devient le **pignon du gymnase** de l'école (`gymgable` : briques, une fenêtre, un toit plat bordé de zinc où l'on arrive en planant), un petit abri à vélos à son pied. Même collision.
+- **La rue** : les panneaux verts au bout de la rue (la forme en L au-dessus de la trouvaille) flottaient ; ils sont **posés sur deux tréteaux**. Même collision.
+- **Gardé tel quel** : les lieux derrière les façades (portes en profondeur, même convention que l'allée du jardin) ; l'école vue de l'intérieur (ses deux portes mènent en profondeur) ; le grillage de l'école qui monte jusqu'en haut de l'aire de jeux (parti pris de jeu, il se lit bien).
+- **Sauvegarde** : aucun changement.
