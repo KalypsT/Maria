@@ -418,7 +418,8 @@ export function shopSiteDrawers({ tileShape }: ShapeTools): Record<string, Drawe
     },
     backfacade(a, r) {
       // L'arrière de la supérette, côté chantier : un mur crépi, une fenêtre, la porte de la
-      // réserve en bas ; le rebord de pierre en haut en est le parapet.
+      // réserve à mi-hauteur, au palier de l'escalier de secours (D-134) ; le rebord de pierre en
+      // haut en est le parapet.
       const { ctx } = a;
       ctx.fillStyle = '#e4e0d4';
       ctx.fillRect(r.x, r.y, r.w, r.h);
@@ -435,6 +436,72 @@ export function shopSiteDrawers({ tileShape }: ShapeTools): Record<string, Drawe
     },
     tarp() {
       // Animée (WorldLifeView) : la bâche claque au vent.
+    },
+    fireescape(a, r) {
+      const { ctx, level } = a;
+      // Escalier de secours (D-134), du palier de la porte de la réserve jusqu'au sol : des
+      // paliers en caillebotis (les planches de la salle), une volée en biais de l'un à l'autre,
+      // un garde-corps, des poteaux jusqu'au sol.
+      const runs = oneWayRuns(a, r).sort((p, q) => p[2] - q[2]);
+      let ground = (r.y + r.h) / T;
+      while (ground < level.height && tileAt(level, r.x / T + 1, ground) === Tile.Empty) {
+        ground++;
+      }
+      ctx.strokeStyle = '#4d5a63';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (const [c0, c1, row] of runs) {
+        for (const x of [c0 * T + 2, (c1 + 1) * T - 2]) {
+          ctx.moveTo(x, row * T + 4);
+          ctx.lineTo(x, ground * T);
+        }
+      }
+      ctx.stroke();
+      // Volées : du bout d'un palier au début du suivant, avec leurs marches.
+      for (let i = 0; i + 1 < runs.length; i++) {
+        const upper = runs[i];
+        const lower = runs[i + 1];
+        if (!upper || !lower) {
+          continue;
+        }
+        const towardRight = lower[0] >= upper[0];
+        const x0 = towardRight ? (upper[1] + 1) * T - 4 : upper[0] * T + 4;
+        const x1 = towardRight ? lower[0] * T + 2 * T : (lower[1] + 1) * T - 2 * T;
+        const y0 = upper[2] * T + 2;
+        const y1 = lower[2] * T;
+        ctx.strokeStyle = '#4d5a63';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.stroke();
+        ctx.strokeStyle = METAL_LIGHT;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let k = 1; k < 6; k++) {
+          const x = x0 + ((x1 - x0) * k) / 6;
+          const y = y0 + ((y1 - y0) * k) / 6;
+          ctx.moveTo(x - 3, y);
+          ctx.lineTo(x + 3, y);
+        }
+        ctx.stroke();
+      }
+      ctx.strokeStyle = METAL;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      for (const [c0, c1, row] of runs) {
+        const top = row * T - 1.1 * T;
+        ctx.moveTo(c0 * T, top);
+        ctx.lineTo((c1 + 1) * T, top);
+        for (let x = c0 * T + 3; x < (c1 + 1) * T; x += 8) {
+          ctx.moveTo(x, top);
+          ctx.lineTo(x, row * T);
+        }
+      }
+      ctx.stroke();
+      for (const [c0, c1, row] of runs) {
+        plank(a, c0, c1, row, '#4d5a63', METAL_LIGHT);
+      }
     },
     floodlight(a, r) {
       const { ctx } = a;

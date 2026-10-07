@@ -226,21 +226,48 @@ export function schoolDrawers({ tileShape }: ShapeTools): Record<string, Drawer>
       ctx.arc(doorX + 2.3 * T, ground - 2 * T, 1.5, 0, Math.PI * 2);
       ctx.fill();
     },
-    bikeshed(a, r) {
+    gymgable(a, r) {
       const { ctx } = a;
-      // Local à vélos : murs de planches, toit de tôle (on arrive dessus), une roue qui dépasse.
-      tileShape(a, r, '#9a7352', '#c79d6f');
-      ctx.fillStyle = 'rgba(0,0,0,0.12)';
-      for (let x = r.x + 4; x < r.x + r.w; x += 6) {
-        ctx.fillRect(x, r.y + 4, 1, r.h - 4);
-      }
+      // Le pignon du gymnase de l'école (D-134) : un mur de briques haut, une fenêtre, un toit
+      // plat bordé de zinc (on arrive dessus) ; à son pied, un petit abri à vélos (fond).
+      const ground = r.y + r.h;
+      const shelter = { x: r.x + r.w, y: ground - 3 * T, w: 2.5 * T };
       ctx.fillStyle = METAL;
-      ctx.fillRect(r.x - 2, r.y, r.w + 4, 3);
+      ctx.fillRect(shelter.x + shelter.w - 2, shelter.y, 2, ground - shelter.y);
+      ctx.fillStyle = '#8fa3ad';
+      ctx.beginPath();
+      ctx.moveTo(shelter.x, shelter.y - 4);
+      ctx.lineTo(shelter.x + shelter.w + 3, shelter.y);
+      ctx.lineTo(shelter.x + shelter.w + 3, shelter.y + 2.5);
+      ctx.lineTo(shelter.x, shelter.y - 1.5);
+      ctx.fill();
       ctx.strokeStyle = '#3b3440';
       ctx.lineWidth = 1.5;
+      for (const dx of [8, 24]) {
+        ctx.beginPath();
+        ctx.arc(shelter.x + dx, ground - 6, 5, 0, Math.PI * 2);
+        ctx.stroke();
+      }
       ctx.beginPath();
-      ctx.arc(r.x + r.w + 6, r.y + r.h - 6, 5, 0, Math.PI * 2);
+      ctx.moveTo(shelter.x + 8, ground - 6);
+      ctx.lineTo(shelter.x + 15, ground - 13);
+      ctx.lineTo(shelter.x + 24, ground - 6);
       ctx.stroke();
+      tileShape(a, r, '#b5634f', '#c97b66');
+      ctx.fillStyle = 'rgba(0,0,0,0.13)';
+      for (let y = r.y + 6, k = 0; y < ground; y += 5, k++) {
+        ctx.fillRect(r.x, y, r.w, 1);
+        for (let x = r.x + (k % 2 === 0 ? 4 : 9); x < r.x + r.w; x += 10) {
+          ctx.fillRect(x, y - 4, 1, 4);
+        }
+      }
+      ctx.fillStyle = '#c8ccd0';
+      ctx.fillRect(r.x - 2, r.y, r.w + 4, 3);
+      ctx.fillStyle = GLASS;
+      ctx.fillRect(r.x + r.w / 2 - 7, r.y + 3 * T, 14, 2 * T);
+      ctx.fillStyle = '#f3ead7';
+      ctx.fillRect(r.x + r.w / 2 - 0.75, r.y + 3 * T, 1.5, 2 * T);
+      ctx.fillRect(r.x + r.w / 2 - 7, r.y + 4 * T, 14, 1.5);
     },
     preau(a, r) {
       const { ctx } = a;

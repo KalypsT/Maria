@@ -1,7 +1,7 @@
 ; Jardin : la terrasse, derrière la buanderie (D-46). Maman étend le linge ; lanterne (point de retour).
 ; Refaite (D-76) : ciel ouvert entre l'avant-toit de la maison et l'arbre du voisin ; guirlande sous la pergola.
 ; Revisite avec le crochet (D-66) : le fil à linge à poulie, de la pergola à la fenêtre de la
-; buanderie (D-132 : la chambre est à l'étage, à l'autre bout de la maison) ; au bout, la jardinière
+; buanderie (D-133 : la chambre est à l'étage, à l'autre bout de la maison) ; au bout, la jardinière
 ; (trouvaille, seulement avec le crochet).
 ; @name: Terrasse
 ; @icon: sun

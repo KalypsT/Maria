@@ -511,7 +511,7 @@ export function gardenDrawers({ tileShape, rounded }: ShapeTools): Record<string
           }
         }
       }
-      // Un passage sous le mur (D-132) : le mur descend jusqu'au sol à l'image, percé d'une arche
+      // Un passage sous le mur (D-133) : le mur descend jusqu'au sol à l'image, percé d'une arche
       // (le passage est dans l'ombre, on y passe devant) ; contre le bord de la salle, le mur
       // continue au-delà, sans piédroit.
       const bottomOf = (col: number): number => {
@@ -577,7 +577,7 @@ export function gardenDrawers({ tileShape, rounded }: ShapeTools): Record<string
     deck(a, r) {
       const { ctx, level, palette: p } = a;
       // Plancher de la cabane : planches, et deux jambes de force jusqu'au tronc ou à la haie ;
-      // pendu à une grosse branche (`limb`, D-132), il n'en a pas besoin.
+      // pendu à une grosse branche (`limb`, D-133), il n'en a pas besoin.
       const x0 = r.x + 6;
       const x1 = r.x + r.w - 6;
       if (level.meta.world !== 'strange' && !level.decor.some((d) => d.kind === 'limb')) {
@@ -600,7 +600,7 @@ export function gardenDrawers({ tileShape, rounded }: ShapeTools): Record<string
       }
     },
     limb(a, r) {
-      // Grosse branche du grand arbre (D-132), du tronc jusqu'au bord de la salle, sous la
+      // Grosse branche du grand arbre (D-133), du tronc jusqu'au bord de la salle, sous la
       // couronne ; deux cordes y pendent le plancher de la cabane (les tuiles pleines du bas du
       // cadre). Du fond : on ne s'y pose pas.
       const { ctx, level, palette: p } = a;
@@ -647,7 +647,7 @@ export function gardenDrawers({ tileShape, rounded }: ShapeTools): Record<string
       ctx.stroke();
     },
     alleybehind(a, r) {
-      // L'allée du fond (D-132), vue de loin derrière le potager, dans le même ordre que dans
+      // L'allée du fond (D-133), vue de loin derrière le potager, dans le même ordre que dans
       // l'allée : la clôture, la remise et sa girouette, le vieux mur et la haie au-dessus. Le
       // voile du lointain (`far`) la fond dans le paysage.
       const { ctx, palette: p } = a;
