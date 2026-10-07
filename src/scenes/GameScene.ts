@@ -29,7 +29,6 @@ import { InputController } from '../core/input/InputController';
 import { KeyboardSource } from '../core/input/KeyboardSource';
 import { TouchSource } from '../core/input/TouchSource';
 import {
-  EntityType,
   Material,
   Tile,
   tileAt,
@@ -84,6 +83,7 @@ import {
   isStreetRoom,
   mapPage,
   doorAt,
+  returnLantern,
   touchedExit,
   type ExitRef,
   type MapBox,
@@ -101,6 +101,7 @@ import {
   type ArtFinish,
   GARDEN_PALETTE,
   MEMORY_PALETTE,
+  NIGHTLIGHT_PALETTE,
   ERASURE_COLORS,
   STREET_DUSK_PALETTE,
   STREET_PALETTE,
@@ -2274,6 +2275,10 @@ export class GameScene extends Phaser.Scene {
 
   /** Palette de la salle : monde étrange (D-28), ou maison le soir ou le matin (D-31). */
   private basePalette() {
+    if (isStrangeRoom(this.level) && this.level.meta.palette === 'nightlight') {
+      // Le monde de Maria (D-141) : la chambre du premier soir, à la lumière de la veilleuse.
+      return NIGHTLIGHT_PALETTE;
+    }
     if (this.strangeWorld || isStrangeRoom(this.level)) {
       // Derrière la haie (D-49) : le monde étrange, dehors (ciel violet au lieu du mur).
       const mockup = this.strangeMockup;
@@ -2414,7 +2419,7 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     if (returnPoint) {
-      const lamp = room.level.entities.find((e) => e.type === EntityType.Checkpoint);
+      const lamp = returnLantern(room.level, col, row);
       void this.session.setCheckpoint(id, lamp ? checkpointId(lamp.col, lamp.row) : null);
     }
     const saved = this.session.data.checkpoint;

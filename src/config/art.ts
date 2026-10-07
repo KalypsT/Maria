@@ -645,6 +645,16 @@ export const DECOR_KINDS: Readonly<
   seagate: { furniture: false },
   napcot: { furniture: false },
   cantower: { furniture: true },
+  // Le dernier niveau (D-141), la chambre immense : la chambre du premier soir, démesurée.
+  giantcradle: { furniture: true },
+  nightlamp: { furniture: true },
+  bedskirt: { furniture: true },
+  giantpillow: { furniture: true },
+  giantcabin: { furniture: false },
+  garland: { furniture: true },
+  giantmusicbox: { furniture: true },
+  /** Une étoile de la berceuse (D-140) : dessinée par `LullabyView`, rien ici. */
+  lullabystar: { furniture: true },
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */
@@ -876,6 +886,28 @@ export const STRANGE_PALETTE: Readonly<ArtPalette> = {
   veil: 0,
   vignette: 0.5,
   vignetteColor: '6,4,16',
+};
+
+/**
+ * La chambre du premier soir, démesurée, à la lumière de la veilleuse (D-141, `; @palette:
+ * nightlight`) : le monde de Maria, au début du dernier niveau. Un monde étrange (hors carte), mais
+ * la chambre garde ses couleurs : moins de violet qu'ailleurs, la nuit bleue, la lumière chaude de
+ * la veilleuse, un liseré à peine turquoise. L'étrange s'efface à mesure qu'on approche de Maria
+ * (D-138). PLACEHOLDER.
+ */
+export const NIGHTLIGHT_PALETTE: Readonly<ArtPalette> = {
+  ...REAL_PALETTE,
+  wallTop: '#2f3a66',
+  wallBottom: '#232c52',
+  wallpaper: 'rgba(255,224,170,0.1)',
+  wainscot: '#2c3560',
+  floor: '#4e3d38',
+  floorEdge: '#6a5248',
+  rim: 'rgba(170,236,225,0.75)',
+  lamp: '255,206,140',
+  darkness: 0.48,
+  vignette: 0.5,
+  vignetteColor: '10,12,32',
 };
 
 /**

@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139) et **PR 2 faite : la berceuse, le moteur et le parcours d'essai 17** (D-140), sur `ccr-06b9800a-238lrq`. Le parcours de la chambre immense est validé (le lit et le coffre ; le ciel de la chambre, jusqu'à la petite porte du grenier). Suite : **essai sur téléphone du parcours 17**, puis la PR 3 (la chambre immense, le lit et le coffre).
+**Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139) , **PR 2 faite : la berceuse, le moteur et le parcours d'essai 17** (D-140) et **PR 3 faite : la chambre immense, le lit et le coffre** (D-141), sur `ccr-06b9800a-238lrq`. Suite : **essai sur téléphone** (le parcours 17, la chambre immense), puis la PR 4 (le ciel de la chambre : le mobile, les étoiles, jusqu'à la petite porte du grenier).
 
 **La cohérence des niveaux** (D-132 à D-137, demande de l'utilisateur) : la maison, le jardin, le quartier et la gare faits et fusionnés ; **le train** (D-136) et **la station balnéaire** (D-137 : l'aile du centre, les pieds de la grue, la pêche aux canards, les rochers percés, le mât d'amarrage) faits, sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (la maison de la nounou), même méthode.
 
@@ -31,6 +31,18 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le dernier niveau, PR 3 : la chambre immense, le lit et le coffre (D-141)
+
+- **L'entrée** : la nuit, Agir sur le berceau vide ; Céleste se retrouve **dans le berceau devenu immense**, sur le coffre à jouets.
+- **Le parcours** (facile) : sortir du berceau, la veilleuse champignon, **glisser sous la jupe du lit**, le passage sous le sommier, **la cheminée** entre l'armoire et la tête de lit, l'oreiller et le lit, **la cabane du lit** (ses barreaux, et sa guirlande du premier soir : on bascule en plein saut), la traverse et **la boîte à musique qui se met à jouer**, puis **les premières étoiles** jusqu'au dessus de l'armoire (là : « ? », le ciel de la chambre viendra).
+- **La palette de la veilleuse** : moins de violet, la chambre garde ses couleurs (l'étrange commence à s'effacer).
+- Corrigé : le point de retour d'une salle d'histoire est la veilleuse la plus proche de l'arrivée.
+- DEBUG → Histoire : « la chambre immense ». Tests : `finaleBed.test.ts`. Vérifié dans Chromium.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « la dernière nuit, le berceau vide », puis Agir sur le berceau ; ou « la chambre immense ») : sent-on qu'on est toute petite dans sa chambre du premier soir ? Le berceau, la veilleuse, le lit, la cabane se reconnaissent-ils ?
+- [ ] Le parcours : assez long, assez varié ? Le dessous du lit se trouve-t-il (glisser sous la jupe) ? La cheminée (deux paliers) ? La guirlande du souvenir dans la cabane se voit-elle assez pour penser à basculer ?
+- [ ] Les étoiles : les attend-on naturellement depuis la traverse ? Le saut jusqu'à l'armoire ?
+- [ ] Facile partout (mesuré) : trop facile, ou bien pour un début de dernier niveau ?
 
 ### Le dernier niveau, PR 2 : la berceuse (D-140)
 
