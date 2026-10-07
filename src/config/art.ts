@@ -425,7 +425,7 @@ export const DECOR_KINDS: Readonly<
   canopycolumn: { furniture: false },
   /** Lampe-globe suspendue à sa tige (fond, D-80). */
   globelamp: { furniture: false },
-  /** Pilier de fonte de la marquise (plein). */
+  /** Grand panneau d'affichage du quai (plein), sur deux pieds (D-135). */
   pillar: { furniture: true },
   /** Passerelle au-dessus des voies : marches et tablier traversables. */
   footbridge: { furniture: true },
@@ -453,7 +453,7 @@ export const DECOR_KINDS: Readonly<
   lostcounter: { furniture: true },
   /** Étagères des objets perdus (planches traversables). */
   lostshelf: { furniture: true },
-  /** Haute armoire de rangement (pleine). */
+  /** Haute armoire de rangement (pleine), sur un haut piètement ouvert (D-135). */
   tallcabinet: { furniture: true },
   /** Casiers de consigne (pleins), une lueur turquoise tout en haut. */
   lockers: { furniture: true },
