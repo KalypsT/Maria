@@ -89,10 +89,12 @@ describe.each([false, true])('maison (D-25), escalade %s', (climb) => {
     () => {
       // Tout ce qu'on peut atteindre, même par un saut raté ou risqué, doit ramener à la chambre
       // par des passages de la difficulté de chaque salle (faciles dans la maison réelle, moyens au
-      // plus dans le monde étrange, dont la fin ramène à la chambre).
+      // plus dans le monde étrange, dont la fin ramène à la chambre). Le monde de Maria (D-138) : on
+      // n'y entre qu'en phase 4, toutes capacités, et il ne ramène à la chambre qu'au matin ; voir
+      // finaleBed.test.ts et finaleSky.test.ts.
       const safe = zoneGraph(climb, roomDifficulty);
       const stuck = [...reachable(zoneGraph(climb, null), home())].filter(
-        (n) => !reachable(safe, n).has(home()),
+        (n) => !roomOf(n).startsWith('finale-') && !reachable(safe, n).has(home()),
       );
       expect(where(stuck, climb), 'surfaces sans retour possible').toEqual([]);
     },
