@@ -1,5 +1,5 @@
 import { STORY_TIMING as S, StoryFlag as F } from '../../config/story';
-import type { StoryData, StoryTrigger, TileArea } from '../../core/story/story';
+import type { StoryData, StoryStep, StoryTrigger, TileArea } from '../../core/story/story';
 
 /**
  * Histoire du dernier niveau (D-138, D-139), le monde de Maria, PLACEHOLDER, réunie à celle de la
@@ -20,6 +20,22 @@ const CRADLE_AREA: TileArea = { col: 20, row: 15, w: 7, h: 5 };
 const CRADLE_MARK = { col: FINALE_CRADLE.col, row: FINALE_CRADLE.row - 1 };
 /** Debout sur le coffre, à côté du berceau (comme quand elle y avait couché Maria). */
 const CRADLE_SIDE = { col: 25, row: 17 };
+/** Là où le berceau scintille, la nuit. */
+const CRADLE_GLOW: TileArea = {
+  col: FINALE_CRADLE.col - 1,
+  row: FINALE_CRADLE.row - 2,
+  w: 3,
+  h: 3,
+};
+/** Dans le berceau devenu immense (la chambre immense, D-141) : on y arrive, dans le noir. */
+export const IMMENSE_START = { col: 88, row: 31 };
+const IMMENSE_ARRIVAL: StoryStep = {
+  do: 'room',
+  room: 'finale-bed',
+  ...IMMENSE_START,
+  facing: -1,
+  returnPoint: true,
+};
 /** Le lit : Agir pour se coucher (le premier soir, D-37). */
 const BED_AREA: TileArea = { col: 7, row: 13, w: 11, h: 3 };
 const BED_SEAT = { col: 12, row: 15 };
@@ -102,7 +118,7 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: 1200 },
       {
         do: 'sparkle',
-        area: { col: FINALE_CRADLE.col - 1, row: FINALE_CRADLE.row - 2, w: 3, h: 3 },
+        area: CRADLE_GLOW,
         ms: S.cradleSparkleMs + 600,
       },
       { do: 'wait', ms: S.cradleSparkleMs },
@@ -111,14 +127,76 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // PLACEHOLDER : la nuit, le berceau vide s'éclaire ; l'entrée du monde de Maria (la chambre
-    // immense) viendra avec la suite du niveau (D-138). En attendant : « ? ».
-    id: 'finale-cradle-glow',
+    // Le berceau vide, la nuit (D-141) : la lumière vacille, tout tremble ; le cercle se referme sur
+    // Céleste, et s'ouvre : elle est dans le berceau, devenu immense, dans la chambre du premier
+    // soir. Le monde de Maria.
+    id: 'finale-enter',
     room: 'bedroom',
     on: 'interact',
     area: CRADLE_AREA,
     mark: CRADLE_MARK,
-    when: { all: [F.FinaleNight] },
+    when: { all: [F.FinaleNight], none: [F.FinaleEntered] },
+    lock: true,
+    steps: [
+      { do: 'sparkle', area: CRADLE_GLOW, ms: S.omenPeakMs + 600 },
+      { do: 'shake', ms: S.omenPeakMs, strength: 0.8 },
+      { do: 'wait', ms: S.omenPeakMs },
+      { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
+      { do: 'flag', id: F.FinaleEntered },
+      IMMENSE_ARRIVAL,
+      { do: 'wait', ms: S.nightBlackMs },
+      { do: 'fadeIn', ms: S.nightFadeInMs, shape: 'iris' },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs },
+    ],
+  },
+  {
+    // Une partie reprise dans la chambre après l'entrée (rien ne l'y ramène d'habitude : la chambre
+    // immense a ses veilleuses) : le berceau y ramène.
+    id: 'finale-reenter',
+    room: 'bedroom',
+    on: 'interact',
+    area: CRADLE_AREA,
+    mark: CRADLE_MARK,
+    when: { all: [F.FinaleEntered] },
+    lock: true,
+    steps: [
+      { do: 'sparkle', area: CRADLE_GLOW, ms: S.reomenPeakMs + 300 },
+      { do: 'wait', ms: S.reomenPeakMs },
+      { do: 'fadeOut', ms: S.blinkOutMs, shape: 'iris' },
+      IMMENSE_ARRIVAL,
+      { do: 'wait', ms: S.blinkBlackMs },
+      { do: 'fadeIn', ms: S.reblinkInMs, shape: 'iris' },
+    ],
+  },
+  {
+    // La boîte à musique, sur la traverse de la cabane (D-141) : en arrivant près d'elle, elle se met
+    // à jouer, seule ; les étoiles de la veilleuse s'éclairent au mur. La berceuse.
+    id: 'finale-music-box',
+    room: 'finale-bed',
+    on: 'touch',
+    area: { col: 34, row: 10, w: 14, h: 3 },
+    when: { all: [F.FinaleEntered], none: [F.FinaleMusicBox] },
+    lock: true,
+    steps: [
+      { do: 'flag', id: F.FinaleMusicBox },
+      { do: 'sparkle', area: { col: 49, row: 8, w: 6, h: 5 }, ms: S.cradleSparkleMs },
+      { do: 'wait', ms: 600 },
+      { do: 'thought', icon: 'music', ms: S.thoughtMs },
+      { do: 'wait', ms: S.thoughtMs },
+      { do: 'sparkle', area: { col: 25, row: 5, w: 10, h: 6 }, ms: S.cradleSparkleMs },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
+  {
+    // PLACEHOLDER : en haut de l'armoire, la suite (le ciel de la chambre, D-138) viendra. « ? ».
+    id: 'finale-wardrobe-later',
+    room: 'finale-bed',
+    on: 'interact',
+    area: { col: 2, row: 1, w: 14, h: 3 },
+    mark: { col: 9, row: 2 },
+    when: { all: [F.FinaleEntered] },
     lock: true,
     repeat: true,
     steps: [

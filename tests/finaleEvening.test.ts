@@ -97,7 +97,8 @@ describe('le dernier niveau : le premier soir, sans Maria (D-139)', () => {
     expect(storyActions(PHASE4)).toEqual(['finale-rug']);
     expect(storyActions(RUG)).toEqual(['finale-cradle']);
     expect(storyActions(CRADLE)).toEqual(['finale-sleep']);
-    expect(storyActions(NIGHT)).toEqual([]);
+    // La nuit, le berceau vide : l'entrée du monde de Maria (D-141).
+    expect(storyActions(NIGHT)).toEqual(['finale-enter']);
     expect(flagsOf(trigger('finale-rug').steps)).toEqual([F.FinaleRug]);
     expect(flagsOf(trigger('finale-cradle').steps)).toEqual([F.FinaleCradle]);
     expect(flagsOf(trigger('finale-sleep').steps)).toEqual([F.FinaleGoodnight, F.FinaleNight]);
@@ -160,7 +161,7 @@ describe('le dernier niveau : le premier soir, sans Maria (D-139)', () => {
     expect(director([F.Slept, F.Grown, F.GrownOlder]).exitsLocked('bedroom', 1)).toBe(false);
   });
 
-  it('la nuit : les lumières éteintes, le berceau vide qui vacille, « ? » provisoire', () => {
+  it('la nuit : les lumières éteintes, le berceau vide qui vacille et mène au monde de Maria', () => {
     expect(director(GOODNIGHT).dim('bedroom')).toBe(false);
     const night = director(NIGHT);
     expect(night.dim('bedroom')).toBe(true);
@@ -168,11 +169,13 @@ describe('le dernier niveau : le premier soir, sans Maria (D-139)', () => {
       story.omen('bedroom', (FINALE_CRADLE.col + 0.5) * TILE_SIZE, FINALE_CRADLE.row * TILE_SIZE);
     expect(near(director(CRADLE))).toBe(0);
     expect(near(night)).toBeGreaterThan(0.8);
-    // L'entrée du monde de Maria viendra avec la suite du niveau (D-138) : « ? », sans effet.
-    const glow = trigger('finale-cradle-glow');
-    expect(glow.repeat).toBe(true);
-    expect(checkCondition(new Set(NIGHT), glow.when)).toBe(true);
-    expect(checkCondition(new Set(CRADLE), glow.when)).toBe(false);
-    expect(glow.steps).toContainEqual(expect.objectContaining({ do: 'thought', icon: 'question' }));
+    // Le berceau, la nuit seulement (D-141) : dans le noir du cercle, la chambre immense.
+    const enter = trigger('finale-enter');
+    expect(checkCondition(new Set(NIGHT), enter.when)).toBe(true);
+    expect(checkCondition(new Set(CRADLE), enter.when)).toBe(false);
+    expect(flagsOf(enter.steps)).toEqual([F.FinaleEntered]);
+    expect(enter.steps).toContainEqual(
+      expect.objectContaining({ do: 'room', room: 'finale-bed', returnPoint: true }),
+    );
   });
 });

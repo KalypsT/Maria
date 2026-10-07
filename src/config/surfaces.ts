@@ -212,6 +212,8 @@ export const ROOM_GROUND: Readonly<Record<string, Surface>> = {
   'nanny-nap': Wood,
   'nanny-stairs': Wood,
   'nanny-playroom': Wood,
+  // Le dernier niveau (D-141) : le parquet de la chambre, démesuré.
+  'finale-bed': Wood,
 };
 
 /** Sol des salles absentes de `ROOM_GROUND` (parcours d'essai, souvenirs jouables). */

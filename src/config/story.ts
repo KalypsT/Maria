@@ -241,6 +241,13 @@ export const StoryFlag = {
   FinaleGoodnight: 'finale.goodnight',
   /** La nuit : les lumières éteintes, le berceau vide s'éclaire. */
   FinaleNight: 'finale.night',
+  /**
+   * Le berceau vide, la nuit (D-141) : Céleste y est passée, dans le monde de Maria ; elle se
+   * retrouve dans le berceau devenu immense.
+   */
+  FinaleEntered: 'finale.entered',
+  /** Dans la chambre immense, la boîte à musique s'est mise à jouer : la berceuse (D-141). */
+  FinaleMusicBox: 'finale.music-box',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
