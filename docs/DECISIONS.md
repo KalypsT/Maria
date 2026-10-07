@@ -1913,3 +1913,43 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Gardé tel quel** : le phare (l'escalier en colimaçon cassé, des volées de part et d'autre du noyau, voulu), la gare de la mer, le centre.
 - **Vérifié par les tests** : l'habillage, l'arrivée, le rivage, le port, la fête foraine.
 - **Sauvegarde** : aucun changement.
+
+## D-138 — Le dernier niveau : plan du niveau 8 validé (« la chambre qui rapetisse »)
+
+- **Choix de l'utilisateur** (après lecture du document d'histoire, §8 à §12) : le monde de Maria naît de **la chambre du premier soir** ; **la chambre qui rapetisse** ; l'entrée par **le berceau vide** ; un vrai parcours, surtout dans la chambre immense ; difficulté **facile à moyenne, sans boss** ; on peut **continuer à jouer après la fin** pour les trouvailles. Le plan est accepté tel quel pour le reste (le soir rejoué, le matin, le dernier plan, après la fin).
+- **Le soir** (réel) : quelques mois après la classe de mer, **un soir**. Le premier soir rejoué **sans Maria** : papa à la porte (l'heure du lit), le tapis vide où elles jouaient, le berceau défait que Céleste refait, maman qui vient dire bonne nuit, le chat sur le tabouret. Les parents reviennent à un moment important (§8.2). La nuit, les lumières éteintes, le berceau vide s'éclaire.
+- **L'entrée** : Agir sur le berceau vide ; le cercle s'ouvre ; Céleste est **dans le berceau devenu immense** et en sort par-dessus les barreaux.
+- **Le monde de Maria** : toujours la même chambre, celle du premier soir (le berceau, la couverture, le mobile, les étoiles de la veilleuse, la boîte à musique), **de plus en plus petite**. Céleste ne change pas de taille : c'est le monde qui revient à la sienne (elle a grandi, sans un mot ; physique commune, pilier 7).
+  1. **la chambre immense** (moyen), un vrai parcours en deux salles :
+     - **le bas** : le berceau, le coffre à jouets, le tapis, le tabouret, le dessous du lit, le pied du bureau ;
+     - **le haut** : le surmeuble, le lit cabane et sa boîte à musique, **le mobile** (ses fils pour le crochet, ses figures pour appuis), **les étoiles de la veilleuse**. **La berceuse** : les étoiles s'allument par vagues lentes, au rythme de la boîte à musique (le moteur des vagues de l'effacement, D-111 : annoncées, jamais sous Céleste, chaque état une variante statique analysée), sans menace. Les deux couches : le présent en silhouettes, le souvenir aux couleurs du premier soir. Les six capacités ;
+  2. **la chambre grande** (facile) : presque plus de couches, moins d'étrangeté ;
+  3. **la vraie chambre, la nuit** (aucune difficulté) : plus de couches (le bouton Basculer pâlit). **Maria dort dans son berceau sous sa couverture**, comme Céleste l'avait couchée le premier soir. Agir : Céleste la prend dans ses bras, le cœur du prologue ; le cercle se referme. On ne sait plus si l'on est encore dans le monde étrange (§12).
+  - **L'étrange s'efface** à mesure qu'on approche de Maria : moins de violet, moins d'effets, des couleurs de plus en plus vraies ; la musique se réduit à la boîte à musique.
+  - Ni boss, ni ennemi, ni trouvaille, ni disque (§9 : pas de nouveau collectible). Une chute ramène au dernier appui ; **sans peur** (proposé, décidé avec la salle). Pas de Maria vue au loin : on voit le berceau sous le mobile, pas Maria.
+  - Méthode D-27 : le parcours de chaque salle est proposé (plan, image) avant d'être finalisé.
+- **Le matin** (réel, jouable) : Céleste se réveille sur son lit, Maria dans les bras. Une étincelle sur le tapis, là où était la toute première action du jeu : Agir, elle s'assoit avec Maria, un cœur, la bulle du livre du soir commence… et s'efface ; elle la regarde. Elle la range avec soin (proposé : **sur le surmeuble du bureau**, là où était la couverture ; à confirmer), le dernier câlin. **C'est le joueur qui fait sortir Céleste par la porte.**
+- **Le dernier plan** : la caméra reste sur Maria ; la veilleuse vacille en turquoise, quelques scintillements, le mobile tourne seul un instant ; Maria ne bouge pas ; tout redevient normal ; le noir.
+- **Après la fin** : un écran de fin sans texte, puis l'accueil. « Continuer » reprend chez elle, en phase 4, pour finir les trouvailles ; Maria reste sur son étagère, sans étincelle (elle ne revient pas la chercher).
+- **Pilier 5, signalé** : Maria ne se déplace jamais à l'écran. Céleste peut la tenir dans ses bras, **immobile** (assise ou debout) ; chaque changement de place se fait dans le noir, comme depuis le prologue ; jamais Céleste qui marche en la portant.
+- **À fournir par l'utilisateur, idéalement** : un thème de fin (une variation de la boîte à musique ou du jingle `maria`), Céleste en phase 4 illustrée, peut-être l'image « Céleste tenant Maria ».
+- **Découpage** : 1 le soir de la phase 4 et l'entrée par le berceau (la suite en « ? » provisoire) ; 2 la berceuse, le moteur et le parcours d'essai 17 (**essai sur téléphone**) ; 3 la chambre immense, le bas (l'arrivée dans le berceau, le dessin du monde de Maria) ; 4 la chambre immense, le haut (le mobile, les étoiles) ; 5 la chambre grande, la vraie chambre la nuit, Maria retrouvée (la pose « dans les bras ») ; 6 le matin et le dernier plan ; 7 après la fin (l'écran de fin, l'accueil, « Continuer », le fil discret).
+
+## D-139 — Le dernier niveau, PR 1 : le premier soir rejoué sans Maria, la nuit, le berceau vide
+
+- **Plan validé** (D-138). Nouveau fichier d'histoire `src/levels/finale/story.ts` (`FINALE_STORY`), réuni à celui de la maison comme les autres niveaux ; nouvelles étapes `finale.rug`, `finale.cradle`, `finale.goodnight`, `finale.night`, ajoutées en fin de liste.
+- **La fin du niveau 7 change** (D-119) : « quelques mois plus tard », c'est **un soir** (nouvelle règle de moment de la journée, avant celle du réveil au dortoir). Le « ? » provisoire est retiré : la dernière bulle reste « Maria qui manque », Céleste est assise sur son lit, et le soir commence.
+- **Le soir** (la chambre, phase 4), comme le premier soir (D-31, D-33, D-37), sans Maria :
+  - **papa à la porte** (son illustration, D-123) ; la chambre est fermée, il rappelle l'heure du lit ;
+  - **le chat** dort sur le tabouret (au salon, ni le chat ni sa caresse pendant ce temps) ;
+  - **le tapis vide** : une étincelle là où était la toute première action du jeu. Agir : Céleste s'assoit à sa place du premier soir, tournée vers la place vide de Maria ; une bulle Maria ; puis la bulle du berceau ;
+  - **le berceau**, défait depuis le premier matin : Agir (du sol ou du dessus du coffre) ; dans le noir d'un fondu, il est refait, la couverture bordée, vide ; une bulle Maria, puis le lit ;
+  - **le lit** : maman vient dire bonne nuit (son cœur, puis celui de Céleste) ; papa est parti.
+- **La nuit** : le noir de la nuit ; **les lumières éteintes** (la règle `dim` du train, D-85, appliquée à la chambre : seule la veilleuse reste) ; maman est partie ; Céleste, assise sur son lit, ne dort pas ; **le berceau vide scintille**, une bulle « berceau ». En s'en approchant, la lumière vacille (un présage, D-35). La chambre reste fermée (la bulle du berceau).
+- **PLACEHOLDER** : Agir sur le berceau, la nuit : « ? » (rejouable, sans effet). L'entrée du monde de Maria (la chambre immense) viendra avec la suite du niveau.
+- **Écart avec le premier soir** : ni câlin ni histoire du soir (sans Maria) ; ni couverture à aller chercher (elle est dans le berceau défait).
+- **Fil discret** (D-129) : trois jalons de plus (le tapis, le berceau, le lit) ; le berceau de la nuit attendra son entrée.
+- **Debug** : l'histoire « quelques mois plus tard, le soir (phase 4, niveau 8) » (renommée) et « la dernière nuit, le berceau vide ».
+- **Tests** (`finaleEvening.test.ts`) : le soir après la fin du niveau 7, plus de « ? » ; le rituel dans l'ordre ; Maria jamais là, le berceau défait puis refait ; les parents du premier soir ; la chambre fermée (papa, puis le berceau) ; la nuit (lumières éteintes, présage, « ? » sans effet). `nannyEnd.test.ts` et `hint.test.ts` mis à jour.
+- **Vérifié dans Chromium** : le soir (papa illustré à la porte, le chat, le berceau défait), le tapis, le berceau refait, maman au bord du lit, la nuit et la bulle du berceau, le « ? ».
+- **Sauvegarde** : aucune migration (quatre étapes en fin de liste).

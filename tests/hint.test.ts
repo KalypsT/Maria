@@ -114,6 +114,8 @@ describe('le fil discret : les jalons (D-129)', () => {
     expect(done.length).toBe(MILESTONES.length);
     expect(new Set(done).size).toBe(MILESTONES.length);
     expect(flags.has(F.NannyEden)).toBe(true);
+    // Le soir du dernier niveau (D-139), jusqu'à la nuit.
+    expect(flags.has(F.FinaleNight)).toBe(true);
   });
 
   it('les îlots du niveau 7 : le plus proche d’abord', () => {

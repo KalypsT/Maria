@@ -77,4 +77,9 @@ export const MILESTONES: readonly Milestone[] = [
   { trigger: 'nanny-play-3' },
   { trigger: 'nanny-play-4' },
   { trigger: 'nanny-eden' },
+  // Le dernier niveau, le soir (D-139) : le tapis vide, le berceau refait, le lit. La nuit, le
+  // berceau vide s'éclaire (son entrée viendra avec la suite du niveau).
+  { trigger: 'finale-rug' },
+  { trigger: 'finale-cradle' },
+  { trigger: 'finale-sleep' },
 ];

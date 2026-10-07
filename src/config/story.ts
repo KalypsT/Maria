@@ -222,7 +222,7 @@ export const StoryFlag = {
   NannyWake: 'nanny.wake',
   /**
    * Quelques mois plus tard (D-119, comme D-43 et D-69) : Céleste a encore grandi (phase de
-   * croissance 4). Le niveau 8, le monde de Maria, commencera ainsi.
+   * croissance 4). C'est un soir : le niveau 8, le monde de Maria, commence (D-139).
    */
   GrownFourth: 'growth.4',
   /**
@@ -230,6 +230,17 @@ export const StoryFlag = {
    * gare : il quitte la salle pour le tourne-disque du grenier.
    */
   RecordAdventures: 'record.adventures',
+  /**
+   * Le niveau 8 (D-138, D-139) : le premier soir rejoué sans Maria. Céleste s'est assise sur le
+   * tapis vide, là où elles jouaient.
+   */
+  FinaleRug: 'finale.rug',
+  /** Elle a refait le berceau vide, défait depuis le premier matin. */
+  FinaleCradle: 'finale.cradle',
+  /** Au lit : maman est venue dire bonne nuit. */
+  FinaleGoodnight: 'finale.goodnight',
+  /** La nuit : les lumières éteintes, le berceau vide s'éclaire. */
+  FinaleNight: 'finale.night',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
