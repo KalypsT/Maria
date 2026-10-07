@@ -39,44 +39,51 @@ Portrait format, high resolution.
 
 `dad-hall` (la nuit, sous l'horloge de la gare) reprend `dad-door` : pas d'image à faire.
 
-## Maman (conversation 2, joindre `celeste.png`)
+## Maman (conversation 2)
+
+Même méthode que papa : une image de référence debout, puis les poses avec cette référence jointe.
+Joindre au premier message `dad-stand.png` (référence de style : même rendu que papa) et, si elle
+existe, l'illustration d'origine de maman (référence du personnage).
 
 ### mom-stand.png
 
 ```
-Using the attached image as a strict style reference (same children's picture-book style: soft
-gouache and colored-pencil texture, thin warm-brown outlines, rounded shapes, soft shading, rosy
-cheeks, same level of detail and same proportions logic), draw the mother of this little girl.
+Using the attached image(s) as a strict style reference (same illustration style, same rendering,
+same level of detail, same proportions and framing as the man in the reference), draw his wife,
+the mother of the family.
 
 A young mother in her thirties: long curly brown hair with volume, falling to the middle of her
 back; a small earring; kind brown eyes; slightly tanned skin; pink short-sleeved V-neck t-shirt
-tucked into light-blue straight jeans (bare forearms); light sneakers with a blue stripe and a white
-sole, no logo.
+tucked into light-blue straight jeans (bare forearms); light beige sneakers with a simple straight
+blue stripe and a white sole, no brand marks. A little shorter than the man.
 
-Pose: standing relaxed, arms hanging naturally, gentle calm expression.
+Pose: standing relaxed, arms hanging naturally, gentle calm smile. No sunglasses.
 
-Full body, strict side profile facing right (like the reference), nothing cropped. Transparent
-background (or plain pure white), no ground shadow, no text, no other element. Portrait format,
+Full body, strict side profile facing right (we see only one eye, one ear, the nose in silhouette),
+nothing cropped, feet near the bottom. Plain pure white background, no ground shadow, no text, no
+other element. Portrait format, high resolution.
+```
+
+### Poses suivantes (joindre `mom-stand.png`)
+
+Début de chaque message :
+
+```
+Using the attached image as the strict reference, draw the SAME woman: same face, same long curly
+brown hair, same earring, same pink V-neck t-shirt, same light-blue jeans, same sneakers, same
+style, same colors, same level of detail. Full body, strict side profile facing right, nothing
+cropped. Plain pure white background, no ground shadow, no text, no other element. Portrait format,
 high resolution.
 ```
 
-### Poses suivantes
-
-Préfixe :
-
-```
-Same mother, same style, same clothes, same colors, same scale, strict side profile facing right,
-full body, transparent background, no shadow, no text. New pose:
-```
-
-| Fichier          | Fin du message                                                                                                                                                                                                                           |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mom-bed.png`    | `sitting on the edge of a bed (seated pose, knees bent, feet on the floor), leaning forward, one hand reaching forward at shoulder height as if gently stroking a child's hair, tender smile. Do not draw the bed: she sits on nothing.` |
-| `mom-sofa.png`   | `sitting on a sofa (seated pose, knees bent), reading an open hardcover book held in both hands, calm. Do not draw the sofa: she sits on nothing.`                                                                                       |
-| `mom-garden.png` | `standing, one arm raised high pinning a small pink sock to a clothesline, wearing simple dark sunglasses. Do not draw the clothesline.`                                                                                                 |
-| `mom-bench.png`  | `sitting on a bench (seated pose), hands resting on her knees, face slightly raised to the sun, eyes closed, wearing simple dark sunglasses. Do not draw the bench.`                                                                     |
-| `mom-yard.png`   | `leaning slightly forward, one arm reaching forward and down with an open hand, warm smile.`                                                                                                                                             |
-| `mom-quay.png`   | `standing, one hand raised waving goodbye, soft wistful smile.`                                                                                                                                                                          |
+| Fichier          | Fin du message                                                                                                                                                                                                                                                                    |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mom-bed.png`    | `No sunglasses. Pose: sitting on the edge of a bed, knees bent, feet flat on the floor, leaning forward, front arm reaching forward at shoulder height with the hand gently curved, as if stroking a small child's hair, tender smile. Do not draw the bed: she sits on nothing.` |
+| `mom-sofa.png`   | `No sunglasses. Pose: sitting on a sofa, knees bent, leaning back a little, reading an open blue hardcover book held in both hands at chest height, calm, eyes on the page. Do not draw the sofa: she sits on nothing.`                                                           |
+| `mom-yard.png`   | `No sunglasses. Pose: standing, leaning slightly forward, front arm reaching forward and down with an open hand toward a small child, warm smile.`                                                                                                                                |
+| `mom-quay.png`   | `No sunglasses. Pose: standing, front hand raised at head height waving goodbye, soft wistful smile.`                                                                                                                                                                             |
+| `mom-garden.png` | `She wears simple dark sunglasses. Pose: standing, front arm raised high above her head pinning a small pink sock to a clothesline with a wooden clothespin, the other arm relaxed. Do not draw the clothesline.`                                                                 |
+| `mom-bench.png`  | `She wears simple dark sunglasses. Pose: sitting on a bench, knees bent, feet on the floor, hands resting on her knees, face slightly raised to the sun, peaceful smile. Do not draw the bench: she sits on nothing.`                                                             |
 
 Si un meuble est dessiné malgré tout, ce n'est pas grave : je l'efface.
 
