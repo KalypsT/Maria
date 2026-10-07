@@ -1,5 +1,5 @@
 import { TILE_SIZE as T } from '../../config/display';
-import { Tile, tileAt, type LevelData } from '../../core/level/LevelData';
+import { Material, Tile, tileAt, type LevelData } from '../../core/level/LevelData';
 import type { ShapeTools } from './gardenArt';
 import type { ArtContext, Rect } from './roomArt';
 
@@ -532,6 +532,71 @@ export function houseDrawers({ tileShape, rounded }: ShapeTools): Record<string,
           }
         }
       }
+    },
+    stairwall(a, r) {
+      // Cloison sous la volée et le palier (les tuiles du mur, pas les marches) : des panneaux de
+      // lambris, le limon le long des marches, une petite porte de placard sous l'escalier.
+      const { ctx, level, palette: p } = a;
+      const wall = (col: number, row: number) =>
+        solid(level, col, row) && level.materials[row * level.width + col] === Material.Default;
+      ctx.save();
+      ctx.beginPath();
+      for (let row = r.y / T; row < (r.y + r.h) / T; row++) {
+        for (let col = r.x / T; col < (r.x + r.w) / T; col++) {
+          if (wall(col, row)) {
+            ctx.rect(col * T, row * T, T, T);
+          }
+        }
+      }
+      ctx.clip();
+      ctx.fillStyle = p.silhouettes ? p.structure : p.wainscot;
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+      if (!p.silhouettes) {
+        // Un lambris de bois peint, un peu plus chaud que le mur.
+        ctx.fillStyle = 'rgba(199,157,111,0.14)';
+        ctx.fillRect(r.x, r.y, r.w, r.h);
+        ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+        ctx.lineWidth = 1;
+        for (let x = r.x + T; x < r.x + r.w; x += 3 * T) {
+          ctx.strokeRect(x + 3, r.y + 3, 3 * T - 6, r.h - 6);
+        }
+      }
+      // Limon : une bande de bois sous le nez des marches, et sous le palier.
+      ctx.fillStyle = p.woodDark;
+      for (let col = r.x / T; col < (r.x + r.w) / T; col++) {
+        for (let row = r.y / T; row < (r.y + r.h) / T; row++) {
+          if (wall(col, row)) {
+            ctx.fillRect(col * T, row * T, T, 6);
+            break;
+          }
+        }
+      }
+      // La porte du placard : là où la cloison est la plus haute qui laisse la porte entière.
+      const floor = (r.y + r.h) / T;
+      for (let col = r.x / T + 1; col < (r.x + r.w) / T - 3; col++) {
+        let top = floor;
+        for (let c = col; c < col + 3; c++) {
+          let row = floor - 1;
+          while (row >= r.y / T && wall(c, row)) {
+            row--;
+          }
+          top = Math.min(top, floor - row - 1);
+        }
+        if (top >= 7) {
+          const door = { x: col * T + 6, y: (floor - 5) * T, w: 3 * T - 12, h: 5 * T };
+          ctx.fillStyle = p.silhouettes ? p.structure : p.wood;
+          rounded(ctx, door, [6, 6, 0, 0]);
+          ctx.fill();
+          if (!p.silhouettes) {
+            ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+            ctx.strokeRect(door.x + 4, door.y + 8, door.w - 8, door.h - 12);
+            ctx.fillStyle = GOLD;
+            ctx.fillRect(door.x + door.w - 8, door.y + door.h / 2, 3, 3);
+          }
+          break;
+        }
+      }
+      ctx.restore();
     },
     atticstep(a, r) {
       // Petit palier devant la porte du grenier : le plateau (plein), un poteau posé sur le

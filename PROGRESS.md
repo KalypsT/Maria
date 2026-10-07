@@ -2,6 +2,8 @@
 
 ## Phase en cours
 
+**La cohérence des niveaux** (D-132, demande de l'utilisateur) : **la maison est faite** (l'escalier jusqu'au sol, le grenier au-dessus du couloir, la porte de la cuisine au sol, la bibliothèque, la poutre, les briques, l'étagère à linge), sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (le jardin), sur le même principe (analyse en captures, propositions, validation).
+
 **Sensations, son, aide et mondes étranges** (D-124) : chantiers **A** (fluidité et sensations), **B** (bruitages et vibrations) et **C** (le fil discret) faits et fusionnés (D-124 à D-129). **Chantier D, PR 1 faite : trois maquettes de la gare étrange** (D-130), sur `ccr-9d90352a-xuwhs1`. Suite : **le choix de l'utilisateur** (A, B, C ou un mélange), puis la gare étrange refaite (D2) et les autres mondes étranges un par un. En attente : essais sur téléphone (compteur de saccades, sensations, sons de test, vibrations, fil discret) ; les sons à fournir (`docs/BRUITAGES.md`) ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades.
 
 **Les personnages illustrés** (D-123) : papa illustré (images de l'utilisateur générées avec ChatGPT, prompts dans `docs/PROMPTS_PERSONNAGES.md`) à la porte de la chambre, dans le hall de la gare, à la cuisine, à la supérette, sur `ccr-142ffd96-q5pgli`. Suite : papa au jardin et sur le quai, maman, puis Céleste en pièces illustrées.
@@ -27,6 +29,15 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### La maison cohérente (D-132)
+
+- **Escalier** : une seule volée jusqu'au sol, devant la porte du salon ; le dessous fermé par une cloison (placard sous le palier) ; au-dessus du palier, la cage monte au grenier en grimpant (placard au-dessus de la porte, étagère, palier du grenier). Le biberon est sur une marche, la veilleuse en bas.
+- **Grenier** : au-dessus du couloir, retourné en miroir ; on en redescend dans la chambre par une petite porte en haut du mur de droite (plus de porte derrière l'armoire). La chambre perd sa mansarde.
+- **Cuisine** : la porte de la buanderie au ras du sol, le plan de travail raccourci, le tabouret de Céleste pour y remonter. **Salon** : la bibliothèque posée au sol, la poutre dans le mur, une retombée de plafond dans le coin, deux briques sur le parquet. **Buanderie** : une haute étagère à linge à la place de l'armoire perchée.
+- Reste une liberté : la trappe à linge traverse la maison (du couloir à la buanderie).
+- Tests : `house.test.ts` (l'escalier se descend et se remonte sans grimper, les portes au ras du sol, les nouveaux endroits d'escalade), `mapModel`, `records`, `story` mis à jour. Vérifié dans Chromium : captures des sept salles et de la carte.
+- [ ] À vérifier sur téléphone : descendre et remonter l'escalier (les sauts de marche en marche, trop nombreux ?) ; monter au grenier par la cage et en redescendre dans la chambre ; revenir de la buanderie à la cuisine par le tabouret ; sauter les deux briques du salon.
 
 ### Bruitages : les premiers fichiers (D-131)
 

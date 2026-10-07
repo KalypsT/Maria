@@ -737,7 +737,7 @@ describe('quelques mois plus tard (D-43)', () => {
     const d = new StoryDirector(HOUSE_STORY, host, HZ);
     const cases = [
       { room: 'hall', box: standing(24, 15), id: 'slipper', prop: 'slipper' },
-      { room: 'staircase', box: standing(35, 15), id: 'bottle', prop: 'bottle' },
+      { room: 'staircase', box: standing(26, 24), id: 'bottle', prop: 'bottle' },
       { room: 'bedroom', box: standing(15, 15), id: 'headband', prop: 'headband' },
       { room: 'garden-tree', box: standing(27, 39), id: 'bonnet', prop: 'bonnet-grass' },
     ];

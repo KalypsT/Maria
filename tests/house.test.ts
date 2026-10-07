@@ -5,6 +5,7 @@ import { isStrangeRoom, mapPage } from '../src/core/world/zone';
 import {
   analysis,
   byDifficulty,
+  level,
   exitSurface,
   node,
   reachable,
@@ -44,7 +45,12 @@ const CLIMB_SPOTS: readonly [string, string, number, number][] = [
   ['trappe à linge', 'hall', 61, 7],
   ['dessus de la bibliothèque', 'living', 50, 8],
   ['dessus des placards hauts', 'kitchen', 45, 8],
-  ['grenier', 'attic', 2, 19],
+  ['grenier', 'attic', 53, 19],
+  // La cage de l'escalier (D-132) : placard au-dessus de la porte, étagère, palier du grenier.
+  ['placard de la cage', 'staircase', 2, 13],
+  ['palier du grenier', 'staircase', 2, 5],
+  // La porte du grenier dans la chambre (D-132) : on en redescend, on n'y monte qu'en grimpant.
+  ['étagère sous la porte du grenier', 'bedroom', 42, 7],
 ];
 
 describe.each([false, true])('maison (D-25), escalade %s', (climb) => {
@@ -151,6 +157,47 @@ describe('grimper aux rebords dans la maison (D-26)', () => {
       expect(reachable(graph, attic).has(home())).toBe(true);
     },
   );
+});
+
+describe('la maison tient debout (D-132)', () => {
+  it(
+    'l’escalier descend jusqu’au sol : de l’étage au salon et retour, facilement, sans grimper',
+    { timeout: TIMEOUT },
+    () => {
+      const inside = new Map<Node, Set<Node>>();
+      for (const move of analysis('staircase', false).moves) {
+        if (move.windowMs >= MIN_WINDOW_MS) {
+          const from = node('staircase', move.from);
+          inside.set(from, (inside.get(from) ?? new Set()).add(node('staircase', move.to)));
+        }
+      }
+      const top = node('staircase', exitSurface('staircase', 1));
+      const bottom = node('staircase', exitSurface('staircase', 2));
+      expect(reachable(inside, top).has(bottom), 'descente').toBe(true);
+      expect(reachable(inside, bottom).has(top), 'montée').toBe(true);
+    },
+  );
+
+  it('les portes d’un même étage s’ouvrent au ras du sol des deux côtés', () => {
+    // Pas de porte au-dessus d'un plan de travail (l'ancienne porte de la buanderie) : seules la
+    // trappe à linge et le grenier, qui changent d'étage, s'ouvrent en hauteur.
+    // Les deux rangées du bas sont le sol : le bas de la porte est juste au-dessus.
+    for (const [room, exit] of [
+      ['bedroom', 1],
+      ['hall', 1],
+      ['hall', 2],
+      ['living', 1],
+      ['living', 2],
+      ['kitchen', 1],
+      ['kitchen', 2],
+      ['laundry', 2],
+      ['staircase', 2],
+    ] as const) {
+      const data = level(room);
+      const e = data.exits.find((x) => x.id === exit);
+      expect(e?.rowMax, `${room}:${String(exit)}`).toBe(data.height - 3);
+    }
+  });
 });
 
 describe('rez-de-chaussée retravaillé (D-39)', () => {

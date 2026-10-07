@@ -212,7 +212,7 @@ describe('le tourne-disque du grenier (D-121)', () => {
   it('posé sur la malle, rejouable avec Agir, depuis la malle ou le plancher à côté', () => {
     expect(storyProblems(HOUSE_STORY, zone)).toEqual([]);
     const prop = HOUSE_STORY.props.find((p) => p.kind === 'record-player');
-    expect(prop).toMatchObject({ room: 'attic', col: 11, row: 17, when: {} });
+    expect(prop).toMatchObject({ room: 'attic', col: 44, row: 17, when: {} });
     expect(PROP_SIZE['record-player'].h).toBeLessThan(T);
     const trigger = HOUSE_STORY.triggers.find((t) => t.id === 'record-player');
     expect(trigger).toMatchObject({ room: 'attic', on: 'interact', repeat: true, when: {} });
@@ -220,7 +220,7 @@ describe('le tourne-disque du grenier (D-121)', () => {
     const attic = level('attic');
     const at = (col: number, row: number) => attic.tiles[row * attic.width + col];
     // La malle : pleine sur deux tuiles, libre au-dessus.
-    expect(at(11, 18)).not.toBe(at(11, 17));
+    expect(at(44, 18)).not.toBe(at(44, 17));
     const calls: string[] = [];
     const host: StoryHost = {
       flagSet: () => undefined,
@@ -244,9 +244,9 @@ describe('le tourne-disque du grenier (D-121)', () => {
     });
     const director = new StoryDirector(HOUSE_STORY, host);
     for (const [col, row] of [
-      [11, 17],
-      [7, 19],
-      [15, 19],
+      [44, 17],
+      [48, 19],
+      [40, 19],
     ] as const) {
       director.step('attic', standing(col, row), true);
       for (let i = 0; i < 10; i++) {
@@ -254,7 +254,7 @@ describe('le tourne-disque du grenier (D-121)', () => {
       }
     }
     expect(calls).toEqual(['records', 'records', 'records']);
-    director.step('attic', standing(20, 19), true);
+    director.step('attic', standing(35, 19), true);
     expect(calls).toHaveLength(3);
   });
 });
