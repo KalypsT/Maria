@@ -1856,3 +1856,15 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Ce qui reste** : la trappe à linge (couloir, à l'étage à gauche → buanderie, au rez-de-chaussée à droite) reste une **petite liberté** (le conduit traverse la maison) ; la corriger demanderait de réordonner les pièces. Le monde étrange n'est pas touché (rien n'y tient debout exprès).
 - **Vérifié par les tests** : la maison reste facile et ne coince jamais (avec et sans escalade, phases 1 et 2), le grenier n'est atteignable qu'en grimpant, sa trouvaille reste moyenne ; nouveaux tests : l'escalier se descend et se remonte facilement sans grimper, les portes d'un même étage s'ouvrent au ras du sol, et les nouveaux endroits d'escalade (cage, chambre).
 - **Sauvegarde** : aucune migration (pas encore de joueurs) ; une ancienne partie peut perdre la trouvaille ou la veilleuse du grenier, et une partie enregistrée dans l'escalier reprend au repère de départ de la salle.
+
+## D-133 — Le jardin cohérent (niveau 2)
+
+- **Même méthode que la maison** (D-132) : captures de chaque salle entière et de la carte, relevé des incohérences, propositions **validées** (« vas-y »), avec les choix par défaut : l'allée montrée au fond, les racines en arche gardées, les arches de verdure faites.
+- **Rien ne touche à la collision** : mêmes cases, mêmes sauts, mêmes difficultés ; seuls le dessin et des textes changent.
+- **Le vieux mur** (grand arbre, allée) flottait au-dessus du passage qu'on prend dessous : il descend maintenant jusqu'au sol à l'image, **percé d'une arche** (passage dans l'ombre, piédroits, arc clair), sans piédroit contre le bord de la salle (le mur continue au-delà). Fait par le dessin `oldwall`, pour tout passage sous un mur ; l'ancien linteau de bois disparaît.
+- **La cabane** : le plancher tenait à la haie, une jambe de force dans le vide. Une **grosse branche** du tronc (`limb`, du fond) court sous la couronne jusqu'au bord de la salle (vers la cabane) ; deux cordes y pendent le plancher, qui n'a plus de jambes de force.
+- **L'allée** passe forcément **derrière le potager** (elle a son propre sol au niveau de la terrasse, mais occupe la même largeur) : un jeu de profil ne peut pas le montrer. Elle se voit maintenant **de loin, au fond du potager** (`alleybehind`, plan lointain) : la haie du fond, la clôture, la remise et sa girouette, le vieux mur et son arche, dans le même ordre que dans l'allée. La carte la garde au-dessus.
+- **Les trouées dans les haies** (sorties dehors) restent claires (on voit qu'on peut passer) mais deviennent des **arches de verdure** : le feuillage arrondit les coins du haut et repousse en touffes au pied.
+- **La façade de la terrasse** : la fenêtre au bout du fil à poulie est celle de la **buanderie** (textes seulement ; la chambre est à l'étage, à l'autre bout de la maison).
+- **Gardé tel quel** : le tronc sur ses racines en arche (voulu, un arbre de conte) ; le monde étrange derrière la haie.
+- **Sauvegarde** : aucun changement.

@@ -69,13 +69,13 @@ describe('carte dessinée par Céleste (§24)', () => {
     const model = buildMapModel(zone, progress());
     const byId = new Map(model.rooms.map((room) => [room.id, room]));
     expect(byId.get('bedroom')?.visited).toBe(true);
-    // Voisines de la chambre : couloir (porte) et grenier (derrière l'armoire).
+    // Voisines de la chambre : couloir (porte) et grenier (sa petite porte haute, D-132).
     expect(byId.get('hall')?.visited).toBe(false);
     expect(byId.get('attic')?.visited).toBe(false);
     expect(byId.has('kitchen')).toBe(false);
     expect(model.links).toHaveLength(2);
-    // Chambre ↔ couloir côte à côte ; chambre ↔ grenier : passage lointain (pointillés).
-    expect(model.links.filter((link) => link.direct)).toHaveLength(1);
+    // Chambre ↔ couloir et chambre ↔ grenier (au-dessus du couloir) : côte à côte.
+    expect(model.links.filter((link) => link.direct)).toHaveLength(2);
   });
 
   it('Céleste est placée là où elle est dans sa salle', () => {

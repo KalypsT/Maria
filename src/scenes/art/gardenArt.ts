@@ -509,21 +509,54 @@ export function gardenDrawers({ tileShape, rounded }: ShapeTools): Record<string
             ctx.arc(x + 4 + hash(col, row) * 8, y + 2, 2.2, 0, Math.PI);
             ctx.fill();
           }
-          if (
-            tileAt(level, col, row + 1) === Tile.Empty &&
-            tileAt(level, col, row - 1) === Tile.Solid
-          ) {
-            // Linteau en bois au-dessus du portail, et le passage dans l'ombre dessous.
-            ctx.fillStyle = p.woodDark;
-            ctx.fillRect(x, y + T - 4, T, 4);
-            const depth = groundBelow(a, col, row) * T - (y + T);
-            const g = ctx.createLinearGradient(0, y + T, 0, y + T + depth);
-            g.addColorStop(0, 'rgba(60,50,40,0.45)');
-            g.addColorStop(1, 'rgba(60,50,40,0.1)');
-            ctx.fillStyle = g;
-            ctx.fillRect(x, y + T, T, depth);
+        }
+      }
+      // Un passage sous le mur (D-132) : le mur descend jusqu'au sol à l'image, percé d'une arche
+      // (le passage est dans l'ombre, on y passe devant) ; contre le bord de la salle, le mur
+      // continue au-delà, sans piédroit.
+      const bottomOf = (col: number): number => {
+        for (let row = (r.y + r.h) / T - 1; row >= r.y / T; row--) {
+          if (tileAt(level, col, row) === Tile.Solid) {
+            return tileAt(level, col, row + 1) === Tile.Empty ? row : -1;
           }
         }
+        return -1;
+      };
+      for (let col = r.x / T; col < (r.x + r.w) / T; col++) {
+        const bottom = bottomOf(col);
+        if (bottom < 0) {
+          continue;
+        }
+        let end = col;
+        while (end + 1 < (r.x + r.w) / T && bottomOf(end + 1) === bottom) {
+          end++;
+        }
+        const top = (bottom + 1) * T;
+        const ground = groundBelow(a, col, bottom) * T;
+        const x0 = col * T;
+        const x1 = (end + 1) * T;
+        ctx.fillStyle = '#a89478';
+        ctx.fillRect(x0, top, x1 - x0, ground - top);
+        const jambLeft = col === 0 ? 0 : 6;
+        const jambRight = end === level.width - 1 ? 0 : 6;
+        const opening = {
+          x: x0 + jambLeft,
+          y: top + 4,
+          w: x1 - x0 - jambLeft - jambRight,
+          h: ground - top - 4,
+        };
+        const radius = Math.min(14, opening.h * 0.6, opening.w / 2);
+        const g = ctx.createLinearGradient(0, opening.y, 0, ground);
+        g.addColorStop(0, 'rgba(38,32,26,0.9)');
+        g.addColorStop(1, 'rgba(70,60,48,0.6)');
+        ctx.fillStyle = g;
+        rounded(ctx, opening, [jambLeft ? radius : 0, jambRight ? radius : 0, 0, 0]);
+        ctx.fill();
+        ctx.strokeStyle = '#cdbb9d';
+        ctx.lineWidth = 2;
+        rounded(ctx, opening, [jambLeft ? radius : 0, jambRight ? radius : 0, 0, 0]);
+        ctx.stroke();
+        col = end;
       }
       // Quelques pieds de lierre, de longueurs inégales, qui pendent du haut du mur.
       for (let x = r.x + 14 + hash(r.x, r.y) * 30; x < r.x + r.w - 6; x += 70 + hash(x, 1) * 60) {
@@ -543,10 +576,11 @@ export function gardenDrawers({ tileShape, rounded }: ShapeTools): Record<string
     },
     deck(a, r) {
       const { ctx, level, palette: p } = a;
-      // Plancher de la cabane : planches, et deux jambes de force jusqu'au tronc ou à la haie.
+      // Plancher de la cabane : planches, et deux jambes de force jusqu'au tronc ou à la haie ;
+      // pendu à une grosse branche (`limb`, D-132), il n'en a pas besoin.
       const x0 = r.x + 6;
       const x1 = r.x + r.w - 6;
-      if (level.meta.world !== 'strange') {
+      if (level.meta.world !== 'strange' && !level.decor.some((d) => d.kind === 'limb')) {
         ctx.strokeStyle = p.woodDark;
         ctx.lineWidth = 3;
         ctx.beginPath();
@@ -564,6 +598,98 @@ export function gardenDrawers({ tileShape, rounded }: ShapeTools): Record<string
       for (let x = r.x + 7; x < r.x + r.w; x += 7) {
         ctx.fillRect(x, r.y + 1, 1, T - 2);
       }
+    },
+    limb(a, r) {
+      // Grosse branche du grand arbre (D-132), du tronc jusqu'au bord de la salle, sous la
+      // couronne ; deux cordes y pendent le plancher de la cabane (les tuiles pleines du bas du
+      // cadre). Du fond : on ne s'y pose pas.
+      const { ctx, level, palette: p } = a;
+      const y0 = r.y + 1.6 * T;
+      const y1 = r.y + 0.8 * T;
+      const xEnd = r.x + r.w;
+      ctx.fillStyle = p.silhouettes ? p.structure : '#7a5a3e';
+      ctx.beginPath();
+      ctx.moveTo(r.x - 4, y0 - 8);
+      ctx.quadraticCurveTo((r.x + xEnd) / 2, y0 - 6, xEnd, y1 - 4);
+      ctx.lineTo(xEnd, y1 + 4);
+      ctx.quadraticCurveTo((r.x + xEnd) / 2, y0 + 4, r.x - 4, y0 + 10);
+      ctx.closePath();
+      ctx.fill();
+      if (!p.silhouettes) {
+        ctx.strokeStyle = 'rgba(255,230,190,0.18)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(r.x, y0 - 6);
+        ctx.quadraticCurveTo((r.x + xEnd) / 2, y0 - 4, xEnd, y1 - 2);
+        ctx.stroke();
+      }
+      const floor = (r.y + r.h) / T - 1;
+      let first = -1;
+      let last = -1;
+      for (let col = r.x / T; col < xEnd / T; col++) {
+        if (tileAt(level, col, floor) === Tile.Solid) {
+          first = first < 0 ? col : first;
+          last = col;
+        }
+      }
+      if (first < 0) {
+        return;
+      }
+      ctx.strokeStyle = p.silhouettes ? p.structure : '#c9b48a';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (const x of [first * T + 5, (last + 1) * T - 5]) {
+        const t = (x - r.x) / r.w;
+        const yLimb = y0 + (y1 - y0) * t;
+        ctx.moveTo(x, yLimb);
+        ctx.lineTo(x, floor * T + 2);
+      }
+      ctx.stroke();
+    },
+    alleybehind(a, r) {
+      // L'allée du fond (D-132), vue de loin derrière le potager, dans le même ordre que dans
+      // l'allée : la clôture, la remise et sa girouette, le vieux mur et la haie au-dessus. Le
+      // voile du lointain (`far`) la fond dans le paysage.
+      const { ctx, palette: p } = a;
+      const base = r.y + r.h;
+      const at = (k: number) => r.x + r.w * k;
+      const dark = p.silhouettes;
+      // La haie du fond, d'un bout à l'autre.
+      ctx.fillStyle = dark ? p.structure : '#6f9a62';
+      for (let x = r.x; x < r.x + r.w; x += 9) {
+        ctx.beginPath();
+        ctx.arc(x + 4, base - 2.6 * T + hash(x, base) * 4, 7, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillRect(r.x, base - 2.6 * T, r.w, 2.6 * T);
+      // La clôture.
+      ctx.fillStyle = dark ? p.structure : '#b49372';
+      ctx.fillRect(at(0.02), base - 2.2 * T, at(0.22) - at(0.02), 2.2 * T);
+      ctx.fillStyle = 'rgba(0,0,0,0.12)';
+      for (let x = at(0.02) + 4; x < at(0.22); x += 4) {
+        ctx.fillRect(x, base - 2.2 * T, 1, 2.2 * T);
+      }
+      // La remise, son toit, sa porte, la girouette.
+      const sx0 = at(0.32);
+      const sx1 = at(0.53);
+      ctx.fillStyle = dark ? p.structure : '#a9845f';
+      ctx.fillRect(sx0, base - 4.4 * T, sx1 - sx0, 4.4 * T);
+      ctx.fillStyle = dark ? p.structure : '#9b5b4a';
+      ctx.fillRect(sx0 - 2, base - 4.4 * T - 3, sx1 - sx0 + 4, 4);
+      ctx.fillStyle = 'rgba(0,0,0,0.18)';
+      ctx.fillRect(sx0 + (sx1 - sx0) * 0.55, base - 2 * T, 0.9 * T, 2 * T);
+      ctx.fillRect(sx1 - 0.25 * (sx1 - sx0), base - 4.4 * T - 1.4 * T, 1, 1.4 * T);
+      ctx.fillRect(sx1 - 0.25 * (sx1 - sx0) - 3, base - 4.4 * T - 1.4 * T, 7, 1);
+      // Le vieux mur, sa mousse et son arche.
+      const wx0 = at(0.6);
+      const wx1 = at(0.98);
+      ctx.fillStyle = dark ? p.structure : '#b7a68b';
+      ctx.fillRect(wx0, base - 3 * T, wx1 - wx0, 3 * T);
+      ctx.fillStyle = dark ? p.structure : '#8fae7a';
+      ctx.fillRect(wx0, base - 3 * T, wx1 - wx0, 2);
+      ctx.fillStyle = 'rgba(40,34,26,0.35)';
+      rounded(ctx, { x: wx1 - 1.6 * T, y: base - 1.3 * T, w: 1.2 * T, h: 1.3 * T }, [6, 6, 0, 0]);
+      ctx.fill();
     },
     crate(a, r) {
       const { ctx, palette: p } = a;

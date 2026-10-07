@@ -1969,6 +1969,24 @@ function drawStructure(a: ArtContext, floorY: number): void {
       ctx.beginPath();
       ctx.ellipse(x + T / 2, y, T * 0.9, 5, 0, 0, Math.PI * 2);
       ctx.fill();
+      // Une arche de verdure (D-132) : le feuillage arrondit les coins du haut et repousse en
+      // touffes au pied de la trouée ; la haie ne pend pas au-dessus du vide.
+      for (const [dx, dy, radius] of [
+        [1, 4, 4],
+        [T - 1, 4, 4],
+        [0, 9, 3],
+        [T, 9, 3],
+        [0, 13, 2],
+        [T, 13, 2],
+        [1, h - 3, 3.5],
+        [T - 1, h - 3, 3.5],
+        [0, h - 7, 2.5],
+        [T, h - 7, 2.5],
+      ] as const) {
+        ctx.beginPath();
+        ctx.arc(x + dx, y + dy, radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
     return;
   }

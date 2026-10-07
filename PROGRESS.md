@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La cohérence des niveaux** (D-132, demande de l'utilisateur) : **la maison est faite** (l'escalier jusqu'au sol, le grenier au-dessus du couloir, la porte de la cuisine au sol, la bibliothèque, la poutre, les briques, l'étagère à linge), sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (le jardin), sur le même principe (analyse en captures, propositions, validation).
+**La cohérence des niveaux** (D-132, D-133, demande de l'utilisateur) : **la maison** (l'escalier jusqu'au sol, le grenier au-dessus du couloir, la porte de la cuisine au sol, la bibliothèque, la poutre, les briques, l'étagère à linge) et **le jardin** (le vieux mur percé d'arches, la branche qui porte la cabane, l'allée vue au fond du potager, les arches de verdure) sont faits, sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (le quartier), sur le même principe (analyse en captures, propositions, validation).
 
 **Sensations, son, aide et mondes étranges** (D-124) : chantiers **A** (fluidité et sensations), **B** (bruitages et vibrations) et **C** (le fil discret) faits et fusionnés (D-124 à D-129). **Chantier D, PR 1 faite : trois maquettes de la gare étrange** (D-130), sur `ccr-9d90352a-xuwhs1`. Suite : **le choix de l'utilisateur** (A, B, C ou un mélange), puis la gare étrange refaite (D2) et les autres mondes étranges un par un. En attente : essais sur téléphone (compteur de saccades, sensations, sons de test, vibrations, fil discret) ; les sons à fournir (`docs/BRUITAGES.md`) ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades.
 
@@ -29,6 +29,12 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le jardin cohérent (D-133)
+
+- Dessin seulement (mêmes cases, mêmes sauts) : le vieux mur descend jusqu'au sol, percé d'une arche (grand arbre, allée) ; une grosse branche du tronc porte la cabane, son plancher pendu par deux cordes ; l'allée se voit de loin au fond du potager ; les trouées des haies sont des arches de verdure ; la fenêtre du fil à poulie est celle de la buanderie.
+- Vérifié dans Chromium : captures de la terrasse, du potager, du grand arbre et de l'allée.
+- [ ] À vérifier sur téléphone : l'arche sous le vieux mur se lit-elle comme un passage ? L'allée au loin se voit-elle sans gêner les appuis du potager ?
 
 ### La maison cohérente (D-132)
 
