@@ -135,9 +135,9 @@ const BEDROOM_SEAT = { col: 12, row: 15 };
  * Le réveil, le retour, la phase 4 (D-119), dans le noir après Eden. Au dortoir, à l'aube :
  * Céleste se réveille sur sa couchette, la camarade dort encore, la mer à la fenêtre ; elle serre
  * quelque chose qu'elle n'a pas (un cœur, puis Maria). Le train du retour, une courte scène : la mer
- * qui défile, assise près de la fenêtre. Puis le noir le plus long : quelques mois plus tard, chez
- * elle, elle a encore grandi (phase 4), la toise a un quatrième trait. La suite, le niveau 8 (le
- * monde de Maria), reste un PLACEHOLDER : une bulle « ? ».
+ * qui défile, assise près de la fenêtre. Puis le noir le plus long : quelques mois plus tard, un
+ * soir, chez elle, elle a encore grandi (phase 4), la toise a un quatrième trait. Le dernier niveau
+ * commence : le premier soir rejoué sans Maria (D-139, `src/levels/finale/story.ts`).
  */
 const WAKE_AND_RETURN: readonly StoryStep[] = [
   { do: 'flag', id: F.NannyWake },
@@ -159,7 +159,8 @@ const WAKE_AND_RETURN: readonly StoryStep[] = [
   { do: 'wait', ms: S.holdMs },
   { do: 'thought', icon: 'train', ms: S.thoughtMs },
   { do: 'wait', ms: S.thoughtMs + S.lookMs },
-  // Quelques mois plus tard (comme D-43 et D-69) : le noir le plus long ; elle a encore grandi.
+  // Quelques mois plus tard (comme D-43 et D-69), un soir (D-139) : le noir le plus long ; elle a
+  // encore grandi.
   { do: 'fadeOut', ms: S.nightFadeOutMs },
   { do: 'flag', id: F.GrownFourth },
   { do: 'room', room: 'bedroom', ...BEDROOM_SEAT, facing: 1, returnPoint: true },
@@ -168,9 +169,6 @@ const WAKE_AND_RETURN: readonly StoryStep[] = [
   { do: 'fadeIn', ms: S.monthsFadeInMs },
   { do: 'wait', ms: 1400 },
   { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs + 800 },
-  { do: 'wait', ms: S.lookMs },
-  // PLACEHOLDER : le niveau 8, le monde de Maria, commencera ici.
-  { do: 'thought', icon: 'question', ms: S.thoughtMs + 800 },
   { do: 'wait', ms: S.lookMs },
 ];
 
@@ -545,7 +543,7 @@ const LOCKED: StoryData['lockedRooms'] = [
   })),
 ];
 
-/** Le réveil (D-119) : le jour revient, de l'aube au niveau 8. */
+/** Le réveil (D-119) : le jour revient, de l'aube au soir du niveau 8 (D-139). */
 const TIMES: StoryData['times'] = [{ when: { all: [F.NannyWake] }, time: 'morning' }];
 
 /** Le train du retour (D-119) : il roule, le temps de la scène. */

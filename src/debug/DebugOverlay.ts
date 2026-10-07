@@ -1585,7 +1585,7 @@ export function installDebugOverlay(scene: GameScene): void {
       ],
     ],
     [
-      'Histoire : quelques mois plus tard, phase 4 (D-119)',
+      'Histoire : quelques mois plus tard, le soir (phase 4, niveau 8, D-119, D-139)',
       [
         F.EveningPlayed,
         F.EveningBlanket,
@@ -1664,6 +1664,14 @@ export function installDebugOverlay(scene: GameScene): void {
       ],
     ],
   ];
+  // La dernière nuit (D-139) : le soir de la phase 4 vécu, le berceau vide s'éclaire.
+  const phaseFour = steps.find(([, flags]) => flags.includes(F.GrownFourth));
+  if (phaseFour) {
+    steps.splice(steps.indexOf(phaseFour) + 1, 0, [
+      'Histoire : la dernière nuit, le berceau vide (D-139)',
+      [...phaseFour[1], F.FinaleRug, F.FinaleCradle, F.FinaleGoodnight, F.FinaleNight],
+    ]);
+  }
   const current = [...scene.story.flags].sort().join();
   for (const [label, flags] of steps) {
     const option = element('option', storySelect, undefined, label);
