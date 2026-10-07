@@ -88,62 +88,94 @@ text, no other element. Portrait format, high resolution.
 
 Si un meuble est dessiné malgré tout, ce n'est pas grave : je l'efface.
 
-## Céleste en pièces détachées (conversation 3, joindre `celeste.png`)
+## Céleste en pièces détachées (une conversation par tenue)
 
 Le jeu anime Céleste en faisant tourner des pièces séparées (papier découpé, D-29) : il faut une
-planche de pièces par tenue. Proportions de la marionnette (largeur × hauteur) : tête 16 × 14,
-couette 5 × 7, torse 11 × 9, bras 4 × 8, jambe 6 × 9, jupe 14 × 7.
+planche de pièces par tenue. Chaque pièce est ensuite ramenée à sa boîte dans le jeu (largeur ×
+hauteur) : **tête 16 × 14** (avec le cou), **couette 5 × 7** (ou **queue de cheval 7 × 11**),
+**torse 11 × 9**, **bras 4 × 8**, **jambe 6 × 9**, **jupe 14 × 7** (robe). La tête reste grosse
+(lisibilité à 85 px de haut sur téléphone) : je la mets à l'échelle, peu importe sa taille sur la
+planche. Le même bras et la même jambe servent des deux côtés (le côté caché est assombri).
 
-### celeste-parts-pyjama.png
+Référence à joindre : l'illustration de la tenue (`celeste.png`, `celeste-dress.png`,
+`celeste-jacket.png`). La phase 4 reprend la planche de la veste.
+
+### Début commun
 
 ```
-Using the attached image as the reference for both the character and the style, create a cut-out
-paper puppet sheet of this exact little girl (5-6 years old, brown hair, round pink glasses,
-freckles, light-blue pajamas with dark blueberries and small leaves, pink piping, pink bunny
-slippers). Same picture-book style, same colors.
+Using the attached image as the strict reference for the character AND the style, create a
+cut-out paper puppet sheet of this exact little girl: same face, same round pink glasses, same
+freckles, same brown hair, same clothes, same colors, same picture-book illustration style and
+level of detail.
 
-Draw her body parts SEPARATED, in strict side profile facing right, all at the SAME scale, laid out
-in one row with generous empty space between them, no part touching another:
-1. the head alone: face, glasses, top of the hair, ending with a short neck. No pigtails.
-2. one low pigtail alone, with its pink ribbon bow at the top.
-3. the torso alone, from the neck to the hips, in the pajama top, WITHOUT arms.
-4. one arm alone, straight and hanging, from a rounded shoulder to the hand, in the pajama sleeve
-   with its pink cuff.
-5. one leg alone, straight, from a rounded top of the thigh to the foot, in the pajama trousers,
-   with the pink bunny slipper.
-The shoulder and the top of the thigh must be rounded (half-disc) so the parts can overlap when
-rotated. Relative sizes (width x height): head 16x14, pigtail 5x7, torso 11x9, arm 4x8, leg 6x9.
+Draw her body parts SEPARATED, each one alone, laid out on one row with generous empty space
+between them, no part touching or overlapping another, all at the same scale, all in strict side
+profile facing right:
+```
 
-Transparent background (or plain pure white), no shadows, no labels, no numbers, no text.
+### Pyjama (`celeste-parts-pyjama.png`, joindre `celeste.png`)
+
+```
+1. HEAD: the head alone with the face, the glasses, the ear and the hair (top and back of the
+   head), ending at the bottom with a short neck stump. WITHOUT the pigtails.
+2. PIGTAIL: one low pigtail alone, hanging down, with its pink ribbon bow at the top.
+3. TORSO: the pajama top alone, from the base of the neck to the hips, with the collar and the
+   pink piping, WITHOUT arms, without head, without legs.
+4. ARM: one arm alone, perfectly straight and hanging down, from a rounded shoulder (half-disc) to
+   the relaxed hand, in the pajama sleeve with its pink cuff.
+5. LEG: one leg alone, perfectly straight, from a rounded top of the thigh (half-disc) to the foot,
+   in the pajama trousers with the pink cuff, wearing the pink bunny slipper pointing right.
+
+Plain pure white background, no shadows, no labels, no numbers, no text, no guide lines.
 Landscape format, high resolution.
 ```
 
-### celeste-parts-dress.png (phase 2)
+### Robe (`celeste-parts-dress.png`, joindre `celeste-dress.png`)
 
 ```
-Same girl, same style, same puppet sheet layout and same scale, but now wearing a pink floral dress
-with a white collar and puffed sleeves, bare legs and pink clogs. Same 5 parts (head, one pigtail,
-torso without arms, one straight arm, one straight leg), plus a 6th part: the flared skirt of the
-dress alone (relative size 14x7). Parts separated, transparent background, no text.
+1. HEAD: the head alone with the face, the glasses, the ear and the hair, ending with a short
+   neck stump. WITHOUT the pigtails.
+2. PIGTAIL: one low pigtail alone, hanging down, with its pink ribbon bow at the top.
+3. TORSO: the top of the dress alone (bodice with the white collar), from the base of the neck to
+   the waist, WITHOUT arms and WITHOUT the skirt.
+4. ARM: one arm alone, perfectly straight and hanging down, from a rounded puffed sleeve at the
+   shoulder to the relaxed hand.
+5. LEG: one bare leg alone, perfectly straight, from a rounded top of the thigh to the foot,
+   wearing the pink clog pointing right.
+6. SKIRT: the flared floral skirt of the dress alone, from the waist down to above the knees.
+
+Plain pure white background, no shadows, no labels, no numbers, no text, no guide lines.
+Landscape format, high resolution.
 ```
 
-### celeste-parts-jacket.png (phase 3)
+### Veste (`celeste-parts-jacket.png`, joindre `celeste-jacket.png`)
 
 ```
-Same girl, a bit older, same style, same puppet sheet layout and same scale, now wearing an open
-denim jacket with rolled-up sleeves and golden buttons over a white t-shirt with small pink flowers,
-pink shorts with cuffs, white socks and pink-and-white sneakers without any logo. Her hair is now in
-a ponytail: replace the pigtail part with a ponytail alone, with its pink scrunchie at the top
-(relative size 7x11). The head has no ponytail attached. Parts separated, transparent background,
-no text.
+1. HEAD: the head alone with the face, the glasses, the ear and the hair, ending with a short
+   neck stump. WITHOUT the ponytail.
+2. PONYTAIL: the ponytail alone, hanging down, with its pink scrunchie at the top.
+3. TORSO: the open denim jacket over the white t-shirt with small pink flowers, from the base of
+   the neck to the hips, WITHOUT arms, without head, without legs.
+4. ARM: one arm alone, perfectly straight and hanging down, from a rounded shoulder to the
+   relaxed hand, in the denim sleeve rolled up at the forearm.
+5. LEG: one leg alone, perfectly straight, from a rounded top of the thigh to the foot: the pink
+   shorts leg with its cuff, the bare knee, the white sock and the pink-and-white sneaker (no
+   logo) pointing right.
+
+Plain pure white background, no shadows, no labels, no numbers, no text, no guide lines.
+Landscape format, high resolution.
 ```
 
-### Si les pièces ne sortent pas proprement séparées
+### Si la planche ne sort pas proprement
+
+Une pièce par message, dans la même conversation (joindre l'illustration et la première planche
+réussie s'il y en a une) :
 
 ```
-Same girl, same style and pajamas, full body, strict side profile facing right, standing with her
-arms held slightly away from her body and her legs slightly apart, so that the arms and legs do not
-overlap the torso. Transparent background, no shadow, no text.
+Same girl, same style, same colors as the reference. Draw ONLY her [HEAD / PIGTAIL / TORSO / ARM /
+LEG], alone, as described: [reprendre la ligne de la pièce]. Strict side profile facing right,
+plain pure white background, no shadow, no text.
 ```
 
-Je découpe alors les pièces moi-même en redessinant les parties cachées.
+Dernier recours : Céleste entière de profil, bras un peu écartés du corps et jambes un peu
+écartées ; je découpe les pièces moi-même (en redessinant les parties cachées).
