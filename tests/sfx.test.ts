@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_PUPPET } from '../src/config/puppet';
 import {
   SFX_BUDGET_BYTES,
+  SFX_LOOP_MARGIN_S,
   SFX_SLOTS,
   STEP_SLOT,
   TEST_TONES,
@@ -66,6 +67,17 @@ describe('fichiers des bruitages (D-126)', () => {
       total += ((data.length - data.indexOf(',') - 1) * 3) / 4;
     }
     expect(total).toBeLessThanOrEqual(SFX_BUDGET_BYTES);
+  });
+
+  it('les boucles sont préparées avec la marge que le lecteur saute', () => {
+    const script = Object.values(
+      import.meta.glob<string>('../scripts/prepare-audio.js', {
+        eager: true,
+        query: '?raw',
+        import: 'default',
+      }),
+    )[0];
+    expect(/const LOOP_MARGIN_S = ([\d.]+);/.exec(script ?? '')?.[1]).toBe(`${SFX_LOOP_MARGIN_S}`);
   });
 });
 
