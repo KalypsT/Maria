@@ -277,3 +277,85 @@ shadow, no text. Square format, high resolution.
 
 `eden-peek` (sa tête qui dépasse d'une cachette) : je la découpe dans `eden-laugh.png`, pas d'image
 à faire.
+
+## Phase suivante : les adultes du train et de l'école, les enfants, le chien (sans photo)
+
+Pas de photo : le personnage vient de la description. Joindre **une illustration du jeu** comme
+référence de style (`dad-stand.png` pour les adultes, `celeste.png` pour les enfants et le chien).
+Une conversation par personnage ; la première image validée sert de référence pour ses autres poses.
+
+### Début commun (première image d'un personnage)
+
+```
+Using the attached image as the strict reference for the style only (same picture-book
+illustration style, same rendering, same level of detail, same proportions logic), draw a NEW
+character, not the one in the reference:
+```
+
+### Fin commune
+
+```
+Strict side profile facing right (we see only one eye, one ear, the nose in silhouette), full
+body, nothing cropped. Plain pure white background, no ground shadow, no text, no other element.
+Portrait format, high resolution.
+```
+
+### Les adultes (joindre `dad-stand.png`)
+
+| Fichier            | Description et pose (entre le début et la fin communs)                                                                                                                                                                                                                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `teacher.png`      | `A kind schoolteacher in her forties: auburn hair gathered in a loose bun, a sage-green long-sleeved top, dark plum trousers, flat brown shoes. Pose: standing, holding a pink ring binder flat against her chest with both arms, head slightly tilted with a warm smile.`                                                            |
+| `conductor.png`    | `A friendly train conductor in his fifties: short grey hair, a short grey beard, a navy-blue uniform cap with a small gold badge, a navy-blue uniform jacket and trousers, black shoes. Pose: standing, holding a small silver ticket punch in his front hand at waist height, benevolent smile.`                                     |
+| `mother-baby.png`  | `A young mother with dark curly hair tied back and warm brown skin, a mustard-yellow sweater, plum trousers. Pose: sitting on a train seat (do not draw the seat: she sits on nothing), knees bent, gently rocking a baby wrapped in a cream blanket in her arms; the baby holds a small doll with a pink outfit. Tender, calm face.` |
+| `sleeper-seat.png` | `A tired traveller in his thirties: short brown hair, a sage-green sweater, grey trousers, brown shoes. Pose: sitting on a train seat (do not draw the seat: he sits on nothing), asleep, head tilted forward on his chest, arms crossed, mouth slightly open.`                                                                       |
+
+### Les enfants de la classe (joindre `celeste.png`)
+
+Trois enfants de l'âge de Céleste (5-6 ans). Pour chacun : d'abord la référence debout, puis ses
+poses avec cette référence jointe et ce début de message :
+
+```
+Using the attached image as the strict reference, draw the SAME child: same face, same hair, same
+clothes, same style, same colors. Strict side profile facing right, whole child, nothing cropped.
+Plain pure white background, no ground shadow, no text. High resolution. New pose:
+```
+
+**La camarade** (cheveux en deux macarons) :
+
+| Fichier                | Description ou pose                                                                                                                                                                                             |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `classmate.png`        | Première image : `A little girl, 5-6 years old, dark brown skin, black hair in two puffs on top of her head, a sunny-yellow t-shirt, blue trousers, red sneakers. Pose: standing, arms relaxed, cheerful face.` |
+| `classmate-slid.png`   | `sitting on the floor just after sliding, leaning back on one hand, legs forward, laughing.`                                                                                                                    |
+| `classmate-asleep.png` | `asleep, lying on her side under a striped blanket pulled up to her shoulders, head on a small white pillow, eyes closed. Landscape format.`                                                                    |
+| `classmate-quay.png`   | `standing, wearing a small red backpack, one hand raised waving goodbye, happy.`                                                                                                                                |
+
+**Le garçon à la casquette** :
+
+| Fichier            | Description ou pose                                                                                                                                                                             |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kid-cap.png`      | Première image : `A little boy, 5-6 years old, light skin, short brown hair under a green cap worn forward, a green t-shirt, dark navy trousers, cream sneakers. Pose: standing, arms relaxed.` |
+| `kid-cap-sit.png`  | `sitting on a train bench (do not draw the bench), legs dangling, hands on the edge of the seat, curious face.`                                                                                 |
+| `kid-cap-quay.png` | `standing, wearing a small blue backpack, arms relaxed, a little shy.`                                                                                                                          |
+
+**La fille au carré** :
+
+| Fichier            | Description ou pose                                                                                                                                                                                   |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kid-bob.png`      | Première image : `A little girl, 5-6 years old, fair skin, light-brown hair cut in a short bob with a fringe, a lilac-purple sweater, light-blue trousers, pink shoes. Pose: standing, arms relaxed.` |
+| `kid-bob-sit.png`  | `sitting on a train bench (do not draw the bench), legs dangling, hands in her lap, turning her head slightly toward the viewer with a shy smile.`                                                    |
+| `kid-asleep.png`   | `asleep, lying on her side under a flowered blanket pulled up to her shoulders, head on a small white pillow, eyes closed. Landscape format.`                                                         |
+| `kid-bob-quay.png` | `standing, wearing a small yellow backpack, hands holding the straps.`                                                                                                                                |
+
+Le groupe du quai (`kids-quay`) : je l'assemble à partir des trois images « quay ».
+
+### Le chien du fourgon (joindre `celeste.png`)
+
+```
+Using the attached image as the strict reference for the style only (same picture-book
+illustration style, same rendering and level of detail), draw a sweet medium-sized dog with short
+tan-brown fur and darker floppy ears, asleep, curled up in a round ball lying on its side, seen
+from the side, head resting on its front paws, eyes closed. Whole dog, nothing cropped, no crate.
+Plain pure white background, no shadow, no text. Landscape format, high resolution.
+```
+
+Fichier : `dog-sleep.png`.
