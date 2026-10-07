@@ -3,6 +3,8 @@ import { DIFFICULTY_MIN_WINDOW_MS, Difficulty } from '../src/config/levelDesign'
 import { DEFAULT_MOVEMENT } from '../src/config/movement';
 import { analyzeLevel, describeMove, type LevelAnalysis } from '../src/core/analysis/analyzeLevel';
 import { parseAsciiLevel } from '../src/core/level/parseAsciiLevel';
+import { LayerMask } from '../src/core/level/LevelData';
+import { erasedLevel } from '../src/core/level/erase';
 import { COURSE_IDS, LEVELS } from '../src/levels';
 import { ANALYSIS_TIMEOUT_MS } from './timeouts';
 
@@ -38,7 +40,16 @@ describe.each(COURSE_IDS)('parcours %s', (id) => {
   if (!source) {
     throw new Error(`Parcours ${id} absent de src/levels/index.ts`);
   }
-  const level = parseAsciiLevel(id, source.text);
+  const parsed = parseAsciiLevel(id, source.text);
+  // La berceuse (D-140) : faisabilité et difficulté toutes les étoiles allumées ; leur rythme est
+  // vérifié à part (`lullabyCourse.test.ts`).
+  const level =
+    parsed.erase?.look === 'stars'
+      ? erasedLevel(
+          parsed,
+          parsed.erase.groups.map(() => LayerMask.Both),
+        )
+      : parsed;
   let cached: LevelAnalysis | undefined;
   // Capacités prêtées par le parcours (`; @abilities:`, D-44).
   const lent = (level.meta.abilities ?? '').split(/\s+/);

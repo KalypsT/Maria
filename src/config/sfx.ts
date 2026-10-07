@@ -66,6 +66,11 @@ export const SFX_SLOTS = [
   'wave-warn',
   /** L'effacement s'annonce (D-111). */
   'erase',
+  /**
+   * La berceuse (D-140) : une étoile va s'allumer ou s'éteindre, une note de boîte à musique (les
+   * variantes font la mélodie).
+   */
+  'lullaby',
   // Monde.
   /** Une porte de façade s'ouvre (D-61). */
   'door',
@@ -232,6 +237,7 @@ export const TEST_TONES: Readonly<
   tunnel: { from: 150, to: 60, ms: 400, wave: 'sawtooth' },
   'wave-warn': { from: 120, to: 300, ms: 500, wave: 'sine' },
   erase: { from: 1200, to: 200, ms: 400, wave: 'sine' },
+  lullaby: { from: 1320, to: 1320, ms: 380, wave: 'sine' },
   door: { from: 350, to: 250, ms: 120, wave: 'triangle' },
   thought: { from: 1200, to: 1500, ms: 50, wave: 'sine' },
   hint: { from: 1500, to: 1900, ms: 180, wave: 'sine' },

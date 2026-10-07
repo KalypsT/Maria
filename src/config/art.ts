@@ -1292,3 +1292,28 @@ export const SHIFT_LAYER_VIEW = {
   /** Bascule réussie : un éclair bref de la couleur de la nouvelle couche (ms). */
   flashMs: 160,
 } as const;
+
+/**
+ * Les étoiles de la berceuse (D-140, `LullabyView`), PLACEHOLDER : une planche de lumière, une
+ * étoile au milieu, un halo. Allumée : chaude et nette ; éteinte : un contour en pointillés, pour
+ * prévoir. Une étoile qui va s'allumer s'éclaire peu à peu ; une qui va s'éteindre vacille.
+ */
+export const LULLABY_VIEW = {
+  light: 0xffe6a6,
+  core: 0xfff8e4,
+  halo: 0xffd98a,
+  /** Halo d'une étoile allumée : anneaux ajoutés à la lumière (opacité de chacun, rayon en px). */
+  haloAlpha: 0.09,
+  haloRadiusPx: 13,
+  haloRings: 4,
+  /** Hauteur de la planche de lumière (px logiques), le dessus de la tuile. */
+  plankPx: 4,
+  /** Rayon de l'étoile au milieu de la planche (px logiques). */
+  starRadiusPx: 5,
+  /** Éteinte : le contour (couleur, opacité, longueur des tirets en px). */
+  dark: 0xc9b98f,
+  darkAlpha: 0.45,
+  dashPx: 3,
+  /** Une étoile qui s'annonce : battement du vacillement (ms). */
+  flickerMs: 110,
+} as const;

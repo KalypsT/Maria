@@ -107,8 +107,11 @@ const LEG_NEEDS: ReadonlySet<string> = new Set([
 ]);
 /** Mots d'un tronçon qui ne sont pas des capacités : la marée, la couche de départ (D-107). */
 const LEG_STATES: ReadonlySet<string> = new Set(['high', 'low', 'memory', 'present']);
-/** Groupe de l'effacement (D-111), répétable : `; @erase: a present 10 4 6 1`. */
-const ERASE = /^([a-z0-9-]+)\s+(present|memory|both)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
+/**
+ * Groupe de l'effacement (D-111), répétable : `; @erase: a present 10 4 6 1` ; une étoile de la
+ * berceuse (D-140) : `both` (allumée) ou `none` (éteinte), avec `; @erase-look: stars`.
+ */
+const ERASE = /^([a-z0-9-]+)\s+(present|memory|both|none)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
 /**
  * Accélération des vagues (D-117), répétable : `; @erase-speed: nanny.play-1 1.25` (étape
  * d'histoire, facteur) ; dissolution : `; @erase-until: nanny.erasure-gone`.
@@ -154,6 +157,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   const eraseSteps: string[][] = [];
   const eraseSpeeds: { flag: string; scale: number }[] = [];
   let eraseUntil = '';
+  let eraseLook = '';
   text.split('\n').forEach((raw, index) => {
     const line = raw.replace(/\r$/, '').trimEnd();
     if (!line.startsWith(COMMENT)) {
@@ -223,7 +227,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
       const mask = z ? maskOf(z[2] ?? '') : null;
       if (!z || mask === null) {
         throw new Error(
-          `Niveau ${id}, ligne ${index + 1} : @erase attend « groupe present|memory|both col ligne l h »`,
+          `Niveau ${id}, ligne ${index + 1} : @erase attend « groupe present|memory|both|none col ligne l h »`,
         );
       }
       const [col = 0, row = 0, w = 0, h = 0] = z.slice(3, 7).map(Number);
@@ -248,6 +252,12 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         throw new Error(`Niveau ${id}, ligne ${index + 1} : @erase-until attend « étape »`);
       }
       eraseUntil = z[1] ?? '';
+    } else if (match?.[1] === 'erase-look' && match[2] !== undefined) {
+      // La berceuse (D-140) : des étoiles qui s'allument et s'éteignent.
+      if (match[2].trim() !== 'stars') {
+        throw new Error(`Niveau ${id}, ligne ${index + 1} : @erase-look attend « stars »`);
+      }
+      eraseLook = 'stars';
     } else if (match?.[1] === 'shift' && match[2] !== undefined) {
       const z = SHIFT.exec(match[2].trim());
       if (!z) {
@@ -511,6 +521,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
             steps: eraseSteps,
             speeds: eraseSpeeds,
             ...(eraseUntil ? { until: eraseUntil } : {}),
+            ...(eraseLook === 'stars' ? { look: 'stars' as const } : {}),
           })
         : null,
     legs,

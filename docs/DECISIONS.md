@@ -1953,3 +1953,22 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Tests** (`finaleEvening.test.ts`) : le soir après la fin du niveau 7, plus de « ? » ; le rituel dans l'ordre ; Maria jamais là, le berceau défait puis refait ; les parents du premier soir ; la chambre fermée (papa, puis le berceau) ; la nuit (lumières éteintes, présage, « ? » sans effet). `nannyEnd.test.ts` et `hint.test.ts` mis à jour.
 - **Vérifié dans Chromium** : le soir (papa illustré à la porte, le chat, le berceau défait), le tapis, le berceau refait, maman au bord du lit, la nuit et la bulle du berceau, le « ? ».
 - **Sauvegarde** : aucune migration (quatre étapes en fin de liste).
+
+## D-140 — Le dernier niveau, PR 2 : la berceuse (le moteur, le parcours d'essai 17)
+
+- **Plan validé** (D-138) ; le parcours de la chambre immense validé par l'utilisateur (le lit et le coffre ; le ciel de la chambre, jusqu'à la petite porte du grenier ; puis la chambre grande et la vraie porte). Aucune salle du jeu n'utilise encore la berceuse : tout est essayé dans le parcours 17.
+- **La berceuse** : des étoiles qui s'allument et s'éteignent par vagues lentes, au rythme de la boîte à musique. C'est **le moteur des vagues de l'effacement** (D-111, D-117), avec une autre allure :
+  - `; @erase-look: stars` : chaque groupe est une **étoile**, **allumée** (`both` : dans les deux couches, la bascule n'y change rien) ou **éteinte** (`none` : nulle part) ; chaque étape l'allume ou l'éteint (`toggledMask`, au lieu de présent ↔ souvenir). Toutes les étoiles sont des vagues (pas de bandes) ; vérifié à la lecture (erreurs explicites) ;
+  - **son propre rythme** : une étape toutes les `lullabyBeatMs` (2 s), annoncée `lullabyWarnMs` (1,2 s) avant (DEBUG → Combat), indépendant de l'effacement et de son accélération ;
+  - comme l'effacement : chaque motif est une variante statique analysée ; **rien ne s'allume sur Céleste** (l'étoile attend qu'elle soit partie) ; rien ne bouge (D-86).
+- **Le dessin** (`LullabyView`, PLACEHOLDER, `LULLABY_VIEW`) : une planche de lumière chaude, une étoile au milieu, un halo en anneaux ajoutés à la lumière ; éteinte, la planche en pointillés et le contour de l'étoile (pour prévoir). **Une étoile qui va s'allumer s'éclaire peu à peu ; une qui va s'éteindre vacille.** Tout est créé au chargement ; chaque image ne change que des opacités. La vue des couches (`ShiftLayerView`) laisse les étoiles à `LullabyView`.
+- **Le son** : à chaque étoile qui s'annonce, **une note de boîte à musique** (nouvel emplacement `lullaby`, 4 à 6 variantes d'une même gamme, `docs/BRUITAGES.md` ; un bip en attendant le fichier).
+- **Parcours d'essai 17 « Berceuse »** (70 × 26, facile, sans capacité) : au-dessus d'un sol sans danger (une chute y ramène ; on revient au départ en marchant), **l'escalier** (quatre étoiles qui montent, la lumière monte avec elles) jusqu'au palier de la lanterne, puis **la traversée** (quatre étoiles au-dessus du vide, la lumière avance) jusqu'à l'arrivée. Chaque étoile reste allumée trois temps : un avec la précédente, un seul, un avec la suivante ; le cycle fait huit temps.
+- **Tests** :
+  - `erase.test.ts` : la lecture, les motifs (la lumière passe d'une étoile à l'autre), le rythme propre, l'étoile qui attend Céleste, les erreurs ;
+  - `lullabyCourse.test.ts` : **le temps comme un graphe** (motif, surface) : dans un motif, les passages faciles ; d'un motif au suivant, on reste sur ce qui reste. **En suivant la lumière, on arrive ; dans un seul motif, jamais** ; une étoile qui va s'éteindre laisse toujours un appui qui reste (pas le sol) à portée pendant l'annonce ; jamais coincée ;
+  - `courses.test.ts` : un parcours de berceuse est analysé toutes étoiles allumées (faisabilité, difficulté) ; son rythme, à part.
+- **Écart avec la conception initiale** : l'annonce était de 1,1 s ; la sonde a mesuré 1,02 s pour quitter la dernière étoile vers le palier (phase 1) : 1,2 s.
+- **Vérifié dans Chromium** : la lumière qui monte, les étoiles allumées, éteintes, qui s'éclairent.
+- **Limites** : le halo paraît terne sous l'obscurité de la salle (à revoir dans la chambre immense : les étoiles pourraient éclairer la salle) ; dans la vraie salle, Céleste aura la bascule : les étoiles, allumées dans les deux couches, n'en dépendent pas.
+- **Sauvegarde** : aucun changement (l'état des étoiles n'est jamais sauvegardé, comme l'effacement).

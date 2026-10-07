@@ -137,6 +137,9 @@ export interface EraseGroup {
  * chaque étape, annoncée, il passe d'une couche à l'autre (présent ↔ souvenir). Les autres sont des
  * **bandes** (avec une poursuite vers le haut) : quand l'effacement monte assez près, elles
  * quittent le présent (elles restent dans le souvenir).
+ *
+ * **La berceuse** (D-140, `; @erase-look: stars`) suit les mêmes règles avec des étoiles : chaque
+ * groupe est une vague, allumé (dans les deux couches) ou éteint (dans aucune), à son propre rythme.
  */
 export interface LevelErase {
   readonly groups: readonly EraseGroup[];
@@ -149,6 +152,8 @@ export interface LevelErase {
   readonly speeds?: readonly { readonly flag: string; readonly scale: number }[];
   /** Étape d'histoire qui dissout l'effacement (D-117, `; @erase-until:`) : plus rien ne change. */
   readonly until?: string;
+  /** Les étoiles de la berceuse (D-140) : allumées ↔ éteintes, au lieu de présent ↔ souvenir. */
+  readonly look?: 'stars';
 }
 
 /** Marée d'un tronçon (`; @leg:`), basse par défaut (sans effet dans une salle sans marée). */

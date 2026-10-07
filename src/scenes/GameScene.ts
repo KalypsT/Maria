@@ -130,6 +130,7 @@ import { ForegroundView } from './ForegroundView';
 import { WorldLifeView } from './WorldLifeView';
 import { WaterView } from './WaterView';
 import { ShiftLayerView } from './ShiftLayerView';
+import { LullabyView } from './LullabyView';
 import { RideView } from './RideView';
 import { MapPage } from '../ui/MapPage';
 import { RecordPicker } from '../ui/RecordPicker';
@@ -310,6 +311,8 @@ export class GameScene extends Phaser.Scene {
   private readonly layerShift = new LayerShift();
   private readonly shiftHost: ShiftHost = { tryShift: (to) => this.tryShiftTo(to) };
   private shiftView!: ShiftLayerView;
+  /** Les étoiles de la berceuse (D-140). */
+  private lullaby!: LullabyView;
   /** L'effacement de la salle (D-111) et la salle telle que lue (ses groupes), null sans lui. */
   private erase: EraseState | null = null;
   private eraseBase: LevelData | null = null;
@@ -562,6 +565,7 @@ export class GameScene extends Phaser.Scene {
     this.worldLife = new WorldLifeView(this);
     this.water = new WaterView(this);
     this.shiftView = new ShiftLayerView(this);
+    this.lullaby = new LullabyView(this);
     this.ride = new RideView(this);
     const save = this.session.data;
     this.haptics.enabled = save.settings.controls.vibration;
@@ -941,6 +945,7 @@ export class GameScene extends Phaser.Scene {
     this.chaseView.render(camera.prevY + (camera.y - camera.prevY) * alpha + camera.viewHeight / 2);
     this.storyView.render(this.puppet.x, this.puppet.y, box.height);
     this.shiftView.render(this.time.now, this.puppet.x, this.puppet.y - box.height / 2, this.erase);
+    this.lullaby.render(this.time.now, this.erase);
     this.worldView.render();
     this.dust.update();
     const hintTarget = this.hintTarget;
@@ -1580,7 +1585,8 @@ export class GameScene extends Phaser.Scene {
     const chase = this.combat.chase;
     const rising = chase && !chase.horizontal && !chase.done && chase.placed;
     if ((erase.step(rising ? chase.front : null, this.eraseHost) & EraseEvent.Announced) !== 0) {
-      this.audio.sfx.play('erase');
+      // La berceuse (D-140) : une note de boîte à musique à chaque étoile qui s'annonce.
+      this.audio.sfx.play(erase.data.look === 'stars' ? 'lullaby' : 'erase');
     }
     this.applyErase();
   }
@@ -1933,6 +1939,8 @@ export class GameScene extends Phaser.Scene {
         : null,
     );
     this.shiftView.show(layerOf(this.level), this.erase?.masks ?? null);
+    // Les étoiles de la berceuse (D-140), dessinées à part, dans toutes les salles.
+    this.lullaby.load(base.erase);
     if (dressed) {
       this.backdrop.build(level, palette, this.artScale, images);
       this.foreground.build(level, palette, this.artScale);

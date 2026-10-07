@@ -33,9 +33,13 @@ const MASKS: Readonly<Record<string, LayerMask>> = {
   present: LayerMask.Present,
   memory: LayerMask.Memory,
   both: LayerMask.Both,
+  none: LayerMask.None,
 };
 
-/** Couches d'un mot de `; @erase:` (présent, souvenir, les deux). */
+/**
+ * Couches d'un mot de `; @erase:` (présent, souvenir, les deux ; aucune : une étoile éteinte de la
+ * berceuse, D-140).
+ */
 export function maskOf(word: string): LayerMask | null {
   return MASKS[word] ?? null;
 }
@@ -50,6 +54,21 @@ export interface EraseSpec {
   readonly steps: readonly (readonly string[])[];
   readonly speeds?: readonly { readonly flag: string; readonly scale: number }[];
   readonly until?: string;
+  readonly look?: 'stars';
+}
+
+/**
+ * La couche suivante d'une vague : présent ↔ souvenir (l'effacement, D-111), allumée (les deux
+ * couches) ↔ éteinte (aucune) pour les étoiles de la berceuse (D-140).
+ */
+export function toggledMask(mask: number): LayerMask {
+  if (mask === LayerMask.Present) {
+    return LayerMask.Memory;
+  }
+  if (mask === LayerMask.Memory) {
+    return LayerMask.Present;
+  }
+  return mask === LayerMask.Both ? LayerMask.None : LayerMask.Both;
 }
 
 /** Groupes et étapes d'une salle qui vient d'être lue ; erreurs explicites. */
@@ -80,15 +99,32 @@ export function buildErase(id: string, width: number, height: number, spec: Eras
       groups.set(group, { rects: [rect], initial: mask });
     }
   }
+  const stars = spec.look === 'stars';
   for (const step of spec.steps) {
     for (const group of step) {
       const known = groups.get(group);
       if (!known) {
         throw new Error(`Niveau ${id} : @erase-step ${group} inconnu`);
       }
-      if (known.initial === LayerMask.Both) {
+      const single = known.initial === LayerMask.Present || known.initial === LayerMask.Memory;
+      if (!stars && !single) {
         throw new Error(`Niveau ${id} : une vague (${group}) est dans une seule couche au départ`);
       }
+    }
+  }
+  for (const [group, g] of groups) {
+    if (stars) {
+      // La berceuse (D-140) : chaque étoile est une vague, allumée ou éteinte dans les deux couches.
+      if (g.initial !== LayerMask.Both && g.initial !== LayerMask.None) {
+        throw new Error(
+          `Niveau ${id} : une étoile (${group}) est both (allumée) ou none (éteinte)`,
+        );
+      }
+      if (!spec.steps.some((step) => step.includes(group))) {
+        throw new Error(`Niveau ${id} : l'étoile ${group} n'est dans aucune @erase-step`);
+      }
+    } else if (g.initial === LayerMask.None) {
+      throw new Error(`Niveau ${id} : @erase ${group} none ne va qu'avec @erase-look: stars`);
     }
   }
   if ((spec.speeds?.length || spec.until) && spec.steps.length === 0) {
@@ -99,6 +135,7 @@ export function buildErase(id: string, width: number, height: number, spec: Eras
     steps: spec.steps,
     ...(spec.speeds?.length ? { speeds: spec.speeds } : {}),
     ...(spec.until ? { until: spec.until } : {}),
+    ...(stars ? { look: 'stars' as const } : {}),
   };
 }
 
@@ -246,8 +283,8 @@ export function groupBottom(group: EraseGroup): number {
 
 /**
  * Les motifs successifs des vagues (D-111), à partir du départ : après chaque étape, les groupes
- * cités passent d'une couche à l'autre ; les étapes en boucle, jusqu'à revenir au départ. Le dernier
- * motif mène au premier.
+ * cités passent d'une couche à l'autre (ou s'allument, s'éteignent : la berceuse, D-140) ; les
+ * étapes en boucle, jusqu'à revenir au départ. Le dernier motif mène au premier.
  */
 export function wavePatterns(erase: LevelErase): Uint8Array[] {
   const out: Uint8Array[] = [initialMasks(erase)];
@@ -258,8 +295,7 @@ export function wavePatterns(erase: LevelErase): Uint8Array[] {
     const next = Uint8Array.from(out[out.length - 1] ?? []);
     for (const group of step) {
       const i = erase.groups.findIndex((g) => g.id === group);
-      const mask = next[i] ?? LayerMask.None;
-      next[i] = mask === LayerMask.Present ? LayerMask.Memory : LayerMask.Present;
+      next[i] = toggledMask(next[i] ?? LayerMask.None);
     }
     const key = patternKey(next);
     if (seen.has(key) && k % erase.steps.length === erase.steps.length - 1) {
