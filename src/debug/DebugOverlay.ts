@@ -9,6 +9,7 @@ import { DEFAULT_PUPPET, PUPPET_PARAM_RANGES, type PuppetParams } from '../confi
 import { ART_FINISH_RANGES, DEFAULT_ART_FINISH, type ArtFinish } from '../config/art';
 import { deserializeSave } from '../core/save/saveData';
 import { HitchMonitor, type FrameWork } from '../core/perf/hitchMonitor';
+import { STRANGE_MOCKUPS, STRANGE_MOCKUP_NAMES } from '../config/strangeThemes';
 import { DEFAULT_MOVEMENT, MOVEMENT_PARAM_RANGES, type MovementParams } from '../config/movement';
 import { LEVELS, ZONES, levelName } from '../levels';
 import type { GameScene } from '../scenes/GameScene';
@@ -268,6 +269,18 @@ export function installDebugOverlay(scene: GameScene): void {
     }
     scene.applyFinish();
     refreshFinish();
+  });
+  // Maquettes du monde étrange (D-130) : la palette, le motif, les liserés et le halo à comparer.
+  const mockupSelect = element('select', panel);
+  element('option', mockupSelect, undefined, 'Maquette du monde étrange : actuelle').value = '';
+  for (const mockup of STRANGE_MOCKUPS) {
+    element('option', mockupSelect, undefined, STRANGE_MOCKUP_NAMES[mockup]).value = mockup;
+  }
+  mockupSelect.value = scene.strangeMockup ?? '';
+  mockupSelect.addEventListener('change', () => {
+    const value = mockupSelect.value;
+    scene.setStrangeMockup(STRANGE_MOCKUPS.find((m) => m === value) ?? null);
+    mockupSelect.blur();
   });
   // Sensations proposées (D-125) : écrasement, inclinaison, poussière et saut adouci d'un coup,
   // pour comparer sur téléphone ; les valeurs par défaut du jeu ne changent pas.

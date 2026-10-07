@@ -141,6 +141,8 @@ import { CelestePoser, PoseAttack } from '../core/player/celestePose';
 import { AttackPhase } from '../core/combat/PlayerAttack';
 import { DustPool } from './DustPool';
 import { HintView } from './HintView';
+import { CelesteHalo } from './CelesteHalo';
+import { STRANGE_MOCKUP_PALETTES, type StrangeMockup } from '../config/strangeThemes';
 import { HINT } from '../config/hint';
 import {
   HintClock,
@@ -407,6 +409,10 @@ export class GameScene extends Phaser.Scene {
   private hintRetargetMs = 0;
   /** Jalon montré par le fil (outil de debug). */
   hintGoalName = '';
+  /** Halo autour de Céleste (D-130), selon la palette. */
+  private celesteHalo!: CelesteHalo;
+  /** Maquette du monde étrange comparée (D-130, outil de debug) ; null : la palette du jeu. */
+  strangeMockup: StrangeMockup | null = null;
   /** Phase du coup de bâton au pas précédent : son au début du coup. */
   private lastAttackPhase: number = AttackPhase.Idle;
   /** Zone de la salle courante ; null dans un parcours d'essai (hors partie). */
@@ -567,6 +573,7 @@ export class GameScene extends Phaser.Scene {
     this.artScale = this.computeArtScale();
     // Partie reprise dans le monde étrange (veilleuse du passage d'ombres, D-34).
     this.drawnStrange = isStrangeRoom(this.level);
+    this.celesteHalo = new CelesteHalo(this);
     this.drawLevel();
     this.run = new RunState(this.level, this.worldParams);
     this.run.load(this.level, save.activatedCheckpoints, checkpointId);
@@ -913,6 +920,7 @@ export class GameScene extends Phaser.Scene {
       feel.lean,
       this.poser.pose,
     );
+    this.celesteHalo.render(this.puppet.x, this.puppet.y - box.height / 2, this.puppet.alpha);
     this.renderCup();
     this.finishView.render(
       this.level,
@@ -1825,6 +1833,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** Aperçu du monde étrange (overlay). */
+  /** Maquette du monde étrange à comparer (D-130, outil de debug) ; null : la palette du jeu. */
+  setStrangeMockup(mockup: StrangeMockup | null): void {
+    this.strangeMockup = mockup;
+    this.redrawArt();
+  }
+
   setStrangeWorld(strange: boolean): void {
     this.strangeWorld = strange;
     this.audio.sfx.setStrange(strange || isStrangeRoom(this.level));
@@ -1893,6 +1907,7 @@ export class GameScene extends Phaser.Scene {
         : base,
     );
     const palette = this.palette();
+    this.celesteHalo.setLook(palette.halo, palette.haloColor);
     const waves = wavesOf(level);
     this.water.load(level, palette.silhouettes, waves?.row ?? -1, level.tide?.highRow ?? -1);
     if (base.layers) {
@@ -2253,7 +2268,11 @@ export class GameScene extends Phaser.Scene {
   private basePalette() {
     if (this.strangeWorld || isStrangeRoom(this.level)) {
       // Derrière la haie (D-49) : le monde étrange, dehors (ciel violet au lieu du mur).
-      return this.level.meta.outdoor ? { ...STRANGE_PALETTE, outdoor: true } : STRANGE_PALETTE;
+      const mockup = this.strangeMockup;
+      const strange = mockup
+        ? { ...STRANGE_PALETTE, ...STRANGE_MOCKUP_PALETTES[mockup] }
+        : STRANGE_PALETTE;
+      return this.level.meta.outdoor ? { ...strange, outdoor: true } : strange;
     }
     if (this.level.meta.world === 'memory') {
       // Un souvenir jouable (D-89) : couleurs chaudes et passées.

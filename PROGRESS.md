@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Sensations, son, aide et mondes étranges** (D-124) : plan validé en quatre chantiers : **A** fluidité et sensations, **B** bruitages et vibrations, **C** le fil discret (activé par défaut), **D** mondes étranges reconnaissables. **Chantier A, PR 1 faite : le compteur de saccades** (fusionnée) et **PR 2 faite : les sensations proposées, la poussière en papier, la matière du sol** (D-125), sur `ccr-9d90352a-xuwhs1`. **Chantier B, PR 1 faite : les bruitages, le système et les premiers sons** (D-126), **PR 2 faite : les sons des capacités, du combat, des dangers, la voix** (D-127) et **PR 3 faite : les vibrations** (D-128), sur la même branche. **Le chantier B est complet** (les sons restent à fournir). **Chantier C fait : le fil discret** (D-129), sur la même branche. Suite : **essai sur téléphone** (Android) du compteur, des sensations et des sons de test ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades ; **les sons à fournir** (`docs/BRUITAGES.md`) ; le fil discret à essayer ; puis le chantier D (mondes étranges : maquettes de la gare étrange).
+**Sensations, son, aide et mondes étranges** (D-124) : chantiers **A** (fluidité et sensations), **B** (bruitages et vibrations) et **C** (le fil discret) faits et fusionnés (D-124 à D-129). **Chantier D, PR 1 faite : trois maquettes de la gare étrange** (D-130), sur `ccr-9d90352a-xuwhs1`. Suite : **le choix de l'utilisateur** (A, B, C ou un mélange), puis la gare étrange refaite (D2) et les autres mondes étranges un par un. En attente : essais sur téléphone (compteur de saccades, sensations, sons de test, vibrations, fil discret) ; les sons à fournir (`docs/BRUITAGES.md`) ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades.
 
 **Les personnages illustrés** (D-123) : papa illustré (images de l'utilisateur générées avec ChatGPT, prompts dans `docs/PROMPTS_PERSONNAGES.md`) à la porte de la chambre, dans le hall de la gare, à la cuisine, à la supérette, sur `ccr-142ffd96-q5pgli`. Suite : papa au jardin et sur le quai, maman, puis Céleste en pièces illustrées.
 
@@ -27,6 +27,14 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Chantier D, PR 1 : trois maquettes de la gare étrange (D-130)
+
+- DEBUG → **« Maquette du monde étrange »** : actuelle, **A** (le crépuscule, mieux lu : les carreaux du hall), **B** (l'heure arrêtée : bleu nuit, ambre, horloges), **C** (les objets perdus, dans la brume : vert d'eau, étiquettes de bagage). Rien ne change dans le jeu tant qu'aucune n'est choisie.
+- Communs : liseré de 2 px et une lueur au-dessus, motif du mur tiré du lieu, halo doux autour de Céleste.
+- Tests : `strangeThemes.test.ts`. Captures dans Chromium : la gare étrange (le départ, la montagne des objets perdus) et la tour, dans les quatre versions.
+- [ ] **À choisir** : A, B, C, ou un mélange (une couleur de l'une, le motif d'une autre…).
+- [ ] À vérifier sur téléphone (DEBUG → « Maquette du monde étrange », puis entrer dans la gare étrange) : les appuis se lisent-ils mieux ? Le motif du mur se voit-il, sans gêner ? Le halo autour de Céleste ?
 
 ### Chantier C : le fil discret (D-129)
 

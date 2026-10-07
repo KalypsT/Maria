@@ -640,7 +640,7 @@ export const DECOR_KINDS: Readonly<
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */
-export const WALL_STYLES = ['dots', 'stripes', 'planks', 'tiles'] as const;
+export const WALL_STYLES = ['dots', 'stripes', 'planks', 'tiles', 'clocks', 'tags'] as const;
 export type WallStyle = (typeof WALL_STYLES)[number];
 
 /**
@@ -736,6 +736,15 @@ export interface ArtPalette {
   vignette: number;
   /** Couleur du vignettage (« r,g,b »). */
   vignetteColor: string;
+  /** Épaisseur du liseré des surfaces praticables (px, D-130). */
+  rimWidth: number;
+  /** Lueur douce au-dessus du liseré (opacité, 0 : aucune, D-130). */
+  rimGlow: number;
+  /** Motif du mur imposé par la palette (un monde étrange, D-130) ; null : celui de la salle. */
+  wallMotif: WallStyle | null;
+  /** Halo doux autour de Céleste (opacité, 0 : aucun, D-130) et sa couleur (« r,g,b »). */
+  halo: number;
+  haloColor: string;
 }
 
 export const REAL_PALETTE: Readonly<ArtPalette> = {
@@ -772,6 +781,11 @@ export const REAL_PALETTE: Readonly<ArtPalette> = {
   veil: 0.2,
   vignette: 0.4,
   vignetteColor: '8,10,24',
+  rimWidth: 1,
+  rimGlow: 0,
+  wallMotif: null,
+  halo: 0,
+  haloColor: '255,255,255',
 };
 
 /**

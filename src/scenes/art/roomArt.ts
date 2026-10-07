@@ -1222,6 +1222,49 @@ function drawWallpaper(
     for (let x = 0; x < width; x += 12) {
       ctx.fillRect(x, 0, 1, bottom);
     }
+  } else if (style === 'clocks') {
+    // La gare étrange (D-130) : de petites horloges, chacune arrêtée à une autre heure.
+    for (let y = 18; y < bottom - 8; y += 34) {
+      for (let x = (y / 34) % 2 < 1 ? 14 : 31; x < width; x += 34) {
+        const k = (x * 7 + y * 13) % 12;
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(
+          x + Math.sin((k / 12) * Math.PI * 2) * 4.5,
+          y - Math.cos((k / 12) * Math.PI * 2) * 4.5,
+        );
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + Math.sin((k / 3) * Math.PI) * 3, y - Math.cos((k / 3) * Math.PI) * 3);
+        ctx.stroke();
+      }
+    }
+  } else if (style === 'tags') {
+    // Les objets perdus (D-130) : des étiquettes de bagage et leur ficelle.
+    for (let y = 14; y < bottom - 10; y += 28) {
+      for (let x = (y / 28) % 2 < 1 ? 10 : 24; x < width; x += 28) {
+        const tilt = (((x * 5 + y * 3) % 7) - 3) * 0.12;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(tilt);
+        ctx.beginPath();
+        ctx.moveTo(-3, -5);
+        ctx.lineTo(3, -5);
+        ctx.lineTo(3, 4);
+        ctx.lineTo(0, 6);
+        ctx.lineTo(-3, 4);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, -3, 0.9, 0, Math.PI * 2);
+        ctx.moveTo(0, -4);
+        ctx.quadraticCurveTo(2, -9, 0, -11);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
   } else {
     for (let y = 10; y < bottom - 4; y += 18) {
       for (let x = (y / 18) % 2 < 1 ? 6 : 15; x < width; x += 18) {
@@ -1636,15 +1679,10 @@ function drawWall(
   wall.addColorStop(1, p.wallBottom);
   ctx.fillStyle = wall;
   ctx.fillRect(0, 0, width, height);
-  drawWallpaper(
-    ctx,
-    p,
-    wallStyle(level),
-    width,
-    wallStyle(level) === 'dots' || wallStyle(level) === 'stripes' ? wainscotY : floorY,
-  );
-  const style = wallStyle(level);
+  // Un monde étrange peut imposer son motif (D-130) : celui de son lieu, pas celui de la maison.
+  const style = p.wallMotif ?? wallStyle(level);
   const wainscot = style === 'dots' || style === 'stripes';
+  drawWallpaper(ctx, p, style, width, wainscot ? wainscotY : floorY);
   if (wainscot) {
     ctx.fillStyle = p.wainscot;
     ctx.fillRect(0, wainscotY, width, floorY - wainscotY);
@@ -2131,8 +2169,9 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
   )) {
     glow(exit.col * T + T, (exit.rowMin + 1.5) * T, 30, '120,240,220', p.silhouettes ? 0.5 : 0.15);
   }
-  // Liserés : dessus de chaque surface praticable.
-  ctx.fillStyle = p.rim;
+  // Liserés : dessus de chaque surface praticable ; dans un monde étrange, plus épais et avec une
+  // lueur au-dessus (D-130), pour que les appuis se lisent sur le fond sombre.
+  const glowAlpha = p.rimGlow;
   for (let row = 1; row < level.height; row++) {
     for (let col = 0; col < level.width; col++) {
       const tile = tileAt(level, col, row);
@@ -2144,7 +2183,16 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
         above !== Tile.Hazard &&
         above !== Tile.Thorns
       ) {
-        ctx.fillRect(col * T, row * T, T, 1);
+        if (glowAlpha > 0) {
+          ctx.globalAlpha = glowAlpha * 0.5;
+          ctx.fillStyle = p.rim;
+          ctx.fillRect(col * T, row * T - 2, T, 2);
+          ctx.globalAlpha = glowAlpha * 0.22;
+          ctx.fillRect(col * T, row * T - 5, T, 3);
+          ctx.globalAlpha = 1;
+        }
+        ctx.fillStyle = p.rim;
+        ctx.fillRect(col * T, row * T, T, p.rimWidth);
       }
     }
   }
