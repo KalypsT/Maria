@@ -103,9 +103,9 @@ describe('carte dessinée par Céleste (§24)', () => {
       zone,
       progress({
         visited,
-        activatedCheckpoints: ['bedroom:c20-19', 'attic:c4-19'],
-        checkpoint: { levelId: 'attic', checkpointId: 'c4-19' },
-        collectibles: ['attic:s49-5'],
+        activatedCheckpoints: ['bedroom:c20-19', 'attic:c51-19'],
+        checkpoint: { levelId: 'attic', checkpointId: 'c51-19' },
+        collectibles: ['attic:s6-5'],
       }),
     );
     const bedroom = some.rooms.find((room) => room.id === 'bedroom');

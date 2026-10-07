@@ -130,6 +130,8 @@ export const DECOR_KINDS: Readonly<
   stepshelf: { furniture: false },
   /** Petit palier devant la porte du grenier, sur son poteau (le dessus est plein). */
   atticstep: { furniture: true },
+  /** Cloison sous la volée et le palier (tuiles du mur) : lambris, limon, porte de placard. */
+  stairwall: { furniture: true },
   /** Suspension : un fil, un abat-jour, de la lumière dessous (fond). */
   pendant: { furniture: false },
   /** Portemanteau sur pied, manteaux et écharpe (fond). */
