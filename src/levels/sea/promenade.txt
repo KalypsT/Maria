@@ -34,7 +34,7 @@
 ; @decor: lamppost 92 14 2 11
 ; @decor: lamppost 99 12 2 13
 ; @decor: planter 88 23 3 2
-; @decor: colonie 104 4 24 21
+; @decor: colonie 104 4 30 21
 ; @decor: colonybalcony 105 12 5 1
 ; @decor: colonybalcony 112 9 5 1
 ; @decor: colonybalcony 120 9 5 1

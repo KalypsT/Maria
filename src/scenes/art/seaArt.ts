@@ -632,8 +632,24 @@ export function seaDrawers({ rounded, tileShape }: ShapeTools): Record<string, D
       ctx.fill();
     },
     groynepost(a, r) {
-      // Un pieu de l'épi : bois sombre jusqu'au sable, coiffé d'une planche (on s'y pose).
+      // Un pieu de l'épi : bois sombre jusqu'au sable, coiffé d'une planche (on s'y pose). Si un
+      // câble s'y attache plus haut (D-137), un mince mât d'amarrage planté dessus le rejoint.
       const { ctx } = a;
+      for (const cable of a.level.cables) {
+        for (const [x, y] of [
+          [cable.x1, cable.y1],
+          [cable.x2, cable.y2],
+        ] as const) {
+          if (x >= r.x && x < r.x + r.w && y < r.y) {
+            ctx.fillStyle = WOOD_DARK;
+            ctx.fillRect(x - 1.5, y - 2, 3, r.y - y + 2);
+            ctx.fillStyle = IRON;
+            ctx.beginPath();
+            ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
       ctx.fillStyle = WOOD_DARK;
       ctx.fillRect(r.x + 3, r.y + 3, r.w - 6, r.h - 3);
       ctx.fillStyle = 'rgba(95,138,78,0.7)';
@@ -739,6 +755,53 @@ export function seaDrawers({ rounded, tileShape }: ShapeTools): Record<string, D
             ctx.fillRect(x + 3 + n * 6, y + T, 2, 4);
           }
         }
+      }
+      // Un rocher percé (D-137) : là où l'on passe sous la pierre (12 tuiles au plus), la pierre
+      // descend jusqu'au sable à l'image, percée d'une arche sombre ; contre une autre pierre, sans
+      // piédroit.
+      const level = a.level;
+      const bottomOf = (col: number): number => {
+        for (let row = (r.y + r.h) / T - 1; row >= r.y / T; row--) {
+          if (tileAt(level, col, row) === Tile.Solid) {
+            return tileAt(level, col, row + 1) === Tile.Empty ? row : -1;
+          }
+        }
+        return -1;
+      };
+      for (let col = r.x / T; col < (r.x + r.w) / T; col++) {
+        const bottom = bottomOf(col);
+        const ground = bottom < 0 ? 0 : groundRow(a, col * T, bottom + 1);
+        if (bottom < 0 || ground - bottom - 1 > 12 || ground >= level.height) {
+          continue;
+        }
+        let end = col;
+        while (
+          end + 1 < (r.x + r.w) / T &&
+          bottomOf(end + 1) === bottom &&
+          groundRow(a, (end + 1) * T, bottom + 1) === ground
+        ) {
+          end++;
+        }
+        const top = (bottom + 1) * T;
+        const x0 = col * T;
+        const x1 = (end + 1) * T;
+        const jambLeft = tileAt(level, col - 1, bottom + 1) === Tile.Solid ? 0 : 5;
+        const jambRight = tileAt(level, end + 1, bottom + 1) === Tile.Solid ? 0 : 5;
+        ctx.fillStyle = ROCK;
+        ctx.fillRect(x0, top, x1 - x0, ground * T - top);
+        const opening = {
+          x: x0 + jambLeft,
+          y: top + 3,
+          w: x1 - x0 - jambLeft - jambRight,
+          h: ground * T - top - 3,
+        };
+        const radius = Math.min(10, opening.h * 0.6, opening.w / 2);
+        ctx.fillStyle = 'rgba(30,34,40,0.78)';
+        rounded(ctx, opening, [jambLeft ? radius : 0, jambRight ? radius : 0, 0, 0]);
+        ctx.fill();
+        ctx.fillStyle = WEED;
+        ctx.fillRect(opening.x, opening.y, opening.w, 3);
+        col = end;
       }
     },
     lighthousefoot(a, r) {
@@ -1003,7 +1066,8 @@ export function seaDrawers({ rounded, tileShape }: ShapeTools): Record<string, D
       // (traversable), sa cabine (on monte dessus) et son crochet qui pend.
       const { ctx } = a;
       tileShape(a, r, '#e8b33c', '#f5cf6a');
-      const quay = groundRow(a, r.x + 13 * T, r.y / T + 10) * T;
+      // Les pieds (D-137) : du bas de leurs tuiles jusqu'au quai.
+      const quay = groundRow(a, r.x + 13 * T, r.y / T + 14) * T;
       ctx.fillStyle = '#e8b33c';
       for (const col of [12, 17]) {
         const x = r.x + col * T;
@@ -1154,8 +1218,37 @@ export function seaDrawers({ rounded, tileShape }: ShapeTools): Record<string, D
       // La pêche aux canards : un long toit bas (plein), le bassin et ses canards dessous, dans le trou
       // du platelage, et des lampions.
       const roof = { x: r.x, y: r.y + 3 * T, w: r.w, h: 5 * T };
-      tileShape(a, roof, MINT, '#c6eee2');
       const { ctx } = a;
+      // Deux poteaux jusqu'au platelage, de part et d'autre du trou, et le bassin aux canards
+      // dans le trou (D-137) : le toit ne flotte pas.
+      const deck = groundRow(a, r.x + T, roof.y / T + 5) * T;
+      ctx.fillStyle = WOOD_DARK;
+      for (const x of [roof.x + 6, roof.x + roof.w - 10]) {
+        ctx.fillRect(x, roof.y + roof.h, 4, deck - roof.y - roof.h);
+      }
+      let c0 = -1;
+      let c1 = -1;
+      for (let col = r.x / T; col < (r.x + r.w) / T; col++) {
+        if (tileAt(a.level, col, deck / T) !== Tile.Solid) {
+          c0 = c0 < 0 ? col : c0;
+          c1 = col;
+        }
+      }
+      if (c0 >= 0) {
+        const pool = { x: c0 * T + 2, y: deck - 10, w: (c1 - c0 + 1) * T - 4, h: 10 };
+        ctx.fillStyle = '#6fb6c9';
+        ctx.fillRect(pool.x, pool.y, pool.w, pool.h);
+        ctx.fillStyle = WHITE;
+        ctx.fillRect(pool.x, pool.y - 3, pool.w, 3);
+        ctx.fillStyle = '#f2c14e';
+        for (let x = pool.x + 8; x < pool.x + pool.w - 6; x += 18) {
+          ctx.beginPath();
+          ctx.ellipse(x, pool.y + 1, 4, 3, 0, 0, Math.PI * 2);
+          ctx.arc(x + 4, pool.y - 3, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      tileShape(a, roof, MINT, '#c6eee2');
       ctx.fillStyle = STRIPE_RED;
       for (let x = roof.x; x < roof.x + roof.w; x += 10) {
         ctx.beginPath();
