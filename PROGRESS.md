@@ -28,6 +28,13 @@
 
 ## Fait
 
+### Bruitages : les premiers fichiers (D-131)
+
+- 16 sons fournis, préparés et intégrés (27 fichiers avec les variantes, 200 Ko) : saut, réception, touchée, chute dans l'eau, hissage, parapluie (ouvert, refermé), crochet, glisse le long du câble (boucle), bascule, trains (annonce, passage), pas sur la pierre, l'herbe, le sable (4 variantes chacun) et les feuilles (3).
+- Les pas découpés en pas isolés ; `train-pass` réduit à 3 s ; les boucles bouclent sans coupure (`audio:prepare -- --sfx --loop`, marge sautée par le lecteur).
+- Reste à fournir : voir `docs/BRUITAGES.md` (les sons sans ✅).
+- [ ] À vérifier sur téléphone : les pas (volume, sable trop soufflé ?), le saut et la réception ensemble, la boucle du câble (sans coupure ?), le train qui passe (assez long, trop long ?), la bascule (1,5 s, finit fort).
+
 ### Chantier D, PR 1 : trois maquettes de la gare étrange (D-130)
 
 - DEBUG → **« Maquette du monde étrange »** : actuelle, **A** (le crépuscule, mieux lu : les carreaux du hall), **B** (l'heure arrêtée : bleu nuit, ambre, horloges), **C** (les objets perdus, dans la brume : vert d'eau, étiquettes de bagage). Rien ne change dans le jeu tant qu'aucune n'est choisie.

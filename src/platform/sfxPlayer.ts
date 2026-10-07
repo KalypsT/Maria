@@ -2,6 +2,7 @@ import type { AudioSettings } from '../config/audio';
 import {
   SFX_GAIN,
   SFX_LOOP_FADE_MS,
+  SFX_LOOP_MARGIN_S,
   SFX_MIX,
   SFX_SLOTS,
   TEST_TONES,
@@ -157,6 +158,7 @@ export class SfxPlayer {
     }
     let gain = SFX_GAIN[slot] ?? 1;
     let source: AudioScheduledSourceNode;
+    let offset = 0;
     const urls = this.files.get(slot);
     if (urls && urls.length > 0) {
       const buffer = this.buffers.get(urls[pickVariant(urls.length, -1, Math.random())] ?? '');
@@ -166,6 +168,13 @@ export class SfxPlayer {
       const player = context.createBufferSource();
       player.buffer = buffer;
       player.loop = true;
+      // Un fichier préparé en boucle a une marge de chaque côté ; un fichier trop court pour en
+      // avoir boucle en entier.
+      if (buffer.duration > 4 * SFX_LOOP_MARGIN_S) {
+        player.loopStart = SFX_LOOP_MARGIN_S;
+        player.loopEnd = buffer.duration - SFX_LOOP_MARGIN_S;
+        offset = SFX_LOOP_MARGIN_S;
+      }
       source = player;
     } else if (__DEBUG_TOOLS__ && this.testTones) {
       const tone = TEST_TONES[slot];
@@ -183,7 +192,11 @@ export class SfxPlayer {
     level.gain.linearRampToValueAtTime(gain, now + SFX_LOOP_FADE_MS.in / 1000);
     source.connect(level);
     level.connect(bus);
-    source.start();
+    if (source instanceof AudioBufferSourceNode) {
+      source.start(now, offset);
+    } else {
+      source.start(now);
+    }
     this.loops.set(slot, () => {
       const t = context.currentTime;
       const end = t + SFX_LOOP_FADE_MS.out / 1000;

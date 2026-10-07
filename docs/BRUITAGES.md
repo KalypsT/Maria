@@ -27,37 +27,39 @@ fichier en plus. **Pas d'ambiances pour l'instant** (décision de l'utilisateur)
 
 ## La liste (tous branchés, chantier B, PR 1 et 2)
 
+✅ : fourni (D-131, avec le nombre de variantes). Les autres sont encore à fournir.
+
 ### Le mouvement
 
-| Emplacement   | Quand                                                       | Variantes |
-| ------------- | ----------------------------------------------------------- | --------- |
-| `step-wood`   | un pas sur du bois (parquet, meuble, planche)               | 3–4       |
-| `step-fabric` | un pas sur du tissu (lit, canapé, couchette, valise)        | 3–4       |
-| `step-grass`  | un pas dans l'herbe, la terre                               | 3–4       |
-| `step-stone`  | un pas sur la pierre, les pavés, le carrelage               | 3–4       |
-| `step-sand`   | un pas dans le sable                                        | 3–4       |
-| `step-metal`  | un pas sur du métal (toit du train, échafaudage, voiture)   | 3–4       |
-| `step-leaves` | un pas sur une haie, un buisson, un nid                     | 2–3       |
-| `jump`        | le décollage d'un saut : un froissement, un petit souffle   | 2         |
-| `land`        | une réception ordinaire (par-dessus le pas)                 | 2         |
-| `land-big`    | la réception d'une grande chute                             | 1–2       |
-| `hurt`        | Céleste touchée (piqûre, coup, poursuivant) : jamais un cri | 2         |
-| `splash`      | une chute dans l'eau                                        | 1–2       |
+| Emplacement         | Quand                                                       | Variantes |
+| ------------------- | ----------------------------------------------------------- | --------- |
+| `step-wood`         | un pas sur du bois (parquet, meuble, planche)               | 3–4       |
+| `step-fabric`       | un pas sur du tissu (lit, canapé, couchette, valise)        | 3–4       |
+| `step-grass` ✅ ×4  | un pas dans l'herbe, la terre                               | 3–4       |
+| `step-stone` ✅ ×4  | un pas sur la pierre, les pavés, le carrelage               | 3–4       |
+| `step-sand` ✅ ×4   | un pas dans le sable                                        | 3–4       |
+| `step-metal`        | un pas sur du métal (toit du train, échafaudage, voiture)   | 3–4       |
+| `step-leaves` ✅ ×3 | un pas sur une haie, un buisson, un nid                     | 2–3       |
+| `jump` ✅           | le décollage d'un saut : un froissement, un petit souffle   | 2         |
+| `land` ✅           | une réception ordinaire (par-dessus le pas)                 | 2         |
+| `land-big`          | la réception d'une grande chute                             | 1–2       |
+| `hurt` ✅           | Céleste touchée (piqûre, coup, poursuivant) : jamais un cri | 2         |
+| `splash` ✅         | une chute dans l'eau                                        | 1–2       |
 
 ### Les capacités
 
-| Emplacement      | Quand                                                    | Variantes |
-| ---------------- | -------------------------------------------------------- | --------- |
-| `ledge-grab`     | les mains attrapent un rebord                            | 2         |
-| `ledge-climb`    | Céleste se hisse                                         | 1–2       |
-| `wall-slide`     | glisse contre un mur (**boucle**, 1 à 3 s, sans coupure) | 1         |
-| `wall-jump`      | le saut mural                                            | 2         |
-| `umbrella-open`  | le parapluie s'ouvre                                     | 1–2       |
-| `umbrella-close` | le parapluie se referme                                  | 1–2       |
-| `hook-catch`     | le crochet attrape un câble (métallique)                 | 1–2       |
-| `cable-slide`    | glisse le long d'un câble (**boucle**)                   | 1         |
-| `slide`          | la glissade au sol (un frottement)                       | 2         |
-| `shift`          | la bascule entre les deux couches (étrange, doux)        | 1–2       |
+| Emplacement         | Quand                                                    | Variantes |
+| ------------------- | -------------------------------------------------------- | --------- |
+| `ledge-grab`        | les mains attrapent un rebord                            | 2         |
+| `ledge-climb` ✅    | Céleste se hisse                                         | 1–2       |
+| `wall-slide`        | glisse contre un mur (**boucle**, 1 à 3 s, sans coupure) | 1         |
+| `wall-jump`         | le saut mural                                            | 2         |
+| `umbrella-open` ✅  | le parapluie s'ouvre                                     | 1–2       |
+| `umbrella-close` ✅ | le parapluie se referme                                  | 1–2       |
+| `hook-catch` ✅     | le crochet attrape un câble (métallique)                 | 1–2       |
+| `cable-slide` ✅    | glisse le long d'un câble (**boucle**)                   | 1         |
+| `slide`             | la glissade au sol (un frottement)                       | 2         |
+| `shift` ✅          | la bascule entre les deux couches (étrange, doux)        | 1–2       |
 
 ### Le combat, les dangers, les poursuites
 
@@ -68,8 +70,8 @@ fichier en plus. **Pas d'ambiances pour l'instant** (décision de l'utilisateur)
 | `enemy-scatter` | un ennemi se disperse                          | 1–2       |
 | `chase-wake`    | un poursuivant s'éveille                       | 1         |
 | `chase-rumble`  | le grondement du poursuivant (**boucle**)      | 1         |
-| `train-warn`    | un train s'annonce en gare                     | 1         |
-| `train-pass`    | un train passe en gare                         | 1         |
+| `train-warn` ✅ | un train s'annonce en gare                     | 1         |
+| `train-pass` ✅ | un train passe en gare                         | 1         |
 | `tunnel`        | le train entre dans un tunnel (sur le toit)    | 1         |
 | `wave-warn`     | la vague s'annonce                             | 1         |
 | `erase`         | l'effacement s'annonce (niveau 7)              | 1         |
@@ -97,4 +99,6 @@ Facultative, jamais de mots, jouée rarement pour ne pas lasser.
 | `voice-oh`     | surprise : un poursuivant qui s'éveille           |
 | `voice-laugh`  | joie : une trouvaille, une capacité trouvée       |
 
-Une **boucle** doit pouvoir se répéter sans coupure audible (la fin rejoint le début).
+Une **boucle** peut être envoyée telle quelle : je la prépare avec `--sfx --loop`, qui mêle sa fin à
+son début en fondu enchaîné (D-131). Il suffit qu'elle dure au moins 1 s, sans attaque ni fin
+marquée.

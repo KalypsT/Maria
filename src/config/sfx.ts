@@ -128,6 +128,13 @@ export const SFX_GAIN: Readonly<Partial<Record<SfxSlot, number>>> = {
 /** Sons joués en boucle tant que dure leur situation (glisser, poursuite). */
 export const SFX_LOOPS: readonly SfxSlot[] = ['wall-slide', 'cable-slide', 'chase-rumble'];
 
+/**
+ * Marge (s) au début et à la fin d'un fichier de boucle, que le lecteur saute : le motif y est
+ * répété (`audio:prepare -- --sfx --loop`, même valeur), pour qu'un éventuel silence laissé par le
+ * décodeur AAC au début ne s'entende pas à chaque tour.
+ */
+export const SFX_LOOP_MARGIN_S = 0.1;
+
 /** Fondu d'entrée et de sortie d'une boucle (ms). */
 export const SFX_LOOP_FADE_MS = { in: 60, out: 160 } as const;
 
