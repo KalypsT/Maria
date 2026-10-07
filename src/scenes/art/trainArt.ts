@@ -145,6 +145,27 @@ export function trainDrawers({ rounded, tileShape }: ShapeTools): Record<string,
       ctx.fillStyle = ALU_LIGHT;
       rounded(ctx, { x: r.x + r.w / 2 - 3, y: r.y + r.h * 0.45, w: 6, h: 4 }, 1);
       ctx.fill();
+      // Sous la cloison, jusqu'au plancher (D-136) : l'encadrement de la porte du compartiment
+      // (on passe par la porte ouverte), la porte coulissante poussée contre le montant.
+      const { level } = a;
+      let floor = (r.y + r.h) / T;
+      while (floor < level.height && tileAt(level, r.x / T, floor) !== Tile.Solid) {
+        floor++;
+      }
+      const top = r.y + r.h;
+      const bottom = floor * T;
+      const gate = level.decor.some((d) => d.kind === 'accordiongate' && d.col === r.x / T);
+      if (bottom - top > T && !gate) {
+        ctx.fillStyle = 'rgba(40,30,24,0.22)';
+        ctx.fillRect(r.x + r.w - 2, top, 9, bottom - top);
+        ctx.fillStyle = VENEER_DARK;
+        ctx.fillRect(r.x, top, 3, bottom - top);
+        ctx.fillRect(r.x + r.w - 3, top, 3, bottom - top);
+        ctx.fillStyle = VENEER;
+        ctx.fillRect(r.x + r.w, top + 2, 6, bottom - top - 2);
+        ctx.fillStyle = ALU_LIGHT;
+        ctx.fillRect(r.x + r.w + 4, top + (bottom - top) * 0.45, 1.5, 6);
+      }
     },
     accordiongate(a, r) {
       // La grille en accordéon entre les compartiments, à moitié dépliée : les plis de caoutchouc
@@ -392,11 +413,24 @@ export function trainDrawers({ rounded, tileShape }: ShapeTools): Record<string,
       // Un vélo pendu par sa roue avant à un crochet ; son cadre est la planche où l'on se pose.
       const { ctx } = a;
       const y = r.y;
+      // Le support vissé à la paroi, son crochet, et une sangle autour du cadre (D-136).
+      ctx.fillStyle = ALU_DARK;
+      rounded(ctx, { x: r.x + r.w / 2 - 4, y: y - 14, w: 8, h: 4 }, 1);
+      ctx.fill();
       ctx.strokeStyle = ALU_DARK;
-      ctx.lineWidth = 1.2;
+      ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(r.x + r.w / 2, y - 10);
-      ctx.lineTo(r.x + r.w / 2, y - 3);
+      ctx.lineTo(r.x + r.w / 2, y - 2);
+      ctx.arc(r.x + r.w / 2 + 2, y - 2, 2, Math.PI, 0, true);
+      ctx.stroke();
+      ctx.strokeStyle = '#c9a46b';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(r.x + 3, y - 1);
+      ctx.lineTo(r.x + r.w / 2 - 3, y - 12);
+      ctx.moveTo(r.x + r.w - 3, y - 1);
+      ctx.lineTo(r.x + r.w / 2 + 3, y - 12);
       ctx.stroke();
       ctx.strokeStyle = '#2f3440';
       ctx.lineWidth = 1.6;
@@ -499,6 +533,29 @@ export function trainDrawers({ rounded, tileShape }: ShapeTools): Record<string,
       // Une voiture vue de dehors : le toit bombé (ce qu'on foule, ses tuiles), la caisse bleue, ses
       // fenêtres éclairées (ou éteintes, la nuit), le filet blanc.
       const { ctx, level } = a;
+      // Les creux du toit (D-136) : des logements creusés dans la caisse (fond de tôle sombre, une
+      // grille d'aération, des rebords), pas des trous où l'on verrait le ciel.
+      for (let col = r.x / T; col < (r.x + r.w) / T; col++) {
+        let row = r.y / T;
+        while (row < r.y / T + 3 && tileAt(level, col, row) === Tile.Empty) {
+          row++;
+        }
+        if (row === r.y / T || row >= r.y / T + 3) {
+          continue;
+        }
+        ctx.fillStyle = '#2c4670';
+        ctx.fillRect(col * T, r.y, T, row * T - r.y);
+        ctx.fillStyle = 'rgba(0,0,0,0.25)';
+        for (let x = col * T + 2; x < (col + 1) * T; x += 4) {
+          ctx.fillRect(x, row * T - 7, 1.5, 6);
+        }
+        for (const side of [-1, 1]) {
+          if (tileAt(level, col + side, r.y / T) === Tile.Solid) {
+            ctx.fillStyle = '#5c7fb0';
+            ctx.fillRect(side < 0 ? col * T : (col + 1) * T - 2, r.y, 2, row * T - r.y);
+          }
+        }
+      }
       tileShape(a, r, '#3d5f8f', '#5c7fb0');
       ctx.fillStyle = '#8a9db5';
       for (let col = r.x / T; col < (r.x + r.w) / T; col++) {
