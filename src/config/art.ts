@@ -55,7 +55,7 @@ export const DECOR_KINDS: Readonly<
   jarshelf: { furniture: true },
   /** Frigo de la cuisine, à escalader (D-39). */
   fridge: { furniture: true },
-  /** Armoire à linge sur pieds, près de la porte de derrière (buanderie, D-46). */
+  /** Haute étagère à linge sur ses montants, près de la porte de derrière (buanderie, D-46). */
   linencabinet: { furniture: true },
   // Fond (sans collision).
   window: { furniture: false },
