@@ -1820,3 +1820,15 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Debug** : INFOS montre le palier, le temps sans progrès et le jalon visé ; DEBUG → « Fil discret : maintenant » saute l'attente.
 - **Vérifié par les tests** : chaque jalon existe ; **le chemin principal se suit jalon après jalon jusqu'à la fin du niveau 7**, chaque but accessible depuis le précédent, et le fil sait toujours quoi montrer dans la salle où l'on est ; les îlots, le plus proche d'abord ; l'horloge (paliers, remise à zéro, inactif).
 - **Boucle de jeu** : une aide facultative ; **rien ne touche à la physique**. **Sauvegarde** : un réglage de plus, sans migration.
+
+## D-130 — Chantier D, PR 1 : trois maquettes de la gare étrange
+
+- **But** (plan D-124, chantier D) : que chaque monde étrange se reconnaisse (aujourd'hui, tous partagent le même violet et même le papier peint de la maison) et se lise mieux, sans quitter les silhouettes de D-28. Le document d'histoire (§4) le demande : chaque monde étrange déforme son lieu réel (proportions, lumière, couleurs). **Salle témoin : la gare étrange**, comme le salon pour le monde réel (D-74).
+- **Trois maquettes**, à choisir (DEBUG → « Maquette du monde étrange ») ; aucune n'est appliquée au jeu :
+  - **A, le crépuscule, mieux lu** : la palette de D-36 gardée, le papier peint de la maison remplacé par **les carreaux du hall de la gare**, des masses violettes plutôt que noires, liserés turquoise ;
+  - **B, l'heure arrêtée** : la nuit de la gare réelle, **bleu nuit et lumière ambrée**, de petites **horloges arrêtées** chacune à une autre heure, liserés ambrés ;
+  - **C, les objets perdus, dans la brume** : une **brume vert d'eau**, des **étiquettes de bagage**, liserés dorés pâles.
+  - B et C reviennent sur le liseré turquoise de D-36 (choisi pour la lisibilité) : un liseré clair et chaud se lit aussi bien sur un fond froid.
+- **Commun aux trois** (nouveaux champs de la palette, sans effet sur le monde réel ni sur le monde étrange actuel) : **liseré de 2 px** au lieu de 1 et **une lueur au-dessus** (`rimWidth`, `rimGlow`) ; **motif du mur imposé** par la palette (`wallMotif`, deux motifs nouveaux : `clocks`, `tags`) ; **halo doux autour de Céleste** (`halo`, `haloColor`, `CelesteHalo`), sous elle, au-dessus du décor : elle porte un peu de lumière.
+- **Suite** : la maquette choisie (ou un mélange) devient la gare étrange (D2), puis chaque monde étrange reçoit la sienne (sa couleur et son motif tirés de son lieu), le niveau 7 en dernier (les deux couches de la bascule doivent rester lisibles).
+- **Rien ne touche à la collision ni au mouvement.** **Sauvegarde** : aucun changement.
