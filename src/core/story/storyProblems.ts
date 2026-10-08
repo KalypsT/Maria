@@ -145,6 +145,17 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
           problems.push(`${what} : Maria prise ou posée sous les yeux du joueur`);
         }
         holding = holds;
+      } else if (step.do === 'end') {
+        // La fin du jeu (D-145) : dans le noir, la dernière étape ; l'accueil suit.
+        if (!dark) {
+          problems.push(`${what} : la fin sous les yeux du joueur`);
+        }
+        if (step !== t.steps.at(-1)) {
+          problems.push(`${what} : des étapes après la fin`);
+        }
+        if (!zone.rooms.has(step.room)) {
+          problems.push(`${what} : salle ${step.room} inconnue`);
+        }
       } else if (step.do === 'gone') {
         // Céleste sortie de la salle (D-144) : dans le noir, et une autre salle la ramène.
         if (!dark) {
@@ -181,13 +192,15 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
         }
       }
     }
-    if (dark) {
+    // La fin du jeu (D-145) mène à l'accueil : elle se termine dans le noir, sans Céleste.
+    const ending = t.steps.at(-1)?.do === 'end';
+    if (dark && !ending) {
       problems.push(`${what} : se termine dans le noir`);
     }
     if (holding) {
       problems.push(`${what} : se termine avec Maria dans les bras`);
     }
-    if (gone) {
+    if (gone && !ending) {
       problems.push(`${what} : se termine sans Céleste`);
     }
   }

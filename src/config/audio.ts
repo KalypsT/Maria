@@ -30,6 +30,8 @@ export const MUSIC_TRACKS = [
    * jingle (un fichier `memory.*` servirait aux deux).
    */
   'memory-play',
+  /** L'écran de fin (D-145) : le thème de fin, une variation de la boîte à musique (à fournir). */
+  'ending',
 ] as const;
 export type MusicTrack = (typeof MUSIC_TRACKS)[number];
 

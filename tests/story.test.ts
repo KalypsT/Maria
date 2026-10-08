@@ -390,6 +390,39 @@ describe('histoire de la maison (D-31)', () => {
     expect(gone([fade, { do: 'gone' }, back])).toEqual(['déclencheur g : se termine sans Céleste']);
   });
 
+  it('la fin du jeu (D-145) : dans le noir, la dernière étape, vers une salle connue', () => {
+    const end = (steps: StoryData['triggers'][number]['steps']): string[] =>
+      storyProblems(
+        {
+          ...HOUSE_STORY,
+          triggers: [
+            {
+              id: 'f',
+              room: 'bedroom',
+              on: 'interact',
+              area: { col: 20, row: 15, w: 7, h: 5 },
+              mark: { col: 23, row: 16 },
+              when: { none: ['x'] },
+              lock: true,
+              steps: [{ do: 'flag', id: 'x' }, ...steps],
+            },
+          ],
+        },
+        zone,
+      ).filter((p) => p.startsWith('déclencheur f'));
+    const fade = { do: 'fadeOut', ms: 100 } as const;
+    expect(end([fade, { do: 'gone' }, { do: 'end', room: 'hall' }])).toEqual([]);
+    expect(end([{ do: 'end', room: 'hall' }])).toEqual([
+      'déclencheur f : la fin sous les yeux du joueur',
+    ]);
+    expect(end([fade, { do: 'end', room: 'hall' }, { do: 'fadeIn', ms: 100 }])).toEqual([
+      'déclencheur f : des étapes après la fin',
+    ]);
+    expect(end([fade, { do: 'end', room: 'nulle-part' }])).toEqual([
+      'déclencheur f : salle nulle-part inconnue',
+    ]);
+  });
+
   it('détecte un changement de salle visible, dans le vide, ou sans veilleuse (D-34)', () => {
     const bad: StoryData = {
       ...HOUSE_STORY,

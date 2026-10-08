@@ -91,6 +91,7 @@ import {
 } from '../core/world/zone';
 import { FlashbackView } from '../ui/FlashbackView';
 import { Hud } from '../ui/Hud';
+import { showEndScreen } from '../ui/EndScreen';
 import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
 import { PauseMenu } from '../ui/PauseMenu';
 import {
@@ -386,6 +387,8 @@ export class GameScene extends Phaser.Scene {
   private cupImage!: Phaser.GameObjects.Image;
   /** Céleste est sortie de la salle (D-144) : invisible jusqu'au prochain changement de salle. */
   private celesteGone = false;
+  /** La fin du jeu (D-145) : plus rien ne bouge, l'écran de fin, puis l'accueil. */
+  private ended = false;
   /** Le très léger signe du dernier plan (D-144) : début (ms, -1 : aucun) et durée. */
   private glimmerAtMs = -1;
   private glimmerMs = 1;
@@ -580,6 +583,9 @@ export class GameScene extends Phaser.Scene {
         this.glimmerAtMs = this.time.now;
         this.glimmerMs = Math.max(1, ms);
       },
+      end: (room) => {
+        this.endGame(room);
+      },
     });
     this.story.setFlags(this.session.data.story.flags);
     this.growth = growthPhase(this.story.flags);
@@ -762,6 +768,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   override update(): void {
+    if (this.ended) {
+      // La fin du jeu (D-145) : l'image reste noire sous l'écran de fin.
+      return;
+    }
     const frameSeconds = Math.min(this.game.loop.rawDelta / 1000, MAX_FRAME_SECONDS);
     this.controls.update();
     const mapPressed = this.controls.consumePressed('Map');
@@ -1386,6 +1396,26 @@ export class GameScene extends Phaser.Scene {
     this.poser.reset();
     this.resetCamera();
     this.reappearAtMs = this.time.now;
+  }
+
+  /**
+   * La fin du jeu (D-145) : « Continuer » reprendra dans `room`, à son départ ; la partie écrite,
+   * le thème de fin, l'écran de fin, puis l'accueil (la page repart, comme « Retour à
+   * l'accueil »).
+   */
+  private endGame(room: string): void {
+    if (this.ended) {
+      return;
+    }
+    this.ended = true;
+    this.audio.setMusic('ending');
+    void this.session
+      .setCheckpoint(room, null)
+      .then(() => this.session.manager.flush())
+      .then(() => showEndScreen(import.meta.env.BASE_URL))
+      .then(() => {
+        location.reload();
+      });
   }
 
   /** Le très léger signe (D-144) : de 0 à 1 et retour, en cloche, pendant sa durée. */

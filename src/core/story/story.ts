@@ -194,7 +194,12 @@ export type StoryStep =
    * refroidit et vacille (le présage), le mobile tourne un instant plus vite ; puis tout redevient
    * normal. Rien ne bouge d'autre, et surtout pas Maria.
    */
-  | { readonly do: 'glimmer'; readonly ms: number };
+  | { readonly do: 'glimmer'; readonly ms: number }
+  /**
+   * La fin du jeu (D-145, dans le noir, la dernière étape) : « Continuer » reprendra dans `room`, à
+   * son départ ; la partie est écrite, l'écran de fin (sans texte), puis l'accueil.
+   */
+  | { readonly do: 'end'; readonly room: string };
 
 export interface StoryTrigger {
   readonly id: string;

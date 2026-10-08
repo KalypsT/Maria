@@ -88,8 +88,11 @@ const SHELF_GLOW: TileArea = { col: 31, row: 9, w: 5, h: 3 };
  * peut pas atteindre la porte sans y passer.
  */
 const LEAVE_AREA: TileArea = { col: 41, row: 9, w: 4, h: 11 };
-/** Le couloir, juste derrière la porte de la chambre : Céleste s'en va. */
-const HALL_ARRIVAL: StoryStep = { do: 'room', room: 'hall', col: 3, row: 15, facing: 1 };
+/**
+ * Après la fin (D-145) : « Continuer » reprend dans le couloir, juste derrière la porte de la
+ * chambre (son départ) ; Céleste ne revient pas chercher Maria.
+ */
+export const AFTER_END_ROOM = 'hall';
 /** Le lit : Agir pour se coucher (le premier soir, D-37). */
 const BED_AREA: TileArea = { col: 7, row: 13, w: 11, h: 3 };
 const BED_SEAT = { col: 12, row: 15 };
@@ -438,7 +441,7 @@ const TRIGGERS: StoryTrigger[] = [
   {
     // C'est le joueur qui fait sortir Céleste (D-138). Le dernier plan (§12) : la vue reste sur
     // Maria ; un très léger signe du monde étrange ; Maria ne bouge pas ; tout redevient normal ; le
-    // noir. Céleste ne revient pas la chercher.
+    // noir. L'écran de fin, puis l'accueil (D-145). Céleste ne revient pas la chercher.
     id: 'finale-leave',
     room: 'bedroom',
     on: 'touch',
@@ -466,10 +469,9 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'sparkle', area: SHELF_GLOW, ms: S.glimmerMs },
       { do: 'wait', ms: S.glimmerMs + S.lookMs },
       { do: 'fadeOut', ms: S.nightFadeOutMs },
-      { do: 'look' },
       { do: 'wait', ms: S.nightBlackMs },
-      HALL_ARRIVAL,
-      { do: 'fadeIn', ms: S.nightFadeInMs },
+      // L'écran de fin, puis l'accueil (D-145).
+      { do: 'end', room: AFTER_END_ROOM },
     ],
   },
 ];

@@ -12,6 +12,7 @@ Déposer ici les morceaux, nommés d'après leur emplacement :
 | `train`          | le train de nuit                                            |
 | `strange`        | tous les mondes étranges (maison, haie, école, gare, train) |
 | `memory-play`    | les souvenirs jouables (la cuisine rose)                    |
+| `ending`         | l'écran de fin (une variation de la boîte à musique)        |
 | `found` (court)  | capacité ou trouvaille ramassée                             |
 | `memory` (court) | nouveau souvenir                                            |
 | `maria` (court)  | apparition de Maria (sans ce fichier : le silence)          |
