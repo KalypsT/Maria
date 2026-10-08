@@ -2061,3 +2061,9 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Vérifié dans Chromium** : le dernier plan, l'écran de fin (Maria, les scintillements, le rond), l'accueil avec Maria dans son coin, « Continuer » dans le couloir.
 - **Le dernier niveau est complet** (D-138 à D-145) : **le jeu se joue du premier soir à la fin**. À fournir, idéalement : le thème de fin (`ending`), le jingle de Maria, Céleste en phase 4 illustrée, l'image « Céleste tenant Maria ».
 - **Sauvegarde** : aucune migration.
+
+## D-146 — Les personnages illustrés, suite : papa complet, maman, poses assises
+
+- Suite de D-123, mêmes principes (images de l'utilisateur générées avec ChatGPT, `CHARACTER_IMAGES`, détourage par `scripts/art-cutout.py`).
+- **Papa complet, maman** : `dad-hall` a son image (penché plus bas), `dad-garden` (lunettes, l'arrosoir et ses gouttes), `dad-quay` ; maman au lit, au jardin, dans la cour, sur le quai. Une image plus large que le cadre (la main tendue) est ramenée dedans quand elle tient. Le petit garçon que ChatGPT a ajouté près de maman est retiré au détourage (`--largest`).
+- **Poses assises** (`seat`, hauteur de l'assise dans l'image) : l'image garde l'échelle d'un adulte debout (les images assises et debout de ChatGPT ont la même taille de tête à 900 px), l'assise sur le bas du cadre, les jambes pendent dessous (la texture s'agrandit vers le bas). Le lit (4 tuiles) convient ; **le canapé (2 tuiles) et le banc (1 tuile) non** : les jambes traverseraient le sol. Ils restent dessinés par le code en attendant des poses aux jambes repliées.

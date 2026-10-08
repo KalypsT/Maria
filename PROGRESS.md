@@ -8,7 +8,7 @@
 
 **Sensations, son, aide et mondes étranges** (D-124) : chantiers **A** (fluidité et sensations), **B** (bruitages et vibrations) et **C** (le fil discret) faits et fusionnés (D-124 à D-129). **Chantier D, PR 1 faite : trois maquettes de la gare étrange** (D-130), sur `ccr-9d90352a-xuwhs1`. Suite : **le choix de l'utilisateur** (A, B, C ou un mélange), puis la gare étrange refaite (D2) et les autres mondes étranges un par un. En attente : essais sur téléphone (compteur de saccades, sensations, sons de test, vibrations, fil discret) ; les sons à fournir (`docs/BRUITAGES.md`) ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades.
 
-**Les personnages illustrés** (D-123) : papa illustré (images de l'utilisateur générées avec ChatGPT, prompts dans `docs/PROMPTS_PERSONNAGES.md`) à la porte de la chambre, dans le hall de la gare, à la cuisine, à la supérette, sur `ccr-142ffd96-q5pgli`. Suite : papa au jardin et sur le quai, maman, puis Céleste en pièces illustrées.
+**Les personnages illustrés** (D-123, D-146) : papa illustré partout, maman sauf au canapé et au banc (images de l'utilisateur générées avec ChatGPT, prompts dans `docs/PROMPTS_PERSONNAGES.md`), sur `ccr-142ffd96-q5pgli`. Suite : maman au canapé et au banc (jambes repliées), Céleste en pièces illustrées (planches reçues, pièces à refaire : jambe seule, tête et torse du pyjama).
 
 **Le niveau 7 plus lisible** (retour d'essai, D-122) : les quatre cubes de la tour d'Eden à la place des objets déjà vus, la porte de la sieste et ses creux, le regard vers la porte, la carte, la salle de jeux où la tour monte, le souvenir d'Eden retravaillé (la tour chacun son tour, le cache-cache avec un compte), Eden blond à la coupe au bol, sur `ccr-abfc1233-t31o4v`. Suite : **essai sur téléphone**.
 
@@ -31,6 +31,13 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les personnages illustrés : papa complet, maman (D-146)
+
+- Papa : `dad-hall` (sa propre image), `dad-garden`, `dad-quay`. Maman : `mom-bed` (assise au bord du lit, les jambes pendantes, `seat`), `mom-garden`, `mom-yard`, `mom-quay` ; `mom-sofa` et `mom-bench` attendent une pose aux jambes repliées (sièges trop bas : 2 et 1 tuiles).
+- Détourage : `--largest` (un enfant ajouté par le générateur retiré), `--holes` (blancs enfermés).
+- Vérifié dans Chromium : la chambre (maman au lit), le jardin, le potager, la cour, le hall.
+- [ ] À vérifier sur téléphone : maman au bord du lit (taille, jambes), papa penché dans le hall.
 
 ### Le dernier niveau, PR 7 : après la fin (D-145)
 
