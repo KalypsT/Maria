@@ -8,7 +8,7 @@
 
 **Sensations, son, aide et mondes étranges** (D-124) : chantiers **A** (fluidité et sensations), **B** (bruitages et vibrations) et **C** (le fil discret) faits et fusionnés (D-124 à D-129). **Chantier D, PR 1 faite : trois maquettes de la gare étrange** (D-130), sur `ccr-9d90352a-xuwhs1`. Suite : **le choix de l'utilisateur** (A, B, C ou un mélange), puis la gare étrange refaite (D2) et les autres mondes étranges un par un. En attente : essais sur téléphone (compteur de saccades, sensations, sons de test, vibrations, fil discret) ; les sons à fournir (`docs/BRUITAGES.md`) ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades.
 
-**Les personnages illustrés** (D-123, D-146, D-147) : papa et maman illustrés partout ; **Céleste illustrée en pyjama** (pièces de papier découpé), sur `ccr-142ffd96-q5pgli`. Suite : essai sur téléphone, puis la robe et la veste (pièces reçues), puis le chat, la nounou, Eden.
+**Les personnages illustrés** (D-123, D-146 à D-148) : papa et maman illustrés partout ; **Céleste illustrée dans ses trois tenues** (pyjama, robe, veste), sur `ccr-142ffd96-q5pgli`. Suite : essai sur téléphone ; la tenue de la phase 4 (t-shirt vert, jean) quand ses pièces seront là ; puis le chat, la nounou, Eden.
 
 **Le niveau 7 plus lisible** (retour d'essai, D-122) : les quatre cubes de la tour d'Eden à la place des objets déjà vus, la porte de la sieste et ses creux, le regard vers la porte, la carte, la salle de jeux où la tour monte, le souvenir d'Eden retravaillé (la tour chacun son tour, le cache-cache avec un compte), Eden blond à la coupe au bol, sur `ccr-abfc1233-t31o4v`. Suite : **essai sur téléphone**.
 
@@ -31,6 +31,12 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Céleste illustrée : la robe et la veste (D-148)
+
+- Robe (phase 2) et veste (phases 3 et 4) en pièces illustrées ; jupe et short en pièces de hanche ; attaches des couettes et de la queue de cheval par tenue (`PROFILE_LAYOUTS`).
+- Vérifié dans Chromium : chaque tenue à l'arrêt, en course, en saut (« Premiers pas », phases 2, 3 et 4).
+- [ ] À vérifier sur téléphone : le haut de la robe (large) et la veste, tassés, se lisent-ils ? La jupe et le short suivent-ils assez les jambes en course ?
 
 ### Céleste illustrée en pyjama ; maman au canapé et au banc (D-147)
 

@@ -392,3 +392,38 @@ shadow, no text:
 
 Le short de la veste et la jupe de la robe deviennent des pièces de hanche, posées devant le haut
 des jambes ; le haut de la robe est coupé à la taille (je m'en charge).
+
+## Céleste, phase 4 (la tenue de la fin)
+
+Référence : l'illustration de l'utilisateur (`celeste-tee`) : queue de cheval au chouchou rose, t-shirt
+vert, jean bleu clair droit, baskets blanches à petites fleurs roses. Une conversation, l'illustration
+jointe à chaque message.
+
+### L'illustration de l'écran de départ, sans logo
+
+```
+Same image, strictly identical (same girl, same pose, same framing, same colors, same style), except
+the sneakers: plain white sneakers with small pink flower prints and white laces, without any logo
+or swoosh.
+```
+
+### Les pièces (une par message)
+
+Début de chaque message :
+
+```
+Using the attached image as the strict reference (same girl, same style, same colors), draw ONLY
+this part of her, alone, as a cut-out paper puppet piece, strict side profile facing right, plain
+pure white background, no shadow, no text:
+```
+
+| Fichier            | Fin du message                                                                                                                                                                                            |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tee-head.png`     | `the HEAD WITHOUT the ponytail and without the scrunchie: the hair is pulled back smoothly toward the back of the head and stops there. Face, round pink glasses, freckles, ear, and a short neck stump.` |
+| `tee-ponytail.png` | `the PONYTAIL alone, hanging down, with its pink scrunchie at the top.`                                                                                                                                   |
+| `tee-torso.png`    | `the green t-shirt alone, from the base of the neck to the hips, WITHOUT arms and without any sleeve drawn on it: the shoulder is a smooth rounded edge (like a sleeveless vest shape).`                  |
+| `tee-arm.png`      | `ONE arm alone, perfectly straight and hanging down, from a rounded shoulder in the short green sleeve to the relaxed hand.`                                                                              |
+| `tee-leg.png`      | `ONE single leg, not a pair: one straight light-blue jeans leg from a rounded top of the thigh to the ankle, with ONE white sneaker with small pink flowers pointing right, no logo.`                     |
+
+Si ChatGPT redessine une paire de jambes : `Only ONE leg. A single leg alone, as if cut from the body
+at the hip.` Si une manche reste sur le torse : `No arm, no sleeve, no hand on the torso.`

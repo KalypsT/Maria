@@ -731,6 +731,9 @@ export const CHARACTER_IMAGES: Readonly<Partial<Record<PropKind, CharacterImage>
  */
 export const CELESTE_PART_IMAGES: Readonly<Partial<Record<CelesteOutfit, readonly string[]>>> = {
   pyjama: ['head', 'pigtail', 'torso', 'arm', 'leg'],
+  dress: ['head', 'pigtail', 'torso', 'arm', 'leg', 'skirt'],
+  // Phases 3 et 4 ; le short est la pièce de hanche (`skirt`), D-148.
+  jacket: ['head', 'ponytail', 'torso', 'arm', 'leg', 'skirt'],
 };
 
 /**

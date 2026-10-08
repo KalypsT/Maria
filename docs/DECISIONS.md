@@ -2078,3 +2078,12 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Robe et veste** : pas encore (pièces reçues, à composer) ; elles restent dessinées par le code.
 - **Maman au canapé** : jambes repliées, assise, les pieds au sol (le canapé fait 2 tuiles). **Au banc** : ChatGPT l'a dessinée accroupie ; posée au sol à côté du banc, au soleil, les pieds au sol (le banc fait 1 tuile : ses fesses posées sur le banc, ses pieds passeraient sous le sol). Son cadre passe de la colonne 10, sur le banc, à la colonne 12, au sol (rien ne flotte : `storyProblems`).
 - **Détourage** : `--ring` et `--reach` pour les boucles épaisses de maman (liseré clair entre les mèches).
+
+## D-148 — Céleste illustrée : la robe et la veste
+
+- **La robe** (phase 2) et **la veste** (phases 3 et 4) prennent leurs pièces illustrées, comme le pyjama (D-147). Les planches de l'utilisateur, plus les jambes refaites une à une ; composées par `scripts/celeste-parts.py`.
+- **Retouches** : couette et queue de cheval détourées à part (liseré clair entre les mèches) ; le blanc derrière les verres des lunettes retiré ; le haut de la robe coupé à la taille (la jupe est une pièce) ; la planche de la veste avait une paire de jambes sous le short : le short seul est gardé.
+- **Pièces de hanche** : la jupe de la robe et **le short de la veste** (`skirt`), de la taille à mi-cuisse, posés devant le haut des jambes. La jupe passe sur la taille de la robe ; le short sous le bas de la veste.
+- **Dessinés de trois quarts** par le générateur, le haut de la robe et la veste sont tassés en largeur (35 % et 20 %) pour aller avec les autres pièces, de profil.
+- **Les attaches** (`PROFILE_LAYOUTS`, par tenue) : les couettes de la robe basses sur la nuque, derrière l'oreille ; la queue de cheval haut derrière la tête.
+- La phase 4 garde la veste. **La tenue de la fin** (t-shirt vert, jean, d'après l'illustration de l'utilisateur) viendra avec ses pièces (prompts dans `docs/PROMPTS_PERSONNAGES.md`).

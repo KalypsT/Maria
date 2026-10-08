@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { CELESTE_PART_IMAGES, type ArtPalette } from '../config/art';
-import type { GrowthPhase } from '../config/growth';
+import type { CelesteOutfit, GrowthPhase } from '../config/growth';
 import type { CelestePose } from '../core/player/celestePose';
 import { CELESTE_PARTS, drawCelestePart, type CelestePart } from './art/celesteArt';
 
@@ -22,6 +22,8 @@ interface PuppetLayout {
   legFront: Point;
   pigtailBack: Point;
   pigtailFront: Point;
+  /** Queue de cheval (D-69), haut derrière la tête, par rapport au cou. */
+  ponytail: Point;
 }
 /** Céleste dessinée par le code, de trois quarts : une couette de chaque côté de la tête. */
 const DRAWN_LAYOUT: Readonly<PuppetLayout> = {
@@ -32,23 +34,43 @@ const DRAWN_LAYOUT: Readonly<PuppetLayout> = {
   legFront: { x: 1.5, y: 0 },
   pigtailBack: { x: -6.2, y: -6.5 },
   pigtailFront: { x: 5.8, y: -7 },
+  ponytail: { x: -5.6, y: -10.2 },
 };
 /**
- * Céleste illustrée, de profil (D-147) : épaules et jambes presque l'une derrière l'autre, les
- * épaules dans l'emmanchure du torse ; les deux couettes au nœud dessiné derrière l'oreille.
- * Relevés sur les pièces composées par `scripts/celeste-parts.py`.
+ * Céleste illustrée, de profil (D-147, D-148) : épaules et jambes presque l'une derrière l'autre,
+ * les épaules dans l'emmanchure du torse ; les couettes (ou la queue de cheval) là où la tête de la
+ * tenue les attend. Relevés sur les pièces composées par `scripts/celeste-parts.py`.
  */
-const PROFILE_LAYOUT: Readonly<PuppetLayout> = {
+const PROFILE_BODY = {
   shoulderBack: { x: -0.8, y: -6.9 },
   shoulderFront: { x: -0.3, y: -6.7 },
   neck: { x: -0.2, y: -7.2 },
   legBack: { x: -0.8, y: 0 },
   legFront: { x: 0.6, y: 0 },
-  pigtailBack: { x: -4.3, y: -7 },
-  pigtailFront: { x: -3.8, y: -6.7 },
+} as const;
+const PROFILE_LAYOUTS: Readonly<Record<CelesteOutfit, Readonly<PuppetLayout>>> = {
+  // Le nœud dessiné derrière l'oreille.
+  pyjama: {
+    ...PROFILE_BODY,
+    pigtailBack: { x: -4.3, y: -7 },
+    pigtailFront: { x: -3.8, y: -6.7 },
+    ponytail: DRAWN_LAYOUT.ponytail,
+  },
+  // Les couettes basses, derrière l'oreille, sur la nuque.
+  dress: {
+    ...PROFILE_BODY,
+    pigtailBack: { x: -3.3, y: -4.3 },
+    pigtailFront: { x: -2.9, y: -4 },
+    ponytail: DRAWN_LAYOUT.ponytail,
+  },
+  // La queue de cheval haut derrière la tête.
+  jacket: {
+    ...PROFILE_BODY,
+    pigtailBack: DRAWN_LAYOUT.pigtailBack,
+    pigtailFront: DRAWN_LAYOUT.pigtailFront,
+    ponytail: { x: -4.9, y: -9.3 },
+  },
 };
-/** Queue de cheval (D-69), haut derrière la tête, par rapport au cou. */
-const PONYTAIL = { x: -5.6, y: -10.2 };
 /** Longueur du bras (px, de l'épaule à la main) et prise du manche du parapluie (D-62). */
 const ARM_LENGTH = 7.2;
 const UMBRELLA_GRIP = 2;
@@ -162,16 +184,23 @@ export class CelestePuppet {
       !palette.silhouettes &&
       illustrated.length > 0 &&
       illustrated.every((part) => images.has(celestePartKey(growth.outfit, part)));
-    this.layout = useImages ? PROFILE_LAYOUT : DRAWN_LAYOUT;
+    this.layout = useImages ? PROFILE_LAYOUTS[growth.outfit] : DRAWN_LAYOUT;
     // De profil, la jambe avant passe sous l'ourlet du haut et le cou sous le col (la tête, et ses
     // couettes, derrière le torse). Sinon l'ordre du dessin par code.
     const c = this.container;
     if (useImages) {
       c.moveBelow(this.legFront, this.torso);
+      // La jupe passe sur la taille de la robe ; le short, sous le bas de la veste.
+      if (growth.outfit === 'jacket') {
+        c.moveBelow(this.skirt, this.torso);
+      } else {
+        c.moveAbove(this.skirt, this.torso);
+      }
       c.moveBelow(this.head, this.torso);
       c.moveBelow(this.pigtailFront, this.head);
     } else {
       c.moveAbove(this.legFront, this.torso);
+      c.moveAbove(this.skirt, this.legFront);
       c.moveAbove(this.pigtailFront, this.skirt);
       c.moveAbove(this.head, this.pigtailFront);
     }
@@ -219,7 +248,10 @@ export class CelestePuppet {
     assign(this.head, 'head');
     assign(this.umbrella, 'umbrella');
     assign(this.hook, 'hook');
-    this.skirt.setVisible(growth.outfit === 'dress');
+    // La jupe de la robe ; le short illustré de la veste est aussi une pièce de hanche (D-148).
+    this.skirt.setVisible(
+      growth.outfit === 'dress' || (useImages && illustrated.includes('skirt')),
+    );
   }
 
   /**
@@ -313,7 +345,7 @@ export class CelestePuppet {
       layout.pigtailFront.y,
       headRotation + pose.pigtails * 0.8,
     );
-    this.place(this.ponytail, PONYTAIL.x, PONYTAIL.y, headRotation + pose.pigtails);
+    this.place(this.ponytail, layout.ponytail.x, layout.ponytail.y, headRotation + pose.pigtails);
   }
 
   /** Place une pièce à un point (dx, dy) du repère courant (origine, rotation), sans allocation. */
