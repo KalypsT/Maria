@@ -2076,5 +2076,5 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **La tête** : ChatGPT a dessiné la couette sur la tête ; sa partie pendante est retirée (la vraie couette, une pièce à part, se balance par-dessus), le blanc derrière le verre avant des lunettes aussi.
 - **Toutes les pièces ou aucune** : une tenue dont une pièce manque garde le dessin par code. **Le monde étrange garde la silhouette dessinée** (seules les lunettes y restent roses).
 - **Robe et veste** : pas encore (pièces reçues, à composer) ; elles restent dessinées par le code.
-- **Maman au canapé** : jambes repliées, assise, les pieds au sol (le canapé fait 2 tuiles). **Au banc** : ChatGPT l'a dessinée accroupie ; posée au sol à côté du banc, au soleil, les pieds au sol (le banc fait 1 tuile, ses fesses au niveau du banc l'enfonceraient dans le sol), la scène décalée de deux tuiles vers la droite.
+- **Maman au canapé** : jambes repliées, assise, les pieds au sol (le canapé fait 2 tuiles). **Au banc** : ChatGPT l'a dessinée accroupie ; posée au sol à côté du banc, au soleil, les pieds au sol (le banc fait 1 tuile : ses fesses posées sur le banc, ses pieds passeraient sous le sol). Son cadre passe de la colonne 10, sur le banc, à la colonne 12, au sol (rien ne flotte : `storyProblems`).
 - **Détourage** : `--ring` et `--reach` pour les boucles épaisses de maman (liseré clair entre les mèches).
