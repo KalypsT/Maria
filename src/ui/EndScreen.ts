@@ -6,8 +6,11 @@ import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
  * son étagère, sous une lumière douce ; quelques scintillements passent près d'elle, puis plus
  * rien. Après un moment, un petit rond invite à continuer : un toucher ou une touche, et la
  * promesse se résout (la scène relance l'accueil). Maria ne bouge pas (pilier 5).
+ *
+ * Toutes les coquilles trouvées (`snail`, D-148) : un petit escargot vivant traverse lentement
+ * l'étagère vers Maria et laisse une trace argentée, sans rien expliquer.
  */
-export function showEndScreen(baseUrl: string): Promise<void> {
+export function showEndScreen(baseUrl: string, snail = false): Promise<void> {
   return new Promise((resolve) => {
     const root = document.createElement('div');
     root.id = 'end-screen';
@@ -25,6 +28,28 @@ export function showEndScreen(baseUrl: string): Promise<void> {
     const shelf = document.createElement('div');
     shelf.className = 'end-shelf';
     scene.append(light, maria, shelf);
+    if (snail) {
+      scene.style.setProperty('--snail-ms', `${String(END_SCREEN.snailMs)}ms`);
+      scene.style.setProperty('--snail-delay', `${String(END_SCREEN.snailDelayMs)}ms`);
+      const trail = document.createElement('div');
+      trail.className = 'end-trail';
+      const crawler = document.createElement('div');
+      crawler.className = 'end-snail';
+      const body = document.createElement('span');
+      body.className = 'end-snail-body';
+      for (const side of ['back', 'front']) {
+        const horn = document.createElement('span');
+        horn.className = `end-snail-horn end-snail-horn-${side}`;
+        body.appendChild(horn);
+      }
+      const shell = document.createElement('img');
+      shell.className = 'end-snail-shell';
+      shell.src = `${baseUrl}${END_SCREEN.shellImage}`;
+      shell.alt = '';
+      shell.draggable = false;
+      crawler.append(body, shell);
+      scene.append(trail, crawler);
+    }
     for (let i = 0; i < END_SCREEN.sparkles; i++) {
       const sparkle = document.createElement('span');
       sparkle.className = 'end-sparkle';

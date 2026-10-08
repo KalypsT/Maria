@@ -93,6 +93,7 @@ import { shellTally, zoneShells } from '../core/world/shells';
 import { FlashbackView } from '../ui/FlashbackView';
 import { Hud } from '../ui/Hud';
 import { showEndScreen } from '../ui/EndScreen';
+import { ShellJarView } from './ShellJarView';
 import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
 import { PauseMenu } from '../ui/PauseMenu';
 import {
@@ -402,6 +403,8 @@ export class GameScene extends Phaser.Scene {
   readonly transition = new RoomTransition(this.worldParams);
   session!: SaveSession;
   private worldView!: WorldView;
+  /** Le bocal à coquilles de la chambre (D-148). */
+  private shellJar!: ShellJarView;
   private hud!: Hud;
   /** Courts souvenirs (D-68). */
   private flashbackView!: FlashbackView;
@@ -642,7 +645,9 @@ export class GameScene extends Phaser.Scene {
     this.combatView = new CombatView(this, this.combat, this.combatParams, this.dust);
     this.combatView.setArt(this.artScale, this.palette());
     this.worldView = new WorldView(this, this.run, this.pickups);
+    this.shellJar = new ShellJarView(this);
     this.worldView.setArt(this.artScale, this.strangeWorld || isStrangeRoom(this.level));
+    this.shellJar.load(this.level.id, this.shellCount(), this.artScale);
     this.showCables();
     this.trainView = new TrainView(this, this.combat);
     this.trainView.setArt(this.artScale);
@@ -1429,7 +1434,14 @@ export class GameScene extends Phaser.Scene {
     void this.session
       .setCheckpoint(room, null)
       .then(() => this.session.manager.flush())
-      .then(() => showEndScreen(import.meta.env.BASE_URL))
+      .then(() => {
+        // Toutes les coquilles trouvées : le petit escargot de la fin (D-148).
+        const shells = this.shellCount();
+        return showEndScreen(
+          import.meta.env.BASE_URL,
+          shells.total > 0 && shells.found === shells.total,
+        );
+      })
       .then(() => {
         location.reload();
       });
@@ -1613,6 +1625,14 @@ export class GameScene extends Phaser.Scene {
     const { abilities, collectibles, seenCollectibles } = this.session.data.progression;
     this.pickups.load(this.level, abilities, collectibles, seenCollectibles);
     this.worldView.rebuild();
+    this.shellJar.load(this.level.id, this.shellCount(), this.artScale);
+  }
+
+  /** Coquilles trouvées et en tout, dans toute la zone (D-148) : le bocal, la fin. */
+  private shellCount(): { found: number; total: number } {
+    const shells = this.zone ? zoneShells(this.zone) : [];
+    const found = this.session.data.progression.collectibles;
+    return { found: shells.filter((s) => found.includes(s.name)).length, total: shells.length };
   }
 
   /**
@@ -1896,6 +1916,7 @@ export class GameScene extends Phaser.Scene {
     this.pickups.load(level, abilities, collectibles, seenCollectibles);
     this.applyAbilities();
     this.worldView.rebuild();
+    this.shellJar.load(level.id, this.shellCount(), this.artScale);
     this.showCables();
     this.props.load(this.story.data.props, level.id, this.story.flags);
     this.storyView.rebuild();
@@ -2041,6 +2062,7 @@ export class GameScene extends Phaser.Scene {
     this.drawnDim = this.isDim();
     this.drawnStrange = isStrangeRoom(this.level);
     this.worldView.setArt(this.artScale, this.strangeWorld || isStrangeRoom(this.level));
+    this.shellJar.load(this.level.id, this.shellCount(), this.artScale);
     this.storyView.setArt(this.artScale, this.artImages());
     this.combatView.setArt(this.artScale, this.palette());
     this.trainView.setArt(this.artScale);

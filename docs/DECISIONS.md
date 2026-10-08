@@ -2121,3 +2121,9 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **La page se colorie** quand toutes les coquilles du lieu sont trouvées : chaque salle visitée reçoit un lavis d'aquarelle (rose, bleu, jaune, vert ou lilas, toujours le même pour une salle) à la place des hachures roses ; le compte passe en rose.
 - **Les noms des salles** sont écrits par-dessus les coquilles et les veilleuses, cernés de papier (une coquille près du coin d'une salle cachait son nom).
 - `buildMapModel` : `shells` et `seenShells` par salle (à la place de `stars`), et le compte du lieu.
+
+### D-148, PR 3 : le bocal à coquilles et le petit escargot de la fin
+
+- **Le bocal** (`ShellJarView`, `SHELL_JAR` dans `src/config/art.ts`, PLACEHOLDER dessiné par le code) : la « boîte à coquilles » est devenue **un bocal en verre** (on voit le tas monter ; une boîte vue de face cache son contenu ; facile à changer), coiffé d'un carré de tissu rose à pois noué d'une ficelle. **Dans la chambre, sur le bureau, sous l'étagère du surmeuble** où Maria finira rangée (colonne 31, posé sur le plateau). Vide au premier soir ; une petite coquille par coquille trouvée, en tas depuis le fond, chacune à sa place (tournée et retournée d'après son rang). **Les rangées se tassent pour que le bocal soit plein juste quand toutes sont trouvées.** Redessiné en entrant dans la chambre, seulement si le compte ou l'échelle change. Aucune collision : un décor.
+- **Le petit escargot** (l'écran de fin, D-145) : **toutes les coquilles trouvées**, un petit escargot vivant (la coquille fournie, un corps et deux cornes dessinés en CSS) arrive par le bout droit de l'étagère et avance **très lentement** vers Maria (48 s, `END_SCREEN.snailMs`), en laissant **une trace argentée** ; il s'arrête juste à côté d'elle. Maria ne bouge pas (pilier 5) ; rien n'est expliqué (pilier 6). Sinon, l'écran de fin ne change pas.
+- **Les défis de la nounou** : rien au bout pour l'instant (choix de l'utilisateur).
