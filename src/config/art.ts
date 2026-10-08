@@ -717,8 +717,8 @@ export const CHARACTER_IMAGES: Readonly<Partial<Record<PropKind, CharacterImage>
   'mom-bed': { file: 'mom-bed.png', footX: 0.48, seat: 0.6 },
   // Jambes repliées sur le canapé (2 tuiles de haut) ; les hanches vers l'arrière du cadre.
   'mom-sofa': { file: 'mom-sofa.png', footX: 0.36, seat: 0.74 },
-  // Accroupie à côté du banc (1 tuile), les pieds au sol : 16 px sous le bas du cadre.
-  'mom-bench': { file: 'mom-bench.png', footX: 0.37, seat: 0.87 },
+  // Accroupie au sol à côté du banc : à l'échelle d'un adulte debout, les pieds sur le bas du cadre.
+  'mom-bench': { file: 'mom-bench.png', footX: 0.37, seat: 1 },
   'mom-garden': { file: 'mom-garden.png', footX: 0.3 },
   'mom-yard': { file: 'mom-yard.png', footX: 0.38 },
   'mom-quay': { file: 'mom-quay.png', footX: 0.33 },
