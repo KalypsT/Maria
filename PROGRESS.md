@@ -8,7 +8,7 @@
 
 **Sensations, son, aide et mondes étranges** (D-124) : chantiers **A** (fluidité et sensations), **B** (bruitages et vibrations) et **C** (le fil discret) faits et fusionnés (D-124 à D-129). **Chantier D, PR 1 faite : trois maquettes de la gare étrange** (D-130), sur `ccr-9d90352a-xuwhs1`. Suite : **le choix de l'utilisateur** (A, B, C ou un mélange), puis la gare étrange refaite (D2) et les autres mondes étranges un par un. En attente : essais sur téléphone (compteur de saccades, sensations, sons de test, vibrations, fil discret) ; les sons à fournir (`docs/BRUITAGES.md`) ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades.
 
-**Les personnages illustrés** (D-123, D-146 à D-148) : papa et maman illustrés partout ; **Céleste illustrée dans ses trois tenues** (pyjama, robe, veste), sur `ccr-142ffd96-q5pgli`. Suite : essai sur téléphone ; la tenue de la phase 4 (t-shirt vert, jean) quand ses pièces seront là ; puis le chat, la nounou, Eden.
+**Les personnages illustrés** (D-123, D-146 à D-149) : papa et maman illustrés partout ; **Céleste illustrée dans ses quatre tenues** (pyjama, robe, veste, la tenue de la fin), sur `ccr-142ffd96-q5pgli`. Suite : essai sur téléphone ; puis le chat, la nounou, Eden (prompts prêts).
 
 **Le niveau 7 plus lisible** (retour d'essai, D-122) : les quatre cubes de la tour d'Eden à la place des objets déjà vus, la porte de la sieste et ses creux, le regard vers la porte, la carte, la salle de jeux où la tour monte, le souvenir d'Eden retravaillé (la tour chacun son tour, le cache-cache avec un compte), Eden blond à la coupe au bol, sur `ccr-abfc1233-t31o4v`. Suite : **essai sur téléphone**.
 
@@ -31,6 +31,12 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### La tenue de la fin, phase 4 (D-149)
+
+- Phase 4 : t-shirt vert, jean, baskets blanches à fleurs, queue de cheval (`tee`), en pièces illustrées et sur l'écran de départ.
+- Vérifié dans Chromium : à l'arrêt, en course, en saut (« Premiers pas », phase 4).
+- [ ] À vérifier sur téléphone : la tenue se lit-elle ? La queue de cheval se voit-elle assez ? L'écran de départ après la fin.
 
 ### Céleste illustrée : la robe et la veste (D-148)
 

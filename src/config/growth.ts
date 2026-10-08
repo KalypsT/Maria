@@ -29,7 +29,7 @@ export interface GrowthPhase {
   readonly outfit: CelesteOutfit;
 }
 
-export type CelesteOutfit = 'pyjama' | 'dress' | 'jacket';
+export type CelesteOutfit = 'pyjama' | 'dress' | 'jacket' | 'tee';
 export type CelesteHair = 'pigtails' | 'ponytail';
 
 const FIRST_PHASE: GrowthPhase = {
@@ -75,8 +75,9 @@ export const GROWTH_PHASES: readonly GrowthPhase[] = [
     // Quelques mois après la classe de mer (D-119) : plus grande à l'écran (le corps, les cheveux),
     // une course un peu plus rapide. La hitbox reste celle de la phase 3 : un seul px de plus
     // fermait la chaîne de planches sous le toit du grenier (rien ne se ferme en grandissant,
-    // testé). Le saut reste celui des phases 2 et 3. L'allure (une queue de cheval plus longue, la
-    // même veste) est PLACEHOLDER faute d'illustration.
+    // testé). Le saut reste celui des phases 2 et 3. L'allure, d'après l'illustration de
+    // l'utilisateur (D-149) : une queue de cheval plus longue, un t-shirt vert, un jean, des
+    // baskets blanches à fleurs.
     id: 4,
     flag: StoryFlag.GrownFourth,
     hitbox: { width: 12, height: 28 },
@@ -84,7 +85,7 @@ export const GROWTH_PHASES: readonly GrowthPhase[] = [
     bodyScale: 1.5,
     hairScale: 1.6,
     hair: 'ponytail',
-    outfit: 'jacket',
+    outfit: 'tee',
   },
 ];
 

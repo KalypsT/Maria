@@ -734,6 +734,8 @@ export const CELESTE_PART_IMAGES: Readonly<Partial<Record<CelesteOutfit, readonl
   dress: ['head', 'pigtail', 'torso', 'arm', 'leg', 'skirt'],
   // Phases 3 et 4 ; le short est la pièce de hanche (`skirt`), D-148.
   jacket: ['head', 'ponytail', 'torso', 'arm', 'leg', 'skirt'],
+  // Phase 4, la tenue de la fin (D-149) : le jean va jusqu'aux chevilles, pas de pièce de hanche.
+  tee: ['head', 'ponytail', 'torso', 'arm', 'leg'],
 };
 
 /**
@@ -745,6 +747,7 @@ export const TITLE_IMAGES: Readonly<Record<CelesteOutfit, string>> = {
   pyjama: 'art/celeste.png',
   dress: 'art/celeste-dress.png',
   jacket: 'art/celeste-jacket.png',
+  tee: 'art/celeste-tee.png',
 };
 
 /** Palette d'une salle habillée ; le monde étrange en est une variante (§6.2). */

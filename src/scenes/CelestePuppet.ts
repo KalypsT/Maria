@@ -63,6 +63,13 @@ const PROFILE_LAYOUTS: Readonly<Record<CelesteOutfit, Readonly<PuppetLayout>>> =
     pigtailFront: { x: -2.9, y: -4 },
     ponytail: DRAWN_LAYOUT.ponytail,
   },
+  // La queue de cheval où les cheveux se rassemblent, derrière la tête.
+  tee: {
+    ...PROFILE_BODY,
+    pigtailBack: DRAWN_LAYOUT.pigtailBack,
+    pigtailFront: DRAWN_LAYOUT.pigtailFront,
+    ponytail: { x: -5.2, y: -8.4 },
+  },
   // La queue de cheval haut derrière la tête.
   jacket: {
     ...PROFILE_BODY,

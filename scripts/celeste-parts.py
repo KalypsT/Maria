@@ -66,6 +66,15 @@ PIECES = {
         "leg": ("jacket-leg.png", (84, 20), 577, 8.4, (2.5, 0.45)),
         "skirt": ("jacket-p4.png", (122, 10), 216, 3.2, (7.0, 0.15), (0, 0, 246, 226)),
     },
+    # Phase 4, la tenue de la fin (D-149) : t-shirt (le trou de l'emmanchure rebouché), de l'épaule
+    # à l'ourlet 6,4 ; le jean jusqu'à la basket, une seule jambe.
+    "tee": {
+        "head": ("tee-head.png", (316, 597), 597, 12.1, (7.5, 13.1)),
+        "ponytail": ("tee-pony.png", (165, 40), 460, 6.0, (3.5, 1.0)),
+        "torso": ("tee-torso.png", (132, 597), 398, 6.4, (5.5, 9.0)),
+        "arm": ("tee-arm.png", (74, 20), 578, 7.2, (2.0, 0.8)),
+        "leg": ("tee-leg.png", (75, 20), 578, 8.4, (2.5, 0.45)),
+    },
 }
 
 

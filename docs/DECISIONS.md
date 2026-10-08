@@ -2087,3 +2087,10 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Dessinés de trois quarts** par le générateur, le haut de la robe et la veste sont tassés en largeur (35 % et 20 %) pour aller avec les autres pièces, de profil.
 - **Les attaches** (`PROFILE_LAYOUTS`, par tenue) : les couettes de la robe basses sur la nuque, derrière l'oreille ; la queue de cheval haut derrière la tête.
 - La phase 4 garde la veste. **La tenue de la fin** (t-shirt vert, jean, d'après l'illustration de l'utilisateur) viendra avec ses pièces (prompts dans `docs/PROMPTS_PERSONNAGES.md`).
+
+## D-149 — La tenue de la fin (phase 4)
+
+- **D'après l'illustration de l'utilisateur** : en phase 4, Céleste porte une nouvelle tenue, `tee` (queue de cheval au chouchou rose, t-shirt vert, jean droit bleu clair, baskets blanches à petites fleurs roses, sans logo) au lieu de la veste (le PLACEHOLDER de D-119). Hitbox, mouvement et proportions de la phase 4 inchangés.
+- **En jeu** : pièces illustrées (tête, queue de cheval, torse, bras, jambe), composées par `scripts/celeste-parts.py` ; le jean va jusqu'à la basket, pas de pièce de hanche. **Écran de départ** : l'illustration détourée, `public/art/celeste-tee.png` (`TITLE_IMAGES.tee`).
+- **Retouches** : les pièces de ChatGPT imitent du papier découpé : le trou de rivet en haut de la jambe et l'emmanchure découpée dans le t-shirt sont rebouchés (texture voisine), l'œillet du chouchou repeint ; le liseré de papier blanc autour de la queue de cheval retiré. Les baskets blanches : `--white` (seuil du fond) les garde.
+- **Sans pièces** (fichier manquant), la tenue reprend le dessin par code de la veste.
