@@ -7,6 +7,8 @@
 ; une trouvaille. Sorties : (1) vers la maison, (2) vers le jardin renversé ; porte (3) vers la
 ; rue d'autrefois (îlot 2), ouverte une fois le cube jaune trouvé.
 ; @name: La chambre d'autrefois
+; @shell: nanny-bed-shelf 61 4
+; @shell: nanny-bed-wardrobe 36 36
 ; @world: strange
 ; @mapped: yes
 ; @music: strange
@@ -56,7 +58,7 @@
 ; @decor: hedge 14 1 20 8
 ; @decor: rug 58 36 16 1
 ; @decor: schoolgate 65 32 3 5
-; Légende : # mur/sol, b bois et v feuillage (pleins), - branche ou étagère et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S trouvaille, 1-9 sorties.
+; Légende : # mur/sol, b bois et v feuillage (pleins), - branche ou étagère et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S coquille (nommée par ; @shell:), 1-9 sorties.
 ############################################################################
 #............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#
 #............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#

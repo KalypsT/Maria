@@ -122,7 +122,7 @@ describe('le jardin (D-46)', () => {
   );
 
   it('trouvaille du potager : en haut des tuteurs, au plus moyenne', { timeout: TIMEOUT }, () => {
-    const secret = entityNode('garden-vegetables', EntityType.Secret);
+    const secret = entityNode('garden-vegetables', EntityType.Shell);
     expect(reachable(zoneGraph(true, easy, 2), home()).has(secret), 'trop facile').toBe(false);
     expect(reachable(zoneGraph(true, medium, 2), home()).has(secret), 'trop difficile').toBe(true);
   });
@@ -131,7 +131,7 @@ describe('le jardin (D-46)', () => {
     'trouvaille de la cabane : seulement avec le saut mural, par la petite cheminée',
     { timeout: TIMEOUT },
     () => {
-      const secret = entityNode('garden-treehouse', EntityType.Secret);
+      const secret = entityNode('garden-treehouse', EntityType.Shell);
       expect(reachable(zoneGraph(true, hard, 2), home()).has(secret)).toBe(false);
       expect(reachable(zoneGraph(true, easy, 2, true), wallJumpItem()).has(secret)).toBe(true);
     },

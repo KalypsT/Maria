@@ -6,6 +6,8 @@
 ; câble et le balcon descendent (le balcon un peu moins, hors de portée de l'auvent du kiosque) ;
 ; l'horloge et le tableau des départs, plus haut, au-dessus du câble.
 ; @name: Le hall
+; @shell: station-hall-ledge 67 25
+; @shell: station-kiosk 43 37
 ; @icon: clock
 ; @world: street
 ; @indoor: yes
@@ -28,7 +30,7 @@
 ; @decor: kiosk 39 32 9 6
 ; @decor: lostoffice 48 28 10 10
 ; @decor: balcony 62 26 9 2
-; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 ########################################################################
 ##########....................................................##########
 #######..........................................................#######

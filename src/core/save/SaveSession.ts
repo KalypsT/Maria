@@ -54,13 +54,24 @@ export class SaveSession {
     return this.persist();
   }
 
-  /** Trouvaille découverte (secret, D-27), enregistrée aussitôt ; sans effet si déjà trouvée. */
+  /** Coquille trouvée (D-27, D-148), enregistrée aussitôt ; sans effet si déjà trouvée. */
   addCollectible(id: string): Promise<void> {
     const collectibles = this.current.progression.collectibles;
     if (collectibles.includes(id)) {
       return Promise.resolve();
     }
     collectibles.push(id);
+    return this.persist();
+  }
+
+  /** Outil de debug (D-148) : une coquille redevient à trouver. */
+  removeCollectible(id: string): Promise<void> {
+    const collectibles = this.current.progression.collectibles;
+    const index = collectibles.indexOf(id);
+    if (index < 0) {
+      return Promise.resolve();
+    }
+    collectibles.splice(index, 1);
     return this.persist();
   }
 

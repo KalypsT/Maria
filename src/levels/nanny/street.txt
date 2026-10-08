@@ -7,6 +7,7 @@
 ; boîte à formes retrouvée ; porte (4), sous l'abribus, vers le train d'autrefois (îlot 3), ouverte
 ; une fois le cube turquoise trouvé.
 ; @name: La rue d'autrefois
+; @shell: nanny-street-lamp 89 16
 ; @world: strange
 ; @mapped: yes
 ; @music: strange
@@ -37,7 +38,7 @@
 ; @decor: schoolgate 71 15 3 5
 ; @decor: bedgate 78 16 3 4
 ; @decor: stationgate 82 22 3 5
-; Légende : # mur/sol, b bois (plein), - étagère et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S trouvaille, 1-9 sorties.
+; Légende : # mur/sol, b bois (plein), - étagère et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S coquille (nommée par ; @shell:), 1-9 sorties.
 ############################################################################################
 #.....................!..!..................!...................!..!................!.!....#
 #.....................!..!..................!...................!..!................!.!....#

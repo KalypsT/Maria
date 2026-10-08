@@ -1,7 +1,7 @@
 import { TILE_SIZE as T } from '../../config/display';
 import { EntityType } from '../level/LevelData';
 import { checkpointId } from '../save/saveData';
-import { secretId } from './Pickups';
+import { shellId } from './Pickups';
 import { isMappedRoom, mapPage, type MapBox, type Zone } from './zone';
 
 /** Point sur la carte (unités de carte). */
@@ -117,8 +117,8 @@ export function buildMapModel(zone: Zone, progress: MapProgress, page: string = 
             lamps.push({ ...center, current });
           }
         } else if (
-          entity.type === EntityType.Secret &&
-          progress.collectibles.includes(secretId(id, entity.col, entity.row))
+          entity.type === EntityType.Shell &&
+          progress.collectibles.includes(shellId(id, entity))
         ) {
           stars.push(center);
         }

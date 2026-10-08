@@ -4,6 +4,7 @@
 ; une échelle monte au toit (porte 3) ; la porte du wagon-restaurant (sortie 2) est fermée de ce
 ; côté : elle s'ouvre de l'intérieur.
 ; @name: Le fourgon
+; @shell: baggage-shelf 54 9
 ; @icon: wagon
 ; @vehicle: train
 ; @music: train
@@ -27,7 +28,7 @@
 ; @decor: roofladder 63 2 2 17
 ; @decor: traindoor 66 11 5 8
 ; @decor: trainlamp 34 8 1 2
-; Légende : # paroi, plancher ou toit, b bois, t tissu (pleins), - filet, tablette, étagère ou crochet (traversables), C veilleuse (checkpoint), P repère de départ, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; Légende : # paroi, plancher ou toit, b bois, t tissu (pleins), - filet, tablette, étagère ou crochet (traversables), C veilleuse (checkpoint), P repère de départ, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 ########################################################################
 ########################################################################
 #......................................................................#

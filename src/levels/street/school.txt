@@ -30,7 +30,7 @@
 ; @decor: fishbowl 47 9 2 2
 ; @decor: oculus 45 6 3 3
 ; @decor: window 52 7 5 6
-; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 ################################################################
 #..............................................................#
 #..............................................................#

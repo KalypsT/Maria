@@ -5,6 +5,7 @@
 ; le filet à bagages et sa trouvaille) ; au bout, le passage vers les compartiments (sortie 1,
 ; ouverte la nuit, D-86).
 ; @name: La voiture-couchettes
+; @shell: couchettes-net 54 3
 ; @icon: train
 ; @vehicle: train
 ; @music: train

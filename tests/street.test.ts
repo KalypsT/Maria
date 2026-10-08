@@ -173,7 +173,7 @@ describe('la rue (D-60)', () => {
       // palissade (D-91), qu'en glissant : voir slideRevisits.test.ts.
       const secrets = level('street').entities.filter(
         (e) =>
-          e.type === EntityType.Secret &&
+          e.type === EntityType.Shell &&
           e.col !== ANTENNA_COL &&
           e.col !== NEST_COL &&
           e.col !== HOARDING_COL,

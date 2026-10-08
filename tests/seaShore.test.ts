@@ -72,7 +72,7 @@ describe('la plage et les rochers : deux salles de marée (D-99)', () => {
       const cave = { col: 154, row: 23 };
       const beacon = { col: 49, row: 12 };
       const secrets = (l: LevelData) =>
-        l.entities.filter((e) => e.type === EntityType.Secret).map((e) => [e.col, e.row]);
+        l.entities.filter((e) => e.type === EntityType.Shell).map((e) => [e.col, e.row]);
       expect(secrets(low)).toEqual(
         expect.arrayContaining([
           [cave.col, cave.row],

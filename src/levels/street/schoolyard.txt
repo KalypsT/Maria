@@ -6,6 +6,7 @@
 ; Refaite (D-79) : du ciel au-dessus (le feuillage seulement en haut du platane) ; une marelle, un
 ; ballon, un pigeon ; au crépuscule, quelques fenêtres de l'école allumées.
 ; @name: Cour de l'école
+; @shell: schoolyard-hoop 34 12
 ; @icon: school
 ; @world: street
 ; @difficulty: easy
@@ -21,7 +22,7 @@
 ; @decor: hopscotch 14 23 7 1
 ; @decor: ball 43 22 1 2
 ; @decor: pigeon 31 22 2 2
-; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 v......................vvvvvvvvvvvv........................v
 #..........................................................#
 #..........................................................#

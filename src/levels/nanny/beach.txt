@@ -7,6 +7,8 @@
 ; ronces, l'étagère de la trouvaille. Dans le corail, ouvert à marée basse, une trouvaille.
 ; Sorties : (1) vers la maison (la trappe), (2) vers le carrousel.
 ; @name: La plage d'autrefois
+; @shell: nanny-beach-shelf 21 7
+; @shell: nanny-beach-coral 55 26
 ; @world: strange
 ; @mapped: yes
 ; @music: strange
@@ -35,7 +37,7 @@
 ; @decor: sanddrift 1 10 14 1
 ; @decor: eyes 66 22 1 1
 ; @decor: eyes 30 24 1 1
-; Légende : # mur/sol, - planche (traversable), = ponton (traversable), ~ eau (la marée haute), ! ronces (piquent), C lanterne, P départ, S trouvaille, 1-9 sorties.
+; Légende : # mur/sol, - planche (traversable), = ponton (traversable), ~ eau (la marée haute), ! ronces (piquent), C lanterne, P départ, S coquille (nommée par ; @shell:), 1-9 sorties.
 ################################################################################################
 #...............!.!..................##...............................#........................#
 #...............!.!..................##...............................#........................#

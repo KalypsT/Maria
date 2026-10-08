@@ -138,7 +138,7 @@ describe('grimper aux rebords dans la maison (D-26)', () => {
   });
 
   it('le premier secret est un passage de difficulté moyenne (D-27)', { timeout: TIMEOUT }, () => {
-    const secret = entityNode(EntityType.Secret, 'attic');
+    const secret = entityNode(EntityType.Shell, 'attic');
     expect(reachable(zoneGraph(false, null), home()).has(secret), 'sans grimper').toBe(false);
     expect(reachable(zoneGraph(true, easy), home()).has(secret), 'trop facile').toBe(false);
     const medium = zoneGraph(true, byDifficulty('medium'));
@@ -228,7 +228,7 @@ describe('rez-de-chaussée retravaillé (D-39)', () => {
     ['salon', 'living'],
     ['cuisine', 'kitchen'],
   ])('trouvaille du %s : en grimpant, au plus moyenne', { timeout: TIMEOUT }, (_name, room) => {
-    const secret = entityNode(EntityType.Secret, room);
+    const secret = entityNode(EntityType.Shell, room);
     expect(reachable(zoneGraph(false, null), home()).has(secret), 'sans grimper').toBe(false);
     expect(reachable(zoneGraph(true, medium), home()).has(secret), 'trop difficile').toBe(true);
   });
@@ -257,7 +257,7 @@ describe('Céleste a grandi (D-43)', () => {
     'la trouvaille du couloir attend qu’elle grandisse : hors d’atteinte avant, moyenne après',
     { timeout: TIMEOUT },
     () => {
-      const secret = entityNode(EntityType.Secret, 'hall');
+      const secret = entityNode(EntityType.Shell, 'hall');
       const hard = byDifficulty('hard');
       expect(reachable(zoneGraph(true, null, 1), home()).has(secret), 'phase 1').toBe(false);
       expect(reachable(zoneGraph(true, hard, 2), home()).has(secret), 'phase 2').toBe(true);

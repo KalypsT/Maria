@@ -3,6 +3,7 @@
 ; du toit par la trappe (porte 2) ; la porte du fourgon (sortie 1) s'ouvre de l'intérieur. Au fond,
 ; la porte de la cuisine : une lueur turquoise passe dessous (le monde étrange, PR 5).
 ; @name: Le wagon-restaurant
+; @shell: restaurant-bottles 51 7
 ; @icon: pot
 ; @vehicle: train
 ; @music: train
@@ -25,7 +26,7 @@
 ; @decor: hatchladder 66 2 2 17
 ; @decor: traindoor 1 11 5 8
 ; @decor: trainlamp 22 8 1 2
-; Légende : # paroi, plancher ou toit, b bois, t tissu (pleins), - filet, tablette, étagère ou crochet (traversables), C veilleuse (checkpoint), P repère de départ, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; Légende : # paroi, plancher ou toit, b bois, t tissu (pleins), - filet, tablette, étagère ou crochet (traversables), C veilleuse (checkpoint), P repère de départ, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 ########################################################################
 ########################################################################
 #......................................................................#

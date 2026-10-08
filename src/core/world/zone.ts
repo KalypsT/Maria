@@ -106,6 +106,27 @@ export function buildZone(source: ZoneSource): Zone {
     }
     rooms.set(room.id, parseAsciiLevel(room.id, room.text));
   }
+  // Chaque coquille d'une zone a un nom fixe (D-148), unique dans toute la zone.
+  const shells = new Map<string, string>();
+  for (const [roomId, level] of rooms) {
+    for (const e of level.entities) {
+      if (e.type !== EntityType.Shell) {
+        continue;
+      }
+      if (e.name === undefined) {
+        throw new Error(
+          `Zone ${source.id} : coquille sans nom (${roomId} ${String(e.col)} ${String(e.row)}, ; @shell:)`,
+        );
+      }
+      const other = shells.get(e.name);
+      if (other !== undefined) {
+        throw new Error(
+          `Zone ${source.id} : coquille « ${e.name} » en double (${other}, ${roomId})`,
+        );
+      }
+      shells.set(e.name, roomId);
+    }
+  }
   if (!rooms.has(source.start)) {
     throw new Error(`Zone ${source.id} : salle de départ « ${source.start} » inconnue`);
   }

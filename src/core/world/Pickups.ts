@@ -1,15 +1,15 @@
 import { TILE_SIZE as T } from '../../config/display';
-import { EntityType, type LevelData } from '../level/LevelData';
+import { EntityType, type LevelData, type LevelEntity } from '../level/LevelData';
 import type { Box } from '../physics/gridCollision';
 
-export const PickupKind = { Ability: 0, Secret: 1 } as const;
+export const PickupKind = { Ability: 0, Shell: 1 } as const;
 export type PickupKind = (typeof PickupKind)[keyof typeof PickupKind];
 
 export interface PickupState {
   readonly kind: PickupKind;
   /**
-   * Capacité donnée (`; @ability:` de la salle, D-26), ou identifiant de la trouvaille
-   * (`salle:s<col>-<row>`, enregistré dans `progression.collectibles`).
+   * Capacité donnée (`; @ability:` de la salle, D-26), ou nom de la coquille (`; @shell:`, D-148,
+   * enregistré dans `progression.collectibles`).
    */
   readonly id: string;
   readonly col: number;
@@ -19,9 +19,12 @@ export interface PickupState {
   taken: boolean;
 }
 
-/** Identifiant stable d'une trouvaille (secret) dans la sauvegarde. */
-export function secretId(levelId: string, col: number, row: number): string {
-  return `${levelId}:s${col}-${row}`;
+/**
+ * Identifiant d'une coquille dans la sauvegarde : son nom fixe (D-148). Une coquille sans nom (un
+ * parcours d'essai, qui ne sauvegarde rien) prend sa salle et sa tuile.
+ */
+export function shellId(levelId: string, shell: LevelEntity): string {
+  return shell.name ?? `${levelId}:s${String(shell.col)}-${String(shell.row)}`;
 }
 
 function overlaps(a: Box, b: Box): boolean {
@@ -29,7 +32,7 @@ function overlaps(a: Box, b: Box): boolean {
 }
 
 /**
- * Objets à ramasser d'une salle, purs : objets de capacité (D-26) et trouvailles (secrets, D-27).
+ * Objets à ramasser d'une salle, purs : objets de capacité (D-26) et coquilles (D-27, D-148).
  * Un objet déjà obtenu n'apparaît plus.
  */
 export class Pickups {
@@ -50,10 +53,10 @@ export class Pickups {
           box,
           taken: abilities.includes(ability),
         });
-      } else if (entity.type === EntityType.Secret) {
-        const id = secretId(level.id, col, row);
+      } else if (entity.type === EntityType.Shell) {
+        const id = shellId(level.id, entity);
         items.push({
-          kind: PickupKind.Secret,
+          kind: PickupKind.Shell,
           id,
           col,
           row,

@@ -8,6 +8,7 @@
 ; Marée haute : les vagues balaient tout ce qui est sous leur ligne ; le saut bas sous l'arche est
 ; difficile. Une petite cheminée entre l'aiguille et le rebord remonte du fond.
 ; @name: Les rochers
+; @shell: rocks-cave 53 27
 ; @icon: sea
 ; @world: street
 ; @backdrop: sea

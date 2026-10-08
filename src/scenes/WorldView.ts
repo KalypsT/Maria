@@ -1,14 +1,18 @@
 import Phaser from 'phaser';
-import { SHIFT_LAYER_VIEW } from '../config/art';
+import { SHELL_ART, SHIFT_LAYER_VIEW } from '../config/art';
 import { PLACEHOLDER_COLORS, TILE_SIZE as T } from '../config/display';
 import type { LevelCable } from '../core/level/LevelData';
 import { PickupKind, type Pickups } from '../core/world/Pickups';
 import type { RunState } from '../core/world/RunState';
+import { drawShellFallback, drawShellGlint, shellSeed } from './art/shellArt';
 
 const CHECKPOINT_OFF = 'checkpoint-off-placeholder';
 const CHECKPOINT_ON = 'checkpoint-on-placeholder';
 const PICKUP = 'ability-pickup-placeholder';
-const SECRET = 'secret-pickup-placeholder';
+const SHELL = 'shell-pickup';
+const SHELL_GLINT = 'shell-glint';
+/** Image fournie de la coquille (D-148), chargée par la scène (`ART_IMAGES`). */
+const SHELL_IMAGE = 'art:shell';
 const WIDTH = 10;
 const HEIGHT = 14;
 const PICKUP_SIZE = 10;
@@ -44,14 +48,26 @@ const STRANGE_LAMP: typeof REAL_LAMP = {
 const CABLE_REAL = { line: 0x3b3640, halo: 0xe8e0cc, end: 0x8e8a92 };
 const CABLE_STRANGE = { line: 0x5ee6d2, halo: 0x12303a, end: 0x2c3e48 };
 
+/** Ouverture de la coquille à gauche plutôt qu'à droite (l'image l'a à droite), selon son nom. */
+function shellFlipped(id: string): boolean {
+  return shellSeed(`${id}:side`) < 0.5;
+}
+
 /**
  * Affichage des checkpoints (placeholder neutre, design ouvert §45) : un petit repère qui s'allume
  * quand il est activé, plus vif s'il est le point de retour courant. Objets de capacité (D-26) :
- * une petite lueur qui flotte ; trouvailles (D-27) : la même, rose (placeholders, nature ouverte).
+ * une petite lueur qui flotte ; coquilles (D-148) : posées sur leur appui, un halo rose, un
+ * scintillement de temps en temps.
  */
 export class WorldView {
   private sprites: Phaser.GameObjects.Image[] = [];
   private pickupSprites: Phaser.GameObjects.Image[] = [];
+  /** Scintillement de chaque coquille (null : un objet de capacité). */
+  private glintSprites: (Phaser.GameObjects.Image | null)[] = [];
+  /** Décalage du scintillement de chaque coquille (ms), d'après son nom. */
+  private glintOffsets: number[] = [];
+  /** Coquille : taille dessinée (px logiques), d'après l'image. */
+  private shellSize: { w: number; h: number } = { w: SHELL_ART.heightPx, h: SHELL_ART.heightPx };
   /** Câbles de la salle (D-65), dessinés une fois par salle. */
   private readonly cables: Phaser.GameObjects.Graphics;
   private cableData: readonly LevelCable[] = [];
@@ -111,31 +127,69 @@ export class WorldView {
         .setScale(1 / this.artScale)
         .setDepth(5),
     );
-    for (const sprite of this.pickupSprites) {
-      sprite.destroy();
+    for (const sprite of [...this.pickupSprites, ...this.glintSprites]) {
+      sprite?.destroy();
     }
-    this.pickupSprites = this.pickups.items.map((item) =>
-      this.scene.add
-        .image(
-          (item.col + 0.5) * T,
-          (item.row + 0.5) * T,
-          item.kind === PickupKind.Secret ? SECRET : PICKUP,
-        )
+    const items = this.pickups.items;
+    const { w, h } = this.shellSize;
+    const pad = SHELL_ART.haloPx;
+    this.glintOffsets = items.map((item) => shellSeed(item.id) * SHELL_ART.glintPeriodMs);
+    this.pickupSprites = items.map((item) => {
+      if (item.kind !== PickupKind.Shell) {
+        return this.scene.add
+          .image((item.col + 0.5) * T, (item.row + 0.5) * T, PICKUP)
+          .setScale(1 / this.artScale)
+          .setDepth(6)
+          .setVisible(!item.taken);
+      }
+      // Posée sur son appui (rien ne flotte), l'ouverture d'un côté ou de l'autre selon son nom.
+      return this.scene.add
+        .image((item.col + 0.5) * T, (item.row + 1) * T, SHELL)
+        .setOrigin(0.5, (pad + h - SHELL_ART.sinkPx) / (h + 2 * pad))
+        .setFlipX(shellFlipped(item.id))
         .setScale(1 / this.artScale)
         .setDepth(6)
-        .setVisible(!item.taken),
+        .setVisible(!item.taken);
+    });
+    this.glintSprites = items.map((item) =>
+      item.kind === PickupKind.Shell
+        ? this.scene.add
+            .image(
+              (item.col + 0.5) * T + (shellFlipped(item.id) ? 0.15 : -0.15) * w,
+              (item.row + 1) * T - h * 0.8,
+              SHELL_GLINT,
+            )
+            .setScale(1 / this.artScale)
+            .setDepth(6)
+            .setVisible(false)
+        : null,
     );
   }
 
   render(): void {
     const items = this.pickups.items;
-    const bob = Math.sin((this.scene.time.now / PICKUP_BOB_MS) * Math.PI * 2) * PICKUP_BOB_PX;
+    const now = this.scene.time.now;
+    const bob = Math.sin((now / PICKUP_BOB_MS) * Math.PI * 2) * PICKUP_BOB_PX;
     for (let i = 0; i < items.length; i++) {
       const sprite = this.pickupSprites[i];
       const item = items[i];
-      if (sprite && item) {
-        sprite.setVisible(!item.taken).setY((item.row + 0.5) * T + bob);
+      if (!sprite || !item) {
+        continue;
       }
+      sprite.setVisible(!item.taken);
+      if (item.kind !== PickupKind.Shell) {
+        sprite.setY((item.row + 0.5) * T + bob);
+        continue;
+      }
+      // Le scintillement : une étoile qui s'ouvre et se referme, de temps en temps.
+      const glint = this.glintSprites[i];
+      const t = (now + (this.glintOffsets[i] ?? 0)) % SHELL_ART.glintPeriodMs;
+      const on = !item.taken && t < SHELL_ART.glintMs;
+      const k = on ? Math.sin((t / SHELL_ART.glintMs) * Math.PI) : 0;
+      glint
+        ?.setVisible(on)
+        .setAlpha(k)
+        .setScale((0.4 + 0.6 * k) / this.artScale);
     }
     const checkpoints = this.run.checkpoints;
     for (let i = 0; i < checkpoints.length; i++) {
@@ -169,7 +223,7 @@ export class WorldView {
 
   /**
    * Veilleuse (checkpoint, placeholder du style D-28 : petite lampe champignon, allumée ou non),
-   * objets de capacité et trouvailles (lueur étoilée), dessinés à l'échelle de l'écran.
+   * objets de capacité (lueur étoilée) et coquilles (D-148), dessinés à l'échelle de l'écran.
    */
   private createTextures(): void {
     const textures = this.scene.textures;
@@ -194,28 +248,55 @@ export class WorldView {
       }
       textures.addCanvas(key, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
     };
-    for (const [key, color] of [
-      [PICKUP, PLACEHOLDER_COLORS.checkpointLit],
-      [SECRET, PLACEHOLDER_COLORS.secret],
-    ] as const) {
-      const css = `#${color.toString(16).padStart(6, '0')}`;
-      make(key, PICKUP_SIZE, PICKUP_SIZE, (ctx) => {
-        const c = PICKUP_SIZE / 2;
-        const halo = ctx.createRadialGradient(c, c, 0, c, c, c);
-        halo.addColorStop(0, `${css}99`);
-        halo.addColorStop(1, `${css}00`);
-        ctx.fillStyle = halo;
-        ctx.fillRect(0, 0, PICKUP_SIZE, PICKUP_SIZE);
-        ctx.fillStyle = css;
-        ctx.beginPath();
-        for (let i = 0; i < 8; i++) {
-          const angle = (i * Math.PI) / 4;
-          const r = i % 2 === 0 ? c - 0.5 : 1.4;
-          ctx.lineTo(c + Math.cos(angle) * r, c + Math.sin(angle) * r);
-        }
-        ctx.fill();
-      });
-    }
+    const css = (color: number) => `#${color.toString(16).padStart(6, '0')}`;
+    make(PICKUP, PICKUP_SIZE, PICKUP_SIZE, (ctx) => {
+      const c = PICKUP_SIZE / 2;
+      const color = css(PLACEHOLDER_COLORS.checkpointLit);
+      const halo = ctx.createRadialGradient(c, c, 0, c, c, c);
+      halo.addColorStop(0, `${color}99`);
+      halo.addColorStop(1, `${color}00`);
+      ctx.fillStyle = halo;
+      ctx.fillRect(0, 0, PICKUP_SIZE, PICKUP_SIZE);
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      for (let i = 0; i < 8; i++) {
+        const angle = (i * Math.PI) / 4;
+        const r = i % 2 === 0 ? c - 0.5 : 1.4;
+        ctx.lineTo(c + Math.cos(angle) * r, c + Math.sin(angle) * r);
+      }
+      ctx.fill();
+    });
+    // La coquille (D-148) : l'image fournie, ou son dessin par le code, sur un halo rose.
+    const image = textures.exists(SHELL_IMAGE)
+      ? (textures.get(SHELL_IMAGE).getSourceImage() as HTMLImageElement)
+      : null;
+    const h = SHELL_ART.heightPx;
+    const w = image && image.height > 0 ? (h * image.width) / image.height : h * 1.2;
+    this.shellSize = { w, h };
+    const pad = SHELL_ART.haloPx;
+    make(SHELL, w + 2 * pad, h + 2 * pad, (ctx) => {
+      const cx = pad + w / 2;
+      const cy = pad + h / 2;
+      const r = Math.max(w, h) / 2 + pad;
+      const rose = css(PLACEHOLDER_COLORS.shell);
+      const alpha = Math.round(SHELL_ART.haloAlpha * 255)
+        .toString(16)
+        .padStart(2, '0');
+      const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+      halo.addColorStop(0, `${rose}${alpha}`);
+      halo.addColorStop(1, `${rose}00`);
+      ctx.fillStyle = halo;
+      ctx.fillRect(0, 0, w + 2 * pad, h + 2 * pad);
+      if (image) {
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(image, pad, pad, w, h);
+      } else {
+        drawShellFallback(ctx, pad, pad, w, h);
+      }
+    });
+    make(SHELL_GLINT, SHELL_ART.glintPx, SHELL_ART.glintPx, (ctx) => {
+      drawShellGlint(ctx, SHELL_ART.glintPx);
+    });
     for (const [key, lit] of [
       [CHECKPOINT_OFF, false],
       [CHECKPOINT_ON, true],

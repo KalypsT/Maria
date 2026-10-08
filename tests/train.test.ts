@@ -182,7 +182,7 @@ describe('le train, PR 2 : le départ et la voiture-couchettes (D-85)', () => {
     () => {
       const a = analysis(true);
       const start = surfaceAt(a, ARRIVAL.col, ARRIVAL.row);
-      const secret = level(ROOM).entities.find((e) => e.type === EntityType.Secret);
+      const secret = level(ROOM).entities.find((e) => e.type === EntityType.Shell);
       if (!secret) {
         throw new Error('trouvaille absente');
       }
