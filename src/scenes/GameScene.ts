@@ -89,6 +89,7 @@ import {
   type MapBox,
   type Zone,
 } from '../core/world/zone';
+import { shellTally, zoneShells } from '../core/world/shells';
 import { FlashbackView } from '../ui/FlashbackView';
 import { Hud } from '../ui/Hud';
 import { showEndScreen } from '../ui/EndScreen';
@@ -116,6 +117,7 @@ import {
   STRANGE_PALETTE,
   TRAIN_RIDE,
   CHASE_VIEW,
+  SHELL_ART,
 } from '../config/art';
 import { STORY_TIMING, StoryFlag, TOWER_CUBES } from '../config/story';
 import { PropStage } from '../core/story/PropStage';
@@ -1540,6 +1542,45 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
+   * Outil de debug (D-148) : Céleste à côté d'une coquille (sur son appui, deux ou trois tuiles à
+   * côté si la place le permet, sinon dessus : elle la ramasse).
+   */
+  teleportToShell(name: string): void {
+    const shell = this.zone ? zoneShells(this.zone).find((s) => s.name === name) : null;
+    if (!shell) {
+      return;
+    }
+    this.teleportToRoom(shell.room);
+    const level = this.level;
+    const free = (col: number, row: number) => tileAt(level, col, row) === Tile.Empty;
+    const ground = (col: number, row: number) => {
+      const tile = tileAt(level, col, row);
+      return tile === Tile.Solid || tile === Tile.OneWay;
+    };
+    const dx = [2, -2, 3, -3].find(
+      (d) =>
+        free(shell.col + d, shell.row) &&
+        free(shell.col + d, shell.row - 1) &&
+        ground(shell.col + d, shell.row + 1),
+    );
+    const col = shell.col + (dx ?? 0);
+    this.player.reset(
+      (col + 0.5) * TILE_SIZE - this.growth.hitbox.width / 2,
+      (shell.row + 1) * TILE_SIZE - this.growth.hitbox.height,
+      level,
+    );
+    this.feel.reset(this.player);
+    this.resetCamera();
+  }
+
+  /** Outil de debug (D-148) : les coquilles de la salle relues dans la sauvegarde. */
+  reloadPickups(): void {
+    const { abilities, collectibles } = this.session.data.progression;
+    this.pickups.load(this.level, abilities, collectibles);
+    this.worldView.rebuild();
+  }
+
+  /**
    * Ce n'est pas le moment de sortir (le soir), ou la porte ne s'ouvre pas encore (la porte de
    * derrière, D-46) : une bulle le rappelle, sans texte. Un parent le rappelle (D-37), sinon Céleste
    * y pense elle-même.
@@ -1871,17 +1912,28 @@ export class GameScene extends Phaser.Scene {
 
   /**
    * Objet ramassé, sauvegardé aussitôt. Capacité (D-26) : appliquée, indice de prototype affiché.
-   * Trouvaille (D-27) : rien d'affiché pour l'instant (pas de compteur avant la carte, §23).
+   * Coquille (D-148) : elle file vers le cahier, et « n/N » de son lieu s'affiche un moment.
    */
   private onPicked(index: number): void {
     const item = this.pickups.items[index];
     if (!item) {
       return;
     }
-    if (item.kind === PickupKind.Secret) {
+    if (item.kind === PickupKind.Shell) {
       this.audio.playJingle('found');
       this.audio.sfx.play('voice-laugh');
       void this.session.addCollectible(item.id);
+      // Elle file vers le cahier, puis « n/N » de son lieu (D-148).
+      const place = this.zone ? mapPage(this.zone, this.level.id) : null;
+      const count =
+        this.zone && place
+          ? shellTally(zoneShells(this.zone), place, this.session.data.progression.collectibles)
+          : null;
+      const from = this.screenPoint(
+        (item.col + 0.5) * TILE_SIZE,
+        (item.row + 1) * TILE_SIZE - SHELL_ART.heightPx / 2,
+      );
+      this.hud.showShell(count, { x: from.x, y: from.y });
       return;
     }
     if (isAbility(item.id)) {
@@ -2488,11 +2540,15 @@ export class GameScene extends Phaser.Scene {
 
   /** Centre du fondu en cercle (D-35) : Céleste, en px CSS de la page. */
   private irisCenter(): { x: number; y: number } {
+    return this.screenPoint(this.puppet.x, this.puppet.y - this.growth.hitbox.height / 2);
+  }
+
+  /** Point du monde (px) en px CSS de la page (réutilise le même objet). */
+  private screenPoint(x: number, y: number): { x: number; y: number } {
     const main = this.cameras.main;
     const bounds = this.game.canvas.getBoundingClientRect();
     const k = bounds.width / this.scale.width;
-    const y = this.puppet.y - this.growth.hitbox.height / 2;
-    this.irisPoint.x = bounds.left + (this.puppet.x - main.worldView.x) * main.zoom * k;
+    this.irisPoint.x = bounds.left + (x - main.worldView.x) * main.zoom * k;
     this.irisPoint.y = bounds.top + (y - main.worldView.y) * main.zoom * k;
     return this.irisPoint;
   }

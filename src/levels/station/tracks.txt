@@ -3,6 +3,8 @@
 ; feu ; son souffle repousse Céleste si elle est sur la voie. Le portique de signalisation (trouvaille
 ; moyenne) ; le toit du poste d'aiguillage, au bout de la caténaire (trouvaille, avec le crochet).
 ; @name: Les voies
+; @shell: tracks-gantry 58 14
+; @shell: tracks-signal-box 84 12
 ; @icon: train
 ; @world: street
 ; @music: station
@@ -28,7 +30,7 @@
 ; @decor: pigeon 49 14 1 1
 ; @decor: pigeon 54 14 1 1
 ; @decor: signalbox 80 13 9 12
-; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 ##########################################################################################
 #........................................................................................#
 #........................................................................................#

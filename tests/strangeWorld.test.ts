@@ -140,7 +140,7 @@ describe('monde étrange (D-34)', () => {
   });
 
   it('la trouvaille du passage est difficile, jamais nécessaire', { timeout: TIMEOUT }, () => {
-    const secret = level('shadows').entities.find((e) => e.type === EntityType.Secret);
+    const secret = level('shadows').entities.find((e) => e.type === EntityType.Shell);
     expect(secret).toBeDefined();
     if (secret) {
       const at = nodeAt('shadows', secret.col, secret.row);

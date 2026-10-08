@@ -207,7 +207,7 @@ describe('la gare (D-66)', () => {
         { room: 'station-depot', col: 73, rule: medium, easier: easy },
       ];
       for (const { room, col, rule, easier } of cases) {
-        const target = entity(room, EntityType.Secret, col);
+        const target = entity(room, EntityType.Shell, col);
         expect(reachable(station(rule), entrance()).has(target), room).toBe(true);
         expect(reachable(station(easier), entrance()).has(target), `${room} trop facile`).toBe(
           false,
@@ -225,7 +225,7 @@ describe('la gare (D-66)', () => {
         { room: 'station-hall', col: 67 },
       ];
       for (const { room, col } of cases) {
-        const target = entity(room, EntityType.Secret, col);
+        const target = entity(room, EntityType.Shell, col);
         expect(reachable(station(null), entrance()).has(target), `${room} sans crochet`).toBe(
           false,
         );
@@ -258,7 +258,7 @@ describe('la gare (D-66)', () => {
         { room: 'street', col: 20, from: nodeAt('street', 100, 7) },
       ];
       for (const { room, col, from } of cases) {
-        const target = entity(room, EntityType.Secret, col);
+        const target = entity(room, EntityType.Shell, col);
         const graph = (rule: WindowRule, hook: boolean) => {
           const g = new Map<Node, Set<Node>>();
           const min = rule ? rule(room) : 0;

@@ -4,6 +4,8 @@
 ; buanderie (D-133 : la chambre est à l'étage, à l'autre bout de la maison) ; au bout, la jardinière
 ; (trouvaille, seulement avec le crochet).
 ; @name: Terrasse
+; @shell: terrace-planter 2 8
+; @shell: terrace-table 37 21
 ; @icon: sun
 ; @world: garden
 ; @difficulty: easy
@@ -24,7 +26,7 @@
 ; @decor: windowbox 1 9 3 1
 ; @decor: guinguette 29 9 19 4
 ; @decor: butterfly 8 10 24 9
-; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (danger), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (danger), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 #######.............................vvvvvvvvvvvvvv
 #####...................................vvvvvvvvvv
 #...........................................vvvvvv

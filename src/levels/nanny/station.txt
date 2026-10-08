@@ -4,6 +4,7 @@
 ; crochet attrape les caténaires : chacune n'existe que dans une couche ; on bascule en plein vol,
 ; entre deux. Sorties : (1) vers la maison, (2) vers le train.
 ; @name: La gare d'autrefois
+; @shell: nanny-station-kiosk 61 26
 ; @world: strange
 ; @mapped: yes
 ; @music: strange
@@ -28,7 +29,7 @@
 ; @decor: floatsuitcase 70 5 3 2
 ; @decor: floatsuitcase 20 2 3 2
 ; @decor: eyes 76 22 1 1
-; Légende : # mur/sol, - quai et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S trouvaille, 1-9 sorties.
+; Légende : # mur/sol, - quai et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S coquille (nommée par ; @shell:), 1-9 sorties.
 ##########################################################################################
 #.........####################..#........................................................#
 #.........####################..#........................................................#

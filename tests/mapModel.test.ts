@@ -105,7 +105,7 @@ describe('carte dessinée par Céleste (§24)', () => {
         visited,
         activatedCheckpoints: ['bedroom:c20-19', 'attic:c51-19'],
         checkpoint: { levelId: 'attic', checkpointId: 'c51-19' },
-        collectibles: ['attic:s6-5'],
+        collectibles: ['attic-ridge'],
       }),
     );
     const bedroom = some.rooms.find((room) => room.id === 'bedroom');

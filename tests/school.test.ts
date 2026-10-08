@@ -106,7 +106,7 @@ describe('l’école et son monde étrange (D-64)', () => {
   );
 
   it('le panier de basket : moyen exactement, avec le parapluie', { timeout: TIMEOUT }, () => {
-    const secret = level('schoolyard').entities.find((e) => e.type === EntityType.Secret);
+    const secret = level('schoolyard').entities.find((e) => e.type === EntityType.Shell);
     if (!secret) {
       throw new Error('trouvaille absente');
     }

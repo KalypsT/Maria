@@ -4,6 +4,7 @@
 ; sur le toit, on est repoussée ; couchée (glissade) ou dans un creux, entre deux voitures, rien.
 ; Au bout, la trappe du wagon-restaurant (porte 2).
 ; @name: Le toit du train
+; @shell: roof-chimney 92 8
 ; @icon: roof
 ; @vehicle: train
 ; @world: street
@@ -19,7 +20,7 @@
 ; @decor: roofvent 30 13 4 2
 ; @decor: kitchenchimney 92 9 2 6
 ; @decor: roofhatch 103 13 3 2
-; Légende : # paroi, plancher ou toit, b bois, t tissu (pleins), - filet, tablette, étagère ou crochet (traversables), C veilleuse (checkpoint), P repère de départ, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; Légende : # paroi, plancher ou toit, b bois, t tissu (pleins), - filet, tablette, étagère ou crochet (traversables), C veilleuse (checkpoint), P repère de départ, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 #............................................................................................................#
 #............................................................................................................#
 #............................................................................................................#

@@ -4,6 +4,7 @@
 ; panneau d'affichage du quai (sur ses deux pieds, D-135) et le mur font une cheminée (saut mural)
 ; jusqu'à une trouvaille (difficile).
 ; @name: Les quais
+; @shell: platforms-pillar 6 7
 ; @icon: train
 ; @world: street
 ; @music: station
@@ -24,7 +25,7 @@
 ; @decor: shelter 62 21 9 6
 ; @decor: stationclock 72 15 3 12
 ; @decor: signal 23 21 1 6
-; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 ################################################################################
 #..............................................................................#
 #..............................................................................#

@@ -98,6 +98,6 @@ Aucune, par décision (D-138).
 
 Détourage essayé avec `scripts/art-cutout.py` : propre du premier coup. La spirale se lit encore à 30 px (une coquille de 10 à 12 px logiques sur téléphone). Ton chaud qui ressort bien sur les murs bleus de la nuit. Limites : peu de contraste sur le sable, le bois clair et le papier ; un style plus détaillé que le décor dessiné par le code (acceptable à cette taille, cohérent avec les personnages illustrés). Trois rendus essayés : brute, halo rose discret, liseré sombre.
 
-## Questions posées à l'utilisateur
+## Les choix de l'utilisateur
 
-Récompense, compteur, carte, indices, lieux sans retour, niveau 8, nombre, part des revisites, revisites aux niveaux 5 et 6, difficulté, types de secrets, rendu de l'image, variété, retour au ramassage, nom, retour rapide après la fin, identifiants fixes et sauvegarde. Les réponses seront reportées ici, puis dans une décision.
+Les recommandations, sauf trois points : aucune coquille dans un lieu sans retour (pour pouvoir tout récupérer après la fin), pas de voyage rapide pour l'instant, des noms fixes sans migration (aucune vraie partie n'existe). Le détail et le plan en 6 PR : **D-148**.

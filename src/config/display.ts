@@ -65,8 +65,8 @@ export const PLACEHOLDER_COLORS = {
   /** Checkpoint éteint / allumé (placeholders, D-21) : une veilleuse. */
   checkpoint: 0x7a7066,
   checkpointLit: 0xf2c879,
-  /** Trouvaille (secret, D-27) : rose des crayons de Céleste. */
-  secret: 0xe38aa0,
+  /** Coquille (D-27, D-148) : son halo, rose des crayons de Céleste. */
+  shell: 0xe38aa0,
   /** Sortie vers une autre salle (placeholder, D-25). */
   exit: 0xf2e6c9,
   /** Bâton de Céleste et arc de frappe (placeholders). */

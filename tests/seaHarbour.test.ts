@@ -101,7 +101,7 @@ describe('le phare et le port : la boucle de la baie (D-100)', () => {
 
   it('la buse du port : sa trouvaille seulement à marée basse ; les crabes de la vase aussi', () => {
     const port = level('sea-port');
-    const pipe = port.entities.find((e) => e.type === EntityType.Secret && e.row === 27);
+    const pipe = port.entities.find((e) => e.type === EntityType.Shell && e.row === 27);
     expect(pipe).toBeDefined();
     const crabs = (l: LevelData) => l.entities.filter((e) => e.type === EntityType.Patroller);
     expect(crabs(port).length).toBeGreaterThan(0);

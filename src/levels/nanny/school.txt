@@ -6,6 +6,8 @@
 ; casier, ouvert dans le souvenir, une trouvaille. Sorties : (1) vers la maison (la bibliothèque),
 ; (2) vers la rue.
 ; @name: L'école d'autrefois
+; @shell: nanny-school-shelf 71 4
+; @shell: nanny-school-locker 10 30
 ; @world: strange
 ; @mapped: yes
 ; @music: strange
@@ -37,7 +39,7 @@
 ; @decor: giantstake 85 6 1 11
 ; @decor: giantstake 70 1 1 12
 ; @decor: shelf 71 5 2 1
-; Légende : # mur/sol, b bois (plein), - étagère et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S trouvaille, 1-9 sorties.
+; Légende : # mur/sol, b bois (plein), - étagère et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S coquille (nommée par ; @shell:), 1-9 sorties.
 ################################################################################################
 #......................!..!.......................!..!................b.....!.!................#
 #......................!..!.......................!..!................b.....!.!................#

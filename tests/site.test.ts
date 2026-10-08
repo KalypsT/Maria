@@ -98,7 +98,7 @@ describe('la supérette et le chantier (D-63)', () => {
     { timeout: TIMEOUT },
     () => {
       const exit = at('site', 2);
-      const secret = entity('site', EntityType.Secret);
+      const secret = entity('site', EntityType.Shell);
       const from = at('site', 1);
       expect(reachable(within(['site'], null), from).has(exit), 'sans parapluie').toBe(false);
       expect(reachable(within(['site'], null), from).has(secret), 'sans parapluie').toBe(false);
@@ -166,7 +166,7 @@ describe('la supérette et le chantier (D-63)', () => {
       ];
       for (const { room, from, col } of cases) {
         const secret = level(room).entities.find(
-          (e) => e.type === EntityType.Secret && e.col === col,
+          (e) => e.type === EntityType.Shell && e.col === col,
         );
         if (!secret) {
           throw new Error(`trouvaille absente (${room})`);

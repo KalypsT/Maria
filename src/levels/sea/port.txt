@@ -6,6 +6,8 @@
 ; la capitainerie, le banc des marées, la lanterne ; la grue (défi : on monte entre ses pieds en saut
 ; mural, sa flèche, la trouvaille sur sa cabine) ; des mouettes qui piquent ; la promenade (sortie 1).
 ; @name: Le port
+; @shell: port-culvert 140 27
+; @shell: port-crane 171 4
 ; @icon: sea
 ; @world: street
 ; @backdrop: sea

@@ -283,8 +283,8 @@ export const EntityType = {
   Checkpoint: 'checkpoint',
   /** Objet qui donne une capacité, nommée par `; @ability:` (D-26). */
   Ability: 'ability',
-  /** Trouvaille : secret à découvrir (D-27), enregistrée dans la sauvegarde. */
-  Secret: 'secret',
+  /** Coquille à trouver (D-27, D-148), nommée par `; @shell:`, enregistrée dans la sauvegarde. */
+  Shell: 'shell',
 } as const;
 export type EntityType = (typeof EntityType)[keyof typeof EntityType];
 
@@ -292,6 +292,8 @@ export interface LevelEntity {
   readonly type: EntityType;
   readonly col: number;
   readonly row: number;
+  /** Nom fixe d'une coquille (`; @shell:`, D-148) : son identifiant dans la sauvegarde. */
+  readonly name?: string;
 }
 
 export interface TilePos {

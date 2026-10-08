@@ -182,7 +182,7 @@ export function highTide(level: LevelData): LevelData {
   );
   const wet = (e: LevelEntity) => tiles[e.row * width + e.col] === Tile.Water;
   const entities = level.entities.filter(
-    (e) => !(wet(e) && (e.type === EntityType.Secret || e.type === EntityType.Patroller)),
+    (e) => !(wet(e) && (e.type === EntityType.Shell || e.type === EntityType.Patroller)),
   );
   const result: LevelData = {
     ...level,
@@ -255,9 +255,9 @@ export function checkTide(level: LevelData): void {
     }
   }
   for (const e of level.entities) {
-    if (e.type === EntityType.Secret && tileOf(level, e.col, e.row) === Tile.Water) {
+    if (e.type === EntityType.Shell && tileOf(level, e.col, e.row) === Tile.Water) {
       throw new Error(
-        `Niveau ${level.id} : trouvaille sous l'eau à marée basse (${String(e.col)} ${String(e.row)})`,
+        `Niveau ${level.id} : coquille sous l'eau à marée basse (${String(e.col)} ${String(e.row)})`,
       );
     }
   }

@@ -50,7 +50,7 @@ const ENTITIES: Readonly<Record<string, EntityType>> = {
   o: EntityType.Snail,
   C: EntityType.Checkpoint,
   A: EntityType.Ability,
-  S: EntityType.Secret,
+  S: EntityType.Shell,
 };
 /** Matériaux d'affichage (D-25). */
 const MATERIALS: Readonly<Record<string, Material>> = {
@@ -120,6 +120,11 @@ const ERASE_SPEED = /^([\w.-]+)\s+(\d+(?:\.\d+)?)$/;
 const ERASE_UNTIL = /^([\w.-]+)$/;
 /** Étape des vagues de l'effacement (D-111), répétable, dans l'ordre : `; @erase-step: a,b`. */
 const ERASE_STEP = /^([a-z0-9-]+(?:\s*,\s*[a-z0-9-]+)*)$/;
+/**
+ * Nom fixe d'une coquille (D-148), répétable : `; @shell: attic-ridge 6 5` (nom, colonne et ligne
+ * de son `S`). Le nom est son identifiant dans la sauvegarde : la déplacer ne la fait pas oublier.
+ */
+const SHELL = /^([a-z0-9]+(?:-[a-z0-9]+)*)\s+(\d+)\s+(\d+)$/;
 /** Zone d'une seule couche (D-107), répétable : `; @shift: memory 10 4 6 2`. */
 const SHIFT = /^(present|memory)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
 
@@ -129,7 +134,8 @@ const SHIFT = /^(present|memory)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
  * Légende : `#` plein, `=` traversable par le dessous, `.` vide, `P` départ (une seule fois),
  * `G` arrivée d'un parcours (au plus une fois), `e` patrouilleur, `a` araignée (D-46), `o` escargot (D-49), `C` checkpoint, `^` danger qui pique, `!` ronces, qui piquent aussi (D-51, D-56),
  * `b` bois, `t` tissu et `v` feuillage (pleins, D-46), `-` étagère (traversable), `1`-`9` sortie dans un mur latéral,
- * `A` objet de capacité (au plus un, capacité nommée par `; @ability:`), `S` trouvaille (secret),
+ * `A` objet de capacité (au plus un, capacité nommée par `; @ability:`), `S` coquille (nommée par
+ * `; @shell:`, D-148),
  * `~` eau (une flaque, la mer qui ne se retire jamais, D-95).
  * Les commentaires `; @clé: valeur` sont des métadonnées ; `; @decor:` (répétable) déclare
  * l'habillage (D-28), `; @door:` (répétable) une porte de façade (D-61), `; @cable:` (répétable)
@@ -142,6 +148,8 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   const doors: LevelDoor[] = [];
   const cableTiles: number[][] = [];
   const trains: LevelTrain[] = [];
+  /** Noms des coquilles (D-148), par tuile `col,ligne`. */
+  const shellNames = new Map<string, string>();
   let chaseEnd = -1;
   let chaseDir = 'up' as ChaseDir;
   let chaseLook = 'default' as ChaseLook;
@@ -186,6 +194,16 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         throw new Error(`Niveau ${id}, ligne ${index + 1} : @door attend « numéro col ligne »`);
       }
       doors.push({ id: Number(d[1]), col: Number(d[2]), row: Number(d[3]) });
+    } else if (match?.[1] === 'shell' && match[2] !== undefined) {
+      const m = SHELL.exec(match[2].trim());
+      if (!m?.[1]) {
+        throw new Error(`Niveau ${id}, ligne ${index + 1} : @shell attend « nom col ligne »`);
+      }
+      const at = `${m[2] ?? ''},${m[3] ?? ''}`;
+      if (shellNames.has(at) || [...shellNames.values()].includes(m[1])) {
+        throw new Error(`Niveau ${id}, ligne ${index + 1} : @shell ${m[1]} en double`);
+      }
+      shellNames.set(at, m[1]);
     } else if (match?.[1] === 'cable' && match[2] !== undefined) {
       const c = CABLE.exec(match[2].trim());
       if (!c) {
@@ -382,7 +400,11 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         goal = { col, row };
       }
       const entity = ENTITIES[char];
-      if (entity) {
+      const name = entity === EntityType.Shell ? shellNames.get(`${col},${row}`) : undefined;
+      if (entity && name !== undefined) {
+        entities.push({ type: entity, col, row, name });
+        shellNames.delete(`${col},${row}`);
+      } else if (entity) {
         entities.push({ type: entity, col, row });
       }
       drawn[row * width + col] = tile;
@@ -392,6 +414,13 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
 
   if (!spawn) {
     throw new Error(`Niveau ${id} : point de départ « ${SPAWN} » manquant`);
+  }
+  const [orphan] = shellNames;
+  if (orphan) {
+    const [at, name] = orphan;
+    throw new Error(
+      `Niveau ${id} : @shell ${name} ${at.replace(',', ' ')} sans « S » à cette place`,
+    );
   }
   if (!tideRows && (seas.length > 0 || rises.length > 0)) {
     throw new Error(`Niveau ${id} : @sea et @rise vont de pair avec @tide`);

@@ -76,7 +76,7 @@ describe('l’aire de jeux (D-61)', () => {
     () => {
       expect(reachable(inPlayground(medium), arrival()).has(deck())).toBe(true);
       expect(reachable(inPlayground(easy), arrival()).has(deck()), 'trop facile').toBe(false);
-      const secrets = level('playground').entities.filter((e) => e.type === EntityType.Secret);
+      const secrets = level('playground').entities.filter((e) => e.type === EntityType.Shell);
       expect(secrets).toHaveLength(1);
       for (const s of secrets) {
         const at = nodeAt('playground', s.col, s.row);

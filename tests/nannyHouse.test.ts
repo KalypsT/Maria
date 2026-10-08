@@ -177,7 +177,7 @@ describe('la maison de la nounou : l’entrée, le miroir, la maison (D-110)', (
   it('sous le canapé, dans le souvenir : on y glisse jusqu’à la trouvaille ; jamais dans le présent', () => {
     const house = level('nanny-house');
     const secret = need(
-      house.entities.find((e) => e.type === EntityType.Secret && e.row === 36),
+      house.entities.find((e) => e.type === EntityType.Shell && e.row === 36),
       'trouvaille du canapé',
     );
     const attempt = (layer: 'present' | 'memory', slide: boolean) => {

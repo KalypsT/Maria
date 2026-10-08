@@ -686,7 +686,32 @@ export const ART_IMAGES: Readonly<Record<string, string>> = {
   maria: 'maria.png',
   /** Roger, la peluche singe de Céleste (D-68, D-69) : image fournie par l'utilisateur, détourée. */
   roger: 'roger.png',
+  /** La coquille d'escargot (D-148) : image fournie par l'utilisateur, détourée. */
+  shell: 'shell.png',
 };
+
+/**
+ * Les coquilles (D-148) : posées sur leur appui (rien ne flotte), un halo rose discret (le rose des
+ * trouvailles reste leur signe), un scintillement de temps en temps, décalé d'une coquille à
+ * l'autre. L'image `shell`, ou un dessin par le code si elle manque. PROVISOIRE : à juger sur
+ * téléphone.
+ */
+export const SHELL_ART = {
+  /** Hauteur de la coquille (px logiques ; Céleste en fait 24 à 28). */
+  heightPx: 11,
+  /** Halo rose autour de la coquille (px) et son opacité au centre. */
+  haloPx: 5,
+  haloAlpha: 0.45,
+  /** Enfoncée d'autant dans son appui (px), pour qu'elle y repose. */
+  sinkPx: 1,
+  /** Scintillement : période, durée (ms) et taille (px). */
+  glintPeriodMs: 3800,
+  glintMs: 560,
+  glintPx: 7,
+  /** Au ramassage : la coquille file vers le cahier (ms), puis « n/N » du lieu reste affiché (ms). */
+  flyMs: 620,
+  countMs: 2200,
+} as const;
 
 /**
  * Personnage illustré (D-123) : image fournie sous `public/art/` (détourée, `scripts/art-cutout.py`),

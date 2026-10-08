@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Les coquilles** (les trouvailles revues, demande de l'utilisateur) : audit fait (`docs/COQUILLES.md`, les 57 trouvailles mesurées par l'analyse à chaque étape des capacités), image de la coquille fournie et détourée à l'essai. Sur `ccr-c9ed5a1e-fyh3vf`. Suite : **les réponses de l'utilisateur** (récompense, compteur, carte, lieux sans retour, nombre, revisites, rendu, identifiants fixes), puis un plan en PR.
+**Les coquilles** (les trouvailles revues, D-148) : audit fait (`docs/COQUILLES.md`), choix de l'utilisateur et plan validés en 6 PR (le système ; la carte et le cahier ; la boîte à coquilles et la fin ; la liste vérifiée, la maison et le jardin ; le quartier et la gare ; le train et la mer). **PR 1 faite : le système** (les noms fixes, la coquille posée et son scintillement, le compteur au ramassage, le debug), sur `ccr-c9ed5a1e-fyh3vf`. Suite : essai sur téléphone, puis la PR 2. À confirmer avant leur PR : un lieu = une page du cahier ; les défis de la nounou sans coquille (un jouet d'autrefois à regarder ?) ; le détail de fin (un petit escargot vivant sur l'étagère de Maria ?).
 
 **Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139) , **PR 2 faite : la berceuse, le moteur et le parcours d'essai 17** (D-140), **PR 3 faite : la chambre immense, le lit et le coffre** (D-141), **PR 4 faite : le ciel de la chambre** (D-142), **PR 5 faite : la chambre grande, la vraie chambre la nuit, Maria retrouvée** (D-143), **PR 6 faite : le matin et le dernier plan** (D-144) et **PR 7 faite : après la fin** (D-145), sur `ccr-06b9800a-238lrq`. **Le niveau 8 est complet : le jeu se joue du premier soir à la fin.** Suite : **essai sur téléphone** (le parcours 17, tout le monde de Maria, toute la fin) ; à fournir : le thème de fin (`ending`), le jingle de Maria, Céleste en phase 4 illustrée.
 
@@ -33,6 +33,15 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les coquilles, PR 1 : le système (D-148)
+
+- Chaque coquille a un nom fixe (`; @shell:`), son identifiant dans la sauvegarde ; les 57 sont nommées. Pas de migration (aucune vraie partie).
+- La coquille : l'image fournie, posée sur son appui, un halo rose, un scintillement de temps en temps ; l'ouverture à gauche ou à droite selon son nom.
+- Au ramassage : elle file vers le bouton Carte, puis « n/N » du lieu (une page du cahier) s'affiche à côté.
+- DEBUG → Coquilles : par lieu, « Aller », « Trouvée » ou « Oublier », tout ou rien.
+- Tests : `pickups.test.ts` (les noms, les erreurs, une coquille déplacée garde son nom), `shells.test.ts` (la liste, le compte par lieu). Vérifié dans Chromium : le grenier, la grotte de la plage, la cuisine (le ramassage et « 1/11 »).
+- [ ] À vérifier sur téléphone : la taille de la coquille (11 px logiques), le halo assez visible sur le sable et le bois clair ? Le scintillement assez fréquent ? L'envol vers le bouton Carte et l'étiquette « n/N » : lisibles, pas gênants ?
 
 ### Céleste illustrée en pyjama ; maman au canapé et au banc (D-147)
 

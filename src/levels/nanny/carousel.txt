@@ -5,6 +5,8 @@
 ; Sortie (1) vers la plage ; portes (2) vers la maison et (3) vers le train d'autrefois, ouvertes
 ; une fois le cube bleu trouvé.
 ; @name: Le carrousel d'autrefois
+; @shell: nanny-carousel-ledge 57 4
+; @shell: nanny-carousel-floor 31 30
 ; @world: strange
 ; @mapped: yes
 ; @music: strange
@@ -30,7 +32,7 @@
 ; @decor: horsepole 34 9 1 13
 ; @decor: bedgate 26 3 3 5
 ; @decor: stationgate 38 3 3 5
-; Légende : # mur/sol, - planche (traversable), = ponton (traversable), ~ eau (la marée haute), ! ronces (piquent), C lanterne, P départ, S trouvaille, 1-9 sorties.
+; Légende : # mur/sol, - planche (traversable), = ponton (traversable), ~ eau (la marée haute), ! ronces (piquent), C lanterne, P départ, S coquille (nommée par ; @shell:), 1-9 sorties.
 ################################################################
 #.................................................!.!..........#
 #.................................................!.!..........#

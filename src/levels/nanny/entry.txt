@@ -5,6 +5,7 @@
 ; Céleste l'imite (la bascule). Dans le souvenir, des patères mènent à l'étagère à chapeaux et à sa
 ; trouvaille (on les voit en contour fantôme avant d'avoir la bascule). Sortie (1) vers la maison.
 ; @name: L'entrée
+; @shell: nanny-entry-pegs 41 7
 ; @world: strange
 ; @mapped: yes
 ; @music: strange
@@ -25,7 +26,7 @@
 ; @decor: nannymirror 47 2 6 21
 ; @decor: mirrorglass 49 1 2 22
 ; @decor: rug 54 22 20 1
-; Légende : # mur/sol, b bois (plein), - étagère et = planche (traversables), C veilleuse, P départ, S trouvaille, 1-9 sorties.
+; Légende : # mur/sol, b bois (plein), - étagère et = planche (traversables), C veilleuse, P départ, S coquille (nommée par ; @shell:), 1-9 sorties.
 ####################################################################################
 #................................................##................................#
 #................................................##................................#

@@ -2078,3 +2078,38 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Robe et veste** : pas encore (pièces reçues, à composer) ; elles restent dessinées par le code.
 - **Maman au canapé** : jambes repliées, assise, les pieds au sol (le canapé fait 2 tuiles). **Au banc** : ChatGPT l'a dessinée accroupie ; posée au sol à côté du banc, au soleil, les pieds au sol (le banc fait 1 tuile : ses fesses posées sur le banc, ses pieds passeraient sous le sol). Son cadre passe de la colonne 10, sur le banc, à la colonne 12, au sol (rien ne flotte : `storyProblems`).
 - **Détourage** : `--ring` et `--reach` pour les boucles épaisses de maman (liseré clair entre les mèches).
+
+## D-148 — Les coquilles : les trouvailles revues (choix et plan)
+
+- **Demande de l'utilisateur** : revoir toutes les trouvailles une fois les huit niveaux faits ; les représenter par des **coquilles d'escargot** (image fournie). Audit dans `docs/COQUILLES.md` (les 57 trouvailles mesurées par l'analyse, à chaque étape des capacités). **Changement de progression et de sauvegarde, signalé et accepté.**
+- **Choix de l'utilisateur** (les recommandations, sauf 6, 17 et 18) :
+  - **la récompense** : la collection, **une boîte à coquilles dans la chambre** qui se remplit, et un petit détail de plus dans l'écran de fin quand on les a toutes, sans rien expliquer ; pas de bonus de jeu ;
+  - **les paliers** : quand toutes les coquilles d'un lieu sont trouvées, **sa page du cahier se colorie** ;
+  - **le compteur** : un rappel de 2 s au ramassage (la coquille et « n/N » du lieu), et le cahier ; jamais à l'écran en permanence ;
+  - **la carte** : le nombre par lieu, et les coquilles **vues mais pas prises** dessinées en pointillés ;
+  - **des traces de bave argentée** qui brillent mènent à quelques coquilles cachées (secrets d'observation) ;
+  - **aucune coquille dans un lieu sans retour** (le passage d'ombres, la maison de la nounou) : toutes se récupèrent après la fin (choix 6b) ; **aucune au niveau 8** ;
+  - **environ 50**, de 6 à 8 par niveau du 1 au 6 ; **un tiers de revisites** aux niveaux 1 à 4 ; aux niveaux 5 et 6, des revisites **par l'état du monde** (la marée, le soir, le train à quai) ;
+  - **au plus une difficile par niveau**, jamais sous 67 ms ; **au moins un secret d'observation ou un passage caché** par niveau, en plus des perchoirs ;
+  - **le rendu** : l'image telle quelle, **posée sur son appui** (rien ne flotte), un **halo rose discret** (le code « rose = trouvaille » reste) et un petit scintillement de temps en temps ; la même coquille partout ;
+  - **au ramassage** : jingle et rire comme avant, la coquille file vers le coin de l'écran avec le compteur ;
+  - **le nom** : « coquilles » partout ;
+  - **pas de voyage rapide** pour l'instant (l'utilisateur veut y réfléchir à part) ;
+  - **des noms fixes dès maintenant** (`; @shell:`), pour les changements à venir ; **pas de migration** : aucune vraie partie n'existe (les trouvailles ramassées dans une partie d'essai sont oubliées).
+- **Plan en 6 PR** :
+  1. **le système** : les noms, la coquille dessinée, le ramassage et son compteur, le debug, le nom ; aucune coquille déplacée ;
+  2. **la carte et le cahier** : la coquille à la place de l'étoile, le nombre par lieu, les coquilles vues en pointillés, la page qui se colorie ;
+  3. **la boîte à coquilles** dans la chambre, et le détail de l'écran de fin ;
+  4. **la liste vérifiée** (l'intention de chaque coquille, un seul test) ; les coquilles retirées des lieux sans retour ; **la maison et le jardin** replacés, les traces de bave ;
+  5. **le quartier et la gare** ;
+  6. **le train et la station balnéaire** (les revisites par l'état du monde).
+- **À confirmer avant leur PR** (propositions) : un « lieu » est une page du cahier (la maison et le jardin partagent « Ma maison ») ; au bout des défis de la nounou, qui n'ont plus de coquille, un jouet d'autrefois à regarder (Agir : un cœur, rien à garder) ; le détail de fin, un petit escargot vivant qui traverse lentement l'étagère de Maria et laisse une trace argentée.
+
+### D-148, PR 1 : le système
+
+- **Les noms** : `; @shell: nom col ligne` (répétable) nomme le `S` à cette place ; le nom est l'identifiant de la coquille dans la sauvegarde (`progression.collectibles`). La lecture d'une salle refuse un nom sans `S`, un nom en double, un nom mal écrit ; la zone refuse une coquille sans nom et un nom pris deux fois. Les 57 coquilles sont nommées (en anglais, comme les identifiants : `attic-ridge`, `street-nest`…). Une coquille sans nom (un parcours d'essai, qui ne sauvegarde rien) garde sa salle et sa tuile. **Pas de migration** (choix de l'utilisateur) : une partie d'essai oublie les trouvailles déjà ramassées.
+- **Le code** : `EntityType.Secret` devient `EntityType.Shell`, `secretId` devient `shellId` ; `zoneShells` et `shellTally` (`src/core/world/shells.ts`, purs) : la liste des coquilles et le compte par lieu.
+- **Le dessin** (`SHELL_ART` dans `src/config/art.ts`, `src/scenes/art/shellArt.ts`) : l'image fournie (`public/art/shell.png`, détourée par `scripts/art-cutout.py`, 96 px de haut), 11 px logiques de haut, **posée sur son appui** (enfoncée d'un pixel) ; un halo rose discret ; l'ouverture d'un côté ou de l'autre selon son nom ; **un scintillement** (une petite étoile qui s'ouvre et se referme) toutes les 3,8 s, décalé d'une coquille à l'autre. Sans l'image, une coquille dessinée par le code. L'objet de capacité garde sa lueur qui flotte.
+- **Au ramassage** : le jingle et le rire comme avant ; **la coquille file vers le bouton Carte** (620 ms), puis une étiquette « coquille n/N » du lieu s'affiche à côté pendant 2,2 s (en haut à gauche sans commandes tactiles). Un **lieu** est une page du cahier : la maison et le jardin partagent « Ma maison ». Une salle hors de la carte : la coquille seule.
+- **Debug** : une section « Coquilles » (trouvées sur le total, par lieu ; pour chacune, « Aller » à côté d'elle et « Trouvée » ou « Oublier » ; « Toutes trouvées », « Aucune »).
+- **Aucune coquille déplacée** : les placements viennent avec les PR 4 à 6.

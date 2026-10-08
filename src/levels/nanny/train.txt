@@ -8,6 +8,8 @@
 ; maison et (3) vers la rue d'autrefois, ouvertes une fois le cube turquoise trouvé ; porte (4) vers
 ; le carrousel d'autrefois (îlot 4), ouverte une fois le cube bleu trouvé.
 ; @name: Le train d'autrefois
+; @shell: nanny-train-signal 86 5
+; @shell: nanny-train-car 12 14
 ; @world: strange
 ; @mapped: yes
 ; @music: strange
@@ -37,7 +39,7 @@
 ; @decor: stationgate 70 4 3 5
 ; @decor: schoolgate 76 4 3 5
 ; @decor: seagate 79 4 1 5
-; Légende : # mur/sol, - quai et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S trouvaille, 1-9 sorties.
+; Légende : # mur/sol, - quai et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S coquille (nommée par ; @shell:), 1-9 sorties.
 ##########################################################################################
 #....................######....................!................................!.!......#
 #....................######....................!................................!.!......#

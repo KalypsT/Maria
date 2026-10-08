@@ -312,7 +312,7 @@ describe('les îlots de mémoire de la maison de la nounou (D-112, D-113)', () =
       it('des trouvailles neuves ; certaines enfermées dans le présent, ouvertes dans le souvenir', () => {
         const secrets = islet.rooms.flatMap((room) =>
           level(room)
-            .entities.filter((e) => e.type === EntityType.Secret)
+            .entities.filter((e) => e.type === EntityType.Shell)
             .map((e) => ({ room, ...e })),
         );
         expect(secrets.length).toBe(islet.secrets);

@@ -7,6 +7,7 @@
 ; carrousel au bout. Sous la jetée, à marée basse : les pilotis, deux pieux en cheminée et une
 ; trouvaille (défi).
 ; @name: La jetée
+; @shell: jetty-piles 162 19
 ; @icon: sea
 ; @world: street
 ; @backdrop: sea

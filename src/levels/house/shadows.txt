@@ -1,6 +1,7 @@
 ; Passage d'ombres (§6.2, D-34) : une montée d'étagères qui flottent autour d'un vide. Maria est
 ; assise de l'autre côté, hors d'atteinte ; tout en haut, un berceau vide.
 ; @name: Passage d'ombres
+; @shell: shadows-corner 43 2
 ; @world: strange
 ; @difficulty: medium
 ; @ambient: #1a1f2c
@@ -41,7 +42,7 @@
 ; @decor: eyes 8 12 1 1
 ; @decor: eyes 18 33 1 1
 ; @decor: eyes 43 30 1 1
-; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), ^ briques de jeu (danger), e jouet mécanique, C veilleuse (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), ^ briques de jeu (danger), e jouet mécanique, C veilleuse (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 ##############################################
 #............................................#
 #..........................................S.#
