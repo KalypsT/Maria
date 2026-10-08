@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { TILE_SIZE as T } from '../src/config/display';
+import { zoneShells } from '../src/core/world/shells';
 import { buildMapModel, mapProblems, type MapProgress } from '../src/core/world/mapModel';
 import { buildZone, isStrangeRoom, mapPage } from '../src/core/world/zone';
 import { HOUSE } from '../src/levels/house/zone';
@@ -94,11 +95,12 @@ describe('carte dessinée par Céleste (§24)', () => {
     ).toBeNull();
   });
 
-  it('seules les veilleuses allumées et les trouvailles ramassées apparaissent', () => {
+  it('seules les veilleuses allumées et les coquilles trouvées apparaissent', () => {
     const visited = ['bedroom', 'hall', 'staircase', 'attic'];
     const none = buildMapModel(zone, progress({ visited }));
     expect(none.rooms.flatMap((room) => room.lamps)).toEqual([]);
-    expect(none.rooms.flatMap((room) => room.stars)).toEqual([]);
+    expect(none.rooms.flatMap((room) => room.shells)).toEqual([]);
+    expect(none.rooms.flatMap((room) => room.seenShells)).toEqual([]);
     const some = buildMapModel(
       zone,
       progress({
@@ -112,7 +114,33 @@ describe('carte dessinée par Céleste (§24)', () => {
     const attic = some.rooms.find((room) => room.id === 'attic');
     expect(bedroom?.lamps.map((lamp) => lamp.current)).toEqual([false]);
     expect(attic?.lamps.map((lamp) => lamp.current)).toEqual([true]);
-    expect(attic?.stars).toHaveLength(1);
+    expect(attic?.shells).toHaveLength(1);
+  });
+
+  it('les coquilles (D-148) : vues en pointillés, et le compte du lieu', () => {
+    const visited = ['bedroom', 'hall', 'staircase', 'attic', 'kitchen'];
+    const page = zoneShells(zone).filter((s) => s.place === 'house');
+    const fresh = buildMapModel(zone, progress({ visited }));
+    expect(fresh.shells).toEqual({ found: 0, total: page.length });
+    const model = buildMapModel(
+      zone,
+      progress({
+        visited,
+        collectibles: ['attic-ridge'],
+        // Une coquille vue puis prise n'est plus en pointillés ; une vue dans une salle pas
+        // encore visitée n'apparaît pas.
+        seenCollectibles: ['attic-ridge', 'kitchen-cupboards', 'laundry-wardrobe'],
+      }),
+    );
+    expect(model.shells).toEqual({ found: 1, total: page.length });
+    const room = (id: string) => model.rooms.find((r) => r.id === id);
+    expect(room('attic')?.shells).toHaveLength(1);
+    expect(room('attic')?.seenShells).toEqual([]);
+    expect(room('kitchen')?.seenShells).toHaveLength(1);
+    expect(model.rooms.flatMap((r) => r.seenShells)).toHaveLength(1);
+    // Une autre page : ses propres coquilles.
+    const street = buildMapModel(zone, progress({ visited: ['street'] }), 'street');
+    expect(street.shells.total).toBe(zoneShells(zone).filter((s) => s.place === 'street').length);
   });
 
   it('une salle découverte depuis la dernière ouverture est « fraîche »', () => {
