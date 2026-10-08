@@ -657,22 +657,34 @@ export const ART_IMAGES: Readonly<Record<string, string>> = {
 /**
  * Personnage illustré (D-123) : image fournie sous `public/art/` (détourée, `scripts/art-cutout.py`),
  * à la place du dessin par code. Elle remplit la hauteur du personnage ; `footX` (fraction de la
- * largeur de l'image) est l'axe des pieds, posé au milieu du cadre comme le corps dessiné.
+ * largeur de l'image) est l'axe des pieds, posé au milieu du cadre comme le corps dessiné ; une
+ * image plus large que le cadre d'un côté (une main tendue) y est ramenée si elle tient.
  * `steam` : haut de la tasse (fractions de l'image), d'où monte la vapeur dessinée par le code.
+ * `seat` : pose assise, hauteur de l'assise dans l'image (fraction) ; l'image garde l'échelle d'un
+ * adulte debout, l'assise posée sur le bas du cadre (le meuble), les jambes pendent en dessous.
  */
 export interface CharacterImage {
   file: string;
   footX: number;
   steam?: { x: number; y: number };
+  seat?: number;
 }
 
 /** Personnages illustrés (D-123) ; les autres restent dessinés par le code (`familyArt`). */
 export const CHARACTER_IMAGES: Readonly<Partial<Record<PropKind, CharacterImage>>> = {
   'dad-door': { file: 'dad-door.png', footX: 0.22 },
-  // Même geste, la main tendue : la nuit, sous l'horloge du hall de la gare (D-69).
-  'dad-hall': { file: 'dad-door.png', footX: 0.22 },
+  'dad-hall': { file: 'dad-hall.png', footX: 0.18 },
   'dad-kitchen': { file: 'dad-kitchen.png', footX: 0.32, steam: { x: 0.896, y: 0.273 } },
   'dad-shop': { file: 'dad-shop.png', footX: 0.31 },
+  'dad-garden': { file: 'dad-garden.png', footX: 0.19 },
+  'dad-quay': { file: 'dad-quay.png', footX: 0.24 },
+  // Assise au bord du lit (4 tuiles de haut) : les pieds pendent un peu au-dessus du sol. Les pieds
+  // au milieu du cadre placent les hanches là où s'asseyait le dessin. Le canapé (2 tuiles) et le
+  // banc (1 tuile) attendent une pose aux jambes repliées : celles-ci traverseraient le sol.
+  'mom-bed': { file: 'mom-bed.png', footX: 0.48, seat: 0.6 },
+  'mom-garden': { file: 'mom-garden.png', footX: 0.3 },
+  'mom-yard': { file: 'mom-yard.png', footX: 0.38 },
+  'mom-quay': { file: 'mom-quay.png', footX: 0.33 },
 };
 
 /**

@@ -19,7 +19,7 @@ import {
   type ThoughtIcon,
 } from '../core/story/story';
 import { drawLoopObject } from './art/memoryArt';
-import { drawCharacter } from './art/familyArt';
+import { characterOverhang, drawCharacter } from './art/familyArt';
 import { SPARKLE_SIZE, THOUGHT_SIZE, drawProp, drawSparkle, drawThought } from './art/storyArt';
 
 /** Objets et personnages animés en boucle (deux images). */
@@ -90,8 +90,9 @@ export class StoryView {
       const { w, h } = PROP_SIZE[kind];
       if (isLooping(kind)) {
         // Deux images pour le petit mouvement en boucle (D-37, D-38).
+        const below = characterOverhang(kind);
         for (const frame of [0, 1]) {
-          this.texture(`prop-${kind}-${String(frame)}`, w, h, (ctx) => {
+          this.texture(`prop-${kind}-${String(frame)}`, w, h + below, (ctx) => {
             if (kind === 'music-box' || kind === 'plant') {
               drawLoopObject(ctx, kind, w, h, frame);
             } else {

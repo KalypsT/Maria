@@ -359,3 +359,36 @@ Plain pure white background, no shadow, no text. Landscape format, high resoluti
 ```
 
 Fichier : `dog-sleep.png`.
+
+## Retouches après la première série
+
+### Maman au canapé et sur le banc (sièges bas)
+
+Le canapé ne fait que 2 tuiles de haut, le banc de l'aire de jeux 1 : avec les jambes pendantes,
+maman traverserait le sol. Joindre `mom-stand.png`, début de message habituel de maman, puis :
+
+| Fichier         | Fin du message                                                                                                                                                                                                                                                                                                                                       |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mom-sofa.png`  | `No sunglasses. Pose: curled up comfortably on a sofa, knees drawn up, both feet tucked up on the cushion beside her (her feet do not touch the floor), reading an open blue hardcover book resting on her knees, calm. Do not draw the sofa: she sits on nothing.`                                                                                  |
+| `mom-bench.png` | `She wears round dark sunglasses. Pose: sitting on a very low bench, like the edge of a sandbox, knees bent high, both feet flat on the ground just in front of her, hands resting on her knees, face slightly raised to the sun, peaceful smile. Strict side profile facing right (not three-quarter). Do not draw the bench: she sits on nothing.` |
+
+### Céleste : pièces à refaire
+
+Dans la conversation de la planche, joindre la planche et demander **une seule pièce par message** :
+
+```
+Using the attached sheet as the strict reference (same girl, same style, same colors, same scale),
+redraw ONLY this part, alone, strict side profile facing right, plain pure white background, no
+shadow, no text:
+```
+
+| Planche | Pièce | Fin du message                                                                                                                                                                                                             |
+| ------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| pyjama  | tête  | `the HEAD without any bun: the hair at the back of the head is smooth and ends at the nape, because the low pigtails are attached separately behind the ear. Face, glasses, ear and short neck stump unchanged.`           |
+| pyjama  | torse | `the TORSO of the pajama top WITHOUT any arm and without any sleeve drawn on it: the shoulder is a smooth rounded edge, we see the side of the top from the armpit to the hem, with the collar and the pink piping.`       |
+| pyjama  | jambe | `ONE single leg, not a pair: one straight pajama trouser leg from a rounded top of the thigh to the ankle, with the pink cuff, and ONE pink bunny slipper pointing right.`                                                 |
+| robe    | jambe | `ONE single bare leg, not a pair: straight, from a rounded top of the thigh to the foot, with ONE pink clog pointing right.`                                                                                               |
+| veste   | jambe | `ONE single bare leg, not a pair and without the shorts: straight, from a rounded top of the thigh to the foot, with a short white sock and ONE pink-and-white sneaker pointing right, with no logo and no swoosh at all.` |
+
+Le short de la veste et la jupe de la robe deviennent des pièces de hanche, posées devant le haut
+des jambes ; le haut de la robe est coupé à la taille (je m'en charge).

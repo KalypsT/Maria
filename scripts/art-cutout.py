@@ -1,12 +1,14 @@
 """Détoure une illustration fournie sur fond blanc (personnages, D-123).
 
 Usage : python3 scripts/art-cutout.py entrée.png sortie.png [--height 900] [--seed x,y ...]
-        [--keep x,y ...] [--halo 0.3]
+        [--keep x,y ...] [--holes N] [--largest] [--halo 0.3]
 
 - Le fond : le blanc relié aux bords de l'image.
 - --seed : un point d'un blanc enfermé à retirer aussi (entre les jambes, sous un bras), en px de
   l'image d'entrée.
 - --keep : un point clair à garder malgré tout (des dents tout contre le profil), en px de l'entrée.
+- --holes N : blancs purs enfermés d'au moins N px retirés aussi (sans désigner de point).
+- --largest : seul le plus grand morceau est gardé (un enfant dessiné à côté, par exemple).
 - --halo : fraction du haut de la silhouette (les cheveux) où le liseré clair laissé par le
   générateur est rongé ; le bas (semelles blanches) est épargné.
 - Bord adouci, image recadrée sur le personnage puis ramenée à --height px de haut.
@@ -29,6 +31,8 @@ def main() -> None:
     parser.add_argument("--seed", action="append", default=[])
     parser.add_argument("--halo", type=float, default=0.3)
     parser.add_argument("--keep", action="append", default=[])
+    parser.add_argument("--holes", type=int, default=0)
+    parser.add_argument("--largest", action="store_true")
     args = parser.parse_args()
 
     rgb = np.asarray(Image.open(args.src).convert("RGB")).astype(np.int16)
@@ -44,6 +48,13 @@ def main() -> None:
         x, y = (int(v) for v in seed.split(","))
         if labels[y, x]:
             keep.add(int(labels[y, x]))
+    if args.holes:
+        # Blancs purs enfermés et grands (entre les jambes, sous un bras) : du fond aussi.
+        sizes = ndimage.sum(np.ones_like(labels), labels, index=np.arange(1, labels.max() + 1))
+        means = ndimage.mean(lo, labels, index=np.arange(1, labels.max() + 1))
+        for index, (size, mean) in enumerate(zip(sizes, means), start=1):
+            if size >= args.holes and mean > 246:
+                keep.add(index)
     background = np.isin(labels, list(keep))
 
     # Liseré clair autour des cheveux : grignoté depuis le fond, dans le haut seulement.
@@ -74,6 +85,12 @@ def main() -> None:
             if not any((pockets[y - 4 : y + 5, x - 4 : x + 5] == index).any() for x, y in kept):
                 background[area] |= inside
 
+    if args.largest:
+        # Un seul personnage : tout ce qui n'est pas relié au plus grand morceau est retiré.
+        parts, count = ndimage.label(~background)
+        if count > 1:
+            sizes = ndimage.sum(np.ones_like(parts), parts, index=np.arange(1, count + 1))
+            background |= parts != int(np.argmax(sizes)) + 1
     alpha = Image.fromarray(np.where(background, 0, 255).astype(np.uint8))
     alpha = alpha.filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.8))
     image = Image.open(args.src).convert("RGB")

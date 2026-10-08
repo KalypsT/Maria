@@ -525,6 +525,18 @@ export function drawCharacter(
   ctx.restore();
 }
 
+/** Hauteur d'un adulte debout (px logiques) : l'échelle des poses assises illustrées. */
+const STANDING_H = PROP_SIZE['dad-door'].h;
+
+/**
+ * Px logiques sous le cadre d'un personnage illustré assis (D-123) : ses jambes pendent sous
+ * l'assise ; la texture est agrandie d'autant vers le bas.
+ */
+export function characterOverhang(kind: PropKind): number {
+  const seat = CHARACTER_IMAGES[kind]?.seat;
+  return seat === undefined ? 0 : Math.ceil((1 - seat) * STANDING_H);
+}
+
 /** Taille de la vapeur au-dessus d'une tasse illustrée (le dessin par code est en ×2). */
 const STEAM_SCALE = 1.1;
 
@@ -540,12 +552,17 @@ function drawIllustrated(
   frame: number,
 ): void {
   const { naturalWidth: width, naturalHeight: height } = image;
-  const scale = size.h / height;
-  const left = size.w / 2 - character.footX * width * scale;
-  ctx.drawImage(image, left, 0, width * scale, size.h);
+  const seat = character.seat;
+  const drawnH = seat === undefined ? size.h : STANDING_H;
+  const top = seat === undefined ? 0 : size.h - seat * drawnH;
+  const scale = drawnH / height;
+  const drawn = width * scale;
+  const centered = size.w / 2 - character.footX * drawn;
+  const left = drawn <= size.w ? Math.min(Math.max(centered, 0), size.w - drawn) : centered;
+  ctx.drawImage(image, left, top, drawn, drawnH);
   if (character.steam) {
     ctx.save();
-    ctx.translate(left + character.steam.x * width * scale, character.steam.y * size.h);
+    ctx.translate(left + character.steam.x * drawn, top + character.steam.y * drawnH);
     // Plus fine que celle du dessin par code, à l'échelle du trait de l'illustration.
     ctx.scale(STEAM_SCALE, STEAM_SCALE);
     ctx.globalAlpha = 0.8;
