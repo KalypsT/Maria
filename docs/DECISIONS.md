@@ -2103,7 +2103,7 @@ Retours d'écoute de l'utilisateur sur téléphone.
   4. **la liste vérifiée** (l'intention de chaque coquille, un seul test) ; les coquilles retirées des lieux sans retour ; **la maison et le jardin** replacés, les traces de bave ;
   5. **le quartier et la gare** ;
   6. **le train et la station balnéaire** (les revisites par l'état du monde).
-- **À confirmer avant leur PR** (propositions) : un « lieu » est une page du cahier (la maison et le jardin partagent « Ma maison ») ; au bout des défis de la nounou, qui n'ont plus de coquille, un jouet d'autrefois à regarder (Agir : un cœur, rien à garder) ; le détail de fin, un petit escargot vivant qui traverse lentement l'étagère de Maria et laisse une trace argentée.
+- **Propositions, réponses de l'utilisateur** : un « lieu » est une page du cahier (la maison et le jardin partagent « Ma maison ») ; **rien au bout des défis de la nounou pour l'instant** (proposition d'un jouet d'autrefois refusée) ; **le détail de fin accepté** : un petit escargot vivant qui traverse lentement l'étagère de Maria et laisse une trace argentée (PR 3).
 
 ### D-148, PR 1 : le système
 
@@ -2113,3 +2113,11 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Au ramassage** : le jingle et le rire comme avant ; **la coquille file vers le bouton Carte** (620 ms), puis une étiquette « coquille n/N » du lieu s'affiche à côté pendant 2,2 s (en haut à gauche sans commandes tactiles). Un **lieu** est une page du cahier : la maison et le jardin partagent « Ma maison ». Une salle hors de la carte : la coquille seule.
 - **Debug** : une section « Coquilles » (trouvées sur le total, par lieu ; pour chacune, « Aller » à côté d'elle et « Trouvée » ou « Oublier » ; « Toutes trouvées », « Aucune »).
 - **Aucune coquille déplacée** : les placements viennent avec les PR 4 à 6.
+
+### D-148, PR 2 : la carte et le cahier
+
+- **Les coquilles vues** : une coquille entrée dans le cadre (à une tuile du bord au moins, jamais dans le noir d'un fondu) est notée vue, une fois, dans la sauvegarde : `progression.seenCollectibles` (nouveau ; **absent d'une sauvegarde plus ancienne : vide**, sans migration ; une liste invalide est refusée comme le reste de la progression). Une coquille déjà trouvée n'est jamais notée vue.
+- **Sur la carte** : une coquille trouvée est dessinée (l'image fournie, ou son dessin par le code) à la place de l'étoile rose ; une coquille **vue mais pas prise** est son contour **en pointillés**, au crayon ; les autres ne sont jamais montrées. **En haut à droite de la page, « coquille n/N »** : les coquilles du lieu, trouvées et en tout (salles pas encore visitées comprises).
+- **La page se colorie** quand toutes les coquilles du lieu sont trouvées : chaque salle visitée reçoit un lavis d'aquarelle (rose, bleu, jaune, vert ou lilas, toujours le même pour une salle) à la place des hachures roses ; le compte passe en rose.
+- **Les noms des salles** sont écrits par-dessus les coquilles et les veilleuses, cernés de papier (une coquille près du coin d'une salle cachait son nom).
+- `buildMapModel` : `shells` et `seenShells` par salle (à la place de `stars`), et le compte du lieu.

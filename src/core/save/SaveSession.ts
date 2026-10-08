@@ -64,6 +64,16 @@ export class SaveSession {
     return this.persist();
   }
 
+  /** Coquille vue mais pas prise (D-148), pour la carte ; écrite seulement si elle est nouvelle. */
+  addSeenCollectible(id: string): Promise<void> {
+    const seen = this.current.progression.seenCollectibles;
+    if (seen.includes(id) || this.current.progression.collectibles.includes(id)) {
+      return Promise.resolve();
+    }
+    seen.push(id);
+    return this.persist();
+  }
+
   /** Outil de debug (D-148) : une coquille redevient à trouver. */
   removeCollectible(id: string): Promise<void> {
     const collectibles = this.current.progression.collectibles;

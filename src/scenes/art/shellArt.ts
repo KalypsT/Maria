@@ -76,3 +76,34 @@ export function shellSeed(name: string): number {
   }
   return (hash >>> 0) / 4294967296;
 }
+
+/**
+ * Coquille vue mais pas prise (D-148), sur la carte : son contour en pointillés, au crayon, centré en
+ * (cx, cy), de hauteur `size`.
+ */
+export function drawShellOutline(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  size: number,
+  color: string,
+): void {
+  const r = size * 0.48;
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.2;
+  ctx.lineCap = 'round';
+  ctx.setLineDash([2, 2.2]);
+  ctx.beginPath();
+  ctx.arc(cx - r * 0.2, cy, r, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx + r * 0.55, cy + r * 0.62);
+  ctx.quadraticCurveTo(cx + r * 1.35, cy + r * 0.95, cx + r * 1.15, cy + r * 0.45);
+  ctx.stroke();
+  // Le centre de la spirale, un seul tour.
+  ctx.beginPath();
+  ctx.arc(cx - r * 0.2, cy, r * 0.42, Math.PI * 0.2, Math.PI * 1.8);
+  ctx.stroke();
+  ctx.restore();
+}

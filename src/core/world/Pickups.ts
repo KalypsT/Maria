@@ -17,6 +17,8 @@ export interface PickupState {
   /** Zone de contact : la tuile de l'objet et celle du dessus. */
   readonly box: Box;
   taken: boolean;
+  /** Coquille déjà vue (D-148) : elle est sur la carte, en pointillés, tant qu'elle n'est pas prise. */
+  seen: boolean;
 }
 
 /**
@@ -38,7 +40,12 @@ function overlaps(a: Box, b: Box): boolean {
 export class Pickups {
   items: PickupState[] = [];
 
-  load(level: LevelData, abilities: readonly string[], collectibles: readonly string[]): void {
+  load(
+    level: LevelData,
+    abilities: readonly string[],
+    collectibles: readonly string[],
+    seen: readonly string[] = [],
+  ): void {
     const ability = level.meta.ability;
     const items: PickupState[] = [];
     for (const entity of level.entities) {
@@ -52,6 +59,7 @@ export class Pickups {
           row,
           box,
           taken: abilities.includes(ability),
+          seen: true,
         });
       } else if (entity.type === EntityType.Shell) {
         const id = shellId(level.id, entity);
@@ -62,6 +70,7 @@ export class Pickups {
           row,
           box,
           taken: collectibles.includes(id),
+          seen: seen.includes(id),
         });
       }
     }

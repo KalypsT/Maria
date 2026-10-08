@@ -623,7 +623,12 @@ export class GameScene extends Phaser.Scene {
     this.drawLevel();
     this.run = new RunState(this.level, this.worldParams);
     this.run.load(this.level, save.activatedCheckpoints, checkpointId);
-    this.pickups.load(this.level, save.progression.abilities, save.progression.collectibles);
+    this.pickups.load(
+      this.level,
+      save.progression.abilities,
+      save.progression.collectibles,
+      save.progression.seenCollectibles,
+    );
     void this.session.revealRoom(this.level.id);
     const { x, y } = this.respawnPosition();
     this.player = new PlayerPhysics(this.level, this.movement, x, y, this.growth.hitbox);
@@ -996,6 +1001,7 @@ export class GameScene extends Phaser.Scene {
     this.shiftView.render(this.time.now, this.puppet.x, this.puppet.y - box.height / 2, this.erase);
     this.lullaby.render(this.time.now, this.erase);
     this.worldView.render();
+    this.noticeShells();
     this.dust.update();
     const hintTarget = this.hintTarget;
     this.hintView.update(
@@ -1131,7 +1137,7 @@ export class GameScene extends Phaser.Scene {
 
   /**
    * Carte dessinée par Céleste (§24) : salles visitées et devinées, veilleuses allumées,
-   * trouvailles, Céleste. Seulement dans une zone (pas dans les parcours d'essai).
+   * coquilles trouvées et vues (D-148), Céleste. Seulement dans une zone (pas dans les parcours d'essai).
    */
   openMap(): void {
     const zone = this.zone;
@@ -1150,6 +1156,7 @@ export class GameScene extends Phaser.Scene {
         activatedCheckpoints: data.activatedCheckpoints,
         checkpoint: data.checkpoint,
         collectibles: data.progression.collectibles,
+        seenCollectibles: data.progression.seenCollectibles,
         celeste: { room: this.level.id, x: box.x + box.width / 2, y: box.y + box.height },
         cubes: ISLET_CUBES.flatMap((cube, k) =>
           this.story.flags.has(cube.flag)
@@ -1542,6 +1549,34 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
+   * Une coquille passée à l'écran est vue (D-148) : Céleste la dessinera en pointillés sur la carte
+   * tant qu'elle ne l'a pas prise. Seulement dans une zone ; bien dans le cadre (une tuile de marge).
+   */
+  private noticeShells(): void {
+    // Dans le noir d'un fondu, rien ne se voit.
+    if (!this.zone || this.hud.black) {
+      return;
+    }
+    const view = this.cameras.main.worldView;
+    for (const item of this.pickups.items) {
+      if (item.kind !== PickupKind.Shell || item.taken || item.seen) {
+        continue;
+      }
+      const x = (item.col + 0.5) * TILE_SIZE;
+      const y = (item.row + 0.5) * TILE_SIZE;
+      if (
+        x > view.x + TILE_SIZE &&
+        x < view.right - TILE_SIZE &&
+        y > view.y + TILE_SIZE &&
+        y < view.bottom - TILE_SIZE
+      ) {
+        item.seen = true;
+        void this.session.addSeenCollectible(item.id);
+      }
+    }
+  }
+
+  /**
    * Outil de debug (D-148) : Céleste à côté d'une coquille (sur son appui, deux ou trois tuiles à
    * côté si la place le permet, sinon dessus : elle la ramasse).
    */
@@ -1575,8 +1610,8 @@ export class GameScene extends Phaser.Scene {
 
   /** Outil de debug (D-148) : les coquilles de la salle relues dans la sauvegarde. */
   reloadPickups(): void {
-    const { abilities, collectibles } = this.session.data.progression;
-    this.pickups.load(this.level, abilities, collectibles);
+    const { abilities, collectibles, seenCollectibles } = this.session.data.progression;
+    this.pickups.load(this.level, abilities, collectibles, seenCollectibles);
     this.worldView.rebuild();
   }
 
@@ -1857,8 +1892,8 @@ export class GameScene extends Phaser.Scene {
     this.chaseView.rebuild();
     this.applyRoomCamera();
     this.run.load(level, this.session.data.activatedCheckpoints, checkpointId);
-    const { abilities, collectibles } = this.session.data.progression;
-    this.pickups.load(level, abilities, collectibles);
+    const { abilities, collectibles, seenCollectibles } = this.session.data.progression;
+    this.pickups.load(level, abilities, collectibles, seenCollectibles);
     this.applyAbilities();
     this.worldView.rebuild();
     this.showCables();

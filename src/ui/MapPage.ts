@@ -13,6 +13,16 @@ import { drawAbility } from '../scenes/art/abilityArt';
 import { drawFlashback } from '../scenes/art/flashbackArt';
 import { playableOf, type PlayableMemoryId } from '../config/playableMemories';
 import { drawMemory } from '../scenes/art/memoryArt';
+import { drawShellFallback, drawShellOutline } from '../scenes/art/shellArt';
+import { ART_IMAGES } from '../config/art';
+
+/** Taille d'une coquille sur la carte (px CSS, D-148). */
+const MAP_SHELL_PX = 14;
+/**
+ * La page d'un lieu dont toutes les coquilles sont trouvées se colorie (D-148) : un lavis par salle,
+ * dans les couleurs des crayons de Céleste.
+ */
+const MAP_WASHES = ['#f3c7d2', '#c9dcef', '#f6e3a6', '#cfe5c4', '#ddd0ee'] as const;
 
 /** Durée du tracé d'une salle découverte depuis la dernière ouverture (ms). */
 const DRAW_IN_MS = 900;
@@ -63,6 +73,8 @@ export class MapPage {
   private frame = 0;
   private openedAt = 0;
   private model: MapModel | null = null;
+  /** La coquille fournie (D-148), pour la carte ; dessinée par le code tant qu'elle manque. */
+  private readonly shellImage = new Image();
   private bounds: MapBox = { x: 0, y: 0, w: 1, h: 1 };
 
   constructor(
@@ -70,6 +82,7 @@ export class MapPage {
     /** Un souvenir jouable touché dans le cahier (D-89) : le cahier se ferme, il se rejoue. */
     private readonly onPlayMemory: (id: PlayableMemoryId) => void = () => undefined,
   ) {
+    this.shellImage.src = `art/${ART_IMAGES['shell'] ?? 'shell.png'}`;
     this.root = document.createElement('div');
     this.root.id = 'map-page';
     this.root.setAttribute(UI_OVERLAY_ATTRIBUTE, '');
@@ -370,6 +383,7 @@ export class MapPage {
     const blue = themeColor('--crayon-blue');
     const lamp = themeColor('--lamp');
     const paperDeep = themeColor('--paper-deep');
+    const paper = themeColor('--paper');
     const font = getComputedStyle(document.body).fontFamily;
     const drawIn = Math.min(1, elapsedMs / DRAW_IN_MS);
 
@@ -417,13 +431,21 @@ export class MapPage {
     }
     ctx.setLineDash([]);
 
-    // Salles.
+    // Salles ; toutes les coquilles du lieu trouvées : la page se colorie (D-148).
+    const complete = model.shells.total > 0 && model.shells.found === model.shells.total;
     for (const room of model.rooms) {
       const progress = room.fresh ? drawIn : 1;
-      this.drawRoom(ctx, room, px, unit, progress, { ink, pencil, roseSoft, paperDeep, font });
+      this.drawRoom(ctx, room, px, unit, progress, {
+        ink,
+        pencil,
+        roseSoft,
+        paperDeep,
+        font,
+        complete,
+      });
     }
 
-    // Veilleuses, trouvailles, Céleste.
+    // Veilleuses, coquilles, Céleste.
     for (const room of model.rooms) {
       if (room.fresh && drawIn < 1) {
         continue;
@@ -447,16 +469,14 @@ export class MapPage {
           ctx.stroke();
         }
       }
-      for (const s of room.stars) {
+      // Les coquilles (D-148) : trouvées, dessinées ; vues mais pas prises, en pointillés.
+      for (const s of room.shells) {
         const p = px(s);
-        ctx.fillStyle = rose;
-        ctx.beginPath();
-        for (let i = 0; i < 10; i++) {
-          const angle = (i * Math.PI) / 5 - Math.PI / 2;
-          const r = i % 2 === 0 ? 6 : 2.6;
-          ctx.lineTo(p.x + Math.cos(angle) * r, p.y + Math.sin(angle) * r);
-        }
-        ctx.fill();
+        this.drawShell(ctx, p.x, p.y, MAP_SHELL_PX);
+      }
+      for (const s of room.seenShells) {
+        const p = px(s);
+        drawShellOutline(ctx, p.x, p.y, MAP_SHELL_PX * 0.9, pencil);
       }
       // Les cubes de la tour d'Eden trouvés (D-122) : un petit carré de leur couleur, cerné d'encre.
       for (const cube of room.cubes) {
@@ -470,10 +490,49 @@ export class MapPage {
         ctx.stroke();
       }
     }
+    // Les noms des salles par-dessus les coquilles et les veilleuses, cernés de papier (D-148).
+    ctx.font = `italic 600 ${String(Math.max(11, Math.round(unit * 0.28)))}px ${font}`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = paper;
+    ctx.fillStyle = ink;
+    for (const room of model.rooms) {
+      if (!room.visited || (room.fresh && drawIn < 1)) {
+        continue;
+      }
+      const tl = px({ x: room.box.x, y: room.box.y });
+      ctx.strokeText(room.name, tl.x + 6, tl.y + 5);
+      ctx.fillText(room.name, tl.x + 6, tl.y + 5);
+    }
     if (model.celeste) {
       const p = px(model.celeste);
       const bob = Math.sin(elapsedMs / 300) * 1.5;
       this.drawCeleste(ctx, p.x, p.y - 8 + bob, blue);
+    }
+    // Le compte des coquilles du lieu (D-148), en haut à droite de la page ; rose quand tout y est.
+    if (model.shells.total > 0) {
+      const text = `${String(model.shells.found)}/${String(model.shells.total)}`;
+      ctx.font = `600 16px ${font}`;
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = complete ? rose : ink;
+      const x = width - 14;
+      const y = 18;
+      ctx.fillText(text, x, y);
+      this.drawShell(ctx, x - ctx.measureText(text).width - 12, y, MAP_SHELL_PX + 2);
+    }
+  }
+
+  /** Une coquille trouvée sur la carte (D-148) : l'image fournie, ou son dessin par le code. */
+  private drawShell(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number): void {
+    const image = this.shellImage;
+    if (image.complete && image.naturalHeight > 0) {
+      const w = (size * image.naturalWidth) / image.naturalHeight;
+      ctx.drawImage(image, cx - w / 2, cy - size / 2, w, size);
+    } else {
+      drawShellFallback(ctx, cx - size * 0.6, cy - size / 2, size * 1.2, size);
     }
   }
 
@@ -483,7 +542,15 @@ export class MapPage {
     px: (p: MapPoint) => { x: number; y: number },
     unit: number,
     progress: number,
-    c: { ink: string; pencil: string; roseSoft: string; paperDeep: string; font: string },
+    c: {
+      ink: string;
+      pencil: string;
+      roseSoft: string;
+      paperDeep: string;
+      font: string;
+      /** Toutes les coquilles du lieu trouvées (D-148) : un lavis de couleur. */
+      complete: boolean;
+    },
   ): void {
     const tl = px({ x: room.box.x, y: room.box.y });
     const w = room.box.w * unit;
@@ -515,7 +582,15 @@ export class MapPage {
       return points;
     };
     const perimeter = 2 * (w + h);
-    if (room.visited) {
+    if (room.visited && c.complete) {
+      // Un lavis d'aquarelle : deux passes un peu décalées, plus foncé sur les bords.
+      ctx.globalAlpha = progress;
+      ctx.fillStyle = MAP_WASHES[Math.floor(random() * MAP_WASHES.length)] ?? c.paperDeep;
+      ctx.fillRect(tl.x + 2, tl.y + 2, w - 4, h - 4);
+      ctx.globalAlpha = progress * 0.45;
+      ctx.fillRect(tl.x + 1 + random() * 2, tl.y + 1 + random() * 2, w - 4, h - 4);
+      ctx.globalAlpha = 1;
+    } else if (room.visited) {
       ctx.globalAlpha = progress;
       ctx.fillStyle = c.paperDeep;
       ctx.fillRect(tl.x + 2, tl.y + 2, w - 4, h - 4);
@@ -558,11 +633,6 @@ export class MapPage {
     if (progress < 1) {
       return;
     }
-    ctx.fillStyle = c.ink;
-    ctx.font = `italic 600 ${String(Math.max(11, Math.round(unit * 0.28)))}px ${c.font}`;
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    ctx.fillText(room.name, tl.x + 6, tl.y + 5);
     if (room.icon) {
       drawIcon(ctx, room.icon, tl.x + w / 2, tl.y + h * 0.62, Math.min(w, h) * 0.32, c.pencil);
     }
