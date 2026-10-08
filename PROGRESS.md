@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139) , **PR 2 faite : la berceuse, le moteur et le parcours d'essai 17** (D-140), **PR 3 faite : la chambre immense, le lit et le coffre** (D-141), **PR 4 faite : le ciel de la chambre** (D-142), **PR 5 faite : la chambre grande, la vraie chambre la nuit, Maria retrouvée** (D-143) et **PR 6 faite : le matin et le dernier plan** (D-144), sur `ccr-06b9800a-238lrq`. Suite : **essai sur téléphone** (le parcours 17, tout le monde de Maria, toute la fin), puis la PR 7 (l'écran de fin, l'accueil, « Continuer », le fil discret après la fin).
+**Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139) , **PR 2 faite : la berceuse, le moteur et le parcours d'essai 17** (D-140), **PR 3 faite : la chambre immense, le lit et le coffre** (D-141), **PR 4 faite : le ciel de la chambre** (D-142), **PR 5 faite : la chambre grande, la vraie chambre la nuit, Maria retrouvée** (D-143), **PR 6 faite : le matin et le dernier plan** (D-144) et **PR 7 faite : après la fin** (D-145), sur `ccr-06b9800a-238lrq`. **Le niveau 8 est complet : le jeu se joue du premier soir à la fin.** Suite : **essai sur téléphone** (le parcours 17, tout le monde de Maria, toute la fin) ; à fournir : le thème de fin (`ending`), le jingle de Maria, Céleste en phase 4 illustrée.
 
 **La cohérence des niveaux** (D-132 à D-137, demande de l'utilisateur) : la maison, le jardin, le quartier et la gare faits et fusionnés ; **le train** (D-136) et **la station balnéaire** (D-137 : l'aile du centre, les pieds de la grue, la pêche aux canards, les rochers percés, le mât d'amarrage) faits, sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (la maison de la nounou), même méthode.
 
@@ -20,7 +20,7 @@
 
 **Le train** (niveau 5, D-83 à D-91) : complet et fusionné. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
-**Structure de la fin du jeu** (D-82) : 8 niveaux (maison, jardin, quartier, gare, train, station balnéaire, avant-dernier, monde de Maria). Niveaux 6 et 7 faits ; niveau 8 : plan validé (D-138).
+**Structure de la fin du jeu** (D-82) : 8 niveaux (maison, jardin, quartier, gare, train, station balnéaire, avant-dernier, monde de Maria). **Les huit niveaux sont faits** (le niveau 8 : D-138 à D-145).
 
 **Passe graphique** (D-71 à D-81) : terminée, tout le monde réel est refait d'après la grille du salon. L'étape 4 (identifiants fixes des trouvailles et lanternes) est écartée jusqu'à la sortie (**à reprendre avant de diffuser le jeu**, pilier 10).
 
@@ -31,6 +31,14 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le dernier niveau, PR 7 : après la fin (D-145)
+
+- **La fin** : après le dernier plan, le noir, puis **l'écran de fin**, sans texte : Maria seule sur son étagère, sur la page du cahier, une lumière douce, quelques scintillements qui passent ; un petit rond pour continuer. Puis **l'accueil**, avec Maria dans un coin.
+- **« Continuer »** : dans le couloir, le matin, en phase 4, toute la maison ouverte, pour finir les trouvailles ; Maria reste sur son étagère, sans étincelle. Le fil discret se tait.
+- Musique : nouvel emplacement `ending` (le thème de fin, à fournir). DEBUG → Histoire : « après la fin ». Tests : `finaleMorning.test.ts`, `story.test.ts`. Vérifié dans Chromium.
+- [ ] À vérifier sur téléphone (jouer la fin depuis DEBUG → Histoire → « Maria rangée sur l'étagère », salle `bedroom`, puis sortir par la porte) : l'écran de fin, assez long avant le rond ? Les scintillements se voient-ils ? L'accueil avec Maria dans son coin ?
+- [ ] « Continuer » après la fin : le couloir, le matin, la chambre avec Maria sur son étagère : juste ?
 
 ### Le dernier niveau, PR 6 : le matin et le dernier plan (D-144)
 

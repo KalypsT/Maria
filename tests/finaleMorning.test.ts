@@ -3,7 +3,7 @@ import { STORY_TIMING as S, StoryFlag as F } from '../src/config/story';
 import { Tile, tileAt } from '../src/core/level/LevelData';
 import { checkCondition, holdsMaria, type StoryStep } from '../src/core/story/story';
 import { StoryDirector } from '../src/core/story/StoryDirector';
-import { MARIA_SHELF } from '../src/levels/finale/story';
+import { AFTER_END_ROOM, MARIA_SHELF } from '../src/levels/finale/story';
 import { HOUSE_STORY } from '../src/levels/house/story';
 import { MILESTONES } from '../src/levels/milestones';
 import { SKY } from './finaleFlags';
@@ -183,7 +183,7 @@ describe('le dernier plan (D-144, §12)', () => {
     expect(area.col + area.w).toBe(door.col);
     expect(area.row + area.h - 1).toBeGreaterThanOrEqual(door.rowMax);
     for (let col = area.col; col < area.col + area.w; col++) {
-      expect(tileAt(bedroom, col, area.row - 1), `${String(col)}`).toBe(Tile.Solid);
+      expect(tileAt(bedroom, col, area.row - 1), String(col)).toBe(Tile.Solid);
     }
   });
 
@@ -199,11 +199,10 @@ describe('le dernier plan (D-144, §12)', () => {
     expect(steps).toContainEqual(expect.objectContaining({ do: 'hush' }));
     // Maria ne bouge pas : rien ne la déplace pendant le plan.
     expect(steps.filter((s) => s.do === 'flag' || s.do === 'toggle')).toHaveLength(1);
-    // Le noir, puis Céleste s'en va par le couloir ; elle ne revient pas la chercher.
-    const room = index(steps, (s) => s.do === 'room');
-    expect(steps[room]).toMatchObject({ do: 'room', room: 'hall' });
+    // Le noir, puis l'écran de fin et l'accueil (D-145) : la dernière étape. « Continuer »
+    // reprendra dans le couloir ; elle ne revient pas la chercher.
     expect(index(steps.slice(glimmer), (s) => s.do === 'fadeOut')).toBeGreaterThan(0);
-    expect(room).toBeGreaterThan(glimmer);
+    expect(steps.at(-1)).toEqual({ do: 'end', room: AFTER_END_ROOM });
     expect(
       HOUSE_STORY.triggers
         .filter(
@@ -211,5 +210,48 @@ describe('le dernier plan (D-144, §12)', () => {
         )
         .filter((t) => !t.repeat),
     ).toEqual([]);
+  });
+});
+
+describe('après la fin (D-145)', () => {
+  it('« Continuer » reprend dans le couloir, juste derrière la porte de la chambre', () => {
+    const hall = level(AFTER_END_ROOM);
+    const door = need(
+      hall.exits.find((e) => e.id === 1),
+      'porte de la chambre',
+    );
+    // Le départ du couloir : à deux pas de la porte de la chambre, du même côté.
+    expect(door.side).toBe('left');
+    expect(Math.abs(hall.spawn.col - door.col)).toBeLessThanOrEqual(4);
+    expect(hall.spawn.row).toBeGreaterThanOrEqual(door.rowMin);
+    expect(hall.spawn.row).toBeLessThanOrEqual(door.rowMax);
+  });
+
+  it('chez elle, le matin : rien de fermé, Maria sur son étagère sans étincelle, le fil discret se tait', () => {
+    const story = director(GONE);
+    expect(story.timeOfDay()).toBe('morning');
+    for (const room of ['bedroom', 'hall']) {
+      for (const exit of level(room).exits) {
+        expect(story.exitsLocked(room, exit.id), `${room}:${String(exit.id)}`).toBe(false);
+      }
+    }
+    expect(marias(GONE)).toEqual([
+      `maria-sit@${String(MARIA_SHELF.col)},${String(MARIA_SHELF.row)}`,
+    ]);
+    // Aucune étincelle sur Maria : rien à faire là où elle est.
+    const set = new Set(GONE);
+    const near = HOUSE_STORY.triggers.filter(
+      (t) =>
+        t.room === 'bedroom' &&
+        t.mark !== undefined &&
+        checkCondition(set, t.when) &&
+        Math.abs(t.mark.col - MARIA_SHELF.col) <= 2 &&
+        Math.abs(t.mark.row - MARIA_SHELF.row) <= 2,
+    );
+    expect(near).toEqual([]);
+    // Le dernier jalon du chemin principal est le dernier plan : après lui, plus de but.
+    const last = MILESTONES.at(-1);
+    expect(last && 'trigger' in last ? last.trigger : '').toBe('finale-leave');
+    expect(checkCondition(set, trigger('finale-leave').when)).toBe(false);
   });
 });

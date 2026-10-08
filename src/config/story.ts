@@ -357,6 +357,21 @@ export const STORY_TIMING = {
   glimmerMs: 2800,
 } as const;
 
+/**
+ * L'écran de fin (D-145), sans texte : Maria seule sur son étagère. Il apparaît lentement ; après
+ * `continueAfterMs`, un petit rond invite à continuer (un toucher, une touche) : l'accueil.
+ * PROVISOIRE.
+ */
+export const END_SCREEN = {
+  fadeInMs: 2400,
+  /** Quelques scintillements qui passent près de Maria, puis plus rien. */
+  sparkles: 5,
+  sparkleMs: 2600,
+  continueAfterMs: 5000,
+  /** L'image de Maria (fournie par l'utilisateur, D-31), par rapport à la racine du site. */
+  mariaImage: 'art/maria.png',
+} as const;
+
 /** Période du petit mouvement en boucle des personnages (ms), D-37. */
 export const CHARACTER_LOOP_MS = { parent: 1600, cat: 2400 } as const;
 

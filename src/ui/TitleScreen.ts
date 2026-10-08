@@ -1,5 +1,6 @@
 import { TITLE_IMAGES } from '../config/art';
 import { growthPhase } from '../config/growth';
+import { END_SCREEN, StoryFlag } from '../config/story';
 import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 import type { InstallHint } from '../core/platform/install';
 import type { LoadReport } from '../core/save/SaveManager';
@@ -37,7 +38,8 @@ function element<K extends keyof HTMLElementTagNameMap>(
 
 /**
  * Écran de départ minimal (placeholder, D-22, spec §21.3) : « Continuer » s'il existe une
- * sauvegarde, « Nouvelle partie » (confirmée si elle efface une partie), import d'un code.
+ * sauvegarde, « Nouvelle partie » (confirmée si elle efface une partie), import d'un code. Après la
+ * fin du jeu (D-145), Maria sur son étagère dans un coin de la page.
  */
 export function showTitleScreen(
   report: LoadReport,
@@ -57,6 +59,15 @@ export function showTitleScreen(
     portrait.draggable = false;
     const panel = element('div', root, 'title-panel');
     element('h1', panel, undefined, 'MARIA');
+    if (flags.has(StoryFlag.FinaleGone)) {
+      // Après la fin (D-145) : Maria, seule sur son étagère, dans un coin de la page.
+      const corner = element('div', root, 'title-maria');
+      const maria = element('img', corner);
+      maria.src = END_SCREEN.mariaImage;
+      maria.alt = '';
+      maria.draggable = false;
+      element('div', corner, 'title-maria-shelf');
+    }
     let unsubscribe = () => {
       // Remplacé ci-dessous si la PWA est active.
     };

@@ -404,6 +404,150 @@ body {
   color: var(--ink);
 }
 
+/* L'écran de fin (D-145), sans texte : Maria seule sur son étagère, sur la page du cahier. */
+#end-screen {
+  position: fixed;
+  z-index: 40;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(
+      90deg,
+      transparent 12%,
+      var(--paper-margin) 12%,
+      var(--paper-margin) calc(12% + 2px),
+      transparent calc(12% + 2px)
+    ),
+    repeating-linear-gradient(transparent 0 27px, var(--paper-line) 27px 28px), var(--paper);
+  animation: end-in var(--end-fade) ease-out both;
+}
+
+@keyframes end-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.end-scene {
+  position: relative;
+  width: min(46vh, 300px);
+  height: min(60vh, 380px);
+}
+
+.end-light {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 214, 150, 0.55), rgba(255, 214, 150, 0));
+}
+
+.end-maria {
+  position: absolute;
+  left: 50%;
+  bottom: 30%;
+  height: 46%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  user-select: none;
+}
+
+.end-shelf {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 26%;
+  height: 4%;
+  border-radius: 3px;
+  background: #c79d6f;
+  box-shadow: 0 6px 0 -2px #8f6a4c;
+}
+
+.end-sparkle {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(127, 233, 218, 0.95);
+  box-shadow: 0 0 8px rgba(127, 233, 218, 0.9);
+  opacity: 0;
+  animation-name: end-sparkle;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+}
+
+@keyframes end-sparkle {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.6);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-14px) scale(1);
+  }
+}
+
+.end-next {
+  position: absolute;
+  right: 6vw;
+  bottom: 8vh;
+  width: 46px;
+  height: 46px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: transparent;
+  opacity: 0;
+  transition: opacity 1200ms ease;
+}
+
+.end-next::after {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 13px;
+  width: 12px;
+  height: 12px;
+  border-top: 2px solid var(--ink);
+  border-right: 2px solid var(--ink);
+  transform: rotate(45deg);
+}
+
+.end-next-shown {
+  opacity: 0.7;
+}
+
+/* Après la fin (D-145) : Maria, seule sur son étagère, dans un coin de l'accueil. */
+.title-maria {
+  position: absolute;
+  right: 5vw;
+  bottom: 7vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+.title-maria img {
+  height: min(16vh, 96px);
+  width: auto;
+  user-select: none;
+}
+
+.title-maria-shelf {
+  width: min(14vh, 84px);
+  height: 5px;
+  border-radius: 2px;
+  background: #c79d6f;
+  box-shadow: 0 4px 0 -1px #8f6a4c;
+}
+
 /* Illustration de Céleste (D-41), à gauche du menu. */
 .title-celeste {
   height: min(88vh, 560px);

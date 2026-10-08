@@ -1665,7 +1665,8 @@ export function installDebugOverlay(scene: GameScene): void {
     ],
   ];
   // La dernière nuit (D-139) : le soir de la phase 4 vécu, le berceau vide s'éclaire ; puis la
-  // chambre immense (D-141), son ciel (D-142), la chambre grande et Maria retrouvée (D-143).
+  // chambre immense (D-141), son ciel (D-142), la chambre grande et Maria retrouvée (D-143), le
+  // matin (D-144) et l'après-fin (D-145).
   const phaseFour = steps.find(([, flags]) => flags.includes(F.GrownFourth));
   if (phaseFour) {
     const night = [...phaseFour[1], F.FinaleRug, F.FinaleCradle, F.FinaleGoodnight, F.FinaleNight];
@@ -1690,6 +1691,17 @@ export function installDebugOverlay(scene: GameScene): void {
       [
         'Histoire : Maria rangée sur l’étagère (D-144)',
         [...together, F.FinaleMorning, F.FinaleAwake, F.FinalePlayed, F.FinaleShelved],
+      ],
+      [
+        'Histoire : après la fin (D-145)',
+        [
+          ...together,
+          F.FinaleMorning,
+          F.FinaleAwake,
+          F.FinalePlayed,
+          F.FinaleShelved,
+          F.FinaleGone,
+        ],
       ],
     );
   }

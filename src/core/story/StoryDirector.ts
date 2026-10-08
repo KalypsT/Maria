@@ -48,6 +48,8 @@ export interface StoryHost {
   gone?(): void;
   /** Un très léger signe du monde étrange pendant `ms` (D-144). */
   glimmer?(ms: number): void;
+  /** La fin du jeu (D-145) : « Continuer » reprendra dans `room` ; l'écran de fin, puis l'accueil. */
+  end?(room: string): void;
 }
 
 /**
@@ -355,6 +357,9 @@ export class StoryDirector {
         break;
       case 'glimmer':
         this.host.glimmer?.(step.ms);
+        break;
+      case 'end':
+        this.host.end?.(step.room);
         break;
       default:
         break;
