@@ -26,8 +26,25 @@ describe('réglages des commandes', () => {
   });
 
   it('relit sans perte ce qui a été sérialisé', () => {
-    const settings = { buttonScale: 1.25, opacity: 0.4, joystickMode: 'analog' } as const;
+    const settings = {
+      buttonScale: 1.25,
+      opacity: 0.4,
+      joystickMode: 'analog',
+      vibration: false,
+      hint: false,
+    } as const;
     expect(parseControlSettings(serializeControlSettings(settings))).toEqual(settings);
+  });
+
+  it('les vibrations (D-128) : gardées, et activées par défaut pour des réglages plus anciens', () => {
+    expect(sanitizeControlSettings({ vibration: false }).vibration).toBe(false);
+    expect(sanitizeControlSettings({ buttonScale: 1 }).vibration).toBe(true);
+    expect(sanitizeControlSettings({ vibration: 'oui' }).vibration).toBe(true);
+  });
+
+  it('le fil discret (D-129) : gardé, et activé par défaut pour des réglages plus anciens', () => {
+    expect(sanitizeControlSettings({ hint: false }).hint).toBe(false);
+    expect(sanitizeControlSettings({ buttonScale: 1 }).hint).toBe(true);
   });
 
   it('ignore une version inconnue', () => {

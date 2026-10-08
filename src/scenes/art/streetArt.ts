@@ -495,8 +495,35 @@ export function streetDrawers({ tileShape, rounded }: ShapeTools): Record<string
     },
     sitehoarding(a, r) {
       // Les planches de la palissade du chantier (D-91), pleines, peintes en vert passé : un jour
-      // reste en bas, juste assez pour s'y glisser.
-      const { ctx } = a;
+      // reste en bas, juste assez pour s'y glisser. Des panneaux en attente, posés sur deux
+      // tréteaux (D-134) : un sous la pile, un au bout ; ils ne flottent pas.
+      const { ctx, level } = a;
+      const bottom = (col: number) => {
+        let row = (r.y + r.h) / T - 1;
+        while (row >= r.y / T && tileAt(level, col, row) !== Tile.Solid) {
+          row--;
+        }
+        return row;
+      };
+      ctx.strokeStyle = '#7a6a55';
+      ctx.lineWidth = 2;
+      for (const col of [r.x / T + 1, (r.x + r.w) / T - 1]) {
+        const top = (bottom(col) + 1) * T;
+        let ground = bottom(col) + 1;
+        while (ground < level.height && tileAt(level, col, ground) === Tile.Empty) {
+          ground++;
+        }
+        const cx = col * T + T / 2;
+        const y1 = ground * T;
+        ctx.beginPath();
+        ctx.moveTo(cx - 6, y1);
+        ctx.lineTo(cx - 1, top);
+        ctx.moveTo(cx + 6, y1);
+        ctx.lineTo(cx + 1, top);
+        ctx.moveTo(cx - 4, (top + y1) / 2 + 2);
+        ctx.lineTo(cx + 4, (top + y1) / 2 + 2);
+        ctx.stroke();
+      }
       tileShape(a, r, '#6f8f6a', '#89a882');
       ctx.fillStyle = 'rgba(0,0,0,0.18)';
       for (let row = r.y / T; row < (r.y + r.h) / T; row++) {

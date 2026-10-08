@@ -2,6 +2,8 @@
 ; jusqu'à la cabane (sortie 2). Le vieux mur (sortie 3, en haut à gauche) ne s'atteint qu'avec le saut mural,
 ; par la cheminée entre le mur et le tronc.
 ; Refait (D-76) : une trouée dans la couronne, un rayon de soleil ; une balançoire pendue à la branche du bas.
+; D-133 : on vient du potager par une arche sous le vieux mur ; le plancher de la cabane pend à une grosse
+; branche du tronc, qui continue jusqu'à la cabane (sortie 2). Le tronc repose sur ses racines en arche.
 ; @name: Grand arbre
 ; @icon: tree
 ; @world: garden
@@ -20,6 +22,7 @@
 ; @decor: branch 26 24 7 1
 ; @decor: bush 37 20 8 2
 ; @decor: branch 26 16 7 1
+; @decor: limb 26 5 20 8
 ; @decor: deck 36 12 9 1
 ; @decor: hedgehole 39 37 6 3
 ; @decor: sunshaft 29 3 9 34

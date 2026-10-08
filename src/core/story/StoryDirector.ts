@@ -44,6 +44,12 @@ export interface StoryHost {
   records?(): void;
   /** Regard (D-122) : la vue va vers cette tuile ; null : elle revient sur Céleste. */
   look?(col: number | null, row: number | null): void;
+  /** Céleste est sortie de la salle (D-144) : invisible jusqu'au prochain changement de salle. */
+  gone?(): void;
+  /** Un très léger signe du monde étrange pendant `ms` (D-144). */
+  glimmer?(ms: number): void;
+  /** La fin du jeu (D-145) : « Continuer » reprendra dans `room` ; l'écran de fin, puis l'accueil. */
+  end?(room: string): void;
 }
 
 /**
@@ -345,6 +351,15 @@ export class StoryDirector {
         break;
       case 'look':
         this.host.look?.(step.col ?? null, step.row ?? null);
+        break;
+      case 'gone':
+        this.host.gone?.();
+        break;
+      case 'glimmer':
+        this.host.glimmer?.(step.ms);
+        break;
+      case 'end':
+        this.host.end?.(step.room);
         break;
       default:
         break;

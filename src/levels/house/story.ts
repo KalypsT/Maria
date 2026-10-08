@@ -4,6 +4,7 @@ import { STATION_STORY } from '../station/story';
 import { TRAIN_STORY } from '../train/story';
 import { SEA_STORY } from '../sea/story';
 import { NANNY_STORY } from '../nanny/story';
+import { FINALE_STORY } from '../finale/story';
 
 /** Haut de la bibliothèque du salon, là où Maria était assise. */
 const LIVING_TOP: TileArea = { col: 46, row: 5, w: 10, h: 3 };
@@ -165,8 +166,8 @@ export const HOUSE_STORY: StoryData = {
       id: 'take-bottle',
       room: 'staircase',
       on: 'interact',
-      area: { col: 33, row: 13, w: 5, h: 3 },
-      mark: { col: 35, row: 14 },
+      area: { col: 24, row: 22, w: 5, h: 3 },
+      mark: { col: 26, row: 23 },
       when: { all: [F.Slept], none: [F.BottleTaken] },
       lock: true,
       steps: [
@@ -254,7 +255,7 @@ export const HOUSE_STORY: StoryData = {
       on: 'interact',
       area: { col: 42, row: 19, w: 4, h: 3 },
       mark: { col: 44, row: 19 },
-      when: { all: [F.Slept], none: [F.CatPetted] },
+      when: { all: [F.Slept], none: [F.CatPetted, F.GrownFourth] },
       lock: true,
       steps: [
         { do: 'flag', id: F.CatPetted },
@@ -885,8 +886,8 @@ export const HOUSE_STORY: StoryData = {
       id: 'record-player',
       room: 'attic',
       on: 'interact',
-      area: { col: 7, row: 15, w: 9, h: 5 },
-      mark: { col: 11, row: 15 },
+      area: { col: 40, row: 15, w: 9, h: 5 },
+      mark: { col: 44, row: 15 },
       when: {},
       lock: true,
       repeat: true,
@@ -896,8 +897,8 @@ export const HOUSE_STORY: StoryData = {
       id: 'look-plant',
       room: 'kitchen',
       on: 'interact',
-      area: { col: 49, row: 13, w: 6, h: 4 },
-      mark: { col: 52, row: 13 },
+      area: { col: 39, row: 13, w: 6, h: 4 },
+      mark: { col: 42, row: 13 },
       when: {},
       lock: true,
       repeat: true,
@@ -931,6 +932,8 @@ export const HOUSE_STORY: StoryData = {
     ...SEA_STORY.triggers,
     // La maison de la nounou (D-110).
     ...NANNY_STORY.triggers,
+    // Le dernier niveau, le monde de Maria (D-139).
+    ...FINALE_STORY.triggers,
   ],
   props: [
     // La gare (D-68).
@@ -941,6 +944,8 @@ export const HOUSE_STORY: StoryData = {
     ...SEA_STORY.props,
     // La maison de la nounou (D-110).
     ...NANNY_STORY.props,
+    // Le dernier niveau, le monde de Maria (D-139).
+    ...FINALE_STORY.props,
     // La toise de la chambre (D-43), au mur près de la porte.
     {
       id: 'height-chart',
@@ -1006,7 +1011,8 @@ export const HOUSE_STORY: StoryData = {
       kind: 'cradle-undone',
       col: 23,
       row: 17,
-      when: { all: [F.Slept] },
+      // Défait jusqu'au dernier soir, où Céleste le refait (D-139).
+      when: { all: [F.Slept], none: [F.FinaleCradle] },
     },
     {
       id: 'blanket',
@@ -1030,8 +1036,8 @@ export const HOUSE_STORY: StoryData = {
       id: 'bottle',
       room: 'staircase',
       kind: 'bottle',
-      col: 35,
-      row: 15,
+      col: 26,
+      row: 24,
       flip: true,
       instant: true,
       when: { all: [F.Slept], none: [F.BottleTaken] },
@@ -1120,10 +1126,18 @@ export const HOUSE_STORY: StoryData = {
       row: 8,
       when: { all: [F.StrangeDone] },
     },
-    { id: 'cat-sit', room: 'living', kind: 'cat-sit', col: 44, row: 21, when: { all: [F.Slept] } },
+    // Le dernier soir, le chat dort dans la chambre (D-139).
+    {
+      id: 'cat-sit',
+      room: 'living',
+      kind: 'cat-sit',
+      col: 44,
+      row: 21,
+      when: { all: [F.Slept], none: [F.GrownFourth] },
+    },
     { id: 'music-box', room: 'bedroom', kind: 'music-box', col: 12, row: 12, when: {} },
-    { id: 'record-player', room: 'attic', kind: 'record-player', col: 11, row: 17, when: {} },
-    { id: 'plant', room: 'kitchen', kind: 'plant', col: 52, row: 16, when: {} },
+    { id: 'record-player', room: 'attic', kind: 'record-player', col: 44, row: 17, when: {} },
+    { id: 'plant', room: 'kitchen', kind: 'plant', col: 42, row: 16, when: {} },
     // Derrière la haie (D-49) : Maria de l'autre côté du vide, hors d'atteinte ; elle est là dès
     // l'arrivée dans la ronce et ne bouge jamais (pilier 5). Le bonnet, au bout du chemin, puis
     // accroché à une branche du grand arbre.
@@ -1250,6 +1264,8 @@ export const HOUSE_STORY: StoryData = {
   ],
   // La nuit après le câlin de maman (D-58), puis le matin quelques mois plus tard.
   times: [
+    // Quelques mois après la classe de mer, le soir du dernier niveau (D-139).
+    ...FINALE_STORY.times,
     // Le réveil au dortoir, à l'aube, après la maison de la nounou (D-119) : le jour revient.
     ...NANNY_STORY.times,
     // Le soir de la fête, à la station balnéaire (D-101) : avant le matin du train.
@@ -1281,6 +1297,7 @@ export const HOUSE_STORY: StoryData = {
     ...TRAIN_STORY.lockedRooms,
     ...SEA_STORY.lockedRooms,
     ...NANNY_STORY.lockedRooms,
+    ...FINALE_STORY.lockedRooms,
   ],
   omens: [
     // L'oculus de l'école (D-64) : en montant les étagères, tant que la fin n'est pas vécue.
@@ -1317,9 +1334,10 @@ export const HOUSE_STORY: StoryData = {
     // La station balnéaire (D-101).
     ...SEA_STORY.omens,
     ...NANNY_STORY.omens,
+    ...FINALE_STORY.omens,
   ],
   // Le train en route (D-85).
   moving: [...TRAIN_STORY.moving, ...NANNY_STORY.moving],
-  // La nuit dans le train, lumières éteintes (D-85).
-  dim: TRAIN_STORY.dim,
+  // La nuit dans le train, lumières éteintes (D-85) ; la dernière nuit dans la chambre (D-139).
+  dim: [...TRAIN_STORY.dim, ...FINALE_STORY.dim],
 };

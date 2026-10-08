@@ -55,7 +55,7 @@ export const DECOR_KINDS: Readonly<
   jarshelf: { furniture: true },
   /** Frigo de la cuisine, à escalader (D-39). */
   fridge: { furniture: true },
-  /** Armoire à linge sur pieds, près de la porte de derrière (buanderie, D-46). */
+  /** Haute étagère à linge sur ses montants, près de la porte de derrière (buanderie, D-46). */
   linencabinet: { furniture: true },
   // Fond (sans collision).
   window: { furniture: false },
@@ -130,6 +130,8 @@ export const DECOR_KINDS: Readonly<
   stepshelf: { furniture: false },
   /** Petit palier devant la porte du grenier, sur son poteau (le dessus est plein). */
   atticstep: { furniture: true },
+  /** Cloison sous la volée et le palier (tuiles du mur) : lambris, limon, porte de placard. */
+  stairwall: { furniture: true },
   /** Suspension : un fil, un abat-jour, de la lumière dessous (fond). */
   pendant: { furniture: false },
   /** Portemanteau sur pied, manteaux et écharpe (fond). */
@@ -254,6 +256,10 @@ export const DECOR_KINDS: Readonly<
   oldwall: { furniture: true },
   /** Plancher de la cabane, sur les branches. */
   deck: { furniture: true },
+  /** Grosse branche du grand arbre qui porte la cabane, et les cordes du plancher (fond, D-133). */
+  limb: { furniture: false },
+  /** L'allée vue de loin, au fond du potager : clôture, remise, vieux mur (D-133). */
+  alleybehind: { furniture: false, far: true },
   crate: { furniture: true },
   /** Coffre suspendu au toit de la cabane. */
   hangingchest: { furniture: true },
@@ -344,8 +350,10 @@ export const DECOR_KINDS: Readonly<
   // L'école et son monde étrange (D-64), dessinés par le code (PLACEHOLDER).
   /** L'arrière de l'école, vu de la cour, avec sa porte (fond). */
   schoolfacade: { furniture: false },
-  /** Local à vélos (plein) : on arrive sur son toit. */
-  bikeshed: { furniture: true },
+  /** Pignon du gymnase (plein) : on arrive sur son toit plat ; un abri à vélos à son pied (D-134). */
+  gymgable: { furniture: true },
+  /** Escalier de secours du chantier : paliers (planches de la salle), volées, garde-corps (D-134). */
+  fireescape: { furniture: true },
   /** Préau : toit traversable, poteaux en fond. */
   preau: { furniture: true },
   /** Panier de basket : le haut du panneau est un perchoir traversable. */
@@ -366,7 +374,7 @@ export const DECOR_KINDS: Readonly<
   sorterlid: { furniture: true },
   cushions: { furniture: false },
   // Revisites avec le crochet (D-66).
-  /** Jardinière sous la fenêtre de la chambre (planche traversable), au bout du fil à linge. */
+  /** Jardinière sous la fenêtre de la buanderie (planche traversable), au bout du fil à linge. */
   windowbox: { furniture: true },
   /** Nid dans le platane de la rue (perchoir traversable), au bout du fil tendu depuis l'école. */
   nest: { furniture: true },
@@ -417,7 +425,7 @@ export const DECOR_KINDS: Readonly<
   canopycolumn: { furniture: false },
   /** Lampe-globe suspendue à sa tige (fond, D-80). */
   globelamp: { furniture: false },
-  /** Pilier de fonte de la marquise (plein). */
+  /** Grand panneau d'affichage du quai (plein), sur deux pieds (D-135). */
   pillar: { furniture: true },
   /** Passerelle au-dessus des voies : marches et tablier traversables. */
   footbridge: { furniture: true },
@@ -445,7 +453,7 @@ export const DECOR_KINDS: Readonly<
   lostcounter: { furniture: true },
   /** Étagères des objets perdus (planches traversables). */
   lostshelf: { furniture: true },
-  /** Haute armoire de rangement (pleine). */
+  /** Haute armoire de rangement (pleine), sur un haut piètement ouvert (D-135). */
   tallcabinet: { furniture: true },
   /** Casiers de consigne (pleins), une lueur turquoise tout en haut. */
   lockers: { furniture: true },
@@ -637,10 +645,36 @@ export const DECOR_KINDS: Readonly<
   seagate: { furniture: false },
   napcot: { furniture: false },
   cantower: { furniture: true },
+  // Le dernier niveau (D-141), la chambre immense : la chambre du premier soir, démesurée.
+  giantcradle: { furniture: true },
+  nightlamp: { furniture: true },
+  bedskirt: { furniture: true },
+  giantpillow: { furniture: true },
+  giantcabin: { furniture: false },
+  garland: { furniture: true },
+  giantmusicbox: { furniture: true },
+  /** Une étoile de la berceuse (D-140) : dessinée par `LullabyView`, rien ici. */
+  lullabystar: { furniture: true },
+  // Le ciel de la chambre (D-142).
+  giantframe: { furniture: true },
+  giantpicture: { furniture: false },
+  mobilethread: { furniture: false },
+  mobilestar: { furniture: false },
+  giantmoon: { furniture: true },
+  giantwindow: { furniture: false },
+  curtainrod: { furniture: false },
+  giantcurtain: { furniture: true },
+  tiedcurtain: { furniture: true },
+  casement: { furniture: true },
+  gianthutch: { furniture: true },
+  giantdesk: { furniture: true },
+  atticdoor: { furniture: false },
+  // La chambre grande (D-143) : le berceau, ses côtés trop hauts pour voir dedans.
+  bigcradle: { furniture: false },
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */
-export const WALL_STYLES = ['dots', 'stripes', 'planks', 'tiles'] as const;
+export const WALL_STYLES = ['dots', 'stripes', 'planks', 'tiles', 'clocks', 'tags'] as const;
 export type WallStyle = (typeof WALL_STYLES)[number];
 
 /**
@@ -660,7 +694,7 @@ export const ART_IMAGES: Readonly<Record<string, string>> = {
  * largeur de l'image) est l'axe des pieds, posé au milieu du cadre comme le corps dessiné ; une
  * image plus large que le cadre d'un côté (une main tendue) y est ramenée si elle tient.
  * `steam` : haut de la tasse (fractions de l'image), d'où monte la vapeur dessinée par le code.
- * `seat` : pose assise, hauteur de l'assise dans l'image (fraction) ; l'image garde l'échelle d'un
+ * `seat` (D-146) : pose assise, hauteur de l'assise dans l'image (fraction) ; l'image garde l'échelle d'un
  * adulte debout, l'assise posée sur le bas du cadre (le meuble), les jambes pendent en dessous.
  */
 export interface CharacterImage {
@@ -748,6 +782,15 @@ export interface ArtPalette {
   vignette: number;
   /** Couleur du vignettage (« r,g,b »). */
   vignetteColor: string;
+  /** Épaisseur du liseré des surfaces praticables (px, D-130). */
+  rimWidth: number;
+  /** Lueur douce au-dessus du liseré (opacité, 0 : aucune, D-130). */
+  rimGlow: number;
+  /** Motif du mur imposé par la palette (un monde étrange, D-130) ; null : celui de la salle. */
+  wallMotif: WallStyle | null;
+  /** Halo doux autour de Céleste (opacité, 0 : aucun, D-130) et sa couleur (« r,g,b »). */
+  halo: number;
+  haloColor: string;
 }
 
 export const REAL_PALETTE: Readonly<ArtPalette> = {
@@ -784,6 +827,11 @@ export const REAL_PALETTE: Readonly<ArtPalette> = {
   veil: 0.2,
   vignette: 0.4,
   vignetteColor: '8,10,24',
+  rimWidth: 1,
+  rimGlow: 0,
+  wallMotif: null,
+  halo: 0,
+  haloColor: '255,255,255',
 };
 
 /**
@@ -866,6 +914,41 @@ export const STRANGE_PALETTE: Readonly<ArtPalette> = {
   veil: 0,
   vignette: 0.5,
   vignetteColor: '6,4,16',
+};
+
+/**
+ * La chambre du premier soir, démesurée, à la lumière de la veilleuse (D-141, `; @palette:
+ * nightlight`) : le monde de Maria, au début du dernier niveau. Un monde étrange (hors carte), mais
+ * la chambre garde ses couleurs : moins de violet qu'ailleurs, la nuit bleue, la lumière chaude de
+ * la veilleuse, un liseré à peine turquoise. L'étrange s'efface à mesure qu'on approche de Maria
+ * (D-138). PLACEHOLDER.
+ */
+export const NIGHTLIGHT_PALETTE: Readonly<ArtPalette> = {
+  ...REAL_PALETTE,
+  wallTop: '#2f3a66',
+  wallBottom: '#232c52',
+  wallpaper: 'rgba(255,224,170,0.1)',
+  wainscot: '#2c3560',
+  floor: '#4e3d38',
+  floorEdge: '#6a5248',
+  rim: 'rgba(170,236,225,0.75)',
+  lamp: '255,206,140',
+  darkness: 0.48,
+  vignette: 0.5,
+  vignetteColor: '10,12,32',
+};
+
+/**
+ * La chambre grande (D-143, `; @palette: nightlight-soft`) : l'étrange s'efface encore. La nuit de
+ * la vraie chambre, un peu plus sombre que la veilleuse immense, un liseré presque blanc. PLACEHOLDER.
+ */
+export const NIGHTLIGHT_SOFT_PALETTE: Readonly<ArtPalette> = {
+  ...NIGHTLIGHT_PALETTE,
+  wallTop: '#343c5e',
+  wallBottom: '#272e4c',
+  rim: 'rgba(214,226,222,0.4)',
+  darkness: 0.6,
+  vignette: 0.45,
 };
 
 /**
@@ -1228,6 +1311,20 @@ export const ERASURE_COLORS = {
   tile: 0xb4b0c4,
 } as const;
 
+/**
+ * Le vide de la nuit (D-142) : tout en bas du ciel de la chambre (`; @void: night`), les tuiles d'eau
+ * sont le noir de la chambre, loin dessous : un bleu de nuit qui s'assombrit, sans vaguelettes ni
+ * reflet. Y tomber ramène au dernier appui, sans peur. PLACEHOLDER.
+ */
+export const NIGHT_VOID_COLORS = {
+  body: [34, 40, 82] as const,
+  deep: [12, 14, 34] as const,
+  alpha: 0.82,
+  surface: 'rgba(150,170,230,0.18)',
+  /** Salles de tuiles (les parcours). */
+  tile: 0x1c2148,
+} as const;
+
 /** La surface animée de l'eau (D-97, `WaterView`) : vaguelettes qui défilent. PROVISOIRE. */
 export const WATER_LIFE = {
   /** Motif répété (px) et hauteur de la bande (px). */
@@ -1281,4 +1378,29 @@ export const SHIFT_LAYER_VIEW = {
   refuseRadiusPx: 14,
   /** Bascule réussie : un éclair bref de la couleur de la nouvelle couche (ms). */
   flashMs: 160,
+} as const;
+
+/**
+ * Les étoiles de la berceuse (D-140, `LullabyView`), PLACEHOLDER : une planche de lumière, une
+ * étoile au milieu, un halo. Allumée : chaude et nette ; éteinte : un contour en pointillés, pour
+ * prévoir. Une étoile qui va s'allumer s'éclaire peu à peu ; une qui va s'éteindre vacille.
+ */
+export const LULLABY_VIEW = {
+  light: 0xffe6a6,
+  core: 0xfff8e4,
+  halo: 0xffd98a,
+  /** Halo d'une étoile allumée : anneaux ajoutés à la lumière (opacité de chacun, rayon en px). */
+  haloAlpha: 0.09,
+  haloRadiusPx: 13,
+  haloRings: 4,
+  /** Hauteur de la planche de lumière (px logiques), le dessus de la tuile. */
+  plankPx: 4,
+  /** Rayon de l'étoile au milieu de la planche (px logiques). */
+  starRadiusPx: 5,
+  /** Éteinte : le contour (couleur, opacité, longueur des tirets en px). */
+  dark: 0xc9b98f,
+  darkAlpha: 0.45,
+  dashPx: 3,
+  /** Une étoile qui s'annonce : battement du vacillement (ms). */
+  flickerMs: 110,
 } as const;

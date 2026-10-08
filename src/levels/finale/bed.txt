@@ -1,0 +1,97 @@
+; Le dernier niveau (D-138, D-141), la chambre immense, le lit et le coffre : la chambre du premier
+; soir, démesurée, à la lumière de la veilleuse. Céleste arrive dans le berceau vide, devenu
+; immense, sur le coffre à jouets ; elle en sort par-dessus les barreaux. La veilleuse champignon
+; (une veilleuse), le dessous du lit (on glisse sous la jupe du lit), la cheminée entre l'armoire
+; et la tête de lit (deux paliers), l'oreiller et le lit, la cabane du lit : ses barreaux (le
+; présent) et sa guirlande (le souvenir), on monte en basculant ; la traverse et la boîte à
+; musique. Les premières étoiles de la berceuse mènent au dessus de l'armoire : de là, le ciel de
+; la chambre (D-142, `finale-sky`). Ni danger, ni ennemi, ni trouvaille. Facile (mesuré) : le
+; moyen est dans le ciel de la chambre.
+; @name: La chambre immense
+; @world: strange
+; @palette: nightlight
+; @music: strange
+; @difficulty: easy
+; @ambient: #1d2244
+; @erase-look: stars
+; @erase: s1 both 24 10 3 1
+; @erase: s2 none 19 7 3 1
+; @erase-step: s2
+; @erase-step: s1
+; @erase-step: s1,s2
+; @shift: present 33 25 5 1
+; @shift: memory 42 21 2 1
+; @shift: present 48 17 2 1
+; @leg: 88,31 70,37 easy
+; @leg: 70,37 22,17 easy wall-jump slide
+; @leg: 22,17 36,12 easy shift
+; @decor: nightstars 1 1 94 33
+; @decor: mobile 82 1 12 18
+; @decor: wardrobe 1 4 16 42
+; @decor: ledge 17 34 2 1
+; @decor: ledge 17 26 2 1
+; @decor: headboard 21 18 3 24
+; @decor: giantcabin 31 3 26 25
+; @decor: bed 24 28 38 14
+; @decor: bedskirt 58 42 4 3
+; @decor: giantpillow 24 25 6 3
+; @decor: beam 33 25 5 1
+; @decor: garland 42 21 2 1
+; @decor: beam 48 17 2 1
+; @decor: beam 31 13 26 1
+; @decor: giantmusicbox 49 10 6 3
+; @decor: lullabystar 24 10 3 1
+; @decor: lullabystar 19 7 3 1
+; @decor: nightlamp 69 38 5 8
+; @decor: toybox 74 35 21 11
+; @decor: giantcradle 81 21 14 14
+; @decor: rug 26 46 46 1
+; Légende : # mur/sol, b bois et t tissu (pleins), - barreau et = planche (traversables), C veilleuse, P départ.
+################################################################################################
+#..............................................................................................#
+#..............................................................................................#
+#..............................................................................................#
+#bbbbbbbbbbbbbbbb..............................................................................#
+#bbbbbbbbbbbbbbbb..............................................................................#
+#bbbbbbbbbbbbbbbb..............................................................................#
+#bbbbbbbbbbbbbbbb..===.........................................................................#
+#bbbbbbbbbbbbbbbb..............................................................................#
+#bbbbbbbbbbbbbbbb..............................................................................#
+#bbbbbbbbbbbbbbbb.......===......................bbbbbb........................................#
+#bbbbbbbbbbbbbbbb................................bbbbbb........................................#
+#bbbbbbbbbbbbbbbb...................C............bbbbbb........................................#
+#bbbbbbbbbbbbbbbb..............--------------------------......................................#
+#bbbbbbbbbbbbbbbb..............................................................................#
+#bbbbbbbbbbbbbbbb..............................................................................#
+#bbbbbbbbbbbbbbbb..............................................................................#
+#bbbbbbbbbbbbbbbb.....C.........................--.............................................#
+#bbbbbbbbbbbbbbbb....bbb.......................................................................#
+#bbbbbbbbbbbbbbbb....bbb.......................................................................#
+#bbbbbbbbbbbbbbbb....bbb.......................................................................#
+#bbbbbbbbbbbbbbbb....bbb..................==..................................................b#
+#bbbbbbbbbbbbbbbb....bbb......................................................................b#
+#bbbbbbbbbbbbbbbb....bbb......................................................................b#
+#bbbbbbbbbbbbbbbb....bbb......................................................................b#
+#bbbbbbbbbbbbbbbb....bbbtttttt...-----........................................................b#
+#bbbbbbbbbbbbbbbb==..bbbtttttt................................................................b#
+#bbbbbbbbbbbbbbbb....bbbtttttt................................................................b#
+#bbbbbbbbbbbbbbbb....bbbtttttttttttttttttttttttttttttttttttttt...................b............b#
+#bbbbbbbbbbbbbbbb....bbbtttttttttttttttttttttttttttttttttttttt...................b............b#
+#bbbbbbbbbbbbbbbb....bbbtttttttttttttttttttttttttttttttttttttt...................b............b#
+#bbbbbbbbbbbbbbbb....bbbtttttttttttttttttttttttttttttttttttttt...................b......P.....b#
+#bbbbbbbbbbbbbbbb....bbbtttttttttttttttttttttttttttttttttttttt...................bbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbb....bbbtttttttttttttttttttttttttttttttttttttt...................bbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbb==..bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb...................bbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbb....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb............bbbbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbb....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb............bbbbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbb....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb........C...bbbbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbb....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.......bbbbbbbbbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbb....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.......bbbbbbbbbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbb....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..........bbbbbbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbb....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..........bbbbbbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbb.........................................tttt..........bbbbbbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbb.........................................tttt..........bbbbbbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbb.........................................tttt..........bbbbbbbbbbbbbbbbbbbbbbb#
+#bbbbbbbbbbbbbbbb.......................................................bbbbbbbbbbbbbbbbbbbbbbb#
+################################################################################################
+################################################################################################

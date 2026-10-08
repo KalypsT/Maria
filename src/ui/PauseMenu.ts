@@ -17,6 +17,8 @@ export interface PauseMenuOptions {
   onAudioChange: (settings: AudioSettings, persist: boolean) => void;
   /** Afficher les réglages tactiles (inutile sans commandes tactiles). */
   showTouchSettings: boolean;
+  /** Le navigateur sait vibrer (Android) : le réglage des vibrations est proposé (D-128). */
+  canVibrate: boolean;
   onResume: () => void;
   /** Ouvrir la carte (§24) ; absent : pas de bouton. */
   onOpenMap?: () => void;
@@ -83,6 +85,8 @@ export class PauseMenu {
     }
     this.addQuit(topRow);
     this.addAudio(panel);
+    element('h3', panel, undefined, 'Aide');
+    this.addChoice(panel, 'Aide discrète', 'hint');
 
     if (options.showTouchSettings) {
       element('h3', panel, undefined, 'Commandes tactiles');
@@ -90,6 +94,9 @@ export class PauseMenu {
       this.addSlider(panel, 'Opacité', 'opacity', (v) => `${Math.round(v * 100)} %`);
       if (options.debugTools) {
         this.addModeChoice(panel);
+      }
+      if (options.canVibrate) {
+        this.addChoice(panel, 'Vibrations', 'vibration');
       }
       const reset = element('button', panel, undefined, 'Réinitialiser les commandes');
       reset.addEventListener('click', () => {
@@ -181,6 +188,33 @@ export class PauseMenu {
     this.refreshers.push(refresh);
   }
 
+  /** Un réglage oui ou non : les vibrations (D-128), le fil discret (D-129). */
+  private addChoice(parent: HTMLElement, label: string, key: 'vibration' | 'hint'): void {
+    const row = element('div', parent, 'pause-row');
+    element('span', row, undefined, label);
+    const group = element('div', row, 'pause-choice');
+    const choices: readonly [boolean, string][] = [
+      [true, 'Oui'],
+      [false, 'Non'],
+    ];
+    const buttons = choices.map(([on, text]) => {
+      const button = element('button', group, undefined, text);
+      button.addEventListener('click', () => {
+        this.settings[key] = on;
+        this.commit();
+        refresh();
+      });
+      return { on, button };
+    });
+    const refresh = () => {
+      for (const { on, button } of buttons) {
+        button.classList.toggle('selected', on === this.settings[key]);
+      }
+    };
+    refresh();
+    this.refreshers.push(refresh);
+  }
+
   private addModeChoice(parent: HTMLElement): void {
     const row = element('div', parent, 'pause-row');
     element('span', row, undefined, 'Joystick');
@@ -207,7 +241,7 @@ export class PauseMenu {
     this.refreshers.push(refresh);
   }
 
-  /** Son (D-57) : volume général et coupure. */
+  /** Son (D-57) : volume général, volume des bruitages (D-126) et coupure. */
   private addAudio(parent: HTMLElement): void {
     element('h3', parent, undefined, 'Son');
     const audio = { ...this.options.audio };
@@ -219,10 +253,20 @@ export class PauseMenu {
     slider.min = '0';
     slider.max = '1';
     slider.step = '0.05';
+    const sfxRow = element('label', parent, 'pause-row');
+    element('span', sfxRow, undefined, 'Bruitages');
+    const sfxValue = element('span', sfxRow, 'pause-value');
+    const sfxSlider = element('input', sfxRow);
+    sfxSlider.type = 'range';
+    sfxSlider.min = '0';
+    sfxSlider.max = '1';
+    sfxSlider.step = '0.05';
     const mute = element('button', parent);
     const refresh = () => {
       slider.value = String(audio.volume);
       value.textContent = `${String(Math.round(audio.volume * 100))} %`;
+      sfxSlider.value = String(audio.sfxVolume);
+      sfxValue.textContent = `${String(Math.round(audio.sfxVolume * 100))} %`;
       mute.textContent = audio.muted ? 'Remettre le son' : 'Couper le son';
       mute.classList.toggle('selected', audio.muted);
     };
@@ -234,6 +278,14 @@ export class PauseMenu {
       this.options.onAudioChange({ ...audio }, false);
     });
     slider.addEventListener('change', () => {
+      this.options.onAudioChange({ ...audio }, true);
+    });
+    sfxSlider.addEventListener('input', () => {
+      audio.sfxVolume = Number(sfxSlider.value);
+      refresh();
+      this.options.onAudioChange({ ...audio }, false);
+    });
+    sfxSlider.addEventListener('change', () => {
       this.options.onAudioChange({ ...audio }, true);
     });
     mute.addEventListener('click', () => {

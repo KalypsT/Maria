@@ -2,19 +2,25 @@
 
 ## Phase en cours
 
-**Les personnages illustrés** (D-123) : papa illustré partout, maman sauf au canapé et au banc (images de l'utilisateur générées avec ChatGPT, prompts dans `docs/PROMPTS_PERSONNAGES.md`), sur `ccr-142ffd96-q5pgli`. Suite : maman au canapé et au banc (jambes repliées), Céleste en pièces illustrées (planches reçues, pièces à refaire : jambe seule, tête et torse du pyjama).
+**Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139) , **PR 2 faite : la berceuse, le moteur et le parcours d'essai 17** (D-140), **PR 3 faite : la chambre immense, le lit et le coffre** (D-141), **PR 4 faite : le ciel de la chambre** (D-142), **PR 5 faite : la chambre grande, la vraie chambre la nuit, Maria retrouvée** (D-143), **PR 6 faite : le matin et le dernier plan** (D-144) et **PR 7 faite : après la fin** (D-145), sur `ccr-06b9800a-238lrq`. **Le niveau 8 est complet : le jeu se joue du premier soir à la fin.** Suite : **essai sur téléphone** (le parcours 17, tout le monde de Maria, toute la fin) ; à fournir : le thème de fin (`ending`), le jingle de Maria, Céleste en phase 4 illustrée.
+
+**La cohérence des niveaux** (D-132 à D-137, demande de l'utilisateur) : la maison, le jardin, le quartier et la gare faits et fusionnés ; **le train** (D-136) et **la station balnéaire** (D-137 : l'aile du centre, les pieds de la grue, la pêche aux canards, les rochers percés, le mât d'amarrage) faits, sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (la maison de la nounou), même méthode.
+
+**Sensations, son, aide et mondes étranges** (D-124) : chantiers **A** (fluidité et sensations), **B** (bruitages et vibrations) et **C** (le fil discret) faits et fusionnés (D-124 à D-129). **Chantier D, PR 1 faite : trois maquettes de la gare étrange** (D-130), sur `ccr-9d90352a-xuwhs1`. Suite : **le choix de l'utilisateur** (A, B, C ou un mélange), puis la gare étrange refaite (D2) et les autres mondes étranges un par un. En attente : essais sur téléphone (compteur de saccades, sensations, sons de test, vibrations, fil discret) ; les sons à fournir (`docs/BRUITAGES.md`) ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades.
+
+**Les personnages illustrés** (D-123, D-146) : papa illustré partout, maman sauf au canapé et au banc (images de l'utilisateur générées avec ChatGPT, prompts dans `docs/PROMPTS_PERSONNAGES.md`), sur `ccr-142ffd96-q5pgli`. Suite : maman au canapé et au banc (jambes repliées), Céleste en pièces illustrées (planches reçues, pièces à refaire : jambe seule, tête et torse du pyjama).
 
 **Le niveau 7 plus lisible** (retour d'essai, D-122) : les quatre cubes de la tour d'Eden à la place des objets déjà vus, la porte de la sieste et ses creux, le regard vers la porte, la carte, la salle de jeux où la tour monte, le souvenir d'Eden retravaillé (la tour chacun son tour, le cache-cache avec un compte), Eden blond à la coupe au bol, sur `ccr-abfc1233-t31o4v`. Suite : **essai sur téléphone**.
 
 **Les disques et le tourne-disque du grenier** (easter egg secret, D-121) : plan validé en 3 PR (le système et le premier morceau, le tourne-disque, le disque aux objets trouvés de la gare). **PR 1 faite : le système, « Les Aventures de Céleste », les jingles par-dessus la musique** **PR 2 faite : le tourne-disque au grenier** et **PR 3 faite : le disque aux objets trouvés de la gare** (D-121), sur `ccr-97cf4444-9oirn1`. **Le système des disques est complet** avec un disque sur trois ; les deux autres (jardin ou quartier, chez la nounou) viendront avec leur musique. Suite : essai sur téléphone.
 
-**L'avant-dernier niveau** (niveau 7, « la maison de la nounou », D-107) : plan validé en 12 PR (la bascule, la maison et le miroir, l'effacement, quatre îlots de mémoire, le torchon blanc, le boss, Eden, le réveil et la phase 4). **PR 1 faite : la bascule (moteur, analyse, parcours d'essai 15)** (D-108) , **PR 2 faite : le dessin des deux couches, le bouton « Basculer », l'aide** (D-109), **PR 3 faite : la porte du couloir, l'entrée et le miroir, la maison, la carte** (D-110) **PR 4 faite : l'effacement (le système) et le parcours d'essai 16** (D-111, fusionnées), **PR 5 faite : l'îlot 1, la chambre d'autrefois et le jardin renversé (Roger)** (D-112) **PR 6 faite : l'îlot 2, l'école et la rue d'autrefois (la boîte à formes)** (D-113) **PR 7 faite : l'îlot 3, la gare et le train d'autrefois (la cuisine rose)** (D-114) **PR 8 faite : l'îlot 4, la plage et le carrousel d'autrefois (le livre musical)** (D-115, fusionnées) **PR 9 faite : la chambre de la sieste et le torchon blanc** (D-116) **PR 10 faite : le boss, l'effacement** (D-117) **PR 11 faite : Eden et son souvenir jouable** (D-118) et **PR 12 faite : le réveil, le train du retour, la phase 4** (D-119), sur `ccr-3d597f8d-070zee`. **Le niveau 7 est complet** (sa suite, le niveau 8, reste un PLACEHOLDER). Suite : **essai sur téléphone** (parcours 15 et 16, l'entrée, la maison, les îlots, la chambre de la sieste, le boss, Eden, la fin), puis le niveau 8.
+**L'avant-dernier niveau** (niveau 7, « la maison de la nounou », D-107) : plan validé en 12 PR (la bascule, la maison et le miroir, l'effacement, quatre îlots de mémoire, le torchon blanc, le boss, Eden, le réveil et la phase 4). **PR 1 faite : la bascule (moteur, analyse, parcours d'essai 15)** (D-108) , **PR 2 faite : le dessin des deux couches, le bouton « Basculer », l'aide** (D-109), **PR 3 faite : la porte du couloir, l'entrée et le miroir, la maison, la carte** (D-110) **PR 4 faite : l'effacement (le système) et le parcours d'essai 16** (D-111, fusionnées), **PR 5 faite : l'îlot 1, la chambre d'autrefois et le jardin renversé (Roger)** (D-112) **PR 6 faite : l'îlot 2, l'école et la rue d'autrefois (la boîte à formes)** (D-113) **PR 7 faite : l'îlot 3, la gare et le train d'autrefois (la cuisine rose)** (D-114) **PR 8 faite : l'îlot 4, la plage et le carrousel d'autrefois (le livre musical)** (D-115, fusionnées) **PR 9 faite : la chambre de la sieste et le torchon blanc** (D-116) **PR 10 faite : le boss, l'effacement** (D-117) **PR 11 faite : Eden et son souvenir jouable** (D-118) et **PR 12 faite : le réveil, le train du retour, la phase 4** (D-119), sur `ccr-3d597f8d-070zee`. **Le niveau 7 est complet** (sa suite, le niveau 8, est commencée : D-138, D-139). Suite : **essai sur téléphone** (parcours 15 et 16, l'entrée, la maison, les îlots, la chambre de la sieste, le boss, Eden, la fin), puis le niveau 8.
 
 **La station balnéaire** (niveau 6, D-82, D-95) : plan validé en 10 PR (la marée à deux états, pas de nage, la baie en boucle, la fête foraine, la fête engloutie et la vague, le livre musical, le couloir de la fin). **PR 1 faite : la marée et l'eau** (D-96, D-97, fusionnée). **PR 2 faite : l'arrivée, la promenade, le centre** (D-98) **PR 3 faite : la plage, les rochers, la première marée, le banc, les vagues** (D-99) **PR 4 faite : le phare, le port, la boucle de la baie** (D-100) **PR 5 faite : la jetée, la fête foraine, le soir, les chaises volantes** (D-101, fusionnées) et **PR 6 faite : la fête engloutie** (D-102) **PR 7 faite : le rythme de la vague, parcours d'essai 14** (D-103) **PR 8 faite : la vague dans le niveau, le livre musical** (D-104) et **PR 9 faite : le court souvenir, la nuit, le couloir en boucle, la fin** (D-105), sur `ccr-014503d9-cj0c7a`. **Le niveau 6 est complet** (sa fin reste un PLACEHOLDER jusqu'au niveau 7). Suite : essais sur téléphone, puis le niveau 7. Le parcours d'essai 13 « Marée » n'a pas encore été essayé sur téléphone.
 
 **Le train** (niveau 5, D-83 à D-91) : complet et fusionné. La glissade n'a pas encore été essayée sur téléphone (l'utilisateur a demandé de continuer).
 
-**Structure de la fin du jeu** (D-82) : 8 niveaux (maison, jardin, quartier, gare, train, station balnéaire, avant-dernier, monde de Maria). Niveau 6 : plan validé (D-95). Niveau 7 : piste retenue (presque entièrement étrange), détails décidés le moment venu ; la phase 4 de croissance viendra avec lui.
+**Structure de la fin du jeu** (D-82) : 8 niveaux (maison, jardin, quartier, gare, train, station balnéaire, avant-dernier, monde de Maria). **Les huit niveaux sont faits** (le niveau 8 : D-138 à D-145).
 
 **Passe graphique** (D-71 à D-81) : terminée, tout le monde réel est refait d'après la grille du salon. L'étape 4 (identifiants fixes des trouvailles et lanternes) est écartée jusqu'à la sortie (**à reprendre avant de diffuser le jeu**, pilier 10).
 
@@ -26,10 +32,201 @@
 
 ## Fait
 
+### Les personnages illustrés : papa complet, maman (D-146)
+
+- Papa : `dad-hall` (sa propre image), `dad-garden`, `dad-quay`. Maman : `mom-bed` (assise au bord du lit, les jambes pendantes, `seat`), `mom-garden`, `mom-yard`, `mom-quay` ; `mom-sofa` et `mom-bench` attendent une pose aux jambes repliées (sièges trop bas : 2 et 1 tuiles).
+- Détourage : `--largest` (un enfant ajouté par le générateur retiré), `--holes` (blancs enfermés).
+- Vérifié dans Chromium : la chambre (maman au lit), le jardin, le potager, la cour, le hall.
+- [ ] À vérifier sur téléphone : maman au bord du lit (taille, jambes), papa penché dans le hall.
+
+### Le dernier niveau, PR 7 : après la fin (D-145)
+
+- **La fin** : après le dernier plan, le noir, puis **l'écran de fin**, sans texte : Maria seule sur son étagère, sur la page du cahier, une lumière douce, quelques scintillements qui passent ; un petit rond pour continuer. Puis **l'accueil**, avec Maria dans un coin.
+- **« Continuer »** : dans le couloir, le matin, en phase 4, toute la maison ouverte, pour finir les trouvailles ; Maria reste sur son étagère, sans étincelle. Le fil discret se tait.
+- Musique : nouvel emplacement `ending` (le thème de fin, à fournir). DEBUG → Histoire : « après la fin ». Tests : `finaleMorning.test.ts`, `story.test.ts`. Vérifié dans Chromium.
+- [ ] À vérifier sur téléphone (jouer la fin depuis DEBUG → Histoire → « Maria rangée sur l'étagère », salle `bedroom`, puis sortir par la porte) : l'écran de fin, assez long avant le rond ? Les scintillements se voient-ils ? L'accueil avec Maria dans son coin ?
+- [ ] « Continuer » après la fin : le couloir, le matin, la chambre avec Maria sur son étagère : juste ?
+
+### Le dernier niveau, PR 6 : le matin et le dernier plan (D-144)
+
+- **Le réveil** : Agir sur le lit ; le matin, Céleste se réveille **Maria dans les bras**, un cœur ; une étincelle sur le tapis.
+- **Le tapis**, comme le premier soir : le cœur, **la bulle du livre commence… et s'efface** ; elle regarde Maria, puis pense à l'étagère.
+- **Ranger Maria** : Agir encore sur le tapis ; Maria sur **l'étagère du surmeuble**, là où était la couverture le premier soir (à confirmer, facile à changer) ; **le dernier câlin**.
+- **La porte** : c'est le joueur qui fait sortir Céleste. **Le dernier plan** : la vue reste sur Maria, la musique se tait, un très léger signe (la lumière froide qui vacille, quelques scintillements, le mobile qui tourne un instant), tout redevient normal, le noir ; puis le couloir. L'écran de fin viendra avec la PR 7.
+- DEBUG → Histoire : « le matin, Maria à côté d'elle », « Maria rangée sur l'étagère » (et « Maria retrouvée » pour tout jouer depuis la nuit). Tests : `finaleMorning.test.ts`. Vérifié dans Chromium.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « Maria retrouvée », salle `bedroom`, Agir sur le lit) : le réveil avec Maria dans les bras ; le tapis : comprend-on que le livre s'efface parce qu'elle a grandi (la bulle assez courte, le regard assez long) ?
+- [ ] Ranger Maria : Agir sur le tapis une deuxième fois se devine-t-il (la bulle de l'étagère) ? **L'étagère du surmeuble** te convient-elle comme place de Maria ?
+- [ ] Le dernier plan : assez long, trop long ? Le signe se voit-il, sans être trop fort (`STRANGE_FX.glimmerPeak`, `glimmerSpin`) ? Le noir puis le couloir : en attendant l'écran de fin.
+
+### Le dernier niveau, PR 5 : la chambre grande, la vraie chambre la nuit, Maria retrouvée (D-143)
+
+- **La chambre grande** : par la petite porte du grenier du ciel, **la vraie chambre deux fois plus grande** ; on redescend par l'étagère haute, le surmeuble et le bureau jusqu'à la porte. Le berceau sous le mobile : on n'en voit que la couverture. L'étrange s'efface (presque les vraies couleurs, plus de couches ; la musique attend le thème de fin). Courte et facile.
+- **La vraie chambre, la nuit** : par la porte, Céleste rentre dans sa chambre ; **Maria dort dans son berceau**.
+- **Maria retrouvée** : Agir sur le berceau ; dans le noir, **Maria dans les bras** (nouvelle pose), **le cœur du prologue**, **le cercle se referme** : Céleste assise sur son lit, Maria à côté d'elle. Agir sur le lit : « ? » (le matin viendra).
+- DEBUG → Histoire : « la chambre grande », « Maria dans son berceau, la vraie chambre », « Maria retrouvée ». Tests : `finaleHome.test.ts`. Vérifié dans Chromium.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « le ciel de la chambre », salle `finale-sky`, Agir devant la petite porte ; ou « la chambre grande », salle `finale-big`) : reconnaît-on tout de suite sa chambre, deux fois trop grande ? La descente est-elle trop courte ?
+- [ ] La porte, puis la vraie chambre : le moment où l'on voit Maria dans son berceau se ressent-il ?
+- [ ] Maria dans les bras : la pose se lit-elle (Maria contre la poitrine) ? Le cœur, le cercle : assez long, trop long ? Céleste assise sur son lit avec Maria à côté : juste, en attendant le matin ?
+
+### Le dernier niveau, PR 4 : le ciel de la chambre (D-142)
+
+- **L'entrée** : du dessus de l'armoire de la chambre immense (plus de « ? »), les étoiles continuent : le ciel de la chambre, le haut de la chambre du premier soir, démesurée.
+- **Le parcours** : **cinq étoiles de la berceuse** jusqu'au cadre ; **les fils du mobile** au crochet (le second, plus haut : le saut depuis le câble) jusqu'à **sa lune** ; **la fenêtre** en plané : entre le rideau noué du premier soir (le souvenir) et le rideau fermé de ce soir (le présent), **on bascule en plein vol** ; le battant ouvert du souvenir ; **glisser sous le surmeuble** ; un **saut long jusqu'à l'étagère haute** (moyen), devant **la petite porte du grenier** (là : « ? », la chambre grande viendra).
+- **Le vide de la nuit**, tout en bas : une chute ramène au dernier appui, **sans peur** ; jamais sur une étoile (corrigé aussi pour l'effacement de la nounou).
+- DEBUG → Histoire : « le ciel de la chambre », puis la salle `finale-sky`. Tests : `finaleSky.test.ts`. Vérifié dans Chromium.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « la chambre immense », monter jusqu'au dessus de l'armoire ; ou « le ciel de la chambre » puis la salle `finale-sky`) : le passage par le dessus de l'armoire se comprend-il ? Reconnaît-on le haut de sa chambre (le cadre, le mobile, la fenêtre, le surmeuble, la petite porte) ?
+- [ ] Les cinq étoiles : le rythme, la montée jusqu'au cadre ; tomber dans le vide de la nuit (retour sur l'armoire) : agaçant ou doux ?
+- [ ] Le mobile : attrape-t-on le premier fil depuis le cadre ? **Le saut depuis le câble** pour le second (une fenêtre de 120 ms, non mesurée) : trop dur ? La lune se lit-elle comme un appui ?
+- [ ] La fenêtre : pense-t-on à basculer **entre les deux rideaux**, en plein vol ? Le rideau fermé et le rideau noué (en contour pâle) se lisent-ils ? Le battant du souvenir ?
+- [ ] Le surmeuble (glisser dessous), puis **le saut long jusqu'à l'étagère haute** (moyen) : juste bien, ou trop dur pour la fin ?
+
+### Le dernier niveau, PR 3 : la chambre immense, le lit et le coffre (D-141)
+
+- **L'entrée** : la nuit, Agir sur le berceau vide ; Céleste se retrouve **dans le berceau devenu immense**, sur le coffre à jouets.
+- **Le parcours** (facile) : sortir du berceau, la veilleuse champignon, **glisser sous la jupe du lit**, le passage sous le sommier, **la cheminée** entre l'armoire et la tête de lit, l'oreiller et le lit, **la cabane du lit** (ses barreaux, et sa guirlande du premier soir : on bascule en plein saut), la traverse et **la boîte à musique qui se met à jouer**, puis **les premières étoiles** jusqu'au dessus de l'armoire (là : « ? », le ciel de la chambre viendra).
+- **La palette de la veilleuse** : moins de violet, la chambre garde ses couleurs (l'étrange commence à s'effacer).
+- Corrigé : le point de retour d'une salle d'histoire est la veilleuse la plus proche de l'arrivée.
+- DEBUG → Histoire : « la chambre immense ». Tests : `finaleBed.test.ts`. Vérifié dans Chromium.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « la dernière nuit, le berceau vide », puis Agir sur le berceau ; ou « la chambre immense ») : sent-on qu'on est toute petite dans sa chambre du premier soir ? Le berceau, la veilleuse, le lit, la cabane se reconnaissent-ils ?
+- [ ] Le parcours : assez long, assez varié ? Le dessous du lit se trouve-t-il (glisser sous la jupe) ? La cheminée (deux paliers) ? La guirlande du souvenir dans la cabane se voit-elle assez pour penser à basculer ?
+- [ ] Les étoiles : les attend-on naturellement depuis la traverse ? Le saut jusqu'à l'armoire ?
+- [ ] Facile partout (mesuré) : trop facile, ou bien pour un début de dernier niveau ?
+
+### Le dernier niveau, PR 2 : la berceuse (D-140)
+
+- **La berceuse** : des étoiles qui s'allument et s'éteignent par vagues lentes, au rythme de la boîte à musique (le moteur de l'effacement, avec `; @erase-look: stars`). Une étape toutes les 2 s ; une étoile qui va s'allumer s'éclaire peu à peu (1,2 s), une qui va s'éteindre vacille. Rien ne s'allume sur Céleste. Une note de boîte à musique à chaque fois (nouvel emplacement `lullaby`, à fournir).
+- **Parcours d'essai 17 « Berceuse »** : l'escalier d'étoiles (la lumière monte), puis la traversée (la lumière avance). Sans danger : une chute ramène au sol.
+- Réglages `lullabyBeatMs`, `lullabyWarnMs` dans DEBUG → Combat.
+- Tests : `erase.test.ts`, `lullabyCourse.test.ts` (le temps comme un graphe : on arrive en suivant la lumière, jamais dans un seul motif ; l'annonce laisse le temps), `courses.test.ts`. Vérifié dans Chromium.
+- [ ] À vérifier sur téléphone (menu pause → Parcours d'essai → « 17. Berceuse ») : le rythme est-il agréable, calme sans être lent (`lullabyBeatMs`) ? Voit-on venir l'étoile qui s'allume, et celle qui va s'éteindre (`lullabyWarnMs`) ? Attendre au pied de l'escalier : trop long ?
+- [ ] Les étoiles se lisent-elles comme des appuis (la planche de lumière), et éteintes comme « pas encore » (les pointillés) ? Le halo (terne pour l'instant) ?
+
+### Le dernier niveau, PR 1 : le premier soir rejoué sans Maria, la nuit, le berceau vide (D-139)
+
+- **Plan du niveau 8 validé** (D-138) : la chambre qui rapetisse, l'entrée par le berceau vide, 7 PR.
+- La fin du niveau 7 arrive **un soir** (plus de « ? ») : Céleste assise sur son lit, « Maria qui manque ».
+- **Le soir**, comme le premier soir, sans Maria : papa à la porte (la chambre est fermée), le chat sur le tabouret ; **le tapis vide** (Agir : elle s'assoit à sa place, pense à Maria) ; **le berceau défait** (Agir : elle le refait, vide) ; **le lit** : maman dit bonne nuit.
+- **La nuit** : les lumières éteintes, seule la veilleuse ; le berceau vide scintille, la lumière vacille en s'en approchant. Agir sur le berceau : « ? » (PLACEHOLDER, la chambre immense viendra).
+- DEBUG → Histoire : « quelques mois plus tard, le soir (phase 4, niveau 8) », « la dernière nuit, le berceau vide ».
+- Tests : `finaleEvening.test.ts` ; `nannyEnd`, `hint` mis à jour. Vérifié dans Chromium : le soir, le tapis, le berceau refait, maman, la nuit, le « ? ».
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « quelques mois plus tard, le soir », ou la fin du niveau 7) : reconnaît-on le premier soir (le tapis, le berceau, papa, maman) ? Le moment sur le tapis vide serre-t-il le cœur sans être trop long ? La nuit est-elle assez sombre, et le berceau qui scintille donne-t-il envie d'y aller ?
+
+### La station balnéaire cohérente (D-137)
+
+- Dessins seulement : l'aile basse du centre existe enfin (ses fenêtres et son balcon ne flottent plus) ; les pieds de la grue du port descendent jusqu'au quai ; le toit de la pêche aux canards sur deux poteaux, le bassin et ses canards ; les rochers où l'on passe dessous percés d'une arche ; un mât d'amarrage au bout du câble de la plage.
+- Tests : habillage, arrivée, rivage, port, fête foraine. Vérifié dans Chromium : captures de la promenade, de la plage, des rochers, du port, de la jetée.
+- [ ] À vérifier sur téléphone : les arches des rochers se lisent-elles comme des passages (surtout la faille, où l'on glisse) ?
+
+### Le train cohérent (D-136)
+
+- Dessins seulement : sous chaque cloison des compartiments, l'encadrement de la porte jusqu'au plancher, la porte coulissante ouverte ; les creux du toit sont des logements creusés dans la caisse (plus de ciel à travers la voiture) ; les vélos du fourgon sur leur support, crochet et sangles.
+- Gardé : l'échelle du fourgon au bout de la voiture (on arrive au début de son toit).
+- Tests : le train, ses voitures, ses dangers, l'arrivée, l'habillage. Vérifié dans Chromium : captures des couchettes, des compartiments, du fourgon, du toit.
+- [ ] À vérifier sur téléphone : les portes ouvertes des compartiments se lisent-elles comme un passage ? Les creux du toit comme un abri ?
+
+### La gare cohérente (D-135)
+
+- **Hall** : la galerie descend à la hauteur de la passerelle des quais ; le colimaçon, le câble du crochet et le balcon descendent avec elle ; l'horloge et le tableau des départs remontent au-dessus du câble.
+- **Quais** : le pilier flottant devient un grand panneau d'affichage sur deux pieds. **Objets trouvés** : la haute armoire sur un piètement ouvert.
+- Tests : gare, revisites en glissade, fin de la gare, gare étrange, fil discret, histoire, habillage. Vérifié dans Chromium : captures du hall, des quais, des objets trouvés.
+- [ ] À vérifier sur téléphone : passer de la passerelle à la galerie (même hauteur) ; le câble du crochet jusqu'au balcon.
+
+### Le quartier cohérent (D-134)
+
+- **Chantier** : la porte de la réserve à mi-hauteur de l'arrière de la supérette, au même niveau que dans la supérette ; un escalier de secours en zigzag y descend.
+- **Cour** : le pignon de briques du gymnase (on arrive sur son toit plat), un abri à vélos à son pied. **Rue** : les panneaux verts sur deux tréteaux.
+- Corrigé : le feuillage des arches de verdure (D-133) se dessinait aussi aux sorties dans un mur.
+- Tests : chantier, école, rue, plateformes basses, plané, aire de jeux, jardin. Vérifié dans Chromium : captures du chantier, de la cour, du bout de la rue, du grand arbre.
+- [ ] À vérifier sur téléphone : l'escalier de secours se monte-t-il bien (paliers traversables) ? La sortie vers la supérette se voit-elle en haut ?
+
+### Le jardin cohérent (D-133)
+
+- Dessin seulement (mêmes cases, mêmes sauts) : le vieux mur descend jusqu'au sol, percé d'une arche (grand arbre, allée) ; une grosse branche du tronc porte la cabane, son plancher pendu par deux cordes ; l'allée se voit de loin au fond du potager ; les trouées des haies sont des arches de verdure ; la fenêtre du fil à poulie est celle de la buanderie.
+- Vérifié dans Chromium : captures de la terrasse, du potager, du grand arbre et de l'allée.
+- [ ] À vérifier sur téléphone : l'arche sous le vieux mur se lit-elle comme un passage ? L'allée au loin se voit-elle sans gêner les appuis du potager ?
+
+### La maison cohérente (D-132)
+
+- **Escalier** : une seule volée jusqu'au sol, devant la porte du salon ; le dessous fermé par une cloison (placard sous le palier) ; au-dessus du palier, la cage monte au grenier en grimpant (placard au-dessus de la porte, étagère, palier du grenier). Le biberon est sur une marche, la veilleuse en bas.
+- **Grenier** : au-dessus du couloir, retourné en miroir ; on en redescend dans la chambre par une petite porte en haut du mur de droite (plus de porte derrière l'armoire). La chambre perd sa mansarde.
+- **Cuisine** : la porte de la buanderie au ras du sol, le plan de travail raccourci, le tabouret de Céleste pour y remonter. **Salon** : la bibliothèque posée au sol, la poutre dans le mur, une retombée de plafond dans le coin, deux briques sur le parquet. **Buanderie** : une haute étagère à linge à la place de l'armoire perchée.
+- Reste une liberté : la trappe à linge traverse la maison (du couloir à la buanderie).
+- Tests : `house.test.ts` (l'escalier se descend et se remonte sans grimper, les portes au ras du sol, les nouveaux endroits d'escalade), `mapModel`, `records`, `story` mis à jour. Vérifié dans Chromium : captures des sept salles et de la carte.
+- [ ] À vérifier sur téléphone : descendre et remonter l'escalier (les sauts de marche en marche, trop nombreux ?) ; monter au grenier par la cage et en redescendre dans la chambre ; revenir de la buanderie à la cuisine par le tabouret ; sauter les deux briques du salon.
+
+### Bruitages : les premiers fichiers (D-131)
+
+- 16 sons fournis, préparés et intégrés (27 fichiers avec les variantes, 200 Ko) : saut, réception, touchée, chute dans l'eau, hissage, parapluie (ouvert, refermé), crochet, glisse le long du câble (boucle), bascule, trains (annonce, passage), pas sur la pierre, l'herbe, le sable (4 variantes chacun) et les feuilles (3).
+- Les pas découpés en pas isolés ; `train-pass` réduit à 3 s ; les boucles bouclent sans coupure (`audio:prepare -- --sfx --loop`, marge sautée par le lecteur).
+- Reste à fournir : voir `docs/BRUITAGES.md` (les sons sans ✅).
+- [ ] À vérifier sur téléphone : les pas (volume, sable trop soufflé ?), le saut et la réception ensemble, la boucle du câble (sans coupure ?), le train qui passe (assez long, trop long ?), la bascule (1,5 s, finit fort).
+
+### Chantier D, PR 1 : trois maquettes de la gare étrange (D-130)
+
+- DEBUG → **« Maquette du monde étrange »** : actuelle, **A** (le crépuscule, mieux lu : les carreaux du hall), **B** (l'heure arrêtée : bleu nuit, ambre, horloges), **C** (les objets perdus, dans la brume : vert d'eau, étiquettes de bagage). Rien ne change dans le jeu tant qu'aucune n'est choisie.
+- Communs : liseré de 2 px et une lueur au-dessus, motif du mur tiré du lieu, halo doux autour de Céleste.
+- Tests : `strangeThemes.test.ts`. Captures dans Chromium : la gare étrange (le départ, la montagne des objets perdus) et la tour, dans les quatre versions.
+- [ ] **À choisir** : A, B, C, ou un mélange (une couleur de l'une, le motif d'une autre…).
+- [ ] À vérifier sur téléphone (DEBUG → « Maquette du monde étrange », puis entrer dans la gare étrange) : les appuis se lisent-ils mieux ? Le motif du mur se voit-il, sans gêner ? Le halo autour de Céleste ?
+
+### Chantier C : le fil discret (D-129)
+
+- Après **3 min sans progrès** (étape de l'histoire, capacité, salle découverte, veilleuse), une lueur (cœur doré, halo turquoise) part de Céleste dans la bonne direction ; après **5 min**, elle mène jusqu'à la sortie à prendre ou au but, et y attend. Tout progrès l'éteint. Jamais pendant une scène, une poursuite ou un souvenir ; jamais vers une trouvaille.
+- **Menu pause → Aide → Aide discrète : Oui / Non** (oui par défaut).
+- Le chemin principal (`src/levels/milestones.ts`) : 59 jalons, de la soirée du prologue au souvenir d'Eden.
+- DEBUG : INFOS montre le palier et le jalon visé ; DEBUG → « Fil discret : maintenant ».
+- Tests : `hint.test.ts` (le chemin principal suivi jusqu'à la fin), `controlSettings.test.ts`. Vérifié dans Chromium : la lueur va vers Maria dans la chambre au début, vers la sortie de la chambre depuis le couloir.
+- [ ] À vérifier sur téléphone (DEBUG → « Fil discret : maintenant », en plusieurs endroits du jeu) : la lueur se voit-elle sans être confondue avec autre chose ? Montre-t-elle le bon chemin (surtout là où l'on passe par le haut, en grimpant) ? 3 et 5 min : trop tôt, trop tard ? Le petit trajet du premier palier se comprend-il ?
+- [ ] Si un endroit guide mal : me dire la salle et l'étape (INFOS montre le jalon visé).
+
+### Chantier B, PR 3 : les vibrations (D-128)
+
+- Sur Android : une courte vibration à la réception d'une grande chute, quand Céleste est touchée, quand le crochet attrape un câble, à la bascule, au réveil d'un poursuivant, à une veilleuse.
+- **Menu pause → Commandes tactiles → Vibrations : Oui / Non** (activées par défaut).
+- Tests : `haptics.test.ts`, `controlSettings.test.ts`. Vérifié dans Chromium : le réglage dans le menu pause.
+- [ ] À vérifier sur téléphone : les vibrations se sentent-elles sans gêner ? Trop, pas assez ? Lesquelles garder ? « Non » les coupe-t-il ?
+
+### Chantier B, PR 2 : les sons des capacités, du combat, des dangers, la voix (D-127)
+
+- Tous les emplacements de `docs/BRUITAGES.md` sont branchés : rebord, hissage, saut mural, parapluie, crochet, glissade, bascule ; deux boucles (contre un mur, le long d'un câble) ; coup de bâton, bâton qui touche, ennemi dispersé ; poursuivant (réveil, grondement en boucle) ; trains en gare, tunnel, vague, effacement ; porte, bulle de pensée ; la voix de Céleste, rarement.
+- Le saut en coyote time a maintenant son son.
+- Tests : `sfx.test.ts`. Vérifié dans Chromium (parcours « Parapluie », sons de test) : saut, saut mural, la boucle contre le mur, pas, réception, coup de bâton.
+- [ ] À vérifier sur téléphone (DEBUG → « Sons de test ») : les bips des capacités tombent-ils au bon moment (le rebord, le hissage, le parapluie, le crochet) ? Les boucles (contre un mur, sur un câble, le grondement de la tour) s'arrêtent-elles bien ? L'annonce du train en gare arrive-t-elle avant de le voir ?
+
+### Chantier B, PR 1 : les bruitages, le système et les premiers sons (D-126)
+
+- **Les sons à fournir** : `docs/BRUITAGES.md` (noms, variantes, formats, licences). Un son manquant reste silencieux.
+- Déjà branchés : **les pas** (selon la matière du sol, au rythme de la foulée), **le saut**, **la réception** (petite ou grande chute), **touchée**, **chute dans l'eau**, **veilleuse**, **la carte**. Dans le monde étrange, les mêmes sons avec un écho.
+- **Menu pause → Son → Bruitages** : leur volume, sous le volume général (sauvegardé, sans migration).
+- **DEBUG → « Sons de test »** : un petit bip différent pour chaque son manquant.
+- Correction : la matière du sol de la première salle d'une partie (D-125).
+- Tests : `sfx.test.ts`, `saveData.test.ts`, `audio.test.ts`, `playerFeel.test.ts`. Vérifié dans Chromium : les sons au bon moment, la lecture, l'écho.
+- [ ] À vérifier sur téléphone (DEBUG → cocher « Sons de test ») : les bips des pas tombent-ils sur les pieds qui se posent ? Le bip du saut part-il sans retard sensible (Web Audio sur Android) ? La réception : petit bip pour un saut, grave pour une grande chute ? Le curseur « Bruitages » du menu pause agit-il ?
+- [ ] Puis, avec les vrais sons : volumes relatifs (pas, saut, réception), variantes, l'écho du monde étrange (agréable ou gênant ?).
+
+### Chantier A, PR 2 : les sensations proposées, la poussière en papier, la matière du sol (D-125)
+
+- **DEBUG → « Sensations proposées »** : écrasement et étirement, inclinaison en course, poussière et saut adouci, d'un coup. Les valeurs par défaut du jeu ne changent pas.
+- **Poussière en papier selon le sol** : copeaux sur le bois, petits nuages sur le tissu, la pierre et le métal, brins d'herbe, grains de sable, petites feuilles ; turquoise et violet dans le monde étrange ; plus de grains après une grande chute.
+- **Matière du sol** de chaque salle (`src/config/surfaces.ts`) : réutilisée pour les bruits de pas (chantier B).
+- Tests : `surface.test.ts`, `playerFeel.test.ts`. Vérifié dans Chromium : la poussière sur le parquet, le lit, la pierre du hall de la gare, dans le monde étrange.
+- [ ] À vérifier sur téléphone (DEBUG → cocher « Sensations proposées », puis comparer en décochant) :
+  - le **saut adouci** : les petits sauts sont-ils plus agréables, moins « coupés » ? Les sauts précis restent-ils aussi sûrs ?
+  - l'**écrasement** à la réception et l'**inclinaison** en course : agréables ou distrayants ?
+  - la **poussière** : se voit-elle sans gêner ? Assez, trop ? Les brins d'herbe se voient-ils au jardin, le sable à la plage ?
+  - ce qui est retenu devient la valeur par défaut (tout, une partie, ou rien).
+
+### Chantier A, PR 1 : le compteur de saccades (D-124)
+
+- Build de debug : une ligne « saccades » dans INFOS (nombre, grosses, dans le noir, la pire avec sa cause et sa salle) et une section **DEBUG → Saccades** (les 8 dernières : durée, cause, salle, position de Céleste ; « Remettre à zéro »). Les saccades sont aussi dans **Exporter JSON**.
+- Causes : **décor** (dessin d'un bloc d'habillage), **salle** (chargement), **jeu**, **rendu** (rendu, ramasse-miettes, navigateur). Les saccades dans le noir d'un fondu sont comptées à part (invisibles).
+- Tests : `hitchMonitor.test.ts`. Vérifié dans Chromium (le conteneur, sans GPU, rend trop lentement pour des chiffres utiles : toutes ses images y sont des saccades « rendu »).
+- [ ] À vérifier sur téléphone (build de debug, INFOS affiché) : « Remettre à zéro », puis courir d'un bout à l'autre de **la rue**, de **la promenade**, du **port**, de **la gare** (voies, quais, hall), et faire un aller-retour dans la maison. Noter le nombre de saccades, les grosses, la pire et sa cause, ou **Exporter JSON** et me transmettre le fichier. Sent-on des à-coups en plein saut ?
+
 ### Les personnages illustrés : papa (D-123)
 
 - `CHARACTER_IMAGES` : une pose → une image détourée de `public/art/` ; les poses sans image restent dessinées par le code.
-- Papa : `dad-door`, `dad-hall`, `dad-kitchen` (avec la vapeur de la tasse), `dad-shop`, `dad-garden`, `dad-quay`. Maman : `mom-bed` (assise au bord du lit, les jambes pendantes), `mom-garden`, `mom-yard`, `mom-quay` ; `mom-sofa` et `mom-bench` attendent une pose aux jambes repliées (sièges trop bas). Détourage : `scripts/art-cutout.py`.
+- Papa : `dad-door` (et `dad-hall`), `dad-kitchen` (avec la vapeur de la tasse), `dad-shop`. Détourage : `scripts/art-cutout.py`.
 - Vérifié dans Chromium : la chambre la nuit, la cuisine le matin, la supérette.
 - [ ] À vérifier sur téléphone : papa illustré se marie-t-il au décor (la nuit, il paraît plus clair que la chambre) ? Sa taille et sa minceur (plus mince que le dessin par code) conviennent-elles ?
 

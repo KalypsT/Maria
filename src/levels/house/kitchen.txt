@@ -3,23 +3,25 @@
 ; @name: Cuisine
 ; @icon: pot
 ; @ambient: #2f3036
-; @note: dessus des placards hauts (colonnes 39-51) : en grimpant par la hotte, ou depuis la table par la suspension, la barre à casseroles, le rebord de la fenêtre et le frigo (D-26, D-39) ; une trouvaille y attend.
+; @note: dessus des placards hauts (colonnes 39-48) : en grimpant par la hotte, ou depuis la table par la suspension, la barre à casseroles, le rebord de la fenêtre et le frigo (D-26, D-39) ; une trouvaille y attend.
 ; @note-2: rien ne flotte : la suspension et la barre pendent du plafond, le rebord fait partie de la fenêtre, le frigo tient au sol.
+; @note-3: la porte de la buanderie est au ras du sol, au bout du plan de travail (même niveau que la buanderie) ; le tabouret de Céleste y remonte.
 ; @wall: tiles
 ; @decor: soffit 37 1 20 4
 ; @decor: clock 4 7 2 2
 ; @decor: window 24 6 6 6
-; @decor: hoodduct 53 5 3 8
+; @decor: hoodduct 50 5 3 8
 ; @decor: fridgebody 32 13 4 9
-; @decor: kettle 54 15 2 2
-; @decor: steam 54 10 2 5
+; @decor: kettle 51 15 2 2
+; @decor: steam 51 10 2 5
 ; @decor: chair 4 19 3 3
 ; @decor: table 7 18 14 4
 ; @decor: chair 21 19 3 3
 ; @decor: bench 34 20 2 2
-; @decor: counter 36 17 21 5
-; @decor: cupboard 38 9 13 3
-; @decor: hood 53 13 3 1
+; @decor: bench 53 20 2 2
+; @decor: counter 36 17 17 5
+; @decor: cupboard 38 9 10 3
+; @decor: hood 50 13 3 1
 ; @decor: ceilinglamp 9 1 6 15
 ; @decor: potrack 16 1 6 12
 ; @decor: windowsill 24 12 6 1
@@ -34,18 +36,18 @@
 #........................................................#
 #........................................................#
 #...........................................S............#
-#.....................................bbbbbbbbbbbbb......#
-#.....................................bbbbbbbbbbbbb......#
-#.....................................bbbbbbbbbbbbb......#
+#.....................................bbbbbbbbbb.........#
+#.....................................bbbbbbbbbb.........#
+#.....................................bbbbbbbbbb.........#
 #...............------..------...........................#
-#...............................----.................bbb.#
-#........................................................2
-#........------..........................................2
-#.............................................C..........2
-#.............e.....................bbbbbbbbbbbbbbbbbbbbb#
-#......bbbbbbbbbbbbbb...............bbbbbbbbbbbbbbbbbbbbb#
-1...bbbb............bbbb............bbbbbbbbbbbbbbbbbbbbb#
-1...b.bb............bb.b..........bbbbbbbbbbbbbbbbbbbbbbb#
-1P..b.bb............bb.b..........bbbbbbbbbbbbbbbbbbbbbbb#
+#...............................----..............bbb....#
+#........................................................#
+#........------..........................................#
+#.............................................C..........#
+#.............e.....................bbbbbbbbbbbbbbbbb....#
+#......bbbbbbbbbbbbbb...............bbbbbbbbbbbbbbbbb....#
+1...bbbb............bbbb............bbbbbbbbbbbbbbbbb....2
+1...b.bb............bb.b..........bbbbbbbbbbbbbbbbbbbbb..2
+1P..b.bb............bb.b..........bbbbbbbbbbbbbbbbbbbbb..2
 ##########################################################
 ##########################################################

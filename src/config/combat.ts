@@ -121,6 +121,13 @@ export interface CombatParams {
   eraseSpeedScale: number;
   eraseLeadTiles: number;
   /**
+   * La berceuse (D-140), au rythme de la boîte à musique : une étape des étoiles toutes les
+   * `lullabyBeatMs` ; une étoile s'annonce (elle s'éclaire, ou vacille) pendant `lullabyWarnMs`
+   * avant de s'allumer ou de s'éteindre. Sans menace : lent, et annoncé longtemps.
+   */
+  lullabyBeatMs: number;
+  lullabyWarnMs: number;
+  /**
    * Tunnels sur le toit du train (D-86), danger simple : un tunnel arrive toutes les
    * `tunnelPeriodMs`, annoncé pendant `tunnelWarnMs` (sa bouche approche, l'image s'assombrit),
    * puis le train est dedans pendant `tunnelPassMs`. Debout sur le toit, Céleste est repoussée vers
@@ -220,6 +227,8 @@ export const DEFAULT_COMBAT: Readonly<CombatParams> = {
   eraseWaveMs: 4000,
   eraseSpeedScale: 1,
   eraseLeadTiles: 5,
+  lullabyBeatMs: 2000,
+  lullabyWarnMs: 1200,
   tunnelPeriodMs: 10000,
   tunnelWarnMs: 2600,
   tunnelPassMs: 2400,
@@ -295,6 +304,8 @@ export const COMBAT_PARAM_RANGES: Readonly<
   eraseWaveMs: { min: 1000, max: 12000, step: 100 },
   eraseSpeedScale: { min: 0.3, max: 3, step: 0.05 },
   eraseLeadTiles: { min: 0, max: 20, step: 0.5 },
+  lullabyBeatMs: { min: 800, max: 8000, step: 100 },
+  lullabyWarnMs: { min: 200, max: 4000, step: 50 },
   tunnelPeriodMs: { min: 3000, max: 30000, step: 500 },
   tunnelWarnMs: { min: 500, max: 6000, step: 100 },
   tunnelPassMs: { min: 300, max: 6000, step: 100 },

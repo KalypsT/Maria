@@ -6,12 +6,14 @@ import {
   MOON_LIGHT_RADIUS,
   WATER_COLORS,
   ERASURE_COLORS,
+  NIGHT_VOID_COLORS,
   type ArtPalette,
   type ArtFinish,
 } from '../../config/art';
 import { TILE_SIZE as T } from '../../config/display';
 import {
   EntityType,
+  Material,
   Tile,
   tileAt,
   type LevelData,
@@ -31,6 +33,7 @@ import { trainDrawers } from './trainArt';
 import { seaDrawers } from './seaArt';
 import { seaCorridorDrawers } from './seaCorridorArt';
 import { nannyDrawers } from './nannyArt';
+import { finaleDrawers } from './finaleArt';
 import { seaStrangeDrawers } from './seaStrangeArt';
 import { drawBrokenDishes, drawHotPlates, trainStrangeDrawers } from './trainStrangeArt';
 import { paperGrainPattern } from './paperGrain';
@@ -269,6 +272,7 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
   ...seaStrangeDrawers({ tileShape, rounded }),
   ...seaCorridorDrawers({ tileShape, rounded }),
   ...nannyDrawers({ tileShape, rounded }),
+  ...finaleDrawers({ tileShape, rounded }),
   console(a, r) {
     wood(a, r);
     if (!a.palette.silhouettes) {
@@ -455,23 +459,45 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     ctx.strokeRect(r.x + 11, r.y + r.h * 0.34 + 55, 7, 5);
   },
   linencabinet(a, r) {
-    // Armoire haute et étroite sur quatre pieds fins (on passe dessous), deux portes, des draps
-    // pliés qui dépassent en haut.
-    const { ctx, palette: p } = a;
+    // Haute étagère à linge : deux montants jusqu'au sol (on passe entre eux, devant les paniers
+    // rangés dessous), un caisson plein garni de draps pliés sur ses étagères.
+    const { ctx, level, palette: p } = a;
+    const floor = floorRow(level) * T;
     ctx.fillStyle = p.woodDark;
-    ctx.fillRect(r.x + 2, r.y + r.h, 2, 3 * T);
-    ctx.fillRect(r.x + r.w - 4, r.y + r.h, 2, 3 * T);
+    ctx.fillRect(r.x + 1, r.y, 4, floor - r.y);
+    ctx.fillRect(r.x + r.w - 5, r.y, 4, floor - r.y);
+    // Traverse basse, à mi-hauteur des pieds.
+    ctx.fillRect(r.x + 1, r.y + r.h + T, r.w - 2, 2);
+    if (!p.silhouettes) {
+      // Les paniers de linge rangés sous l'étagère.
+      ctx.fillStyle = '#b99a6b';
+      rounded(ctx, { x: r.x + 6, y: floor - 12, w: r.w - 12, h: 12 }, [2, 2, 3, 3]);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,0.18)';
+      for (let y = floor - 9; y < floor - 1; y += 3) {
+        ctx.fillRect(r.x + 7, y, r.w - 14, 1);
+      }
+      ctx.fillStyle = '#9fc0e8';
+      rounded(ctx, { x: r.x + 10, y: floor - 16, w: 12, h: 5 }, 2.5);
+      ctx.fill();
+    }
     wood(a, r);
     if (p.silhouettes) {
       return;
     }
-    ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(r.x + 3, r.y + 4, r.w / 2 - 4, r.h - 8);
-    ctx.strokeRect(r.x + r.w / 2 + 1, r.y + 4, r.w / 2 - 4, r.h - 8);
-    ctx.fillStyle = '#f2c879';
-    ctx.fillRect(r.x + r.w / 2 - 3, r.y + r.h / 2, 1.5, 4);
-    ctx.fillRect(r.x + r.w / 2 + 1.5, r.y + r.h / 2, 1.5, 4);
+    // Étagères ouvertes : le fond, une planche toutes les deux tuiles, des draps pliés.
+    ctx.fillStyle = 'rgba(40,28,22,0.55)';
+    ctx.fillRect(r.x + 5, r.y + 5, r.w - 10, r.h - 8);
+    const linens = ['#f4efe6', '#f1a9bd', '#9fc0e8', '#e6c27a'];
+    for (let y = r.y + 2 * T, i = 0; y < r.y + r.h - 4; y += 2 * T, i++) {
+      ctx.fillStyle = p.wood;
+      ctx.fillRect(r.x + 4, y, r.w - 8, 2.5);
+      for (let k = 0; k < 3; k++) {
+        ctx.fillStyle = linens[(i + k) % linens.length] ?? '#f4efe6';
+        rounded(ctx, { x: r.x + 7, y: y - 6 - k * 5, w: r.w - 14, h: 4.5 }, 1.5);
+        ctx.fill();
+      }
+    }
   },
   jarshelf(a, r) {
     // Étagère murale et ses bocaux (pâtes, confiture, biscuits).
@@ -576,6 +602,38 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     // Fond de la bibliothèque, puis étagères et dessus d'après les tuiles.
     ctx.fillStyle = p.silhouettes ? p.structure : 'rgba(60,40,30,0.55)';
     ctx.fillRect(r.x, r.y, r.w, r.h);
+    // Sous la dernière étagère, jusqu'en bas du cadre : un meuble bas à portes (fond), qui pose la
+    // bibliothèque au sol.
+    let lowest = r.y / T;
+    for (let row = r.y / T; row < (r.y + r.h) / T; row++) {
+      for (let col = r.x / T; col < (r.x + r.w) / T; col++) {
+        const tile = tileAt(a.level, col, row);
+        if (tile === Tile.OneWay || tile === Tile.Solid) {
+          lowest = row;
+        }
+      }
+    }
+    const base = (lowest + 1) * T;
+    if (r.y + r.h - base >= 2 * T) {
+      ctx.fillStyle = p.silhouettes ? p.structure : p.woodDark;
+      ctx.fillRect(r.x, base, r.w, r.y + r.h - base);
+      if (!p.silhouettes) {
+        ctx.fillStyle = p.wood;
+        ctx.fillRect(r.x, base, r.w, 3);
+        ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+        ctx.lineWidth = 1;
+        for (let x = r.x; x < r.x + r.w - 4; x += 2 * T) {
+          ctx.strokeRect(
+            x + 3,
+            base + 6,
+            Math.min(2 * T, r.x + r.w - x) - 6,
+            r.y + r.h - base - 10,
+          );
+          ctx.fillStyle = '#f2c879';
+          ctx.fillRect(x + T - 1, base + (r.y + r.h - base) / 2, 2, 2);
+        }
+      }
+    }
     tileShape(a, r, p.wood, p.woodLight);
     if (p.silhouettes) {
       return;
@@ -1222,6 +1280,49 @@ function drawWallpaper(
     for (let x = 0; x < width; x += 12) {
       ctx.fillRect(x, 0, 1, bottom);
     }
+  } else if (style === 'clocks') {
+    // La gare étrange (D-130) : de petites horloges, chacune arrêtée à une autre heure.
+    for (let y = 18; y < bottom - 8; y += 34) {
+      for (let x = (y / 34) % 2 < 1 ? 14 : 31; x < width; x += 34) {
+        const k = (x * 7 + y * 13) % 12;
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(
+          x + Math.sin((k / 12) * Math.PI * 2) * 4.5,
+          y - Math.cos((k / 12) * Math.PI * 2) * 4.5,
+        );
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + Math.sin((k / 3) * Math.PI) * 3, y - Math.cos((k / 3) * Math.PI) * 3);
+        ctx.stroke();
+      }
+    }
+  } else if (style === 'tags') {
+    // Les objets perdus (D-130) : des étiquettes de bagage et leur ficelle.
+    for (let y = 14; y < bottom - 10; y += 28) {
+      for (let x = (y / 28) % 2 < 1 ? 10 : 24; x < width; x += 28) {
+        const tilt = (((x * 5 + y * 3) % 7) - 3) * 0.12;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(tilt);
+        ctx.beginPath();
+        ctx.moveTo(-3, -5);
+        ctx.lineTo(3, -5);
+        ctx.lineTo(3, 4);
+        ctx.lineTo(0, 6);
+        ctx.lineTo(-3, 4);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, -3, 0.9, 0, Math.PI * 2);
+        ctx.moveTo(0, -4);
+        ctx.quadraticCurveTo(2, -9, 0, -11);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
   } else {
     for (let y = 10; y < bottom - 4; y += 18) {
       for (let x = (y / 18) % 2 < 1 ? 6 : 15; x < width; x += 18) {
@@ -1636,15 +1737,10 @@ function drawWall(
   wall.addColorStop(1, p.wallBottom);
   ctx.fillStyle = wall;
   ctx.fillRect(0, 0, width, height);
-  drawWallpaper(
-    ctx,
-    p,
-    wallStyle(level),
-    width,
-    wallStyle(level) === 'dots' || wallStyle(level) === 'stripes' ? wainscotY : floorY,
-  );
-  const style = wallStyle(level);
+  // Un monde étrange peut imposer son motif (D-130) : celui de son lieu, pas celui de la maison.
+  const style = p.wallMotif ?? wallStyle(level);
   const wainscot = style === 'dots' || style === 'stripes';
+  drawWallpaper(ctx, p, style, width, wainscot ? wainscotY : floorY);
   if (wainscot) {
     ctx.fillStyle = p.wainscot;
     ctx.fillRect(0, wainscotY, width, floorY - wainscotY);
@@ -1786,25 +1882,31 @@ function drawStructure(a: ArtContext, floorY: number): void {
           depth++;
         }
         const k = depth / WATER_COLORS.deepRows;
-        // L'effacement (D-111) : une décoloration grise et pâle à la place de l'eau.
-        const erasure = level.meta.void === 'erasure';
-        const top = erasure
-          ? ERASURE_COLORS.body
+        // L'effacement (D-111) : une décoloration grise et pâle à la place de l'eau. Le vide de la
+        // nuit (D-142) : le noir de la chambre, loin dessous.
+        const still =
+          level.meta.void === 'erasure'
+            ? ERASURE_COLORS
+            : level.meta.void === 'night'
+              ? NIGHT_VOID_COLORS
+              : null;
+        const top = still
+          ? still.body
           : p.silhouettes
             ? WATER_COLORS.strangeBody
             : WATER_COLORS.body;
-        const deep = erasure
-          ? ERASURE_COLORS.deep
+        const deep = still
+          ? still.deep
           : p.silhouettes
             ? WATER_COLORS.strangeDeep
             : WATER_COLORS.deep;
         const mix = (i: 0 | 1 | 2) => Math.round(top[i] + (deep[i] - top[i]) * k);
-        const alpha = erasure ? ERASURE_COLORS.alpha : WATER_COLORS.alpha;
+        const alpha = still ? still.alpha : WATER_COLORS.alpha;
         ctx.fillStyle = `rgba(${String(mix(0))},${String(mix(1))},${String(mix(2))},${String(alpha)})`;
         ctx.fillRect(x, y, T, T);
         if (depth === 0 && tileAt(level, col, row - 1) === Tile.Empty) {
-          ctx.fillStyle = erasure
-            ? ERASURE_COLORS.surface
+          ctx.fillStyle = still
+            ? still.surface
             : p.silhouettes
               ? WATER_COLORS.strangeSurface
               : WATER_COLORS.surface;
@@ -1873,10 +1975,37 @@ function drawStructure(a: ArtContext, floorY: number): void {
       const h = (exit.rowMax - exit.rowMin + 1) * T;
       ctx.fillStyle = p.wallBottom;
       ctx.fillRect(x, y, T, h);
+      // Dans un mur (D-134) : une simple ouverture sous son linteau, sans feuillage.
+      const hedge =
+        level.materials[(exit.rowMin - 1) * level.width + exit.col] === Material.Leaf ||
+        level.materials[(exit.rowMax + 1) * level.width + exit.col] === Material.Leaf;
+      if (!hedge) {
+        ctx.fillStyle = p.structure;
+        ctx.fillRect(x, y - 3, T, 3);
+        continue;
+      }
       ctx.fillStyle = p.leafDark;
       ctx.beginPath();
       ctx.ellipse(x + T / 2, y, T * 0.9, 5, 0, 0, Math.PI * 2);
       ctx.fill();
+      // Une arche de verdure (D-133) : le feuillage arrondit les coins du haut et repousse en
+      // touffes au pied de la trouée ; la haie ne pend pas au-dessus du vide.
+      for (const [dx, dy, radius] of [
+        [1, 4, 4],
+        [T - 1, 4, 4],
+        [0, 9, 3],
+        [T, 9, 3],
+        [0, 13, 2],
+        [T, 13, 2],
+        [1, h - 3, 3.5],
+        [T - 1, h - 3, 3.5],
+        [0, h - 7, 2.5],
+        [T, h - 7, 2.5],
+      ] as const) {
+        ctx.beginPath();
+        ctx.arc(x + dx, y + dy, radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
     return;
   }
@@ -2131,8 +2260,9 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
   )) {
     glow(exit.col * T + T, (exit.rowMin + 1.5) * T, 30, '120,240,220', p.silhouettes ? 0.5 : 0.15);
   }
-  // Liserés : dessus de chaque surface praticable.
-  ctx.fillStyle = p.rim;
+  // Liserés : dessus de chaque surface praticable ; dans un monde étrange, plus épais et avec une
+  // lueur au-dessus (D-130), pour que les appuis se lisent sur le fond sombre.
+  const glowAlpha = p.rimGlow;
   for (let row = 1; row < level.height; row++) {
     for (let col = 0; col < level.width; col++) {
       const tile = tileAt(level, col, row);
@@ -2144,7 +2274,16 @@ export function drawRoomLight(a: ArtContext, scratch: HTMLCanvasElement): void {
         above !== Tile.Hazard &&
         above !== Tile.Thorns
       ) {
-        ctx.fillRect(col * T, row * T, T, 1);
+        if (glowAlpha > 0) {
+          ctx.globalAlpha = glowAlpha * 0.5;
+          ctx.fillStyle = p.rim;
+          ctx.fillRect(col * T, row * T - 2, T, 2);
+          ctx.globalAlpha = glowAlpha * 0.22;
+          ctx.fillRect(col * T, row * T - 5, T, 3);
+          ctx.globalAlpha = 1;
+        }
+        ctx.fillStyle = p.rim;
+        ctx.fillRect(col * T, row * T, T, p.rimWidth);
       }
     }
   }

@@ -5,8 +5,8 @@ import {
   MEMORY_CAMERA_ZOOM,
   type CameraParams,
 } from '../config/camera';
-import { DEFAULT_COMBAT, TrainPhase, type CombatParams } from '../config/combat';
-import { DEFAULT_FEEL, type FeelParams } from '../config/feel';
+import { DEFAULT_COMBAT, TrainPhase, trainPhase, type CombatParams } from '../config/combat';
+import { DEFAULT_FEEL, DUST_FULL_FALL_TILES, type FeelParams } from '../config/feel';
 import {
   GAME_HEIGHT,
   LEVEL_CHUNK_TILES,
@@ -23,13 +23,12 @@ import {
 } from '../config/movement';
 import { CameraController } from '../core/camera/CameraController';
 import { ChaseEvent } from '../core/boss/Chase';
-import { CombatWorld, wavesOf } from '../core/combat/CombatWorld';
+import { CombatEvent, CombatWorld, wavesOf } from '../core/combat/CombatWorld';
 import { FixedStepClock } from '../core/FixedStepClock';
 import { InputController } from '../core/input/InputController';
 import { KeyboardSource } from '../core/input/KeyboardSource';
 import { TouchSource } from '../core/input/TouchSource';
 import {
-  EntityType,
   Material,
   Tile,
   tileAt,
@@ -39,7 +38,7 @@ import {
 } from '../core/level/LevelData';
 import { atLayer, commonLayer, layerOf, otherLayer } from '../core/level/layers';
 import { LayerShift, ShiftEvent, type ShiftHost } from '../core/player/LayerShift';
-import { EraseState, type EraseHost } from '../core/boss/Erase';
+import { EraseEvent, EraseState, type EraseHost } from '../core/boss/Erase';
 import { eraseDissolved, eraseFactor, eraseRoot, erasedLevel } from '../core/level/erase';
 import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
 import { atTide } from '../core/level/tide';
@@ -84,6 +83,7 @@ import {
   isStreetRoom,
   mapPage,
   doorAt,
+  returnLantern,
   touchedExit,
   type ExitRef,
   type MapBox,
@@ -91,6 +91,7 @@ import {
 } from '../core/world/zone';
 import { FlashbackView } from '../ui/FlashbackView';
 import { Hud } from '../ui/Hud';
+import { showEndScreen } from '../ui/EndScreen';
 import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
 import { PauseMenu } from '../ui/PauseMenu';
 import {
@@ -101,7 +102,10 @@ import {
   type ArtFinish,
   GARDEN_PALETTE,
   MEMORY_PALETTE,
+  NIGHTLIGHT_PALETTE,
+  NIGHTLIGHT_SOFT_PALETTE,
   ERASURE_COLORS,
+  NIGHT_VOID_COLORS,
   STREET_DUSK_PALETTE,
   STREET_PALETTE,
   TRAIN_DAY_PALETTE,
@@ -115,7 +119,8 @@ import {
 import { STORY_TIMING, StoryFlag, TOWER_CUBES } from '../config/story';
 import { PropStage } from '../core/story/PropStage';
 import { StoryDirector } from '../core/story/StoryDirector';
-import type { TimeOfDay } from '../core/story/story';
+import { holdsMaria, type TimeOfDay } from '../core/story/story';
+import { STRANGE_FX } from '../config/strangeFx';
 import { HOUSE_STORY } from '../levels/house/story';
 import { ISLET_CUBES } from '../levels/nanny/story';
 import type { Box } from '../core/physics/gridCollision';
@@ -130,6 +135,7 @@ import { ForegroundView } from './ForegroundView';
 import { WorldLifeView } from './WorldLifeView';
 import { WaterView } from './WaterView';
 import { ShiftLayerView } from './ShiftLayerView';
+import { LullabyView } from './LullabyView';
 import { RideView } from './RideView';
 import { MapPage } from '../ui/MapPage';
 import { RecordPicker } from '../ui/RecordPicker';
@@ -140,6 +146,24 @@ import { DEFAULT_PUPPET, type PuppetParams } from '../config/puppet';
 import { CelestePoser, PoseAttack } from '../core/player/celestePose';
 import { AttackPhase } from '../core/combat/PlayerAttack';
 import { DustPool } from './DustPool';
+import { HintView } from './HintView';
+import { CelesteHalo } from './CelesteHalo';
+import { STRANGE_MOCKUP_PALETTES, type StrangeMockup } from '../config/strangeThemes';
+import { HINT } from '../config/hint';
+import {
+  HintClock,
+  HintStage,
+  currentGoal,
+  hintPoint,
+  milestoneName,
+  type HintWorld,
+} from '../core/hint/hint';
+import { MILESTONES } from '../levels/milestones';
+import { DEFAULT_GROUND, type Surface } from '../config/surfaces';
+import { Haptics, canVibrate } from '../platform/haptics';
+import { roomGround, surfaceUnder } from '../core/level/surface';
+import { STEP_SLOT, type SfxSlot } from '../config/sfx';
+import { PhaseCue, PhaseWatch, SfxCue, SfxDirector } from '../core/audio/sfx';
 import { ChaseView } from './ChaseView';
 import { TrainView } from './TrainView';
 import { TrainRideView } from './TrainRideView';
@@ -151,10 +175,31 @@ import { debugSwitchUrl } from '../core/platform/debugSwitch';
 
 /** Durée d'image maximale prise en compte (onglet en arrière-plan, pause du navigateur). */
 const MAX_FRAME_SECONDS = 0.25;
+/** Maria dans les bras (D-143) : la texture de Maria assise, dessinée par `StoryView`. */
+const HELD_MARIA_TEXTURE = 'prop-maria-sit';
+/**
+ * Où Maria est assise dans les bras (px depuis les pieds de Céleste, par unité de `bodyScale`, la
+ * marionnette D-29) : sur les avant-bras, contre la poitrine. Visuel seulement.
+ */
+const HELD_MARIA_AT = { x: 2, xPerBody: 3.5, yPerBody: -10 } as const;
 /** Clé du registre Phaser où main.ts dépose la partie en cours (D-22). */
 export const SESSION_KEY = 'maria-session';
 /** Clé du registre où main.ts dépose le lecteur de musique (D-57). */
 export const AUDIO_KEY = 'maria-audio';
+
+/** Bruitages du mouvement qui ne dépendent que de leur signal (D-127). */
+const CUE_SOUNDS: readonly (readonly [number, SfxSlot])[] = [
+  [SfxCue.Jump, 'jump'],
+  [SfxCue.WallJump, 'wall-jump'],
+  [SfxCue.LedgeGrab, 'ledge-grab'],
+  [SfxCue.LedgeClimb, 'ledge-climb'],
+  [SfxCue.UmbrellaOpen, 'umbrella-open'],
+  [SfxCue.UmbrellaClose, 'umbrella-close'],
+  [SfxCue.HookCatch, 'hook-catch'],
+  [SfxCue.Slide, 'slide'],
+  [SfxCue.VoiceHop, 'voice-hop'],
+  [SfxCue.VoiceEffort, 'voice-effort'],
+];
 
 /** Couleurs des tuiles pleines selon le matériau (placeholders, D-24). */
 interface SolidColors {
@@ -209,10 +254,21 @@ function savedReturn(session: SaveSession): { room: ZoneRoom; checkpointId: stri
 /** Événement du jeu émis quand les réglages d'affichage changent (main.ts redimensionne le canvas). */
 export const DISPLAY_SETTINGS_EVENT = 'maria-display-settings';
 
-/** Mesures de la dernière image, lues par l'overlay de debug. */
+/**
+ * Mesures de la dernière image, lues par l'overlay de debug. Le travail (décor, salle) s'accumule
+ * jusqu'à ce que l'overlay le lise et le remette à zéro (compteur de saccades, D-124).
+ */
 export interface FrameStats {
   steps: number;
   simulationMs: number;
+  /** Dessin des blocs d'habillage (ms). */
+  artMs: number;
+  /** Chargement de salles (ms). */
+  roomMs: number;
+  /** Le jeu a avancé (faux : pause, carte, choix d'un disque). */
+  active: boolean;
+  /** L'écran était entièrement noir à la fin de l'image. */
+  veiled: boolean;
 }
 
 /**
@@ -267,6 +323,8 @@ export class GameScene extends Phaser.Scene {
   private readonly layerShift = new LayerShift();
   private readonly shiftHost: ShiftHost = { tryShift: (to) => this.tryShiftTo(to) };
   private shiftView!: ShiftLayerView;
+  /** Les étoiles de la berceuse (D-140). */
+  private lullaby!: LullabyView;
   /** L'effacement de la salle (D-111) et la salle telle que lue (ses groupes), null sans lui. */
   private erase: EraseState | null = null;
   private eraseBase: LevelData | null = null;
@@ -327,6 +385,15 @@ export class GameScene extends Phaser.Scene {
   } | null = null;
   /** La tasse que Céleste tient dans le souvenir de la cuisine. */
   private cupImage!: Phaser.GameObjects.Image;
+  /** Céleste est sortie de la salle (D-144) : invisible jusqu'au prochain changement de salle. */
+  private celesteGone = false;
+  /** La fin du jeu (D-145) : plus rien ne bouge, l'écran de fin, puis l'accueil. */
+  private ended = false;
+  /** Le très léger signe du dernier plan (D-144) : début (ms, -1 : aucun) et durée. */
+  private glimmerAtMs = -1;
+  private glimmerMs = 1;
+  /** Maria dans les bras de Céleste (D-143) : l'image de Maria assise, tenue devant elle. */
+  private heldMaria!: Phaser.GameObjects.Image;
   private readonly mapSeen = new Set<string>();
   /** Changement de salle en cours (D-25). */
   readonly transition = new RoomTransition(this.worldParams);
@@ -340,8 +407,38 @@ export class GameScene extends Phaser.Scene {
   /** Zoom appliqué à la caméra (celui des réglages, ou rapproché dans un souvenir, D-89). */
   private appliedZoom = DEFAULT_CAMERA.zoom;
   readonly clock = new FixedStepClock(1 / PHYSICS_STEP_HZ, MAX_STEPS_PER_FRAME);
-  readonly frameStats: FrameStats = { steps: 0, simulationMs: 0 };
+  readonly frameStats: FrameStats = {
+    steps: 0,
+    simulationMs: 0,
+    artMs: 0,
+    roomMs: 0,
+    active: false,
+    veiled: false,
+  };
   level!: LevelData;
+  /** Sol de la salle courante (D-125), là où ni meuble ni matériau ne dit sa matière. */
+  private ground: Surface = DEFAULT_GROUND;
+  /** Bruitages du mouvement (D-126, D-127) : pas, sauts, réception, capacités, voix. */
+  private readonly sfxDirector = new SfxDirector();
+  /** Annonce et passage des dangers à cycle (D-127) : trains en gare, tunnel, vague. */
+  private readonly trainWatches = [new PhaseWatch(), new PhaseWatch(), new PhaseWatch()];
+  private readonly tunnelWatch = new PhaseWatch();
+  private readonly waveWatch = new PhaseWatch();
+  /** Vibrations aux moments forts (D-128, Android). */
+  private readonly haptics = new Haptics();
+  /** Le fil discret (D-129) : le temps sans progrès, la lueur, le point montré. */
+  readonly hintClock = new HintClock();
+  private hintView!: HintView;
+  private readonly hintTarget = { valid: false, x: 0, y: 0 };
+  private hintRetargetMs = 0;
+  /** Jalon montré par le fil (outil de debug). */
+  hintGoalName = '';
+  /** Halo autour de Céleste (D-130), selon la palette. */
+  private celesteHalo!: CelesteHalo;
+  /** Maquette du monde étrange comparée (D-130, outil de debug) ; null : la palette du jeu. */
+  strangeMockup: StrangeMockup | null = null;
+  /** Phase du coup de bâton au pas précédent : son au début du coup. */
+  private lastAttackPhase: number = AttackPhase.Idle;
   /** Zone de la salle courante ; null dans un parcours d'essai (hors partie). */
   zone: Zone | null = null;
   player!: PlayerPhysics;
@@ -438,10 +535,12 @@ export class GameScene extends Phaser.Scene {
         this.storyRoom(room, col, row, facing, returnPoint);
       },
       pose: (pose) => {
-        this.poser.sitting = pose === 'sit';
+        this.poser.sitting = pose === 'sit' || pose === 'hold-sit';
+        this.poser.holding = holdsMaria(pose);
       },
       think: (icon, ms, by) => {
         this.storyView.think(icon, ms, by);
+        this.audio.sfx.play('thought');
       },
       sparkle: (area, ms) => {
         this.fx.sparkle(area, ms);
@@ -477,6 +576,16 @@ export class GameScene extends Phaser.Scene {
           this.camera.focus((col + 0.5) * TILE_SIZE, (row + 0.5) * TILE_SIZE);
         }
       },
+      gone: () => {
+        this.celesteGone = true;
+      },
+      glimmer: (ms) => {
+        this.glimmerAtMs = this.time.now;
+        this.glimmerMs = Math.max(1, ms);
+      },
+      end: (room) => {
+        this.endGame(room);
+      },
     });
     this.story.setFlags(this.session.data.story.flags);
     this.growth = growthPhase(this.story.flags);
@@ -488,14 +597,19 @@ export class GameScene extends Phaser.Scene {
     this.worldLife = new WorldLifeView(this);
     this.water = new WaterView(this);
     this.shiftView = new ShiftLayerView(this);
+    this.lullaby = new LullabyView(this);
     this.ride = new RideView(this);
     const save = this.session.data;
+    this.haptics.enabled = save.settings.controls.vibration;
     const { room, checkpointId } = savedReturn(this.session);
     this.level = this.roomLevel(room.level);
+    this.ground = roomGround(this.level.id);
     this.zone = room.zone;
+    this.audio.sfx.setStrange(this.strangeWorld || isStrangeRoom(this.level));
     this.artScale = this.computeArtScale();
     // Partie reprise dans le monde étrange (veilleuse du passage d'ombres, D-34).
     this.drawnStrange = isStrangeRoom(this.level);
+    this.celesteHalo = new CelesteHalo(this);
     this.drawLevel();
     this.run = new RunState(this.level, this.worldParams);
     this.run.load(this.level, save.activatedCheckpoints, checkpointId);
@@ -507,6 +621,7 @@ export class GameScene extends Phaser.Scene {
     this.puppet = new CelestePuppet(this);
     this.puppet.redraw(this.artScale, this.celestePalette(), this.artImages(), this.growth);
     this.dust = new DustPool(this, this.feelParams);
+    this.hintView = new HintView(this);
     this.combat = new CombatWorld(this.level, this.combatParams);
     this.ride.load(this.combat.sweeps);
     this.combatView = new CombatView(this, this.combat, this.combatParams, this.dust);
@@ -535,6 +650,7 @@ export class GameScene extends Phaser.Scene {
     this.hud = new Hud();
     this.flashbackView = new FlashbackView();
     this.cupImage = this.createCupImage();
+    this.heldMaria = this.add.image(0, 0, '__DEFAULT').setDepth(10.5).setVisible(false);
     this.applyMovement();
     this.applyAbilities();
     this.motion = this.movingTarget();
@@ -568,6 +684,7 @@ export class GameScene extends Phaser.Scene {
         }
       },
       showTouchSettings: this.touch !== undefined,
+      canVibrate: canVibrate(),
       onResume: () => {
         this.setPaused(false);
       },
@@ -578,6 +695,7 @@ export class GameScene extends Phaser.Scene {
       onSettingsChange: (settings) => {
         void this.session.setControls(settings);
         this.touch?.setSettings(settings);
+        this.haptics.enabled = settings.vibration;
       },
       onExportSave: () => {
         showExportDialog(this.session.data);
@@ -650,6 +768,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   override update(): void {
+    if (this.ended) {
+      // La fin du jeu (D-145) : l'image reste noire sous l'écran de fin.
+      return;
+    }
     const frameSeconds = Math.min(this.game.loop.rawDelta / 1000, MAX_FRAME_SECONDS);
     this.controls.update();
     const mapPressed = this.controls.consumePressed('Map');
@@ -673,6 +795,9 @@ export class GameScene extends Phaser.Scene {
     if (mapPressed && !this.story.locked) {
       this.openMap();
       return;
+    }
+    if (__DEBUG_TOOLS__) {
+      this.frameStats.active = true;
     }
     const steps = this.clock.advance(frameSeconds);
     const start = __DEBUG_TOOLS__ ? performance.now() : 0;
@@ -765,13 +890,20 @@ export class GameScene extends Phaser.Scene {
       if (combat.events !== 0) {
         this.combatView.onEvents(combat.events);
       }
+      this.stepCombatSounds();
       run.step(this.player.box, combat.events, this.player.grounded);
-      if ((run.events & RunEvent.Splashed) !== 0) {
+      // Le vide de la nuit (D-142) : ni gerbe ni bruit, Céleste s'efface dans le noir.
+      if ((run.events & RunEvent.Splashed) !== 0 && this.level.meta.void !== 'night') {
         this.dust.splash(this.player.box);
+        this.audio.sfx.play('splash');
       }
       const picked = this.pickups.step(this.player.box);
       if (picked >= 0) {
         this.onPicked(picked);
+      }
+      if ((run.events & RunEvent.CheckpointActivated) !== 0) {
+        this.audio.sfx.play('checkpoint');
+        this.haptics.pulse('checkpoint');
       }
       if ((run.events & RunEvent.CheckpointActivated) !== 0 && this.zone) {
         // Sauvegarde automatique au checkpoint (D-22), sans attendre l'écriture. Les parcours
@@ -799,10 +931,20 @@ export class GameScene extends Phaser.Scene {
       feel.step(this.player);
       this.stepPose();
       this.stepStage();
-      if (feel.events !== 0) {
-        this.dust.emit(feel.events, this.player.box, this.player.facing);
+      if (feel.events !== 0 && this.feelParams.dustEnabled >= 1) {
+        // Poussière selon la matière du sol (D-125), aux couleurs du monde étrange.
+        this.dust.emit(
+          feel.events,
+          this.player.box,
+          this.player.facing,
+          surfaceUnder(this.level, this.player.box, this.ground),
+          this.strangeWorld || isStrangeRoom(this.level),
+          feel.fallHeight / (DUST_FULL_FALL_TILES * TILE_SIZE),
+        );
       }
+      this.stepMoveSounds();
     }
+    this.stepHint((steps * 1000) / PHYSICS_STEP_HZ);
     if (__DEBUG_TOOLS__) {
       this.frameStats.steps = steps;
       this.frameStats.simulationMs = performance.now() - start;
@@ -820,7 +962,9 @@ export class GameScene extends Phaser.Scene {
       feel.lean,
       this.poser.pose,
     );
+    this.celesteHalo.render(this.puppet.x, this.puppet.y - box.height / 2, this.puppet.alpha);
     this.renderCup();
+    this.renderHeldMaria();
     this.finishView.render(
       this.level,
       this.artFinish,
@@ -840,8 +984,19 @@ export class GameScene extends Phaser.Scene {
     this.chaseView.render(camera.prevY + (camera.y - camera.prevY) * alpha + camera.viewHeight / 2);
     this.storyView.render(this.puppet.x, this.puppet.y, box.height);
     this.shiftView.render(this.time.now, this.puppet.x, this.puppet.y - box.height / 2, this.erase);
+    this.lullaby.render(this.time.now, this.erase);
     this.worldView.render();
     this.dust.update();
+    const hintTarget = this.hintTarget;
+    this.hintView.update(
+      this.time.now,
+      this.hintClock.stage,
+      this.puppet.x,
+      this.puppet.y - box.height,
+      hintTarget.valid,
+      hintTarget.x,
+      hintTarget.y,
+    );
     const main = this.cameras.main;
     main.centerOn(
       camera.prevX + (camera.x - camera.prevX) * alpha,
@@ -849,7 +1004,14 @@ export class GameScene extends Phaser.Scene {
     );
     // Monde étrange (D-35) : présage en grimpant, effets, tremblement (visuel seulement).
     const fx = this.fx;
-    fx.setOmen(this.story.omen(this.level.id, this.puppet.x, this.puppet.y - box.height / 2));
+    const glimmer = this.glimmer();
+    fx.setOmen(
+      Math.max(
+        glimmer * STRANGE_FX.glimmerPeak,
+        this.story.omen(this.level.id, this.puppet.x, this.puppet.y - box.height / 2),
+      ),
+    );
+    this.worldLife.setSpin(glimmer * STRANGE_FX.glimmerSpin);
     const view = this.fxView;
     view.setTo(
       camera.x - camera.viewWidth / 2,
@@ -864,7 +1026,11 @@ export class GameScene extends Phaser.Scene {
     artView.y = view.y;
     artView.w = view.width;
     artView.h = view.height;
+    const artStart = __DEBUG_TOOLS__ ? performance.now() : 0;
     this.roomArt.update(artView, Math.max(this.story.veil, this.transition.veil) >= 1);
+    if (__DEBUG_TOOLS__) {
+      this.frameStats.artMs += performance.now() - artStart;
+    }
     this.water.update(this.time.now);
     this.ride.update(
       this.time.now,
@@ -908,6 +1074,9 @@ export class GameScene extends Phaser.Scene {
       this.game.loop.delta,
     );
     this.renderRunState();
+    if (__DEBUG_TOOLS__) {
+      this.frameStats.veiled = this.hud.black;
+    }
   }
 
   /**
@@ -985,6 +1154,7 @@ export class GameScene extends Phaser.Scene {
     }
     this.clock.reset();
     this.touch?.releaseAll();
+    this.audio.sfx.stopLoops();
     this.mapPage.open(
       model,
       MAP_TITLES[page] ?? page,
@@ -992,6 +1162,7 @@ export class GameScene extends Phaser.Scene {
       data.progression.memories,
       this.ownedAbilities(),
     );
+    this.audio.sfx.play('map-open');
   }
 
   /**
@@ -1009,6 +1180,7 @@ export class GameScene extends Phaser.Scene {
     this.clock.reset();
     this.touch?.releaseAll();
     this.recordMoveDir = 0;
+    this.audio.sfx.stopLoops();
     this.recordPicker.open(shelf, this.audio.record);
   }
 
@@ -1053,6 +1225,7 @@ export class GameScene extends Phaser.Scene {
 
   private closeMap(): void {
     this.mapPage.close();
+    this.audio.sfx.play('map-close');
     this.clock.reset();
     this.controls.consumePressed('Jump');
   }
@@ -1064,6 +1237,7 @@ export class GameScene extends Phaser.Scene {
     }
     this.paused = paused;
     this.audio.setPaused(paused);
+    this.audio.sfx.stopLoops();
     this.clock.reset();
     this.touch?.releaseAll();
     if (paused) {
@@ -1224,6 +1398,39 @@ export class GameScene extends Phaser.Scene {
     this.reappearAtMs = this.time.now;
   }
 
+  /**
+   * La fin du jeu (D-145) : « Continuer » reprendra dans `room`, à son départ ; la partie écrite,
+   * le thème de fin, l'écran de fin, puis l'accueil (la page repart, comme « Retour à
+   * l'accueil »).
+   */
+  private endGame(room: string): void {
+    if (this.ended) {
+      return;
+    }
+    this.ended = true;
+    this.audio.setMusic('ending');
+    void this.session
+      .setCheckpoint(room, null)
+      .then(() => this.session.manager.flush())
+      .then(() => showEndScreen(import.meta.env.BASE_URL))
+      .then(() => {
+        location.reload();
+      });
+  }
+
+  /** Le très léger signe (D-144) : de 0 à 1 et retour, en cloche, pendant sa durée. */
+  private glimmer(): number {
+    if (this.glimmerAtMs < 0) {
+      return 0;
+    }
+    const k = (this.time.now - this.glimmerAtMs) / this.glimmerMs;
+    if (k >= 1) {
+      this.glimmerAtMs = -1;
+      return 0;
+    }
+    return Math.sin(Math.PI * Math.max(0, k));
+  }
+
   /** Voile de l'évanouissement, jauge de peur, transparence de Céleste. */
   private renderRunState(): void {
     // Court souvenir (D-68) : la vignette au-dessus du jeu.
@@ -1259,6 +1466,10 @@ export class GameScene extends Phaser.Scene {
       }
     }
     this.hud.setVeil(veil, this.story.veilShape === 'iris' ? this.irisCenter() : null);
+    if (this.celesteGone) {
+      // Sortie de la salle (D-144) : on ne la voit plus.
+      this.puppet.setAlpha(0);
+    }
   }
 
   respawn(): void {
@@ -1349,6 +1560,7 @@ export class GameScene extends Phaser.Scene {
       this.lockedExitThought(door);
       return;
     }
+    this.audio.sfx.play('door');
     this.transition.start(target, 0);
   }
 
@@ -1397,6 +1609,8 @@ export class GameScene extends Phaser.Scene {
     const event = this.layerShift.step(pressed, this.player.movement, this.shiftHost);
     if (event === ShiftEvent.Shifted) {
       this.shiftView.flash(this.time.now);
+      this.audio.sfx.play('shift');
+      this.haptics.pulse('shift');
     } else if (event === ShiftEvent.Refused) {
       this.shiftView.refuse(this.time.now);
     }
@@ -1453,7 +1667,10 @@ export class GameScene extends Phaser.Scene {
     }
     const chase = this.combat.chase;
     const rising = chase && !chase.horizontal && !chase.done && chase.placed;
-    erase.step(rising ? chase.front : null, this.eraseHost);
+    if ((erase.step(rising ? chase.front : null, this.eraseHost) & EraseEvent.Announced) !== 0) {
+      // La berceuse (D-140) : une note de boîte à musique à chaque étoile qui s'annonce.
+      this.audio.sfx.play(erase.data.look === 'stars' ? 'lullaby' : 'erase');
+    }
     this.applyErase();
   }
 
@@ -1552,9 +1769,27 @@ export class GameScene extends Phaser.Scene {
    * carte révélée. Céleste est replacée ensuite.
    */
   private setRoom(source: LevelData, zone: Zone | null, checkpointId: string | null): void {
+    const roomStart = __DEBUG_TOOLS__ ? performance.now() : 0;
     // Une salle à deux couches se charge toujours dans le présent (D-107).
     const level = this.roomLevel(source);
     this.level = level;
+    this.ground = roomGround(level.id);
+    if (this.celesteGone) {
+      // Une autre salle la ramène (D-144).
+      this.celesteGone = false;
+      this.puppet.setAlpha(1);
+    }
+    this.glimmerAtMs = -1;
+    this.audio.sfx.setStrange(this.strangeWorld || isStrangeRoom(level));
+    this.audio.sfx.stopLoops();
+    this.sfxDirector.reset(this.player);
+    this.hintView.reset();
+    this.hintRetargetMs = 0;
+    for (const watch of this.trainWatches) {
+      watch.reset();
+    }
+    this.tunnelWatch.reset();
+    this.waveWatch.reset();
     this.layerShift.reset();
     this.zone = zone;
     if (zone && isMappedRoom(level)) {
@@ -1587,6 +1822,9 @@ export class GameScene extends Phaser.Scene {
     // Arrivée dans une salle qui roule déjà : à pleine vitesse (le départ, lui, se voit).
     this.motion = this.movingTarget();
     this.nextJoltMs = 0;
+    if (__DEBUG_TOOLS__) {
+      this.frameStats.roomMs += performance.now() - roomStart;
+    }
   }
 
   /** Capacités de Céleste en ce moment (sauvegarde, debug, parcours d'essai), pour le cahier. */
@@ -1634,6 +1872,7 @@ export class GameScene extends Phaser.Scene {
     }
     if (item.kind === PickupKind.Secret) {
       this.audio.playJingle('found');
+      this.audio.sfx.play('voice-laugh');
       void this.session.addCollectible(item.id);
       return;
     }
@@ -1648,6 +1887,7 @@ export class GameScene extends Phaser.Scene {
    */
   private learnAbility(id: Ability): void {
     this.audio.playJingle('found');
+    this.audio.sfx.play('voice-laugh');
     void this.session.unlockAbility(id);
     this.applyAbilities();
     this.hud.showHint(ABILITY_HINTS[id], ABILITY_HINT_MS);
@@ -1688,8 +1928,15 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** Aperçu du monde étrange (overlay). */
+  /** Maquette du monde étrange à comparer (D-130, outil de debug) ; null : la palette du jeu. */
+  setStrangeMockup(mockup: StrangeMockup | null): void {
+    this.strangeMockup = mockup;
+    this.redrawArt();
+  }
+
   setStrangeWorld(strange: boolean): void {
     this.strangeWorld = strange;
+    this.audio.sfx.setStrange(strange || isStrangeRoom(this.level));
     this.redrawArt();
   }
 
@@ -1755,6 +2002,7 @@ export class GameScene extends Phaser.Scene {
         : base,
     );
     const palette = this.palette();
+    this.celesteHalo.setLook(palette.halo, palette.haloColor);
     const waves = wavesOf(level);
     this.water.load(level, palette.silhouettes, waves?.row ?? -1, level.tide?.highRow ?? -1);
     if (base.layers) {
@@ -1780,6 +2028,8 @@ export class GameScene extends Phaser.Scene {
         : null,
     );
     this.shiftView.show(layerOf(this.level), this.erase?.masks ?? null);
+    // Les étoiles de la berceuse (D-140), dessinées à part, dans toutes les salles.
+    this.lullaby.load(base.erase);
     if (dressed) {
       this.backdrop.build(level, palette, this.artScale, images);
       this.foreground.build(level, palette, this.artScale);
@@ -1877,9 +2127,13 @@ export class GameScene extends Phaser.Scene {
       return true;
     }
     if (tile === Tile.Water) {
-      // L'effacement (D-111) : gris pâle à la place de l'eau.
+      // L'effacement (D-111) : gris pâle à la place de l'eau ; le vide de la nuit (D-142).
       g.fillStyle(
-        level.meta.void === 'erasure' ? ERASURE_COLORS.tile : PLACEHOLDER_COLORS.water,
+        level.meta.void === 'erasure'
+          ? ERASURE_COLORS.tile
+          : level.meta.void === 'night'
+            ? NIGHT_VOID_COLORS.tile
+            : PLACEHOLDER_COLORS.water,
         0.8,
       );
       g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
@@ -1906,6 +2160,166 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** Pose de la marionnette (D-29), un pas : état de Céleste et coup de bâton en cours. */
+  /**
+   * Le fil discret (D-129) : le temps de jeu sans progrès (étape de l'histoire, capacité, salle
+   * découverte, veilleuse) ; au-delà des paliers, le point à montrer dans la salle, recalculé de
+   * temps en temps. Seulement dans une zone, hors des scènes, poursuites et souvenirs.
+   */
+  private stepHint(dtMs: number): void {
+    const data = this.session.data;
+    const run = this.run;
+    const chase = this.combat.chase;
+    const active =
+      data.settings.controls.hint &&
+      this.zone !== null &&
+      !this.story.busy &&
+      !this.memoryPlay &&
+      !(chase && !chase.done) &&
+      !run.fainting &&
+      !run.splashing &&
+      !this.transition.leaving;
+    const { abilities, mapRevealed } = data.progression;
+    const progress =
+      this.story.flags.size +
+      1e3 * abilities.length +
+      1e5 * mapRevealed.length +
+      1e7 * data.activatedCheckpoints.length;
+    const before = this.hintClock.stage;
+    this.hintClock.step(dtMs, active, progress);
+    const stage = this.hintClock.stage;
+    if (stage > before) {
+      this.audio.sfx.play('hint');
+    }
+    const target = this.hintTarget;
+    if (stage === HintStage.None) {
+      target.valid = false;
+      this.hintGoalName = '';
+      return;
+    }
+    const now = this.time.now;
+    if (now < this.hintRetargetMs) {
+      return;
+    }
+    this.hintRetargetMs = now + HINT.retargetMs;
+    const world = this.hintWorld();
+    const current = world ? currentGoal(MILESTONES, world, this.level.id) : null;
+    const point =
+      world && current ? hintPoint(current.goal, world, this.level.id, this.level) : null;
+    target.valid = point !== null;
+    if (point) {
+      target.x = point.x;
+      target.y = point.y;
+    }
+    this.hintGoalName = current ? milestoneName(current.milestone) : '';
+  }
+
+  /** Ce que le fil sait de la partie en ce moment (D-129) ; null hors d'une zone. */
+  private hintWorld(): HintWorld | null {
+    const zone = this.zone;
+    if (!zone) {
+      return null;
+    }
+    const story = this.story;
+    return {
+      zone,
+      triggers: story.data.triggers,
+      flags: story.flags,
+      abilities: new Set(this.session.data.progression.abilities),
+      locked: (room, exit) => story.exitsLocked(room, exit),
+    };
+  }
+
+  /**
+   * Bruitages du mouvement (D-126), après les sensations et la pose : les pas selon la matière du
+   * sol, au rythme de la foulée ; le saut ; la réception selon la hauteur de la chute.
+   */
+  private stepMoveSounds(): void {
+    const director = this.sfxDirector;
+    const player = this.player;
+    director.step(
+      player,
+      this.poser.runPhase,
+      Math.abs(player.vx) / this.movement.maxRunSpeed,
+      this.feel.events,
+      this.feel.fallHeight,
+    );
+    const sfx = this.audio.sfx;
+    sfx.loop('wall-slide', director.wallSliding);
+    sfx.loop('cable-slide', director.cableSliding);
+    const cues = director.cues;
+    if (cues === SfxCue.None) {
+      return;
+    }
+    if ((cues & SfxCue.Step) !== 0) {
+      sfx.play(STEP_SLOT[surfaceUnder(this.level, player.box, this.ground)], director.stepVolume);
+    }
+    if ((cues & SfxCue.LandBig) !== 0) {
+      sfx.play('land-big');
+      this.haptics.pulse('landBig');
+    } else if ((cues & SfxCue.Land) !== 0) {
+      sfx.play('land');
+    }
+    for (const [cue, slot] of CUE_SOUNDS) {
+      if ((cues & cue) !== 0) {
+        sfx.play(slot);
+      }
+    }
+    if ((cues & SfxCue.HookCatch) !== 0) {
+      this.haptics.pulse('hookCatch');
+    }
+  }
+
+  /**
+   * Bruitages du combat et des dangers (D-127) : le coup de bâton, le bâton qui touche, l'ennemi
+   * dispersé, Céleste touchée ; le poursuivant (réveil, grondement) ; l'annonce et le passage des
+   * trains, le tunnel, la vague.
+   */
+  private stepCombatSounds(): void {
+    const combat = this.combat;
+    const sfx = this.audio.sfx;
+    const phase = combat.attack.phase;
+    if (phase === AttackPhase.Startup && this.lastAttackPhase !== AttackPhase.Startup) {
+      sfx.play('attack');
+    }
+    this.lastAttackPhase = phase;
+    const events = combat.events;
+    if ((events & CombatEvent.Hit) !== 0) {
+      sfx.play('hit');
+    }
+    if ((events & CombatEvent.Disperse) !== 0) {
+      sfx.play('enemy-scatter');
+    }
+    if ((events & CombatEvent.Hurt) !== 0) {
+      sfx.play('hurt');
+      sfx.play('voice-ouch');
+      this.haptics.pulse('hurt');
+    }
+    const chase = combat.chase;
+    if (chase && (chase.events & ChaseEvent.Wake) !== 0) {
+      sfx.play('chase-wake');
+      sfx.play('voice-oh');
+      this.haptics.pulse('chaseWake');
+    }
+    sfx.loop('chase-rumble', chase !== null && chase.placed && !chase.done && !chase.paused);
+    const trains = this.level.trains;
+    for (let i = 0; i < trains.length && i < this.trainWatches.length; i++) {
+      const cue = this.trainWatches[i]?.step(
+        trainPhase(combat.trainMs, combat.trainOffsetMs(i), this.combatParams),
+      );
+      if (cue === PhaseCue.Warn) {
+        sfx.play('train-warn');
+      } else if (cue === PhaseCue.Pass) {
+        sfx.play('train-pass');
+      }
+    }
+    if (combat.tunnelRow >= 0 && this.tunnelWatch.step(combat.tunnelPhase) === PhaseCue.Pass) {
+      sfx.play('tunnel');
+    }
+    if (combat.waveRow >= 0 && this.waveWatch.step(combat.wavePhase) === PhaseCue.Warn) {
+      sfx.play('wave-warn');
+    }
+  }
+
   private stepPose(): void {
     const attack = this.combat.attack;
     let phase: number = PoseAttack.None;
@@ -1953,9 +2367,21 @@ export class GameScene extends Phaser.Scene {
 
   /** Palette de la salle : monde étrange (D-28), ou maison le soir ou le matin (D-31). */
   private basePalette() {
+    if (isStrangeRoom(this.level) && this.level.meta.palette === 'nightlight') {
+      // Le monde de Maria (D-141) : la chambre du premier soir, à la lumière de la veilleuse.
+      return NIGHTLIGHT_PALETTE;
+    }
+    if (isStrangeRoom(this.level) && this.level.meta.palette === 'nightlight-soft') {
+      // La chambre grande (D-143) : l'étrange s'efface.
+      return NIGHTLIGHT_SOFT_PALETTE;
+    }
     if (this.strangeWorld || isStrangeRoom(this.level)) {
       // Derrière la haie (D-49) : le monde étrange, dehors (ciel violet au lieu du mur).
-      return this.level.meta.outdoor ? { ...STRANGE_PALETTE, outdoor: true } : STRANGE_PALETTE;
+      const mockup = this.strangeMockup;
+      const strange = mockup
+        ? { ...STRANGE_PALETTE, ...STRANGE_MOCKUP_PALETTES[mockup] }
+        : STRANGE_PALETTE;
+      return this.level.meta.outdoor ? { ...strange, outdoor: true } : strange;
     }
     if (this.level.meta.world === 'memory') {
       // Un souvenir jouable (D-89) : couleurs chaudes et passées.
@@ -2089,7 +2515,7 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     if (returnPoint) {
-      const lamp = room.level.entities.find((e) => e.type === EntityType.Checkpoint);
+      const lamp = returnLantern(room.level, col, row);
       void this.session.setCheckpoint(id, lamp ? checkpointId(lamp.col, lamp.row) : null);
     }
     const saved = this.session.data.checkpoint;
@@ -2179,6 +2605,7 @@ export class GameScene extends Phaser.Scene {
     this.feel.step(player);
     this.stepPose();
     this.stepStage();
+    this.stepMoveSounds();
   }
 
   /** Fin du souvenir (dans le noir) : retour exact là où était Céleste. */
@@ -2286,12 +2713,39 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Maria dans les bras (D-143) : l'image de Maria assise (celle des objets de l'histoire), contre
+   * Céleste, du côté où elle regarde.
+   */
+  private renderHeldMaria(): void {
+    const visible = this.poser.holding && this.textures.exists(HELD_MARIA_TEXTURE);
+    this.heldMaria.setVisible(visible);
+    if (!visible) {
+      return;
+    }
+    if (this.heldMaria.texture.key !== HELD_MARIA_TEXTURE) {
+      this.heldMaria.setTexture(HELD_MARIA_TEXTURE);
+    }
+    const facing = this.player.facing;
+    const body = this.growth.bodyScale;
+    // Assise (D-144) : le corps descend, Maria avec lui, sur ses genoux.
+    this.heldMaria
+      .setOrigin(0.5, 1)
+      .setScale(1 / this.artScale)
+      .setFlipX(facing < 0)
+      .setPosition(
+        this.puppet.x + facing * (HELD_MARIA_AT.x + HELD_MARIA_AT.xPerBody * body),
+        this.puppet.y + HELD_MARIA_AT.yPerBody * body + this.poser.pose.bodyY,
+      );
+  }
+
   /** Outil de debug : étapes de l'histoire remplacées (sans sauvegarde), salle redessinée. */
   setStoryFlags(flags: readonly string[]): void {
     this.story.setFlags(flags);
     this.applyGrowth();
     this.props.load(this.story.data.props, this.level.id, this.story.flags);
     this.poser.sitting = false;
+    this.poser.holding = false;
     this.redrawArt();
   }
 }

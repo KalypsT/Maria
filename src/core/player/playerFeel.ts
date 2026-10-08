@@ -1,5 +1,6 @@
 import type { FeelParams } from '../../config/feel';
 import { PHYSICS_STEP_HZ } from '../../config/movement';
+import type { Box } from '../physics/gridCollision';
 
 /** Ce que les sensations observent : `PlayerPhysics` convient tel quel. */
 export interface FeelSubject {
@@ -7,6 +8,7 @@ export interface FeelSubject {
   readonly vy: number;
   readonly grounded: boolean;
   readonly facing: number;
+  readonly box: Readonly<Box>;
 }
 
 /** Événements du dernier pas (masque de bits), pour la poussière. */
@@ -26,6 +28,12 @@ export class PlayerFeel {
   lean = 0;
   /** Événements du dernier pas (`FeelEvent`). */
   events = 0;
+  /**
+   * Hauteur de la dernière chute (px), du plus haut des pieds en l'air jusqu'à la réception : dose
+   * la poussière et le bruit de la réception (D-125, D-126). Un saut ordinaire retombe déjà à la
+   * vitesse de chute maximale : la vitesse ne distingue pas un petit saut d'une grande chute.
+   */
+  fallHeight = 0;
   /** Vitesse horizontale maximale, pour l'inclinaison (px/s). Écrite par la scène. */
   maxRunSpeed = 1;
   /** Vitesse de chute maximale, pour l'écrasement (px/s). Écrite par la scène. */
@@ -33,6 +41,8 @@ export class PlayerFeel {
   private wasGrounded = true;
   private lastFacing = 1;
   private lastAirVy = 0;
+  /** Plus haut des pieds (px, y le plus petit) depuis que Céleste a quitté le sol. */
+  private airTopY = 0;
   private kLean = 1;
   private readonly dt: number;
   private readonly params: FeelParams;
@@ -66,6 +76,8 @@ export class PlayerFeel {
     this.wasGrounded = subject.grounded;
     this.lastFacing = subject.facing;
     this.lastAirVy = 0;
+    this.airTopY = subject.box.y + subject.box.height;
+    this.fallHeight = 0;
   }
 
   /** Échelle horizontale d'affichage (aire à peu près conservée). */
@@ -91,6 +103,14 @@ export class PlayerFeel {
       events |= FeelEvent.Turn;
     }
     this.events = events;
+    const feetY = subject.box.y + subject.box.height;
+    if (!grounded) {
+      if (this.wasGrounded || feetY < this.airTopY) {
+        this.airTopY = feetY;
+      }
+    } else if (!this.wasGrounded) {
+      this.fallHeight = Math.max(0, feetY - this.airTopY);
+    }
     this.wasGrounded = grounded;
     this.lastFacing = subject.facing;
 

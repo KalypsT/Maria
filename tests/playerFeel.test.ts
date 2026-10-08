@@ -108,6 +108,31 @@ describe('PlayerFeel', () => {
     expect(big).toBeLessThanOrEqual(DEFAULT_FEEL.landSquash + 1e-9);
   });
 
+  it('mesure la hauteur de la chute, pour doser la poussière (D-125)', () => {
+    const fallHeight = (fallFromLedge: boolean) => {
+      const r = rig({ squashEnabled: 0 });
+      if (fallFromLedge) {
+        r.input.moveX = 1;
+      } else {
+        r.input.jumpPressed = true;
+        r.input.jumpHeld = true;
+      }
+      let height = -1;
+      r.run(240, () => {
+        if ((r.feel.events & FeelEvent.Land) !== 0 && height < 0) {
+          r.input.moveX = 0;
+          height = r.feel.fallHeight;
+        }
+      });
+      return height;
+    };
+    // Un saut complet sur place : sa hauteur ; la chute du rebord : 7 tuiles, plus haut.
+    const jump = fallHeight(false);
+    expect(jump).toBeGreaterThan(DEFAULT_MOVEMENT.jumpHeightTiles * 16 - 4);
+    expect(jump).toBeLessThan(DEFAULT_MOVEMENT.jumpHeightTiles * 16 + 4);
+    expect(fallHeight(true)).toBeCloseTo(7 * 16, 0);
+  });
+
   it('penche dans le sens de la course, sans pencher en l’air', () => {
     const r = rig();
     r.input.moveX = 1;

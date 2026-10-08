@@ -141,10 +141,10 @@ describe('mixage (D-57)', () => {
     mix.paused = true;
     run(mix, AUDIO_MIX.duckMs);
     expect(mix.musicVolume('garden')).toBeCloseTo(full * AUDIO_MIX.pausedDuck, 5);
-    mix.settings = { volume: 0.7, muted: true };
+    mix.settings = { volume: 0.7, muted: true, sfxVolume: 1 };
     expect(mix.musicVolume('garden')).toBe(0);
     expect(mix.jingleVolume).toBe(0);
-    mix.settings = { volume: 0, muted: false };
+    mix.settings = { volume: 0, muted: false, sfxVolume: 1 };
     expect(mix.musicVolume('garden')).toBe(0);
   });
 
@@ -180,7 +180,11 @@ describe('fichiers audio (D-57)', () => {
 
   it('réglages du son bornés', () => {
     expect(sanitizeAudioSettings(undefined)).toEqual(DEFAULT_AUDIO_SETTINGS);
-    expect(sanitizeAudioSettings({ volume: -2, muted: true })).toEqual({ volume: 0, muted: true });
+    expect(sanitizeAudioSettings({ volume: -2, muted: true, sfxVolume: 3 })).toEqual({
+      volume: 0,
+      muted: true,
+      sfxVolume: 1,
+    });
   });
 });
 
@@ -191,6 +195,8 @@ describe('silences de Maria dans l’histoire (D-57)', () => {
     expect(hushed.map((t) => t.id).sort()).toEqual(
       [
         'evening-sleep',
+        // Le dernier plan (D-144) : la vue reste sur Maria.
+        'finale-leave',
         'hedge-enter',
         'living-see',
         'living-vanish',

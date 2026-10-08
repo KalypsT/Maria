@@ -110,7 +110,8 @@ export class ShiftLayerView {
   load(base: LevelData, art: LayerArt | null): void {
     this.clear();
     const layers = base.layers;
-    const erase = base.erase;
+    // Les étoiles de la berceuse (D-140) ne changent pas de couche : `LullabyView` les dessine.
+    const erase = base.erase?.look === 'stars' ? null : base.erase;
     this.layered = layers !== null || erase !== null;
     const tiles = rawOf(base).tiles;
     if (layers) {

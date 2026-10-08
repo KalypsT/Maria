@@ -323,6 +323,106 @@ describe('histoire de la maison (D-31)', () => {
     expect(problems).toContain('objet p : ne repose sur rien');
   });
 
+  it('Maria dans les bras (D-143) : prise et posée seulement dans le noir, jamais à la fin', () => {
+    const hold = (steps: StoryData['triggers'][number]['steps']): string[] =>
+      storyProblems(
+        {
+          ...HOUSE_STORY,
+          triggers: [
+            {
+              id: 'h',
+              room: 'bedroom',
+              on: 'interact',
+              area: { col: 20, row: 15, w: 7, h: 5 },
+              mark: { col: 23, row: 16 },
+              when: {},
+              lock: true,
+              repeat: false,
+              steps: [{ do: 'flag', id: 'x' }, ...steps],
+            },
+          ],
+        },
+        zone,
+      ).filter((p) => p.startsWith('déclencheur h') && p.includes('Maria'));
+    const fade = { do: 'fadeOut', ms: 100 } as const;
+    const back = { do: 'fadeIn', ms: 100 } as const;
+    expect(
+      hold([fade, { do: 'pose', pose: 'hold' }, back, fade, { do: 'pose', pose: 'sit' }, back]),
+    ).toEqual([]);
+    expect(hold([{ do: 'pose', pose: 'hold' }, fade, { do: 'pose', pose: 'stand' }, back])).toEqual(
+      ['déclencheur h : Maria prise ou posée sous les yeux du joueur'],
+    );
+    expect(hold([fade, { do: 'pose', pose: 'hold' }, back, { do: 'pose', pose: 'stand' }])).toEqual(
+      ['déclencheur h : Maria prise ou posée sous les yeux du joueur'],
+    );
+    expect(hold([fade, { do: 'pose', pose: 'hold' }, back])).toEqual([
+      'déclencheur h : se termine avec Maria dans les bras',
+    ]);
+  });
+
+  it('Céleste sortie de la salle (D-144) : dans le noir, et une autre salle la ramène', () => {
+    const gone = (steps: StoryData['triggers'][number]['steps']): string[] =>
+      storyProblems(
+        {
+          ...HOUSE_STORY,
+          triggers: [
+            {
+              id: 'g',
+              room: 'bedroom',
+              on: 'interact',
+              area: { col: 20, row: 15, w: 7, h: 5 },
+              mark: { col: 23, row: 16 },
+              when: {},
+              lock: true,
+              steps: [{ do: 'flag', id: 'x' }, ...steps],
+            },
+          ],
+        },
+        zone,
+      ).filter((p) => p.startsWith('déclencheur g') && p.includes('Céleste'));
+    const fade = { do: 'fadeOut', ms: 100 } as const;
+    const back = { do: 'fadeIn', ms: 100 } as const;
+    const hall = { do: 'room', room: 'hall', col: 3, row: 15, facing: 1 } as const;
+    expect(gone([fade, { do: 'gone' }, back, fade, hall, back])).toEqual([]);
+    expect(gone([{ do: 'gone' }, fade, hall, back])).toEqual([
+      'déclencheur g : Céleste disparaît sous les yeux du joueur',
+    ]);
+    expect(gone([fade, { do: 'gone' }, back])).toEqual(['déclencheur g : se termine sans Céleste']);
+  });
+
+  it('la fin du jeu (D-145) : dans le noir, la dernière étape, vers une salle connue', () => {
+    const end = (steps: StoryData['triggers'][number]['steps']): string[] =>
+      storyProblems(
+        {
+          ...HOUSE_STORY,
+          triggers: [
+            {
+              id: 'f',
+              room: 'bedroom',
+              on: 'interact',
+              area: { col: 20, row: 15, w: 7, h: 5 },
+              mark: { col: 23, row: 16 },
+              when: { none: ['x'] },
+              lock: true,
+              steps: [{ do: 'flag', id: 'x' }, ...steps],
+            },
+          ],
+        },
+        zone,
+      ).filter((p) => p.startsWith('déclencheur f'));
+    const fade = { do: 'fadeOut', ms: 100 } as const;
+    expect(end([fade, { do: 'gone' }, { do: 'end', room: 'hall' }])).toEqual([]);
+    expect(end([{ do: 'end', room: 'hall' }])).toEqual([
+      'déclencheur f : la fin sous les yeux du joueur',
+    ]);
+    expect(end([fade, { do: 'end', room: 'hall' }, { do: 'fadeIn', ms: 100 }])).toEqual([
+      'déclencheur f : des étapes après la fin',
+    ]);
+    expect(end([fade, { do: 'end', room: 'nulle-part' }])).toEqual([
+      'déclencheur f : salle nulle-part inconnue',
+    ]);
+  });
+
   it('détecte un changement de salle visible, dans le vide, ou sans veilleuse (D-34)', () => {
     const bad: StoryData = {
       ...HOUSE_STORY,
@@ -737,7 +837,7 @@ describe('quelques mois plus tard (D-43)', () => {
     const d = new StoryDirector(HOUSE_STORY, host, HZ);
     const cases = [
       { room: 'hall', box: standing(24, 15), id: 'slipper', prop: 'slipper' },
-      { room: 'staircase', box: standing(35, 15), id: 'bottle', prop: 'bottle' },
+      { room: 'staircase', box: standing(26, 24), id: 'bottle', prop: 'bottle' },
       { room: 'bedroom', box: standing(15, 15), id: 'headband', prop: 'headband' },
       { room: 'garden-tree', box: standing(27, 39), id: 'bonnet', prop: 'bonnet-grass' },
     ];

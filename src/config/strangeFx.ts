@@ -13,6 +13,13 @@ export const STRANGE_FX = {
   /** Présage : tremblement continu (px logiques) au sommet, à partir de ce seuil. */
   omenShakePx: 1.2,
   omenShakeFrom: 0.5,
+  /**
+   * Le très léger signe du dernier plan (D-144, §12) : sommet du présage (sous `omenShakeFrom` : pas
+   * de tremblement, seulement le voile froid et la lumière qui vacille) ; le mobile tourne alors
+   * jusqu'à `1 + glimmerSpin` fois plus vite.
+   */
+  glimmerPeak: 0.45,
+  glimmerSpin: 4,
   /** Tremblement d'un script : amplitude (px logiques) pour une force de 1. */
   shakePx: 2.5,
   /** Scintillements : nombre maximal à l'écran, durée de vie (ms), taille (px). */

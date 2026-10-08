@@ -8,6 +8,8 @@ import { DEFAULT_WORLD, WORLD_PARAM_RANGES, type WorldParams } from '../config/w
 import { DEFAULT_PUPPET, PUPPET_PARAM_RANGES, type PuppetParams } from '../config/puppet';
 import { ART_FINISH_RANGES, DEFAULT_ART_FINISH, type ArtFinish } from '../config/art';
 import { deserializeSave } from '../core/save/saveData';
+import { HitchMonitor, type FrameWork } from '../core/perf/hitchMonitor';
+import { STRANGE_MOCKUPS, STRANGE_MOCKUP_NAMES } from '../config/strangeThemes';
 import { DEFAULT_MOVEMENT, MOVEMENT_PARAM_RANGES, type MovementParams } from '../config/movement';
 import { LEVELS, ZONES, levelName } from '../levels';
 import type { GameScene } from '../scenes/GameScene';
@@ -34,6 +36,8 @@ const COMBAT_STORAGE_KEY = 'maria.debug.combat';
 const WORLD_STORAGE_KEY = 'maria.debug.world';
 /** Cadre d'infos (FPS, position…) affiché ou masqué (D-59). */
 const STATS_STORAGE_KEY = 'maria.debug.stats';
+/** Sons de test des bruitages (D-126). */
+const SFX_TEST_STORAGE_KEY = 'maria.debug.sfxTest';
 const ATTACK_COLOR = 0xff5d5d;
 const ENEMY_BOX_COLOR = 0xffa24d;
 const ENEMY_STATE_LABEL = ['patrouille', 'étourdi', 'dispersé'] as const;
@@ -152,7 +156,7 @@ function addCheck(
   label: string,
   initial: boolean,
   onChange: (checked: boolean) => void,
-): void {
+): HTMLInputElement {
   const row = element('label', parent, 'dbg-check');
   const input = element('input', row);
   input.type = 'checkbox';
@@ -161,6 +165,7 @@ function addCheck(
   input.addEventListener('change', () => {
     onChange(input.checked);
   });
+  return input;
 }
 
 /**
@@ -264,6 +269,49 @@ export function installDebugOverlay(scene: GameScene): void {
     }
     scene.applyFinish();
     refreshFinish();
+  });
+  // Maquettes du monde étrange (D-130) : la palette, le motif, les liserés et le halo à comparer.
+  const mockupSelect = element('select', panel);
+  element('option', mockupSelect, undefined, 'Maquette du monde étrange : actuelle').value = '';
+  for (const mockup of STRANGE_MOCKUPS) {
+    element('option', mockupSelect, undefined, STRANGE_MOCKUP_NAMES[mockup]).value = mockup;
+  }
+  mockupSelect.value = scene.strangeMockup ?? '';
+  mockupSelect.addEventListener('change', () => {
+    const value = mockupSelect.value;
+    scene.setStrangeMockup(STRANGE_MOCKUPS.find((m) => m === value) ?? null);
+    mockupSelect.blur();
+  });
+  // Sensations proposées (D-125) : écrasement, inclinaison, poussière et saut adouci d'un coup,
+  // pour comparer sur téléphone ; les valeurs par défaut du jeu ne changent pas.
+  const proposedFeel = addCheck(
+    panel,
+    'Sensations proposées',
+    scene.feelParams.squashEnabled >= 1 &&
+      scene.feelParams.dustEnabled >= 1 &&
+      scene.movement.jumpReleaseMode >= 1,
+    (checked) => {
+      const on = checked ? 1 : 0;
+      scene.feelParams.squashEnabled = on;
+      scene.feelParams.dustEnabled = on;
+      scene.movement.jumpReleaseMode = on;
+      scene.applyFeel();
+      scene.applyMovement();
+      save(FEEL_STORAGE_KEY, feelToJson(scene.feelParams));
+      save(STORAGE_KEY, movementToJson(scene.movement));
+      refreshFeel();
+      refreshMovement();
+    },
+  );
+  // Sons de test (D-126) : un emplacement de bruitage sans fichier joue un petit son synthétisé.
+  try {
+    scene.audio.sfx.testTones = localStorage.getItem(SFX_TEST_STORAGE_KEY) === 'on';
+  } catch {
+    // Stockage indisponible : désactivés.
+  }
+  addCheck(panel, 'Sons de test (bruitages sans fichier)', scene.audio.sfx.testTones, (checked) => {
+    scene.audio.sfx.testTones = checked;
+    save(SFX_TEST_STORAGE_KEY, checked ? 'on' : 'off');
   });
   // Étape de l'histoire (D-31) : pour la partie en cours seulement, sans sauvegarde.
   const storySelect = element('select', panel);
@@ -1537,7 +1585,7 @@ export function installDebugOverlay(scene: GameScene): void {
       ],
     ],
     [
-      'Histoire : quelques mois plus tard, phase 4 (D-119)',
+      'Histoire : quelques mois plus tard, le soir (phase 4, niveau 8, D-119, D-139)',
       [
         F.EveningPlayed,
         F.EveningBlanket,
@@ -1616,6 +1664,47 @@ export function installDebugOverlay(scene: GameScene): void {
       ],
     ],
   ];
+  // La dernière nuit (D-139) : le soir de la phase 4 vécu, le berceau vide s'éclaire ; puis la
+  // chambre immense (D-141), son ciel (D-142), la chambre grande et Maria retrouvée (D-143), le
+  // matin (D-144) et l'après-fin (D-145).
+  const phaseFour = steps.find(([, flags]) => flags.includes(F.GrownFourth));
+  if (phaseFour) {
+    const night = [...phaseFour[1], F.FinaleRug, F.FinaleCradle, F.FinaleGoodnight, F.FinaleNight];
+    const sky = [...night, F.FinaleEntered, F.FinaleMusicBox, F.FinaleSky];
+    const together = [...sky, F.FinaleBig, F.FinaleHome, F.FinaleFound, F.FinaleTogether];
+    steps.splice(
+      steps.indexOf(phaseFour) + 1,
+      0,
+      ['Histoire : la dernière nuit, le berceau vide (D-139)', night],
+      ['Histoire : la chambre immense (D-141)', [...night, F.FinaleEntered]],
+      ['Histoire : le ciel de la chambre (D-142)', sky],
+      ['Histoire : la chambre grande (D-143)', [...sky, F.FinaleBig]],
+      [
+        'Histoire : Maria dans son berceau, la vraie chambre (D-143)',
+        [...sky, F.FinaleBig, F.FinaleHome],
+      ],
+      ['Histoire : Maria retrouvée (D-143)', together],
+      [
+        'Histoire : le matin, Maria à côté d’elle (D-144)',
+        [...together, F.FinaleMorning, F.FinaleAwake],
+      ],
+      [
+        'Histoire : Maria rangée sur l’étagère (D-144)',
+        [...together, F.FinaleMorning, F.FinaleAwake, F.FinalePlayed, F.FinaleShelved],
+      ],
+      [
+        'Histoire : après la fin (D-145)',
+        [
+          ...together,
+          F.FinaleMorning,
+          F.FinaleAwake,
+          F.FinalePlayed,
+          F.FinaleShelved,
+          F.FinaleGone,
+        ],
+      ],
+    );
+  }
   const current = [...scene.story.flags].sort().join();
   for (const [label, flags] of steps) {
     const option = element('option', storySelect, undefined, label);
@@ -1870,6 +1959,30 @@ export function installDebugOverlay(scene: GameScene): void {
     },
   );
 
+  // Saccades (D-124) : images en retard, leur cause probable, la salle et la position de Céleste.
+  const hitches = new HitchMonitor();
+  const hitchSection = element('details', panel);
+  element('summary', hitchSection, undefined, 'Saccades');
+  const hitchInfo = element('div', hitchSection, 'dbg-stats');
+  hitchInfo.style.whiteSpace = 'pre-wrap';
+  const refreshHitches = () => {
+    hitchInfo.textContent =
+      hitches.recent.length === 0
+        ? 'aucune'
+        : hitches.recent
+            .map(
+              (h) =>
+                `${h.ms.toFixed(0)} ms  ${h.cause}  ${h.room}  x ${h.x.toFixed(0)} y ${h.y.toFixed(0)}`,
+            )
+            .join('\n');
+  };
+  refreshHitches();
+  const hitchActions = element('div', hitchSection, 'dbg-actions');
+  element('button', hitchActions, undefined, 'Remettre à zéro').addEventListener('click', () => {
+    hitches.reset();
+    refreshHitches();
+  });
+
   // Actions.
   const actions = element('div', panel, 'dbg-actions');
   const exportButton = element('button', actions, undefined, 'Exporter JSON');
@@ -1882,6 +1995,13 @@ export function installDebugOverlay(scene: GameScene): void {
         combat: orderedParams(scene.combatParams, COMBAT_PARAM_RANGES),
         world: orderedParams(scene.worldParams, WORLD_PARAM_RANGES),
         finish: orderedParams(scene.artFinish, ART_FINISH_RANGES),
+        hitches: {
+          count: hitches.count,
+          big: hitches.big,
+          masked: hitches.masked,
+          worst: hitches.worst,
+          recent: hitches.recent,
+        },
       },
       null,
       2,
@@ -1904,6 +2024,7 @@ export function installDebugOverlay(scene: GameScene): void {
     }, 1500);
   });
   element('button', actions, undefined, 'Valeurs par défaut').addEventListener('click', () => {
+    proposedFeel.checked = false;
     Object.assign(scene.movement, DEFAULT_MOVEMENT);
     scene.applyMovement();
     save(STORAGE_KEY, movementToJson(scene.movement));
@@ -1931,6 +2052,13 @@ export function installDebugOverlay(scene: GameScene): void {
     scene.applyFinish();
     refreshFinish();
   });
+  // Le fil discret (D-129) : comme après un long moment sans progrès.
+  element('button', actions, undefined, 'Fil discret : maintenant').addEventListener(
+    'click',
+    () => {
+      scene.hintClock.skip();
+    },
+  );
   element('button', actions, undefined, 'Replacer Céleste').addEventListener('click', () => {
     scene.respawn();
   });
@@ -1950,9 +2078,31 @@ export function installDebugOverlay(scene: GameScene): void {
   let simMsSum = 0;
   let simMsMax = 0;
   let frames = 0;
+  // Travail de l'image (D-124) : la mise à jour est mesurée entre PRE_UPDATE et POST_UPDATE.
+  let updateStart = 0;
+  const frameWork: FrameWork = { updateMs: 0, artMs: 0, roomMs: 0, active: false, veiled: false };
+  const onPreUpdate = () => {
+    updateStart = performance.now();
+  };
   const onPostUpdate = (time: number) => {
     const player = scene.player;
     const camera = scene.camera;
+    const frame = scene.frameStats;
+    frameWork.updateMs = performance.now() - updateStart;
+    frameWork.artMs = frame.artMs;
+    frameWork.roomMs = frame.roomMs;
+    frameWork.active = frame.active;
+    frameWork.veiled = frame.veiled;
+    frame.artMs = 0;
+    frame.roomMs = 0;
+    frame.active = false;
+    hitches.frame(
+      scene.game.loop.rawDelta,
+      frameWork,
+      scene.level.meta.name ?? scene.level.id,
+      player.box.x,
+      player.box.y,
+    );
     graphics.clear();
     if (showHitbox) {
       graphics.lineStyle(1, HITBOX_COLOR, 1);
@@ -2024,6 +2174,14 @@ export function installDebugOverlay(scene: GameScene): void {
         `vue ${camera.viewWidth.toFixed(0)}×${camera.viewHeight.toFixed(0)} rendu ×${scene.renderScale.toFixed(2)}\n` +
         `simu ${((simMsSum / frames) * 1000).toFixed(0)} µs/img (max ${(simMsMax * 1000).toFixed(0)})  ` +
         `pas perdus ${scene.clock.droppedSteps}  blocs ${String(scene.artChunks)}`;
+      const worst = hitches.worst;
+      stats.textContent +=
+        `\nsaccades ${String(hitches.count)} (grosses ${String(hitches.big)}, ` +
+        `dans le noir ${String(hitches.masked)})` +
+        (worst ? `  pire ${worst.ms.toFixed(0)} ms ${worst.cause} · ${worst.room}` : '');
+      if (hitchSection.open) {
+        refreshHitches();
+      }
       const combat = scene.combat;
       const states = combat.enemies.map((enemy) => ENEMY_STATE_LABEL[enemy.state]).join(' ');
       stats.textContent +=
@@ -2031,7 +2189,11 @@ export function installDebugOverlay(scene: GameScene): void {
         (states ? `  ennemis ${states}` : '') +
         `\npeur ${scene.run.fear}/${scene.worldParams.fearMax}  retour ${scene.run.currentKey ?? 'départ'}` +
         (scene.run.fainting ? '  évanouie' : '');
-      stats.textContent += `\n${scene.audio.status()}`;
+      stats.textContent += `\n${scene.audio.status()}\n${scene.audio.sfx.status()}`;
+      const hint = scene.hintClock;
+      stats.textContent +=
+        `\nfil palier ${String(hint.stage)}  sans progrès ${(hint.idleMs / 1000).toFixed(0)} s` +
+        (scene.hintGoalName ? `  → ${scene.hintGoalName}` : '');
       const touch = scene.touch;
       if (touch) {
         const stick = touch.controller.joystick;
@@ -2045,8 +2207,10 @@ export function installDebugOverlay(scene: GameScene): void {
       frames = 0;
     }
   };
+  scene.events.on(Phaser.Scenes.Events.PRE_UPDATE, onPreUpdate);
   scene.events.on(Phaser.Scenes.Events.POST_UPDATE, onPostUpdate);
   scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+    scene.events.off(Phaser.Scenes.Events.PRE_UPDATE, onPreUpdate);
     scene.events.off(Phaser.Scenes.Events.POST_UPDATE, onPostUpdate);
     root.remove();
     style.remove();

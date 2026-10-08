@@ -86,11 +86,23 @@ export const THOUGHT_ICONS = [
    * (dessiné selon les étapes, `towerCubesMask`).
    */
   'cubes',
+  /** Maria assise sur l'étagère du surmeuble (D-144) : là où la ranger. */
+  'maria-shelf',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
-/** Poses imposées par un script (Céleste assise pour jouer, puis au réveil). */
-export type ScriptPose = 'sit' | 'stand';
+/**
+ * Poses imposées par un script (Céleste assise pour jouer, puis au réveil). `hold` (D-143) : debout,
+ * Maria dans les bras, immobile ; `hold-sit` (D-144) : assise, Maria dans les bras. Maria y est
+ * prise et posée seulement dans le noir, jamais à la fin d'un script (Céleste ne marche jamais en la
+ * portant, pilier 5 ; vérifié par `storyProblems`).
+ */
+export type ScriptPose = 'sit' | 'stand' | 'hold' | 'hold-sit';
+
+/** Maria dans les bras de Céleste dans cette pose (D-143, D-144). */
+export function holdsMaria(pose: ScriptPose): boolean {
+  return pose === 'hold' || pose === 'hold-sit';
+}
 
 /**
  * Forme d'un fondu : uniforme, ou en cercle centré sur Céleste (`iris`, D-35 : le monde étrange se
@@ -171,7 +183,23 @@ export type StoryStep =
    * Le tourne-disque du grenier (D-121, non bloquant) : le choix des disques trouvés, ou une bulle
    * (le plateau vide) s'il n'y en a aucun.
    */
-  | { readonly do: 'records' };
+  | { readonly do: 'records' }
+  /**
+   * Céleste est sortie de la salle (D-144, seulement dans le noir) : on ne la voit plus ; une
+   * étape `room` la ramène, avant la fin du script (vérifié par `storyProblems`).
+   */
+  | { readonly do: 'gone' }
+  /**
+   * Un très léger signe du monde étrange (D-144, §12, non bloquant) : pendant `ms`, la lumière se
+   * refroidit et vacille (le présage), le mobile tourne un instant plus vite ; puis tout redevient
+   * normal. Rien ne bouge d'autre, et surtout pas Maria.
+   */
+  | { readonly do: 'glimmer'; readonly ms: number }
+  /**
+   * La fin du jeu (D-145, dans le noir, la dernière étape) : « Continuer » reprendra dans `room`, à
+   * son départ ; la partie est écrite, l'écran de fin (sans texte), puis l'accueil.
+   */
+  | { readonly do: 'end'; readonly room: string };
 
 export interface StoryTrigger {
   readonly id: string;

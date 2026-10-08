@@ -64,11 +64,16 @@ import nannyCarousel from '../nanny/carousel.txt?raw';
 import nannyNap from '../nanny/nap.txt?raw';
 import nannyStairs from '../nanny/stairs.txt?raw';
 import nannyPlayroom from '../nanny/playroom.txt?raw';
+import finaleBed from '../finale/bed.txt?raw';
+import finaleSky from '../finale/sky.txt?raw';
+import finaleBig from '../finale/big.txt?raw';
 
 /**
- * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). En grimpant aux rebords (D-26) :
- * la trappe à linge (couloir:3 ↔ buanderie:1) ferme la boucle, l'escalier mène au grenier
- * (escalier:3 ↔ grenier:1), d'où l'on ressort derrière l'armoire de la chambre (grenier:2 ↔
+ * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). L'étage (chambre, couloir) est à
+ * gauche de la cage de l'escalier, le rez-de-chaussée (salon, cuisine, buanderie) à droite, le
+ * grenier au-dessus du couloir (D-132). En grimpant aux rebords (D-26) : la trappe à linge
+ * (couloir:3 ↔ buanderie:1) ferme la boucle, le haut de la cage mène au grenier (escalier:3 ↔
+ * grenier:1), d'où l'on redescend dans la chambre par sa petite porte haute (grenier:2 ↔
  * chambre:2). Le monde étrange (salon étrange, passage d'ombres) n'est relié à la maison que par
  * l'histoire (D-34).
  *
@@ -182,6 +187,11 @@ export const HOUSE: ZoneSource = {
     // Le boss, l'effacement (D-117) : la cage d'escalier (la fuite), puis la salle de jeux. Hors carte.
     { id: 'nanny-stairs', text: nannyStairs },
     { id: 'nanny-playroom', text: nannyPlayroom },
+    // Le dernier niveau (D-138, D-141) : la chambre immense, le lit et le coffre ; on y entre par
+    // le berceau vide de la chambre, la nuit (l'histoire). Hors carte.
+    { id: 'finale-bed', text: finaleBed },
+    { id: 'finale-sky', text: finaleSky },
+    { id: 'finale-big', text: finaleBig },
   ],
   links: [
     ['bedroom:1', 'hall:1'],
@@ -294,8 +304,9 @@ export const HOUSE: ZoneSource = {
   map: {
     bedroom: { x: 0, y: 2.2, w: 3, h: 1.9 },
     hall: { x: 3.4, y: 2.5, w: 3.8, h: 1.6 },
-    staircase: { x: 7.6, y: 2.2, w: 2.2, h: 4.5 },
-    attic: { x: 10.2, y: 0.3, w: 6.8, h: 1.6 },
+    // La cage de l'escalier monte du rez-de-chaussée au grenier, qui est au-dessus de l'étage.
+    staircase: { x: 7.6, y: 0.3, w: 2.2, h: 6.4 },
+    attic: { x: 3.4, y: 0.4, w: 3.8, h: 1.6 },
     living: { x: 10.2, y: 4.9, w: 2.2, h: 1.8 },
     kitchen: { x: 12.8, y: 4.9, w: 2.4, h: 1.8 },
     laundry: { x: 15.6, y: 4.4, w: 2.4, h: 2.3 },

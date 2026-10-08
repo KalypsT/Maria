@@ -222,7 +222,7 @@ export const StoryFlag = {
   NannyWake: 'nanny.wake',
   /**
    * Quelques mois plus tard (D-119, comme D-43 et D-69) : Céleste a encore grandi (phase de
-   * croissance 4). Le niveau 8, le monde de Maria, commencera ainsi.
+   * croissance 4). C'est un soir : le niveau 8, le monde de Maria, commence (D-139).
    */
   GrownFourth: 'growth.4',
   /**
@@ -230,6 +230,44 @@ export const StoryFlag = {
    * gare : il quitte la salle pour le tourne-disque du grenier.
    */
   RecordAdventures: 'record.adventures',
+  /**
+   * Le niveau 8 (D-138, D-139) : le premier soir rejoué sans Maria. Céleste s'est assise sur le
+   * tapis vide, là où elles jouaient.
+   */
+  FinaleRug: 'finale.rug',
+  /** Elle a refait le berceau vide, défait depuis le premier matin. */
+  FinaleCradle: 'finale.cradle',
+  /** Au lit : maman est venue dire bonne nuit. */
+  FinaleGoodnight: 'finale.goodnight',
+  /** La nuit : les lumières éteintes, le berceau vide s'éclaire. */
+  FinaleNight: 'finale.night',
+  /**
+   * Le berceau vide, la nuit (D-141) : Céleste y est passée, dans le monde de Maria ; elle se
+   * retrouve dans le berceau devenu immense.
+   */
+  FinaleEntered: 'finale.entered',
+  /** Dans la chambre immense, la boîte à musique s'est mise à jouer : la berceuse (D-141). */
+  FinaleMusicBox: 'finale.music-box',
+  /** Du dessus de l'armoire, Céleste a suivi les étoiles : le ciel de la chambre (D-142). */
+  FinaleSky: 'finale.sky',
+  /** Par la petite porte du grenier, la chambre grande (D-143). */
+  FinaleBig: 'finale.big',
+  /** Par la porte de la chambre grande, la vraie chambre, la nuit : Maria dort dans son berceau. */
+  FinaleHome: 'finale.home',
+  /** Céleste a pris Maria dans ses bras (D-143) : le berceau est vide. */
+  FinaleFound: 'finale.found',
+  /** Le cercle s'est refermé : Céleste sur son lit, Maria à côté d'elle. */
+  FinaleTogether: 'finale.together',
+  /** Le matin (D-144) : Céleste se réveille, Maria dans les bras. */
+  FinaleMorning: 'finale.morning',
+  /** Réveillée : Maria assise à côté d'elle sur le lit ; une étincelle sur le tapis. */
+  FinaleAwake: 'finale.awake',
+  /** Sur le tapis, comme le premier soir : le cœur, le livre commence… et s'efface. */
+  FinalePlayed: 'finale.played',
+  /** Maria rangée avec soin sur l'étagère du surmeuble (là où était la couverture) ; le câlin. */
+  FinaleShelved: 'finale.shelved',
+  /** Céleste est sortie par la porte : le dernier plan, sur Maria (D-144). */
+  FinaleGone: 'finale.gone',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -312,6 +350,26 @@ export const STORY_TIMING = {
   monthsFadeInMs: 3200,
   /** Court souvenir (D-68) : la vignette, apparition et disparition comprises. */
   flashbackMs: 7000,
+  /** Le matin (D-144) : la bulle du livre du soir, qui commence… et s'efface vite. */
+  fadingBookMs: 1100,
+  /** Le dernier plan : la vue reste sur Maria, puis un très léger signe du monde étrange. */
+  lastShotMs: 2600,
+  glimmerMs: 2800,
+} as const;
+
+/**
+ * L'écran de fin (D-145), sans texte : Maria seule sur son étagère. Il apparaît lentement ; après
+ * `continueAfterMs`, un petit rond invite à continuer (un toucher, une touche) : l'accueil.
+ * PROVISOIRE.
+ */
+export const END_SCREEN = {
+  fadeInMs: 2400,
+  /** Quelques scintillements qui passent près de Maria, puis plus rien. */
+  sparkles: 5,
+  sparkleMs: 2600,
+  continueAfterMs: 5000,
+  /** L'image de Maria (fournie par l'utilisateur, D-31), par rapport à la racine du site. */
+  mariaImage: 'art/maria.png',
 } as const;
 
 /** Période du petit mouvement en boucle des personnages (ms), D-37. */

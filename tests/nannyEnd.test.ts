@@ -49,9 +49,9 @@ describe('la fin du niveau 7 : le réveil, le retour, la phase 4 (D-119)', () =>
     const grow = eden.steps.findIndex((s) => s.do === 'flag' && s.id === F.GrownFourth);
     expect(grow).toBeGreaterThan(order.lastIndexOf('fadeOut'));
     expect(grow).toBeLessThan(order.lastIndexOf('room'));
-    // Le niveau 8 reste ouvert : une bulle « ? » (PLACEHOLDER), la dernière.
+    // La dernière bulle : Maria qui manque ; le soir du niveau 8 suit (D-139).
     const last = [...eden.steps].reverse().find((s) => s.do === 'thought');
-    expect(last).toMatchObject({ do: 'thought', icon: 'question' });
+    expect(last).toMatchObject({ do: 'thought', icon: 'maria-missing' });
   });
 
   it('le jour revient au réveil ; le train roule le temps de la scène', () => {

@@ -540,28 +540,34 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
     },
     pillar(a, r) {
       const { ctx } = a;
-      // Pilier de fonte de la marquise (plein), un chapiteau en haut ; sous la partie pleine, sa
-      // colonne fine (fond) descend jusqu'au quai : on passe dessous, il tient (D-80).
-      const cx = r.x + r.w / 2;
-      const ground = groundRow(a, cx, (r.y + r.h) / T) * T;
-      if (ground > r.y + r.h) {
-        ctx.fillStyle = IRON;
-        ctx.fillRect(cx - 2.5, r.y + r.h, 5, ground - r.y - r.h);
-        ctx.fillRect(cx - 5, ground - 5, 10, 5);
-        ctx.beginPath();
-        ctx.moveTo(r.x + 1, r.y + r.h);
-        ctx.lineTo(r.x + r.w - 1, r.y + r.h);
-        ctx.lineTo(cx + 2.5, r.y + r.h + 6);
-        ctx.lineTo(cx - 2.5, r.y + r.h + 6);
-        ctx.fill();
-        ctx.fillStyle = IRON_LIGHT;
-        ctx.fillRect(cx - 2.5, r.y + r.h + 6, 1, ground - r.y - r.h - 11);
+      // Grand panneau d'affichage du quai (plein, D-135) : un cadre de fonte, une affiche de
+      // voyage ; sous la partie pleine, ses deux pieds (fond) descendent jusqu'au quai : on passe
+      // entre eux, il tient.
+      const ground = groundRow(a, r.x + r.w / 2, (r.y + r.h) / T) * T;
+      ctx.fillStyle = IRON;
+      for (const x of [r.x + 2, r.x + r.w - 5]) {
+        ctx.fillRect(x, r.y + r.h - 4, 3, ground - r.y - r.h + 4);
+        ctx.fillRect(x - 2, ground - 3, 7, 3);
       }
       tileShape(a, r, IRON, IRON_LIGHT);
+      // L'affiche : un ciel, la mer, un soleil (la station balnéaire, plus tard).
+      const poster = { x: r.x + 3, y: r.y + 6, w: r.w - 6, h: r.h - 12 };
+      ctx.fillStyle = '#f3e6c8';
+      ctx.fillRect(poster.x, poster.y, poster.w, poster.h);
+      ctx.fillStyle = '#9fc6dc';
+      ctx.fillRect(poster.x + 2, poster.y + 2, poster.w - 4, poster.h * 0.45);
+      ctx.fillStyle = '#4f87a8';
+      ctx.fillRect(poster.x + 2, poster.y + 2 + poster.h * 0.45, poster.w - 4, poster.h * 0.2);
+      ctx.fillStyle = '#e8b23a';
+      ctx.beginPath();
+      ctx.arc(poster.x + poster.w / 2, poster.y + poster.h * 0.25, poster.w / 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#c96a5a';
+      for (let k = 0; k < 3; k++) {
+        ctx.fillRect(poster.x + 4, poster.y + poster.h * (0.75 + k * 0.07), poster.w - 8, 2);
+      }
       ctx.fillStyle = IRON_LIGHT;
       ctx.fillRect(r.x - 2, r.y + 2, r.w + 4, 3);
-      ctx.fillStyle = 'rgba(0,0,0,0.18)';
-      ctx.fillRect(r.x + r.w - 4, r.y + 5, 3, r.h - 5);
     },
     footbridge(a, r) {
       const { ctx } = a;
@@ -1034,18 +1040,14 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
     },
     tallcabinet(a, r) {
       const { ctx } = a;
-      // Haut placard mural (plein, D-81) : vissé au mur sur deux équerres (on passe dessous) ;
-      // dessous, posé au sol, un porte-parapluies (fond).
+      // Haute armoire (pleine, D-81) sur un haut piètement ouvert (D-135) : deux montants jusqu'au
+      // sol et une traverse (on passe dessous) ; dessous, posé au sol, un porte-parapluies (fond).
       const ground = groundRow(a, r.x + r.w / 2, (r.y + r.h) / T) * T;
       ctx.fillStyle = WOOD_DARK;
-      for (const x of [r.x + 2, r.x + r.w - 2]) {
-        const dir = x < r.x + r.w / 2 ? 1 : -1;
-        ctx.beginPath();
-        ctx.moveTo(x, r.y + r.h);
-        ctx.lineTo(x + dir * 8, r.y + r.h);
-        ctx.lineTo(x, r.y + r.h + 10);
-        ctx.fill();
+      for (const x of [r.x + 1, r.x + r.w - 4]) {
+        ctx.fillRect(x, r.y + r.h - 2, 3, ground - r.y - r.h + 2);
       }
+      ctx.fillRect(r.x + 1, r.y + r.h + (ground - r.y - r.h) * 0.45, r.w - 2, 2);
       if (ground > r.y + r.h + 2 * T) {
         const cx = r.x + r.w / 2;
         ctx.fillStyle = '#6d86c2';

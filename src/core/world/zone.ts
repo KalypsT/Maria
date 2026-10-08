@@ -1,6 +1,14 @@
 import { TILE_SIZE as T } from '../../config/display';
 import { DOOR_REACH_TILES } from '../../config/world';
-import { Tile, tileAt, type LevelData, type LevelDoor, type LevelExit } from '../level/LevelData';
+import {
+  EntityType,
+  Tile,
+  tileAt,
+  type LevelData,
+  type LevelDoor,
+  type LevelEntity,
+  type LevelExit,
+} from '../level/LevelData';
 import { parseAsciiLevel } from '../level/parseAsciiLevel';
 import { highTide } from '../level/tide';
 import type { Box } from '../physics/gridCollision';
@@ -189,6 +197,23 @@ export function isStrangeRoom(level: LevelData): boolean {
  */
 export function isMappedRoom(level: LevelData): boolean {
   return !isStrangeRoom(level) || level.meta.mapped === 'yes';
+}
+
+/**
+ * La veilleuse d'une salle où l'histoire fait arriver Céleste (le point de retour, D-34) : la plus
+ * proche de l'arrivée (D-141 ; avant, la première lue, qui pouvait être à l'autre bout de la salle).
+ */
+export function returnLantern(level: LevelData, col: number, row: number): LevelEntity | null {
+  let best: LevelEntity | null = null;
+  let distance = Infinity;
+  for (const e of level.entities) {
+    const d = Math.hypot(e.col - col, e.row - row);
+    if (e.type === EntityType.Checkpoint && d < distance) {
+      best = e;
+      distance = d;
+    }
+  }
+  return best;
 }
 
 /** La rue et le quartier (D-60) : dehors, de jour (`; @world: street`). */

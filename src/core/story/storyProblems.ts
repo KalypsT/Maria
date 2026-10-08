@@ -7,6 +7,7 @@ import type { Zone } from '../world/zone';
 import { propBox } from './PropStage';
 import {
   CHARACTER_KINDS,
+  holdsMaria,
   WALL_PROP_KINDS,
   WINDOW_PROP_KINDS,
   type FlagCondition,
@@ -34,7 +35,8 @@ function conditionFlags(when: FlagCondition): string[] {
  * - salles et positions existantes ;
  * - chaque déclencheur se désactive lui-même (il note une étape que sa condition exclut) ;
  * - Céleste n'est déplacée ou ne change de salle que dans le noir (entre un fondu au noir et le
- *   retour de l'image), debout sur un sol ;
+ *   retour de l'image), debout sur un sol ; Maria n'arrive dans ses bras et n'en repart que dans le
+ *   noir, et jamais à la fin d'un script (D-143) ;
  * - les étapes des conditions sont notées par un déclencheur ;
  * - les objets reposent sur une surface.
  */
@@ -119,6 +121,8 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
       problems.push(`${what} : ne se désactive pas (rejoué sans fin)`);
     }
     let dark = false;
+    let holding = false;
+    let gone = false;
     let room = t.room;
     for (const step of t.steps) {
       if (step.do === 'memory' && !isMemory(step.id) && !isRecordSlot(step.id)) {
@@ -134,6 +138,30 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
         }
       } else if (step.do === 'toggle' && !dark) {
         problems.push(`${what} : étape réversible ${step.id} sous les yeux du joueur`);
+      } else if (step.do === 'pose') {
+        // Maria dans les bras (D-143) : elle n'y arrive et n'en part que dans le noir.
+        const holds = holdsMaria(step.pose);
+        if (holds !== holding && !dark) {
+          problems.push(`${what} : Maria prise ou posée sous les yeux du joueur`);
+        }
+        holding = holds;
+      } else if (step.do === 'end') {
+        // La fin du jeu (D-145) : dans le noir, la dernière étape ; l'accueil suit.
+        if (!dark) {
+          problems.push(`${what} : la fin sous les yeux du joueur`);
+        }
+        if (step !== t.steps.at(-1)) {
+          problems.push(`${what} : des étapes après la fin`);
+        }
+        if (!zone.rooms.has(step.room)) {
+          problems.push(`${what} : salle ${step.room} inconnue`);
+        }
+      } else if (step.do === 'gone') {
+        // Céleste sortie de la salle (D-144) : dans le noir, et une autre salle la ramène.
+        if (!dark) {
+          problems.push(`${what} : Céleste disparaît sous les yeux du joueur`);
+        }
+        gone = true;
       } else if (step.do === 'fadeOut') {
         dark = true;
       } else if (step.do === 'fadeIn') {
@@ -144,6 +172,7 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
         }
         if (step.do === 'room') {
           room = step.room;
+          gone = false;
           if (t.on === 'leave') {
             problems.push(`${what} : changement de salle en quittant la salle`);
           }
@@ -163,8 +192,16 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
         }
       }
     }
-    if (dark) {
+    // La fin du jeu (D-145) mène à l'accueil : elle se termine dans le noir, sans Céleste.
+    const ending = t.steps.at(-1)?.do === 'end';
+    if (dark && !ending) {
       problems.push(`${what} : se termine dans le noir`);
+    }
+    if (holding) {
+      problems.push(`${what} : se termine avec Maria dans les bras`);
+    }
+    if (gone && !ending) {
+      problems.push(`${what} : se termine sans Céleste`);
     }
   }
   for (const prop of story.props) {

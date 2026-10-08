@@ -185,11 +185,15 @@ export class RunState {
     this.events = RunEvent.None;
     const p = this.params;
     // L'eau (D-97) : Céleste n'y entre jamais ; elle est ramenée au bord, la peur monte d'un cran
-    // (au dernier cran, elle s'évanouit comme d'ordinaire).
+    // (au dernier cran, elle s'évanouit comme d'ordinaire). Le vide de la nuit (D-142) : ramenée
+    // de même, sans peur.
     if (touchesTile(this.level, player, Tile.Water)) {
-      this.fear++;
-      this.decaySteps = 0;
-      this.events |= RunEvent.FearChanged | RunEvent.Splashed;
+      this.events |= RunEvent.Splashed;
+      if (this.level.meta.void !== 'night') {
+        this.fear++;
+        this.decaySteps = 0;
+        this.events |= RunEvent.FearChanged;
+      }
       if (this.fear >= p.fearMax) {
         this.startFaint(FaintCause.Fear);
       } else {
@@ -202,6 +206,7 @@ export class RunState {
       grounded &&
       (combatEvents & CombatEvent.Hurt) === 0 &&
       this.bothFeetDown(player) &&
+      !this.onFleeting(player) &&
       !touchesHazard(this.level, player)
     ) {
       const footing = (this.footing ??= { x: 0, y: 0, level: this.level });
@@ -253,6 +258,28 @@ export class RunState {
       return tile === Tile.Solid || tile === Tile.OneWay;
     };
     return ground(player.x + 1) && ground(player.x + player.width - 1);
+  }
+
+  /**
+   * Debout sur ce qui peut s'effacer ou s'éteindre (D-111, D-140) : ce n'est jamais un appui retenu
+   * (D-142), sinon Céleste y reviendrait après une chute, dans le vide, et retomberait.
+   */
+  private onFleeting(player: Box): boolean {
+    const groups = this.level.erase?.groups;
+    if (!groups) {
+      return false;
+    }
+    const row = Math.round((player.y + player.height) / T);
+    const left = Math.floor((player.x + 1) / T);
+    const right = Math.floor((player.x + player.width - 1) / T);
+    for (const g of groups) {
+      for (const r of g.rects) {
+        if (row >= r.row && row < r.row + r.height && right >= r.col && left < r.col + r.width) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   /** Déclenche un évanouissement (outil de debug : déclenchement d'événements). */
