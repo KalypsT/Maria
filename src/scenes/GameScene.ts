@@ -94,6 +94,8 @@ import { FlashbackView } from '../ui/FlashbackView';
 import { Hud } from '../ui/Hud';
 import { showEndScreen } from '../ui/EndScreen';
 import { ShellJarView } from './ShellJarView';
+import { HideoutView } from './HideoutView';
+import { hideAt } from '../core/fx/hideouts';
 import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
 import { PauseMenu } from '../ui/PauseMenu';
 import {
@@ -405,6 +407,8 @@ export class GameScene extends Phaser.Scene {
   private worldView!: WorldView;
   /** Le bocal à coquilles de la chambre (D-148). */
   private shellJar!: ShellJarView;
+  /** Les cachettes de la salle (D-148), au premier plan. */
+  private hideouts!: HideoutView;
   private hud!: Hud;
   /** Courts souvenirs (D-68). */
   private flashbackView!: FlashbackView;
@@ -646,8 +650,10 @@ export class GameScene extends Phaser.Scene {
     this.combatView.setArt(this.artScale, this.palette());
     this.worldView = new WorldView(this, this.run, this.pickups);
     this.shellJar = new ShellJarView(this);
+    this.hideouts = new HideoutView(this);
     this.worldView.setArt(this.artScale, this.strangeWorld || isStrangeRoom(this.level));
     this.shellJar.load(this.level.id, this.shellCount(), this.artScale);
+    this.hideouts.load(this.level, this.artScale, this.story.timeOfDay() === 'evening');
     this.showCables();
     this.trainView = new TrainView(this, this.combat);
     this.trainView.setArt(this.artScale);
@@ -1006,6 +1012,7 @@ export class GameScene extends Phaser.Scene {
     this.shiftView.render(this.time.now, this.puppet.x, this.puppet.y - box.height / 2, this.erase);
     this.lullaby.render(this.time.now, this.erase);
     this.worldView.render();
+    this.hideouts.update(box, this.game.loop.delta);
     this.noticeShells();
     this.dust.update();
     const hintTarget = this.hintTarget;
@@ -1574,6 +1581,11 @@ export class GameScene extends Phaser.Scene {
       if (item.kind !== PickupKind.Shell || item.taken || item.seen) {
         continue;
       }
+      // Une coquille dans une cachette (D-148) ne se voit que découverte.
+      const hide = hideAt(this.level, item.col, item.row);
+      if (hide >= 0 && (this.hideouts.alphas[hide] ?? 1) > 0.5) {
+        continue;
+      }
       const x = (item.col + 0.5) * TILE_SIZE;
       const y = (item.row + 0.5) * TILE_SIZE;
       if (
@@ -1917,6 +1929,7 @@ export class GameScene extends Phaser.Scene {
     this.applyAbilities();
     this.worldView.rebuild();
     this.shellJar.load(level.id, this.shellCount(), this.artScale);
+    this.hideouts.load(level, this.artScale, this.story.timeOfDay() === 'evening');
     this.showCables();
     this.props.load(this.story.data.props, level.id, this.story.flags);
     this.storyView.rebuild();
@@ -2063,6 +2076,7 @@ export class GameScene extends Phaser.Scene {
     this.drawnStrange = isStrangeRoom(this.level);
     this.worldView.setArt(this.artScale, this.strangeWorld || isStrangeRoom(this.level));
     this.shellJar.load(this.level.id, this.shellCount(), this.artScale);
+    this.hideouts.load(this.level, this.artScale, this.story.timeOfDay() === 'evening');
     this.storyView.setArt(this.artScale, this.artImages());
     this.combatView.setArt(this.artScale, this.palette());
     this.trainView.setArt(this.artScale);

@@ -101,3 +101,7 @@ Détourage essayé avec `scripts/art-cutout.py` : propre du premier coup. La spi
 ## Les choix de l'utilisateur
 
 Les recommandations, sauf trois points : aucune coquille dans un lieu sans retour (pour pouvoir tout récupérer après la fin), pas de voyage rapide pour l'instant, des noms fixes sans migration (aucune vraie partie n'existe). Le détail et le plan en 6 PR : **D-148**.
+
+## Après la PR 4
+
+Les intentions sont dans les salles (`; @shell:`) et vérifiées par les tests. Page « Ma maison » : 15 coquilles (maison 8, jardin 7), 6 revisites ; les lieux sans retour n'en ont plus. Le quartier, la gare, le train et la mer : PR 5 et 6.

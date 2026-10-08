@@ -7,8 +7,6 @@
 ; une trouvaille. Sorties : (1) vers la maison, (2) vers le jardin renversé ; porte (3) vers la
 ; rue d'autrefois (îlot 2), ouverte une fois le cube jaune trouvé.
 ; @name: La chambre d'autrefois
-; @shell: nanny-bed-shelf 61 4
-; @shell: nanny-bed-wardrobe 36 36
 ; @world: strange
 ; @mapped: yes
 ; @music: strange
@@ -63,7 +61,7 @@
 #............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#
 #............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#
 #............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#
-#............!vvvvvvvvvvvvvvvvvvvv..........................bS....!.!......#
+#............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#
 #............!vvvvvvvvvvvvvvvvvvvv..........................bbb...!.!......#
 2............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#
 2............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#
@@ -95,7 +93,7 @@
 #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbb....bbbbbbbbbbbbbb................!#
 #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbb....bbbbbbbbbbbbbb..bbbbb..........#
 #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbb....bbbbbbbbbbbbbb..bbbbb..........1
-#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbSbbb....bbbbbbbbbbbbbb..bbbbb...C...P..1
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbb.bbb....bbbbbbbbbbbbbb..bbbbb...C...P..1
 ############################################################################
 ############################################################################
 ############################################################################

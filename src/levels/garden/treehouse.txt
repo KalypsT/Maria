@@ -1,7 +1,7 @@
 ; Jardin : la cabane dans l'arbre (D-46). Le saut mural s'y trouve, et une petite cheminée pour l'essayer.
 ; Refaite (D-76) : un toit en appentis, une lanterne, les dessins de Céleste au mur.
 ; @name: Cabane
-; @shell: treehouse-chest 22 3
+; @shell: treehouse-chest 22 3 easy wall-jump
 ; @icon: house
 ; @wall: planks
 ; @ambient: #3a3228

@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Les coquilles** (les trouvailles revues, D-148) : audit fait (`docs/COQUILLES.md`), choix de l'utilisateur et plan validés en 6 PR (le système ; la carte et le cahier ; la boîte à coquilles et la fin ; la liste vérifiée, la maison et le jardin ; le quartier et la gare ; le train et la mer). **PR 1 faite : le système** (les noms fixes, la coquille posée et son scintillement, le compteur au ramassage, le debug), **PR 2 faite : la carte et le cahier** (les coquilles vues en pointillés, « n/N » du lieu, la page qui se colorie) et **PR 3 faite : le bocal à coquilles dans la chambre et le petit escargot de la fin**, sur `ccr-c9ed5a1e-fyh3vf`. Suite : la PR 4 (la liste vérifiée, les coquilles retirées des lieux sans retour, la maison et le jardin replacés). Rien au bout des défis de la nounou pour l'instant (choix de l'utilisateur).
+**Les coquilles** (les trouvailles revues, D-148) : audit fait (`docs/COQUILLES.md`), choix de l'utilisateur et plan validés en 6 PR (le système ; la carte et le cahier ; la boîte à coquilles et la fin ; la liste vérifiée, la maison et le jardin ; le quartier et la gare ; le train et la mer). **PR 1 faite : le système** (les noms fixes, la coquille posée et son scintillement, le compteur au ramassage, le debug), **PR 2 faite : la carte et le cahier** (les coquilles vues en pointillés, « n/N » du lieu, la page qui se colorie) et **PR 3 faite : le bocal à coquilles dans la chambre et le petit escargot de la fin** et **PR 4 faite : la liste vérifiée (l'intention de chaque coquille, un seul test), les cachettes et les traces de bave, les coquilles retirées des lieux sans retour, la maison (8) et le jardin (7) replacés**, sur `ccr-c9ed5a1e-fyh3vf`. Suite : la PR 5 (le quartier et la gare). Rien au bout des défis de la nounou pour l'instant (choix de l'utilisateur).
 
 **Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139) , **PR 2 faite : la berceuse, le moteur et le parcours d'essai 17** (D-140), **PR 3 faite : la chambre immense, le lit et le coffre** (D-141), **PR 4 faite : le ciel de la chambre** (D-142), **PR 5 faite : la chambre grande, la vraie chambre la nuit, Maria retrouvée** (D-143), **PR 6 faite : le matin et le dernier plan** (D-144) et **PR 7 faite : après la fin** (D-145), sur `ccr-06b9800a-238lrq`. **Le niveau 8 est complet : le jeu se joue du premier soir à la fin.** Suite : **essai sur téléphone** (le parcours 17, tout le monde de Maria, toute la fin) ; à fournir : le thème de fin (`ending`), le jingle de Maria, Céleste en phase 4 illustrée.
 
@@ -33,6 +33,15 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les coquilles, PR 4 : la liste vérifiée, la maison et le jardin (D-148)
+
+- Chaque coquille porte son intention dans sa ligne `; @shell:` (difficulté exacte, capacités sans lesquelles elle est impossible, croissance) ; un seul test par lieu la vérifie avec la vraie simulation (`shellsHome.test.ts`). Il a corrigé trois réglages : les tuteurs du potager (moyens sans escalade), le haut du vieux mur (facile), la glycine (facile).
+- Les cachettes (`; @hide:`) : un décor devant Céleste qui s'efface quand elle passe derrière ; le drap du grenier, la glycine de la pergola. Les traces de bave argentées y mènent.
+- Retirées : les 17 coquilles de la maison de la nounou et celle du passage d'ombres.
+- Nouvelles : le manteau de la cheminée (la première coquille du jeu, sans capacité), sous le drap du grenier, le haut du vieux mur, le pot sous la glycine. Page « Ma maison » : 15 coquilles, 6 revisites. Total du jeu : 43 pour l'instant.
+- Vérifié dans Chromium : le manteau, le drap et sa trace, la glycine (dense : la coquille ne se voit pas au travers) et sa trace sur le poteau, le vieux mur.
+- [ ] À vérifier sur téléphone : les traces de bave se remarquent-elles ? Le drap et la glycine s'effacent-ils au bon moment, sans gêner ? La première coquille sur le manteau : remarquée dès le premier matin ?
 
 ### Les coquilles, PR 3 : le bocal et le petit escargot de la fin (D-148)
 

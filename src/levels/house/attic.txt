@@ -3,7 +3,10 @@
 ; (sortie 2). Sous un toit à deux pans, le faîte à gauche : la charpente (chaque poutre sur son
 ; poteau), la fenêtre de toit dans le pan.
 ; @name: Grenier
-; @shell: attic-ridge 6 5
+; @shell: attic-ridge 6 5 medium
+; @shell: attic-sheet 38 19 easy
+; @hide: sheet 36 15 4 5
+; @decor: slimetrail 39 19 3 1
 ; @icon: roof
 ; @ambient: #2c2a31
 ; @note: poutres de la charpente jusqu'au recoin sous le faîte : secret de plateforme, difficulté moyenne (D-27).
@@ -43,6 +46,6 @@
 #......................................................#
 2..............................bbbb....................1
 2..............................bbbb.......bbbbb........1
-2...........tttttt......e......bbbb.......bbbbb....C.P.1
+2...........tttttt......e......bbbb...S...bbbbb....C.P.1
 ########################################################
 ########################################################

@@ -46,6 +46,11 @@ export interface LevelData {
   readonly doors: readonly LevelDoor[];
   /** Habillage (D-28) : meubles et éléments dessinés, déclarés par `; @decor:` (vide : tuiles). */
   readonly decor: readonly LevelDecor[];
+  /**
+   * Cachettes (D-148) : un décor au premier plan qui cache une niche et s'efface quand Céleste passe
+   * derrière ; déclarées par `; @hide:` (absent : aucune).
+   */
+  readonly hides?: readonly LevelHide[];
   /** Câbles (D-65) : le crochet du parapluie s'y accroche ; déclarés par `; @cable:`. */
   readonly cables: readonly LevelCable[];
   /** Voies ferrées (D-66) : un train y passe et son souffle repousse ; déclarées par `; @train:`. */
@@ -267,6 +272,15 @@ export interface LevelExit {
  * Porte de façade (D-61) : une sortie au milieu d'une salle (la porte d'un lieu, dans la rue), qu'on
  * franchit avec Agir. Même numérotation que les sorties latérales (un chiffre par salle).
  */
+/** Cachette (D-148) : son dessin (`sheet`, `wisteria`…) et ses tuiles. Sans collision. */
+export interface LevelHide {
+  readonly kind: string;
+  readonly col: number;
+  readonly row: number;
+  readonly width: number;
+  readonly height: number;
+}
+
 export interface LevelDoor {
   readonly id: number;
   /** Tuile où Céleste se tient devant la porte (ses pieds au bas de cette tuile). */
@@ -294,6 +308,24 @@ export interface LevelEntity {
   readonly row: number;
   /** Nom fixe d'une coquille (`; @shell:`, D-148) : son identifiant dans la sauvegarde. */
   readonly name?: string;
+  /** Intention d'une coquille (D-148), vérifiée par les tests. */
+  readonly intent?: ShellIntent;
+}
+
+/**
+ * Intention d'une coquille (D-148), dans sa ligne `; @shell:` : sa difficulté exacte au moment du
+ * jeu où on doit l'atteindre ; les capacités sans lesquelles elle est impossible ; `growth` :
+ * impossible avant la croissance ; `crawl` : dans un passage bas (vérifiée en glissant par la
+ * simulation, pas par l'analyse des surfaces) ; `from` : d'où on part (sinon : les entrées de la
+ * salle) ; `high` : à marée haute.
+ */
+export interface ShellIntent {
+  readonly difficulty: 'easy' | 'medium' | 'hard';
+  readonly needs: readonly string[];
+  readonly growth: boolean;
+  readonly crawl: boolean;
+  readonly from: TilePos | null;
+  readonly high: boolean;
 }
 
 export interface TilePos {

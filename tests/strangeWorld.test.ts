@@ -139,20 +139,8 @@ describe('monde étrange (D-34)', () => {
     }
   });
 
-  it('la trouvaille du passage est difficile, jamais nécessaire', { timeout: TIMEOUT }, () => {
-    const secret = level('shadows').entities.find((e) => e.type === EntityType.Shell);
-    expect(secret).toBeDefined();
-    if (secret) {
-      const at = nodeAt('shadows', secret.col, secret.row);
-      expect(
-        reachable(strangeGraph(byDifficulty('medium')), arrival()).has(at),
-        'trop facile',
-      ).toBe(false);
-      expect(
-        reachable(strangeGraph(byDifficulty('hard')), arrival()).has(at),
-        'trop difficile',
-      ).toBe(true);
-    }
+  it('aucune coquille dans le passage d’ombres : on n’y revient jamais (D-148)', () => {
+    expect(level('shadows').entities.filter((e) => e.type === EntityType.Shell)).toEqual([]);
   });
 
   it('une seule veilleuse, dans le passage d’ombres', () => {

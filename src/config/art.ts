@@ -140,6 +140,8 @@ export const DECOR_KINDS: Readonly<
   floorplant: { furniture: false },
   /** Poussière qui danse dans un rayon de lumière (animée). */
   dust: { furniture: false },
+  /** Trace de bave d'escargot (D-148), vers une coquille cachée. */
+  slimetrail: { furniture: false },
   /** Papillon de nuit autour d'une lampe, le soir (animé). */
   moth: { furniture: false },
   // Le rez-de-chaussée et le grenier (D-75).
@@ -711,6 +713,18 @@ export const SHELL_ART = {
   /** Au ramassage : la coquille file vers le cahier (ms), puis « n/N » du lieu reste affiché (ms). */
   flyMs: 620,
   countMs: 2200,
+} as const;
+
+/**
+ * Les cachettes (D-148) : un décor au premier plan (`; @hide:`) qui s'efface quand Céleste passe
+ * derrière (à `marginPx` près), pour qu'on la voie toujours (pilier 1). PROVISOIRE.
+ */
+export const HIDEOUT = {
+  fadedAlpha: 0.22,
+  marginPx: 4,
+  fadeTimeMs: 140,
+  /** Devant Céleste (10), derrière le bâton et la vignette. */
+  depth: 10.8,
 } as const;
 
 /**

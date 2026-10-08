@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildZone } from '../src/core/world/zone';
+import { buildZone, isStrangeRoom } from '../src/core/world/zone';
 import { shellTally, zoneShells } from '../src/core/world/shells';
 import { HOUSE } from '../src/levels/house/zone';
 
@@ -15,10 +15,24 @@ describe('les coquilles (D-148)', () => {
       row: 5,
       place: 'house',
     });
-    // Le jardin est sur la page « Ma maison » ; une salle hors de la carte n'a pas de lieu.
+    // Le jardin est sur la page « Ma maison ».
     expect(shells.find((s) => s.room === 'garden-treehouse')?.place).toBe('house');
     expect(shells.find((s) => s.room === 'street')?.place).toBe('street');
-    expect(shells.find((s) => s.room === 'shadows')?.place).toBeNull();
+  });
+
+  it('aucune dans un lieu sans retour : monde étrange, maison de la nounou, dernier niveau', () => {
+    const zone = buildZone(HOUSE);
+    const oneWay = shells.filter((s) => {
+      const level = zone.rooms.get(s.room);
+      return (
+        !level ||
+        isStrangeRoom(level) ||
+        s.room.startsWith('nanny-') ||
+        s.room.startsWith('finale-') ||
+        s.place === null
+      );
+    });
+    expect(oneWay.map((s) => s.name)).toEqual([]);
   });
 
   it('trouvées et en tout, par lieu', () => {

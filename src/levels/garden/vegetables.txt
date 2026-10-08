@@ -3,8 +3,8 @@
 ; Au loin, derrière (D-133) : l'allée du fond, sa clôture, sa remise et le vieux mur (on y passe par
 ; le toit de la pergola de la terrasse).
 ; @name: Potager
-; @shell: vegetables-beanpoles 41 5
-; @shell: vegetables-birdhouse 60 7
+; @shell: vegetables-beanpoles 41 5 medium
+; @shell: vegetables-birdhouse 60 7 medium umbrella
 ; @icon: flower
 ; @world: garden
 ; @difficulty: medium

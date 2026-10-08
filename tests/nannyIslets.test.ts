@@ -42,8 +42,6 @@ interface Islet {
   /** Portes cachées tant que l'objet n'est pas retrouvé. */
   readonly shortcuts: readonly (readonly [string, number])[];
   /** Trouvailles neuves, dont celles enfermées dans le présent (ouvertes dans le souvenir). */
-  readonly secrets: number;
-  readonly closed: readonly string[];
 }
 const ISLETS: readonly Islet[] = [
   {
@@ -60,8 +58,6 @@ const ISLETS: readonly Islet[] = [
       ['nanny-garden', 2],
       ['nanny-house', 3],
     ],
-    secrets: 4,
-    closed: ['nanny-bed', 'nanny-garden'],
   },
   {
     name: 'l’école et la rue d’autrefois (D-113)',
@@ -79,8 +75,6 @@ const ISLETS: readonly Islet[] = [
       ['nanny-street', 3],
       ['nanny-bed', 3],
     ],
-    secrets: 3,
-    closed: ['nanny-school'],
   },
   {
     name: 'la gare et le train d’autrefois (D-114)',
@@ -98,8 +92,6 @@ const ISLETS: readonly Islet[] = [
       ['nanny-train', 3],
       ['nanny-street', 4],
     ],
-    secrets: 3,
-    closed: ['nanny-station', 'nanny-train'],
   },
   {
     name: 'la plage et le carrousel d’autrefois (D-115)',
@@ -117,8 +109,6 @@ const ISLETS: readonly Islet[] = [
       ['nanny-carousel', 3],
       ['nanny-train', 4],
     ],
-    secrets: 4,
-    closed: ['nanny-beach', 'nanny-carousel'],
   },
 ];
 const ALL = ['nanny-entry', 'nanny-house', ...ISLETS.flatMap((i) => i.rooms)];
@@ -309,27 +299,11 @@ describe('les îlots de mémoire de la maison de la nounou (D-112, D-113)', () =
         }
       });
 
-      it('des trouvailles neuves ; certaines enfermées dans le présent, ouvertes dans le souvenir', () => {
-        const secrets = islet.rooms.flatMap((room) =>
-          level(room)
-            .entities.filter((e) => e.type === EntityType.Shell)
-            .map((e) => ({ room, ...e })),
+      it('aucune coquille : on ne revient jamais chez la nounou (D-148)', () => {
+        const shells = islet.rooms.flatMap((room) =>
+          level(room).entities.filter((e) => e.type === EntityType.Shell),
         );
-        expect(secrets.length).toBe(islet.secrets);
-        const closed = secrets.filter(({ room, col, row }) => {
-          const present = level(room);
-          return [
-            [col - 1, row],
-            [col + 1, row],
-            [col, row - 1],
-          ].every(([c, r]) => tileAt(present, c ?? 0, r ?? 0) === Tile.Solid);
-        });
-        expect(closed.map((s) => s.room).sort()).toEqual([...islet.closed]);
-        for (const { room, col, row } of closed) {
-          const memory = atLayer(level(room), 'memory');
-          expect(tileAt(memory, col, row - 1)).toBe(Tile.Empty);
-          expect(standOn(level(room), { col, row }, null, 'memory')).toBeGreaterThanOrEqual(0);
-        }
+        expect(shells).toEqual([]);
       });
     });
   }

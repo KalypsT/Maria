@@ -4,8 +4,12 @@
 ; buanderie (D-133 : la chambre est à l'étage, à l'autre bout de la maison) ; au bout, la jardinière
 ; (trouvaille, seulement avec le crochet).
 ; @name: Terrasse
-; @shell: terrace-planter 2 8
-; @shell: terrace-table 37 21
+; @shell: terrace-planter 2 8 easy hook
+; @shell: terrace-table 37 21 easy slide crawl
+; @shell: terrace-wisteria 45 15 easy from 8,21
+; @decor: hangingplant 44 10 3 7
+; @hide: wisteria 43 10 5 7
+; @decor: slimetrail 46 17 1 4
 ; @icon: sun
 ; @world: garden
 ; @difficulty: easy
@@ -42,8 +46,8 @@
 #................................................v
 #................................................v
 #................................................v
-#................................................v
-#................................................v
+#............................................S...v
+#...........................................---..v
 #................................................v
 #................................................v
 1..................................bbbbbb........2
