@@ -245,6 +245,10 @@ export class WorldLifeView {
   private readonly fires: Fire[] = [];
   private readonly pendulums: Phaser.GameObjects.Image[] = [];
   private readonly mobiles: Mobile[] = [];
+  /** Tour du mobile (radians), accumulé : il peut tourner plus vite un instant (D-144). */
+  private mobileTurn = 0;
+  private lastLifeMs = -1;
+  private spin = 0;
   private readonly fields: SparkField[] = [];
   private readonly moths: Moth[] = [];
   private readonly drums: Drum[] = [];
@@ -1272,10 +1276,21 @@ export class WorldLifeView {
       .setDepth(SPARK_DEPTH);
     this.moths.push({ image, x: r.x + r.w / 2, y: r.y + r.h / 2 });
   }
+  /**
+   * Le mobile tourne plus vite un instant (le dernier plan, D-144) : 0 au repos, `k` fois plus vite
+   * en plus.
+   */
+  setSpin(k: number): void {
+    this.spin = k;
+  }
+
   /** Mobile, étoiles, poussière, papillon : positions d'après l'heure, sans allocation. */
   private updateRoomLife(nowMs: number): void {
     const cfg = WORLD_LIFE;
-    const turn = (nowMs / cfg.mobile.periodMs) * Math.PI * 2;
+    const dt = this.lastLifeMs < 0 ? 0 : Math.min(100, nowMs - this.lastLifeMs);
+    this.lastLifeMs = nowMs;
+    this.mobileTurn += (dt / cfg.mobile.periodMs) * Math.PI * 2 * (1 + this.spin);
+    const turn = this.mobileTurn;
     for (const mobile of this.mobiles) {
       mobile.bars.forEach((bar, i) => {
         const c = Math.cos(turn + (i * Math.PI) / 2);

@@ -228,12 +228,9 @@ describe('la vraie chambre, la nuit : Maria retrouvée (D-143)', () => {
     expect(circle).toBeGreaterThan(heart);
     // Après le cercle : sur son lit, assise, Maria à côté d'elle.
     expect(found.steps.slice(circle)).toContainEqual({ do: 'pose', pose: 'sit' });
-    // La chambre reste fermée : la nuit, puis Céleste pense à dormir. Le matin viendra (PR 6).
+    // La chambre reste fermée : la nuit, puis Céleste pense à dormir ; le lit mène au matin (D-144).
     expect(director(HOME).lockIcon('bedroom', 1)).toBe('cradle');
     expect(director(TOGETHER).lockIcon('bedroom', 1)).toBe('bed');
-    expect(actions('bedroom', TOGETHER)).toEqual([]);
-    const later = trigger('finale-morning-later');
-    expect(later.repeat).toBe(true);
-    expect(checkCondition(new Set(TOGETHER), later.when)).toBe(true);
+    expect(actions('bedroom', TOGETHER)).toEqual(['finale-morning']);
   });
 });

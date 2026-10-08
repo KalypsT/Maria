@@ -1670,6 +1670,7 @@ export function installDebugOverlay(scene: GameScene): void {
   if (phaseFour) {
     const night = [...phaseFour[1], F.FinaleRug, F.FinaleCradle, F.FinaleGoodnight, F.FinaleNight];
     const sky = [...night, F.FinaleEntered, F.FinaleMusicBox, F.FinaleSky];
+    const together = [...sky, F.FinaleBig, F.FinaleHome, F.FinaleFound, F.FinaleTogether];
     steps.splice(
       steps.indexOf(phaseFour) + 1,
       0,
@@ -1681,9 +1682,14 @@ export function installDebugOverlay(scene: GameScene): void {
         'Histoire : Maria dans son berceau, la vraie chambre (D-143)',
         [...sky, F.FinaleBig, F.FinaleHome],
       ],
+      ['Histoire : Maria retrouvée (D-143)', together],
       [
-        'Histoire : Maria retrouvée (D-143)',
-        [...sky, F.FinaleBig, F.FinaleHome, F.FinaleFound, F.FinaleTogether],
+        'Histoire : le matin, Maria à côté d’elle (D-144)',
+        [...together, F.FinaleMorning, F.FinaleAwake],
+      ],
+      [
+        'Histoire : Maria rangée sur l’étagère (D-144)',
+        [...together, F.FinaleMorning, F.FinaleAwake, F.FinalePlayed, F.FinaleShelved],
       ],
     );
   }

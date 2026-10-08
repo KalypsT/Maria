@@ -118,7 +118,8 @@ import {
 import { STORY_TIMING, StoryFlag, TOWER_CUBES } from '../config/story';
 import { PropStage } from '../core/story/PropStage';
 import { StoryDirector } from '../core/story/StoryDirector';
-import type { TimeOfDay } from '../core/story/story';
+import { holdsMaria, type TimeOfDay } from '../core/story/story';
+import { STRANGE_FX } from '../config/strangeFx';
 import { HOUSE_STORY } from '../levels/house/story';
 import { ISLET_CUBES } from '../levels/nanny/story';
 import type { Box } from '../core/physics/gridCollision';
@@ -383,6 +384,11 @@ export class GameScene extends Phaser.Scene {
   } | null = null;
   /** La tasse que Céleste tient dans le souvenir de la cuisine. */
   private cupImage!: Phaser.GameObjects.Image;
+  /** Céleste est sortie de la salle (D-144) : invisible jusqu'au prochain changement de salle. */
+  private celesteGone = false;
+  /** Le très léger signe du dernier plan (D-144) : début (ms, -1 : aucun) et durée. */
+  private glimmerAtMs = -1;
+  private glimmerMs = 1;
   /** Maria dans les bras de Céleste (D-143) : l'image de Maria assise, tenue devant elle. */
   private heldMaria!: Phaser.GameObjects.Image;
   private readonly mapSeen = new Set<string>();
@@ -526,8 +532,8 @@ export class GameScene extends Phaser.Scene {
         this.storyRoom(room, col, row, facing, returnPoint);
       },
       pose: (pose) => {
-        this.poser.sitting = pose === 'sit';
-        this.poser.holding = pose === 'hold';
+        this.poser.sitting = pose === 'sit' || pose === 'hold-sit';
+        this.poser.holding = holdsMaria(pose);
       },
       think: (icon, ms, by) => {
         this.storyView.think(icon, ms, by);
@@ -566,6 +572,13 @@ export class GameScene extends Phaser.Scene {
         } else {
           this.camera.focus((col + 0.5) * TILE_SIZE, (row + 0.5) * TILE_SIZE);
         }
+      },
+      gone: () => {
+        this.celesteGone = true;
+      },
+      glimmer: (ms) => {
+        this.glimmerAtMs = this.time.now;
+        this.glimmerMs = Math.max(1, ms);
       },
     });
     this.story.setFlags(this.session.data.story.flags);
@@ -981,7 +994,14 @@ export class GameScene extends Phaser.Scene {
     );
     // Monde étrange (D-35) : présage en grimpant, effets, tremblement (visuel seulement).
     const fx = this.fx;
-    fx.setOmen(this.story.omen(this.level.id, this.puppet.x, this.puppet.y - box.height / 2));
+    const glimmer = this.glimmer();
+    fx.setOmen(
+      Math.max(
+        glimmer * STRANGE_FX.glimmerPeak,
+        this.story.omen(this.level.id, this.puppet.x, this.puppet.y - box.height / 2),
+      ),
+    );
+    this.worldLife.setSpin(glimmer * STRANGE_FX.glimmerSpin);
     const view = this.fxView;
     view.setTo(
       camera.x - camera.viewWidth / 2,
@@ -1368,6 +1388,19 @@ export class GameScene extends Phaser.Scene {
     this.reappearAtMs = this.time.now;
   }
 
+  /** Le très léger signe (D-144) : de 0 à 1 et retour, en cloche, pendant sa durée. */
+  private glimmer(): number {
+    if (this.glimmerAtMs < 0) {
+      return 0;
+    }
+    const k = (this.time.now - this.glimmerAtMs) / this.glimmerMs;
+    if (k >= 1) {
+      this.glimmerAtMs = -1;
+      return 0;
+    }
+    return Math.sin(Math.PI * Math.max(0, k));
+  }
+
   /** Voile de l'évanouissement, jauge de peur, transparence de Céleste. */
   private renderRunState(): void {
     // Court souvenir (D-68) : la vignette au-dessus du jeu.
@@ -1403,6 +1436,10 @@ export class GameScene extends Phaser.Scene {
       }
     }
     this.hud.setVeil(veil, this.story.veilShape === 'iris' ? this.irisCenter() : null);
+    if (this.celesteGone) {
+      // Sortie de la salle (D-144) : on ne la voit plus.
+      this.puppet.setAlpha(0);
+    }
   }
 
   respawn(): void {
@@ -1707,6 +1744,12 @@ export class GameScene extends Phaser.Scene {
     const level = this.roomLevel(source);
     this.level = level;
     this.ground = roomGround(level.id);
+    if (this.celesteGone) {
+      // Une autre salle la ramène (D-144).
+      this.celesteGone = false;
+      this.puppet.setAlpha(1);
+    }
+    this.glimmerAtMs = -1;
     this.audio.sfx.setStrange(this.strangeWorld || isStrangeRoom(level));
     this.audio.sfx.stopLoops();
     this.sfxDirector.reset(this.player);
@@ -2655,13 +2698,14 @@ export class GameScene extends Phaser.Scene {
     }
     const facing = this.player.facing;
     const body = this.growth.bodyScale;
+    // Assise (D-144) : le corps descend, Maria avec lui, sur ses genoux.
     this.heldMaria
       .setOrigin(0.5, 1)
       .setScale(1 / this.artScale)
       .setFlipX(facing < 0)
       .setPosition(
         this.puppet.x + facing * (HELD_MARIA_AT.x + HELD_MARIA_AT.xPerBody * body),
-        this.puppet.y + HELD_MARIA_AT.yPerBody * body,
+        this.puppet.y + HELD_MARIA_AT.yPerBody * body + this.poser.pose.bodyY,
       );
   }
 

@@ -256,8 +256,18 @@ export const StoryFlag = {
   FinaleHome: 'finale.home',
   /** Céleste a pris Maria dans ses bras (D-143) : le berceau est vide. */
   FinaleFound: 'finale.found',
-  /** Le cercle s'est refermé : Céleste sur son lit, Maria à côté d'elle (le matin viendra). */
+  /** Le cercle s'est refermé : Céleste sur son lit, Maria à côté d'elle. */
   FinaleTogether: 'finale.together',
+  /** Le matin (D-144) : Céleste se réveille, Maria dans les bras. */
+  FinaleMorning: 'finale.morning',
+  /** Réveillée : Maria assise à côté d'elle sur le lit ; une étincelle sur le tapis. */
+  FinaleAwake: 'finale.awake',
+  /** Sur le tapis, comme le premier soir : le cœur, le livre commence… et s'efface. */
+  FinalePlayed: 'finale.played',
+  /** Maria rangée avec soin sur l'étagère du surmeuble (là où était la couverture) ; le câlin. */
+  FinaleShelved: 'finale.shelved',
+  /** Céleste est sortie par la porte : le dernier plan, sur Maria (D-144). */
+  FinaleGone: 'finale.gone',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -340,6 +350,11 @@ export const STORY_TIMING = {
   monthsFadeInMs: 3200,
   /** Court souvenir (D-68) : la vignette, apparition et disparition comprises. */
   flashbackMs: 7000,
+  /** Le matin (D-144) : la bulle du livre du soir, qui commence… et s'efface vite. */
+  fadingBookMs: 1100,
+  /** Le dernier plan : la vue reste sur Maria, puis un très léger signe du monde étrange. */
+  lastShotMs: 2600,
+  glimmerMs: 2800,
 } as const;
 
 /** Période du petit mouvement en boucle des personnages (ms), D-37. */
