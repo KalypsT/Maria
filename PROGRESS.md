@@ -34,12 +34,12 @@
 
 ### Le dernier niveau, PR 5 : la chambre grande, la vraie chambre la nuit, Maria retrouvée (D-143)
 
-- **La chambre grande** : par la petite porte du grenier du ciel, **la vraie chambre deux fois plus grande** ; on redescend par l'étagère haute, le surmeuble et le bureau jusqu'à la porte. Le berceau sous le mobile : on n'en voit que la couverture. L'étrange s'efface (presque les vraies couleurs, la musique de la maison, plus de couches). Courte et facile.
+- **La chambre grande** : par la petite porte du grenier du ciel, **la vraie chambre deux fois plus grande** ; on redescend par l'étagère haute, le surmeuble et le bureau jusqu'à la porte. Le berceau sous le mobile : on n'en voit que la couverture. L'étrange s'efface (presque les vraies couleurs, plus de couches ; la musique attend le thème de fin). Courte et facile.
 - **La vraie chambre, la nuit** : par la porte, Céleste rentre dans sa chambre ; **Maria dort dans son berceau**.
 - **Maria retrouvée** : Agir sur le berceau ; dans le noir, **Maria dans les bras** (nouvelle pose), **le cœur du prologue**, **le cercle se referme** : Céleste assise sur son lit, Maria à côté d'elle. Agir sur le lit : « ? » (le matin viendra).
 - DEBUG → Histoire : « la chambre grande », « Maria dans son berceau, la vraie chambre », « Maria retrouvée ». Tests : `finaleHome.test.ts`. Vérifié dans Chromium.
 - [ ] À vérifier sur téléphone (DEBUG → Histoire → « le ciel de la chambre », salle `finale-sky`, Agir devant la petite porte ; ou « la chambre grande », salle `finale-big`) : reconnaît-on tout de suite sa chambre, deux fois trop grande ? La descente est-elle trop courte ?
-- [ ] La porte, puis la vraie chambre : le moment où l'on voit Maria dans son berceau se ressent-il ? (À juger aussi : la musique de la maison à la place du thème de fin.)
+- [ ] La porte, puis la vraie chambre : le moment où l'on voit Maria dans son berceau se ressent-il ?
 - [ ] Maria dans les bras : la pose se lit-elle (Maria contre la poitrine) ? Le cœur, le cercle : assez long, trop long ? Céleste assise sur son lit avec Maria à côté : juste, en attendant le matin ?
 
 ### Le dernier niveau, PR 4 : le ciel de la chambre (D-142)
