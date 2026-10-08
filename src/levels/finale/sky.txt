@@ -5,8 +5,8 @@
 ; rideau ouvert du premier soir (le souvenir), puis le rideau fermé de ce soir (le présent), on
 ; bascule entre les deux en plein vol ; sur le rebord, le battant ouvert du souvenir (une
 ; veilleuse après lui) ; on glisse sous le surmeuble, accroché au-dessus du bureau (une
-; veilleuse) ; un saut long jusqu'à l'étagère haute, devant la petite porte du grenier (la suite :
-; la chambre grande, PLACEHOLDER). Tout en bas, le vide de la nuit : une chute ramène au dernier
+; veilleuse) ; un saut long jusqu'à l'étagère haute, devant la petite porte du grenier : derrière,
+; la chambre grande (D-143). Tout en bas, le vide de la nuit : une chute ramène au dernier
 ; appui, sans peur. Ni danger, ni ennemi, ni trouvaille. Facile, sauf l'étagère haute (moyen).
 ; @name: Le ciel de la chambre
 ; @world: strange

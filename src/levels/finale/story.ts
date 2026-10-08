@@ -7,8 +7,9 @@ import type { StoryData, StoryStep, StoryTrigger, TileArea } from '../../core/st
  * sans Maria, dans la chambre. Papa à la porte rappelle l'heure du lit, le tapis est vide, le
  * berceau défait depuis le premier matin ; Céleste le refait, maman vient dire bonne nuit. La nuit,
  * les lumières éteintes, le berceau vide s'éclaire : l'entrée du monde de Maria, la chambre immense
- * (D-141), puis son ciel (D-142). Maria n'est jamais à l'écran ; les parents ne bougent jamais à
- * l'écran.
+ * (D-141), son ciel (D-142), la chambre grande ; par sa porte, la vraie chambre, la nuit : Maria dort
+ * dans son berceau, Céleste la prend dans ses bras (D-143). Maria ne bouge jamais à l'écran ; les
+ * parents non plus.
  */
 
 /** Le tapis, là où Maria était assise le premier soir (D-31) : Céleste s'y assoit, seule. */
@@ -51,6 +52,28 @@ const SKY_ARRIVAL: StoryStep = {
 };
 /** La petite porte du grenier, en haut du mur de droite du ciel de la chambre. */
 const ATTIC_DOOR: TileArea = { col: 155, row: 15, w: 4, h: 5 };
+/** La chambre grande (D-143) : on y arrive par sa petite porte du grenier, sur l'étagère haute. */
+export const BIG_START = { col: 86, row: 15 };
+const BIG_ARRIVAL: StoryStep = {
+  do: 'room',
+  room: 'finale-big',
+  ...BIG_START,
+  facing: -1,
+  returnPoint: true,
+};
+/** La porte de la chambre grande, en bas du mur de droite : derrière, la vraie chambre. */
+const BIG_DOOR: TileArea = { col: 84, row: 34, w: 6, h: 6 };
+/** La vraie chambre, la nuit (D-143) : Céleste entre par sa porte. */
+export const HOME_START = { col: 43, row: 19 };
+const HOME_ARRIVAL: StoryStep = {
+  do: 'room',
+  room: 'bedroom',
+  ...HOME_START,
+  facing: -1,
+  returnPoint: true,
+};
+/** Maria, à côté de Céleste sur son lit, après le cercle (D-143). */
+const MARIA_BED = { col: 10, row: 15 };
 /** Le lit : Agir pour se coucher (le premier soir, D-37). */
 const BED_AREA: TileArea = { col: 7, row: 13, w: 11, h: 3 };
 const BED_SEAT = { col: 12, row: 15 };
@@ -174,7 +197,7 @@ const TRIGGERS: StoryTrigger[] = [
     on: 'interact',
     area: CRADLE_AREA,
     mark: CRADLE_MARK,
-    when: { all: [F.FinaleEntered] },
+    when: { all: [F.FinaleEntered], none: [F.FinaleHome] },
     lock: true,
     steps: [
       { do: 'sparkle', area: CRADLE_GLOW, ms: S.reomenPeakMs + 300 },
@@ -233,14 +256,101 @@ const TRIGGERS: StoryTrigger[] = [
     steps: [{ do: 'fadeOut', ms: S.fadeMs }, SKY_ARRIVAL, { do: 'fadeIn', ms: S.fadeMs }],
   },
   {
-    // PLACEHOLDER : la petite porte du grenier, au bout du ciel de la chambre ; la suite (la
-    // chambre grande, D-138) viendra. « ? ».
-    id: 'finale-door-later',
+    // La petite porte du grenier, au bout du ciel de la chambre (D-143) : elle s'ouvre ; derrière,
+    // la chambre grande.
+    id: 'finale-big',
     room: 'finale-sky',
     on: 'interact',
     area: ATTIC_DOOR,
     mark: { col: 157, row: 14 },
-    when: { all: [F.FinaleSky] },
+    when: { all: [F.FinaleSky], none: [F.FinaleBig] },
+    lock: true,
+    steps: [
+      { do: 'fadeOut', ms: S.fadeMs },
+      { do: 'flag', id: F.FinaleBig },
+      BIG_ARRIVAL,
+      { do: 'fadeIn', ms: S.fadeMs },
+    ],
+  },
+  {
+    // Une partie reprise dans le ciel après la chambre grande : la petite porte y ramène.
+    id: 'finale-big-again',
+    room: 'finale-sky',
+    on: 'interact',
+    area: ATTIC_DOOR,
+    mark: { col: 157, row: 14 },
+    when: { all: [F.FinaleBig] },
+    lock: true,
+    steps: [{ do: 'fadeOut', ms: S.fadeMs }, BIG_ARRIVAL, { do: 'fadeIn', ms: S.fadeMs }],
+  },
+  {
+    // La porte de la chambre grande (D-143) : derrière, la vraie chambre, la nuit. Maria dort dans
+    // son berceau, sous sa couverture, comme Céleste l'avait couchée le premier soir.
+    id: 'finale-home',
+    room: 'finale-big',
+    on: 'interact',
+    area: BIG_DOOR,
+    mark: { col: 88, row: 32 },
+    when: { all: [F.FinaleBig], none: [F.FinaleHome] },
+    lock: true,
+    steps: [
+      { do: 'fadeOut', ms: S.nightFadeOutMs },
+      { do: 'flag', id: F.FinaleHome },
+      HOME_ARRIVAL,
+      { do: 'wait', ms: S.nightBlackMs },
+      { do: 'fadeIn', ms: S.nightFadeInMs },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
+  {
+    // Une partie reprise dans la chambre grande après la vraie chambre : la porte y ramène.
+    id: 'finale-home-again',
+    room: 'finale-big',
+    on: 'interact',
+    area: BIG_DOOR,
+    mark: { col: 88, row: 32 },
+    when: { all: [F.FinaleHome] },
+    lock: true,
+    steps: [{ do: 'fadeOut', ms: S.fadeMs }, HOME_ARRIVAL, { do: 'fadeIn', ms: S.fadeMs }],
+  },
+  {
+    // Maria retrouvée (D-143, §11). Dans le noir, Céleste la prend dans ses bras ; le cœur du
+    // prologue. Le cercle se referme : Céleste sur son lit, Maria assise à côté d'elle. Maria ne
+    // bouge jamais à l'écran (pilier 5) : elle change de place dans le noir.
+    id: 'finale-found',
+    room: 'bedroom',
+    on: 'interact',
+    area: CRADLE_AREA,
+    mark: CRADLE_MARK,
+    when: { all: [F.FinaleHome], none: [F.FinaleFound] },
+    lock: true,
+    steps: [
+      { do: 'wait', ms: S.lookMs },
+      { do: 'fadeOut', ms: S.fadeMs },
+      { do: 'flag', id: F.FinaleFound },
+      { do: 'place', ...CRADLE_SIDE, facing: -1 },
+      { do: 'pose', pose: 'hold' },
+      { do: 'fadeIn', ms: S.fadeMs },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'thought', icon: 'heart', ms: S.holdMs },
+      { do: 'wait', ms: S.holdMs + S.lookMs },
+      { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
+      { do: 'flag', id: F.FinaleTogether },
+      { do: 'place', ...BED_SEAT, facing: -1 },
+      { do: 'pose', pose: 'sit' },
+      { do: 'wait', ms: S.nightBlackMs },
+      { do: 'fadeIn', ms: S.nightFadeInMs, shape: 'iris' },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
+  {
+    // PLACEHOLDER : sur son lit, Maria à côté d'elle ; le matin (D-138, la PR 6) viendra. « ? ».
+    id: 'finale-morning-later',
+    room: 'bedroom',
+    on: 'interact',
+    area: BED_AREA,
+    mark: { col: 9, row: 14 },
+    when: { all: [F.FinaleTogether] },
     lock: true,
     repeat: true,
     steps: [
@@ -286,7 +396,31 @@ const PROPS: StoryData['props'] = [
     room: 'bedroom',
     kind: 'cradle',
     ...FINALE_CRADLE,
-    when: { all: [F.FinaleCradle] },
+    when: { all: [F.FinaleCradle], none: [F.FinaleHome] },
+  },
+  // De retour par la porte, la nuit (D-143) : Maria dort dans son berceau, sous sa couverture.
+  {
+    id: 'cradle-maria-finale',
+    room: 'bedroom',
+    kind: 'cradle-maria',
+    ...FINALE_CRADLE,
+    when: { all: [F.FinaleHome], none: [F.FinaleFound] },
+  },
+  // Maria dans les bras de Céleste, puis à côté d'elle : le berceau est vide.
+  {
+    id: 'cradle-empty-finale',
+    room: 'bedroom',
+    kind: 'cradle',
+    ...FINALE_CRADLE,
+    when: { all: [F.FinaleFound] },
+  },
+  // Le cercle refermé : Maria assise sur le lit, à côté de Céleste.
+  {
+    id: 'maria-bed-finale',
+    room: 'bedroom',
+    kind: 'maria-sit',
+    ...MARIA_BED,
+    when: { all: [F.FinaleTogether] },
   },
 ];
 
@@ -303,7 +437,7 @@ export const FINALE_STORY: Pick<
     // La nuit, en approchant du berceau vide, la lumière vacille (D-35, D-40).
     {
       room: 'bedroom',
-      when: { all: [F.FinaleNight] },
+      when: { all: [F.FinaleNight], none: [F.FinaleHome] },
       col: FINALE_CRADLE.col,
       row: FINALE_CRADLE.row - 1,
       radius: 10,
@@ -316,6 +450,8 @@ export const FINALE_STORY: Pick<
       when: { all: [F.GrownFourth], none: [F.FinaleNight] },
       speaker: 'dad-door-finale',
     },
+    // Maria retrouvée, à côté d'elle (D-143) : Céleste pense à dormir.
+    { room: 'bedroom', when: { all: [F.FinaleTogether] }, icon: 'bed' },
     // La nuit : Céleste ne sort pas ; elle pense au berceau.
     { room: 'bedroom', when: { all: [F.FinaleNight] }, icon: 'cradle' },
   ],

@@ -34,7 +34,8 @@ function conditionFlags(when: FlagCondition): string[] {
  * - salles et positions existantes ;
  * - chaque déclencheur se désactive lui-même (il note une étape que sa condition exclut) ;
  * - Céleste n'est déplacée ou ne change de salle que dans le noir (entre un fondu au noir et le
- *   retour de l'image), debout sur un sol ;
+ *   retour de l'image), debout sur un sol ; Maria n'arrive dans ses bras et n'en repart que dans le
+ *   noir, et jamais à la fin d'un script (D-143) ;
  * - les étapes des conditions sont notées par un déclencheur ;
  * - les objets reposent sur une surface.
  */
@@ -119,6 +120,7 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
       problems.push(`${what} : ne se désactive pas (rejoué sans fin)`);
     }
     let dark = false;
+    let holding = false;
     let room = t.room;
     for (const step of t.steps) {
       if (step.do === 'memory' && !isMemory(step.id) && !isRecordSlot(step.id)) {
@@ -134,6 +136,13 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
         }
       } else if (step.do === 'toggle' && !dark) {
         problems.push(`${what} : étape réversible ${step.id} sous les yeux du joueur`);
+      } else if (step.do === 'pose') {
+        // Maria dans les bras (D-143) : elle n'y arrive et n'en part que dans le noir.
+        const holds = step.pose === 'hold';
+        if (holds !== holding && !dark) {
+          problems.push(`${what} : Maria prise ou posée sous les yeux du joueur`);
+        }
+        holding = holds;
       } else if (step.do === 'fadeOut') {
         dark = true;
       } else if (step.do === 'fadeIn') {
@@ -165,6 +174,9 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
     }
     if (dark) {
       problems.push(`${what} : se termine dans le noir`);
+    }
+    if (holding) {
+      problems.push(`${what} : se termine avec Maria dans les bras`);
     }
   }
   for (const prop of story.props) {

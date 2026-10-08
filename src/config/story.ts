@@ -250,6 +250,14 @@ export const StoryFlag = {
   FinaleMusicBox: 'finale.music-box',
   /** Du dessus de l'armoire, Céleste a suivi les étoiles : le ciel de la chambre (D-142). */
   FinaleSky: 'finale.sky',
+  /** Par la petite porte du grenier, la chambre grande (D-143). */
+  FinaleBig: 'finale.big',
+  /** Par la porte de la chambre grande, la vraie chambre, la nuit : Maria dort dans son berceau. */
+  FinaleHome: 'finale.home',
+  /** Céleste a pris Maria dans ses bras (D-143) : le berceau est vide. */
+  FinaleFound: 'finale.found',
+  /** Le cercle s'est refermé : Céleste sur son lit, Maria à côté d'elle (le matin viendra). */
+  FinaleTogether: 'finale.together',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 

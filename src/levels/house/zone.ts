@@ -66,6 +66,7 @@ import nannyStairs from '../nanny/stairs.txt?raw';
 import nannyPlayroom from '../nanny/playroom.txt?raw';
 import finaleBed from '../finale/bed.txt?raw';
 import finaleSky from '../finale/sky.txt?raw';
+import finaleBig from '../finale/big.txt?raw';
 
 /**
  * Première zone : la maison la nuit (PLACEHOLDER, D-25, D-27). L'étage (chambre, couloir) est à
@@ -190,6 +191,7 @@ export const HOUSE: ZoneSource = {
     // le berceau vide de la chambre, la nuit (l'histoire). Hors carte.
     { id: 'finale-bed', text: finaleBed },
     { id: 'finale-sky', text: finaleSky },
+    { id: 'finale-big', text: finaleBig },
   ],
   links: [
     ['bedroom:1', 'hall:1'],

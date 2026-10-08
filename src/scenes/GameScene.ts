@@ -102,6 +102,7 @@ import {
   GARDEN_PALETTE,
   MEMORY_PALETTE,
   NIGHTLIGHT_PALETTE,
+  NIGHTLIGHT_SOFT_PALETTE,
   ERASURE_COLORS,
   NIGHT_VOID_COLORS,
   STREET_DUSK_PALETTE,
@@ -172,6 +173,13 @@ import { debugSwitchUrl } from '../core/platform/debugSwitch';
 
 /** Durée d'image maximale prise en compte (onglet en arrière-plan, pause du navigateur). */
 const MAX_FRAME_SECONDS = 0.25;
+/** Maria dans les bras (D-143) : la texture de Maria assise, dessinée par `StoryView`. */
+const HELD_MARIA_TEXTURE = 'prop-maria-sit';
+/**
+ * Où Maria est assise dans les bras (px depuis les pieds de Céleste, par unité de `bodyScale`, la
+ * marionnette D-29) : sur les avant-bras, contre la poitrine. Visuel seulement.
+ */
+const HELD_MARIA_AT = { x: 2, xPerBody: 3.5, yPerBody: -10 } as const;
 /** Clé du registre Phaser où main.ts dépose la partie en cours (D-22). */
 export const SESSION_KEY = 'maria-session';
 /** Clé du registre où main.ts dépose le lecteur de musique (D-57). */
@@ -375,6 +383,8 @@ export class GameScene extends Phaser.Scene {
   } | null = null;
   /** La tasse que Céleste tient dans le souvenir de la cuisine. */
   private cupImage!: Phaser.GameObjects.Image;
+  /** Maria dans les bras de Céleste (D-143) : l'image de Maria assise, tenue devant elle. */
+  private heldMaria!: Phaser.GameObjects.Image;
   private readonly mapSeen = new Set<string>();
   /** Changement de salle en cours (D-25). */
   readonly transition = new RoomTransition(this.worldParams);
@@ -517,6 +527,7 @@ export class GameScene extends Phaser.Scene {
       },
       pose: (pose) => {
         this.poser.sitting = pose === 'sit';
+        this.poser.holding = pose === 'hold';
       },
       think: (icon, ms, by) => {
         this.storyView.think(icon, ms, by);
@@ -620,6 +631,7 @@ export class GameScene extends Phaser.Scene {
     this.hud = new Hud();
     this.flashbackView = new FlashbackView();
     this.cupImage = this.createCupImage();
+    this.heldMaria = this.add.image(0, 0, '__DEFAULT').setDepth(10.5).setVisible(false);
     this.applyMovement();
     this.applyAbilities();
     this.motion = this.movingTarget();
@@ -929,6 +941,7 @@ export class GameScene extends Phaser.Scene {
     );
     this.celesteHalo.render(this.puppet.x, this.puppet.y - box.height / 2, this.puppet.alpha);
     this.renderCup();
+    this.renderHeldMaria();
     this.finishView.render(
       this.level,
       this.artFinish,
@@ -2285,6 +2298,10 @@ export class GameScene extends Phaser.Scene {
       // Le monde de Maria (D-141) : la chambre du premier soir, à la lumière de la veilleuse.
       return NIGHTLIGHT_PALETTE;
     }
+    if (isStrangeRoom(this.level) && this.level.meta.palette === 'nightlight-soft') {
+      // La chambre grande (D-143) : l'étrange s'efface.
+      return NIGHTLIGHT_SOFT_PALETTE;
+    }
     if (this.strangeWorld || isStrangeRoom(this.level)) {
       // Derrière la haie (D-49) : le monde étrange, dehors (ciel violet au lieu du mur).
       const mockup = this.strangeMockup;
@@ -2623,12 +2640,38 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Maria dans les bras (D-143) : l'image de Maria assise (celle des objets de l'histoire), contre
+   * Céleste, du côté où elle regarde.
+   */
+  private renderHeldMaria(): void {
+    const visible = this.poser.holding && this.textures.exists(HELD_MARIA_TEXTURE);
+    this.heldMaria.setVisible(visible);
+    if (!visible) {
+      return;
+    }
+    if (this.heldMaria.texture.key !== HELD_MARIA_TEXTURE) {
+      this.heldMaria.setTexture(HELD_MARIA_TEXTURE);
+    }
+    const facing = this.player.facing;
+    const body = this.growth.bodyScale;
+    this.heldMaria
+      .setOrigin(0.5, 1)
+      .setScale(1 / this.artScale)
+      .setFlipX(facing < 0)
+      .setPosition(
+        this.puppet.x + facing * (HELD_MARIA_AT.x + HELD_MARIA_AT.xPerBody * body),
+        this.puppet.y + HELD_MARIA_AT.yPerBody * body,
+      );
+  }
+
   /** Outil de debug : étapes de l'histoire remplacées (sans sauvegarde), salle redessinée. */
   setStoryFlags(flags: readonly string[]): void {
     this.story.setFlags(flags);
     this.applyGrowth();
     this.props.load(this.story.data.props, this.level.id, this.story.flags);
     this.poser.sitting = false;
+    this.poser.holding = false;
     this.redrawArt();
   }
 }

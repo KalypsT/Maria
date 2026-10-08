@@ -5,6 +5,7 @@ import { checkCondition, type StoryStep } from '../src/core/story/story';
 import { StoryDirector } from '../src/core/story/StoryDirector';
 import { FINALE_CRADLE } from '../src/levels/finale/story';
 import { HOUSE_STORY } from '../src/levels/house/story';
+import { PHASE4 } from './finaleFlags';
 
 /** Le dernier niveau, PR 1 (D-139) : le premier soir rejoué sans Maria, la nuit, le berceau vide. */
 function need<V>(value: V | null | undefined, what: string): V {
@@ -21,35 +22,6 @@ const trigger = (id: string) =>
 const flagsOf = (steps: readonly StoryStep[]) =>
   steps.flatMap((s) => (s.do === 'flag' ? [s.id] : []));
 
-/** L'histoire jusqu'à la fin du niveau 7 (D-119) : quelques mois plus tard, la phase 4. */
-const PHASE4 = [
-  F.EveningPlayed,
-  F.EveningBlanket,
-  F.EveningTucked,
-  F.EveningGoodnight,
-  F.Slept,
-  F.SlipperTaken,
-  F.BottleTaken,
-  F.MariaSeen,
-  F.MariaVanished,
-  F.StrangeDone,
-  F.HeadbandTaken,
-  F.DadVisit,
-  F.MomHug,
-  F.Grown,
-  F.HedgeDone,
-  F.BonnetTaken,
-  F.GateOpen,
-  F.SchoolDone,
-  F.StreetMorning,
-  F.StationDone,
-  F.GrownOlder,
-  F.TrainArrived,
-  F.SeaEnd,
-  F.NannyEden,
-  F.NannyWake,
-  F.GrownFourth,
-];
 const RUG = [...PHASE4, F.FinaleRug];
 const CRADLE = [...RUG, F.FinaleCradle];
 const GOODNIGHT = [...CRADLE, F.FinaleGoodnight];

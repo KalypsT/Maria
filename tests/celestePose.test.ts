@@ -172,6 +172,21 @@ describe('Céleste en papier découpé (D-29)', () => {
   });
 });
 
+describe('Maria dans les bras (D-143)', () => {
+  it('les deux bras devant, la tête penchée vers elle ; reset la repose', () => {
+    const poser = new CelestePoser(DEFAULT_PUPPET, DT, MAX_RUN);
+    run(poser, subject(PlayerState.Idle), 120);
+    const rest = { front: poser.pose.armFront, head: poser.pose.headTilt };
+    poser.holding = true;
+    run(poser, subject(PlayerState.Idle), 120);
+    expect(poser.pose.armFront).toBeGreaterThan(rest.front + 1);
+    expect(poser.pose.armBack).toBeGreaterThan(0.9);
+    expect(poser.pose.headTilt).toBeGreaterThan(rest.head + 0.1);
+    poser.reset();
+    expect(poser.holding).toBe(false);
+  });
+});
+
 describe('souvenir jouable (D-89) : les mains devant', () => {
   it('un geste lève les deux bras devant, puis finit ; tenir la tasse garde les mains devant', () => {
     const poser = new CelestePoser(DEFAULT_PUPPET, DT, MAX_RUN);

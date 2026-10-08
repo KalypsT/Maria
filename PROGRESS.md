@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139) , **PR 2 faite : la berceuse, le moteur et le parcours d'essai 17** (D-140), **PR 3 faite : la chambre immense, le lit et le coffre** (D-141) et **PR 4 faite : le ciel de la chambre** (D-142), sur `ccr-06b9800a-238lrq`. Suite : **essai sur téléphone** (le parcours 17, la chambre immense et son ciel), puis la PR 5 (la chambre grande, la vraie chambre la nuit, Maria retrouvée).
+**Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139) , **PR 2 faite : la berceuse, le moteur et le parcours d'essai 17** (D-140), **PR 3 faite : la chambre immense, le lit et le coffre** (D-141), **PR 4 faite : le ciel de la chambre** (D-142) et **PR 5 faite : la chambre grande, la vraie chambre la nuit, Maria retrouvée** (D-143), sur `ccr-06b9800a-238lrq`. Suite : **essai sur téléphone** (le parcours 17, tout le monde de Maria, Maria retrouvée), puis la PR 6 (le matin et le dernier plan).
 
 **La cohérence des niveaux** (D-132 à D-137, demande de l'utilisateur) : la maison, le jardin, le quartier et la gare faits et fusionnés ; **le train** (D-136) et **la station balnéaire** (D-137 : l'aile du centre, les pieds de la grue, la pêche aux canards, les rochers percés, le mât d'amarrage) faits, sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (la maison de la nounou), même méthode.
 
@@ -31,6 +31,16 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le dernier niveau, PR 5 : la chambre grande, la vraie chambre la nuit, Maria retrouvée (D-143)
+
+- **La chambre grande** : par la petite porte du grenier du ciel, **la vraie chambre deux fois plus grande** ; on redescend par l'étagère haute, le surmeuble et le bureau jusqu'à la porte. Le berceau sous le mobile : on n'en voit que la couverture. L'étrange s'efface (presque les vraies couleurs, la musique de la maison, plus de couches). Courte et facile.
+- **La vraie chambre, la nuit** : par la porte, Céleste rentre dans sa chambre ; **Maria dort dans son berceau**.
+- **Maria retrouvée** : Agir sur le berceau ; dans le noir, **Maria dans les bras** (nouvelle pose), **le cœur du prologue**, **le cercle se referme** : Céleste assise sur son lit, Maria à côté d'elle. Agir sur le lit : « ? » (le matin viendra).
+- DEBUG → Histoire : « la chambre grande », « Maria dans son berceau, la vraie chambre », « Maria retrouvée ». Tests : `finaleHome.test.ts`. Vérifié dans Chromium.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « le ciel de la chambre », salle `finale-sky`, Agir devant la petite porte ; ou « la chambre grande », salle `finale-big`) : reconnaît-on tout de suite sa chambre, deux fois trop grande ? La descente est-elle trop courte ?
+- [ ] La porte, puis la vraie chambre : le moment où l'on voit Maria dans son berceau se ressent-il ? (À juger aussi : la musique de la maison à la place du thème de fin.)
+- [ ] Maria dans les bras : la pose se lit-elle (Maria contre la poitrine) ? Le cœur, le cercle : assez long, trop long ? Céleste assise sur son lit avec Maria à côté : juste, en attendant le matin ?
 
 ### Le dernier niveau, PR 4 : le ciel de la chambre (D-142)
 
