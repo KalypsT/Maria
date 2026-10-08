@@ -1203,7 +1203,7 @@ export const HOUSE_STORY: StoryData = {
       kind: 'mom-bench',
       // Accroupie au soleil à côté du banc, les pieds au sol (D-147).
       col: 12,
-      row: 26,
+      row: 27,
       when: { all: [F.GateOpen] },
     },
     {
