@@ -78,11 +78,15 @@ export const MILESTONES: readonly Milestone[] = [
   { trigger: 'nanny-play-4' },
   { trigger: 'nanny-eden' },
   // Le dernier niveau, le soir (D-139) : le tapis vide, le berceau refait, le lit. La nuit, le
-  // berceau vide (D-141), puis la chambre immense : la boîte à musique ; son ciel (D-142).
+  // berceau vide (D-141), puis la chambre immense : la boîte à musique ; son ciel (D-142) ; la
+  // chambre grande, la vraie chambre, Maria retrouvée (D-143).
   { trigger: 'finale-rug' },
   { trigger: 'finale-cradle' },
   { trigger: 'finale-sleep' },
   { trigger: 'finale-enter' },
   { trigger: 'finale-music-box' },
   { trigger: 'finale-sky' },
+  { trigger: 'finale-big' },
+  { trigger: 'finale-home' },
+  { trigger: 'finale-found' },
 ];

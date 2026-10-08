@@ -188,6 +188,46 @@ export function finaleDrawers({ tileShape, rounded }: ShapeTools): Record<string
       ctx.closePath();
       ctx.fill();
     },
+    bigcradle(a, r) {
+      // La chambre grande (D-143) : le berceau de poupée deux fois trop grand, sur le coffre ; son
+      // côté monte plus haut que le bord : on n'en voit que la couverture, bombée. Pas Maria.
+      const { ctx, palette: p } = a;
+      const k = r.w / 30;
+      const h = r.h / k;
+      ctx.save();
+      ctx.translate(r.x, r.y);
+      ctx.scale(k, k);
+      ctx.strokeStyle = p.woodDark;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(1, h - 3);
+      ctx.quadraticCurveTo(15, h + 1.5, 29, h - 3);
+      ctx.stroke();
+      ctx.fillStyle = BLANKET;
+      ctx.beginPath();
+      ctx.moveTo(6, h - 11);
+      ctx.quadraticCurveTo(13, h - 15, 20, h - 12.5);
+      ctx.quadraticCurveTo(24, h - 11.5, 25, h - 11);
+      ctx.lineTo(25, h - 9);
+      ctx.lineTo(6, h - 9);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = p.wood;
+      ctx.beginPath();
+      ctx.roundRect(3, h - 12, 24, 9, 2);
+      ctx.roundRect(2, h - 16, 4, 13, [2, 2, 0, 0]);
+      ctx.roundRect(24, h - 14, 4, 11, [2, 2, 0, 0]);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      for (let x = 9; x < 23; x += 4) {
+        ctx.fillRect(x, h - 11, 1, 7);
+      }
+      ctx.fillStyle = BLANKET_LIGHT;
+      for (let x = 9; x < 21; x += 3) {
+        ctx.fillRect(x, h - 12.6, 1, 1);
+      }
+      ctx.restore();
+    },
     // Les étoiles de la berceuse (D-140) : dessinées par `LullabyView`.
     lullabystar() {
       return;

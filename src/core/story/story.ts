@@ -89,8 +89,12 @@ export const THOUGHT_ICONS = [
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
-/** Poses imposées par un script (Céleste assise pour jouer, puis au réveil). */
-export type ScriptPose = 'sit' | 'stand';
+/**
+ * Poses imposées par un script (Céleste assise pour jouer, puis au réveil). `hold` (D-143) : debout,
+ * Maria dans les bras, immobile ; prise et posée seulement dans le noir, jamais à la fin d'un script
+ * (Céleste ne marche jamais en la portant, pilier 5 ; vérifié par `storyProblems`).
+ */
+export type ScriptPose = 'sit' | 'stand' | 'hold';
 
 /**
  * Forme d'un fondu : uniforme, ou en cercle centré sur Céleste (`iris`, D-35 : le monde étrange se

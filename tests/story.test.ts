@@ -323,6 +323,43 @@ describe('histoire de la maison (D-31)', () => {
     expect(problems).toContain('objet p : ne repose sur rien');
   });
 
+  it('Maria dans les bras (D-143) : prise et posée seulement dans le noir, jamais à la fin', () => {
+    const hold = (steps: StoryData['triggers'][number]['steps']): string[] =>
+      storyProblems(
+        {
+          ...HOUSE_STORY,
+          triggers: [
+            {
+              id: 'h',
+              room: 'bedroom',
+              on: 'interact',
+              area: { col: 20, row: 15, w: 7, h: 5 },
+              mark: { col: 23, row: 16 },
+              when: {},
+              lock: true,
+              repeat: false,
+              steps: [{ do: 'flag', id: 'x' }, ...steps],
+            },
+          ],
+        },
+        zone,
+      ).filter((p) => p.startsWith('déclencheur h') && p.includes('Maria'));
+    const fade = { do: 'fadeOut', ms: 100 } as const;
+    const back = { do: 'fadeIn', ms: 100 } as const;
+    expect(
+      hold([fade, { do: 'pose', pose: 'hold' }, back, fade, { do: 'pose', pose: 'sit' }, back]),
+    ).toEqual([]);
+    expect(hold([{ do: 'pose', pose: 'hold' }, fade, { do: 'pose', pose: 'stand' }, back])).toEqual(
+      ['déclencheur h : Maria prise ou posée sous les yeux du joueur'],
+    );
+    expect(hold([fade, { do: 'pose', pose: 'hold' }, back, { do: 'pose', pose: 'stand' }])).toEqual(
+      ['déclencheur h : Maria prise ou posée sous les yeux du joueur'],
+    );
+    expect(hold([fade, { do: 'pose', pose: 'hold' }, back])).toEqual([
+      'déclencheur h : se termine avec Maria dans les bras',
+    ]);
+  });
+
   it('détecte un changement de salle visible, dans le vide, ou sans veilleuse (D-34)', () => {
     const bad: StoryData = {
       ...HOUSE_STORY,

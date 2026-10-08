@@ -215,6 +215,7 @@ export const ROOM_GROUND: Readonly<Record<string, Surface>> = {
   // Le dernier niveau (D-141) : le parquet de la chambre, démesuré.
   'finale-bed': Wood,
   'finale-sky': Wood,
+  'finale-big': Wood,
 };
 
 /** Sol des salles absentes de `ROOM_GROUND` (parcours d'essai, souvenirs jouables). */

@@ -72,6 +72,8 @@ export class CelestePoser {
   gesture: 'stir' | 'pour' | 'serve' | 'count' | null = null;
   gestureSteps = 0;
   carrying = false;
+  /** Maria dans les bras (D-143), imposé par l'histoire : les deux bras devant, la tête penchée. */
+  holding = false;
   private time = 0;
   private stateSteps = 0;
   private lastState: PlayerState = PlayerState.Idle;
@@ -122,6 +124,7 @@ export class CelestePoser {
     this.gesture = null;
     this.gestureSteps = 0;
     this.carrying = false;
+    this.holding = false;
   }
 
   /** Un pas de simulation. `attack` : phase d'attaque (`PoseAttack`), `attackProgress` 0 → 1. */
@@ -312,6 +315,11 @@ export class CelestePoser {
     } else if (this.carrying) {
       t.armFront = 66 * DEG;
       t.armBack = 58 * DEG;
+    } else if (this.holding) {
+      // Les avant-bras sous Maria, contre la poitrine.
+      t.armFront = 52 * DEG;
+      t.armBack = 48 * DEG;
+      t.headTilt = 9 * DEG;
     }
     // Passage en douceur vers la pose visée (la course garde son cycle exact).
     const k = p.blendMs <= 0 ? 1 : 1 - Math.exp((-dt * 1000) / p.blendMs);

@@ -669,6 +669,8 @@ export const DECOR_KINDS: Readonly<
   gianthutch: { furniture: true },
   giantdesk: { furniture: true },
   atticdoor: { furniture: false },
+  // La chambre grande (D-143) : le berceau, ses côtés trop hauts pour voir dedans.
+  bigcradle: { furniture: false },
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */
@@ -922,6 +924,19 @@ export const NIGHTLIGHT_PALETTE: Readonly<ArtPalette> = {
   darkness: 0.48,
   vignette: 0.5,
   vignetteColor: '10,12,32',
+};
+
+/**
+ * La chambre grande (D-143, `; @palette: nightlight-soft`) : l'étrange s'efface encore. La nuit de
+ * la vraie chambre, un peu plus sombre que la veilleuse immense, un liseré presque blanc. PLACEHOLDER.
+ */
+export const NIGHTLIGHT_SOFT_PALETTE: Readonly<ArtPalette> = {
+  ...NIGHTLIGHT_PALETTE,
+  wallTop: '#343c5e',
+  wallBottom: '#272e4c',
+  rim: 'rgba(214,226,222,0.4)',
+  darkness: 0.6,
+  vignette: 0.45,
 };
 
 /**

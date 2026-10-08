@@ -32,7 +32,7 @@ const FRAME = { col: 46, row: 9 };
 const MOON = { col: 90, row: 10 };
 const SILL = { col: 126, row: 25 };
 const DESK = { col: 145, row: 25 };
-/** L'étagère haute, devant la petite porte du grenier (la suite : la chambre grande). */
+/** L'étagère haute, devant la petite porte du grenier : derrière, la chambre grande (D-143). */
 const SHELF = { col: 157, row: 19 };
 /** Le vide de la nuit, tout en bas. */
 const VOID_ROW = 36;
@@ -86,7 +86,7 @@ describe('le ciel de la chambre (D-142)', () => {
         expect(Math.floor(i / room.width)).toBeGreaterThanOrEqual(VOID_ROW);
       }
     }
-    // Pas de sortie pour l'instant : la chambre grande viendra (D-138).
+    // Pas de sortie : la petite porte du grenier mène à la chambre grande (D-143), par l'histoire.
     expect(room.exits).toHaveLength(0);
   });
 
@@ -106,8 +106,8 @@ describe('le ciel de la chambre (D-142)', () => {
     const lamp = need(returnLantern(room, SKY_START.col, SKY_START.row), 'veilleuse');
     expect({ col: lamp.col, row: lamp.row }).toEqual(WARDROBE);
     expect(MILESTONES.map((m) => ('trigger' in m ? m.trigger : ''))).toContain('finale-sky');
-    // La petite porte du grenier : « ? » pour l'instant (PLACEHOLDER).
-    const door = trigger('finale-door-later');
+    // La petite porte du grenier : la chambre grande (D-143).
+    const door = trigger('finale-big');
     const area = need(door.area, 'zone');
     expect(SHELF.col).toBeGreaterThanOrEqual(area.col);
     expect(SHELF.col).toBeLessThan(area.col + area.w);
