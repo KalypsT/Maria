@@ -98,6 +98,7 @@ import {
   ART_IMAGES,
   CELESTE_PART_IMAGES,
   CHARACTER_IMAGES,
+  characterFiles,
   DAY_PALETTE,
   DEFAULT_ART_FINISH,
   type ArtFinish,
@@ -517,7 +518,8 @@ export class GameScene extends Phaser.Scene {
       }
     }
     // Personnages illustrés (D-123) : une image peut servir à plusieurs poses.
-    for (const { file } of Object.values(CHARACTER_IMAGES)) {
+    const files = new Set(Object.values(CHARACTER_IMAGES).flatMap(characterFiles));
+    for (const file of files) {
       if (!this.textures.exists(`art:${file}`)) {
         this.load.image(`art:${file}`, `art/${file}`);
       }
@@ -1968,7 +1970,7 @@ export class GameScene extends Phaser.Scene {
     const images = new Map<string, CanvasImageSource>();
     const keys = [
       ...Object.keys(ART_IMAGES),
-      ...Object.values(CHARACTER_IMAGES).map((character) => character.file),
+      ...Object.values(CHARACTER_IMAGES).flatMap(characterFiles),
       ...Object.entries(CELESTE_PART_IMAGES).flatMap(([outfit, parts]) =>
         parts.map((part) => celestePartKey(outfit, part)),
       ),

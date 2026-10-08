@@ -702,6 +702,21 @@ export interface CharacterImage {
   footX: number;
   steam?: { x: number; y: number };
   seat?: number;
+  /**
+   * Pose assise (D-150) : hauteur dessinée de l'image (px logiques), à la place de celle d'un
+   * adulte debout. Sur une banquette, elle pose les pieds au sol ; un enfant garde sa taille.
+   */
+  height?: number;
+  /**
+   * Un groupe (D-150) : plusieurs personnages côte à côte, chacun dans une part égale du cadre, à
+   * la place de `file`.
+   */
+  group?: readonly { file: string; footX: number }[];
+}
+
+/** Les fichiers d'un personnage illustré (une image, ou celles d'un groupe). */
+export function characterFiles(character: CharacterImage): readonly string[] {
+  return character.group ? character.group.map((member) => member.file) : [character.file];
 }
 
 /** Personnages illustrés (D-123) ; les autres restent dessinés par le code (`familyArt`). */
@@ -722,6 +737,30 @@ export const CHARACTER_IMAGES: Readonly<Partial<Record<PropKind, CharacterImage>
   'mom-garden': { file: 'mom-garden.png', footX: 0.3 },
   'mom-yard': { file: 'mom-yard.png', footX: 0.38 },
   'mom-quay': { file: 'mom-quay.png', footX: 0.33 },
+  // Les adultes du train et de l'école (D-150).
+  teacher: { file: 'teacher.png', footX: 0.34 },
+  conductor: { file: 'conductor.png', footX: 0.3 },
+  // Sur une banquette du compartiment (2 tuiles) : les pieds au sol, 32 px sous l'assise.
+  'mother-baby': { file: 'mother-baby.png', footX: 0.82, seat: 0.65, height: 91 },
+  'sleeper-seat': { file: 'sleeper-seat.png', footX: 0.78, seat: 0.64, height: 89 },
+  // Les enfants de la classe et le chien (D-150). Assis sur une couchette ou un lit, les jambes
+  // pendent ; couchés, l'image remplit la hauteur du cadre.
+  classmate: { file: 'classmate.png', footX: 0.65 },
+  'classmate-slid': { file: 'classmate-slid.png', footX: 0.5 },
+  'classmate-asleep': { file: 'classmate-asleep.png', footX: 0.5 },
+  'kid-cap-sit': { file: 'kid-cap-sit.png', footX: 0.77, seat: 0.67, height: 23 },
+  'kid-bob-sit': { file: 'kid-bob-sit.png', footX: 0.76, seat: 0.64, height: 23 },
+  'kid-asleep': { file: 'kid-asleep.png', footX: 0.5 },
+  'kids-quay': {
+    file: 'kid-bob-quay.png',
+    footX: 0.64,
+    group: [
+      { file: 'kid-bob-quay.png', footX: 0.64 },
+      { file: 'kid-cap-quay.png', footX: 0.56 },
+      { file: 'classmate-quay.png', footX: 0.59 },
+    ],
+  },
+  'dog-sleep': { file: 'dog-sleep.png', footX: 0.5 },
 };
 
 /**

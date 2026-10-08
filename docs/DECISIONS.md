@@ -2094,3 +2094,12 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **En jeu** : pièces illustrées (tête, queue de cheval, torse, bras, jambe), composées par `scripts/celeste-parts.py` ; le jean va jusqu'à la basket, pas de pièce de hanche. **Écran de départ** : l'illustration détourée, `public/art/celeste-tee.png` (`TITLE_IMAGES.tee`).
 - **Retouches** : les pièces de ChatGPT imitent du papier découpé : le trou de rivet en haut de la jambe et l'emmanchure découpée dans le t-shirt sont rebouchés (texture voisine), l'œillet du chouchou repeint ; le liseré de papier blanc autour de la queue de cheval retiré. Les baskets blanches : `--white` (seuil du fond) les garde.
 - **Sans pièces** (fichier manquant), la tenue reprend le dessin par code de la veste.
+
+## D-150 — Les adultes du train et de l'école, les enfants de la classe, le chien illustrés
+
+- **Images de l'utilisateur** (ChatGPT, prompts de `docs/PROMPTS_PERSONNAGES.md`) : la maîtresse, le contrôleur, la maman au bébé, le voyageur endormi ; la camarade (debout, glissée, endormie, au quai), le garçon à la casquette et la fille au carré (assis, au quai), la fille au carré endormie ; le chien du fourgon. Toutes à la place du dessin par code (`CHARACTER_IMAGES`).
+- **Retournées** au détourage pour regarder vers la droite comme les autres : la maman au bébé et la camarade endormie (la tête du côté de l'oreiller dessiné par le code). La surface du lit dessinée sous la fille endormie est retirée.
+- **Assis** (`height`) : sur une banquette du compartiment (2 tuiles), la maman et le voyageur sont dessinés à la hauteur qui pose leurs pieds au sol (91 et 89 px, environ trois quarts d'un adulte debout, la taille d'un adulte assis) ; sur une couchette, les enfants gardent une taille d'enfant assis (23 px), les jambes pendent.
+- **Le groupe du quai** (`group`) : les trois enfants au sac à dos, chacun dans un tiers du cadre (`kids-quay`, aussi sur la plage et la jetée).
+- Les poses debout seules du garçon à la casquette et de la fille au carré ne servent pas encore (aucune scène ne les montre debout sans sac) ; gardées hors du dépôt.
+- Le petit mouvement en boucle de ces personnages (une respiration, un bras) disparaît : les images sont fixes.
