@@ -7,6 +7,7 @@ import type { Zone } from '../world/zone';
 import { propBox } from './PropStage';
 import {
   CHARACTER_KINDS,
+  holdsMaria,
   WALL_PROP_KINDS,
   WINDOW_PROP_KINDS,
   type FlagCondition,
@@ -121,6 +122,7 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
     }
     let dark = false;
     let holding = false;
+    let gone = false;
     let room = t.room;
     for (const step of t.steps) {
       if (step.do === 'memory' && !isMemory(step.id) && !isRecordSlot(step.id)) {
@@ -138,11 +140,17 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
         problems.push(`${what} : étape réversible ${step.id} sous les yeux du joueur`);
       } else if (step.do === 'pose') {
         // Maria dans les bras (D-143) : elle n'y arrive et n'en part que dans le noir.
-        const holds = step.pose === 'hold';
+        const holds = holdsMaria(step.pose);
         if (holds !== holding && !dark) {
           problems.push(`${what} : Maria prise ou posée sous les yeux du joueur`);
         }
         holding = holds;
+      } else if (step.do === 'gone') {
+        // Céleste sortie de la salle (D-144) : dans le noir, et une autre salle la ramène.
+        if (!dark) {
+          problems.push(`${what} : Céleste disparaît sous les yeux du joueur`);
+        }
+        gone = true;
       } else if (step.do === 'fadeOut') {
         dark = true;
       } else if (step.do === 'fadeIn') {
@@ -153,6 +161,7 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
         }
         if (step.do === 'room') {
           room = step.room;
+          gone = false;
           if (t.on === 'leave') {
             problems.push(`${what} : changement de salle en quittant la salle`);
           }
@@ -177,6 +186,9 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
     }
     if (holding) {
       problems.push(`${what} : se termine avec Maria dans les bras`);
+    }
+    if (gone) {
+      problems.push(`${what} : se termine sans Céleste`);
     }
   }
   for (const prop of story.props) {

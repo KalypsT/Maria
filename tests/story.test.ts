@@ -360,6 +360,36 @@ describe('histoire de la maison (D-31)', () => {
     ]);
   });
 
+  it('Céleste sortie de la salle (D-144) : dans le noir, et une autre salle la ramène', () => {
+    const gone = (steps: StoryData['triggers'][number]['steps']): string[] =>
+      storyProblems(
+        {
+          ...HOUSE_STORY,
+          triggers: [
+            {
+              id: 'g',
+              room: 'bedroom',
+              on: 'interact',
+              area: { col: 20, row: 15, w: 7, h: 5 },
+              mark: { col: 23, row: 16 },
+              when: {},
+              lock: true,
+              steps: [{ do: 'flag', id: 'x' }, ...steps],
+            },
+          ],
+        },
+        zone,
+      ).filter((p) => p.startsWith('déclencheur g') && p.includes('Céleste'));
+    const fade = { do: 'fadeOut', ms: 100 } as const;
+    const back = { do: 'fadeIn', ms: 100 } as const;
+    const hall = { do: 'room', room: 'hall', col: 3, row: 15, facing: 1 } as const;
+    expect(gone([fade, { do: 'gone' }, back, fade, hall, back])).toEqual([]);
+    expect(gone([{ do: 'gone' }, fade, hall, back])).toEqual([
+      'déclencheur g : Céleste disparaît sous les yeux du joueur',
+    ]);
+    expect(gone([fade, { do: 'gone' }, back])).toEqual(['déclencheur g : se termine sans Céleste']);
+  });
+
   it('détecte un changement de salle visible, dans le vide, ou sans veilleuse (D-34)', () => {
     const bad: StoryData = {
       ...HOUSE_STORY,

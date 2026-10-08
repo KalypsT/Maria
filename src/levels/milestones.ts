@@ -89,4 +89,9 @@ export const MILESTONES: readonly Milestone[] = [
   { trigger: 'finale-big' },
   { trigger: 'finale-home' },
   { trigger: 'finale-found' },
+  // Le matin (D-144) : le réveil, le tapis, l'étagère, la porte.
+  { trigger: 'finale-morning' },
+  { trigger: 'finale-play' },
+  { trigger: 'finale-shelf' },
+  { trigger: 'finale-leave' },
 ];

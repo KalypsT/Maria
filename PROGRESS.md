@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139) , **PR 2 faite : la berceuse, le moteur et le parcours d'essai 17** (D-140), **PR 3 faite : la chambre immense, le lit et le coffre** (D-141), **PR 4 faite : le ciel de la chambre** (D-142) et **PR 5 faite : la chambre grande, la vraie chambre la nuit, Maria retrouvée** (D-143), sur `ccr-06b9800a-238lrq`. Suite : **essai sur téléphone** (le parcours 17, tout le monde de Maria, Maria retrouvée), puis la PR 6 (le matin et le dernier plan).
+**Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139) , **PR 2 faite : la berceuse, le moteur et le parcours d'essai 17** (D-140), **PR 3 faite : la chambre immense, le lit et le coffre** (D-141), **PR 4 faite : le ciel de la chambre** (D-142), **PR 5 faite : la chambre grande, la vraie chambre la nuit, Maria retrouvée** (D-143) et **PR 6 faite : le matin et le dernier plan** (D-144), sur `ccr-06b9800a-238lrq`. Suite : **essai sur téléphone** (le parcours 17, tout le monde de Maria, toute la fin), puis la PR 7 (l'écran de fin, l'accueil, « Continuer », le fil discret après la fin).
 
 **La cohérence des niveaux** (D-132 à D-137, demande de l'utilisateur) : la maison, le jardin, le quartier et la gare faits et fusionnés ; **le train** (D-136) et **la station balnéaire** (D-137 : l'aile du centre, les pieds de la grue, la pêche aux canards, les rochers percés, le mât d'amarrage) faits, sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (la maison de la nounou), même méthode.
 
@@ -31,6 +31,17 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le dernier niveau, PR 6 : le matin et le dernier plan (D-144)
+
+- **Le réveil** : Agir sur le lit ; le matin, Céleste se réveille **Maria dans les bras**, un cœur ; une étincelle sur le tapis.
+- **Le tapis**, comme le premier soir : le cœur, **la bulle du livre commence… et s'efface** ; elle regarde Maria, puis pense à l'étagère.
+- **Ranger Maria** : Agir encore sur le tapis ; Maria sur **l'étagère du surmeuble**, là où était la couverture le premier soir (à confirmer, facile à changer) ; **le dernier câlin**.
+- **La porte** : c'est le joueur qui fait sortir Céleste. **Le dernier plan** : la vue reste sur Maria, la musique se tait, un très léger signe (la lumière froide qui vacille, quelques scintillements, le mobile qui tourne un instant), tout redevient normal, le noir ; puis le couloir. L'écran de fin viendra avec la PR 7.
+- DEBUG → Histoire : « le matin, Maria à côté d'elle », « Maria rangée sur l'étagère » (et « Maria retrouvée » pour tout jouer depuis la nuit). Tests : `finaleMorning.test.ts`. Vérifié dans Chromium.
+- [ ] À vérifier sur téléphone (DEBUG → Histoire → « Maria retrouvée », salle `bedroom`, Agir sur le lit) : le réveil avec Maria dans les bras ; le tapis : comprend-on que le livre s'efface parce qu'elle a grandi (la bulle assez courte, le regard assez long) ?
+- [ ] Ranger Maria : Agir sur le tapis une deuxième fois se devine-t-il (la bulle de l'étagère) ? **L'étagère du surmeuble** te convient-elle comme place de Maria ?
+- [ ] Le dernier plan : assez long, trop long ? Le signe se voit-il, sans être trop fort (`STRANGE_FX.glimmerPeak`, `glimmerSpin`) ? Le noir puis le couloir : en attendant l'écran de fin.
 
 ### Le dernier niveau, PR 5 : la chambre grande, la vraie chambre la nuit, Maria retrouvée (D-143)
 

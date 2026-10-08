@@ -8,8 +8,8 @@ import type { StoryData, StoryStep, StoryTrigger, TileArea } from '../../core/st
  * berceau défait depuis le premier matin ; Céleste le refait, maman vient dire bonne nuit. La nuit,
  * les lumières éteintes, le berceau vide s'éclaire : l'entrée du monde de Maria, la chambre immense
  * (D-141), son ciel (D-142), la chambre grande ; par sa porte, la vraie chambre, la nuit : Maria dort
- * dans son berceau, Céleste la prend dans ses bras (D-143). Maria ne bouge jamais à l'écran ; les
- * parents non plus.
+ * dans son berceau, Céleste la prend dans ses bras (D-143). Le matin, le tapis, l'étagère, la porte
+ * et le dernier plan (D-144). Maria ne bouge jamais à l'écran ; les parents non plus.
  */
 
 /** Le tapis, là où Maria était assise le premier soir (D-31) : Céleste s'y assoit, seule. */
@@ -74,6 +74,22 @@ const HOME_ARRIVAL: StoryStep = {
 };
 /** Maria, à côté de Céleste sur son lit, après le cercle (D-143). */
 const MARIA_BED = { col: 10, row: 15 };
+/** Le matin (D-144) : Maria sur le tapis, à sa place du premier soir (D-31), en face de Céleste. */
+const MARIA_RUG = { col: 19, row: 19 };
+/**
+ * Là où Céleste la range : l'étagère du surmeuble, là où était la couverture le premier soir (D-31) ;
+ * Céleste debout à côté d'elle.
+ */
+export const MARIA_SHELF = { col: 33, row: 11 };
+const SHELF_STAND = { col: 35, row: 11 };
+const SHELF_GLOW: TileArea = { col: 31, row: 9, w: 5, h: 3 };
+/**
+ * Devant la porte de la chambre, sur toute la hauteur : en sortant, le dernier plan (D-144). On ne
+ * peut pas atteindre la porte sans y passer.
+ */
+const LEAVE_AREA: TileArea = { col: 41, row: 9, w: 4, h: 11 };
+/** Le couloir, juste derrière la porte de la chambre : Céleste s'en va. */
+const HALL_ARRIVAL: StoryStep = { do: 'room', room: 'hall', col: 3, row: 15, facing: 1 };
 /** Le lit : Agir pour se coucher (le premier soir, D-37). */
 const BED_AREA: TileArea = { col: 7, row: 13, w: 11, h: 3 };
 const BED_SEAT = { col: 12, row: 15 };
@@ -344,18 +360,116 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // PLACEHOLDER : sur son lit, Maria à côté d'elle ; le matin (D-138, la PR 6) viendra. « ? ».
-    id: 'finale-morning-later',
+    // Le matin (D-144) : Céleste s'endort, Maria à côté d'elle ; elle se réveille, Maria dans les
+    // bras, le cœur. Elle la pose à côté d'elle (dans le noir) ; une étincelle sur le tapis, là où
+    // était la toute première action du jeu.
+    id: 'finale-morning',
     room: 'bedroom',
     on: 'interact',
     area: BED_AREA,
     mark: { col: 9, row: 14 },
-    when: { all: [F.FinaleTogether] },
+    when: { all: [F.FinaleTogether], none: [F.FinaleMorning] },
     lock: true,
-    repeat: true,
     steps: [
-      { do: 'thought', icon: 'question', ms: S.thoughtMs },
+      { do: 'pose', pose: 'sit' },
+      { do: 'wait', ms: S.holdMs },
+      { do: 'fadeOut', ms: S.nightFadeOutMs },
+      { do: 'flag', id: F.FinaleMorning },
+      { do: 'place', ...BED_SEAT, facing: 1 },
+      { do: 'pose', pose: 'hold-sit' },
+      { do: 'wait', ms: S.nightBlackMs },
+      { do: 'fadeIn', ms: S.nightFadeInMs },
       { do: 'wait', ms: S.lookMs },
+      { do: 'thought', icon: 'heart', ms: S.holdMs },
+      { do: 'wait', ms: S.holdMs + S.lookMs },
+      { do: 'fadeOut', ms: S.fadeMs },
+      { do: 'flag', id: F.FinaleAwake },
+      { do: 'pose', pose: 'sit' },
+      { do: 'fadeIn', ms: S.fadeMs },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'sparkle', area: RUG_AREA, ms: S.cradleSparkleMs },
+    ],
+  },
+  {
+    // Sur le tapis, comme le premier soir (D-31) : Céleste s'assoit en face de Maria, un câlin,
+    // l'histoire du soir commence… et s'efface. Elle la regarde : elle a grandi (§11). Puis elle
+    // pense à l'étagère où la ranger.
+    id: 'finale-play',
+    room: 'bedroom',
+    on: 'interact',
+    area: RUG_AREA,
+    mark: { col: 19, row: 18 },
+    when: { all: [F.FinaleAwake], none: [F.FinalePlayed] },
+    lock: true,
+    steps: [
+      { do: 'fadeOut', ms: S.fadeMs },
+      { do: 'flag', id: F.FinalePlayed },
+      { do: 'place', ...RUG_SEAT, facing: -1 },
+      { do: 'pose', pose: 'sit' },
+      { do: 'fadeIn', ms: S.fadeMs },
+      { do: 'thought', icon: 'heart', ms: S.holdMs },
+      { do: 'wait', ms: S.holdMs + 200 },
+      { do: 'thought', icon: 'book', ms: S.fadingBookMs },
+      { do: 'wait', ms: S.fadingBookMs + S.holdMs + S.lookMs },
+      { do: 'pose', pose: 'stand' },
+      { do: 'thought', icon: 'maria-shelf', ms: S.thoughtMs },
+    ],
+  },
+  {
+    // Ranger Maria (§11) : dans le noir, Céleste la porte sur l'étagère du surmeuble, là où était la
+    // couverture le premier soir, et la pose avec soin. Le dernier câlin.
+    id: 'finale-shelf',
+    room: 'bedroom',
+    on: 'interact',
+    area: RUG_AREA,
+    mark: { col: 19, row: 18 },
+    when: { all: [F.FinalePlayed], none: [F.FinaleShelved] },
+    lock: true,
+    steps: [
+      { do: 'fadeOut', ms: S.fadeMs },
+      { do: 'flag', id: F.FinaleShelved },
+      { do: 'place', ...SHELF_STAND, facing: -1 },
+      { do: 'fadeIn', ms: S.fadeMs },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'thought', icon: 'heart', ms: S.holdMs },
+      { do: 'wait', ms: S.holdMs + S.lookMs },
+    ],
+  },
+  {
+    // C'est le joueur qui fait sortir Céleste (D-138). Le dernier plan (§12) : la vue reste sur
+    // Maria ; un très léger signe du monde étrange ; Maria ne bouge pas ; tout redevient normal ; le
+    // noir. Céleste ne revient pas la chercher.
+    id: 'finale-leave',
+    room: 'bedroom',
+    on: 'touch',
+    area: LEAVE_AREA,
+    when: { all: [F.FinaleShelved], none: [F.FinaleGone] },
+    lock: true,
+    steps: [
+      { do: 'fadeOut', ms: S.fadeMs },
+      { do: 'flag', id: F.FinaleGone },
+      { do: 'gone' },
+      { do: 'look', ...MARIA_SHELF },
+      {
+        do: 'hush',
+        ms:
+          S.nightFadeInMs +
+          S.lastShotMs +
+          S.glimmerMs +
+          S.lookMs +
+          S.nightFadeOutMs +
+          S.nightBlackMs,
+      },
+      { do: 'fadeIn', ms: S.nightFadeInMs },
+      { do: 'wait', ms: S.lastShotMs },
+      { do: 'glimmer', ms: S.glimmerMs },
+      { do: 'sparkle', area: SHELF_GLOW, ms: S.glimmerMs },
+      { do: 'wait', ms: S.glimmerMs + S.lookMs },
+      { do: 'fadeOut', ms: S.nightFadeOutMs },
+      { do: 'look' },
+      { do: 'wait', ms: S.nightBlackMs },
+      HALL_ARRIVAL,
+      { do: 'fadeIn', ms: S.nightFadeInMs },
     ],
   },
 ];
@@ -414,13 +528,37 @@ const PROPS: StoryData['props'] = [
     ...FINALE_CRADLE,
     when: { all: [F.FinaleFound] },
   },
-  // Le cercle refermé : Maria assise sur le lit, à côté de Céleste.
+  // Le cercle refermé : Maria assise sur le lit, à côté de Céleste, la nuit.
   {
     id: 'maria-bed-finale',
     room: 'bedroom',
     kind: 'maria-sit',
     ...MARIA_BED,
-    when: { all: [F.FinaleTogether] },
+    when: { all: [F.FinaleTogether], none: [F.FinaleMorning] },
+  },
+  // Le matin (D-144) : réveillée, Maria dans les bras, puis à côté d'elle sur le lit…
+  {
+    id: 'maria-bed-morning',
+    room: 'bedroom',
+    kind: 'maria-sit',
+    ...MARIA_BED,
+    when: { all: [F.FinaleAwake], none: [F.FinalePlayed] },
+  },
+  // … sur le tapis, à sa place du premier soir…
+  {
+    id: 'maria-rug-morning',
+    room: 'bedroom',
+    kind: 'maria-sit',
+    ...MARIA_RUG,
+    when: { all: [F.FinalePlayed], none: [F.FinaleShelved] },
+  },
+  // … rangée sur l'étagère du surmeuble. Elle y reste (Céleste ne revient pas la chercher).
+  {
+    id: 'maria-shelf-finale',
+    room: 'bedroom',
+    kind: 'maria-sit',
+    ...MARIA_SHELF,
+    when: { all: [F.FinaleShelved] },
   },
 ];
 
@@ -450,13 +588,28 @@ export const FINALE_STORY: Pick<
       when: { all: [F.GrownFourth], none: [F.FinaleNight] },
       speaker: 'dad-door-finale',
     },
+    // Le matin (D-144) : pas avant d'avoir joué avec Maria, puis de l'avoir rangée. Ensuite, la
+    // porte : le dernier plan.
+    { room: 'bedroom', when: { all: [F.FinaleMorning], none: [F.FinalePlayed] }, icon: 'maria' },
+    {
+      room: 'bedroom',
+      when: { all: [F.FinalePlayed], none: [F.FinaleShelved] },
+      icon: 'maria-shelf',
+    },
     // Maria retrouvée, à côté d'elle (D-143) : Céleste pense à dormir.
-    { room: 'bedroom', when: { all: [F.FinaleTogether] }, icon: 'bed' },
+    {
+      room: 'bedroom',
+      when: { all: [F.FinaleTogether], none: [F.FinaleMorning] },
+      icon: 'bed',
+    },
     // La nuit : Céleste ne sort pas ; elle pense au berceau.
-    { room: 'bedroom', when: { all: [F.FinaleNight] }, icon: 'cradle' },
+    { room: 'bedroom', when: { all: [F.FinaleNight], none: [F.FinaleMorning] }, icon: 'cradle' },
   ],
-  // Quelques mois après la classe de mer, c'est le soir (D-139), jusqu'au matin du niveau 8.
-  times: [{ when: { all: [F.GrownFourth] }, time: 'evening' }],
+  // Quelques mois après la classe de mer, c'est le soir (D-139), jusqu'au matin du niveau 8 (D-144).
+  times: [
+    { when: { all: [F.FinaleMorning] }, time: 'morning' },
+    { when: { all: [F.GrownFourth] }, time: 'evening' },
+  ],
   // La nuit : les lumières éteintes, seule la veilleuse reste (D-85).
-  dim: [{ room: 'bedroom', when: { all: [F.FinaleNight] } }],
+  dim: [{ room: 'bedroom', when: { all: [F.FinaleNight], none: [F.FinaleMorning] } }],
 };

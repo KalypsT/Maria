@@ -1034,6 +1034,19 @@ function drawIcon(
     case 'maria':
       mariaHead(ctx, cx, cy, 6, maria);
       break;
+    case 'maria-shelf':
+      // Maria assise sur une planche, deux équerres dessous (D-144) : là où la ranger.
+      ctx.save();
+      ctx.translate(cx - 3.2, cy - 8.5);
+      ctx.scale(0.8, 0.8);
+      drawMariaSit(ctx, 8, 13, maria);
+      ctx.restore();
+      ctx.fillStyle = WOOD;
+      ctx.fillRect(cx - 9, cy + 2, 18, 2);
+      ctx.fillStyle = WOOD_DARK;
+      ctx.fillRect(cx - 7, cy + 4, 1.2, 3);
+      ctx.fillRect(cx + 5.8, cy + 4, 1.2, 3);
+      break;
     case 'maria-missing':
       ctx.globalAlpha = 0.35;
       mariaHead(ctx, cx - 2, cy + 0.5, 5.5, maria);
