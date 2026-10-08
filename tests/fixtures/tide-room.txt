@@ -2,6 +2,8 @@
 ; ponton posé sur le sable (il flotte à marée haute), une falaise à droite. À marée basse, on marche
 ; sur le sable (une trouvaille) ; à marée haute, le ponton monte et mène à la falaise (en grimpant).
 ; @name: Marée (essai)
+; @shell: tide-pontoon 32 3
+; @shell: tide-sand 13 13
 ; @tide: 14 10
 ; @sea: 11 1 14 15
 ; @rise: 18 13 4 1
