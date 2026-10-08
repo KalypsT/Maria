@@ -102,6 +102,39 @@ describe('objets de capacité (D-26)', () => {
     );
   });
 
+  it('@shell : son intention (D-148), et @hide : une cachette', () => {
+    const grid = ['######', '#P.S.#', '######'];
+    const level = parseAsciiLevel(
+      'r',
+      [
+        '; @shell: a 3 1 medium climb wall-jump growth from 1,1 high',
+        '; @hide: sheet 2 0 2 2',
+        ...grid,
+      ].join('\n'),
+    );
+    expect(level.entities.find((e) => e.name === 'a')?.intent).toEqual({
+      difficulty: 'medium',
+      needs: ['climb', 'wall-jump'],
+      growth: true,
+      crawl: false,
+      from: { col: 1, row: 1 },
+      high: true,
+    });
+    expect(level.hides).toEqual([{ kind: 'sheet', col: 2, row: 0, width: 2, height: 2 }]);
+    expect(
+      parseAsciiLevel('r', ['; @shell: a 3 1', ...grid].join('\n')).entities[0],
+    ).not.toHaveProperty('intent');
+    expect(() => parseAsciiLevel('r', ['; @shell: a 3 1 tricky', ...grid].join('\n'))).toThrow(
+      /difficulté « tricky »/,
+    );
+    expect(() => parseAsciiLevel('r', ['; @shell: a 3 1 easy fly', ...grid].join('\n'))).toThrow(
+      /« fly » inconnu/,
+    );
+    expect(() => parseAsciiLevel('r', ['; @hide: sheet 5 0 2 2', ...grid].join('\n'))).toThrow(
+      /@hide sheet hors de la salle/,
+    );
+  });
+
   it('chaque coquille du jeu a un nom, unique dans toute la zone', () => {
     const names = [...buildZone(HOUSE).rooms.values()].flatMap((level) =>
       level.entities.filter((e) => e.type === EntityType.Shell).map((e) => e.name),

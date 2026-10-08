@@ -1,7 +1,7 @@
 ; Couloir de l'étage (D-75) : un plafond bas à gauche, un œil-de-bœuf sous la lune au milieu, la
 ; cage haute de la trappe à linge à droite, au-dessus du placard de la porte de l'escalier.
 ; @name: Couloir
-; @shell: hall-mirror 8 6
+; @shell: hall-mirror 8 6 medium climb growth
 ; @icon: door
 ; @ambient: #2a2d38
 ; @note: trappe à linge (sortie 3) : sur le placard au-dessus de la porte, en grimpant depuis la commode (D-26).

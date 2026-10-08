@@ -5,8 +5,6 @@
 ; Défi : la fleur géante, jusqu'au rebord de sa trouvaille. Dans le deuxième pot, ouvert dans le
 ; souvenir, une trouvaille. Sortie (1) vers la chambre ; porte (2) vers la maison.
 ; @name: Le jardin renversé
-; @shell: nanny-garden-ledge 2 2
-; @shell: nanny-garden-pot 43 20
 ; @world: strange
 ; @mapped: yes
 ; @music: strange
@@ -47,7 +45,7 @@
 ; Légende : # mur/sol, b bois et v feuillage (pleins), - branche ou étagère et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S coquille (nommée par ; @shell:), 1-9 sorties.
 ########################################################################
 #...........!.!........................................................#
-#.S.........!.!........................................................#
+#...........!.!........................................................#
 #vvv........!.!........................................................#
 #vvv...-....!.!........................................................#
 #...........!.!........................................................1
@@ -65,7 +63,7 @@
 #...............bbbbbbbbbbbb............bbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
 #...............bbbbbbbbbbbb............bbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
 #...............bbbbbbbbbbbb............bbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
-#...............bbbbbbbbbbbbb..!!!!!.!!!bbbSbbbbbbbbbbbbbbbbvvvvvvvvvvv#
+#...............bbbbbbbbbbbbb..!!!!!.!!!bbb.bbbbbbbbbbbbbbbbvvvvvvvvvvv#
 #...............bbbbbbbbbbbb...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
 #...............bbbbbbbbbbbb...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
 #...............bbbbbbbbbbbb...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#

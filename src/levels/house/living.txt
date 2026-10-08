@@ -4,8 +4,9 @@
 ; Rien ne flotte : les appuis de la route haute pendent (plantes, lustre) ou tiennent au sol ; les
 ; briques de jeu traînent sur le parquet.
 ; @name: Salon
-; @shell: living-clock 61 8
-; @shell: living-sofa 18 21
+; @shell: living-clock 61 8 easy climb
+; @shell: living-sofa 18 21 easy slide crawl
+; @shell: living-mantel 35 15 easy
 ; @icon: sofa
 ; @ambient: #2e2b33
 ; @note: route haute (en grimpant, facile) : placard mural, deux plantes suspendues, tringle du rideau, lustre, dessus de la bibliothèque.
@@ -48,7 +49,7 @@
 #................................................................#
 #.............................................--------------.....#
 #.bbbbb..........................................................#
-#.bbbbb..........................................................#
+#.bbbbb............................S.............................#
 #................................------------.--------...........#
 #................................................................#
 #.......tt.........tt............................................#

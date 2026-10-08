@@ -1,7 +1,7 @@
 ; Buanderie (D-75) : on y trouve de quoi grimper (objet A, placeholder) ; on en ressort par la trappe à
 ; linge. Un plafond bas et ses tuyaux, une ampoule nue au-dessus de la machine, le linge qui tourne.
 ; @name: Buanderie
-; @shell: laundry-wardrobe 40 4
+; @shell: laundry-wardrobe 40 4 easy wall-jump
 ; @icon: machine
 ; @ambient: #29303a
 ; @ability: climb
