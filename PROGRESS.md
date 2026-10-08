@@ -8,7 +8,7 @@
 
 **Sensations, son, aide et mondes étranges** (D-124) : chantiers **A** (fluidité et sensations), **B** (bruitages et vibrations) et **C** (le fil discret) faits et fusionnés (D-124 à D-129). **Chantier D, PR 1 faite : trois maquettes de la gare étrange** (D-130), sur `ccr-9d90352a-xuwhs1`. Suite : **le choix de l'utilisateur** (A, B, C ou un mélange), puis la gare étrange refaite (D2) et les autres mondes étranges un par un. En attente : essais sur téléphone (compteur de saccades, sensations, sons de test, vibrations, fil discret) ; les sons à fournir (`docs/BRUITAGES.md`) ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades.
 
-**Les personnages illustrés** (D-123, D-146) : papa illustré partout, maman sauf au canapé et au banc (images de l'utilisateur générées avec ChatGPT, prompts dans `docs/PROMPTS_PERSONNAGES.md`), sur `ccr-142ffd96-q5pgli`. Suite : maman au canapé et au banc (jambes repliées), Céleste en pièces illustrées (planches reçues, pièces à refaire : jambe seule, tête et torse du pyjama).
+**Les personnages illustrés** (D-123, D-146, D-147) : papa et maman illustrés partout ; **Céleste illustrée en pyjama** (pièces de papier découpé), sur `ccr-142ffd96-q5pgli`. Suite : essai sur téléphone, puis la robe et la veste (pièces reçues), puis le chat, la nounou, Eden.
 
 **Le niveau 7 plus lisible** (retour d'essai, D-122) : les quatre cubes de la tour d'Eden à la place des objets déjà vus, la porte de la sieste et ses creux, le regard vers la porte, la carte, la salle de jeux où la tour monte, le souvenir d'Eden retravaillé (la tour chacun son tour, le cache-cache avec un compte), Eden blond à la coupe au bol, sur `ccr-abfc1233-t31o4v`. Suite : **essai sur téléphone**.
 
@@ -31,6 +31,13 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Céleste illustrée en pyjama ; maman au canapé et au banc (D-147)
+
+- La marionnette prend les pièces illustrées du pyjama (`CELESTE_PART_IMAGES`, `public/art/celeste/`), composées par `scripts/celeste-parts.py` ; de profil (`PROFILE_LAYOUT`). Robe et veste : encore dessinées par le code. Monde étrange : silhouette dessinée.
+- Maman au canapé (jambes repliées) et accroupie à côté du banc de l'aire de jeux.
+- Vérifié dans Chromium : Céleste à l'arrêt, en course, en saut (parcours « Premiers pas ») ; le salon, l'aire de jeux.
+- [ ] À vérifier sur téléphone : Céleste se lit-elle à sa taille (visage, lunettes, couette) ? Le cou, les épaules, les jambes en course : des jointures visibles ? Le corps de profil paraît-il trop mince ? Maman accroupie près du banc : naturel ?
 
 ### Les personnages illustrés : papa complet, maman (D-146)
 

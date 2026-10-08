@@ -1201,7 +1201,8 @@ export const HOUSE_STORY: StoryData = {
       id: 'mom-bench',
       room: 'playground',
       kind: 'mom-bench',
-      col: 10,
+      // Accroupie au soleil à côté du banc, les pieds au sol (D-147).
+      col: 12,
       row: 26,
       when: { all: [F.GateOpen] },
     },

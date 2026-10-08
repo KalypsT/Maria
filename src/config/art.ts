@@ -713,12 +713,24 @@ export const CHARACTER_IMAGES: Readonly<Partial<Record<PropKind, CharacterImage>
   'dad-garden': { file: 'dad-garden.png', footX: 0.19 },
   'dad-quay': { file: 'dad-quay.png', footX: 0.24 },
   // Assise au bord du lit (4 tuiles de haut) : les pieds pendent un peu au-dessus du sol. Les pieds
-  // au milieu du cadre placent les hanches là où s'asseyait le dessin. Le canapé (2 tuiles) et le
-  // banc (1 tuile) attendent une pose aux jambes repliées : celles-ci traverseraient le sol.
+  // au milieu du cadre placent les hanches là où s'asseyait le dessin.
   'mom-bed': { file: 'mom-bed.png', footX: 0.48, seat: 0.6 },
+  // Jambes repliées sur le canapé (2 tuiles de haut) ; les hanches vers l'arrière du cadre.
+  'mom-sofa': { file: 'mom-sofa.png', footX: 0.36, seat: 0.74 },
+  // Accroupie à côté du banc (1 tuile), les pieds au sol : 16 px sous le bas du cadre.
+  'mom-bench': { file: 'mom-bench.png', footX: 0.37, seat: 0.87 },
   'mom-garden': { file: 'mom-garden.png', footX: 0.3 },
   'mom-yard': { file: 'mom-yard.png', footX: 0.38 },
   'mom-quay': { file: 'mom-quay.png', footX: 0.33 },
+};
+
+/**
+ * Céleste illustrée (D-147) : par tenue, les pièces de la marionnette (noms de `CELESTE_PARTS`),
+ * composées par `scripts/celeste-parts.py` dans `public/art/celeste/<tenue>-<pièce>.png`. Une tenue
+ * absente garde le dessin par code ; ses autres pièces (parapluie, crochet…) aussi.
+ */
+export const CELESTE_PART_IMAGES: Readonly<Partial<Record<CelesteOutfit, readonly string[]>>> = {
+  pyjama: ['head', 'pigtail', 'torso', 'arm', 'leg'],
 };
 
 /**
