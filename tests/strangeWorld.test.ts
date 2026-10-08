@@ -90,6 +90,7 @@ describe('monde étrange (D-34)', () => {
       'nanny-playroom',
       'finale-bed',
       'finale-sky',
+      'finale-big',
     ]);
     // La maison de la nounou a sa page du cahier (D-107) ; les autres restent hors carte, comme la
     // cage d'escalier et la salle de jeux du boss (D-117), et le monde de Maria (D-138).

@@ -1,13 +1,12 @@
 ; Le dernier niveau (D-138, D-143), la chambre grande : la chambre du premier soir, deux fois trop
-; grande, la nuit ; l'étrange s'efface (pas de couches, la palette presque vraie, la musique de la
-; maison). Céleste arrive par la petite porte du grenier, en haut à droite, sur l'étagère haute (une
+; grande, la nuit ; l'étrange s'efface (pas de couches, la palette presque vraie). Céleste arrive par la petite porte du grenier, en haut à droite, sur l'étagère haute (une
 ; veilleuse) ; elle redescend par le surmeuble et le bureau (le raccourci du retour, D-27) jusqu'à
 ; la porte de la chambre : la vraie chambre. Le berceau, sous le mobile, sur le coffre à jouets :
 ; ses côtés sont trop hauts pour voir dedans. Ni danger, ni ennemi, ni trouvaille. Facile.
 ; @name: La chambre grande
 ; @world: strange
 ; @palette: nightlight-soft
-; @music: house
+; @music: strange
 ; @difficulty: easy
 ; @ambient: #232a4a
 ; Tronçon (D-96) : de l'étagère haute à la porte.

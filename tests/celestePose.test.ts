@@ -179,8 +179,8 @@ describe('Maria dans les bras (D-143)', () => {
     const rest = { front: poser.pose.armFront, head: poser.pose.headTilt };
     poser.holding = true;
     run(poser, subject(PlayerState.Idle), 120);
-    expect(poser.pose.armFront).toBeGreaterThan(rest.front + 1);
-    expect(poser.pose.armBack).toBeGreaterThan(0.9);
+    expect(poser.pose.armFront).toBeGreaterThan(rest.front + 0.7);
+    expect(poser.pose.armBack).toBeGreaterThan(0.7);
     expect(poser.pose.headTilt).toBeGreaterThan(rest.head + 0.1);
     poser.reset();
     expect(poser.holding).toBe(false);

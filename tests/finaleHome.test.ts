@@ -124,11 +124,12 @@ describe('la chambre grande (D-143)', () => {
     }
   });
 
-  it('un monde étrange qui s’efface : hors carte, presque vrai, la musique de la maison ; plus de couches ; facile', () => {
+  it('un monde étrange qui s’efface : hors carte, presque vrai ; plus de couches ; facile', () => {
     expect(isStrangeRoom(big)).toBe(true);
     expect(isMappedRoom(big)).toBe(false);
     expect(big.meta.palette).toBe('nightlight-soft');
-    expect(big.meta.music).toBe('house');
+    // Le thème des mondes étranges (D-94), en attendant le thème de fin.
+    expect(big.meta.music).toBe('strange');
     expect(big.meta.difficulty).toBe('easy');
     expect(big.layers).toBeNull();
     expect(big.erase).toBeNull();
