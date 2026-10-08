@@ -1,7 +1,8 @@
 """Détoure une illustration fournie sur fond blanc (personnages, D-123).
 
 Usage : python3 scripts/art-cutout.py entrée.png sortie.png [--height 900] [--seed x,y ...]
-        [--keep x,y ...] [--holes N] [--largest] [--halo 0.3]
+        [--keep x,y ...] [--holes N] [--largest] [--ring 120] [--reach 4]
+        [--halo 0.3]
 
 - Le fond : le blanc relié aux bords de l'image.
 - --seed : un point d'un blanc enfermé à retirer aussi (entre les jambes, sous un bras), en px de
@@ -9,6 +10,10 @@ Usage : python3 scripts/art-cutout.py entrée.png sortie.png [--height 900] [--s
 - --keep : un point clair à garder malgré tout (des dents tout contre le profil), en px de l'entrée.
 - --holes N : blancs purs enfermés d'au moins N px retirés aussi (sans désigner de point).
 - --largest : seul le plus grand morceau est gardé (un enfant dessiné à côté, par exemple).
+- --ring N : seuil (0-255) du tour sombre d'une poche claire retirée ; plus haut pour des boucles
+  fines (120 par défaut).
+- --reach N : distance (px) entre une poche claire et le fond, au plus (4 par défaut ; plus pour
+  des mèches épaisses).
 - --halo : fraction du haut de la silhouette (les cheveux) où le liseré clair laissé par le
   générateur est rongé ; le bas (semelles blanches) est épargné.
 - Bord adouci, image recadrée sur le personnage puis ramenée à --height px de haut.
@@ -33,6 +38,8 @@ def main() -> None:
     parser.add_argument("--keep", action="append", default=[])
     parser.add_argument("--holes", type=int, default=0)
     parser.add_argument("--largest", action="store_true")
+    parser.add_argument("--ring", type=int, default=120)
+    parser.add_argument("--reach", type=int, default=4)
     args = parser.parse_args()
 
     rgb = np.asarray(Image.open(args.src).convert("RGB")).astype(np.int16)
@@ -75,13 +82,13 @@ def main() -> None:
     kept = [tuple(int(v) for v in point.split(",")) for point in args.keep]
     for index, box in enumerate(ndimage.find_objects(pockets), start=1):
         pocket = pockets[box] == index
-        if distance[box][pocket].min() > 4:
+        if distance[box][pocket].min() > args.reach:
             continue
         y0, x0 = max(box[0].start - 3, 0), max(box[1].start - 3, 0)
         area = (slice(y0, box[0].stop + 3), slice(x0, box[1].stop + 3))
         inside = pockets[area] == index
         ring = ndimage.binary_dilation(inside, iterations=2) & ~inside & ~background[area]
-        if ring.any() and lo[area][ring].mean() < 120:
+        if ring.any() and lo[area][ring].mean() < args.ring:
             if not any((pockets[y - 4 : y + 5, x - 4 : x + 5] == index).any() for x, y in kept):
                 background[area] |= inside
 

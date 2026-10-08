@@ -96,6 +96,7 @@ import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
 import { PauseMenu } from '../ui/PauseMenu';
 import {
   ART_IMAGES,
+  CELESTE_PART_IMAGES,
   CHARACTER_IMAGES,
   DAY_PALETTE,
   DEFAULT_ART_FINISH,
@@ -127,7 +128,7 @@ import type { Box } from '../core/physics/gridCollision';
 import { StoryView } from './StoryView';
 import { StrangeFxView } from './StrangeFxView';
 import { CombatView } from './CombatView';
-import { CelestePuppet } from './CelestePuppet';
+import { CelestePuppet, celestePartKey } from './CelestePuppet';
 import { RoomArtView } from './RoomArtView';
 import { FinishView } from './FinishView';
 import { BackdropView } from './BackdropView';
@@ -507,6 +508,13 @@ export class GameScene extends Phaser.Scene {
     // Images fournies (D-28) : elles remplacent le dessin par code de l'élément du même nom.
     for (const [key, file] of Object.entries(ART_IMAGES)) {
       this.load.image(`art:${key}`, `art/${file}`);
+    }
+    // Céleste illustrée (D-147), une image par pièce et par tenue.
+    for (const [outfit, parts] of Object.entries(CELESTE_PART_IMAGES)) {
+      for (const part of parts) {
+        const key = celestePartKey(outfit, part);
+        this.load.image(`art:${key}`, `art/celeste/${outfit}-${part}.png`);
+      }
     }
     // Personnages illustrés (D-123) : une image peut servir à plusieurs poses.
     for (const { file } of Object.values(CHARACTER_IMAGES)) {
@@ -1961,6 +1969,9 @@ export class GameScene extends Phaser.Scene {
     const keys = [
       ...Object.keys(ART_IMAGES),
       ...Object.values(CHARACTER_IMAGES).map((character) => character.file),
+      ...Object.entries(CELESTE_PART_IMAGES).flatMap(([outfit, parts]) =>
+        parts.map((part) => celestePartKey(outfit, part)),
+      ),
     ];
     for (const key of keys) {
       if (this.textures.exists(`art:${key}`)) {
