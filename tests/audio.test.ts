@@ -195,6 +195,8 @@ describe('silences de Maria dans l’histoire (D-57)', () => {
     expect(hushed.map((t) => t.id).sort()).toEqual(
       [
         'evening-sleep',
+        // Le dernier plan (D-144) : la vue reste sur Maria.
+        'finale-leave',
         'hedge-enter',
         'living-see',
         'living-vanish',
