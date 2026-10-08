@@ -714,6 +714,30 @@ export const SHELL_ART = {
 } as const;
 
 /**
+ * Le bocal à coquilles (D-148) : dans la chambre, sur le bureau, sous l'étagère où Maria finira
+ * rangée (tuile du bas, posé sur le plateau). Une petite coquille par coquille trouvée, en tas.
+ * PLACEHOLDER (dessiné par le code), place à confirmer.
+ */
+export const SHELL_JAR = {
+  room: 'bedroom',
+  col: 31,
+  row: 14,
+  /** Taille du bocal (px logiques), enfoncé d'autant dans le plateau. */
+  widthPx: 24,
+  heightPx: 32,
+  sinkPx: 1,
+  /**
+   * Les petites coquilles : hauteur (px), par rangée, montée d'une rangée à l'autre au plus (px) ;
+   * les rangées se tassent pour que le bocal soit plein quand toutes sont trouvées.
+   */
+  shellPx: 5,
+  perRow: 5,
+  stepYPx: 2.6,
+  /** Devant le décor, derrière les personnages (comme les objets de l'histoire). */
+  depth: 5,
+} as const;
+
+/**
  * Personnage illustré (D-123) : image fournie sous `public/art/` (détourée, `scripts/art-cutout.py`),
  * à la place du dessin par code. Elle remplit la hauteur du personnage ; `footX` (fraction de la
  * largeur de l'image) est l'axe des pieds, posé au milieu du cadre comme le corps dessiné ; une

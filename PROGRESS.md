@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Les coquilles** (les trouvailles revues, D-148) : audit fait (`docs/COQUILLES.md`), choix de l'utilisateur et plan validés en 6 PR (le système ; la carte et le cahier ; la boîte à coquilles et la fin ; la liste vérifiée, la maison et le jardin ; le quartier et la gare ; le train et la mer). **PR 1 faite : le système** (les noms fixes, la coquille posée et son scintillement, le compteur au ramassage, le debug) et **PR 2 faite : la carte et le cahier** (les coquilles vues en pointillés, « n/N » du lieu, la page qui se colorie), sur `ccr-c9ed5a1e-fyh3vf`. Suite : la PR 3 (la boîte à coquilles dans la chambre, le petit escargot de l'écran de fin). Rien au bout des défis de la nounou pour l'instant (choix de l'utilisateur).
+**Les coquilles** (les trouvailles revues, D-148) : audit fait (`docs/COQUILLES.md`), choix de l'utilisateur et plan validés en 6 PR (le système ; la carte et le cahier ; la boîte à coquilles et la fin ; la liste vérifiée, la maison et le jardin ; le quartier et la gare ; le train et la mer). **PR 1 faite : le système** (les noms fixes, la coquille posée et son scintillement, le compteur au ramassage, le debug), **PR 2 faite : la carte et le cahier** (les coquilles vues en pointillés, « n/N » du lieu, la page qui se colorie) et **PR 3 faite : le bocal à coquilles dans la chambre et le petit escargot de la fin**, sur `ccr-c9ed5a1e-fyh3vf`. Suite : la PR 4 (la liste vérifiée, les coquilles retirées des lieux sans retour, la maison et le jardin replacés). Rien au bout des défis de la nounou pour l'instant (choix de l'utilisateur).
 
 **Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139) , **PR 2 faite : la berceuse, le moteur et le parcours d'essai 17** (D-140), **PR 3 faite : la chambre immense, le lit et le coffre** (D-141), **PR 4 faite : le ciel de la chambre** (D-142), **PR 5 faite : la chambre grande, la vraie chambre la nuit, Maria retrouvée** (D-143), **PR 6 faite : le matin et le dernier plan** (D-144) et **PR 7 faite : après la fin** (D-145), sur `ccr-06b9800a-238lrq`. **Le niveau 8 est complet : le jeu se joue du premier soir à la fin.** Suite : **essai sur téléphone** (le parcours 17, tout le monde de Maria, toute la fin) ; à fournir : le thème de fin (`ending`), le jingle de Maria, Céleste en phase 4 illustrée.
 
@@ -33,6 +33,13 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les coquilles, PR 3 : le bocal et le petit escargot de la fin (D-148)
+
+- Un bocal en verre (coiffé de tissu rose à pois) sur le bureau de la chambre, sous l'étagère de Maria : une petite coquille par coquille trouvée, plein quand tout est trouvé. (« Boîte » devenue bocal : on voit le tas monter.)
+- Toutes les coquilles trouvées : sur l'écran de fin, un petit escargot avance très lentement sur l'étagère vers Maria, et laisse une trace argentée.
+- Vérifié dans Chromium : le bocal à 20 puis à 57 coquilles, l'escargot (animation accélérée pour l'essai) qui s'arrête à côté de Maria.
+- [ ] À vérifier sur téléphone : le bocal se remarque-t-il (taille, place sur le bureau) ? Plein, se lit-il comme plein ? L'escargot : assez lent, assez visible, touchant ?
 
 ### Les coquilles, PR 2 : la carte et le cahier (D-148)
 

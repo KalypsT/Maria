@@ -370,6 +370,13 @@ export const END_SCREEN = {
   continueAfterMs: 5000,
   /** L'image de Maria (fournie par l'utilisateur, D-31), par rapport à la racine du site. */
   mariaImage: 'art/maria.png',
+  /**
+   * Toutes les coquilles trouvées (D-148) : un petit escargot traverse l'étagère vers Maria, très
+   * lentement (ms), un peu après l'arrivée de l'écran (ms) ; sa coquille, l'image fournie.
+   */
+  snailMs: 48000,
+  snailDelayMs: 3400,
+  shellImage: 'art/shell.png',
 } as const;
 
 /** Période du petit mouvement en boucle des personnages (ms), D-37. */
