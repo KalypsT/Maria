@@ -878,6 +878,9 @@ body {
   display: flex;
   gap: clamp(6px, 1.4vw, 18px);
   margin: 0 0 4px clamp(10px, 3vw, 34px);
+  /* Six onglets (D-153) : sur un écran étroit, ils défilent sous le doigt plutôt que d'être coupés. */
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .map-title {
