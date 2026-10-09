@@ -15,6 +15,9 @@ import { playableOf, type PlayableMemoryId } from '../config/playableMemories';
 import { drawMemory } from '../scenes/art/memoryArt';
 import { drawShellFallback, drawShellOutline } from '../scenes/art/shellArt';
 import { ART_IMAGES } from '../config/art';
+import type { NotebookFigures } from '../core/world/notebookFigures';
+import { formatPlayTime } from '../core/save/stats';
+import { drawFigureIcon, type FigureIcon } from '../scenes/art/figureArt';
 
 /** Taille d'une coquille sur la carte (px CSS, D-148). */
 const MAP_SHELL_PX = 14;
@@ -51,7 +54,7 @@ function seeded(text: string): () => number {
  * qu'elle est ouverte ; un toucher ou le bouton Carte la referme. Dessinée au crayon : salles
  * visitées, salles devinées (« ? »), passages, veilleuses allumées, trouvailles, Céleste.
  */
-type NotebookPage = 'map' | 'memories' | 'maria' | 'strange' | 'abilities';
+type NotebookPage = 'map' | 'memories' | 'maria' | 'strange' | 'abilities' | 'journey';
 
 export class MapPage {
   private readonly root: HTMLElement;
@@ -61,6 +64,9 @@ export class MapPage {
   private readonly mariaTab: HTMLButtonElement;
   private readonly strangeTab: HTMLButtonElement;
   private readonly abilitiesTab: HTMLButtonElement;
+  private readonly journeyTab: HTMLButtonElement;
+  /** Les chiffres de la page « Mon voyage » (D-153). */
+  private figures: NotebookFigures | null = null;
   /** Capacités acquises (D-62), pour la page « Mes capacités ». */
   private abilities: ReadonlySet<string> = new Set();
   /** Page affichée : la carte, les souvenirs (D-38) ou les affaires de Maria (D-58). */
@@ -107,13 +113,24 @@ export class MapPage {
     this.abilitiesTab = document.createElement('button');
     this.abilitiesTab.className = 'map-title';
     this.abilitiesTab.textContent = 'Mes capacités';
-    tabs.append(this.title, this.memoriesTab, this.mariaTab, this.strangeTab, this.abilitiesTab);
+    this.journeyTab = document.createElement('button');
+    this.journeyTab.className = 'map-title';
+    this.journeyTab.textContent = 'Mon voyage';
+    tabs.append(
+      this.title,
+      this.memoriesTab,
+      this.mariaTab,
+      this.strangeTab,
+      this.abilitiesTab,
+      this.journeyTab,
+    );
     for (const [tab, page] of [
       [this.title, 'map'],
       [this.memoriesTab, 'memories'],
       [this.mariaTab, 'maria'],
       [this.strangeTab, 'strange'],
       [this.abilitiesTab, 'abilities'],
+      [this.journeyTab, 'journey'],
     ] as const) {
       tab.type = 'button';
       tab.addEventListener('pointerup', (event) => {
@@ -142,7 +159,8 @@ export class MapPage {
 
   /**
    * Ouvre le cahier sur la carte. `bounds` : boîte englobant toute la zone (disposition stable) ;
-   * `memories` : souvenirs trouvés ; `abilities` : capacités acquises.
+   * `memories` : souvenirs trouvés ; `abilities` : capacités acquises ; `figures` : les chiffres
+   * de la page « Mon voyage » (D-153).
    */
   open(
     model: MapModel,
@@ -150,8 +168,10 @@ export class MapPage {
     bounds: MapBox,
     memories: readonly string[] = [],
     abilities: readonly string[] = [],
+    figures: NotebookFigures | null = null,
   ): void {
     this.model = model;
+    this.figures = figures;
     this.bounds = bounds;
     this.title.textContent = title;
     this.found = new Set(memories);
@@ -187,6 +207,76 @@ export class MapPage {
     this.mariaTab.classList.toggle('active', page === 'maria');
     this.strangeTab.classList.toggle('active', page === 'strange');
     this.abilitiesTab.classList.toggle('active', page === 'abilities');
+    this.journeyTab.classList.toggle('active', page === 'journey');
+  }
+
+  /**
+   * Page « Mon voyage » (D-153, choix de l'utilisateur) : peu de texte, un pictogramme et un chiffre
+   * par ligne : le temps de jeu, les coquilles, les souvenirs, les lieux découverts, les
+   * évanouissements (une petite lune). Deux colonnes en paysage.
+   */
+  private drawJourney(ctx: CanvasRenderingContext2D, width: number, height: number): void {
+    const f = this.figures;
+    if (!f) {
+      return;
+    }
+    const ink = themeColor('--ink');
+    const pencil = themeColor('--pencil');
+    const rose = themeColor('--crayon-rose');
+    const blue = themeColor('--crayon-blue');
+    const lamp = themeColor('--lamp');
+    const font = getComputedStyle(document.body).fontFamily;
+    const tally = (t: { found: number; total: number }) =>
+      `${String(t.found)} / ${String(t.total)}`;
+    const rows: { icon: FigureIcon | 'shell'; text: string; accent: string; full: boolean }[] = [
+      { icon: 'time', text: formatPlayTime(f.playMs), accent: lamp, full: false },
+      {
+        icon: 'shell',
+        text: tally(f.shells),
+        accent: rose,
+        full: f.shells.total > 0 && f.shells.found === f.shells.total,
+      },
+      {
+        icon: 'memories',
+        text: tally(f.memories),
+        accent: rose,
+        full: f.memories.total > 0 && f.memories.found === f.memories.total,
+      },
+      {
+        icon: 'places',
+        text: tally(f.places),
+        accent: blue,
+        full: f.places.total > 0 && f.places.found === f.places.total,
+      },
+      { icon: 'faints', text: String(f.faints), accent: lamp, full: false },
+    ];
+    const cols = width >= 520 ? 2 : 1;
+    const perCol = Math.ceil(rows.length / cols);
+    const colW = width / cols;
+    const rowH = Math.min(92, (height - 16) / perCol);
+    const box = rowH * 0.74;
+    ctx.lineCap = 'round';
+    rows.forEach((row, i) => {
+      const col = Math.floor(i / perCol);
+      const left = col * colW + Math.max(20, colW * 0.12);
+      const cy = 8 + rowH * ((i % perCol) + 0.5);
+      ctx.strokeStyle = pencil;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.roundRect(left, cy - box / 2, box, box, 10);
+      ctx.stroke();
+      if (row.icon === 'shell') {
+        this.drawShell(ctx, left + box / 2, cy, box * 0.56);
+      } else {
+        drawFigureIcon(ctx, row.icon, left + box / 2, cy, box * 0.78, ink, row.accent);
+      }
+      // Tout trouvé : le chiffre en rose, comme le compte des coquilles d'un lieu (D-148).
+      ctx.fillStyle = row.full ? rose : ink;
+      ctx.font = `italic 600 ${String(Math.round(Math.min(30, rowH * 0.36)))}px ${font}`;
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'left';
+      ctx.fillText(row.text, left + box + 18, cy);
+    });
   }
 
   /**
@@ -363,6 +453,10 @@ export class MapPage {
     ctx.clearRect(0, 0, width, height);
     if (this.page === 'abilities') {
       this.drawAbilities(ctx, width, height);
+      return;
+    }
+    if (this.page === 'journey') {
+      this.drawJourney(ctx, width, height);
       return;
     }
     const list = this.memoryList();

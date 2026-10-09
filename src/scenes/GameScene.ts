@@ -159,6 +159,7 @@ import { CelesteHalo } from './CelesteHalo';
 import { STRANGE_MOCKUP_PALETTES, type StrangeMockup } from '../config/strangeThemes';
 import { HINT } from '../config/hint';
 import { STATS } from '../config/stats';
+import { notebookFigures } from '../core/world/notebookFigures';
 import {
   HintClock,
   HintStage,
@@ -1205,6 +1206,7 @@ export class GameScene extends Phaser.Scene {
       mapBounds(zone, page),
       data.progression.memories,
       this.ownedAbilities(),
+      notebookFigures(zone, data),
     );
     this.audio.sfx.play('map-open');
   }

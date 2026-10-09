@@ -2211,3 +2211,10 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Écriture** : le temps reste en mémoire et part avec chaque sauvegarde ; au plus tard toutes les minutes de jeu (`STATS.saveEveryMs`), et à la pause (appli en arrière-plan comprise) ; un évanouissement est écrit aussitôt. Rien à chaque image (aucune allocation, sauf la première fois dans une salle).
 - **Le code de sauvegarde** contient les stats : un joueur d'essai peut envoyer sa partie et ses chiffres. « Nouvelle partie » repart de zéro.
 - **Debug** : DEBUG → « Stats » : le temps et les évanouissements, par lieu (page du cahier) et par salle, le fil discret ; « Remettre à zéro » (confirmé).
+
+### D-153, PR 2 : la page « Mon voyage » du cahier
+
+- **Un sixième onglet du cahier, « Mon voyage »** (`MapPage`, `drawJourney`) : peu de texte, un pictogramme au crayon et un chiffre par ligne, deux colonnes en paysage (une sur un écran étroit) : **le temps de jeu** (un réveil), **les coquilles** (l'image de la coquille, « 5 / 47 »), **les souvenirs** (une photo et un cœur ; les trois pages du cahier, sans les disques), **les lieux découverts** (une maison ; les salles de la carte, sans le monde étrange), **les évanouissements** (une petite lune et une étoile, jamais le mot « mort » ni « échec », choix de l'utilisateur). Un compte complet s'écrit en rose, comme le compte des coquilles d'un lieu.
+- **Les chiffres** (`notebookFigures`, pur, testé) : lus dans la sauvegarde au moment d'ouvrir le cahier ; rien de nouveau n'est enregistré.
+- **Les onglets défilent** sous le doigt quand l'écran est trop étroit pour les six (au lieu d'être coupés).
+- Pictogrammes : PLACEHOLDER dessinés par le code (`src/scenes/art/figureArt.ts`).
