@@ -178,10 +178,10 @@ describe('le train, PR 6a : le matin, la gare de la mer, le train à quai (D-90)
     expect(zone.destination(SEA, 1)).toEqual({ room: 'train-couchettes', exit: 2 });
     expect(zone.destination(SEA, 2)).toEqual({ room: 'sea-promenade', exit: 1 });
     expect(zone.destination('train-baggage', 4)).toEqual({ room: 'station-platforms', exit: 4 });
-    // La lanterne de la gare de la mer n'a pas bougé (son identifiant dépend de sa position).
-    expect(sea.entities.filter((e) => e.type === EntityType.Checkpoint)).toEqual([
-      { type: EntityType.Checkpoint, col: 24, row: 17 },
-    ]);
+    // La lanterne de la gare de la mer, nommée (D-152).
+    expect(sea.entities.filter((e) => e.type === EntityType.Checkpoint).map((e) => e.name)).toEqual(
+      ['sea-station-quay'],
+    );
   });
 
   it('les portes du train à quai : cachées et fermées avant l’arrivée, ouvertes ensuite', () => {
