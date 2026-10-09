@@ -4,7 +4,6 @@ import { StoryFlag } from '../src/config/story';
 import { EntityType, Tile, tileAt, type LevelData } from '../src/core/level/LevelData';
 import { parseAsciiLevel } from '../src/core/level/parseAsciiLevel';
 import { atTide, highTide } from '../src/core/level/tide';
-import { secretId } from '../src/core/world/Pickups';
 import { StoryDirector, type StoryHost } from '../src/core/story/StoryDirector';
 import type { StoryData } from '../src/core/story/story';
 import { storyProblems } from '../src/core/story/storyProblems';
@@ -102,11 +101,12 @@ describe('la marée : deux variantes statiques d’une salle (D-95)', () => {
   it('mêmes identifiants aux deux marées ; la trouvaille noyée n’est qu’à marée basse', () => {
     expect(high.id).toBe(low.id);
     const secrets = (level: LevelData) =>
-      level.entities
-        .filter((e) => e.type === EntityType.Secret)
-        .map((e) => secretId(level.id, e.col, e.row));
-    expect(secrets(low)).toEqual([secretId(ROOM, 32, 3), secretId(ROOM, 13, 13)]);
-    expect(secrets(high)).toEqual([secretId(ROOM, 32, 3)]);
+      level.entities.filter((e) => e.type === EntityType.Shell).map((e) => [e.col, e.row]);
+    expect(secrets(low)).toEqual([
+      [32, 3],
+      [13, 13],
+    ]);
+    expect(secrets(high)).toEqual([[32, 3]]);
     expect(high.entities.filter((e) => e.type === EntityType.Checkpoint)).toEqual(
       low.entities.filter((e) => e.type === EntityType.Checkpoint),
     );
@@ -147,7 +147,7 @@ describe('la marée : deux variantes statiques d’une salle (D-95)', () => {
         'x',
         room(lines('#.P........#', '####.S...###'), ['tide: 5 5', 'sea: 4 1 5 6']),
       ),
-    ).toThrow(/trouvaille sous l'eau à marée basse/);
+    ).toThrow(/coquille sous l'eau à marée basse/);
     expect(() =>
       parseAsciiLevel(
         'x',
@@ -308,8 +308,7 @@ describe('le parcours d’essai 13 « Marée » (D-97)', () => {
 
   it('a ce qui flotte et une trouvaille noyée à marée haute', () => {
     expect(course.tide?.rises).toHaveLength(2);
-    const secrets = (level: LevelData) =>
-      level.entities.filter((e) => e.type === EntityType.Secret);
+    const secrets = (level: LevelData) => level.entities.filter((e) => e.type === EntityType.Shell);
     expect(secrets(course)).toHaveLength(1);
     expect(secrets(highTide(course))).toHaveLength(0);
   });

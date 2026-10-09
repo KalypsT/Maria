@@ -30,6 +30,11 @@ export interface SaveData {
   progression: {
     abilities: string[];
     collectibles: string[];
+    /**
+     * Coquilles vues mais pas encore prises (D-148), dessinées en pointillés sur la carte. Absent
+     * des sauvegardes plus anciennes : vide (aucune migration).
+     */
+    seenCollectibles: string[];
     memories: string[];
     mapRevealed: string[];
   };
@@ -93,7 +98,13 @@ export function createNewSave(
       display: { ...settings.display },
       audio: { ...settings.audio },
     },
-    progression: { abilities: [], collectibles: [], memories: [], mapRevealed: [] },
+    progression: {
+      abilities: [],
+      collectibles: [],
+      seenCollectibles: [],
+      memories: [],
+      mapRevealed: [],
+    },
     story: { flags: [] },
   };
 }
@@ -170,7 +181,9 @@ export function validateSaveData(raw: unknown): SaveData | null {
   const collectibles = stringList(progression['collectibles']);
   const memories = stringList(progression['memories']);
   const mapRevealed = stringList(progression['mapRevealed']);
-  if (!abilities || !collectibles || !memories || !mapRevealed) {
+  const seen = progression['seenCollectibles'];
+  const seenCollectibles = seen === undefined ? [] : stringList(seen);
+  if (!abilities || !collectibles || !seenCollectibles || !memories || !mapRevealed) {
     return null;
   }
   return {
@@ -183,7 +196,7 @@ export function validateSaveData(raw: unknown): SaveData | null {
       display: sanitizeDisplaySettings(settings['display']),
       audio: sanitizeAudioSettings(settings['audio']),
     },
-    progression: { abilities, collectibles, memories, mapRevealed },
+    progression: { abilities, collectibles, seenCollectibles, memories, mapRevealed },
     story: { flags },
   };
 }

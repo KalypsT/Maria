@@ -2,7 +2,9 @@
 
 ## Phase en cours
 
-**Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139) , **PR 2 faite : la berceuse, le moteur et le parcours d'essai 17** (D-140), **PR 3 faite : la chambre immense, le lit et le coffre** (D-141), **PR 4 faite : le ciel de la chambre** (D-142), **PR 5 faite : la chambre grande, la vraie chambre la nuit, Maria retrouvée** (D-143), **PR 6 faite : le matin et le dernier plan** (D-144) et **PR 7 faite : après la fin** (D-145), sur `ccr-06b9800a-238lrq`. **Le niveau 8 est complet : le jeu se joue du premier soir à la fin.** Suite : **essai sur téléphone** (le parcours 17, tout le monde de Maria, toute la fin) ; à fournir : le thème de fin (`ending`), le jingle de Maria, Céleste en phase 4 illustrée.
+**Les coquilles** (les trouvailles revues, D-148) : audit fait (`docs/COQUILLES.md`), choix de l'utilisateur et plan validés en 6 PR (le système ; la carte et le cahier ; la boîte à coquilles et la fin ; la liste vérifiée, la maison et le jardin ; le quartier et la gare ; le train et la mer). **PR 1 faite : le système** (les noms fixes, la coquille posée et son scintillement, le compteur au ramassage, le debug), **PR 2 faite : la carte et le cahier** (les coquilles vues en pointillés, « n/N » du lieu, la page qui se colorie) et **PR 3 faite : le bocal à coquilles dans la chambre et le petit escargot de la fin** et **PR 4 faite : la liste vérifiée (l'intention de chaque coquille, un seul test), les cachettes et les traces de bave, les coquilles retirées des lieux sans retour, la maison (8) et le jardin (7) replacés** et **PR 5 faite : le quartier (9) et la gare (8)** et **PR 6 faite : le train (6) et la station balnéaire (9), les revisites par la marée**, sur `ccr-c9ed5a1e-fyh3vf`. **Le plan des coquilles est complet : 47 coquilles.** Suite : essai sur téléphone (les traces de bave, les cachettes, le compteur, le bocal). Le « train à quai » n'ouvre aucun chemin : le train n'a pas de revisite (signalé, D-148 PR 6). Rien au bout des défis de la nounou pour l'instant (choix de l'utilisateur).
+
+**Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139) , **PR 2 faite : la berceuse, le moteur et le parcours d'essai 17** (D-140), **PR 3 faite : la chambre immense, le lit et le coffre** (D-141), **PR 4 faite : le ciel de la chambre** (D-142), **PR 5 faite : la chambre grande, la vraie chambre la nuit, Maria retrouvée** (D-143), **PR 6 faite : le matin et le dernier plan** (D-144) et **PR 7 faite : après la fin** (D-145), sur `ccr-06b9800a-238lrq`. **Le niveau 8 est complet : le jeu se joue du premier soir à la fin.** Suite : **essai sur téléphone** (le parcours 17, tout le monde de Maria, toute la fin) ; à fournir : le thème de fin (`ending`), le jingle de Maria.
 
 **La cohérence des niveaux** (D-132 à D-137, demande de l'utilisateur) : la maison, le jardin, le quartier et la gare faits et fusionnés ; **le train** (D-136) et **la station balnéaire** (D-137 : l'aile du centre, les pieds de la grue, la pêche aux canards, les rochers percés, le mât d'amarrage) faits, sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (la maison de la nounou), même méthode.
 
@@ -49,6 +51,56 @@
 - Robe (phase 2) et veste (phases 3 et 4) en pièces illustrées ; jupe et short en pièces de hanche ; attaches des couettes et de la queue de cheval par tenue (`PROFILE_LAYOUTS`).
 - Vérifié dans Chromium : chaque tenue à l'arrêt, en course, en saut (« Premiers pas », phases 2, 3 et 4).
 - [ ] À vérifier sur téléphone : le haut de la robe (large) et la veste, tassés, se lisent-ils ? La jupe et le short suivent-ils assez les jambes en course ?
+
+### Les coquilles, PR 6 : le train et la station balnéaire (D-148)
+
+- Le train (6) : nouvelle, derrière le rideau tiré d'une couchette libre (une trace monte le long du montant). Les autres restent ; le train reste facile (sauf le filet, moyen) : avec toutes les capacités, tout y est à portée. Pas de revisite : à quai, le train n'ouvre aucun chemin (seulement moins de dangers).
+- La station balnéaire (9) : cinq coquilles demandent une marée, vérifié (`tide` : impossible à l'autre) : la balise (haute), la grotte de la plage, la buse du port, la grotte des rochers, le dessous de la jetée (basse). Le dessous de la jetée caché par un rideau d'algues entre les deux pieux, une trace sur le sable. La grotte des rochers : 50 ms → moyenne (158 ms), la flaque a perdu une tuile.
+- Une coquille difficile n'est jamais sous huit pas (66,7 ms) : vérifié par le test des intentions. Deux difficiles dans tout le jeu (la lampe du chantier, le pilier des quais).
+- Tests : `shellsTrain.test.ts`, `shellsSea.test.ts`, `pickups.test.ts` (le mot `tide`). Total : 47 coquilles.
+- Vérifié dans Chromium : le rideau de la couchette (fermé, la trace ; ouvert, la coquille), les algues de la jetée et la trace sur le sable, la grotte des rochers.
+- [ ] À vérifier sur téléphone : la lueur rose sous le rideau et sous les algues se remarque-t-elle ? Le saut de la grotte des rochers (moyen) : juste ?
+
+### Les coquilles, PR 5 : le quartier et la gare (D-148)
+
+- Le quartier (9) : le nichoir de l'aire de jeux rapproché (moyen, plus une deuxième difficile) ; nouvelle : derrière le linge qui sèche à une fenêtre de la rue (crochet, depuis le nid du platane ; une trace monte sur la façade). Une seule difficile : la lampe du chantier. 3 revisites sur 9.
+- La gare (8) : nouvelles : sous les casiers des objets trouvés, derrière un portant de manteaux oubliés (glissade, une trace au sol) ; sous un banc de l'abri du quai (glissade). Une seule difficile : le pilier des quais. 3 revisites sur 8.
+- Tests : `shellsStreet.test.ts`, `shellsStation.test.ts` (le test des intentions, par lieu), `slideRevisits.test.ts` (le banc). Total du jeu : 46.
+- Vérifié dans Chromium : le linge et sa trace sur la façade, le portant de manteaux (la niche cachée jusqu'au sol) et sa trace, le banc de l'abri, le nichoir.
+- [ ] À vérifier sur téléphone : le linge se devine-t-il comme une cachette ? Le banc du quai gêne-t-il le passage le long du quai ?
+
+### Les coquilles, PR 4 : la liste vérifiée, la maison et le jardin (D-148)
+
+- Chaque coquille porte son intention dans sa ligne `; @shell:` (difficulté exacte, capacités sans lesquelles elle est impossible, croissance) ; un seul test par lieu la vérifie avec la vraie simulation (`shellsHome.test.ts`). Il a corrigé trois réglages : les tuteurs du potager (moyens sans escalade), le haut du vieux mur (facile), la glycine (facile).
+- Les cachettes (`; @hide:`) : un décor devant Céleste qui s'efface quand elle passe derrière ; le drap du grenier, la glycine de la pergola. Les traces de bave argentées y mènent.
+- Retirées : les 17 coquilles de la maison de la nounou et celle du passage d'ombres.
+- Nouvelles : le manteau de la cheminée (la première coquille du jeu, sans capacité), sous le drap du grenier, le haut du vieux mur, le pot sous la glycine. Page « Ma maison » : 15 coquilles, 6 revisites. Total du jeu : 43 pour l'instant.
+- Vérifié dans Chromium : le manteau, le drap et sa trace, la glycine (dense : la coquille ne se voit pas au travers) et sa trace sur le poteau, le vieux mur.
+- [ ] À vérifier sur téléphone : les traces de bave se remarquent-elles ? Le drap et la glycine s'effacent-ils au bon moment, sans gêner ? La première coquille sur le manteau : remarquée dès le premier matin ?
+
+### Les coquilles, PR 3 : le bocal et le petit escargot de la fin (D-148)
+
+- Un bocal en verre (coiffé de tissu rose à pois) sur le bureau de la chambre, sous l'étagère de Maria : une petite coquille par coquille trouvée, plein quand tout est trouvé. (« Boîte » devenue bocal : on voit le tas monter.)
+- Toutes les coquilles trouvées : sur l'écran de fin, un petit escargot avance très lentement sur l'étagère vers Maria, et laisse une trace argentée.
+- Vérifié dans Chromium : le bocal à 20 puis à 57 coquilles, l'escargot (animation accélérée pour l'essai) qui s'arrête à côté de Maria.
+- [ ] À vérifier sur téléphone : le bocal se remarque-t-il (taille, place sur le bureau) ? Plein, se lit-il comme plein ? L'escargot : assez lent, assez visible, touchant ?
+
+### Les coquilles, PR 2 : la carte et le cahier (D-148)
+
+- Une coquille passée à l'écran est notée vue (sauvegardée) ; sur la carte, elle est en pointillés tant qu'elle n'est pas prise ; une coquille trouvée est dessinée à la place de l'étoile.
+- En haut à droite de la page : « n/N » des coquilles du lieu ; toutes trouvées, la page se colorie (un lavis par salle) et le compte passe en rose.
+- Les noms des salles passent par-dessus les coquilles.
+- Tests : `mapModel.test.ts` (pointillés, compte du lieu), `saveData.test.ts` (les coquilles vues, absentes d'une ancienne sauvegarde), `saveSession.test.ts`. Vérifié dans Chromium : la page « Ma maison » à 3/11 (une coquille vue en pointillés dans la cuisine), puis coloriée à 11/11.
+- [ ] À vérifier sur téléphone : les pointillés se lisent-ils ? La page coloriée : assez belle pour donner envie ?
+
+### Les coquilles, PR 1 : le système (D-148)
+
+- Chaque coquille a un nom fixe (`; @shell:`), son identifiant dans la sauvegarde ; les 57 sont nommées. Pas de migration (aucune vraie partie).
+- La coquille : l'image fournie, posée sur son appui, un halo rose, un scintillement de temps en temps ; l'ouverture à gauche ou à droite selon son nom.
+- Au ramassage : elle file vers le bouton Carte, puis « n/N » du lieu (une page du cahier) s'affiche à côté.
+- DEBUG → Coquilles : par lieu, « Aller », « Trouvée » ou « Oublier », tout ou rien.
+- Tests : `pickups.test.ts` (les noms, les erreurs, une coquille déplacée garde son nom), `shells.test.ts` (la liste, le compte par lieu). Vérifié dans Chromium : le grenier, la grotte de la plage, la cuisine (le ramassage et « 1/11 »).
+- [ ] À vérifier sur téléphone : la taille de la coquille (11 px logiques), le halo assez visible sur le sable et le bois clair ? Le scintillement assez fréquent ? L'envol vers le bouton Carte et l'étiquette « n/N » : lisibles, pas gênants ?
 
 ### Céleste illustrée en pyjama ; maman au canapé et au banc (D-147)
 

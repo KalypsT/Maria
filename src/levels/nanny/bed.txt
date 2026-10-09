@@ -56,12 +56,12 @@
 ; @decor: hedge 14 1 20 8
 ; @decor: rug 58 36 16 1
 ; @decor: schoolgate 65 32 3 5
-; Légende : # mur/sol, b bois et v feuillage (pleins), - branche ou étagère et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S trouvaille, 1-9 sorties.
+; Légende : # mur/sol, b bois et v feuillage (pleins), - branche ou étagère et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S coquille (nommée par ; @shell:), 1-9 sorties.
 ############################################################################
 #............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#
 #............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#
 #............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#
-#............!vvvvvvvvvvvvvvvvvvvv..........................bS....!.!......#
+#............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#
 #............!vvvvvvvvvvvvvvvvvvvv..........................bbb...!.!......#
 2............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#
 2............!vvvvvvvvvvvvvvvvvvvv..........................b.....!.!......#
@@ -93,7 +93,7 @@
 #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbb....bbbbbbbbbbbbbb................!#
 #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbb....bbbbbbbbbbbbbb..bbbbb..........#
 #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbbbbb....bbbbbbbbbbbbbb..bbbbb..........1
-#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbbSbbb....bbbbbbbbbbbbbb..bbbbb...C...P..1
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvbb.bbb....bbbbbbbbbbbbbb..bbbbb...C...P..1
 ############################################################################
 ############################################################################
 ############################################################################

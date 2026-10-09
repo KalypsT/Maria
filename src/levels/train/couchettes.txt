@@ -2,9 +2,12 @@
 ; plateforme d'où l'on monte ; le compartiment de la classe (couchettes sur trois étages, tablette
 ; sous la fenêtre, la veilleuse) ; une grille en accordéon à moitié fermée (on glisse dessous :
 ; la camarade montre la glissade) ; le compartiment suivant (couchettes, le chariot du vendeur,
-; le filet à bagages et sa trouvaille) ; au bout, le passage vers les compartiments (sortie 1,
-; ouverte la nuit, D-86).
+; le filet à bagages et sa trouvaille, une couchette libre au rideau tiré) ; au bout, le passage
+; vers les compartiments (sortie 1, ouverte la nuit, D-86). Derrière le rideau, une coquille : une
+; trace de bave monte le long du montant des couchettes (D-148).
 ; @name: La voiture-couchettes
+; @shell: couchettes-net 54 3 medium
+; @shell: couchettes-curtain 67 9 easy
 ; @icon: train
 ; @vehicle: train
 ; @music: train
@@ -32,7 +35,9 @@
 ; @decor: foldtable 21 14 7 5
 ; @decor: rack 49 4 11 1
 ; @decor: trolley 52 16 4 3
-; Légende : # paroi/plancher, b bois (plein), - couchette, tablette ou filet (traversables), C veilleuse (checkpoint), P repère de départ, S trouvaille.
+; @decor: slimetrail 68 10 1 9
+; @hide: curtain 64 8 5 2
+; Légende : # paroi/plancher, b bois (plein), - couchette, tablette ou filet (traversables), C veilleuse (checkpoint), P repère de départ, S coquille (nommée par ; @shell:).
 ######################################################################################
 ######################################################################################
 #.........b...........................bb.............................b...............#
@@ -42,7 +47,7 @@
 #.........b...........................bb.............................b...............#
 #.........b...........................bb........................-----b...............#
 #.........b...........................bb.............................b...............#
-#.........b...........................bb.............................b...............#
+#.........b...........................bb...........................S.b...............#
 #.........b-----.................-----bb-----...................-----b...............#
 #.........b...........................bb.............................b...............#
 #.........b...........................bb.............................b...............#

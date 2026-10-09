@@ -190,7 +190,7 @@ export function checkErase(level: LevelData): void {
     }
   };
   for (const e of level.entities) {
-    if (e.type !== EntityType.Secret) {
+    if (e.type !== EntityType.Shell) {
       both(e.type, e.col, e.row, e.type === EntityType.Checkpoint || e.type === EntityType.Ability);
     }
   }

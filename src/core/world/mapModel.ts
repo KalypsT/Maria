@@ -1,7 +1,7 @@
 import { TILE_SIZE as T } from '../../config/display';
 import { EntityType } from '../level/LevelData';
 import { checkpointId } from '../save/saveData';
-import { secretId } from './Pickups';
+import { shellId } from './Pickups';
 import { isMappedRoom, mapPage, type MapBox, type Zone } from './zone';
 
 /** Point sur la carte (unités de carte). */
@@ -20,8 +20,10 @@ export interface MapRoom {
   readonly fresh: boolean;
   /** Veilleuses allumées ; `current` : le point de retour. */
   readonly lamps: readonly (MapPoint & { readonly current: boolean })[];
-  /** Trouvailles déjà ramassées (les autres ne sont jamais révélées, §24). */
-  readonly stars: readonly MapPoint[];
+  /** Coquilles trouvées (D-148). */
+  readonly shells: readonly MapPoint[];
+  /** Coquilles vues mais pas prises (D-148), en pointillés ; les autres ne sont jamais montrées. */
+  readonly seenShells: readonly MapPoint[];
   /** Cubes de la tour d'Eden trouvés dans cette salle (D-122), de leur couleur. */
   readonly cubes: readonly (MapPoint & { readonly color: string })[];
   /** Icône de la salle (`; @icon:`), dessinée par la carte. */
@@ -40,6 +42,8 @@ export interface MapLink {
 
 export interface MapModel {
   readonly rooms: readonly MapRoom[];
+  /** Coquilles du lieu (la page, D-148) : trouvées et en tout, salles pas encore visitées comprises. */
+  readonly shells: { readonly found: number; readonly total: number };
   readonly links: readonly MapLink[];
   /** Céleste, dans sa salle (null hors de la zone). */
   readonly celeste: MapPoint | null;
@@ -53,6 +57,8 @@ export interface MapProgress {
   readonly activatedCheckpoints: readonly string[];
   readonly checkpoint: { readonly levelId: string; readonly checkpointId: string | null };
   readonly collectibles: readonly string[];
+  /** Coquilles vues mais pas prises (D-148). */
+  readonly seenCollectibles?: readonly string[];
   /** Salle et position de Céleste (px), ou null. */
   readonly celeste: { readonly room: string; readonly x: number; readonly y: number } | null;
   /** Cubes de la tour d'Eden trouvés (D-122) : leur salle, leur tuile, leur couleur. */
@@ -69,7 +75,8 @@ const DIRECT_GAP = 0.6;
 
 /**
  * Modèle de la carte dessinée par Céleste (§24), pur : quelles salles dessiner, lesquelles sont
- * devinées, où placer les liaisons, Céleste, les veilleuses allumées et les trouvailles trouvées.
+ * devinées, où placer les liaisons, Céleste, les veilleuses allumées, les coquilles trouvées et vues,
+ * et le compte des coquilles du lieu (D-148).
  */
 export function buildMapModel(zone: Zone, progress: MapProgress, page: string = zone.id): MapModel {
   const visited = new Set(progress.visited.filter((id) => zone.rooms.has(id)));
@@ -94,7 +101,19 @@ export function buildMapModel(zone: Zone, progress: MapProgress, page: string = 
     };
   };
   const rooms: MapRoom[] = [];
+  const seenShells = progress.seenCollectibles ?? [];
+  const tally = { found: 0, total: 0 };
   for (const [id, level] of zone.rooms) {
+    if (mapPage(zone, id) === page) {
+      for (const entity of level.entities) {
+        if (entity.type === EntityType.Shell) {
+          tally.total++;
+          if (progress.collectibles.includes(shellId(id, entity))) {
+            tally.found++;
+          }
+        }
+      }
+    }
     const box = zone.map[id];
     const isVisited = visited.has(id);
     // Une page du cahier par lieu (D-60) : seules les salles de cette page.
@@ -102,7 +121,8 @@ export function buildMapModel(zone: Zone, progress: MapProgress, page: string = 
       continue;
     }
     const lamps: (MapPoint & { current: boolean })[] = [];
-    const stars: MapPoint[] = [];
+    const shells: MapPoint[] = [];
+    const seen: MapPoint[] = [];
     if (isVisited) {
       for (const entity of level.entities) {
         const center = at(id, (entity.col + 0.5) * T, (entity.row + 0.5) * T);
@@ -116,11 +136,13 @@ export function buildMapModel(zone: Zone, progress: MapProgress, page: string = 
               progress.checkpoint.levelId === id && progress.checkpoint.checkpointId === cp;
             lamps.push({ ...center, current });
           }
-        } else if (
-          entity.type === EntityType.Secret &&
-          progress.collectibles.includes(secretId(id, entity.col, entity.row))
-        ) {
-          stars.push(center);
+        } else if (entity.type === EntityType.Shell) {
+          const shell = shellId(id, entity);
+          if (progress.collectibles.includes(shell)) {
+            shells.push(center);
+          } else if (seenShells.includes(shell)) {
+            seen.push(center);
+          }
         }
       }
     }
@@ -139,7 +161,8 @@ export function buildMapModel(zone: Zone, progress: MapProgress, page: string = 
       visited: isVisited,
       fresh: isVisited && !progress.seen.has(id),
       lamps,
-      stars,
+      shells,
+      seenShells: seen,
       cubes,
       icon: level.meta.icon ?? null,
     });
@@ -170,7 +193,7 @@ export function buildMapModel(zone: Zone, progress: MapProgress, page: string = 
   const c = progress.celeste;
   const celeste =
     c && visited.has(c.room) && mapPage(zone, c.room) === page ? at(c.room, c.x, c.y) : null;
-  return { rooms, links, celeste };
+  return { rooms, links, celeste, shells: tally };
 }
 
 /** Côté d'une sortie : -1 mur gauche, 1 mur droit, 0 porte de façade (D-61). */

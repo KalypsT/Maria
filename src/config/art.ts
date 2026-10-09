@@ -140,6 +140,8 @@ export const DECOR_KINDS: Readonly<
   floorplant: { furniture: false },
   /** Poussière qui danse dans un rayon de lumière (animée). */
   dust: { furniture: false },
+  /** Trace de bave d'escargot (D-148), vers une coquille cachée. */
+  slimetrail: { furniture: false },
   /** Papillon de nuit autour d'une lampe, le soir (animé). */
   moth: { furniture: false },
   // Le rez-de-chaussée et le grenier (D-75).
@@ -686,7 +688,68 @@ export const ART_IMAGES: Readonly<Record<string, string>> = {
   maria: 'maria.png',
   /** Roger, la peluche singe de Céleste (D-68, D-69) : image fournie par l'utilisateur, détourée. */
   roger: 'roger.png',
+  /** La coquille d'escargot (D-148) : image fournie par l'utilisateur, détourée. */
+  shell: 'shell.png',
 };
+
+/**
+ * Les coquilles (D-148) : posées sur leur appui (rien ne flotte), un halo rose discret (le rose des
+ * trouvailles reste leur signe), un scintillement de temps en temps, décalé d'une coquille à
+ * l'autre. L'image `shell`, ou un dessin par le code si elle manque. PROVISOIRE : à juger sur
+ * téléphone.
+ */
+export const SHELL_ART = {
+  /** Hauteur de la coquille (px logiques ; Céleste en fait 24 à 28). */
+  heightPx: 11,
+  /** Halo rose autour de la coquille (px) et son opacité au centre. */
+  haloPx: 5,
+  haloAlpha: 0.45,
+  /** Enfoncée d'autant dans son appui (px), pour qu'elle y repose. */
+  sinkPx: 1,
+  /** Scintillement : période, durée (ms) et taille (px). */
+  glintPeriodMs: 3800,
+  glintMs: 560,
+  glintPx: 7,
+  /** Au ramassage : la coquille file vers le cahier (ms), puis « n/N » du lieu reste affiché (ms). */
+  flyMs: 620,
+  countMs: 2200,
+} as const;
+
+/**
+ * Les cachettes (D-148) : un décor au premier plan (`; @hide:`) qui s'efface quand Céleste passe
+ * derrière (à `marginPx` près), pour qu'on la voie toujours (pilier 1). PROVISOIRE.
+ */
+export const HIDEOUT = {
+  fadedAlpha: 0.22,
+  marginPx: 4,
+  fadeTimeMs: 140,
+  /** Devant Céleste (10), derrière le bâton et la vignette. */
+  depth: 10.8,
+} as const;
+
+/**
+ * Le bocal à coquilles (D-148) : dans la chambre, sur le bureau, sous l'étagère où Maria finira
+ * rangée (tuile du bas, posé sur le plateau). Une petite coquille par coquille trouvée, en tas.
+ * PLACEHOLDER (dessiné par le code), place à confirmer.
+ */
+export const SHELL_JAR = {
+  room: 'bedroom',
+  col: 31,
+  row: 14,
+  /** Taille du bocal (px logiques), enfoncé d'autant dans le plateau. */
+  widthPx: 24,
+  heightPx: 32,
+  sinkPx: 1,
+  /**
+   * Les petites coquilles : hauteur (px), par rangée, montée d'une rangée à l'autre au plus (px) ;
+   * les rangées se tassent pour que le bocal soit plein quand toutes sont trouvées.
+   */
+  shellPx: 5,
+  perRow: 5,
+  stepYPx: 2.6,
+  /** Devant le décor, derrière les personnages (comme les objets de l'histoire). */
+  depth: 5,
+} as const;
 
 /**
  * Personnage illustré (D-123) : image fournie sous `public/art/` (détourée, `scripts/art-cutout.py`),

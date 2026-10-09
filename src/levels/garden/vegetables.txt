@@ -3,6 +3,8 @@
 ; Au loin, derrière (D-133) : l'allée du fond, sa clôture, sa remise et le vieux mur (on y passe par
 ; le toit de la pergola de la terrasse).
 ; @name: Potager
+; @shell: vegetables-beanpoles 41 5 medium
+; @shell: vegetables-birdhouse 60 7 medium umbrella
 ; @icon: flower
 ; @world: garden
 ; @difficulty: medium
@@ -24,7 +26,7 @@
 ; @decor: wheelbarrow 55 19 4 3
 ; @decor: barrel 62 18 3 4
 ; @decor: butterfly 16 5 30 12
-; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 vvvvvvvvvvvv........................................vvvvvvvvvvvvvv
 vvvvvvv..................................................vvvvvvvvv
 v................................................................v

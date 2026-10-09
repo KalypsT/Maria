@@ -125,6 +125,23 @@ describe('saveData', () => {
     });
   });
 
+  it('les coquilles vues (D-148) : gardées, vides dans une sauvegarde plus ancienne', () => {
+    const data = sample();
+    data.progression.seenCollectibles = ['attic-ridge'];
+    expect(deserializeSave(serializeSave(data))).toMatchObject({
+      ok: true,
+      data: { progression: { seenCollectibles: ['attic-ridge'] } },
+    });
+    const older: Partial<SaveData['progression']> = { ...data.progression };
+    delete older.seenCollectibles;
+    expect(validateSaveData({ ...data, progression: older })?.progression.seenCollectibles).toEqual(
+      [],
+    );
+    expect(
+      validateSaveData({ ...data, progression: { ...older, seenCollectibles: [3] } }),
+    ).toBeNull();
+  });
+
   it('exporte et réimporte un code de sauvegarde, et refuse un code abîmé', () => {
     const data = sample();
     const code = encodeSaveCode(data);

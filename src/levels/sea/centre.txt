@@ -4,6 +4,7 @@
 ; la veilleuse, l'armoire. Au-dessus de la cage de l'escalier, une poutre et sa trouvaille (défi,
 ; moyen) : du haut d'une couchette, la suspension pendue au plafond, puis un saut vers la poutre.
 ; @name: Le centre
+; @shell: centre-beam 23 3 medium umbrella
 ; @icon: bed
 ; @world: street
 ; @indoor: yes

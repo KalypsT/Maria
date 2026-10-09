@@ -5,6 +5,7 @@
 ; galerie dehors (sortie 2), la passerelle vers le port. Défi (moyen) : la trouvaille sur la
 ; grande lentille (posée sur son socle, on passe dessous), par un saut mural contre le mur.
 ; @name: Le phare
+; @shell: lighthouse-lens 23 4 medium wall-jump
 ; @icon: sea
 ; @world: street
 ; @indoor: yes

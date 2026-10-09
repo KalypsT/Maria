@@ -101,4 +101,23 @@ describe('SaveSession', () => {
     const reloaded = (await new SaveManager(storage).load()).data;
     expect(reloaded?.progression.memories).toEqual(['photo']);
   });
+
+  it('note une coquille vue une seule fois, jamais une coquille déjà trouvée (D-148)', async () => {
+    const storage = new MemorySaveStorage();
+    let clock = 0;
+    const session = new SaveSession(
+      new SaveManager(storage),
+      createNewSave('bedroom', 0),
+      () => ++clock,
+    );
+    await session.addSeenCollectible('attic-ridge');
+    await session.addSeenCollectible('attic-ridge');
+    await session.addCollectible('hall-mirror');
+    await session.addSeenCollectible('hall-mirror');
+    expect(clock).toBe(2);
+    const reloaded = (await new SaveManager(storage).load()).data;
+    expect(reloaded?.progression.seenCollectibles).toEqual(['attic-ridge']);
+    await session.removeCollectible('hall-mirror');
+    expect(session.data.progression.collectibles).toEqual([]);
+  });
 });

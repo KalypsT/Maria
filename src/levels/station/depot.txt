@@ -2,6 +2,7 @@
 ; visite pleines de gravats, de toit en toit ; puis les crochets du pont roulant, de plus en plus
 ; haut (moyen), jusqu'à une trouvaille. Une lanterne sur le troisième wagon.
 ; @name: Le dépôt
+; @shell: depot-crane-hooks 73 13 medium
 ; @icon: wagon
 ; @world: street
 ; @music: station
@@ -21,7 +22,7 @@
 ; @decor: trestle 64 28 3 1
 ; @decor: trestle 70 28 3 1
 ; @decor: trestle 75 28 2 1
-; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 ##########################################################################################
 #........................................................................................#
 #........................................................................................#

@@ -1,16 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { Ability } from '../src/config/abilities';
-import { TILE_SIZE as T } from '../src/config/display';
-import { phaseMovement } from '../src/config/growth';
-import { DEFAULT_MOVEMENT } from '../src/config/movement';
 import { StoryFlag as F, TOWER_CUBES, towerCubesMask } from '../src/config/story';
 import { EntityType, Tile, tileAt } from '../src/core/level/LevelData';
 import { atLayer } from '../src/core/level/layers';
-import { PlayerPhysics, type PlayerInput } from '../src/core/player/PlayerPhysics';
 import { checkCondition } from '../src/core/story/story';
 import { storyProblems } from '../src/core/story/storyProblems';
 import { isMappedRoom, isStrangeRoom, mapPage } from '../src/core/world/zone';
-import { Pickups } from '../src/core/world/Pickups';
 import { mapProblems } from '../src/core/world/mapModel';
 import { HOUSE_STORY } from '../src/levels/house/story';
 import { ISLETS_DONE, MIRROR, NANNY_ARRIVAL, NAP_DOOR, NAP_SLOTS } from '../src/levels/nanny/story';
@@ -23,12 +18,11 @@ import {
   tideGraph,
   tideNode,
 } from './tideGraph';
-import { level, phase, zone } from './zoneGraph';
+import { level, zone } from './zoneGraph';
 import { ANALYSIS_TIMEOUT_MS } from './timeouts';
 
 /** L'avant-dernier niveau, PR 3 (D-110) : la porte, l'entrée et son miroir, la maison, la carte. */
 const ROOMS = ['nanny-entry', 'nanny-house'];
-const P3 = phase(3);
 
 function need<V>(value: V | null | undefined, what: string): V {
   if (value === null || value === undefined) {
@@ -172,44 +166,6 @@ describe('la maison de la nounou : l’entrée, le miroir, la maison (D-110)', (
       }
     }
     expect(seen.has(to)).toBe(false);
-  });
-
-  it('sous le canapé, dans le souvenir : on y glisse jusqu’à la trouvaille ; jamais dans le présent', () => {
-    const house = level('nanny-house');
-    const secret = need(
-      house.entities.find((e) => e.type === EntityType.Secret && e.row === 36),
-      'trouvaille du canapé',
-    );
-    const attempt = (layer: 'present' | 'memory', slide: boolean) => {
-      const data = atLayer(house, layer);
-      const { width, height } = P3.hitbox;
-      const player = new PlayerPhysics(
-        data,
-        phaseMovement(DEFAULT_MOVEMENT, P3),
-        (11.5 + 0.5) * T - width / 2,
-        37 * T - height,
-        P3.hitbox,
-      );
-      player.canClimb = player.canWallJump = player.canGlide = player.canHook = true;
-      player.canSlide = slide;
-      const pickups = new Pickups();
-      pickups.load(data, [], []);
-      const input: PlayerInput = { moveX: 1, moveY: 0, jumpPressed: false, jumpHeld: false };
-      for (let s = 0; s < 900; s++) {
-        input.abilityPressed = slide && s % 30 === 0;
-        input.jumpPressed = !slide && s % 40 === 0;
-        input.jumpHeld = input.jumpPressed;
-        player.step(input);
-        if (pickups.step(player.box) >= 0) {
-          return true;
-        }
-      }
-      return false;
-    };
-    expect(secret.col).toBeGreaterThan(13);
-    expect(attempt('memory', true)).toBe(true);
-    expect(attempt('memory', false)).toBe(false);
-    expect(attempt('present', true)).toBe(false);
   });
 
   it('à l’arrivée dans la maison, la vue montre la porte de la sieste et ses quatre creux (D-122)', () => {

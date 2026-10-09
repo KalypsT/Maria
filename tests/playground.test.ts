@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { StoryFlag } from '../src/config/story';
-import { EntityType } from '../src/core/level/LevelData';
 import { StoryDirector } from '../src/core/story/StoryDirector';
 import { buildMapModel } from '../src/core/world/mapModel';
 import { isStreetRoom, mapPage } from '../src/core/world/zone';
@@ -27,7 +26,6 @@ const F = StoryFlag;
 const OPEN = [F.GateOpen];
 const easy = byDifficulty('easy');
 const medium = byDifficulty('medium');
-const hard = byDifficulty('hard');
 /** Arrivée dans l'aire de jeux, par le portillon (porte de façade de la rue). */
 const arrival = () => node('playground', exitSurface('playground', 1));
 const home = () => node(zone.start, analysis(zone.start, false).start);
@@ -71,18 +69,11 @@ describe('l’aire de jeux (D-61)', () => {
   });
 
   it(
-    'la tour du toboggan : moyenne exactement ; le nichoir : difficile exactement',
+    'la tour du toboggan : moyenne exactement (le nichoir : tests des coquilles, D-148)',
     { timeout: TIMEOUT },
     () => {
       expect(reachable(inPlayground(medium), arrival()).has(deck())).toBe(true);
       expect(reachable(inPlayground(easy), arrival()).has(deck()), 'trop facile').toBe(false);
-      const secrets = level('playground').entities.filter((e) => e.type === EntityType.Secret);
-      expect(secrets).toHaveLength(1);
-      for (const s of secrets) {
-        const at = nodeAt('playground', s.col, s.row);
-        expect(reachable(inPlayground(hard), arrival()).has(at)).toBe(true);
-        expect(reachable(inPlayground(medium), arrival()).has(at), 'trop facile').toBe(false);
-      }
     },
   );
 

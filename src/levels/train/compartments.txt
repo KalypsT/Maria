@@ -3,6 +3,7 @@
 ; endormis. Dans les virages, des valises tombent des filets (elles tremblent d'abord). Au bout, une
 ; grille en accordéon à moitié fermée (on glisse dessous) avant le fourgon.
 ; @name: Les compartiments
+; @shell: compartments-rack 60 7 easy
 ; @icon: train
 ; @vehicle: train
 ; @music: train
@@ -38,7 +39,7 @@
 ; @decor: fallingcase 34 5 1 1
 ; @decor: fallingcase 44 5 1 1
 ; @decor: fallingcase 62 7 1 1
-; Légende : # paroi, plancher ou toit, b bois, t tissu (pleins), - filet, tablette, étagère ou crochet (traversables), C veilleuse (checkpoint), P repère de départ, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; Légende : # paroi, plancher ou toit, b bois, t tissu (pleins), - filet, tablette, étagère ou crochet (traversables), C veilleuse (checkpoint), P repère de départ, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 ##########################################################################################
 ##########################################################################################
 #......b....................b........................b........................b......bb..#

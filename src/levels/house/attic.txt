@@ -3,6 +3,9 @@
 ; (sortie 2). Sous un toit à deux pans, le faîte à gauche : la charpente (chaque poutre sur son
 ; poteau), la fenêtre de toit dans le pan.
 ; @name: Grenier
+; @shell: attic-ridge 6 5 medium
+; @shell: attic-sheet 38 19 easy
+; @hide: sheet 36 15 4 5
 ; @icon: roof
 ; @ambient: #2c2a31
 ; @note: poutres de la charpente jusqu'au recoin sous le faîte : secret de plateforme, difficulté moyenne (D-27).
@@ -22,7 +25,8 @@
 ; @decor: atticbeam 21 9 3 11
 ; @decor: atticbeam 13 7 3 13
 ; @decor: collartie 4 1 6 6
-; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), ^ briques de jeu (danger), e jouet mécanique, C veilleuse (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; @decor: slimetrail 39 19 3 1
+; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), ^ briques de jeu (danger), e jouet mécanique, C veilleuse (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 ########################################################
 ########.....###########################################
 #######..........#######################################
@@ -42,6 +46,6 @@
 #......................................................#
 2..............................bbbb....................1
 2..............................bbbb.......bbbbb........1
-2...........tttttt......e......bbbb.......bbbbb....C.P.1
+2...........tttttt......e......bbbb...S...bbbbb....C.P.1
 ########################################################
 ########################################################

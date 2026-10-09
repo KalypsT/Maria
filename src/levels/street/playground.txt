@@ -5,6 +5,7 @@
 ; de la tour, on passe dans la cour de l'école (sortie 2, D-64).
 ; Refaite (D-78) : du ciel au-dessus (le feuillage seulement en haut du platane), les balançoires au vent.
 ; @name: Aire de jeux
+; @shell: playground-birdhouse 53 10 medium
 ; @icon: swing
 ; @world: street
 ; @difficulty: medium
@@ -18,12 +19,12 @@
 ; @decor: roundabout 25 27 3 1
 ; @decor: climbingdome 31 19 10 7
 ; @decor: swingset 42 16 10 12
-; @decor: birdhouse 52 10 2 18
+; @decor: birdhouse 53 11 2 17
 ; @decor: slidetower 58 12 14 16
 ; @decor: springrider 12 25 2 3
 ; @decor: schoolfence 76 1 4 27
 ; @decor: butterfly 4 12 30 10
-; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 v.............vvvvvvvvvvvvv.................................................vvvv
 v...........................................................................bbbb
 v...........................................................................bbbb
@@ -33,9 +34,9 @@ v...........................................................................bbbb
 v...........................................................................bbbb
 v...........................................................................bbbb
 v...........................................................................bbbb
+v...........................................................................bbbb
 v....................................................S......................bbbb
-v...................................................--......................bbbb
-v..............................................................................2
+v....................................................--........................2
 v...........................................................bbb................2
 v...........................................................................bbbb
 v...........................................................................bbbb

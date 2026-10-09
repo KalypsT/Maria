@@ -12,6 +12,7 @@ import { HitchMonitor, type FrameWork } from '../core/perf/hitchMonitor';
 import { STRANGE_MOCKUPS, STRANGE_MOCKUP_NAMES } from '../config/strangeThemes';
 import { DEFAULT_MOVEMENT, MOVEMENT_PARAM_RANGES, type MovementParams } from '../config/movement';
 import { LEVELS, ZONES, levelName } from '../levels';
+import { shellTally, zoneShells } from '../core/world/shells';
 import type { GameScene } from '../scenes/GameScene';
 import {
   cameraToJson,
@@ -1899,6 +1900,68 @@ export function installDebugOverlay(scene: GameScene): void {
       scene.applyWorld();
       save(WORLD_STORAGE_KEY, worldToJson(scene.worldParams));
     },
+  });
+
+  // Les coquilles (D-148) : par lieu, trouvées ou non ; y aller, cocher, tout ou rien.
+  const shellSection = element('details', panel);
+  const shellSummary = element('summary', shellSection, undefined, 'Coquilles');
+  const shellList = element('div', shellSection);
+  const shells = ZONES.flatMap((zone) => zoneShells(zone));
+  const refreshShells = () => {
+    const found = scene.session.data.progression.collectibles;
+    shellSummary.textContent = `Coquilles (${String(
+      shells.filter((s) => found.includes(s.name)).length,
+    )}/${String(shells.length)})`;
+    shellList.replaceChildren();
+    const places = [...new Set(shells.map((s) => s.place))];
+    for (const place of places) {
+      const tally = place ? shellTally(shells, place, found) : null;
+      element(
+        'div',
+        shellList,
+        'dbg-stats',
+        `${place ?? 'hors carte'}${tally ? ` ${String(tally.found)}/${String(tally.total)}` : ''}`,
+      );
+      for (const shell of shells.filter((s) => s.place === place)) {
+        const row = element('div', shellList, 'dbg-actions');
+        const taken = found.includes(shell.name);
+        element('span', row, undefined, `${taken ? '✓' : '·'} ${shell.name}`);
+        element('button', row, undefined, 'Aller').addEventListener('click', (event) => {
+          scene.teleportToShell(shell.name);
+          (event.currentTarget as HTMLElement).blur();
+        });
+        element('button', row, undefined, taken ? 'Oublier' : 'Trouvée').addEventListener(
+          'click',
+          () => {
+            const done = taken
+              ? scene.session.removeCollectible(shell.name)
+              : scene.session.addCollectible(shell.name);
+            void done.then(() => {
+              scene.reloadPickups();
+              refreshShells();
+            });
+          },
+        );
+      }
+    }
+  };
+  shellSection.addEventListener('toggle', () => {
+    if (shellSection.open) {
+      refreshShells();
+    }
+  });
+  const shellActions = element('div', shellSection, 'dbg-actions');
+  element('button', shellActions, undefined, 'Toutes trouvées').addEventListener('click', () => {
+    void Promise.all(shells.map((s) => scene.session.addCollectible(s.name))).then(() => {
+      scene.reloadPickups();
+      refreshShells();
+    });
+  });
+  element('button', shellActions, undefined, 'Aucune').addEventListener('click', () => {
+    void Promise.all(shells.map((s) => scene.session.removeCollectible(s.name))).then(() => {
+      scene.reloadPickups();
+      refreshShells();
+    });
   });
 
   // Sauvegarde (D-22) : inspection des emplacements, checkpoints, tests de récupération.

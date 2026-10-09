@@ -17,6 +17,13 @@ export const DIFFICULTY_MIN_WINDOW_MS: Readonly<Record<Difficulty, number>> = {
   hard: 50,
 };
 
+/**
+ * Fenêtre minimale (ms) d'une coquille difficile (D-148) : huit pas de 1/120 s (66,7 ms, « 67 »),
+ * plus large que le plancher du « difficile » (six pas), pour qu'une trouvaille reste à portée au
+ * tactile.
+ */
+export const SHELL_HARD_MIN_WINDOW_MS = 66;
+
 /** Réglages de la recherche de passages (simulation d'entrées scriptées). */
 export const MOVE_SEARCH = {
   /**

@@ -42,10 +42,10 @@
 ; @decor: bedgate 23 3 3 4
 ; @decor: eyes 36 6 1 1
 ; @decor: eyes 8 20 1 1
-; Légende : # mur/sol, b bois et v feuillage (pleins), - branche ou étagère et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S trouvaille, 1-9 sorties.
+; Légende : # mur/sol, b bois et v feuillage (pleins), - branche ou étagère et = planche (traversables), ! ronces (piquent), C lanterne, P départ, S coquille (nommée par ; @shell:), 1-9 sorties.
 ########################################################################
 #...........!.!........................................................#
-#.S.........!.!........................................................#
+#...........!.!........................................................#
 #vvv........!.!........................................................#
 #vvv...-....!.!........................................................#
 #...........!.!........................................................1
@@ -63,7 +63,7 @@
 #...............bbbbbbbbbbbb............bbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
 #...............bbbbbbbbbbbb............bbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
 #...............bbbbbbbbbbbb............bbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
-#...............bbbbbbbbbbbbb..!!!!!.!!!bbbSbbbbbbbbbbbbbbbbvvvvvvvvvvv#
+#...............bbbbbbbbbbbbb..!!!!!.!!!bbb.bbbbbbbbbbbbbbbbvvvvvvvvvvv#
 #...............bbbbbbbbbbbb...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
 #...............bbbbbbbbbbbb...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#
 #...............bbbbbbbbbbbb...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbvvvvvvvvvvv#

@@ -1030,6 +1030,50 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
     ctx.fillStyle = fade;
     ctx.fillRect(r.x + r.w * 0.6, r.y, r.w * 0.4 + 1, r.h);
   },
+  slimetrail(a, r) {
+    // Une trace de bave d'escargot (D-148), qui mène à une coquille cachée : une traînée argentée
+    // qui ondule, quelques reflets. À plat sur une surface (une tuile de haut : le long du bas du
+    // cadre), le long d'un montant (une tuile de large : au milieu), sinon en biais, du bas à
+    // gauche vers le haut à droite.
+    const { ctx } = a;
+    const flat = r.h <= T;
+    const upright = !flat && r.w <= T;
+    const x0 = upright ? r.x + r.w / 2 : r.x + 1;
+    const y0 = flat ? r.y + r.h - 1.2 : r.y + r.h - 1;
+    const x1 = upright ? x0 : r.x + r.w - 1;
+    const y1 = flat ? y0 : r.y + 1;
+    const length = Math.hypot(x1 - x0, y1 - y0);
+    const steps = Math.max(2, Math.round(length / 2));
+    const nx = -(y1 - y0) / length;
+    const ny = (x1 - x0) / length;
+    const point = (k: number) => {
+      const wave = Math.sin(k * length * 0.7) * 0.8;
+      return { x: x0 + (x1 - x0) * k + nx * wave, y: y0 + (y1 - y0) * k + ny * wave };
+    };
+    // Un liseré sombre dessous, pour qu'elle se voie aussi sur un mur clair.
+    for (const [width, color] of [
+      [3.4, 'rgba(255, 255, 255, 0.18)'],
+      [2.2, 'rgba(70, 80, 100, 0.35)'],
+      [1.3, 'rgba(232, 242, 250, 0.82)'],
+    ] as const) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (let i = 0; i <= steps; i++) {
+        const p = point(i / steps);
+        ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+    for (let d = 5; d < length; d += 9) {
+      const p = point(d / length);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 0.95, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  },
   peel(a, r) {
     // Papier peint qui pèle : des lambeaux qui s'enroulent, le mur nu dessous.
     const { ctx, palette: p } = a;

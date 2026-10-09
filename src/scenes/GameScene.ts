@@ -89,9 +89,13 @@ import {
   type MapBox,
   type Zone,
 } from '../core/world/zone';
+import { shellTally, zoneShells } from '../core/world/shells';
 import { FlashbackView } from '../ui/FlashbackView';
 import { Hud } from '../ui/Hud';
 import { showEndScreen } from '../ui/EndScreen';
+import { ShellJarView } from './ShellJarView';
+import { HideoutView } from './HideoutView';
+import { hideAt } from '../core/fx/hideouts';
 import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
 import { PauseMenu } from '../ui/PauseMenu';
 import {
@@ -117,6 +121,7 @@ import {
   STRANGE_PALETTE,
   TRAIN_RIDE,
   CHASE_VIEW,
+  SHELL_ART,
 } from '../config/art';
 import { STORY_TIMING, StoryFlag, TOWER_CUBES } from '../config/story';
 import { PropStage } from '../core/story/PropStage';
@@ -401,6 +406,10 @@ export class GameScene extends Phaser.Scene {
   readonly transition = new RoomTransition(this.worldParams);
   session!: SaveSession;
   private worldView!: WorldView;
+  /** Le bocal à coquilles de la chambre (D-148). */
+  private shellJar!: ShellJarView;
+  /** Les cachettes de la salle (D-148), au premier plan. */
+  private hideouts!: HideoutView;
   private hud!: Hud;
   /** Courts souvenirs (D-68). */
   private flashbackView!: FlashbackView;
@@ -623,7 +632,12 @@ export class GameScene extends Phaser.Scene {
     this.drawLevel();
     this.run = new RunState(this.level, this.worldParams);
     this.run.load(this.level, save.activatedCheckpoints, checkpointId);
-    this.pickups.load(this.level, save.progression.abilities, save.progression.collectibles);
+    this.pickups.load(
+      this.level,
+      save.progression.abilities,
+      save.progression.collectibles,
+      save.progression.seenCollectibles,
+    );
     void this.session.revealRoom(this.level.id);
     const { x, y } = this.respawnPosition();
     this.player = new PlayerPhysics(this.level, this.movement, x, y, this.growth.hitbox);
@@ -637,7 +651,11 @@ export class GameScene extends Phaser.Scene {
     this.combatView = new CombatView(this, this.combat, this.combatParams, this.dust);
     this.combatView.setArt(this.artScale, this.palette());
     this.worldView = new WorldView(this, this.run, this.pickups);
+    this.shellJar = new ShellJarView(this);
+    this.hideouts = new HideoutView(this);
     this.worldView.setArt(this.artScale, this.strangeWorld || isStrangeRoom(this.level));
+    this.shellJar.load(this.level.id, this.shellCount(), this.artScale);
+    this.hideouts.load(this.level, this.artScale, this.story.timeOfDay() === 'evening');
     this.showCables();
     this.trainView = new TrainView(this, this.combat);
     this.trainView.setArt(this.artScale);
@@ -996,6 +1014,8 @@ export class GameScene extends Phaser.Scene {
     this.shiftView.render(this.time.now, this.puppet.x, this.puppet.y - box.height / 2, this.erase);
     this.lullaby.render(this.time.now, this.erase);
     this.worldView.render();
+    this.hideouts.update(box, this.game.loop.delta);
+    this.noticeShells();
     this.dust.update();
     const hintTarget = this.hintTarget;
     this.hintView.update(
@@ -1131,7 +1151,7 @@ export class GameScene extends Phaser.Scene {
 
   /**
    * Carte dessinée par Céleste (§24) : salles visitées et devinées, veilleuses allumées,
-   * trouvailles, Céleste. Seulement dans une zone (pas dans les parcours d'essai).
+   * coquilles trouvées et vues (D-148), Céleste. Seulement dans une zone (pas dans les parcours d'essai).
    */
   openMap(): void {
     const zone = this.zone;
@@ -1150,6 +1170,7 @@ export class GameScene extends Phaser.Scene {
         activatedCheckpoints: data.activatedCheckpoints,
         checkpoint: data.checkpoint,
         collectibles: data.progression.collectibles,
+        seenCollectibles: data.progression.seenCollectibles,
         celeste: { room: this.level.id, x: box.x + box.width / 2, y: box.y + box.height },
         cubes: ISLET_CUBES.flatMap((cube, k) =>
           this.story.flags.has(cube.flag)
@@ -1422,7 +1443,14 @@ export class GameScene extends Phaser.Scene {
     void this.session
       .setCheckpoint(room, null)
       .then(() => this.session.manager.flush())
-      .then(() => showEndScreen(import.meta.env.BASE_URL))
+      .then(() => {
+        // Toutes les coquilles trouvées : le petit escargot de la fin (D-148).
+        const shells = this.shellCount();
+        return showEndScreen(
+          import.meta.env.BASE_URL,
+          shells.total > 0 && shells.found === shells.total,
+        );
+      })
       .then(() => {
         location.reload();
       });
@@ -1539,6 +1567,86 @@ export class GameScene extends Phaser.Scene {
     this.clock.reset();
     this.transition.cancel();
     this.resetCamera();
+  }
+
+  /**
+   * Une coquille passée à l'écran est vue (D-148) : Céleste la dessinera en pointillés sur la carte
+   * tant qu'elle ne l'a pas prise. Seulement dans une zone ; bien dans le cadre (une tuile de marge).
+   */
+  private noticeShells(): void {
+    // Dans le noir d'un fondu, rien ne se voit.
+    if (!this.zone || this.hud.black) {
+      return;
+    }
+    const view = this.cameras.main.worldView;
+    for (const item of this.pickups.items) {
+      if (item.kind !== PickupKind.Shell || item.taken || item.seen) {
+        continue;
+      }
+      // Une coquille dans une cachette (D-148) ne se voit que découverte.
+      const hide = hideAt(this.level, item.col, item.row);
+      if (hide >= 0 && (this.hideouts.alphas[hide] ?? 1) > 0.5) {
+        continue;
+      }
+      const x = (item.col + 0.5) * TILE_SIZE;
+      const y = (item.row + 0.5) * TILE_SIZE;
+      if (
+        x > view.x + TILE_SIZE &&
+        x < view.right - TILE_SIZE &&
+        y > view.y + TILE_SIZE &&
+        y < view.bottom - TILE_SIZE
+      ) {
+        item.seen = true;
+        void this.session.addSeenCollectible(item.id);
+      }
+    }
+  }
+
+  /**
+   * Outil de debug (D-148) : Céleste à côté d'une coquille (sur son appui, deux ou trois tuiles à
+   * côté si la place le permet, sinon dessus : elle la ramasse).
+   */
+  teleportToShell(name: string): void {
+    const shell = this.zone ? zoneShells(this.zone).find((s) => s.name === name) : null;
+    if (!shell) {
+      return;
+    }
+    this.teleportToRoom(shell.room);
+    const level = this.level;
+    const free = (col: number, row: number) => tileAt(level, col, row) === Tile.Empty;
+    const ground = (col: number, row: number) => {
+      const tile = tileAt(level, col, row);
+      return tile === Tile.Solid || tile === Tile.OneWay;
+    };
+    const dx = [2, -2, 3, -3].find(
+      (d) =>
+        free(shell.col + d, shell.row) &&
+        free(shell.col + d, shell.row - 1) &&
+        ground(shell.col + d, shell.row + 1),
+    );
+    const col = shell.col + (dx ?? 0);
+    this.player.reset(
+      (col + 0.5) * TILE_SIZE - this.growth.hitbox.width / 2,
+      (shell.row + 1) * TILE_SIZE - this.growth.hitbox.height,
+      level,
+    );
+    this.feel.reset(this.player);
+    this.resetCamera();
+  }
+
+  /** Outil de debug (D-148) : les coquilles de la salle relues dans la sauvegarde. */
+  reloadPickups(): void {
+    const { abilities, collectibles, seenCollectibles } = this.session.data.progression;
+    this.pickups.load(this.level, abilities, collectibles, seenCollectibles);
+    this.worldView.rebuild();
+    this.shellJar.load(this.level.id, this.shellCount(), this.artScale);
+  }
+
+  /** Coquilles trouvées et en tout, dans toute la zone (D-148) : le bocal, la fin. */
+  private shellCount(): { found: number; total: number } {
+    const shells = this.zone ? zoneShells(this.zone) : [];
+    const found = this.session.data.progression.collectibles;
+    return { found: shells.filter((s) => found.includes(s.name)).length, total: shells.length };
   }
 
   /**
@@ -1818,10 +1926,12 @@ export class GameScene extends Phaser.Scene {
     this.chaseView.rebuild();
     this.applyRoomCamera();
     this.run.load(level, this.session.data.activatedCheckpoints, checkpointId);
-    const { abilities, collectibles } = this.session.data.progression;
-    this.pickups.load(level, abilities, collectibles);
+    const { abilities, collectibles, seenCollectibles } = this.session.data.progression;
+    this.pickups.load(level, abilities, collectibles, seenCollectibles);
     this.applyAbilities();
     this.worldView.rebuild();
+    this.shellJar.load(level.id, this.shellCount(), this.artScale);
+    this.hideouts.load(level, this.artScale, this.story.timeOfDay() === 'evening');
     this.showCables();
     this.props.load(this.story.data.props, level.id, this.story.flags);
     this.storyView.rebuild();
@@ -1873,17 +1983,28 @@ export class GameScene extends Phaser.Scene {
 
   /**
    * Objet ramassé, sauvegardé aussitôt. Capacité (D-26) : appliquée, indice de prototype affiché.
-   * Trouvaille (D-27) : rien d'affiché pour l'instant (pas de compteur avant la carte, §23).
+   * Coquille (D-148) : elle file vers le cahier, et « n/N » de son lieu s'affiche un moment.
    */
   private onPicked(index: number): void {
     const item = this.pickups.items[index];
     if (!item) {
       return;
     }
-    if (item.kind === PickupKind.Secret) {
+    if (item.kind === PickupKind.Shell) {
       this.audio.playJingle('found');
       this.audio.sfx.play('voice-laugh');
       void this.session.addCollectible(item.id);
+      // Elle file vers le cahier, puis « n/N » de son lieu (D-148).
+      const place = this.zone ? mapPage(this.zone, this.level.id) : null;
+      const count =
+        this.zone && place
+          ? shellTally(zoneShells(this.zone), place, this.session.data.progression.collectibles)
+          : null;
+      const from = this.screenPoint(
+        (item.col + 0.5) * TILE_SIZE,
+        (item.row + 1) * TILE_SIZE - SHELL_ART.heightPx / 2,
+      );
+      this.hud.showShell(count, { x: from.x, y: from.y });
       return;
     }
     if (isAbility(item.id)) {
@@ -1956,6 +2077,8 @@ export class GameScene extends Phaser.Scene {
     this.drawnDim = this.isDim();
     this.drawnStrange = isStrangeRoom(this.level);
     this.worldView.setArt(this.artScale, this.strangeWorld || isStrangeRoom(this.level));
+    this.shellJar.load(this.level.id, this.shellCount(), this.artScale);
+    this.hideouts.load(this.level, this.artScale, this.story.timeOfDay() === 'evening');
     this.storyView.setArt(this.artScale, this.artImages());
     this.combatView.setArt(this.artScale, this.palette());
     this.trainView.setArt(this.artScale);
@@ -2490,11 +2613,15 @@ export class GameScene extends Phaser.Scene {
 
   /** Centre du fondu en cercle (D-35) : Céleste, en px CSS de la page. */
   private irisCenter(): { x: number; y: number } {
+    return this.screenPoint(this.puppet.x, this.puppet.y - this.growth.hitbox.height / 2);
+  }
+
+  /** Point du monde (px) en px CSS de la page (réutilise le même objet). */
+  private screenPoint(x: number, y: number): { x: number; y: number } {
     const main = this.cameras.main;
     const bounds = this.game.canvas.getBoundingClientRect();
     const k = bounds.width / this.scale.width;
-    const y = this.puppet.y - this.growth.hitbox.height / 2;
-    this.irisPoint.x = bounds.left + (this.puppet.x - main.worldView.x) * main.zoom * k;
+    this.irisPoint.x = bounds.left + (x - main.worldView.x) * main.zoom * k;
     this.irisPoint.y = bounds.top + (y - main.worldView.y) * main.zoom * k;
     return this.irisPoint;
   }

@@ -133,7 +133,7 @@ describe('le train, PR 3 : les compartiments, le fourgon, le toit, le wagon-rest
         room,
       ).toEqual([]);
       // Ses trouvailles s'atteignent.
-      for (const secret of level(room).entities.filter((e) => e.type === EntityType.Secret)) {
+      for (const secret of level(room).entities.filter((e) => e.type === EntityType.Shell)) {
         const target = surfaceUnder(level(room), a.map, secret.col, secret.row);
         expect(all.has(target), `${room} : trouvaille (${String(secret.col)})`).toBe(true);
       }

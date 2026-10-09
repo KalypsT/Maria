@@ -5,7 +5,7 @@ import { DEFAULT_MOVEMENT } from '../src/config/movement';
 import { EntityType } from '../src/core/level/LevelData';
 import { PlayerPhysics, type PlayerInput } from '../src/core/player/PlayerPhysics';
 import { PlayerState } from '../src/core/player/playerState';
-import { Pickups, secretId } from '../src/core/world/Pickups';
+import { Pickups, shellId } from '../src/core/world/Pickups';
 import { level, phase } from './zoneGraph';
 
 const P3 = phase(3);
@@ -30,6 +30,13 @@ const CASES = [
     from: { col: 49, row: 37 },
     dir: -1,
   },
+  // D-148 : sous le banc de l'abri du quai.
+  {
+    name: 'les quais, sous le banc de l’abri',
+    room: 'station-platforms',
+    from: { col: 61, row: 26 },
+    dir: 1,
+  },
 ] as const;
 
 /** La nouvelle trouvaille de la salle (dans le passage bas, ou derrière). */
@@ -37,7 +44,7 @@ function secretOf(room: string, from: { col: number; row: number }, dir: number)
   const data = level(room);
   const found = data.entities
     .filter(
-      (e) => e.type === EntityType.Secret && e.row === from.row && (e.col - from.col) * dir > 0,
+      (e) => e.type === EntityType.Shell && e.row === from.row && (e.col - from.col) * dir > 0,
     )
     .sort((a, b) => (a.col - from.col) * dir - (b.col - from.col) * dir)[0];
   if (!found) {
@@ -84,7 +91,7 @@ function attempt(room: string, from: { col: number; row: number }, dir: number, 
 describe('les revisites avec la glissade (D-91)', () => {
   it.each(CASES)('$name : la trouvaille seulement en glissant', ({ room, from, dir }) => {
     const secret = secretOf(room, from, dir);
-    const id = secretId(room, secret.col, secret.row);
+    const id = shellId(room, secret);
     expect(attempt(room, from, dir, true).picked).toBe(id);
     expect(attempt(room, from, dir, false).picked, 'sans la glissade').not.toBe(id);
   });

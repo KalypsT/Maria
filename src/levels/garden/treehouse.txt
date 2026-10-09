@@ -1,6 +1,7 @@
 ; Jardin : la cabane dans l'arbre (D-46). Le saut mural s'y trouve, et une petite cheminée pour l'essayer.
 ; Refaite (D-76) : un toit en appentis, une lanterne, les dessins de Céleste au mur.
 ; @name: Cabane
+; @shell: treehouse-chest 22 3 easy wall-jump
 ; @icon: house
 ; @wall: planks
 ; @ambient: #3a3228
@@ -16,7 +17,7 @@
 ; @decor: drawings 2 7 6 3
 ; @decor: dust 13 7 7 6
 ; @decor: cushions 2 13 3 1
-; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (danger), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S trouvaille, 1-9 sorties (liaisons dans zone.ts).
+; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (danger), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 ##############################
 ################.............#
 #############................#

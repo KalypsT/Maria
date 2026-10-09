@@ -7,6 +7,8 @@
 ; drisse de son drapeau (le crochet) jusqu'aux épis, le haut des pieux, les bouées qui ont monté, le
 ; gros rocher, l'avancée. La balise au large et sa trouvaille : à marée haute seulement (défi).
 ; @name: La plage
+; @shell: beach-beacon 49 12 medium high tide from 176,17
+; @shell: beach-cave 154 23 easy slide tide
 ; @icon: sea
 ; @world: street
 ; @backdrop: sea

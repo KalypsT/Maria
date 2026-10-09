@@ -13,7 +13,9 @@ import {
   type LevelLayers,
   type LayerMask,
   type LevelLeg,
+  type LevelHide,
   type LevelTide,
+  type ShellIntent,
   type LevelTrain,
   type TilePos,
   type TileRect,
@@ -50,7 +52,7 @@ const ENTITIES: Readonly<Record<string, EntityType>> = {
   o: EntityType.Snail,
   C: EntityType.Checkpoint,
   A: EntityType.Ability,
-  S: EntityType.Secret,
+  S: EntityType.Shell,
 };
 /** Matériaux d'affichage (D-25). */
 const MATERIALS: Readonly<Record<string, Material>> = {
@@ -120,6 +122,15 @@ const ERASE_SPEED = /^([\w.-]+)\s+(\d+(?:\.\d+)?)$/;
 const ERASE_UNTIL = /^([\w.-]+)$/;
 /** Étape des vagues de l'effacement (D-111), répétable, dans l'ordre : `; @erase-step: a,b`. */
 const ERASE_STEP = /^([a-z0-9-]+(?:\s*,\s*[a-z0-9-]+)*)$/;
+/**
+ * Nom fixe d'une coquille (D-148), répétable : `; @shell: attic-ridge 6 5 medium climb` (nom,
+ * colonne et ligne de son `S`, puis son intention : difficulté, capacités exigées, `growth`,
+ * `crawl`, `from col,ligne`, `high`, `tide`). Le nom est son identifiant dans la sauvegarde : la
+ * déplacer ne la fait pas oublier.
+ */
+const SHELL = /^([a-z0-9]+(?:-[a-z0-9]+)*)\s+(\d+)\s+(\d+)((?:\s+[\w,-]+)*)$/;
+/** Cachette (D-148), répétable : `; @hide: sheet 36 15 4 5` (dessin, colonne, ligne, largeur, hauteur). */
+const HIDE = DECOR;
 /** Zone d'une seule couche (D-107), répétable : `; @shift: memory 10 4 6 2`. */
 const SHIFT = /^(present|memory)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
 
@@ -129,7 +140,8 @@ const SHIFT = /^(present|memory)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
  * Légende : `#` plein, `=` traversable par le dessous, `.` vide, `P` départ (une seule fois),
  * `G` arrivée d'un parcours (au plus une fois), `e` patrouilleur, `a` araignée (D-46), `o` escargot (D-49), `C` checkpoint, `^` danger qui pique, `!` ronces, qui piquent aussi (D-51, D-56),
  * `b` bois, `t` tissu et `v` feuillage (pleins, D-46), `-` étagère (traversable), `1`-`9` sortie dans un mur latéral,
- * `A` objet de capacité (au plus un, capacité nommée par `; @ability:`), `S` trouvaille (secret),
+ * `A` objet de capacité (au plus un, capacité nommée par `; @ability:`), `S` coquille (nommée par
+ * `; @shell:`, D-148),
  * `~` eau (une flaque, la mer qui ne se retire jamais, D-95).
  * Les commentaires `; @clé: valeur` sont des métadonnées ; `; @decor:` (répétable) déclare
  * l'habillage (D-28), `; @door:` (répétable) une porte de façade (D-61), `; @cable:` (répétable)
@@ -142,6 +154,9 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   const doors: LevelDoor[] = [];
   const cableTiles: number[][] = [];
   const trains: LevelTrain[] = [];
+  /** Noms et intentions des coquilles (D-148), par tuile `col,ligne`. */
+  const shellNames = new Map<string, { name: string; intent: ShellIntent | undefined }>();
+  const hides: LevelHide[] = [];
   let chaseEnd = -1;
   let chaseDir = 'up' as ChaseDir;
   let chaseLook = 'default' as ChaseLook;
@@ -186,6 +201,36 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         throw new Error(`Niveau ${id}, ligne ${index + 1} : @door attend « numéro col ligne »`);
       }
       doors.push({ id: Number(d[1]), col: Number(d[2]), row: Number(d[3]) });
+    } else if (match?.[1] === 'shell' && match[2] !== undefined) {
+      const m = SHELL.exec(match[2].trim());
+      if (!m?.[1]) {
+        throw new Error(`Niveau ${id}, ligne ${index + 1} : @shell attend « nom col ligne »`);
+      }
+      const at = `${m[2] ?? ''},${m[3] ?? ''}`;
+      const name = m[1];
+      if (shellNames.has(at) || [...shellNames.values()].some((s) => s.name === name)) {
+        throw new Error(`Niveau ${id}, ligne ${index + 1} : @shell ${name} en double`);
+      }
+      const words = (m[4] ?? '')
+        .trim()
+        .split(/\s+/)
+        .filter((w) => w !== '');
+      shellNames.set(at, { name, intent: parseShellIntent(id, index + 1, name, words) });
+    } else if (match?.[1] === 'hide' && match[2] !== undefined) {
+      const h = HIDE.exec(match[2].trim());
+      if (!h?.[1]) {
+        throw new Error(
+          `Niveau ${id}, ligne ${index + 1} : @hide attend « dessin col ligne largeur hauteur »`,
+        );
+      }
+      const [col, row, width, height] = h.slice(2, 6).map(Number);
+      hides.push({
+        kind: h[1],
+        col: col ?? 0,
+        row: row ?? 0,
+        width: width ?? 0,
+        height: height ?? 0,
+      });
     } else if (match?.[1] === 'cable' && match[2] !== undefined) {
       const c = CABLE.exec(match[2].trim());
       if (!c) {
@@ -382,7 +427,17 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         goal = { col, row };
       }
       const entity = ENTITIES[char];
-      if (entity) {
+      const named = entity === EntityType.Shell ? shellNames.get(`${col},${row}`) : undefined;
+      if (entity && named !== undefined) {
+        entities.push({
+          type: entity,
+          col,
+          row,
+          name: named.name,
+          ...(named.intent ? { intent: named.intent } : {}),
+        });
+        shellNames.delete(`${col},${row}`);
+      } else if (entity) {
         entities.push({ type: entity, col, row });
       }
       drawn[row * width + col] = tile;
@@ -392,6 +447,27 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
 
   if (!spawn) {
     throw new Error(`Niveau ${id} : point de départ « ${SPAWN} » manquant`);
+  }
+  const [orphan] = shellNames;
+  if (orphan) {
+    const [at, { name }] = orphan;
+    throw new Error(
+      `Niveau ${id} : @shell ${name} ${at.replace(',', ' ')} sans « S » à cette place`,
+    );
+  }
+  for (const h of hides) {
+    if (h.width < 1 || h.height < 1 || h.col + h.width > width || h.row + h.height > height) {
+      throw new Error(`Niveau ${id} : @hide ${h.kind} hors de la salle`);
+    }
+  }
+  if (!tideRows) {
+    for (const e of entities) {
+      if (e.intent?.high || e.intent?.tide) {
+        throw new Error(
+          `Niveau ${id} : @shell ${e.name ?? ''} : « high » et « tide » vont avec @tide`,
+        );
+      }
+    }
   }
   if (!tideRows && (seas.length > 0 || rises.length > 0)) {
     throw new Error(`Niveau ${id} : @sea et @rise vont de pair avec @tide`);
@@ -530,6 +606,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         : null,
     legs,
     sweeps,
+    ...(hides.length > 0 ? { hides } : {}),
   };
   checkTide(level);
   const present = presentOf(level);
@@ -562,4 +639,53 @@ function exitFromTiles(
     );
   }
   return { id: exitId, side: col === 0 ? 'left' : 'right', col, rowMin, rowMax };
+}
+
+/** L'intention d'une coquille (D-148), après son nom et sa place ; absente : rien après. */
+function parseShellIntent(
+  levelId: string,
+  line: number,
+  name: string,
+  words: readonly string[],
+): ShellIntent | undefined {
+  const [difficulty, ...rest] = words;
+  if (difficulty === undefined) {
+    return undefined;
+  }
+  const fail = (why: string): never => {
+    throw new Error(`Niveau ${levelId}, ligne ${String(line)} : @shell ${name} : ${why}`);
+  };
+  if (difficulty !== 'easy' && difficulty !== 'medium' && difficulty !== 'hard') {
+    return fail(`difficulté « ${difficulty} » inconnue`);
+  }
+  const needs: string[] = [];
+  let growth = false;
+  let crawl = false;
+  let high = false;
+  let tide = false;
+  let from: TilePos | null = null;
+  for (let i = 0; i < rest.length; i++) {
+    const word = rest[i] ?? '';
+    if (LEG_NEEDS.has(word)) {
+      needs.push(word);
+    } else if (word === 'growth') {
+      growth = true;
+    } else if (word === 'crawl') {
+      crawl = true;
+    } else if (word === 'high') {
+      high = true;
+    } else if (word === 'tide') {
+      tide = true;
+    } else if (word === 'from') {
+      const at = /^(\d+),(\d+)$/.exec(rest[i + 1] ?? '');
+      if (!at) {
+        return fail('« from » attend « col,ligne »');
+      }
+      from = { col: Number(at[1]), row: Number(at[2]) };
+      i++;
+    } else {
+      return fail(`« ${word} » inconnu`);
+    }
+  }
+  return { difficulty, needs, growth, crawl, from, high, tide };
 }
