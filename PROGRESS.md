@@ -38,6 +38,11 @@
 
 ## Fait
 
+### Musique : l'accueil, la rue, le train, la fin
+
+- Quatre morceaux de l'utilisateur intégrés à leur emplacement (`title`, `street`, `train`, `ending`), préparés par `npm run audio:prepare` (−18 LUFS, AAC) : 1 + 1,5 + 1,5 + 2,6 Mo ; la musique pèse 16,5 Mo (limite 32 Mo).
+- [ ] À vérifier sur téléphone : le volume de chaque morceau par rapport aux autres ; la boucle de la rue et du train.
+
 ### Le chat, la nounou, Eden (D-154)
 
 - Le chat gris (assis, endormi), la nounou dans son fauteuil (tricot, main tendue ; un peu passée), Eden (assis, bras levés, qui rit, caché).
