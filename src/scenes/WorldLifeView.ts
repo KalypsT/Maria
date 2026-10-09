@@ -42,9 +42,8 @@ const BUTTERFLY_TEXTURE = 'life-butterfly';
 /** Balançoire, girouette (D-76) : inclinaisons et orientations dessinées d'avance. */
 const SWING_FRAMES = 9;
 const VANE_FRAMES = 8;
-/** Drapeau de l'école, queue du chat (D-77). */
+/** Drapeau de l'école (D-77). */
 const FLAG_FRAMES = 6;
-const TAIL_FRAMES = 7;
 /** Ventilateur, bâche (D-78). */
 const FAN_FRAMES = 4;
 const TARP_FRAMES = 6;
@@ -168,7 +167,7 @@ interface Drum {
 /** Un objet animé par images (balançoire, girouette) : son image et sa phase. */
 interface Framed {
   readonly image: Phaser.GameObjects.Image;
-  readonly kind: 'swing' | 'vane' | 'flag' | 'tail' | 'fan' | 'tarp';
+  readonly kind: 'swing' | 'vane' | 'flag' | 'fan' | 'tarp';
 }
 
 /** Une ampoule de la guirlande, à sa place sur le fil. */
@@ -392,8 +391,6 @@ export class WorldLifeView {
         this.makeTarp(`${level.id}-${String(i)}`, r, palette, artScale);
       } else if (d.kind === 'flag') {
         this.makeFlag(`${level.id}-${String(i)}`, r, artScale);
-      } else if (d.kind === 'cat') {
-        this.makeCatTail(`${level.id}-${String(i)}`, r, artScale);
       } else if (d.kind === 'fireplace') {
         this.makeFire(`${level.id}-${String(i)}`, r, artScale);
       } else if (d.kind === 'grandclock') {
@@ -851,52 +848,6 @@ export class WorldLifeView {
     this.framed.push({ image, kind: 'flag' });
   }
 
-  /** La queue du chat roux (D-77) : elle pend du rebord et balance doucement. */
-  private makeCatTail(
-    id: string,
-    r: { x: number; y: number; w: number; h: number },
-    artScale: number,
-  ): void {
-    const swing = WORLD_LIFE.catTail.swingRad;
-    const key = `life-cat-tail-${id}`;
-    const made = framedTexture(
-      this.scene,
-      key,
-      TAIL_FRAMES,
-      20,
-      18,
-      10,
-      1,
-      artScale,
-      (k) => -swing + (2 * swing * k) / (TAIL_FRAMES - 1),
-      (ctx) => {
-        ctx.strokeStyle = '#d98a4a';
-        ctx.lineWidth = 2.4;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.quadraticCurveTo(-1, 9, 3, 15);
-        ctx.stroke();
-        ctx.strokeStyle = '#b86a33';
-        ctx.lineWidth = 2.4;
-        ctx.beginPath();
-        ctx.moveTo(1.5, 11);
-        ctx.lineTo(2.5, 13);
-        ctx.stroke();
-      },
-    );
-    if (!made) {
-      return;
-    }
-    this.roomTextures.push(key);
-    const image = this.scene.add
-      .image(r.x + r.w / 2 + 4, r.y + r.h - 3, key, FRAME_NAMES[(TAIL_FRAMES - 1) / 2])
-      .setOrigin(0.5, 1 / 18)
-      .setScale(1 / artScale)
-      .setDepth(LAUNDRY_DEPTH);
-    this.framed.push({ image, kind: 'tail' });
-  }
-
   /** Le pigeon de la cour (D-79) : trois images dessinées d'avance (debout, il picore, il vole). */
   private makePigeon(r: { x: number; y: number; w: number; h: number }): void {
     if (!this.scene.textures.exists(PIGEON_TEXTURE)) {
@@ -1217,10 +1168,6 @@ export class WorldLifeView {
       } else if (item.kind === 'flag') {
         const wave = Math.floor(nowMs / (cfg.flag.periodMs / FLAG_FRAMES)) % FLAG_FRAMES;
         item.image.setFrame(FRAME_NAMES[wave] ?? '0', false, false);
-      } else if (item.kind === 'tail') {
-        const k = Math.sin((nowMs / cfg.catTail.periodMs) * Math.PI * 2);
-        const frame = Math.round(((k + 1) / 2) * (TAIL_FRAMES - 1));
-        item.image.setFrame(FRAME_NAMES[frame] ?? '0', false, false);
       } else {
         // La girouette se tourne lentement, plus vite quand le vent forcit.
         const turn = Math.abs(Math.sin(nowMs / 9000 + gust * 1.5));

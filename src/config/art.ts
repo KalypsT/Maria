@@ -837,6 +837,10 @@ export const CHARACTER_IMAGES: Readonly<Partial<Record<PropKind, CharacterImage>
   'eden-cheer': { file: 'eden-cheer.png', footX: 0.5 },
   'eden-laugh': { file: 'eden-laugh.png', footX: 0.5 },
   'eden-peek': { file: 'eden-peek.png', footX: 0.5, seat: 1, height: 9 },
+  // Les passants (D-155). La caissière sur son tabouret : les hanches au milieu du cadre (au-dessus
+  // du tabouret), les jambes pendent 3 tuiles sous l'assise jusqu'au sol.
+  'busstop-man': { file: 'busstop-man.png', footX: 0.48 },
+  cashier: { file: 'cashier.png', footX: 0.3, seat: 0.6, height: 120 },
 };
 
 /**
@@ -1397,9 +1401,8 @@ export const WORLD_LIFE = {
   garland: { swayPx: 2.5 },
   /** Fumée des cheminées de la rue (D-77) : volutes par cheminée, montée (px/s), dérive au vent. */
   smoke: { count: 5, risePxPerS: 7, windPx: 14, alpha: 0.6 },
-  /** Drapeau de l'école (D-77) : une vague (ms). Queue du chat : un aller-retour (ms). */
+  /** Drapeau de l'école (D-77) : une vague (ms). */
   flag: { periodMs: 900 },
-  catTail: { periodMs: 2600, swingRad: 0.35 },
   /** Supérette (D-78) : tour du ventilateur (ms) ; clignotement du tube de la réserve. */
   fan: { periodMs: 700 },
   tubeFlicker: { everyMs: [4000, 9000] as [number, number], blinkMs: 90, blinks: 3 },

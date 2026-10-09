@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Les passants et l'Educaville** (D-155, demande de l'utilisateur) : proposition validée en 3 PR (l'Educaville à la place de la boîte à formes, son téléphone qui sonne ; le système des passants, la rue et la supérette ; la gare, la mer, le jardin, la rue d'autrefois). Prompts des images dans `docs/PROMPTS_PERSONNAGES.md` (section D-155), sur `ccr-fd60fab4-k0uhko`. Suite : les images de l'utilisateur (le jouet, les passants, le chat roux) ; la sonnerie de jouet à fournir.
+**Les passants et l'Educaville** (D-155, demande de l'utilisateur) : proposition validée en 3 PR (l'Educaville à la place de la boîte à formes, son téléphone qui sonne ; le système des passants, la rue et la supérette ; la gare, la mer, le jardin, la rue d'autrefois). Prompts des images dans `docs/PROMPTS_PERSONNAGES.md` (section D-155), sur `ccr-fd60fab4-k0uhko`. **PR 2 faite : le système des passants, la rue et la supérette** (avant la PR 1, qui attend l'image du jouet). Suite : les images (le jouet ; la voisine, le chat roux, la dame au chien et le vieux couple sur fond blanc, les secondes poses) ; la PR 3 ; la sonnerie de jouet à fournir.
 
 **Les stats** (D-153, demande de l'utilisateur, avant la diffusion) : plan validé en 2 PR (le système ; la page du cahier). **PR 1 faite : le système** (temps de jeu, évanouissements, fil discret, par salle ; dans la sauvegarde sans migration ; DEBUG → « Stats »), sur `ccr-dae061c9-3hvwy2`. **PR 2 faite : la page « Mon voyage » du cahier** (le temps, les coquilles, les souvenirs, les lieux, les évanouissements : une petite lune), validée par l'utilisateur telle quelle. **Les stats sont complètes.** Suite : essai sur téléphone ; une vraie partie d'essai, chiffres du debug à l'appui.
 
@@ -39,6 +39,12 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les passants, PR 2 : le système, la rue, la supérette (D-155)
+
+- La voisine à sa fenêtre (elle salue), le monsieur de l'abribus (image, une bulle), la dame au petit chien, le chat roux qui bondit, deux pigeons ; la caissière (image) sur son tabouret. Silhouettes provisoires pour les images à venir.
+- Vérifié dans Chromium : la voisine dans sa fenêtre, le monsieur et sa bulle, le bond du chat (ralenti pour l'essai), la dame au chien, la caissière.
+- [ ] À vérifier sur téléphone : les passants gênent-ils la lecture du parcours ? La bulle vient-elle au bon moment (ni trop tôt, ni trop souvent) ? Le chat file-t-il quand on monte sur l'abribus ?
 
 ### Musique : l'accueil, la rue, le train, la fin
 

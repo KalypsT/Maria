@@ -517,4 +517,15 @@ export const PROP_SIZE = {
   // Le portillon au bout du passage sous le vieux mur (D-60), fermé puis ouvert.
   gate: { w: 14, h: 46 },
   'gate-open': { w: 14, h: 46 },
+  // Les passants (D-155), à hauteur d'enfant comme les parents. La caissière : jusqu'à l'assise de
+  // son tabouret (ses jambes pendent dessous) ; la voisine : son buste, dans l'embrasure de sa
+  // fenêtre (`PASSERBY_FRAMES`) ; le chat roux : comme le chat gris, sa queue pend du rebord.
+  'busstop-man': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  'busstop-man-look': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  'dog-walker': { w: 64 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  'neighbor-window': { w: 30, h: 30 },
+  'neighbor-wave': { w: 30, h: 30 },
+  cashier: { w: 40 * PARENT_SCALE, h: 36 * PARENT_SCALE },
+  'ginger-cat-sit': { w: 12 * CAT_SCALE, h: 14 * CAT_SCALE },
+  'ginger-cat-leap': { w: 22 * CAT_SCALE, h: 12 * CAT_SCALE },
 } as const satisfies Readonly<Record<PropKind, { w: number; h: number }>>;

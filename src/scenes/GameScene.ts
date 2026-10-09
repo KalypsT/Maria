@@ -132,6 +132,7 @@ import { STRANGE_FX } from '../config/strangeFx';
 import { HOUSE_STORY } from '../levels/house/story';
 import { ISLET_CUBES } from '../levels/nanny/story';
 import type { Box } from '../core/physics/gridCollision';
+import { PasserbyView } from './PasserbyView';
 import { StoryView } from './StoryView';
 import { StrangeFxView } from './StrangeFxView';
 import { CombatView } from './CombatView';
@@ -480,6 +481,8 @@ export class GameScene extends Phaser.Scene {
   story!: StoryDirector;
   readonly props = new PropStage();
   private storyView!: StoryView;
+  /** Les passants et les animaux (D-155). */
+  private passersby!: PasserbyView;
   /** Effets du monde étrange (D-35) : présage, scintillements, tremblements, vie des salles. */
   private fx!: StrangeFxView;
   private readonly fxView = new Phaser.Geom.Rectangle();
@@ -675,6 +678,7 @@ export class GameScene extends Phaser.Scene {
     this.props.load(this.story.data.props, this.level.id, this.story.flags);
     this.storyView = new StoryView(this, this.props, this.story);
     this.storyView.setArt(this.artScale, this.artImages());
+    this.passersby = new PasserbyView(this);
     this.fx = new StrangeFxView(this);
     this.fx.load(
       this.level,
@@ -1025,6 +1029,12 @@ export class GameScene extends Phaser.Scene {
     );
     this.chaseView.render(camera.prevY + (camera.y - camera.prevY) * alpha + camera.viewHeight / 2);
     this.storyView.render(this.puppet.x, this.puppet.y, box.height);
+    this.passersby.update(
+      this.time.now,
+      this.game.loop.delta,
+      this.puppet.x,
+      this.puppet.y - box.height / 2,
+    );
     this.shiftView.render(this.time.now, this.puppet.x, this.puppet.y - box.height / 2, this.erase);
     this.lullaby.render(this.time.now, this.erase);
     this.worldView.render();
@@ -2006,6 +2016,7 @@ export class GameScene extends Phaser.Scene {
     this.props.load(this.story.data.props, level.id, this.story.flags);
     this.storyView.rebuild();
     this.storyView.clearThought();
+    this.loadPassersby();
     this.poser.sitting = false;
     this.fx.reset();
     this.fx.load(level, isStrangeRoom(level), this.palette(), this.story.timeOfDay() === 'morning');
@@ -2141,6 +2152,17 @@ export class GameScene extends Phaser.Scene {
     this.redrawArt();
   }
 
+  /** Les passants de la salle (D-155), à ce moment de la journée ; personne dans un monde étrange. */
+  private loadPassersby(): void {
+    this.passersby.load(
+      this.level.id,
+      this.story.timeOfDay(),
+      this.strangeWorld || isStrangeRoom(this.level),
+      this.artScale,
+      this.artImages(),
+    );
+  }
+
   /** Redessine la salle et Céleste (échelle ou palette changée). */
   private redrawArt(): void {
     this.drawnTime = this.story.timeOfDay();
@@ -2150,6 +2172,7 @@ export class GameScene extends Phaser.Scene {
     this.shellJar.load(this.level.id, this.shellCount(), this.artScale);
     this.hideouts.load(this.level, this.artScale, this.story.timeOfDay() === 'evening');
     this.storyView.setArt(this.artScale, this.artImages());
+    this.loadPassersby();
     this.combatView.setArt(this.artScale, this.palette());
     this.trainView.setArt(this.artScale);
     this.rideView.setArt(this.artScale);

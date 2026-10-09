@@ -224,6 +224,28 @@ export interface StoryTrigger {
   readonly steps: readonly StoryStep[];
 }
 
+/**
+ * Les passants et les animaux (D-155) : de la vie dans le monde réel, hors de l'histoire. Une pose,
+ * parfois une seconde quand Céleste passe tout près (`-look`, `-wave`, `-leap`). Ils ont leur taille
+ * et leur image comme les personnages de l'histoire (`PROP_SIZE`, `CHARACTER_IMAGES`).
+ */
+export const PASSERBY_KINDS = [
+  /** Le monsieur de l'abribus, son journal ; il lève les yeux vers Céleste. */
+  'busstop-man',
+  'busstop-man-look',
+  /** La dame et son petit chien, sur le trottoir. */
+  'dog-walker',
+  /** La voisine accoudée à sa fenêtre (la fenêtre est dessinée avec elle) ; elle salue. */
+  'neighbor-window',
+  'neighbor-wave',
+  /** La caissière de la supérette, sur son tabouret, au bout du comptoir. */
+  'cashier',
+  /** Le chat roux de la rue, sur son rebord ; il bondit et s'en va. */
+  'ginger-cat-sit',
+  'ginger-cat-leap',
+] as const;
+export type PasserbyKind = (typeof PASSERBY_KINDS)[number];
+
 /** Objets de mise en scène (dessins provisoires ; Maria : image fournie « maria »). */
 export const PROP_KINDS = [
   'maria-sit',
@@ -371,8 +393,14 @@ export const PROP_KINDS = [
   'record-player',
   /** « Les Aventures de Céleste » (D-121), un disque perdu dans sa pochette rose, debout. */
   'record-adventures',
+  ...PASSERBY_KINDS,
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
+
+/** Un passant (D-155) : dessiné par la vue des passants, jamais par l'histoire. */
+export function isPasserbyKind(kind: PropKind): kind is PasserbyKind {
+  return (PASSERBY_KINDS as readonly string[]).includes(kind);
+}
 
 /** Objets animés en boucle (deux images), sans être des personnages. */
 export const LOOP_OBJECT_KINDS: ReadonlySet<PropKind> = new Set<PropKind>(['music-box', 'plant']);

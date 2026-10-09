@@ -2243,3 +2243,13 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
   - Le train et la maison ne changent pas.
 - **Plan en 3 PR** : l'Educaville ; le système des passants, la rue et la supérette ; la gare, la station balnéaire, le jardin et la rue d'autrefois.
 - Prompts : `docs/PROMPTS_PERSONNAGES.md`, section D-155.
+
+### D-155, PR 2 : le système des passants, la rue, la supérette
+
+- **Le système** (`config/passersby.ts`, `core/world/passersby.ts`, `PasserbyView`) : hors de l'histoire et de la sauvegarde. Chaque passant a sa salle, sa tuile, ses moments de la journée ; sa réaction (`PASSERBY_REACTIONS`) : une seconde pose en fondu tant que Céleste est tout près (30 px, quittée au-delà de 60), une bulle sans texte une fois par visite, ou la fuite (le chat). Une seconde pose n'est prise que si elle est dessinée comme la première (deux images ou deux silhouettes).
+- **Les passants sont des sortes d'objets de l'histoire** (`PASSERBY_KINDS` dans `PROP_KINDS`) : leur taille (`PROP_SIZE`), leur image (`CHARACTER_IMAGES`), sans texture dans `StoryView`. Silhouettes provisoires par le code (`passerbyArt.ts`) tant que l'image manque.
+- **La rue** : la voisine dans une fenêtre ouverte dessinée par le code (volets, la pièce derrière, allumée le soir, la jardinière), posée sur une fenêtre de la façade jaune ; elle salue quand Céleste passe dessous (proximité en largeur). Le monsieur de l'abribus (image) ; la dame au petit chien devant l'école ; deux pigeons sur le trottoir (ceux de la cour, D-79). Le matin seulement, sauf la voisine et le chat.
+- **Le chat roux** remplace la queue animée de D-77 (le rebord reste dessiné) : il file (un bond en arc, à l'opposé de Céleste, effacé, 650 ms) dès qu'elle monte sur le toit de l'abribus (128 px), pas quand elle passe sur le trottoir ; il revient à la visite suivante.
+- **La supérette** : la caissière (image) assise sur un tabouret haut dessiné par le code, au bout du comptoir, tournée vers l'entrée.
+- `tests/passersby.test.ts` : les réactions ; chaque passant posé (sol, fenêtre sur une façade, rebord du chat, tabouret), sans coquille, lanterne ni objet sous lui, loin des portes.
+- **Images** : `busstop-man`, `cashier` intégrées. Retournées par le jeu au besoin (`flip`). À refaire sur fond blanc : la dame au chien et le vieux couple (un décor derrière). Faites pour la PR 3 : le pêcheur, la voyageuse, le voyageur.

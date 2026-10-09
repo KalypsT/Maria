@@ -434,6 +434,13 @@ Proposition validée telle quelle par l'utilisateur, options comprises (le jardi
 de la rue d'autrefois : sans nouvelle image). Même méthode que les adultes du train : une conversation par personnage, la
 première image validée sert de référence pour sa seconde pose.
 
+### Où en sont les images (PR 2)
+
+- Intégrées : `busstop-man.png`, `cashier.png`.
+- Faites, pour la PR 3 : `fisherman.png`, `traveler-suitcase.png` (tous deux tournés vers la gauche : le jeu les retourne, rien à refaire), `traveler-board.png`.
+- **À refaire sur fond blanc** (un décor a été dessiné derrière, impossible à détourer proprement) : `dog-walker.png` (ajouter : `She stands still, both feet on the ground.`) et `old-couple-bench.png`. Ajouter à la fin du prompt : `IMPORTANT: no background at all, no scenery, no sea, no trees, no grass: the characters alone on plain pure white.`
+- À faire : la voisine (`neighbor-window`, `neighbor-wave`), le chat roux (`ginger-cat-sit`, `ginger-cat-leap`), le forain, les secondes poses (`busstop-man-look`, `traveler-wave`, `fisherman-nod`).
+
 ### Les passants (joindre `dad-stand.png`)
 
 Début et fin communs : ceux des adultes du train (« Using the attached image as the strict

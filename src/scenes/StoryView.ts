@@ -14,6 +14,7 @@ import {
   CHARACTER_KINDS,
   LOOP_OBJECT_KINDS,
   PROP_KINDS,
+  isPasserbyKind,
   THOUGHT_ICONS,
   type PropKind,
   type ThoughtIcon,
@@ -87,6 +88,9 @@ export class StoryView {
   setArt(scale: number, images: ReadonlyMap<string, CanvasImageSource>): void {
     this.artScale = scale;
     for (const kind of PROP_KINDS) {
+      if (isPasserbyKind(kind)) {
+        continue; // Les passants (D-155) : leur propre vue.
+      }
       const { w, h } = PROP_SIZE[kind];
       if (isLooping(kind)) {
         // Deux images pour le petit mouvement en boucle (D-37, D-38).
