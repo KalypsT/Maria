@@ -2235,7 +2235,7 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
   - Le couvercle géant de l'école étrange devient le jouet géant en silhouettes : **mêmes plateformes, même trou** (aucun changement de parcours).
   - **L'identifiant `shape-box` reste** dans la sauvegarde (invisible du joueur ; le renommer demanderait une migration).
   - **Ni nom ni logo** de la marque (le jeu est public) : un jouet d'après l'Educaville. Le téléphone de la photo est un clavier (pas un cadran) avec un gros combiné jaune sur le flanc gauche : c'est lui qui se soulève.
-  - Le jouet passe de 40 × 32 à environ 56 × 38 px (il est en largeur).
+  - Le jouet passe de 40 × 32 à 48 × 32 px (il est en largeur ; un objet de l'histoire ne dépasse pas 2 tuiles de haut).
   - Un son de sonnerie de jouet à fournir (`docs/BRUITAGES.md`) ; d'ici là, une vibration et la lueur.
 - **Les passants** : des images fixes (deux poses pour certains), derrière Céleste, sans collision, qui ne cachent jamais une coquille ni un passage. Quand Céleste passe tout près, une fois : ils changent de pose (un salut, un regard), une petite bulle sans texte (cœur, main). Le chat roux bondit et disparaît ; les oiseaux s'envolent et reviennent (comme le pigeon de la cour, D-79).
   - **Règles** : aucun adulte près d'un passage où Céleste grimpe (le chantier reste vide) ; personne dans les mondes étranges, la nuit, ni au bureau des objets trouvés.
@@ -2263,3 +2263,12 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
 - **Le jardin** : un merle sur la terrasse (il s'envole) ; un hérisson qui trottine sous la pergola et se roule en boule quand Céleste approche. **De jour** : le jardin n'a qu'une lumière (`GARDEN_PALETTE`), il n'a jamais de soir.
 - **La rue d'autrefois** (monde étrange) : la voisine pâlie (55 %) à une fenêtre allumée, sous le toit d'où part Céleste ; elle salue. Un passant n'est dans un monde étrange que s'il est un écho (`memory`).
 - **Le système** : un passant peut dépendre de l'histoire (`when`, comme les objets de l'histoire) ; quand l'histoire avance (la marée, le soir de la fête), les passants sont replacés au prochain noir. `illustratedBox` (familyArt) : où est dessinée l'image d'un personnage, partagé avec le fil de pêche.
+
+### D-155, PR 1 : l'Educaville
+
+- **L'Educaville** (`toy-town`, `toy-town-lifted`, objets de l'histoire) à la place de la boîte à formes, au bout de l'école étrange, sur le dessus de l'Educaville géante. Dessinée par le code (PLACEHOLDER, d'après la photo de l'utilisateur, sans nom ni logo) tant que son image manque : le jeu prendra `toy-town.png` et `toy-town-lifted.png` dès qu'elles seront dans `ART_IMAGES`.
+- **Le téléphone sonne** (`toy-phone-ring`, boucle, le son de l'utilisateur) tant qu'il n'est pas décroché, quand Céleste est à moins de 300 px du jouet (`TOY_PHONE`) : pas pendant toute la montée. Le combiné tremble (deux images, 90 ms), des ondes à côté.
+- **Céleste décroche** (Agir) : l'étape `school.phone` (nouvelle, ajoutée à la liste figée de la sauvegarde) ; le clic du combiné (`toy-phone-pickup`) ; le combiné se soulève aussitôt devant elle (`instant`), son fil en spirale, une lueur turquoise ; le silence, une bulle « ? » (au lieu de la bulle de Maria). La suite ne change pas (la cour au crépuscule, maman).
+- **Le souvenir** garde son nom dans la sauvegarde (`shape-box`) ; la case du cahier montre l'Educaville.
+- **L'école étrange** : le couvercle géant devient le dessus de l'Educaville géante (de grosses touches de clavier et le cadran de l'horloge sur sa tranche) ; mêmes plateformes, même trou. La frise de formes de l'école reste (l'Educaville a ses formes à encastrer).
+- Chez la nounou, la boîte à formes avait déjà laissé sa place aux cubes de la tour d'Eden (D-122) : rien à changer.

@@ -40,7 +40,10 @@ export const MARIA_THINGS = [
  * regarde (Agir) sans les prendre ; elles y restent. L'ordre est celui des cases.
  */
 export const STRANGE_THINGS = [
-  /** La boîte à formes, au plafond du monde étrange de l'école. */
+  /**
+   * L'Educaville (D-155 ; la boîte à formes de D-64, dont elle garde le nom dans la sauvegarde), au
+   * plafond du monde étrange de l'école.
+   */
   'shape-box',
   /** Roger, la peluche singe, tout en haut de la tour des objets perdus (D-68). */
   'roger',

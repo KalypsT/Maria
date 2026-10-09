@@ -544,7 +544,7 @@ salon ni de personne derrière). Le téléphone n'a pas de cadran : c'est un **c
 \*, 0, #) avec un **gros combiné jaune** accroché sur le flanc gauche ; c'est ce combiné qui se
 soulève quand il sonne (D-155).
 
-Dans le jeu, le jouet est **petit** (environ 56 × 38 px) : il faut des formes franches, peu de
+Dans le jeu, le jouet est **petit** (48 × 32 px) : il faut des formes franches, peu de
 détails. On garde ce qui se reconnaît de loin : l'anse en arc, les toits rouges, la tour bleue et
 son horloge jaune, le clavier bleu, le bloc jaune de l'alphabet, l'auvent rayé rouge et blanc, les
 formes à encastrer, le socle bleu, le combiné jaune. **Pas de nom de marque ni de logo** (marque
@@ -575,7 +575,7 @@ View: straight front view, the whole toy, nothing cropped. Plain pure white back
 no text other than the alphabet tiles and keypad numbers. Landscape format, high resolution.
 ```
 
-`toy-town-ringing.png` (joindre `toy-town.png`) :
+`toy-town-lifted.png` (joindre `toy-town.png`) :
 
 ```
 Using the attached image as the strict reference, draw the SAME toy, same view, same framing, same
@@ -585,5 +585,6 @@ Nothing else changes. Plain pure white background, no shadow, no text. Landscape
 resolution.
 ```
 
-Je dessine moi-même, par le code : la lueur turquoise qui sort du combiné, la version pâlie de la
-salle de jeux, le jouet géant en silhouettes du monde étrange de l'école.
+En attendant ces deux images, le jeu dessine le jouet par le code (D-155, PR 1). Je dessine aussi,
+par le code : la lueur turquoise qui sort du combiné, le tremblement du téléphone qui sonne, le
+jouet géant en silhouettes du monde étrange de l'école.

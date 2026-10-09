@@ -68,6 +68,7 @@ flag prologue.slept
 flag record.adventures
 flag school.done
 flag school.open
+flag school.phone
 flag school.strange
 flag sea.arrived
 flag sea.end

@@ -721,10 +721,12 @@ export const HOUSE_STORY: StoryData = {
       ],
     },
     {
-      // Fin de l'école étrange (D-64) : la boîte à formes, sur le couvercle géant. Céleste la
-      // regarde (un trou a la forme de Maria) : elle devient un souvenir de la rubrique « Monde
-      // étrange » ; on ne la ramasse pas. Le cercle se referme ; Céleste est assise dans la cour, au
-      // crépuscule ; maman vient la chercher. La nuit, dans sa chambre, une lueur au loin.
+      // Fin de l'école étrange (D-64, D-155) : l'Educaville, sur le jouet géant. Son téléphone sonne
+      // tout seul ; Céleste décroche (Agir) : la sonnerie s'arrête, le combiné se soulève, une lueur
+      // turquoise en sort ; le silence (Maria n'est ni montrée ni entendue, pilier 5), un « ? ». Le
+      // jouet devient un souvenir de la rubrique « Monde étrange » (`shape-box`, son nom dans la
+      // sauvegarde) ; on ne le ramasse pas. Le cercle se referme ; Céleste est assise dans la cour,
+      // au crépuscule ; maman vient la chercher. La nuit, dans sa chambre, une lueur au loin.
       id: 'school-box',
       room: 'school-strange',
       on: 'interact',
@@ -737,10 +739,11 @@ export const HOUSE_STORY: StoryData = {
           do: 'hush',
           ms: S.cradleSparkleMs + S.holdMs + S.nightFadeOutMs + S.nightBlackMs + S.nightFadeInMs,
         },
+        { do: 'flag', id: F.SchoolPhone },
         { do: 'memory', id: 'shape-box' },
         { do: 'sparkle', area: { col: 11, row: 5, w: 5, h: 3 }, ms: S.cradleSparkleMs + 600 },
         { do: 'wait', ms: S.cradleSparkleMs },
-        { do: 'thought', icon: 'maria', ms: S.holdMs },
+        { do: 'thought', icon: 'question', ms: S.holdMs },
         { do: 'wait', ms: S.holdMs },
         { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
         { do: 'flag', id: F.SchoolDone },
@@ -1225,8 +1228,27 @@ export const HOUSE_STORY: StoryData = {
       flip: true,
       when: { all: [F.SchoolDone], none: [F.StreetMorning] },
     },
-    // La boîte à formes reste dans le monde étrange (D-64) : on ne la ramasse pas.
-    { id: 'shape-box', room: 'school-strange', kind: 'shape-box', col: 13, row: 7, when: {} },
+    // L'Educaville reste dans le monde étrange (D-64, D-155) : on ne la ramasse pas.
+    // L'Educaville (D-155) : son téléphone sonne ; décroché (l'étape, au premier pas du script), le
+    // combiné se soulève aussitôt, devant Céleste.
+    {
+      id: 'toy-town',
+      room: 'school-strange',
+      kind: 'toy-town',
+      col: 13,
+      row: 7,
+      instant: true,
+      when: { none: [F.SchoolPhone] },
+    },
+    {
+      id: 'toy-town-lifted',
+      room: 'school-strange',
+      kind: 'toy-town-lifted',
+      col: 13,
+      row: 7,
+      instant: true,
+      when: { all: [F.SchoolPhone] },
+    },
     {
       // La nuit, par la fenêtre de la chambre : la grue au loin, une lueur au bout de la flèche.
       id: 'far-crane',

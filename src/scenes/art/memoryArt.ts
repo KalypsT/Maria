@@ -463,59 +463,138 @@ function babyPhoto(ctx: CanvasRenderingContext2D, s: number): void {
   ctx.fill();
 }
 
+/** État du téléphone de l'Educaville : raccroché, qui sonne (deux images), décroché. */
+export type ToyPhone = 'still' | 'ring0' | 'ring1' | 'lifted';
+
 /**
- * La boîte à formes (D-64), vue de face : un cercle, un carré, un triangle et, au milieu, un trou à
- * la forme de Maria (tête ronde, bras, jambes). Le couvercle est bleu, la face jaune ; les trous
- * sont sombres. Sert au souvenir et à l'objet posé dans le monde étrange (`glow` : teinte turquoise).
+ * L'Educaville (D-155, à la place de la boîte à formes de D-64), vue de face, PLACEHOLDER en
+ * attendant l'image : sur son socle bleu-vert, la maison au toit rouge et son clavier bleu, la tour
+ * bleue et son horloge jaune, l'anse en arc, l'alphabet jaune, l'auvent rayé, les formes à encastrer,
+ * et le gros combiné jaune sur le flanc gauche. Largeur `s`, centrée sur l'origine. Qui sonne : le
+ * combiné tremble, des ondes ; décroché : il flotte au-dessus, son fil tendu, une lueur turquoise.
  */
-export function shapeBox(ctx: CanvasRenderingContext2D, s: number, glow = false): void {
-  roundRect(ctx, -s * 0.46, -s * 0.24, s * 0.92, s * 0.6, s * 0.05, glow ? '#e8c45a' : '#f2cf5f');
-  roundRect(ctx, -s * 0.5, -s * 0.36, s, s * 0.16, s * 0.04, glow ? '#4d7fc0' : '#5b8fd4');
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
-  ctx.fillRect(-s * 0.46, s * 0.28, s * 0.92, s * 0.08);
-  const hole = glow ? '#1c3b45' : '#3b3330';
-  ctx.fillStyle = hole;
-  // Cercle, carré, triangle sur les côtés.
+export function toyTown(ctx: CanvasRenderingContext2D, s: number, phone: ToyPhone = 'still'): void {
+  // L'anse en arc, sans nom ni logo, son petit arc-en-ciel au pied droit.
+  ctx.strokeStyle = '#efe4cc';
+  ctx.lineWidth = s * 0.035;
   ctx.beginPath();
-  ctx.arc(-s * 0.32, -s * 0.06, s * 0.075, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillRect(s * 0.24, -s * 0.13, s * 0.14, s * 0.14);
-  ctx.beginPath();
-  ctx.moveTo(-s * 0.32, s * 0.08);
-  ctx.lineTo(-s * 0.4, s * 0.22);
-  ctx.lineTo(-s * 0.24, s * 0.22);
-  ctx.closePath();
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(s * 0.31, s * 0.15, s * 0.08, s * 0.05, 0, 0, Math.PI * 2);
-  ctx.fill();
-  // Le trou à la forme de Maria : tête, corps rond, bras écartés, jambes courtes.
-  ctx.beginPath();
-  ctx.arc(0, -s * 0.09, s * 0.075, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(0, s * 0.07, s * 0.075, s * 0.1, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.lineCap = 'round';
-  ctx.strokeStyle = hole;
-  ctx.lineWidth = s * 0.045;
-  ctx.beginPath();
-  ctx.moveTo(-s * 0.12, -s * 0.02);
-  ctx.lineTo(-s * 0.05, s * 0.03);
-  ctx.moveTo(s * 0.12, -s * 0.02);
-  ctx.lineTo(s * 0.05, s * 0.03);
-  ctx.moveTo(-s * 0.04, s * 0.14);
-  ctx.lineTo(-s * 0.05, s * 0.22);
-  ctx.moveTo(s * 0.04, s * 0.14);
-  ctx.lineTo(s * 0.05, s * 0.22);
+  ctx.arc(0, -s * 0.2, s * 0.17, Math.PI, 0);
   ctx.stroke();
-  if (glow) {
-    // Une lueur turquoise sort du trou de Maria.
-    const light = ctx.createRadialGradient(0, s * 0.02, 0, 0, s * 0.02, s * 0.3);
-    light.addColorStop(0, 'rgba(120, 236, 220, 0.55)');
+  ctx.strokeStyle = '#e86a8a';
+  ctx.lineWidth = s * 0.012;
+  ctx.beginPath();
+  ctx.arc(s * 0.17, -s * 0.2, s * 0.03, Math.PI, Math.PI * 1.6);
+  ctx.stroke();
+  // Le socle et le corps.
+  roundRect(ctx, -s * 0.5, s * 0.2, s, s * 0.1, s * 0.03, '#2f7d8c');
+  roundRect(ctx, -s * 0.42, -s * 0.16, s * 0.84, s * 0.38, s * 0.02, '#f3ead6');
+  // La maison de gauche, son toit rouge ; son clavier bleu.
+  ctx.fillStyle = '#d9534f';
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.45, -s * 0.15);
+  ctx.lineTo(-s * 0.3, -s * 0.27);
+  ctx.lineTo(-s * 0.15, -s * 0.15);
+  ctx.fill();
+  roundRect(ctx, -s * 0.38, -s * 0.11, s * 0.17, s * 0.24, s * 0.015, '#2f6fb0');
+  ctx.fillStyle = '#f3ead6';
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 3; col++) {
+      ctx.fillRect(-s * (0.36 - col * 0.052), -s * (0.09 - row * 0.055), s * 0.03, s * 0.03);
+    }
+  }
+  // La tour bleue et son horloge jaune.
+  roundRect(ctx, -s * 0.14, -s * 0.3, s * 0.24, s * 0.22, s * 0.02, '#3d7fc1');
+  ctx.fillStyle = '#f2cf5f';
+  ctx.beginPath();
+  ctx.arc(-s * 0.02, -s * 0.19, s * 0.075, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#3b3330';
+  ctx.lineWidth = s * 0.012;
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.02, -s * 0.19);
+  ctx.lineTo(-s * 0.02, -s * 0.245);
+  ctx.moveTo(-s * 0.02, -s * 0.19);
+  ctx.lineTo(s * 0.025, -s * 0.17);
+  ctx.stroke();
+  // L'alphabet : des carreaux jaunes, des lettres rouges réduites à des traits.
+  roundRect(ctx, -s * 0.08, -s * 0.05, s * 0.16, s * 0.24, s * 0.01, '#f2cf5f');
+  ctx.fillStyle = '#d9534f';
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 3; col++) {
+      ctx.fillRect(-s * (0.06 - col * 0.05), -s * (0.03 - row * 0.055), s * 0.025, s * 0.03);
+    }
+  }
+  // Les cheminées rouges, l'auvent rayé, les formes à encastrer (rond, triangle, carré, cœur).
+  roundRect(ctx, s * 0.14, -s * 0.24, s * 0.08, s * 0.08, s * 0.01, '#c9443f');
+  roundRect(ctx, s * 0.28, -s * 0.24, s * 0.1, s * 0.08, s * 0.01, '#c9443f');
+  for (let k = 0; k < 6; k++) {
+    ctx.fillStyle = k % 2 === 0 ? '#d9534f' : '#fdf6ec';
+    ctx.fillRect(s * (0.12 + k * 0.047), -s * 0.08, s * 0.048, s * 0.07);
+  }
+  ctx.fillStyle = '#d9534f';
+  ctx.beginPath();
+  ctx.arc(s * 0.17, s * 0.06, s * 0.03, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#f2cf5f';
+  ctx.beginPath();
+  ctx.moveTo(s * 0.25, s * 0.03);
+  ctx.lineTo(s * 0.22, s * 0.09);
+  ctx.lineTo(s * 0.28, s * 0.09);
+  ctx.fill();
+  ctx.fillStyle = '#5aa05a';
+  ctx.fillRect(s * 0.31, s * 0.035, s * 0.055, s * 0.055);
+  ctx.fillStyle = '#7b4f9e';
+  ctx.beginPath();
+  ctx.arc(s * 0.19, s * 0.15, s * 0.022, 0, Math.PI * 2);
+  ctx.arc(s * 0.23, s * 0.15, s * 0.022, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(s * 0.168, s * 0.158);
+  ctx.lineTo(s * 0.21, s * 0.2);
+  ctx.lineTo(s * 0.252, s * 0.158);
+  ctx.fill();
+  // Le gros combiné jaune, sur le flanc gauche.
+  const hook = { x: -s * 0.455, y: -s * 0.01 };
+  ctx.save();
+  if (phone === 'lifted') {
+    // Décroché : il flotte au-dessus, penché ; son fil en spirale, tendu jusqu'au jouet.
+    const at = { x: hook.x - s * 0.04, y: hook.y - s * 0.2 };
+    const light = ctx.createRadialGradient(at.x, at.y, 0, at.x, at.y, s * 0.24);
+    light.addColorStop(0, 'rgba(120, 236, 220, 0.6)');
     light.addColorStop(1, 'rgba(120, 236, 220, 0)');
     ctx.fillStyle = light;
-    ctx.fillRect(-s * 0.3, -s * 0.28, s * 0.6, s * 0.6);
+    ctx.fillRect(at.x - s * 0.24, at.y - s * 0.24, s * 0.48, s * 0.48);
+    ctx.strokeStyle = '#e0b02a';
+    ctx.lineWidth = s * 0.01;
+    ctx.beginPath();
+    for (let k = 0; k <= 12; k++) {
+      const t = k / 12;
+      const x = hook.x + s * 0.02 + (at.x - hook.x) * t + (k % 2 === 0 ? -1 : 1) * s * 0.015;
+      ctx.lineTo(x, hook.y + s * 0.1 + (at.y - hook.y - s * 0.02) * t);
+    }
+    ctx.stroke();
+    ctx.translate(at.x, at.y);
+    ctx.rotate(-0.5);
+  } else {
+    ctx.translate(hook.x, hook.y);
+    if (phone !== 'still') {
+      ctx.rotate(phone === 'ring0' ? -0.12 : 0.12);
+    }
+  }
+  roundRect(ctx, -s * 0.035, -s * 0.13, s * 0.07, s * 0.26, s * 0.035, '#f2c230');
+  roundRect(ctx, -s * 0.02, -s * 0.15, s * 0.07, s * 0.07, s * 0.025, '#f2c230');
+  roundRect(ctx, -s * 0.02, s * 0.08, s * 0.07, s * 0.07, s * 0.025, '#f2c230');
+  ctx.restore();
+  if (phone === 'ring0' || phone === 'ring1') {
+    // Les ondes de la sonnerie, à gauche du combiné.
+    ctx.strokeStyle = 'rgba(255, 244, 200, 0.85)';
+    ctx.lineWidth = s * 0.012;
+    for (let k = 0; k < 2; k++) {
+      const r = s * (0.08 + k * 0.05 + (phone === 'ring1' ? 0.02 : 0));
+      ctx.beginPath();
+      ctx.arc(hook.x, hook.y, r, Math.PI * 0.75, Math.PI * 1.25);
+      ctx.stroke();
+    }
   }
 }
 
@@ -1006,7 +1085,8 @@ export function drawMemory(
       bottle(ctx, size);
       break;
     case 'shape-box':
-      shapeBox(ctx, size);
+      // L'Educaville (D-155) : le souvenir garde son nom de la sauvegarde.
+      toyTown(ctx, size);
       break;
     case 'roger':
       roger(ctx, size * 0.9);

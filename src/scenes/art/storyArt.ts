@@ -13,7 +13,8 @@ import {
   redPanda,
   teaCup,
   roger,
-  shapeBox,
+  toyTown,
+  type ToyPhone,
   whiteCloth,
 } from './memoryArt';
 
@@ -760,12 +761,9 @@ export function drawProp(
       // Photo encadrée posée debout, en haut de la bibliothèque.
       drawMemory(ctx, 'bookcase', w / 2, h / 2, Math.min(w / 0.8, h / 0.88));
       break;
-    case 'shape-box':
-      // Au monde étrange : la boîte à formes, une lueur sort du trou à la forme de Maria (D-64).
-      ctx.save();
-      ctx.translate(w / 2, h - Math.min(w, h / 0.72) * 0.36);
-      shapeBox(ctx, Math.min(w, h / 0.72), true);
-      ctx.restore();
+    case 'toy-town-lifted':
+      // Au monde étrange (D-155) : le téléphone décroché, une lueur turquoise sort du combiné.
+      drawToyTown(ctx, w, h, 'lifted', images);
       break;
     case 'far-crane':
       drawFarCrane(ctx, w, h);
@@ -1580,5 +1578,52 @@ function drawTeaTable(
   ctx.save();
   ctx.translate(w * 0.83, h - plush * 0.55);
   redPanda(ctx, plush);
+  ctx.restore();
+}
+
+/**
+ * L'Educaville posée dans le monde étrange (D-155) : l'image de l'utilisateur (`toy-town`, et
+ * `toy-town-lifted` décroché) si elle est chargée, sinon le dessin par le code. Qui sonne, le jouet
+ * tremble un peu.
+ */
+export function drawToyTown(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  phone: ToyPhone,
+  images: ReadonlyMap<string, CanvasImageSource>,
+): void {
+  const image = images.get(phone === 'lifted' ? 'toy-town-lifted' : 'toy-town');
+  if (image instanceof HTMLImageElement) {
+    const k = Math.min(w / image.naturalWidth, h / image.naturalHeight);
+    const dw = image.naturalWidth * k;
+    const dh = image.naturalHeight * k;
+    ctx.save();
+    ctx.translate(w / 2, h);
+    if (phone === 'ring0' || phone === 'ring1') {
+      ctx.rotate(phone === 'ring0' ? -0.02 : 0.02);
+    }
+    ctx.drawImage(image, -dw / 2, -dh, dw, dh);
+    if (phone === 'lifted') {
+      const light = ctx.createRadialGradient(
+        -dw * 0.35,
+        -dh * 0.7,
+        0,
+        -dw * 0.35,
+        -dh * 0.7,
+        dh * 0.5,
+      );
+      light.addColorStop(0, 'rgba(120, 236, 220, 0.5)');
+      light.addColorStop(1, 'rgba(120, 236, 220, 0)');
+      ctx.fillStyle = light;
+      ctx.fillRect(-dw / 2, -dh, dw, dh);
+    }
+    ctx.restore();
+    return;
+  }
+  const size = Math.min(w, h / 0.72);
+  ctx.save();
+  ctx.translate(w / 2, h - size * 0.3);
+  toyTown(ctx, size, phone);
   ctx.restore();
 }

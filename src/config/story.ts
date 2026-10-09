@@ -57,8 +57,13 @@ export const StoryFlag = {
   /** L'école étrange (D-64) : Céleste y est passée par l'oculus (première fois). */
   SchoolStrange: 'school.strange',
   /**
-   * Fin de l'école étrange (D-64) : la boîte à formes ; Céleste dans la cour au crépuscule, maman
-   * vient la chercher ; la nuit, une lueur au loin par la fenêtre.
+   * Au bout de l'école étrange (D-155) : Céleste a décroché le téléphone de l'Educaville, qui
+   * sonnait tout seul.
+   */
+  SchoolPhone: 'school.phone',
+  /**
+   * Fin de l'école étrange (D-64, D-155) : l'Educaville et son téléphone ; Céleste dans la cour au
+   * crépuscule, maman vient la chercher ; la nuit, une lueur au loin par la fenêtre.
    */
   SchoolDone: 'school.done',
   /** Le lendemain matin (D-64) : la palissade du chantier s'est ouverte. */
@@ -380,7 +385,18 @@ export const END_SCREEN = {
 } as const;
 
 /** Période du petit mouvement en boucle des personnages (ms), D-37. */
-export const CHARACTER_LOOP_MS = { parent: 1600, cat: 2400 } as const;
+export const CHARACTER_LOOP_MS = {
+  parent: 1600,
+  cat: 2400,
+  /** Le téléphone de l'Educaville qui sonne (D-155) : le combiné tremble vite. */
+  ring: 90,
+} as const;
+
+/**
+ * Le téléphone de l'Educaville (D-155), au bout de l'école étrange : il sonne tant qu'il n'est pas
+ * décroché, quand Céleste est à moins de `ringPx` (px) du jouet (pas pendant toute la montée).
+ */
+export const TOY_PHONE = { room: 'school-strange', col: 13, row: 7, ringPx: 300 } as const;
 
 /** Agrandissement des bulles de pensée (retour de l'utilisateur : mieux lisibles sur téléphone). */
 export const THOUGHT_SCALE = 1.9;
@@ -425,9 +441,10 @@ export const PROP_SIZE = {
   'mom-yard': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // Sous l'horloge du hall de la gare, la nuit (D-69), papa vient chercher Céleste.
   'dad-hall': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
-  // La boîte à formes (D-64), dans le monde étrange ; la grue au loin par la fenêtre de la chambre ;
+  // L'Educaville (D-155), dans le monde étrange ; la grue au loin par la fenêtre de la chambre ;
   // la palissade du chantier ouverte, le lendemain.
-  'shape-box': { w: 40, h: 32 },
+  'toy-town': { w: 48, h: 32 },
+  'toy-town-lifted': { w: 48, h: 32 },
   'far-crane': { w: 44, h: 34 },
   'site-gap': { w: 80, h: 64 },
   // Le train à quai (D-69), quelques mois après la gare : une voiture et le nez de la suivante.

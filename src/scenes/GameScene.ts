@@ -124,7 +124,7 @@ import {
   CHASE_VIEW,
   SHELL_ART,
 } from '../config/art';
-import { STORY_TIMING, StoryFlag, TOWER_CUBES } from '../config/story';
+import { STORY_TIMING, StoryFlag, TOWER_CUBES, TOY_PHONE } from '../config/story';
 import { PropStage } from '../core/story/PropStage';
 import { StoryDirector } from '../core/story/StoryDirector';
 import { holdsMaria, type TimeOfDay } from '../core/story/story';
@@ -558,6 +558,10 @@ export class GameScene extends Phaser.Scene {
       flagSet: (id) => {
         void this.session.addStoryFlag(id);
         this.passersbyStale = true;
+        if (id === StoryFlag.SchoolPhone) {
+          // Céleste décroche le téléphone de l'Educaville (D-155) : le clic, puis le silence.
+          this.audio.sfx.play('toy-phone-pickup');
+        }
         // Croissance : posée dans le noir d'un fondu, avant que le script ne replace Céleste.
         this.applyGrowth();
       },
@@ -2156,6 +2160,24 @@ export class GameScene extends Phaser.Scene {
     this.redrawArt();
   }
 
+  /**
+   * Le téléphone de l'Educaville sonne (D-155) : au bout de l'école étrange, tant que Céleste ne l'a
+   * pas décroché, quand elle approche.
+   */
+  private toyPhoneRinging(): boolean {
+    const flags = this.story.flags;
+    if (
+      this.level.id !== TOY_PHONE.room ||
+      !flags.has(StoryFlag.SchoolStrange) ||
+      flags.has(StoryFlag.SchoolPhone)
+    ) {
+      return false;
+    }
+    const dx = this.puppet.x - (TOY_PHONE.col + 0.5) * TILE_SIZE;
+    const dy = this.puppet.y - (TOY_PHONE.row + 1) * TILE_SIZE;
+    return Math.hypot(dx, dy) < TOY_PHONE.ringPx;
+  }
+
   /** Les passants de la salle (D-155), à ce moment de la journée ; personne dans un monde étrange. */
   private loadPassersby(): void {
     this.passersbyStale = false;
@@ -2539,6 +2561,7 @@ export class GameScene extends Phaser.Scene {
       this.haptics.pulse('chaseWake');
     }
     sfx.loop('chase-rumble', chase !== null && chase.placed && !chase.done && !chase.paused);
+    sfx.loop('toy-phone-ring', this.toyPhoneRinging());
     const trains = this.level.trains;
     for (let i = 0; i < trains.length && i < this.trainWatches.length; i++) {
       const cue = this.trainWatches[i]?.step(

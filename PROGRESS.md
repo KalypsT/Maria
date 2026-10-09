@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Les passants et l'Educaville** (D-155, demande de l'utilisateur) : proposition validée en 3 PR (l'Educaville à la place de la boîte à formes, son téléphone qui sonne ; le système des passants, la rue et la supérette ; la gare, la mer, le jardin, la rue d'autrefois). Prompts des images dans `docs/PROMPTS_PERSONNAGES.md` (section D-155), sur `ccr-fd60fab4-k0uhko`. **PR 2 faite : le système des passants, la rue et la supérette** et **PR 3 faite : la gare, la mer, le jardin, la rue d'autrefois** (avant la PR 1, qui attend l'image du jouet ; les deux bruitages du téléphone sont fournis). Suite : la PR 1 (l'Educaville) ; l'image du vieux couple à refaire.
+**Les passants et l'Educaville** (D-155, demande de l'utilisateur) : proposition validée en 3 PR (l'Educaville à la place de la boîte à formes, son téléphone qui sonne ; le système des passants, la rue et la supérette ; la gare, la mer, le jardin, la rue d'autrefois). Prompts des images dans `docs/PROMPTS_PERSONNAGES.md` (section D-155), sur `ccr-fd60fab4-k0uhko`. **PR 2 faite : le système des passants, la rue et la supérette** et **PR 3 faite : la gare, la mer, le jardin, la rue d'autrefois** et **PR 1 faite : l'Educaville** (dessinée par le code en attendant son image ; sa sonnerie et le clic du combiné, sons de l'utilisateur). **Le plan D-155 est complet.** Suite : les images du jouet et du vieux couple ; essai sur téléphone.
 
 **Les stats** (D-153, demande de l'utilisateur, avant la diffusion) : plan validé en 2 PR (le système ; la page du cahier). **PR 1 faite : le système** (temps de jeu, évanouissements, fil discret, par salle ; dans la sauvegarde sans migration ; DEBUG → « Stats »), sur `ccr-dae061c9-3hvwy2`. **PR 2 faite : la page « Mon voyage » du cahier** (le temps, les coquilles, les souvenirs, les lieux, les évanouissements : une petite lune), validée par l'utilisateur telle quelle. **Les stats sont complètes.** Suite : essai sur téléphone ; une vraie partie d'essai, chiffres du debug à l'appui.
 
@@ -39,6 +39,12 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### L'Educaville, PR 1 (D-155)
+
+- L'Educaville à la place de la boîte à formes, au bout de l'école étrange : son téléphone sonne quand Céleste approche ; elle décroche (Agir) : le clic, le combiné se soulève dans une lueur turquoise, le silence, un « ? ». Le cahier, le dessus du jouet géant. Dessin provisoire par le code.
+- Vérifié dans Chromium : le jouet posé sur le dessus géant ; ses trois états dessinés à part (au repos, qui sonne, décroché), en grand et à sa taille.
+- [ ] À vérifier sur téléphone : la sonnerie (volume, boucle, distance) ; le décroché se comprend-il sans texte ? Le jouet se reconnaît-il à 48 px ?
 
 ### Les passants, PR 3 : la gare, la mer, le jardin, la rue d'autrefois (D-155)
 

@@ -286,8 +286,13 @@ export const PROP_KINDS = [
   'mom-yard',
   // La gare (D-69) : papa vient chercher Céleste sous l'horloge du hall, la nuit.
   'dad-hall',
-  /** La boîte à formes (objet d'enfance, seulement dans le monde étrange) ; un trou en forme de Maria. */
-  'shape-box',
+  /**
+   * L'Educaville (D-155, à la place de la boîte à formes de D-64), le jouet d'enfance de Céleste,
+   * seulement dans le monde étrange : son téléphone sonne tout seul ; décroché, une lueur turquoise
+   * sort du combiné.
+   */
+  'toy-town',
+  'toy-town-lifted',
   /** La grue au loin, une lueur turquoise au bout de la flèche, par la fenêtre de la chambre. */
   'far-crane',
   /** La palissade du chantier, ouverte le lendemain (le niveau suivant). */
@@ -415,7 +420,11 @@ export function isPasserbyKind(kind: PropKind): kind is PasserbyKind {
 }
 
 /** Objets animés en boucle (deux images), sans être des personnages. */
-export const LOOP_OBJECT_KINDS: ReadonlySet<PropKind> = new Set<PropKind>(['music-box', 'plant']);
+export const LOOP_OBJECT_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
+  'music-box',
+  'plant',
+  'toy-town',
+]);
 
 /**
  * Fixés au mur (la toise, D-43) ou faisant partie du mur (le portillon, D-60) : plus hauts que

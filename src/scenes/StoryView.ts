@@ -21,7 +21,14 @@ import {
 } from '../core/story/story';
 import { drawLoopObject } from './art/memoryArt';
 import { characterOverhang, drawCharacter } from './art/familyArt';
-import { SPARKLE_SIZE, THOUGHT_SIZE, drawProp, drawSparkle, drawThought } from './art/storyArt';
+import {
+  SPARKLE_SIZE,
+  THOUGHT_SIZE,
+  drawProp,
+  drawSparkle,
+  drawThought,
+  drawToyTown,
+} from './art/storyArt';
 
 /** Objets et personnages animés en boucle (deux images). */
 function isLooping(kind: PropKind): boolean {
@@ -97,7 +104,10 @@ export class StoryView {
         const below = characterOverhang(kind);
         for (const frame of [0, 1]) {
           this.texture(`prop-${kind}-${String(frame)}`, w, h + below, (ctx) => {
-            if (kind === 'music-box' || kind === 'plant') {
+            if (kind === 'toy-town') {
+              // Le téléphone de l'Educaville sonne (D-155) : le combiné tremble.
+              drawToyTown(ctx, w, h, frame === 0 ? 'ring0' : 'ring1', images);
+            } else if (kind === 'music-box' || kind === 'plant') {
               drawLoopObject(ctx, kind, w, h, frame);
             } else {
               drawCharacter(ctx, kind, frame, images);
@@ -146,7 +156,11 @@ export class StoryView {
         ? ([
             `prop-${prop.kind}-0`,
             `prop-${prop.kind}-1`,
-            prop.kind.startsWith('cat') ? CHARACTER_LOOP_MS.cat : CHARACTER_LOOP_MS.parent,
+            prop.kind === 'toy-town'
+              ? CHARACTER_LOOP_MS.ring
+              : prop.kind.startsWith('cat')
+                ? CHARACTER_LOOP_MS.cat
+                : CHARACTER_LOOP_MS.parent,
           ] as const)
         : null,
     );

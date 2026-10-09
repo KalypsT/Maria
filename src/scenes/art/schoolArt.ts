@@ -417,8 +417,9 @@ export function schoolDrawers({ tileShape }: ShapeTools): Record<string, Drawer>
     },
     sorterlid(a, r) {
       const { ctx, level, palette: p } = a;
-      // Le couvercle géant d'une boîte à formes (plein) ; le trou par lequel on passe, et des
-      // trous en forme (rond, carré, étoile) dessinés sur sa tranche.
+      // Le dessus de l'Educaville géante (D-155, à la place du couvercle de la boîte à formes de
+      // D-64), plein ; le trou par lequel on passe. Sur sa tranche, de grosses touches du clavier et
+      // le cadran de l'horloge, en creux.
       let start = -1;
       for (let col = r.x / T; col <= (r.x + r.w) / T; col++) {
         const solid = col < (r.x + r.w) / T && tileAt(level, col, r.y / T) === Tile.Solid;
@@ -432,25 +433,29 @@ export function schoolDrawers({ tileShape }: ShapeTools): Record<string, Drawer>
       ctx.fillStyle = '#07080d';
       const cy = r.y + r.h / 2;
       for (const [x, kind] of [
-        [r.x + 4 * T, 'circle'],
-        [r.x + 12 * T, 'square'],
-        [r.x + 32 * T, 'star'],
-        [r.x + 39 * T, 'circle'],
+        [r.x + 3 * T, 'key'],
+        [r.x + 4.2 * T, 'key'],
+        [r.x + 12 * T, 'clock'],
+        [r.x + 32 * T, 'key'],
+        [r.x + 39 * T, 'key'],
       ] as const) {
         ctx.beginPath();
-        if (kind === 'circle') {
-          ctx.arc(x, cy, 5, 0, Math.PI * 2);
-        } else if (kind === 'square') {
-          ctx.rect(x - 5, cy - 5, 10, 10);
+        if (kind === 'key') {
+          ctx.roundRect(x - 6, cy - 5, 12, 10, 3);
+          ctx.fill();
         } else {
-          for (let k = 0; k < 10; k++) {
-            const radius = k % 2 === 0 ? 6 : 2.5;
-            const angle = -Math.PI / 2 + (k * Math.PI) / 5;
-            ctx.lineTo(x + Math.cos(angle) * radius, cy + Math.sin(angle) * radius);
-          }
-          ctx.closePath();
+          ctx.arc(x, cy, 6.5, 0, Math.PI * 2);
+          ctx.fill();
+          // Les aiguilles, en relief sur le cadran sombre.
+          ctx.strokeStyle = p.woodLight;
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(x, cy);
+          ctx.lineTo(x, cy - 4.5);
+          ctx.moveTo(x, cy);
+          ctx.lineTo(x + 3, cy + 1.5);
+          ctx.stroke();
         }
-        ctx.fill();
       }
     },
   };

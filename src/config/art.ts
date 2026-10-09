@@ -376,7 +376,10 @@ export const DECOR_KINDS: Readonly<
   bookstack: { furniture: true },
   /** Chaise d'écolier qui flotte (assise pleine). */
   floatchair: { furniture: true },
-  /** Couvercle géant d'une boîte à formes (plein, avec son trou). */
+  /**
+   * Le dessus de l'Educaville géante (D-155 ; le couvercle de la boîte à formes de D-64), plein,
+   * avec son trou.
+   */
   sorterlid: { furniture: true },
   cushions: { furniture: false },
   // Revisites avec le crochet (D-66).
