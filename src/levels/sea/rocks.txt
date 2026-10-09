@@ -4,11 +4,12 @@
 ; cheminée ; la cheminée (saut mural) monte au rocher de la lanterne. À gauche, l'aiguille du
 ; pêcheur et son câble (le crochet), le bloc de la grotte, la grande pierre percée, les marches et le
 ; pied du phare (sa porte, la suite avec la PR 4). Marée basse : le fond, ses flaques et ses crabes ;
-; la grotte (on y entre couchée par la gauche) et sa trouvaille au-delà d'une flaque (défi, difficile).
+; la grotte (on y entre couchée par la gauche) et sa coquille au-delà d'une flaque (défi, moyen : un
+; saut long depuis la glissade, sous le plafond bas ; la flaque a perdu une tuile, D-148).
 ; Marée haute : les vagues balaient tout ce qui est sous leur ligne ; le saut bas sous l'arche est
 ; difficile. Une petite cheminée entre l'aiguille et le rebord remonte du fond.
 ; @name: Les rochers
-; @shell: rocks-cave 53 27
+; @shell: rocks-cave 53 27 medium slide tide
 ; @icon: sea
 ; @world: street
 ; @backdrop: sea
@@ -20,7 +21,7 @@
 ; @door: 2 6 19
 ; @leg: 144,17 8,19 easy wall-jump
 ; @leg: 144,17 8,19 hard wall-jump high
-; @leg: 8,19 53,27 hard slide
+; @leg: 8,19 53,27 medium slide
 ; @cable: 57 13 16 17
 ; @decor: searock 1 28 148 2
 ; @decor: searock 140 18 9 10
@@ -71,7 +72,7 @@
 #######################...............########.........#..##..#################....####.....###...########..###.....###....###.....###.###############
 #######################...............########.........#..##..#################....####.....###...########..###.....###....###.....###.###############
 #######################...e..........................S.#..##..#################....####.e...###.............###.....###....###.....###.###############
-############################~~~~###############~~~~~############################################################~~~###################################
-############################~~~~###############~~~~~############################################################~~~###################################
+############################~~~~################~~~~############################################################~~~###################################
+############################~~~~################~~~~############################################################~~~###################################
 ######################################################################################################################################################
 ######################################################################################################################################################

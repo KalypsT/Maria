@@ -22,6 +22,12 @@ export function drawHideout(
     case 'coats':
       drawCoats(ctx, w, h);
       break;
+    case 'curtain':
+      drawCurtain(ctx, w, h, night);
+      break;
+    case 'seaweed':
+      drawSeaweed(ctx, w, h);
+      break;
     default:
       // Inconnue : un voile, pour qu'elle se voie et se corrige.
       ctx.fillStyle = 'rgba(120, 110, 140, 0.8)';
@@ -176,4 +182,83 @@ function drawCoats(ctx: CanvasRenderingContext2D, w: number, h: number): void {
       ctx.fill();
     }
   }
+}
+
+/**
+ * Le rideau tiré d'une couchette (le train) : un tissu bleu nuit à plis serrés, pendu à sa tringle
+ * par des anneaux, l'ourlet juste au-dessus de la planche.
+ */
+function drawCurtain(ctx: CanvasRenderingContext2D, w: number, h: number, night: boolean): void {
+  ctx.fillStyle = '#9aa3b4';
+  ctx.fillRect(0, 0.5, w, 1.2);
+  ctx.fillStyle = night ? '#3a3f63' : '#4a5585';
+  ctx.beginPath();
+  ctx.moveTo(0.5, 1.5);
+  ctx.lineTo(w - 0.5, 1.5);
+  ctx.lineTo(w - 0.5, h - 1);
+  // L'ourlet ondule un peu d'un pli à l'autre.
+  const folds = Math.max(4, Math.round(w / 6));
+  for (let i = folds; i >= 0; i--) {
+    ctx.lineTo((i / folds) * (w - 1) + 0.5, h - (i % 2 === 0 ? 0.2 : 1.2));
+  }
+  ctx.closePath();
+  ctx.fill();
+  // Les plis : des bandes plus claires et plus sombres, de haut en bas.
+  for (let i = 0; i < folds; i++) {
+    const x = (i / folds) * w;
+    ctx.fillStyle = i % 2 === 0 ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.18)';
+    ctx.fillRect(x + 0.5, 2, w / folds - 1, h - 3);
+  }
+  // Une bande de couleur près du bas, et les anneaux sur la tringle.
+  ctx.fillStyle = night ? 'rgba(196, 150, 90, 0.55)' : 'rgba(214, 170, 104, 0.75)';
+  ctx.fillRect(0.5, h - 4.5, w - 1, 1.2);
+  ctx.fillStyle = '#c9ced8';
+  for (let i = 0; i <= folds; i++) {
+    ctx.beginPath();
+    ctx.arc(Math.min(w - 1, 0.8 + (i / folds) * (w - 1.6)), 1.4, 0.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+/**
+ * Un rideau d'algues (la mer) : de longues lanières brun-vert qui pendent d'une poutre ou d'un
+ * rocher, serrées, ondulées, avec leurs petits flotteurs ; on ne voit rien au travers.
+ */
+function drawSeaweed(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  // Un fond sombre derrière les lanières : rien ne se voit au travers.
+  ctx.fillStyle = 'rgba(40, 46, 26, 0.94)';
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(w, 0);
+  for (let x = w; x >= 0; x -= 2) {
+    ctx.lineTo(x, h - 3 - ((x * 13) % 7) * 0.6);
+  }
+  ctx.closePath();
+  ctx.fill();
+  const colors = ['#6b5a2a', '#55652e', '#7d6b35', '#46552a', '#8a7438', '#5f4e26'];
+  const strands = Math.max(6, Math.round(w / 1.7));
+  for (let i = 0; i < strands; i++) {
+    const seed = (i * 37) % 11;
+    const x = (i + 0.5) * (w / strands) + ((seed % 3) - 1) * 0.6;
+    const len = h - (seed % 5) * 0.9;
+    const sway = (seed % 5) - 2;
+    ctx.strokeStyle = colors[(i * 5) % colors.length] ?? '#6b5a2a';
+    ctx.lineWidth = 1.5 + (seed % 3) * 0.6;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.bezierCurveTo(x + 1.4 * sway, len * 0.3, x - 1.2 * sway, len * 0.6, x + 0.8 * sway, len);
+    ctx.stroke();
+    // Les petits flotteurs, plus clairs.
+    if (seed % 4 === 1) {
+      ctx.fillStyle = 'rgba(176, 156, 84, 0.85)';
+      ctx.beginPath();
+      ctx.ellipse(x - 0.3 * sway, len * 0.55, 0.9, 1.3, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  // L'ombre sous la poutre, et un reflet mouillé.
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.fillRect(0, 0, w, 2);
+  ctx.fillStyle = 'rgba(220, 230, 200, 0.1)';
+  ctx.fillRect(0, 2, w, 1);
 }

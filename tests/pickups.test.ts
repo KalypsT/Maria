@@ -107,8 +107,10 @@ describe('objets de capacité (D-26)', () => {
     const level = parseAsciiLevel(
       'r',
       [
-        '; @shell: a 3 1 medium climb wall-jump growth from 1,1 high',
+        '; @shell: a 3 1 medium climb wall-jump growth from 1,1 high tide',
         '; @hide: sheet 2 0 2 2',
+        '; @tide: 2 1',
+        '; @sea: 4 1 1 1',
         ...grid,
       ].join('\n'),
     );
@@ -119,7 +121,12 @@ describe('objets de capacité (D-26)', () => {
       crawl: false,
       from: { col: 1, row: 1 },
       high: true,
+      tide: true,
     });
+    // La marée d'une coquille, dans une salle sans marée.
+    expect(() => parseAsciiLevel('r', ['; @shell: a 3 1 easy tide', ...grid].join('\n'))).toThrow(
+      /« high » et « tide » vont avec @tide/,
+    );
     expect(level.hides).toEqual([{ kind: 'sheet', col: 2, row: 0, width: 2, height: 2 }]);
     expect(
       parseAsciiLevel('r', ['; @shell: a 3 1', ...grid].join('\n')).entities[0],

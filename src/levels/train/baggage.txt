@@ -4,7 +4,7 @@
 ; une échelle monte au toit (porte 3) ; la porte du wagon-restaurant (sortie 2) est fermée de ce
 ; côté : elle s'ouvre de l'intérieur.
 ; @name: Le fourgon
-; @shell: baggage-shelf 54 9
+; @shell: baggage-shelf 54 9 easy umbrella
 ; @icon: wagon
 ; @vehicle: train
 ; @music: train

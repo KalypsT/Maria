@@ -317,7 +317,8 @@ export interface LevelEntity {
  * jeu où on doit l'atteindre ; les capacités sans lesquelles elle est impossible ; `growth` :
  * impossible avant la croissance ; `crawl` : dans un passage bas (vérifiée en glissant par la
  * simulation, pas par l'analyse des surfaces) ; `from` : d'où on part (sinon : les entrées de la
- * salle) ; `high` : à marée haute.
+ * salle) ; `high` : à marée haute ; `tide` : seulement à cette marée (impossible à l'autre : on
+ * revient quand la marée a tourné).
  */
 export interface ShellIntent {
   readonly difficulty: 'easy' | 'medium' | 'hard';
@@ -326,6 +327,7 @@ export interface ShellIntent {
   readonly crawl: boolean;
   readonly from: TilePos | null;
   readonly high: boolean;
+  readonly tide: boolean;
 }
 
 export interface TilePos {

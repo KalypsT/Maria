@@ -3,7 +3,7 @@
 ; endormis. Dans les virages, des valises tombent des filets (elles tremblent d'abord). Au bout, une
 ; grille en accordéon à moitié fermée (on glisse dessous) avant le fourgon.
 ; @name: Les compartiments
-; @shell: compartments-rack 60 7
+; @shell: compartments-rack 60 7 easy
 ; @icon: train
 ; @vehicle: train
 ; @music: train

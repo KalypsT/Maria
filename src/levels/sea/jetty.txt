@@ -4,10 +4,11 @@
 ; comptoirs) ; les chaises volantes qui balaient à hauteur de tête ; la seconde lanterne ; la pêche
 ; aux canards, son long toit bas au-dessus d'un trou du platelage (le saut long) ; le stand de
 ; berlingots au bord du grand trou, les guirlandes (le crochet) ; la grande roue au fond ; le
-; carrousel au bout. Sous la jetée, à marée basse : les pilotis, deux pieux en cheminée et une
-; trouvaille (défi).
+; carrousel au bout. Sous la jetée, à marée basse : les pilotis, deux pieux en cheminée et, derrière
+; un rideau d'algues qui pend entre eux, une coquille ; une trace de bave y mène sur le sable, jusque
+; sous la fente entre les deux pieux (D-148).
 ; @name: La jetée
-; @shell: jetty-piles 162 19
+; @shell: jetty-piles 162 19 easy wall-jump tide
 ; @icon: sea
 ; @world: street
 ; @backdrop: sea
@@ -65,6 +66,8 @@
 ; @decor: piling 192 18 1 8
 ; @decor: piling 160 18 1 8
 ; @decor: piling 164 18 1 8
+; @decor: slimetrail 162 25 10 1
+; @hide: seaweed 161 18 3 2
 #..........................................................................................................................................................................................................................#
 #..........................................................................................................................................................................................................................#
 #..........................................................................................................................................................................................................................#
