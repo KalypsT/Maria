@@ -2656,7 +2656,7 @@ export class GameScene extends Phaser.Scene {
     }
     if (returnPoint) {
       const lamp = returnLantern(room.level, col, row);
-      void this.session.setCheckpoint(id, lamp ? checkpointId(lamp.col, lamp.row) : null);
+      void this.session.setCheckpoint(id, lamp ? checkpointId(lamp) : null);
     }
     const saved = this.session.data.checkpoint;
     this.setRoom(room.level, room.zone, saved.levelId === id ? saved.checkpointId : null);

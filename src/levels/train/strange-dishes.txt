@@ -5,6 +5,9 @@
 ; cassée (saut long depuis la glissade), une pile de valises, une dernière barrière. Au bout, la
 ; cuisine rose. Une veilleuse au début de chaque tronçon.
 ; @name: Train de la vaisselle
+; @lantern: train-strange-dishes-1 4 11
+; @lantern: train-strange-dishes-2 48 11
+; @lantern: train-strange-dishes-3 84 11
 ; @world: strange
 ; @music: strange
 ; @hazard: brokendishes

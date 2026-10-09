@@ -5,6 +5,7 @@
 ; et la sortie (1) vers le train de la vaisselle. On y arrive par l'histoire (la porte de la
 ; cuisine du wagon-restaurant), jamais par une porte.
 ; @name: Cuisine étrange
+; @lantern: train-strange-kitchen-shelf 53 6
 ; @world: strange
 ; @music: strange
 ; @hazard: hotplates

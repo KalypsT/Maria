@@ -7,6 +7,9 @@
 ; ronces, l'étagère de la trouvaille. Dans le corail, ouvert à marée basse, une trouvaille.
 ; Sorties : (1) vers la maison (la trappe), (2) vers le carrousel.
 ; @name: La plage d'autrefois
+; @lantern: nanny-beach-dune 5 10
+; @lantern: nanny-beach-middle 52 15
+; @lantern: nanny-beach-end 88 15
 ; @world: strange
 ; @mapped: yes
 ; @music: strange

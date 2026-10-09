@@ -3,6 +3,7 @@
 ; long du quai, sa porte ouverte (porte 1, vers la voiture-couchettes). La classe et la maîtresse
 ; attendent à gauche, les sacs posés : on ne va pas plus loin pour l'instant.
 ; @name: La gare de la mer
+; @lantern: sea-station-quay 24 17
 ; @icon: train
 ; @world: street
 ; @music: station

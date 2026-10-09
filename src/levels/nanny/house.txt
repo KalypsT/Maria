@@ -17,6 +17,8 @@
 ; ouverte une fois les quatre cubes trouvés ; porte (11) : au pied de la bibliothèque, la porte
 ; de la salle de jeux, ouverte une fois l'effacement dissous.
 ; @name: La maison de la nounou
+; @lantern: nanny-house-hall 6 36
+; @lantern: nanny-house-rug 68 36
 ; @world: strange
 ; @mapped: yes
 ; @music: strange

@@ -4,6 +4,7 @@
 ; de valises (difficile) jusqu'à la tour des objets perdus (sortie 1). On y arrive par l'histoire
 ; (le haut des casiers du bureau des objets trouvés), jamais par une porte.
 ; @name: Objets perdus
+; @lantern: station-strange-pile 47 23
 ; @world: strange
 ; @music: strange
 ; @hazard: umbrellas

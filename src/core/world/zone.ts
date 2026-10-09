@@ -106,25 +106,35 @@ export function buildZone(source: ZoneSource): Zone {
     }
     rooms.set(room.id, parseAsciiLevel(room.id, room.text));
   }
-  // Chaque coquille d'une zone a un nom fixe (D-148), unique dans toute la zone.
-  const shells = new Map<string, string>();
+  // Chaque coquille (D-148) et chaque lanterne (D-152) d'une zone a un nom fixe, unique dans toute
+  // la zone : son identifiant dans la sauvegarde.
+  const named = [
+    { type: EntityType.Shell, what: 'coquille', meta: '@shell', seen: new Map<string, string>() },
+    {
+      type: EntityType.Checkpoint,
+      what: 'lanterne',
+      meta: '@lantern',
+      seen: new Map<string, string>(),
+    },
+  ];
   for (const [roomId, level] of rooms) {
     for (const e of level.entities) {
-      if (e.type !== EntityType.Shell) {
+      const kind = named.find((k) => k.type === e.type);
+      if (!kind) {
         continue;
       }
       if (e.name === undefined) {
         throw new Error(
-          `Zone ${source.id} : coquille sans nom (${roomId} ${String(e.col)} ${String(e.row)}, ; @shell:)`,
+          `Zone ${source.id} : ${kind.what} sans nom (${roomId} ${String(e.col)} ${String(e.row)}, ; ${kind.meta}:)`,
         );
       }
-      const other = shells.get(e.name);
+      const other = kind.seen.get(e.name);
       if (other !== undefined) {
         throw new Error(
-          `Zone ${source.id} : coquille « ${e.name} » en double (${other}, ${roomId})`,
+          `Zone ${source.id} : ${kind.what} « ${e.name} » en double (${other}, ${roomId})`,
         );
       }
-      shells.set(e.name, roomId);
+      kind.seen.set(e.name, roomId);
     }
   }
   if (!rooms.has(source.start)) {

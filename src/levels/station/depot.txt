@@ -3,6 +3,8 @@
 ; haut (moyen), jusqu'à une trouvaille. Une lanterne sur le troisième wagon.
 ; @name: Le dépôt
 ; @shell: depot-crane-hooks 73 13 medium
+; @lantern: station-depot-wagon 51 25
+; @lantern: station-depot-entry 7 29
 ; @icon: wagon
 ; @world: street
 ; @music: station

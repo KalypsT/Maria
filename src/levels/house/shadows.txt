@@ -1,6 +1,7 @@
 ; Passage d'ombres (§6.2, D-34) : une montée d'étagères qui flottent autour d'un vide. Maria est
 ; assise de l'autre côté, hors d'atteinte ; tout en haut, un berceau vide.
 ; @name: Passage d'ombres
+; @lantern: shadows-shelf 39 29
 ; @world: strange
 ; @difficulty: medium
 ; @ambient: #1a1f2c

@@ -306,7 +306,10 @@ export interface LevelEntity {
   readonly type: EntityType;
   readonly col: number;
   readonly row: number;
-  /** Nom fixe d'une coquille (`; @shell:`, D-148) : son identifiant dans la sauvegarde. */
+  /**
+   * Nom fixe d'une coquille (`; @shell:`, D-148) ou d'une lanterne (`; @lantern:`, D-152) : son
+   * identifiant dans la sauvegarde.
+   */
   readonly name?: string;
   /** Intention d'une coquille (D-148), vérifiée par les tests. */
   readonly intent?: ShellIntent;

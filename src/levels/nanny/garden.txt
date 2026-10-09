@@ -5,6 +5,9 @@
 ; Défi : la fleur géante, jusqu'au rebord de sa trouvaille. Dans le deuxième pot, ouvert dans le
 ; souvenir, une trouvaille. Sortie (1) vers la chambre ; porte (2) vers la maison.
 ; @name: Le jardin renversé
+; @lantern: nanny-garden-cans 17 6
+; @lantern: nanny-garden-hedge 68 6
+; @lantern: nanny-garden-planter 30 28
 ; @world: strange
 ; @mapped: yes
 ; @music: strange

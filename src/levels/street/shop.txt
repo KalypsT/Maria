@@ -4,6 +4,7 @@
 ; Refaite (D-78) : un faux plafond et ses tubes (celui de la réserve clignote), un ventilateur ; la
 ; mezzanine de la réserve sur pilotis.
 ; @name: Supérette
+; @lantern: shop-entry 4 21
 ; @icon: basket
 ; @world: street
 ; @indoor: yes

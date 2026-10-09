@@ -6,6 +6,9 @@
 ; monte en basculant. La géométrie du parcours d'essai 16 (D-111). Une veilleuse en bas, une au
 ; milieu, une en haut. Sortie (1) vers la salle de jeux. Hors carte.
 ; @name: La cage d'escalier
+; @lantern: nanny-stairs-top 27 16
+; @lantern: nanny-stairs-banister 29 40
+; @lantern: nanny-stairs-bottom 6 55
 ; @world: strange
 ; @music: strange
 ; @difficulty: easy

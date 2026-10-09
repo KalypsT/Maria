@@ -6,6 +6,7 @@
 ; @name: Les quais
 ; @shell: platforms-pillar 6 7 hard
 ; @shell: platforms-bench 66 26 easy slide crawl
+; @lantern: station-platforms-footbridge 14 26
 ; @icon: train
 ; @world: street
 ; @music: station

@@ -5,6 +5,7 @@
 ; moyen) : du haut d'une couchette, la suspension pendue au plafond, puis un saut vers la poutre.
 ; @name: Le centre
 ; @shell: centre-beam 23 3 medium umbrella
+; @lantern: sea-centre-dorm 50 11
 ; @icon: bed
 ; @world: street
 ; @indoor: yes

@@ -4,6 +4,7 @@
 ; la porte de la cuisine : une lueur turquoise passe dessous (le monde étrange, PR 5).
 ; @name: Le wagon-restaurant
 ; @shell: restaurant-bottles 51 7 easy
+; @lantern: train-restaurant-table 30 18
 ; @icon: pot
 ; @vehicle: train
 ; @music: train

@@ -2,6 +2,7 @@
 ; casseroles), le coin cuisine bas à droite (retombée de plafond, hotte et son conduit, cafetière).
 ; @name: Cuisine
 ; @shell: kitchen-cupboards 44 8 easy climb
+; @lantern: kitchen-counter 46 16
 ; @icon: pot
 ; @ambient: #2f3036
 ; @note: dessus des placards hauts (colonnes 39-48) : en grimpant par la hotte, ou depuis la table par la suspension, la barre à casseroles, le rebord de la fenêtre et le frigo (D-26, D-39) ; une trouvaille y attend.

@@ -101,7 +101,7 @@ export class RunState {
     this.checkpoints = level.entities
       .filter((entity) => entity.type === EntityType.Checkpoint)
       .map((entity) => {
-        const id = checkpointId(entity.col, entity.row);
+        const id = checkpointId(entity);
         return {
           id,
           col: entity.col,

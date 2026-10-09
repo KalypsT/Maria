@@ -105,8 +105,8 @@ describe('carte dessinée par Céleste (§24)', () => {
       zone,
       progress({
         visited,
-        activatedCheckpoints: ['bedroom:c20-19', 'attic:c51-19'],
-        checkpoint: { levelId: 'attic', checkpointId: 'c51-19' },
+        activatedCheckpoints: ['bedroom:bedroom-toybox', 'attic:attic-trunk'],
+        checkpoint: { levelId: 'attic', checkpointId: 'attic-trunk' },
         collectibles: ['attic-ridge'],
       }),
     );

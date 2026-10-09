@@ -10,6 +10,7 @@
 ; difficile. Une petite cheminée entre l'aiguille et le rebord remonte du fond.
 ; @name: Les rochers
 ; @shell: rocks-cave 53 27 medium slide tide
+; @lantern: sea-rocks-top 72 11
 ; @icon: sea
 ; @world: street
 ; @backdrop: sea

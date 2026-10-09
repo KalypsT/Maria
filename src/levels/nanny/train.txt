@@ -8,6 +8,8 @@
 ; maison et (3) vers la rue d'autrefois, ouvertes une fois le cube turquoise trouvé ; porte (4) vers
 ; le carrousel d'autrefois (îlot 4), ouverte une fois le cube bleu trouvé.
 ; @name: Le train d'autrefois
+; @lantern: nanny-train-roof 67 8
+; @lantern: nanny-train-rack 4 11
 ; @world: strange
 ; @mapped: yes
 ; @music: strange

@@ -6,6 +6,7 @@
 ; branche du tronc, qui continue jusqu'à la cabane (sortie 2). Le tronc repose sur ses racines en arche.
 ; @name: Grand arbre
 ; @shell: tree-oldwall 10 8 easy wall-jump from 4,39
+; @lantern: garden-tree-foot 9 39
 ; @icon: tree
 ; @world: garden
 ; @difficulty: medium

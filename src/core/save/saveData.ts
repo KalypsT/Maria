@@ -5,12 +5,13 @@ import { parseControlSettings, sanitizeControlSettings } from '../settings/contr
 import { parseDisplaySettings, sanitizeDisplaySettings } from '../settings/displaySettings';
 import { sanitizeAudioSettings } from '../settings/audioSettings';
 import { LEGACY_STORY_FLAGS } from '../../config/story';
+import type { LevelEntity } from '../level/LevelData';
 
 /**
  * Sauvegarde (décision D-22) : format versionné, validé strictement, protégé par une somme de
  * contrôle. Pur et indépendant du stockage (IndexedDB, localStorage ou mémoire).
  */
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 const RECORD_FORMAT = 'maria-save';
 const CODE_PREFIX = 'MARIA1';
 const MAX_ID_LENGTH = 64;
@@ -64,9 +65,12 @@ export type SaveProblem =
 
 export type DecodeResult = { ok: true; data: SaveData } | { ok: false; problem: SaveProblem };
 
-/** Identifiant stable d'un checkpoint dans sa salle (d'après sa tuile). */
-export function checkpointId(col: number, row: number): string {
-  return `c${col}-${row}`;
+/**
+ * Identifiant d'un checkpoint dans sa salle : le nom fixe de sa lanterne (`; @lantern:`, D-152). Une
+ * lanterne sans nom (un parcours d'essai, qui ne sauvegarde rien) prend sa tuile.
+ */
+export function checkpointId(lantern: Readonly<LevelEntity>): string {
+  return lantern.name ?? `c${String(lantern.col)}-${String(lantern.row)}`;
 }
 
 /** FNV-1a 32 bits, en hexadécimal : détecte les altérations accidentelles (pas une signature). */
@@ -213,6 +217,17 @@ export function migrateSaveData(raw: unknown): unknown {
   if (data['version'] === 1) {
     // v1 → v2 (D-31) : une partie commencée avant l'histoire a déjà « vécu » le prologue.
     data = { ...data, version: 2, story: { flags: [...LEGACY_STORY_FLAGS] } };
+  }
+  if (data['version'] === 2) {
+    // v2 → v3 (D-152) : les lanternes, repérées par leur tuile, ont un nom fixe. Aucune vraie partie
+    // n'existait : le point de retour revient au départ de sa salle, les lanternes à rallumer.
+    const checkpoint = data['checkpoint'];
+    data = {
+      ...data,
+      version: 3,
+      checkpoint: isRecord(checkpoint) ? { ...checkpoint, checkpointId: null } : checkpoint,
+      activatedCheckpoints: [],
+    };
   }
   return data;
 }

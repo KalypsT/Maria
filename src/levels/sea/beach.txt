@@ -9,6 +9,7 @@
 ; @name: La plage
 ; @shell: beach-beacon 49 12 medium high tide from 176,17
 ; @shell: beach-cave 154 23 easy slide tide
+; @lantern: sea-beach-upper 176 17
 ; @icon: sea
 ; @world: street
 ; @backdrop: sea

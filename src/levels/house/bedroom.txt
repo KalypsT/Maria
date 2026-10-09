@@ -2,6 +2,7 @@
 ; mobile au-dessus du berceau, la veilleuse qui projette des étoiles. Le grenier est au-dessus du
 ; couloir : sa petite porte s'ouvre en haut du mur de droite, au-dessus d'une étagère haute.
 ; @name: Chambre
+; @lantern: bedroom-toybox 20 19
 ; @icon: bed
 ; @ambient: #2b2f3d
 ; @note: dessus de l'armoire (colonnes 2-6) : en grimpant depuis la tête de lit (D-26).

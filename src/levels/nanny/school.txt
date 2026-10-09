@@ -6,6 +6,9 @@
 ; casier, ouvert dans le souvenir, une trouvaille. Sorties : (1) vers la maison (la bibliothèque),
 ; (2) vers la rue.
 ; @name: L'école d'autrefois
+; @lantern: nanny-school-books 3 8
+; @lantern: nanny-school-table 39 14
+; @lantern: nanny-school-desk 90 19
 ; @world: strange
 ; @mapped: yes
 ; @music: strange

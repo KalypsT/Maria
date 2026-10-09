@@ -9,6 +9,11 @@
 ; la chambre grande (D-143). Tout en bas, le vide de la nuit : une chute ramène au dernier
 ; appui, sans peur. Ni danger, ni ennemi, ni trouvaille. Facile, sauf l'étagère haute (moyen).
 ; @name: Le ciel de la chambre
+; @lantern: finale-sky-picture 46 9
+; @lantern: finale-sky-moon 90 10
+; @lantern: finale-sky-window 126 25
+; @lantern: finale-sky-desk 145 25
+; @lantern: finale-sky-wardrobe 11 26
 ; @world: strange
 ; @palette: nightlight
 ; @music: strange

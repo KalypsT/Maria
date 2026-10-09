@@ -5,6 +5,7 @@
 ; côté : elle s'ouvre de l'intérieur.
 ; @name: Le fourgon
 ; @shell: baggage-shelf 54 9 easy umbrella
+; @lantern: train-baggage-crate 36 18
 ; @icon: wagon
 ; @vehicle: train
 ; @music: train

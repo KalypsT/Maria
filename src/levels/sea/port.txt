@@ -8,6 +8,7 @@
 ; @name: Le port
 ; @shell: port-culvert 140 27 easy slide tide
 ; @shell: port-crane 171 4 easy wall-jump
+; @lantern: sea-port-office 146 17
 ; @icon: sea
 ; @world: street
 ; @backdrop: sea

@@ -6,6 +6,7 @@
 ; Refaite (D-78) : du ciel au-dessus (le feuillage seulement en haut du platane), les balançoires au vent.
 ; @name: Aire de jeux
 ; @shell: playground-birdhouse 53 10 medium
+; @lantern: playground-bench 5 27
 ; @icon: swing
 ; @world: street
 ; @difficulty: medium

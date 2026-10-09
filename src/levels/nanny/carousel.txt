@@ -5,6 +5,8 @@
 ; Sortie (1) vers la plage ; portes (2) vers la maison et (3) vers le train d'autrefois, ouvertes
 ; une fois le cube bleu trouvé.
 ; @name: Le carrousel d'autrefois
+; @lantern: nanny-carousel-top 24 7
+; @lantern: nanny-carousel-entry 5 24
 ; @world: strange
 ; @mapped: yes
 ; @music: strange

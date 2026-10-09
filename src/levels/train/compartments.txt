@@ -4,6 +4,7 @@
 ; grille en accordéon à moitié fermée (on glisse dessous) avant le fourgon.
 ; @name: Les compartiments
 ; @shell: compartments-rack 60 7 easy
+; @lantern: train-compartments-table 14 18
 ; @icon: train
 ; @vehicle: train
 ; @music: train

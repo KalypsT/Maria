@@ -4,6 +4,9 @@
 ; crochet attrape les caténaires : chacune n'existe que dans une couche ; on bascule en plein vol,
 ; entre deux. Sorties : (1) vers la maison, (2) vers le train.
 ; @name: La gare d'autrefois
+; @lantern: nanny-station-shelf 36 13
+; @lantern: nanny-station-end 86 19
+; @lantern: nanny-station-entry 4 26
 ; @world: strange
 ; @mapped: yes
 ; @music: strange

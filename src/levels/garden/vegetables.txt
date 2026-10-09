@@ -5,6 +5,7 @@
 ; @name: Potager
 ; @shell: vegetables-beanpoles 41 5 medium
 ; @shell: vegetables-birdhouse 60 7 medium umbrella
+; @lantern: garden-vegetables-planter 31 18
 ; @icon: flower
 ; @world: garden
 ; @difficulty: medium
