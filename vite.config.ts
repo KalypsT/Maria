@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { appVersion } from './scripts/app-version.js';
 
 /** Papier du cahier (écran de départ) : couleur de lancement et de la barre d'état. */
 const BACKGROUND = '#f3ead7';
@@ -13,6 +14,8 @@ export default defineConfig(({ mode }) => {
     define: {
       // Remplacé textuellement : le code de debug est éliminé du build principal.
       __DEBUG_TOOLS__: JSON.stringify(mode !== 'production'),
+      // Version affichée sur l'écran de départ (D-152).
+      __APP_VERSION__: JSON.stringify(appVersion()),
     },
     plugins: [
       // PWA (D-09, D-23) : build principal seulement. Le build de debug et le serveur de dev n'ont

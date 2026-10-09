@@ -68,6 +68,8 @@ export function showTitleScreen(
       maria.draggable = false;
       element('div', corner, 'title-maria-shelf');
     }
+    // La version (D-152), pour les retours d'essai.
+    element('p', root, 'title-version', `Version ${__APP_VERSION__}`);
     let unsubscribe = () => {
       // Remplacé ci-dessous si la PWA est active.
     };
