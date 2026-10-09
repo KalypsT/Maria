@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Avant diffusion** (D-152, demande de l'utilisateur) : plan validé en 5 PR (les noms des lanternes ; la revue des lanternes, salle par salle, dans `docs/LANTERNES.md`, à valider par l'utilisateur ; puis trois PR qui l'appliquent : maison et jardin ; quartier, gare et train ; mer, nounou et monde de Maria). **PR 1 faite : les 97 lanternes nommées (`; @lantern:`), la sauvegarde en version 3, les identifiants de la sauvegarde figés par un test, la version sur l'écran de départ**, sur `ccr-dae061c9-3hvwy2`. Suite : la PR 2, la revue des lanternes. Ensuite, dans une branche à part, avant la diffusion : un système de stats (à définir avec l'utilisateur : pour qui, où, lesquelles).
+**Avant diffusion** (D-152, demande de l'utilisateur) : plan validé en 5 PR (les noms des lanternes ; la revue des lanternes, salle par salle, dans `docs/LANTERNES.md`, à valider par l'utilisateur ; puis trois PR qui l'appliquent : maison et jardin ; quartier, gare et train ; mer, nounou et monde de Maria). **PR 1 faite : les 97 lanternes nommées (`; @lantern:`), la sauvegarde en version 3, les identifiants de la sauvegarde figés par un test, la version sur l'écran de départ**, sur `ccr-dae061c9-3hvwy2`. **PR 2 faite : la revue des lanternes** (`docs/LANTERNES.md`, l'outil DEBUG → « Lanternes »). Suite : **les réponses de l'utilisateur** (la plage, le grand arbre, l'aspect des lanternes dehors), puis les PR qui les appliquent (sans doute une seule : deux lanternes ajoutées). Ensuite, dans une branche à part, avant la diffusion : un système de stats (à définir avec l'utilisateur : pour qui, où, lesquelles).
 
 **Les coquilles** (les trouvailles revues, D-148) : audit fait (`docs/COQUILLES.md`), choix de l'utilisateur et plan validés en 6 PR (le système ; la carte et le cahier ; la boîte à coquilles et la fin ; la liste vérifiée, la maison et le jardin ; le quartier et la gare ; le train et la mer). **PR 1 faite : le système** (les noms fixes, la coquille posée et son scintillement, le compteur au ramassage, le debug), **PR 2 faite : la carte et le cahier** (les coquilles vues en pointillés, « n/N » du lieu, la page qui se colorie) et **PR 3 faite : le bocal à coquilles dans la chambre et le petit escargot de la fin** et **PR 4 faite : la liste vérifiée (l'intention de chaque coquille, un seul test), les cachettes et les traces de bave, les coquilles retirées des lieux sans retour, la maison (8) et le jardin (7) replacés** et **PR 5 faite : le quartier (9) et la gare (8)** et **PR 6 faite : le train (6) et la station balnéaire (9), les revisites par la marée**, sur `ccr-c9ed5a1e-fyh3vf`. **Le plan des coquilles est complet : 47 coquilles.** Suite : essai sur téléphone (les traces de bave, les cachettes, le compteur, le bocal). Le « train à quai » n'ouvre aucun chemin : le train n'a pas de revisite (signalé, D-148 PR 6). Rien au bout des défis de la nounou pour l'instant (choix de l'utilisateur).
 
@@ -35,6 +35,12 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Avant diffusion, PR 2 : la revue des lanternes (D-152)
+
+- `docs/LANTERNES.md` : les 97 lanternes revues (mesures de la simulation, photos dans Chromium, points de retour de l'histoire). Toutes bien posées ; deux propositions (la plage, le grand arbre) et deux questions.
+- DEBUG → « Lanternes » : aller à chaque lanterne, par salle.
+- [ ] À vérifier sur téléphone : DEBUG → « Lanternes » → « Aller » pose Céleste à côté de la lanterne, sans l'allumer.
 
 ### Avant diffusion, PR 1 : les lanternes nommées, la sauvegarde v3, la version (D-152)
 
