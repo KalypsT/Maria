@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Les stats** (D-153, demande de l'utilisateur, avant la diffusion) : plan validé en 2 PR (le système ; la page du cahier). **PR 1 faite : le système** (temps de jeu, évanouissements, fil discret, par salle ; dans la sauvegarde sans migration ; DEBUG → « Stats »), sur `ccr-dae061c9-3hvwy2`. Suite : la PR 2, la page du cahier (une maquette d'abord).
+**Les stats** (D-153, demande de l'utilisateur, avant la diffusion) : plan validé en 2 PR (le système ; la page du cahier). **PR 1 faite : le système** (temps de jeu, évanouissements, fil discret, par salle ; dans la sauvegarde sans migration ; DEBUG → « Stats »), sur `ccr-dae061c9-3hvwy2`. **PR 2 faite : la page « Mon voyage » du cahier** (le temps, les coquilles, les souvenirs, les lieux, les évanouissements : une petite lune), proposée à l'utilisateur. Suite : sa validation (le nom de l'onglet, la mise en page).
 
 **Avant diffusion** (D-152, demande de l'utilisateur) : plan validé en 5 PR (les noms des lanternes ; la revue des lanternes, salle par salle, dans `docs/LANTERNES.md`, à valider par l'utilisateur ; puis trois PR qui l'appliquent : maison et jardin ; quartier, gare et train ; mer, nounou et monde de Maria). **PR 1 faite : les 97 lanternes nommées (`; @lantern:`), la sauvegarde en version 3, les identifiants de la sauvegarde figés par un test, la version sur l'écran de départ**, sur `ccr-dae061c9-3hvwy2`. **PR 2 faite : la revue des lanternes** (`docs/LANTERNES.md`, l'outil DEBUG → « Lanternes »). **PR 3 faite : la lanterne de la plage** (oui pour la plage, non pour l'arbre ; la règle : des lanternes utiles, sans trop simplifier). Suite : la réponse sur l'aspect des lanternes dehors (une variante par lieu ?) ; la suite complète des tests à faire passer par la CI. Ensuite, dans une branche à part : les stats. Ensuite, dans une branche à part, avant la diffusion : un système de stats (à définir avec l'utilisateur : pour qui, où, lesquelles).
 
@@ -37,6 +37,13 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les stats, PR 2 : la page « Mon voyage » du cahier (D-153)
+
+- Un sixième onglet du cahier : un pictogramme et un chiffre par ligne (le temps de jeu, les coquilles, les souvenirs, les lieux découverts, les évanouissements), deux colonnes en paysage.
+- Les onglets défilent sur un écran étroit.
+- Vérifié dans Chromium : 568 × 320 (une colonne, les onglets défilent) et 844 × 390 (deux colonnes).
+- [ ] À vérifier sur téléphone : les chiffres se lisent-ils ? Les pictogrammes se comprennent-ils sans texte (surtout la lune) ? Les onglets défilent-ils bien au doigt ?
 
 ### Les stats, PR 1 : le système (D-153)
 
