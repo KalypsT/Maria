@@ -4,6 +4,7 @@
 ; @name: Marée (essai)
 ; @shell: tide-pontoon 32 3
 ; @shell: tide-sand 13 13
+; @lantern: tide-bank 2 10
 ; @tide: 14 10
 ; @sea: 11 1 14 15
 ; @rise: 18 13 4 1
