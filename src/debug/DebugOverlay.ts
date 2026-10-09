@@ -9,6 +9,8 @@ import { DEFAULT_PUPPET, PUPPET_PARAM_RANGES, type PuppetParams } from '../confi
 import { ART_FINISH_RANGES, DEFAULT_ART_FINISH, type ArtFinish } from '../config/art';
 import { EntityType } from '../core/level/LevelData';
 import { deserializeSave } from '../core/save/saveData';
+import { formatPlayTime, statsByPlace, totalFaints } from '../core/save/stats';
+import { mapPage } from '../core/world/zone';
 import { HitchMonitor, type FrameWork } from '../core/perf/hitchMonitor';
 import { STRANGE_MOCKUPS, STRANGE_MOCKUP_NAMES } from '../config/strangeThemes';
 import { DEFAULT_MOVEMENT, MOVEMENT_PARAM_RANGES, type MovementParams } from '../config/movement';
@@ -1986,6 +1988,60 @@ export function installDebugOverlay(scene: GameScene): void {
       scene.reloadPickups();
       refreshShells();
     });
+  });
+
+  // Les stats (D-153) : le temps de jeu, les évanouissements, le fil discret ; par lieu et par salle.
+  const statsSection = element('details', panel);
+  element('summary', statsSection, undefined, 'Stats');
+  const statsInfo = element('div', statsSection);
+  const placeOf = (room: string) => {
+    for (const zone of ZONES) {
+      if (zone.rooms.has(room)) {
+        return mapPage(zone, room) ?? room.split('-')[0] ?? null;
+      }
+    }
+    return null;
+  };
+  const refreshStats = () => {
+    const stats = scene.session.data.stats;
+    statsInfo.replaceChildren();
+    element(
+      'div',
+      statsInfo,
+      'dbg-stats',
+      `Temps ${formatPlayTime(stats.playMs)} · évanouissements ${String(totalFaints(stats))}`,
+    );
+    for (const p of statsByPlace(stats, placeOf)) {
+      element(
+        'div',
+        statsInfo,
+        'dbg-stats',
+        `${p.place} : ${formatPlayTime(p.ms)} · évan. ${String(p.faints)} · fil ${String(p.hints)}`,
+      );
+    }
+    for (const [room, r] of Object.entries(stats.rooms)) {
+      element(
+        'div',
+        statsInfo,
+        'dbg-actions',
+        `${room} ${formatPlayTime(r.ms)} · évan. ${String(r.faints)} · fil ${String(r.hints)}`,
+      );
+    }
+    let confirming = false;
+    const reset = element('button', statsInfo, undefined, 'Remettre à zéro');
+    reset.addEventListener('click', () => {
+      if (!confirming) {
+        confirming = true;
+        reset.textContent = 'Effacer les stats ?';
+        return;
+      }
+      void scene.session.resetStats().then(refreshStats);
+    });
+  };
+  statsSection.addEventListener('toggle', () => {
+    if (statsSection.open) {
+      refreshStats();
+    }
   });
 
   // Sauvegarde (D-22) : inspection des emplacements, checkpoints, tests de récupération.

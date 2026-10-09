@@ -3,6 +3,7 @@ import type { ControlSettings } from '../../config/controls';
 import type { DisplaySettings } from '../../config/display';
 import type { SaveData } from './saveData';
 import type { SaveManager } from './SaveManager';
+import { addFaint, addHint, addPlayTime, createStats } from './stats';
 
 /**
  * Partie en cours (D-22) : la sauvegarde courante et les modifications du jeu (checkpoint, salle,
@@ -128,6 +129,31 @@ export class SaveSession {
 
   setAudio(audio: Readonly<AudioSettings>): Promise<void> {
     this.current.settings.audio = { ...audio };
+    return this.persist();
+  }
+
+  /**
+   * Du temps de jeu dans une salle (D-153), en mémoire : écrit avec la prochaine sauvegarde. Sans
+   * allocation (appelé à chaque image).
+   */
+  addPlayTime(room: string, ms: number): void {
+    addPlayTime(this.current.stats, room, ms);
+  }
+
+  /** Un évanouissement (D-153), écrit aussitôt (rare). */
+  recordFaint(room: string): Promise<void> {
+    addFaint(this.current.stats, room);
+    return this.persist();
+  }
+
+  /** Le fil discret s'allume (D-153), en mémoire : écrit avec la prochaine sauvegarde. */
+  recordHint(room: string): void {
+    addHint(this.current.stats, room);
+  }
+
+  /** Outil de debug (D-153) : les stats remises à zéro. */
+  resetStats(): Promise<void> {
+    this.current.stats = createStats();
     return this.persist();
   }
 

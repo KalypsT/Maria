@@ -6,6 +6,7 @@ import { parseDisplaySettings, sanitizeDisplaySettings } from '../settings/displ
 import { sanitizeAudioSettings } from '../settings/audioSettings';
 import { LEGACY_STORY_FLAGS } from '../../config/story';
 import type { LevelEntity } from '../level/LevelData';
+import { createStats, sanitizeStats, type GameStats } from './stats';
 
 /**
  * Sauvegarde (décision D-22) : format versionné, validé strictement, protégé par une somme de
@@ -41,6 +42,8 @@ export interface SaveData {
   };
   /** Histoire (§33, version 2) : étapes déjà vécues (drapeaux des événements). */
   story: { flags: string[] };
+  /** Stats de la partie (D-153) : absentes des sauvegardes plus anciennes, à zéro (aucune migration). */
+  stats: GameStats;
 }
 
 /** Enregistrement stocké : le contenu sérialisé et sa somme de contrôle. */
@@ -110,6 +113,7 @@ export function createNewSave(
       mapRevealed: [],
     },
     story: { flags: [] },
+    stats: createStats(),
   };
 }
 
@@ -202,6 +206,7 @@ export function validateSaveData(raw: unknown): SaveData | null {
     },
     progression: { abilities, collectibles, seenCollectibles, memories, mapRevealed },
     story: { flags },
+    stats: sanitizeStats(raw['stats']),
   };
 }
 

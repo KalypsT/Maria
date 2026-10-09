@@ -158,6 +158,7 @@ import { HintView } from './HintView';
 import { CelesteHalo } from './CelesteHalo';
 import { STRANGE_MOCKUP_PALETTES, type StrangeMockup } from '../config/strangeThemes';
 import { HINT } from '../config/hint';
+import { STATS } from '../config/stats';
 import {
   HintClock,
   HintStage,
@@ -443,6 +444,10 @@ export class GameScene extends Phaser.Scene {
   private hintView!: HintView;
   private readonly hintTarget = { valid: false, x: 0, y: 0 };
   private hintRetargetMs = 0;
+  /** Temps de jeu pas encore écrit (D-153) : une sauvegarde au plus tard toutes les minutes. */
+  private statsUnsavedMs = 0;
+  /** L'évanouissement en cours est déjà compté (D-153). */
+  private faintRecorded = false;
   /** Jalon montré par le fil (outil de debug). */
   hintGoalName = '';
   /** Halo autour de Céleste (D-130), selon la palette. */
@@ -853,6 +858,11 @@ export class GameScene extends Phaser.Scene {
         continue;
       }
       if (run.fainting) {
+        // Les stats (D-153) : un évanouissement compté une fois, à son début.
+        if (!this.faintRecorded && this.zone) {
+          this.faintRecorded = true;
+          void this.session.recordFaint(this.level.id);
+        }
         // Évanouissement (D-21) : rien ne bouge ; à la fin, retour au point de retour.
         run.stepFainting();
         this.freezeInterpolation();
@@ -920,6 +930,7 @@ export class GameScene extends Phaser.Scene {
         this.combatView.onEvents(combat.events);
       }
       this.stepCombatSounds();
+      this.faintRecorded = false;
       run.step(this.player.box, combat.events, this.player.grounded);
       // Le vide de la nuit (D-142) : ni gerbe ni bruit, Céleste s'efface dans le noir.
       if ((run.events & RunEvent.Splashed) !== 0 && this.level.meta.void !== 'night') {
@@ -974,6 +985,7 @@ export class GameScene extends Phaser.Scene {
       this.stepMoveSounds();
     }
     this.stepHint((steps * 1000) / PHYSICS_STEP_HZ);
+    this.stepStats((steps * 1000) / PHYSICS_STEP_HZ);
     if (__DEBUG_TOOLS__) {
       this.frameStats.steps = steps;
       this.frameStats.simulationMs = performance.now() - start;
@@ -1262,6 +1274,22 @@ export class GameScene extends Phaser.Scene {
     this.controls.consumePressed('Jump');
   }
 
+  /**
+   * Les stats (D-153) : le temps de jeu de la salle, hors pause et carte (la mise à jour s'arrête
+   * avant), scènes et souvenirs compris ; seulement dans la partie (pas les parcours d'essai).
+   */
+  private stepStats(dtMs: number): void {
+    if (!this.zone || dtMs <= 0) {
+      return;
+    }
+    this.session.addPlayTime(this.level.id, dtMs);
+    this.statsUnsavedMs += dtMs;
+    if (this.statsUnsavedMs >= STATS.saveEveryMs) {
+      this.statsUnsavedMs = 0;
+      void this.session.persist();
+    }
+  }
+
   /** Met le jeu en pause (simulation arrêtée, menu affiché) ou le reprend. */
   setPaused(paused: boolean): void {
     if (paused === this.paused) {
@@ -1273,6 +1301,11 @@ export class GameScene extends Phaser.Scene {
     this.clock.reset();
     this.touch?.releaseAll();
     if (paused) {
+      // Pause, appli en arrière-plan : le temps de jeu est écrit (D-153).
+      if (this.statsUnsavedMs > 0) {
+        this.statsUnsavedMs = 0;
+        void this.session.persist();
+      }
       this.pauseMenu?.open();
     } else {
       this.pauseMenu?.close();
@@ -2360,6 +2393,9 @@ export class GameScene extends Phaser.Scene {
     const stage = this.hintClock.stage;
     if (stage > before) {
       this.audio.sfx.play('hint');
+    }
+    if (before === HintStage.None && stage !== HintStage.None) {
+      this.session.recordHint(this.level.id);
     }
     const target = this.hintTarget;
     if (stage === HintStage.None) {
