@@ -76,7 +76,7 @@ export const GROWTH_PHASES: readonly GrowthPhase[] = [
     // une course un peu plus rapide. La hitbox reste celle de la phase 3 : un seul px de plus
     // fermait la chaîne de planches sous le toit du grenier (rien ne se ferme en grandissant,
     // testé). Le saut reste celui des phases 2 et 3. L'allure, d'après l'illustration de
-    // l'utilisateur (D-149) : une queue de cheval plus longue, un t-shirt vert, un jean, des
+    // l'utilisateur (D-150) : une queue de cheval plus longue, un t-shirt vert, un jean, des
     // baskets blanches à fleurs.
     id: 4,
     flag: StoryFlag.GrownFourth,

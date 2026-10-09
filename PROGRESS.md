@@ -8,7 +8,7 @@
 
 **Sensations, son, aide et mondes étranges** (D-124) : chantiers **A** (fluidité et sensations), **B** (bruitages et vibrations) et **C** (le fil discret) faits et fusionnés (D-124 à D-129). **Chantier D, PR 1 faite : trois maquettes de la gare étrange** (D-130), sur `ccr-9d90352a-xuwhs1`. Suite : **le choix de l'utilisateur** (A, B, C ou un mélange), puis la gare étrange refaite (D2) et les autres mondes étranges un par un. En attente : essais sur téléphone (compteur de saccades, sensations, sons de test, vibrations, fil discret) ; les sons à fournir (`docs/BRUITAGES.md`) ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades.
 
-**Les personnages illustrés** (D-123, D-146 à D-150) : papa, maman, Céleste dans ses quatre tenues, les adultes du train et de l'école, les enfants de la classe et le chien, sur `ccr-142ffd96-q5pgli`. Reste : le chat, la nounou, Eden (prompts prêts, photos de l'utilisateur).
+**Les personnages illustrés** (D-123, D-146 à D-151) : papa, maman, Céleste dans ses quatre tenues, les adultes du train et de l'école, les enfants de la classe et le chien, sur `ccr-142ffd96-q5pgli`. Reste : le chat, la nounou, Eden (prompts prêts, photos de l'utilisateur).
 
 **Le niveau 7 plus lisible** (retour d'essai, D-122) : les quatre cubes de la tour d'Eden à la place des objets déjà vus, la porte de la sieste et ses creux, le regard vers la porte, la carte, la salle de jeux où la tour monte, le souvenir d'Eden retravaillé (la tour chacun son tour, le cache-cache avec un compte), Eden blond à la coupe au bol, sur `ccr-abfc1233-t31o4v`. Suite : **essai sur téléphone**.
 
@@ -32,19 +32,19 @@
 
 ## Fait
 
-### Les adultes du train, les enfants, le chien (D-150)
+### Les adultes du train, les enfants, le chien (D-151)
 
 - La maîtresse, le contrôleur, la maman au bébé, le voyageur endormi ; la camarade, le garçon à la casquette, la fille au carré (assis, couchés, au quai) ; le chien. Assis : `height` (les pieds au sol sur une banquette) ; le quai : `group`.
 - Vérifié dans Chromium : la voiture-couchettes (soir et nuit), les compartiments, le fourgon ; les poses assises et le groupe dessinés à part.
 - [ ] À vérifier sur téléphone : les enfants se lisent-ils à leur petite taille ? La maman au bébé, le voyageur : bien assis sur la banquette ?
 
-### La tenue de la fin, phase 4 (D-149)
+### La tenue de la fin, phase 4 (D-150)
 
 - Phase 4 : t-shirt vert, jean, baskets blanches à fleurs, queue de cheval (`tee`), en pièces illustrées et sur l'écran de départ.
 - Vérifié dans Chromium : à l'arrêt, en course, en saut (« Premiers pas », phase 4).
 - [ ] À vérifier sur téléphone : la tenue se lit-elle ? La queue de cheval se voit-elle assez ? L'écran de départ après la fin.
 
-### Céleste illustrée : la robe et la veste (D-148)
+### Céleste illustrée : la robe et la veste (D-149)
 
 - Robe (phase 2) et veste (phases 3 et 4) en pièces illustrées ; jupe et short en pièces de hanche ; attaches des couettes et de la queue de cheval par tenue (`PROFILE_LAYOUTS`).
 - Vérifié dans Chromium : chaque tenue à l'arrêt, en course, en saut (« Premiers pas », phases 2, 3 et 4).

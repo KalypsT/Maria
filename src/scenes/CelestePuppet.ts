@@ -37,7 +37,7 @@ const DRAWN_LAYOUT: Readonly<PuppetLayout> = {
   ponytail: { x: -5.6, y: -10.2 },
 };
 /**
- * Céleste illustrée, de profil (D-147, D-148) : épaules et jambes presque l'une derrière l'autre,
+ * Céleste illustrée, de profil (D-147, D-149) : épaules et jambes presque l'une derrière l'autre,
  * les épaules dans l'emmanchure du torse ; les couettes (ou la queue de cheval) là où la tête de la
  * tenue les attend. Relevés sur les pièces composées par `scripts/celeste-parts.py`.
  */
@@ -255,7 +255,7 @@ export class CelestePuppet {
     assign(this.head, 'head');
     assign(this.umbrella, 'umbrella');
     assign(this.hook, 'hook');
-    // La jupe de la robe ; le short illustré de la veste est aussi une pièce de hanche (D-148).
+    // La jupe de la robe ; le short illustré de la veste est aussi une pièce de hanche (D-149).
     this.skirt.setVisible(
       growth.outfit === 'dress' || (useImages && illustrated.includes('skirt')),
     );

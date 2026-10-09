@@ -513,7 +513,7 @@ export function drawCharacter(
   const size = PROP_SIZE[kind];
   const illustrated = CHARACTER_IMAGES[kind];
   if (illustrated?.group) {
-    // Un groupe (D-150) : chacun dans sa part du cadre, s'ils sont tous chargés.
+    // Un groupe (D-151) : chacun dans sa part du cadre, s'ils sont tous chargés.
     const members = illustrated.group;
     const loaded = members.map((member) => images?.get(member.file));
     if (loaded.every((image) => image instanceof HTMLImageElement)) {

@@ -703,12 +703,12 @@ export interface CharacterImage {
   steam?: { x: number; y: number };
   seat?: number;
   /**
-   * Pose assise (D-150) : hauteur dessinée de l'image (px logiques), à la place de celle d'un
+   * Pose assise (D-151) : hauteur dessinée de l'image (px logiques), à la place de celle d'un
    * adulte debout. Sur une banquette, elle pose les pieds au sol ; un enfant garde sa taille.
    */
   height?: number;
   /**
-   * Un groupe (D-150) : plusieurs personnages côte à côte, chacun dans une part égale du cadre, à
+   * Un groupe (D-151) : plusieurs personnages côte à côte, chacun dans une part égale du cadre, à
    * la place de `file`.
    */
   group?: readonly { file: string; footX: number }[];
@@ -737,13 +737,13 @@ export const CHARACTER_IMAGES: Readonly<Partial<Record<PropKind, CharacterImage>
   'mom-garden': { file: 'mom-garden.png', footX: 0.3 },
   'mom-yard': { file: 'mom-yard.png', footX: 0.38 },
   'mom-quay': { file: 'mom-quay.png', footX: 0.33 },
-  // Les adultes du train et de l'école (D-150).
+  // Les adultes du train et de l'école (D-151).
   teacher: { file: 'teacher.png', footX: 0.34 },
   conductor: { file: 'conductor.png', footX: 0.3 },
   // Sur une banquette du compartiment (2 tuiles) : les pieds au sol, 32 px sous l'assise.
   'mother-baby': { file: 'mother-baby.png', footX: 0.82, seat: 0.65, height: 91 },
   'sleeper-seat': { file: 'sleeper-seat.png', footX: 0.78, seat: 0.64, height: 89 },
-  // Les enfants de la classe et le chien (D-150). Assis sur une couchette ou un lit, les jambes
+  // Les enfants de la classe et le chien (D-151). Assis sur une couchette ou un lit, les jambes
   // pendent ; couchés, l'image remplit la hauteur du cadre.
   classmate: { file: 'classmate.png', footX: 0.65 },
   'classmate-slid': { file: 'classmate-slid.png', footX: 0.5 },
@@ -771,9 +771,9 @@ export const CHARACTER_IMAGES: Readonly<Partial<Record<PropKind, CharacterImage>
 export const CELESTE_PART_IMAGES: Readonly<Partial<Record<CelesteOutfit, readonly string[]>>> = {
   pyjama: ['head', 'pigtail', 'torso', 'arm', 'leg'],
   dress: ['head', 'pigtail', 'torso', 'arm', 'leg', 'skirt'],
-  // Phases 3 et 4 ; le short est la pièce de hanche (`skirt`), D-148.
+  // Phases 3 et 4 ; le short est la pièce de hanche (`skirt`), D-149.
   jacket: ['head', 'ponytail', 'torso', 'arm', 'leg', 'skirt'],
-  // Phase 4, la tenue de la fin (D-149) : le jean va jusqu'aux chevilles, pas de pièce de hanche.
+  // Phase 4, la tenue de la fin (D-150) : le jean va jusqu'aux chevilles, pas de pièce de hanche.
   tee: ['head', 'ponytail', 'torso', 'arm', 'leg'],
 };
 

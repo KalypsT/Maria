@@ -102,7 +102,7 @@ export function drawCelestePart(
     drawDressPart(ctx, part, dark);
     return;
   }
-  // La tenue de la fin (D-149) n'a pas de dessin par code : celui de la veste, si une pièce manque.
+  // La tenue de la fin (D-150) n'a pas de dessin par code : celui de la veste, si une pièce manque.
   if ((outfit === 'jacket' || outfit === 'tee') && part !== 'head' && part !== 'pigtail') {
     drawJacketPart(ctx, part, dark);
     return;

@@ -2079,7 +2079,7 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Maman au canapé** : jambes repliées, assise, les pieds au sol (le canapé fait 2 tuiles). **Au banc** : ChatGPT l'a dessinée accroupie ; posée au sol à côté du banc, au soleil, les pieds au sol (le banc fait 1 tuile : ses fesses posées sur le banc, ses pieds passeraient sous le sol). Son cadre passe de la colonne 10, sur le banc, à la colonne 12, au sol (rien ne flotte : `storyProblems`).
 - **Détourage** : `--ring` et `--reach` pour les boucles épaisses de maman (liseré clair entre les mèches).
 
-## D-148 — Céleste illustrée : la robe et la veste
+## D-149 — Céleste illustrée : la robe et la veste
 
 - **La robe** (phase 2) et **la veste** (phases 3 et 4) prennent leurs pièces illustrées, comme le pyjama (D-147). Les planches de l'utilisateur, plus les jambes refaites une à une ; composées par `scripts/celeste-parts.py`.
 - **Retouches** : couette et queue de cheval détourées à part (liseré clair entre les mèches) ; le blanc derrière les verres des lunettes retiré ; le haut de la robe coupé à la taille (la jupe est une pièce) ; la planche de la veste avait une paire de jambes sous le short : le short seul est gardé.
@@ -2088,14 +2088,14 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Les attaches** (`PROFILE_LAYOUTS`, par tenue) : les couettes de la robe basses sur la nuque, derrière l'oreille ; la queue de cheval haut derrière la tête.
 - La phase 4 garde la veste. **La tenue de la fin** (t-shirt vert, jean, d'après l'illustration de l'utilisateur) viendra avec ses pièces (prompts dans `docs/PROMPTS_PERSONNAGES.md`).
 
-## D-149 — La tenue de la fin (phase 4)
+## D-150 — La tenue de la fin (phase 4)
 
 - **D'après l'illustration de l'utilisateur** : en phase 4, Céleste porte une nouvelle tenue, `tee` (queue de cheval au chouchou rose, t-shirt vert, jean droit bleu clair, baskets blanches à petites fleurs roses, sans logo) au lieu de la veste (le PLACEHOLDER de D-119). Hitbox, mouvement et proportions de la phase 4 inchangés.
 - **En jeu** : pièces illustrées (tête, queue de cheval, torse, bras, jambe), composées par `scripts/celeste-parts.py` ; le jean va jusqu'à la basket, pas de pièce de hanche. **Écran de départ** : l'illustration détourée, `public/art/celeste-tee.png` (`TITLE_IMAGES.tee`).
 - **Retouches** : les pièces de ChatGPT imitent du papier découpé : le trou de rivet en haut de la jambe et l'emmanchure découpée dans le t-shirt sont rebouchés (texture voisine), l'œillet du chouchou repeint ; le liseré de papier blanc autour de la queue de cheval retiré. Les baskets blanches : `--white` (seuil du fond) les garde.
 - **Sans pièces** (fichier manquant), la tenue reprend le dessin par code de la veste.
 
-## D-150 — Les adultes du train et de l'école, les enfants de la classe, le chien illustrés
+## D-151 — Les adultes du train et de l'école, les enfants de la classe, le chien illustrés
 
 - **Images de l'utilisateur** (ChatGPT, prompts de `docs/PROMPTS_PERSONNAGES.md`) : la maîtresse, le contrôleur, la maman au bébé, le voyageur endormi ; la camarade (debout, glissée, endormie, au quai), le garçon à la casquette et la fille au carré (assis, au quai), la fille au carré endormie ; le chien du fourgon. Toutes à la place du dessin par code (`CHARACTER_IMAGES`).
 - **Retournées** au détourage pour regarder vers la droite comme les autres : la maman au bébé et la camarade endormie (la tête du côté de l'oreiller dessiné par le code). La surface du lit dessinée sous la fille endormie est retirée.
