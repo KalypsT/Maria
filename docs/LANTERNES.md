@@ -1,6 +1,8 @@
 # Les lanternes : revue et propositions (D-152, PR 2)
 
-Demande de l'utilisateur (branche « avant diffusion ») : refaire un tour de tous les niveaux pour s'assurer que les lanternes sont toutes bien placées, à des endroits cohérents. Pas d'obligation d'une lanterne par salle. Ce document est l'état des lieux et les propositions ; **rien n'est changé dans les salles avant la validation de l'utilisateur** (PR 3 à 5).
+Demande de l'utilisateur (branche « avant diffusion ») : refaire un tour de tous les niveaux pour s'assurer que les lanternes sont toutes bien placées, à des endroits cohérents. Pas d'obligation d'une lanterne par salle.
+
+**Réponses de l'utilisateur** : oui pour la plage (proposition B, faite : `sea-beach-point`), non pour le grand arbre (proposition A). La règle : **des points de sauvegarde utiles, sans trop simplifier le jeu**. Une lanterne coupe un retour vraiment long ou sert plusieurs passages ; elle ne se pose pas avant chaque difficulté, et un passage garde le coût de son échec. Questions 3 (l'aspect dehors) et 4 (les débuts des mondes étranges) : en attente ; rien n'est changé.
 
 ## Ce qu'est une lanterne dans le jeu
 
@@ -45,7 +47,7 @@ Légende des avis : **✓** bien placée ; **±** acceptable, à voir ; **→** 
 | `garden-thorns-bottom`      | La ronce, en bas                     | ✓ la première veilleuse turquoise                                           |
 | `garden-thorns-bush`        | La ronce, sur le buisson du milieu   | ✓ coupe la montée difficile en deux (3 s d'écart)                           |
 
-**Proposition A — le grand arbre** (priorité moyenne) : la montée fait une trentaine de tuiles, avec deux araignées en haut et trois sauts moyens (117 ms, sans danger dessous). Trois contacts d'araignée et Céleste revient **en bas, à 11 s de montée**, alors que la cabane, la récompense (le saut mural), est juste au-dessus. **→ ajouter une lanterne en haut, sur la grosse branche qui mène à la cabane** (près de la sortie 2). Variante plus « diégétique » : dans la cabane elle-même, où une lanterne est déjà dessinée au mur (D-76) ; mais une lanterne dans la cabane ne sert qu'après la montée.
+**Proposition A — le grand arbre** (refusée : la montée garde le coût de son échec) : la montée fait une trentaine de tuiles, avec deux araignées en haut et trois sauts moyens (117 ms, sans danger dessous). Trois contacts d'araignée et Céleste revient **en bas, à 11 s de montée**, alors que la cabane, la récompense (le saut mural), est juste au-dessus. **→ ajouter une lanterne en haut, sur la grosse branche qui mène à la cabane** (près de la sortie 2). Variante plus « diégétique » : dans la cabane elle-même, où une lanterne est déjà dessinée au mur (D-76) ; mais une lanterne dans la cabane ne sert qu'après la montée.
 
 **Sans lanterne** : l'allée (deux araignées, des orties ; entre la terrasse et l'arbre, retours courts), la cabane (petite, sans danger), le jardin renversé (règle des mondes étranges : retour au jardin, le trou de la haie y ramène). Rien à changer.
 
@@ -115,7 +117,7 @@ Rien à changer.
 | `sea-strange-fair-stall`                  | Fête engloutie, sur un stand              | ✓ juste avant le seul saut difficile (67 ms)                                                                     |
 | `sea-strange-wave-deck-1/2`, `-stall-1/2` | La vague, au début de chaque tronçon      | ✓ une par tronçon de la poursuite (tests de rythme)                                                              |
 
-**Proposition B — la plage** (priorité haute) : la plage fait 190 tuiles ; sa seule lanterne est tout à droite, au pied de l'escalier. La sortie vers les rochers est tout à gauche : **21 s de course**, avec deux crabes et la marée au milieu. Et comme les rochers n'ont leur lanterne qu'en haut de leur cheminée, **un évanouissement au début des rochers ramène au pied de l'escalier de la plage : environ 30 s pour revenir**. **→ ajouter une lanterne à gauche de la plage, sur le gros rocher ou les marches de rochers de l'avancée**, au sec aux deux marées (la lecture des salles le vérifie). Elle sert la plage et le début des rochers.
+**Proposition B — la plage** (acceptée, faite : `sea-beach-point`, sur l'avancée, colonne 6, au sec aux deux marées) : la plage fait 190 tuiles ; sa seule lanterne est tout à droite, au pied de l'escalier. La sortie vers les rochers est tout à gauche : **21 s de course**, avec deux crabes et la marée au milieu. Et comme les rochers n'ont leur lanterne qu'en haut de leur cheminée, **un évanouissement au début des rochers ramène au pied de l'escalier de la plage : environ 30 s pour revenir**. **→ ajouter une lanterne à gauche de la plage, sur le gros rocher ou les marches de rochers de l'avancée**, au sec aux deux marées (la lecture des salles le vérifie). Elle sert la plage et le début des rochers. Posée **après** la traversée : un crabe au milieu de la plage ramène toujours à l'escalier, la traversée garde sa difficulté.
 
 **Sans lanterne** : les cinq couloirs en boucle (sans danger, D-105). Rien à changer.
 

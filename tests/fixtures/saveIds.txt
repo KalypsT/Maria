@@ -155,6 +155,7 @@ lantern school-strange:school-strange-sorter
 lantern school-strange:school-strange-tables
 lantern school:school-corridor
 lantern schoolyard:schoolyard-bench
+lantern sea-beach:sea-beach-point
 lantern sea-beach:sea-beach-upper
 lantern sea-centre:sea-centre-dorm
 lantern sea-jetty:sea-jetty-end
