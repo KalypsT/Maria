@@ -125,8 +125,8 @@ const ERASE_STEP = /^([a-z0-9-]+(?:\s*,\s*[a-z0-9-]+)*)$/;
 /**
  * Nom fixe d'une coquille (D-148), répétable : `; @shell: attic-ridge 6 5 medium climb` (nom,
  * colonne et ligne de son `S`, puis son intention : difficulté, capacités exigées, `growth`,
- * `crawl`, `from col,ligne`, `high`). Le nom est son identifiant dans la sauvegarde : la déplacer ne
- * la fait pas oublier.
+ * `crawl`, `from col,ligne`, `high`, `tide`). Le nom est son identifiant dans la sauvegarde : la
+ * déplacer ne la fait pas oublier.
  */
 const SHELL = /^([a-z0-9]+(?:-[a-z0-9]+)*)\s+(\d+)\s+(\d+)((?:\s+[\w,-]+)*)$/;
 /** Cachette (D-148), répétable : `; @hide: sheet 36 15 4 5` (dessin, colonne, ligne, largeur, hauteur). */
@@ -460,6 +460,15 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
       throw new Error(`Niveau ${id} : @hide ${h.kind} hors de la salle`);
     }
   }
+  if (!tideRows) {
+    for (const e of entities) {
+      if (e.intent?.high || e.intent?.tide) {
+        throw new Error(
+          `Niveau ${id} : @shell ${e.name ?? ''} : « high » et « tide » vont avec @tide`,
+        );
+      }
+    }
+  }
   if (!tideRows && (seas.length > 0 || rises.length > 0)) {
     throw new Error(`Niveau ${id} : @sea et @rise vont de pair avec @tide`);
   }
@@ -653,6 +662,7 @@ function parseShellIntent(
   let growth = false;
   let crawl = false;
   let high = false;
+  let tide = false;
   let from: TilePos | null = null;
   for (let i = 0; i < rest.length; i++) {
     const word = rest[i] ?? '';
@@ -664,6 +674,8 @@ function parseShellIntent(
       crawl = true;
     } else if (word === 'high') {
       high = true;
+    } else if (word === 'tide') {
+      tide = true;
     } else if (word === 'from') {
       const at = /^(\d+),(\d+)$/.exec(rest[i + 1] ?? '');
       if (!at) {
@@ -675,5 +687,5 @@ function parseShellIntent(
       return fail(`« ${word} » inconnu`);
     }
   }
-  return { difficulty, needs, growth, crawl, from, high };
+  return { difficulty, needs, growth, crawl, from, high, tide };
 }

@@ -8,7 +8,7 @@
 ; Défi (moyen) : du toit du kiosque, les lampadaires, les balcons, puis le toit du centre et sa
 ; trouvaille, à côté de l'enseigne.
 ; @name: La promenade
-; @shell: promenade-roof 122 3
+; @shell: promenade-roof 122 3 medium
 ; @icon: sea
 ; @world: street
 ; @backdrop: sea

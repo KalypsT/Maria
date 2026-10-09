@@ -105,3 +105,17 @@ Les recommandations, sauf trois points : aucune coquille dans un lieu sans retou
 ## Après la PR 4
 
 Les intentions sont dans les salles (`; @shell:`) et vérifiées par les tests. Page « Ma maison » : 15 coquilles (maison 8, jardin 7), 6 revisites ; les lieux sans retour n'en ont plus. Le quartier, la gare, le train et la mer : PR 5 et 6.
+
+## Après la PR 6 (fin du plan)
+
+**47 coquilles**, toutes dans des lieux où l'on revient, chacune avec son intention vérifiée par la simulation (`tests/shells*.test.ts`) :
+
+| Lieu (page du cahier) | Coquilles | Revisites                                                   | Difficiles | Cachette (trace de bave)       |
+| --------------------- | --------- | ----------------------------------------------------------- | ---------- | ------------------------------ |
+| Ma maison             | 15        | 6 (croissance, saut mural, parapluie, crochet, glissade ×2) | 0          | le drap du grenier, la glycine |
+| Le quartier           | 9         | 3 (crochet ×2, glissade)                                    | 1 (92 ms)  | le linge qui sèche             |
+| La gare               | 8         | 3 (glissade ×3)                                             | 1 (67 ms)  | le portant de manteaux         |
+| Le train              | 6         | 0 (le « train à quai » n'ouvre aucun chemin)                | 0          | le rideau d'une couchette      |
+| La station balnéaire  | 9         | 5 par la marée (1 à marée haute, 4 à marée basse)           | 0          | le rideau d'algues de la jetée |
+
+La grotte des rochers (50 ms) est devenue moyenne (158 ms) : sous son plafond bas, aucun réglage ne tombait entre les deux.

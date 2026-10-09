@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { Ability } from '../src/config/abilities';
 import { GROWTH_PHASES, phaseMovement } from '../src/config/growth';
-import { DIFFICULTY_MIN_WINDOW_MS, type Difficulty } from '../src/config/levelDesign';
+import {
+  DIFFICULTY_MIN_WINDOW_MS,
+  SHELL_HARD_MIN_WINDOW_MS,
+  type Difficulty,
+} from '../src/config/levelDesign';
 import { DEFAULT_MOVEMENT } from '../src/config/movement';
 import {
   analyzeLevel,
@@ -21,7 +25,8 @@ import { ANALYSIS_TIMEOUT_MS as TIMEOUT } from './timeouts';
  * Vérification de l'intention de chaque coquille (D-148, `; @shell:`) : depuis les entrées de sa
  * salle (ou le départ donné par `from`), atteignable à la difficulté voulue, exactement, avec les
  * capacités de ce moment du jeu ; impossible sans chacune des capacités nommées ; impossible avant
- * la croissance (`growth`). La vraie simulation (D-16), salle par salle.
+ * la croissance (`growth`) ; impossible à l'autre marée (`tide`). La vraie simulation (D-16), salle
+ * par salle.
  */
 export const zone = buildZone(HOUSE);
 
@@ -57,10 +62,9 @@ export function placeStart(room: string): { phase: number; ability: number } {
   if (room.startsWith('station-')) {
     return { phase: 2, ability: 2 };
   }
-  if (room.startsWith('train-')) {
-    return { phase: 3, ability: 3 };
-  }
-  if (room.startsWith('sea-')) {
+  // Le train et la mer : la glissade se trouve au début du train, sous la grille de la
+  // voiture-couchettes (D-84), avant toutes ses coquilles.
+  if (room.startsWith('train-') || room.startsWith('sea-')) {
     return { phase: 3, ability: 4 };
   }
   return { phase: 1, ability: -1 };
@@ -227,7 +231,8 @@ export function withoutAbility(stage: Stage, ability: string): Stage {
 
 /**
  * Les tests d'un lieu (D-148) : chaque coquille de ses salles a son intention, et la tient :
- * exactement à sa difficulté, impossible sans chaque capacité nommée et avant la croissance.
+ * exactement à sa difficulté (jamais sous 67 ms), impossible sans chaque capacité nommée, avant la
+ * croissance et à l'autre marée.
  */
 export function describeShells(title: string, rooms: readonly string[]): void {
   describe(title, () => {
@@ -250,6 +255,8 @@ export function describeShells(title: string, rooms: readonly string[]): void {
         const w = shellWindow(shell.room, at, stage);
         // Exactement à sa difficulté : faisable, et pas plus facile.
         expect(difficultyOf(w), `fenêtre ${String(Math.round(w))} ms`).toBe(intent.difficulty);
+        // Jamais au plancher du « difficile » : une coquille reste à portée au tactile.
+        expect(w).toBeGreaterThanOrEqual(SHELL_HARD_MIN_WINDOW_MS);
         for (const ability of intent.needs) {
           const without = shellWindow(shell.room, at, withoutAbility(stage, ability));
           expect(without, `sans ${ability}`).toBeLessThan(DIFFICULTY_MIN_WINDOW_MS.hard);
@@ -257,6 +264,14 @@ export function describeShells(title: string, rooms: readonly string[]): void {
         if (intent.growth) {
           const before = shellWindow(shell.room, at, { ...stage, phase: stage.phase - 1 });
           expect(before, 'avant la croissance').toBeLessThan(DIFFICULTY_MIN_WINDOW_MS.hard);
+        }
+        if (intent.tide) {
+          const other = shellWindow(
+            shell.room,
+            { ...at, intent: { ...intent, high: !intent.high } },
+            stage,
+          );
+          expect(other, "à l'autre marée").toBeLessThan(DIFFICULTY_MIN_WINDOW_MS.hard);
         }
       },
     );
