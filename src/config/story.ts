@@ -527,5 +527,5 @@ export const PROP_SIZE = {
   'neighbor-wave': { w: 30, h: 30 },
   cashier: { w: 40 * PARENT_SCALE, h: 36 * PARENT_SCALE },
   'ginger-cat-sit': { w: 12 * CAT_SCALE, h: 14 * CAT_SCALE },
-  'ginger-cat-leap': { w: 22 * CAT_SCALE, h: 12 * CAT_SCALE },
+  'ginger-cat-leap': { w: 30 * CAT_SCALE, h: 12 * CAT_SCALE },
 } as const satisfies Readonly<Record<PropKind, { w: number; h: number }>>;

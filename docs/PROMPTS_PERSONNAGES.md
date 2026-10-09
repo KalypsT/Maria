@@ -434,12 +434,11 @@ Proposition validée telle quelle par l'utilisateur, options comprises (le jardi
 de la rue d'autrefois : sans nouvelle image). Même méthode que les adultes du train : une conversation par personnage, la
 première image validée sert de référence pour sa seconde pose.
 
-### Où en sont les images (PR 2)
+### Où en sont les images
 
-- Intégrées : `busstop-man.png`, `cashier.png`.
-- Faites, pour la PR 3 : `fisherman.png`, `traveler-suitcase.png` (tous deux tournés vers la gauche : le jeu les retourne, rien à refaire), `traveler-board.png`.
-- **À refaire sur fond blanc** (un décor a été dessiné derrière, impossible à détourer proprement) : `dog-walker.png` (ajouter : `She stands still, both feet on the ground.`) et `old-couple-bench.png`. Ajouter à la fin du prompt : `IMPORTANT: no background at all, no scenery, no sea, no trees, no grass: the characters alone on plain pure white.`
-- À faire : la voisine (`neighbor-window`, `neighbor-wave`), le chat roux (`ginger-cat-sit`, `ginger-cat-leap`), le forain, les secondes poses (`busstop-man-look`, `traveler-wave`, `fisherman-nod`).
+- Intégrées : le monsieur de l'abribus (deux poses), la caissière, la dame au chien (la flaque retirée), la voisine (deux poses), le chat roux (assis, en plein bond).
+- Faites, pour la PR 3 : le pêcheur (deux poses ; tourné vers la gauche, le jeu le retourne ; le fil de pêche, trop fin, est redessiné par le code), la voyageuse (deux poses), le voyageur, le forain.
+- **À refaire** : `old-couple-bench.png`, deux fois rendu avec la mer derrière. Essayer dans une nouvelle conversation, sans joindre d'image de la mer, en commençant par : `On a plain pure white background (like a sticker, no scenery at all):` ; ou demander les deux personnages séparément, assis, chacun sur fond blanc.
 
 ### Les passants (joindre `dad-stand.png`)
 

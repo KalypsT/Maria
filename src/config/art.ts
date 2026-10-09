@@ -839,8 +839,16 @@ export const CHARACTER_IMAGES: Readonly<Partial<Record<PropKind, CharacterImage>
   'eden-peek': { file: 'eden-peek.png', footX: 0.5, seat: 1, height: 9 },
   // Les passants (D-155). La caissière sur son tabouret : les hanches au milieu du cadre (au-dessus
   // du tabouret), les jambes pendent 3 tuiles sous l'assise jusqu'au sol.
-  'busstop-man': { file: 'busstop-man.png', footX: 0.48 },
+  'busstop-man': { file: 'busstop-man.png', footX: 0.39 },
+  'busstop-man-look': { file: 'busstop-man-look.png', footX: 0.36 },
+  'dog-walker': { file: 'dog-walker.png', footX: 0.5 },
   cashier: { file: 'cashier.png', footX: 0.3, seat: 0.6, height: 120 },
+  // La voisine : son buste, dans l'embrasure de sa fenêtre (même cadrage pour les deux poses).
+  'neighbor-window': { file: 'neighbor-window.png', footX: 0.45 },
+  'neighbor-wave': { file: 'neighbor-wave.png', footX: 0.45 },
+  // Le chat roux : les pattes sur le rebord (le bas du cadre), la queue pend dessous.
+  'ginger-cat-sit': { file: 'ginger-cat-sit.png', footX: 0.5, seat: 0.83, height: 34 },
+  'ginger-cat-leap': { file: 'ginger-cat-leap.png', footX: 0.5 },
 };
 
 /**
