@@ -29,6 +29,7 @@ import { InputController } from '../core/input/InputController';
 import { KeyboardSource } from '../core/input/KeyboardSource';
 import { TouchSource } from '../core/input/TouchSource';
 import {
+  EntityType,
   Material,
   Tile,
   tileAt,
@@ -1628,6 +1629,40 @@ export class GameScene extends Phaser.Scene {
     this.player.reset(
       (col + 0.5) * TILE_SIZE - this.growth.hitbox.width / 2,
       (shell.row + 1) * TILE_SIZE - this.growth.hitbox.height,
+      level,
+    );
+    this.feel.reset(this.player);
+    this.resetCamera();
+  }
+
+  /**
+   * Outil de debug (D-152) : Céleste à côté d'une lanterne (deux ou trois tuiles à côté si la place
+   * le permet, sans l'allumer ; sinon dessus).
+   */
+  teleportToLantern(room: string, name: string): void {
+    this.teleportToRoom(room);
+    const level = this.level;
+    const lantern = level.entities.find((e) => e.type === EntityType.Checkpoint && e.name === name);
+    if (level.id !== room || !lantern) {
+      return;
+    }
+    const free = (col: number, row: number) => tileAt(level, col, row) === Tile.Empty;
+    const ground = (col: number, row: number) => {
+      const tile = tileAt(level, col, row);
+      return tile === Tile.Solid || tile === Tile.OneWay;
+    };
+    // Du côté du centre de la salle : jamais sur une sortie dans le mur.
+    const side = lantern.col < level.width / 2 ? 1 : -1;
+    const dx = [3 * side, 2 * side, -2 * side, -3 * side].find(
+      (d) =>
+        free(lantern.col + d, lantern.row) &&
+        free(lantern.col + d, lantern.row - 1) &&
+        ground(lantern.col + d, lantern.row + 1),
+    );
+    const col = lantern.col + (dx ?? 0);
+    this.player.reset(
+      (col + 0.5) * TILE_SIZE - this.growth.hitbox.width / 2,
+      (lantern.row + 1) * TILE_SIZE - this.growth.hitbox.height,
       level,
     );
     this.feel.reset(this.player);

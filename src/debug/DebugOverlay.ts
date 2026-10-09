@@ -7,6 +7,7 @@ import { DEFAULT_FEEL, FEEL_PARAM_RANGES, type FeelParams } from '../config/feel
 import { DEFAULT_WORLD, WORLD_PARAM_RANGES, type WorldParams } from '../config/world';
 import { DEFAULT_PUPPET, PUPPET_PARAM_RANGES, type PuppetParams } from '../config/puppet';
 import { ART_FINISH_RANGES, DEFAULT_ART_FINISH, type ArtFinish } from '../config/art';
+import { EntityType } from '../core/level/LevelData';
 import { deserializeSave } from '../core/save/saveData';
 import { HitchMonitor, type FrameWork } from '../core/perf/hitchMonitor';
 import { STRANGE_MOCKUPS, STRANGE_MOCKUP_NAMES } from '../config/strangeThemes';
@@ -1901,6 +1902,29 @@ export function installDebugOverlay(scene: GameScene): void {
       save(WORLD_STORAGE_KEY, worldToJson(scene.worldParams));
     },
   });
+
+  // Les lanternes (D-152) : par salle, leur nom ; y aller (sans l'allumer).
+  const lanternSection = element('details', panel);
+  element('summary', lanternSection, undefined, 'Lanternes');
+  for (const zone of ZONES) {
+    for (const [id, level] of zone.rooms) {
+      const names = level.entities
+        .filter((e) => e.type === EntityType.Checkpoint)
+        .map((e) => e.name ?? '?');
+      if (names.length === 0) {
+        continue;
+      }
+      element('div', lanternSection, 'dbg-stats', level.meta.name ?? id);
+      for (const name of names) {
+        const row = element('div', lanternSection, 'dbg-actions');
+        element('span', row, undefined, name);
+        element('button', row, undefined, 'Aller').addEventListener('click', (event) => {
+          scene.teleportToLantern(id, name);
+          (event.currentTarget as HTMLElement).blur();
+        });
+      }
+    }
+  }
 
   // Les coquilles (D-148) : par lieu, trouvées ou non ; y aller, cocher, tout ou rien.
   const shellSection = element('details', panel);
