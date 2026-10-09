@@ -14,7 +14,7 @@
 
 **Sensations, son, aide et mondes étranges** (D-124) : chantiers **A** (fluidité et sensations), **B** (bruitages et vibrations) et **C** (le fil discret) faits et fusionnés (D-124 à D-129). **Chantier D, PR 1 faite : trois maquettes de la gare étrange** (D-130), sur `ccr-9d90352a-xuwhs1`. Suite : **le choix de l'utilisateur** (A, B, C ou un mélange), puis la gare étrange refaite (D2) et les autres mondes étranges un par un. En attente : essais sur téléphone (compteur de saccades, sensations, sons de test, vibrations, fil discret) ; les sons à fournir (`docs/BRUITAGES.md`) ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades.
 
-**Les personnages illustrés** (D-123, D-146 à D-151) : papa, maman, Céleste dans ses quatre tenues, les adultes du train et de l'école, les enfants de la classe et le chien, sur `ccr-142ffd96-q5pgli`. Reste : le chat, la nounou, Eden (prompts prêts, photos de l'utilisateur).
+**Les personnages illustrés** (D-123, D-146 à D-151, D-154) : **tous les personnages sont illustrés** (papa, maman, Céleste dans ses quatre tenues, adultes, enfants, le chien, le chat, la nounou, Eden), sur `ccr-142ffd96-q5pgli`. Suite : essai sur téléphone.
 
 **Le niveau 7 plus lisible** (retour d'essai, D-122) : les quatre cubes de la tour d'Eden à la place des objets déjà vus, la porte de la sieste et ses creux, le regard vers la porte, la carte, la salle de jeux où la tour monte, le souvenir d'Eden retravaillé (la tour chacun son tour, le cache-cache avec un compte), Eden blond à la coupe au bol, sur `ccr-abfc1233-t31o4v`. Suite : **essai sur téléphone**.
 
@@ -37,6 +37,18 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Musique : l'accueil, la rue, le train, la fin
+
+- Quatre morceaux de l'utilisateur intégrés à leur emplacement (`title`, `street`, `train`, `ending`), préparés par `npm run audio:prepare` (−18 LUFS, AAC) : 1 + 1,5 + 1,5 + 2,6 Mo ; la musique pèse 16,5 Mo (limite 32 Mo).
+- Retouches : la fin compressée doucement (le passage calme vers 2 min restait 14 dB sous le reste, inaudible sur un haut-parleur de téléphone : LRA 15 → 8) et limitée ; le long fondu final de la rue, du train, de l'accueil et de la fin raccourci (1 à 5 s), pour que l'enchaînement de la boucle (4 s) ne creuse pas le son.
+- [ ] À vérifier sur téléphone : le volume de chaque morceau par rapport aux autres ; la boucle de la rue et du train ; la fin, pas trop « écrasée » ?
+
+### Le chat, la nounou, Eden (D-154)
+
+- Le chat gris (assis, endormi), la nounou dans son fauteuil (tricot, main tendue ; un peu passée), Eden (assis, bras levés, qui rit, caché).
+- Vérifié dans Chromium : la chambre (le chat endormi) ; chaque pose dessinée à part par le code du jeu.
+- [ ] À vérifier sur téléphone : le chat se voit-il sur le mur sombre la nuit ? La nounou et Eden dans le souvenir.
 
 ### Les stats, PR 2 : la page « Mon voyage » du cahier (D-153)
 

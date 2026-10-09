@@ -2218,3 +2218,11 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Les chiffres** (`notebookFigures`, pur, testé) : lus dans la sauvegarde au moment d'ouvrir le cahier ; rien de nouveau n'est enregistré.
 - **Les onglets défilent** sous le doigt quand l'écran est trop étroit pour les six (au lieu d'être coupés).
 - Pictogrammes : PLACEHOLDER dessinés par le code (`src/scenes/art/figureArt.ts`).
+
+## D-154 — Le chat, la nounou, Eden illustrés
+
+- **Images de l'utilisateur** (ChatGPT, d'après ses photos) : le chat gris (assis, endormi), la nounou dans son fauteuil (au tricot, puis la main tendue vers la cachette d'Eden), Eden tout petit (assis avec un cube, les bras levés, debout qui rit). Toutes à la place du dessin par code (`CHARACTER_IMAGES`). **Tous les personnages du jeu sont maintenant illustrés** (hors Céleste dans le monde étrange, en silhouette, et Maria, inchangée).
+- **La nounou au tricot** : ChatGPT avait dessiné deux tout-petits à ses pieds. Les deux images de la nounou ont exactement le même cadrage : le bas de la première (le fauteuil, les pieds) est remplacé par celui de la seconde, en fondu.
+- **Un souvenir** (`alpha`) : la nounou est un peu passée (90 %), comme le voulait D-118 ; son visage est net.
+- **Eden caché** (`eden-peek`) : sa tête qui rit, découpée dans l'image debout, petite (9 px) en bas du cadre.
+- Eden, de face quand il rit ou lève les bras (pas de profil) : c'est voulu, il regarde Céleste.
