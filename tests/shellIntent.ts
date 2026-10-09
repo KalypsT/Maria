@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { Ability } from '../src/config/abilities';
 import { GROWTH_PHASES, phaseMovement } from '../src/config/growth';
 import { DIFFICULTY_MIN_WINDOW_MS, type Difficulty } from '../src/config/levelDesign';
@@ -14,6 +15,7 @@ import { atTide } from '../src/core/level/tide';
 import { buildZone } from '../src/core/world/zone';
 import { HOUSE_STORY } from '../src/levels/house/story';
 import { HOUSE } from '../src/levels/house/zone';
+import { ANALYSIS_TIMEOUT_MS as TIMEOUT } from './timeouts';
 
 /**
  * Vérification de l'intention de chaque coquille (D-148, `; @shell:`) : depuis les entrées de sa
@@ -221,4 +223,42 @@ export function shellsOf(rooms: readonly string[]) {
 export function withoutAbility(stage: Stage, ability: string): Stage {
   const i = ORDER.indexOf(ability as (typeof ORDER)[number]);
   return { phase: stage.phase, abilities: stage.abilities.filter((k) => k < i) };
+}
+
+/**
+ * Les tests d'un lieu (D-148) : chaque coquille de ses salles a son intention, et la tient :
+ * exactement à sa difficulté, impossible sans chaque capacité nommée et avant la croissance.
+ */
+export function describeShells(title: string, rooms: readonly string[]): void {
+  describe(title, () => {
+    const shells = shellsOf(rooms);
+
+    it('chacune a son intention', () => {
+      expect(shells.filter((s) => !s.intent).map((s) => s.name)).toEqual([]);
+    });
+
+    it.each(shells.filter((s) => s.intent && !s.intent.crawl))(
+      '$name ($room)',
+      { timeout: TIMEOUT },
+      (shell) => {
+        const intent = shell.intent;
+        if (!intent) {
+          return;
+        }
+        const stage = shellStage(shell.room, intent);
+        const at = { ...shell, intent };
+        const w = shellWindow(shell.room, at, stage);
+        // Exactement à sa difficulté : faisable, et pas plus facile.
+        expect(difficultyOf(w), `fenêtre ${String(Math.round(w))} ms`).toBe(intent.difficulty);
+        for (const ability of intent.needs) {
+          const without = shellWindow(shell.room, at, withoutAbility(stage, ability));
+          expect(without, `sans ${ability}`).toBeLessThan(DIFFICULTY_MIN_WINDOW_MS.hard);
+        }
+        if (intent.growth) {
+          const before = shellWindow(shell.room, at, { ...stage, phase: stage.phase - 1 });
+          expect(before, 'avant la croissance').toBeLessThan(DIFFICULTY_MIN_WINDOW_MS.hard);
+        }
+      },
+    );
+  });
 }

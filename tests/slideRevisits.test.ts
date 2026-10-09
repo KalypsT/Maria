@@ -30,6 +30,13 @@ const CASES = [
     from: { col: 49, row: 37 },
     dir: -1,
   },
+  // D-148 : sous le banc de l'abri du quai.
+  {
+    name: 'les quais, sous le banc de l’abri',
+    room: 'station-platforms',
+    from: { col: 61, row: 26 },
+    dir: 1,
+  },
 ] as const;
 
 /** La nouvelle trouvaille de la salle (dans le passage bas, ou derrière). */

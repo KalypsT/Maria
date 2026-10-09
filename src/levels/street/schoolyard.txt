@@ -6,7 +6,7 @@
 ; Refaite (D-79) : du ciel au-dessus (le feuillage seulement en haut du platane) ; une marelle, un
 ; ballon, un pigeon ; au crépuscule, quelques fenêtres de l'école allumées.
 ; @name: Cour de l'école
-; @shell: schoolyard-hoop 34 12
+; @shell: schoolyard-hoop 34 12 medium umbrella
 ; @icon: school
 ; @world: street
 ; @difficulty: easy

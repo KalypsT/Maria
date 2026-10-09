@@ -2,7 +2,7 @@
 ; visite pleines de gravats, de toit en toit ; puis les crochets du pont roulant, de plus en plus
 ; haut (moyen), jusqu'à une trouvaille. Une lanterne sur le troisième wagon.
 ; @name: Le dépôt
-; @shell: depot-crane-hooks 73 13
+; @shell: depot-crane-hooks 73 13 medium
 ; @icon: wagon
 ; @world: street
 ; @music: station

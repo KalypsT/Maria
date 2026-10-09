@@ -31,12 +31,6 @@ const F = StoryFlag;
 const easy = byDifficulty('easy');
 const medium = byDifficulty('medium');
 const OPEN = [F.GateOpen];
-/** Colonne de la trouvaille sur l'antenne de la supérette (revisite avec le parapluie, D-63). */
-/** Le nid du platane, au bout du fil tendu depuis l'école (D-66). */
-/** La trouvaille de la cachette sous la palissade (D-91). */
-const HOARDING_COL = 195;
-const NEST_COL = 20;
-const ANTENNA_COL = 133;
 /** Arrivée dans la rue par le portillon. */
 const arrival = () => node('street', exitSurface('street', 1));
 const home = () => node(zone.start, analysis(zone.start, false).start);
@@ -168,15 +162,12 @@ describe('la rue (D-60)', () => {
     'les trouvailles, sur les toits et l’échafaudage : jamais faciles, au plus moyennes',
     { timeout: TIMEOUT },
     () => {
-      // L'antenne de la supérette (D-63) ne s'atteint qu'avec le parapluie : voir site.test.ts ;
-      // le nid du platane (D-66), qu'avec le crochet : voir station.test.ts ; la cachette sous la
-      // palissade (D-91), qu'en glissant : voir slideRevisits.test.ts.
+      // Le toit de l'école et le haut de l'échafaudage ; les autres coquilles de la rue (l'antenne,
+      // le nid, la palissade, le linge) ont leurs tests (D-148 : shellsStreet.test.ts).
       const secrets = level('street').entities.filter(
         (e) =>
           e.type === EntityType.Shell &&
-          e.col !== ANTENNA_COL &&
-          e.col !== NEST_COL &&
-          e.col !== HOARDING_COL,
+          (e.name === 'street-school-roof' || e.name === 'street-scaffold'),
       );
       expect(secrets).toHaveLength(2);
       const byEasy = reachable(zoneGraph(true, easy, 2, true, OPEN), arrival());

@@ -5,6 +5,8 @@
 ; Tout en haut du mur de gauche, une étagère à chapeaux et un disque perdu (D-121) : on y plane
 ; depuis le haut de l'armoire.
 ; @name: Objets trouvés
+; @shell: lost-lockers 42 27 easy slide
+; @hide: coats 37 23 6 5
 ; @icon: umbrella
 ; @world: street
 ; @indoor: yes
@@ -23,6 +25,7 @@
 ; @decor: lockers 38 10 5 18
 ; @decor: hatshelf 33 19 2 1
 ; @decor: hatshelf 1 12 2 1
+; @decor: slimetrail 31 27 7 1
 ; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 ############################################
 ##################.........................#
@@ -50,7 +53,7 @@
 #..............................bb.....bbbbb#
 #.......bbbbbbbbbb....................bbbbb#
 #.......bbbbbbbbbb....................bbbbb#
-1.......bbbbbbbbbb....................bbbbb#
-1..P..C.bbbbbbbbbb....................bbbbb#
+1.......bbbbbbbbbb....................bbb..#
+1..P..C.bbbbbbbbbb........................S#
 ############################################
 ############################################
