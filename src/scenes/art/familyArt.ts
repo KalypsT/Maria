@@ -563,7 +563,7 @@ const STEAM_SCALE = 1.1;
  */
 function drawIllustrated(
   ctx: CanvasRenderingContext2D,
-  character: Pick<CharacterImage, 'footX' | 'steam' | 'seat' | 'height'>,
+  character: Pick<CharacterImage, 'footX' | 'steam' | 'seat' | 'height' | 'alpha'>,
   image: HTMLImageElement,
   size: { w: number; h: number },
   frame: number,
@@ -576,7 +576,10 @@ function drawIllustrated(
   const drawn = width * scale;
   const centered = size.w / 2 - character.footX * drawn;
   const left = drawn <= size.w ? Math.min(Math.max(centered, 0), size.w - drawn) : centered;
+  ctx.save();
+  ctx.globalAlpha = character.alpha ?? 1;
   ctx.drawImage(image, left, top, drawn, drawnH);
+  ctx.restore();
   if (character.steam) {
     ctx.save();
     ctx.translate(left + character.steam.x * drawn, top + character.steam.y * drawnH);

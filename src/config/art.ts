@@ -770,6 +770,8 @@ export interface CharacterImage {
    * adulte debout. Sur une banquette, elle pose les pieds au sol ; un enfant garde sa taille.
    */
   height?: number;
+  /** Un souvenir (D-154) : l'image un peu passée (opacité, de 0 à 1). */
+  alpha?: number;
   /**
    * Un groupe (D-151) : plusieurs personnages côte à côte, chacun dans une part égale du cadre, à
    * la place de `file`.
@@ -824,6 +826,17 @@ export const CHARACTER_IMAGES: Readonly<Partial<Record<PropKind, CharacterImage>
     ],
   },
   'dog-sleep': { file: 'dog-sleep.png', footX: 0.5 },
+  // Le chat gris (D-154).
+  'cat-sit': { file: 'cat-sit.png', footX: 0.5 },
+  'cat-sleep': { file: 'cat-sleep.png', footX: 0.5 },
+  // La nounou dans son fauteuil (D-154), dans le souvenir d'Eden : un peu passée, comme un souvenir.
+  'nanny-shadow': { file: 'nanny-sit.png', footX: 0.5, alpha: 0.9 },
+  'nanny-look': { file: 'nanny-look.png', footX: 0.5, alpha: 0.9 },
+  // Eden tout petit (D-154). Caché, seule sa tête dépasse : petite, en bas du cadre.
+  'eden-small': { file: 'eden-small.png', footX: 0.5 },
+  'eden-cheer': { file: 'eden-cheer.png', footX: 0.5 },
+  'eden-laugh': { file: 'eden-laugh.png', footX: 0.5 },
+  'eden-peek': { file: 'eden-peek.png', footX: 0.5, seat: 1, height: 9 },
 };
 
 /**
