@@ -2196,3 +2196,9 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **`docs/LANTERNES.md`** : les 97 lanternes revues salle par salle (relevé, vraie simulation au premier passage : passages délicats obligés et temps du retour ; points de retour de l'histoire ; une photo de chacune dans Chromium). Toutes sont posées sur un appui, hors des dangers, visibles, espacées ; les points de retour de l'histoire sont justes.
 - **Propositions** (à valider) : une lanterne à gauche de la plage (21 s de retour, environ 30 s pour un évanouissement au début des rochers) ; une lanterne en haut du grand arbre (11 s de montée sous les araignées). Questions : l'aspect des lanternes dehors (une variante par lieu, §20.3), les débuts des mondes étranges sans lanterne (D-34, gardés).
 - **Outil de debug** : DEBUG → « Lanternes » : par salle, le nom de chaque lanterne et « Aller » (Céleste posée à deux ou trois tuiles, du côté du centre de la salle, sans l'allumer).
+
+### D-152, PR 3 : la lanterne de la plage
+
+- **Réponses de l'utilisateur** : la lanterne de la plage oui, celle du grand arbre non. **La règle des lanternes** : des points de sauvegarde utiles, sans trop simplifier le jeu. Une lanterne coupe un retour vraiment long ou en sert plusieurs ; pas une lanterne avant chaque difficulté ; un passage garde le coût de son échec.
+- **`sea-beach-point`** (6, 15) : sur l'avancée de la plage, à la sortie vers les rochers, au sec aux deux marées. Elle coupe le retour du début des rochers (environ 30 s → quelques secondes) ; posée après la traversée, elle laisse sa difficulté à la plage (un crabe ramène toujours à l'escalier). Testé (`lanterns.test.ts`) ; la liste des identifiants de la sauvegarde la reçoit.
+- Aucune lanterne retirée, aucune déplacée : la revue n'en a trouvé aucune qui simplifie trop (celles d'avant un saut difficile suivent D-106 : « difficile » seulement sur des passages courts, une veilleuse juste avant).

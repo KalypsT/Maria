@@ -43,4 +43,15 @@ describe('les lanternes (D-152)', () => {
       buildZone({ id: 'z', start: 'a', rooms: [twice('a'), twice('b')], links: [] }),
     ).toThrow(/lanterne « same » en double/);
   });
+
+  it('la plage (D-152) : une lanterne à l’escalier, une à l’avancée, rien entre les deux', () => {
+    // L'avancée sert la plage et le début des rochers ; la traversée garde sa difficulté.
+    const beach = buildZone(HOUSE).rooms.get('sea-beach');
+    expect(
+      beach?.entities.filter((e) => e.type === EntityType.Checkpoint).map((e) => [e.name, e.col]),
+    ).toEqual([
+      ['sea-beach-point', 6],
+      ['sea-beach-upper', 176],
+    ]);
+  });
 });
