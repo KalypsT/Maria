@@ -72,8 +72,10 @@ describe('les passants : réactions (D-155)', () => {
   });
 
   it('personne dans un monde étrange ; chacun à son moment de la journée', () => {
-    expect(passersbyIn(PASSERSBY, 'street', 'morning', true)).toEqual([]);
-    const evening = passersbyIn(PASSERSBY, 'street', 'evening', false).map((s) => s.kind);
+    expect(passersbyIn(PASSERSBY, 'street', 'morning', true, new Set())).toEqual([]);
+    const evening = passersbyIn(PASSERSBY, 'street', 'evening', false, new Set()).map(
+      (s) => s.kind,
+    );
     expect(evening).toContain('neighbor-window');
     expect(evening).not.toContain('busstop-man');
   });
@@ -103,7 +105,7 @@ describe('les passants : emplacements (D-155)', () => {
       const left = (spot.col + 0.5) * T - size.w / 2;
       const bottom = (spot.row + 1) * T + (spot.dy ?? 0);
       const box = { x: left, y: bottom - size.h, width: size.w, height: size.h };
-      if (frame) {
+      if (frame?.style === 'window') {
         // À une fenêtre : sur une façade de maisons.
         const houses = level.decor.filter((d) => d.kind === 'houses');
         expect(

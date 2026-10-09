@@ -528,4 +528,14 @@ export const PROP_SIZE = {
   cashier: { w: 40 * PARENT_SCALE, h: 36 * PARENT_SCALE },
   'ginger-cat-sit': { w: 12 * CAT_SCALE, h: 14 * CAT_SCALE },
   'ginger-cat-leap': { w: 30 * CAT_SCALE, h: 12 * CAT_SCALE },
+  // La gare et la mer (D-155). Assise sur sa valise, la voyageuse a la hauteur d'un adulte assis ;
+  // le pêcheur, jusqu'à l'assise (le bord du quai), ses jambes pendent dessous ; le forain : son
+  // buste derrière son chariot (`PASSERBY_FRAMES`).
+  'traveler-suitcase': { w: 40 * PARENT_SCALE, h: 46 * PARENT_SCALE },
+  'traveler-wave': { w: 40 * PARENT_SCALE, h: 46 * PARENT_SCALE },
+  'traveler-board': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  'old-couple': { w: 56 * PARENT_SCALE, h: 46 * PARENT_SCALE },
+  fisherman: { w: 40 * PARENT_SCALE, h: 37 * PARENT_SCALE },
+  'fisherman-nod': { w: 40 * PARENT_SCALE, h: 37 * PARENT_SCALE },
+  'candyfloss-vendor': { w: 48, h: 52 },
 } as const satisfies Readonly<Record<PropKind, { w: number; h: number }>>;

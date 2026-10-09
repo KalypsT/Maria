@@ -33,6 +33,8 @@ interface Passerby {
   /** La seconde pose (null : aucune, ou pas dessinée comme la première). */
   readonly alt: Phaser.GameObjects.Image | null;
   readonly state: PasserbyState;
+  /** Opacité (un écho, dans un souvenir : un peu passé). */
+  readonly alpha: number;
   /** Côté du bond du chat (1 : vers la droite). */
   fleeDir: number;
 }
@@ -67,12 +69,13 @@ export class PasserbyView {
     room: string,
     time: TimeOfDay,
     strange: boolean,
+    flags: ReadonlySet<string>,
     scale: number,
     images: ReadonlyMap<string, CanvasImageSource>,
   ): void {
     this.clear();
     this.artScale = scale;
-    const spots = passersbyIn(PASSERSBY, room, time, strange);
+    const spots = passersbyIn(PASSERSBY, room, time, strange, flags);
     if (spots.length === 0) {
       return;
     }
@@ -125,8 +128,8 @@ export class PasserbyView {
         }
         this.renderFlee(passerby);
       } else if (passerby.alt) {
-        passerby.alt.setAlpha(state.blend).setVisible(state.blend > 0);
-        passerby.base.setAlpha(1 - state.blend).setVisible(state.blend < 1);
+        passerby.alt.setAlpha(state.blend * passerby.alpha).setVisible(state.blend > 0);
+        passerby.base.setAlpha((1 - state.blend) * passerby.alpha).setVisible(state.blend < 1);
       }
     }
     this.renderBubble(nowMs);
@@ -146,6 +149,7 @@ export class PasserbyView {
         .setOrigin(0, 0)
         .setScale(1 / this.artScale)
         .setFlipX(spot.flip ?? false)
+        .setAlpha(spot.alpha ?? 1)
         .setDepth(PASSERBY_DEPTH);
     const reaction = PASSERBY_REACTIONS[spot.kind] ?? NO_REACTION;
     // Une seconde pose seulement si elle est dessinée comme la première (deux images, ou deux
@@ -162,6 +166,7 @@ export class PasserbyView {
       base: image(spot.kind),
       alt,
       state,
+      alpha: spot.alpha ?? 1,
       fleeDir: 1,
     };
   }
@@ -181,7 +186,7 @@ export class PasserbyView {
     leap
       .setVisible(t < 1)
       .setFlipX(passerby.fleeDir < 0)
-      .setAlpha(1 - t * t)
+      .setAlpha((1 - t * t) * passerby.alpha)
       .setPosition(
         box.x + (w - leapW) / 2 + passerby.fleeDir * dxPx * t,
         box.y + (alt ? box.height - alt.height / this.artScale : 0) - Math.sin(Math.PI * t) * hopPx,

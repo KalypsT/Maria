@@ -31,6 +31,8 @@
 ; @decor: butterfly 8 10 24 9
 ; @decor: hangingplant 44 10 3 7
 ; @decor: slimetrail 46 17 1 4
+; @decor: blackbird 14 20 2 2
+; @decor: hedgehog 41 20 7 2
 ; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (danger), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 #######.............................vvvvvvvvvvvvvv
 #####...................................vvvvvvvvvv

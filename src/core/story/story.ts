@@ -243,6 +243,18 @@ export const PASSERBY_KINDS = [
   /** Le chat roux de la rue, sur son rebord ; il bondit et s'en va. */
   'ginger-cat-sit',
   'ginger-cat-leap',
+  /** La voyageuse assise sur sa valise, dans le hall de la gare ; elle fait un petit signe. */
+  'traveler-suitcase',
+  'traveler-wave',
+  /** Le voyageur qui lève les yeux vers le tableau des départs. */
+  'traveler-board',
+  /** Le vieux couple sur son banc, sur la promenade (le banc est dessiné avec eux). */
+  'old-couple',
+  /** Le pêcheur assis au bord du quai, à marée haute ; il touche son bonnet. */
+  'fisherman',
+  'fisherman-nod',
+  /** Le forain de la barbe à papa, derrière son chariot (dessiné avec lui), le soir de la fête. */
+  'candyfloss-vendor',
 ] as const;
 export type PasserbyKind = (typeof PASSERBY_KINDS)[number];
 

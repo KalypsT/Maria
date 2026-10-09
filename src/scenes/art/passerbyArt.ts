@@ -1,8 +1,8 @@
 import { CHARACTER_IMAGES } from '../../config/art';
-import { PASSERBY_FRAMES, PASSERBY_STOOLS } from '../../config/passersby';
+import { PASSERBY_FRAMES, PASSERBY_LINES, PASSERBY_STOOLS } from '../../config/passersby';
 import { PROP_SIZE } from '../../config/story';
 import type { PasserbyKind } from '../../core/story/story';
-import { characterOverhang, drawCharacter } from './familyArt';
+import { characterOverhang, drawCharacter, illustratedBox } from './familyArt';
 
 /**
  * Les passants (D-155) : l'image fournie (`CHARACTER_IMAGES`), sinon une silhouette provisoire
@@ -23,7 +23,8 @@ export function passerbyIllustrated(
 export function passerbySize(kind: PasserbyKind): { w: number; h: number; below: number } {
   const frame = PASSERBY_FRAMES[kind];
   const size = frame ?? PROP_SIZE[kind];
-  return { w: size.w, h: size.h, below: frame ? 0 : characterOverhang(kind) };
+  const below = Math.max(characterOverhang(kind), PASSERBY_LINES[kind]?.below ?? 0);
+  return { w: size.w, h: size.h, below: frame ? 0 : below };
 }
 
 export function drawPasserby(
@@ -35,23 +36,38 @@ export function drawPasserby(
   const { w, h, below } = passerbySize(kind);
   const frame = PASSERBY_FRAMES[kind];
   if (frame) {
-    windowBack(ctx, w, frame.inner, evening);
+    if (frame.style === 'window') {
+      windowBack(ctx, w, frame.inner, evening);
+    } else {
+      cartBack(ctx, w, evening);
+    }
     ctx.save();
     ctx.translate(frame.inner.x, frame.inner.y);
     if (passerbyIllustrated(kind, images)) {
       drawCharacter(ctx, kind, 0, images);
     } else {
-      neighborBust(ctx, PROP_SIZE[kind].w, PROP_SIZE[kind].h, kind === 'neighbor-wave');
+      bust(ctx, kind, PROP_SIZE[kind].w, PROP_SIZE[kind].h);
     }
     ctx.restore();
-    windowSill(ctx, w, h);
+    if (frame.style === 'window') {
+      windowSill(ctx, w, h);
+    } else {
+      cartFront(ctx, w, h);
+    }
     return;
   }
   if (PASSERBY_STOOLS.has(kind)) {
     stool(ctx, w / 2, h, below);
   }
-  if (passerbyIllustrated(kind, images)) {
+  const line = PASSERBY_LINES[kind];
+  const character = CHARACTER_IMAGES[kind];
+  const image = character && images.get(character.file);
+  if (character && image instanceof HTMLImageElement) {
     drawCharacter(ctx, kind, 0, images);
+    if (line) {
+      const box = illustratedBox(character, image, PROP_SIZE[kind]);
+      fishingLine(ctx, box.left + line.tip.x * box.w, box.top + line.tip.y * box.h, h + below);
+    }
     return;
   }
   switch (kind) {
@@ -74,10 +90,114 @@ export function drawPasserby(
     case 'ginger-cat-leap':
       gingerCatLeap(ctx, w, h);
       break;
+    case 'traveler-suitcase':
+    case 'traveler-wave':
+      suitcase(ctx, w / 2 + 8, h);
+      seatedAdult(ctx, w / 2, h - 30, 26, ADULTS.traveler);
+      break;
+    case 'traveler-board':
+      adult(ctx, w / 2, h, ADULTS.board);
+      break;
+    case 'old-couple':
+      bench(ctx, w, h);
+      seatedAdult(ctx, w * 0.36, h - 22, 18, ADULTS.oldMan);
+      seatedAdult(ctx, w * 0.6, h - 22, 18, ADULTS.oldWoman);
+      break;
+    case 'fisherman':
+    case 'fisherman-nod':
+      seatedAdult(ctx, w / 2, h, Math.min(below, 44), ADULTS.fisherman);
+      fishingLine(ctx, w / 2 + 34, h - 70, h + below);
+      break;
     case 'neighbor-window':
     case 'neighbor-wave':
+    case 'candyfloss-vendor':
       break;
   }
+}
+
+/** Le fil de pêche, du bout de la canne jusqu'en bas du dessin (la mer). */
+function fishingLine(ctx: CanvasRenderingContext2D, x: number, y: number, bottom: number): void {
+  ctx.strokeStyle = 'rgba(240,240,235,0.85)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x, bottom);
+  ctx.stroke();
+}
+
+/** L'auvent rayé du chariot de barbe à papa et ses deux montants, derrière le forain. */
+function cartBack(ctx: CanvasRenderingContext2D, w: number, evening: boolean): void {
+  ctx.fillStyle = '#8a6a4a';
+  ctx.fillRect(4, 8, 2, 52);
+  ctx.fillRect(w - 6, 8, 2, 52);
+  for (let k = 0; k < 8; k++) {
+    ctx.fillStyle = k % 2 === 0 ? '#e5534b' : '#fdf6ec';
+    ctx.fillRect(1 + k * ((w - 2) / 8), 2, (w - 2) / 8 + 0.5, 7);
+  }
+  for (let k = 0; k < 8; k++) {
+    ctx.fillStyle = k % 2 === 0 ? '#e5534b' : '#fdf6ec';
+    disc(ctx, 1 + (k + 0.5) * ((w - 2) / 8), 9, (w - 2) / 16);
+  }
+  if (evening) {
+    ctx.fillStyle = '#ffe9a0';
+    for (let x = 4; x < w; x += 8) {
+      disc(ctx, x, 12, 1.4);
+    }
+  }
+}
+
+/** Le comptoir du chariot, devant le forain : rayé de rose, la cuve à barbe à papa, les roues. */
+function cartFront(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  const top = h - 32;
+  ctx.fillStyle = '#c98d5a';
+  ctx.fillRect(0, top, w, 4);
+  for (let k = 0; k < 6; k++) {
+    ctx.fillStyle = k % 2 === 0 ? '#f2a7bf' : '#fdf6ec';
+    ctx.fillRect(2 + k * ((w - 4) / 6), top + 4, (w - 4) / 6 + 0.5, 22);
+  }
+  ctx.fillStyle = '#d6dde3';
+  ctx.beginPath();
+  ctx.ellipse(w - 16, top - 3, 10, 5, 0, 0, Math.PI);
+  ctx.fill();
+  ctx.fillStyle = '#f6c7d6';
+  disc(ctx, w - 16, top - 6, 5);
+  ctx.fillStyle = '#3b3440';
+  disc(ctx, 12, h - 4, 4);
+  disc(ctx, w - 12, h - 4, 4);
+}
+
+/** Buste provisoire (la voisine, le forain), en attendant l'image. */
+function bust(ctx: CanvasRenderingContext2D, kind: PasserbyKind, w: number, h: number): void {
+  if (kind === 'candyfloss-vendor') {
+    const c = ADULTS.vendor;
+    ctx.fillStyle = c.top;
+    roundRect(ctx, w / 2 - 12, h - 30, 24, 32, 6);
+    ctx.fillStyle = c.skin;
+    disc(ctx, w / 2 + 2, h - 38, 8);
+    ctx.fillStyle = '#f6c7d6';
+    disc(ctx, w / 2 + 16, h - 40, 6);
+    return;
+  }
+  neighborBust(ctx, w, h, kind === 'neighbor-wave');
+}
+
+function suitcase(ctx: CanvasRenderingContext2D, cx: number, floor: number): void {
+  ctx.fillStyle = '#7a2b35';
+  roundRect(ctx, cx - 14, floor - 32, 28, 30, 3);
+  ctx.fillStyle = '#2b2226';
+  disc(ctx, cx - 10, floor - 1.5, 1.6);
+  disc(ctx, cx + 10, floor - 1.5, 1.6);
+}
+
+/** Le banc du vieux couple (le leur, à part du banc des marées). */
+function bench(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  ctx.fillStyle = '#4f5d6b';
+  ctx.fillRect(w * 0.18, h - 22, 2, 22);
+  ctx.fillRect(w * 0.82 - 2, h - 22, 2, 22);
+  ctx.fillStyle = '#8c6a4a';
+  ctx.fillRect(w * 0.14, h - 24, w * 0.72, 4);
+  ctx.fillRect(w * 0.14, h - 40, w * 0.72, 3);
+  ctx.fillRect(w * 0.14, h - 33, w * 0.72, 3);
 }
 
 interface AdultColors {
@@ -94,6 +214,18 @@ const ADULTS = {
   walker: { skin: '#f0cfb4', hair: '#d0572a', top: '#d9a630', legs: '#3d5687', shoes: '#4f7a4a' },
   cashier: { skin: '#c99872', hair: '#3a3634', top: '#b8343e', legs: '#3d5687', shoes: '#f2f0ea' },
   neighbor: { skin: '#f2d6c4', hair: '#ece8e2', top: '#b9a3cf', legs: '#b9a3cf', shoes: '#b9a3cf' },
+  traveler: { skin: '#f0d2b8', hair: '#1f1b1d', top: '#b8894f', legs: '#2c2f36', shoes: '#8a5a32' },
+  board: { skin: '#f2d6c4', hair: '#d8b45a', top: '#283a5c', legs: '#7a7c80', shoes: '#d9d3c6' },
+  oldMan: { skin: '#f0d0bc', hair: '#e8e4dc', top: '#2f3c5c', legs: '#c9b48e', shoes: '#5a4632' },
+  oldWoman: { skin: '#f2d6c4', hair: '#f0ece6', top: '#8fa9d6', legs: '#c9b48e', shoes: '#8a6a4a' },
+  fisherman: {
+    skin: '#e3a387',
+    hair: '#f0ece6',
+    top: '#e8c22a',
+    legs: '#2f3c5c',
+    shoes: '#1f1f22',
+  },
+  vendor: { skin: '#c99872', hair: '#1f1b1d', top: '#d9534f', legs: '#2c2f36', shoes: '#2c2f36' },
 } as const satisfies Record<string, AdultColors>;
 
 function roundRect(

@@ -223,6 +223,10 @@ export const DECOR_KINDS: Readonly<
   ball: { furniture: false },
   /** Pigeon qui picore, puis s'envole quand Céleste approche (animé). */
   pigeon: { furniture: false },
+  /** La mouette de la promenade, le merle et le hérisson du jardin (D-155). */
+  seagull: { furniture: false },
+  blackbird: { furniture: false },
+  hedgehog: { furniture: false },
   /** Casiers de la classe posés au sol (fond) ; leur dessus est `cubbytop`. */
   cubbybody: { furniture: false },
   /** Dessus des casiers (planche traversable). */
@@ -849,6 +853,14 @@ export const CHARACTER_IMAGES: Readonly<Partial<Record<PropKind, CharacterImage>
   // Le chat roux : les pattes sur le rebord (le bas du cadre), la queue pend dessous.
   'ginger-cat-sit': { file: 'ginger-cat-sit.png', footX: 0.5, seat: 0.83, height: 34 },
   'ginger-cat-leap': { file: 'ginger-cat-leap.png', footX: 0.5 },
+  // La gare et la mer (D-155). Le pêcheur : les hanches au milieu du cadre, sur le bord du quai ;
+  // les jambes pendent 44 px sous l'assise ; le haut de sa canne : `rodTip`, d'où pend le fil.
+  'traveler-suitcase': { file: 'traveler-suitcase.png', footX: 0.55 },
+  'traveler-wave': { file: 'traveler-wave.png', footX: 0.55 },
+  'traveler-board': { file: 'traveler-board.png', footX: 0.45 },
+  fisherman: { file: 'fisherman.png', footX: 0.75, seat: 0.62, height: 118 },
+  'fisherman-nod': { file: 'fisherman-nod.png', footX: 0.75, seat: 0.62, height: 118 },
+  'candyfloss-vendor': { file: 'candyfloss-vendor.png', footX: 0.4 },
 };
 
 /**
@@ -1420,6 +1432,8 @@ export const WORLD_LIFE = {
   tarp: { periodMs: 1100 },
   /** Pigeon de la cour (D-79) : distance d'envol (px), vol (px/s), retour (ms, Céleste loin). */
   pigeon: { scareDistancePx: 48, flyPxPerS: 90, returnMs: 15000, returnDistancePx: 160 },
+  /** Le hérisson du jardin (D-155) : sa marche (px/s), roulé en boule en deçà, déroulé au-delà (px). */
+  hedgehog: { walkPxPerS: 6, curlPx: 40, uncurlPx: 72 },
   /** Poisson rouge (D-79) : un aller-retour dans le bocal (ms). */
   fish: { periodMs: 5200 },
 } as const;

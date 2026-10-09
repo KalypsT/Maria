@@ -2253,3 +2253,13 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
 - **La supérette** : la caissière (image) assise sur un tabouret haut dessiné par le code, au bout du comptoir, tournée vers l'entrée.
 - `tests/passersby.test.ts` : les réactions ; chaque passant posé (sol, fenêtre sur une façade, rebord du chat, tabouret), sans coquille, lanterne ni objet sous lui, loin des portes.
 - **Images** : le monsieur de l'abribus (deux poses), la caissière, la dame au chien (la flaque grise retirée au détourage), la voisine (deux poses), le chat roux (assis : les pattes sur le rebord, la queue pend dessous et s'efface ; en plein bond). Les petites (la voisine, le chat) ramenées à 320 px de haut (240 pour le bond) : elles s'affichent à moins de 40 px. Le vieux couple : à refaire (la mer derrière).
+
+### D-155, PR 3 : la gare, la mer, le jardin, la rue d'autrefois
+
+- **Le hall de la gare**, le jour : le voyageur qui lève les yeux vers le tableau des départs ; la voyageuse sur sa valise (elle fait un petit signe, une bulle).
+- **La promenade**, le jour : le vieux couple sur son banc (le leur, dessiné avec eux, entre deux bacs à fleurs, loin du banc des marées) ; silhouettes provisoires (l'image est à refaire). Deux mouettes sur la promenade (les pigeons de D-79, en blanc).
+- **Le port** : le pêcheur assis au bord du quai, au-dessus de l'échelle, à marée haute seulement (à marée basse, la vase) ; il touche son bonnet ; son fil de pêche, trop fin pour le détourage, est redessiné par le code, du bout de la canne jusqu'à l'eau.
+- **La jetée**, le soir de la fête seulement (pas la nuit qui suit) : le forain derrière un chariot de barbe à papa dessiné par le code (auvent rayé, ampoules le soir, comptoir rose, la cuve), entre les deux stands. Les stands de la jetée sont des blocs fermés (on glisse dessous) : impossible d'y mettre un vendeur.
+- **Le jardin** : un merle sur la terrasse (il s'envole) ; un hérisson qui trottine sous la pergola et se roule en boule quand Céleste approche. **De jour** : le jardin n'a qu'une lumière (`GARDEN_PALETTE`), il n'a jamais de soir.
+- **La rue d'autrefois** (monde étrange) : la voisine pâlie (55 %) à une fenêtre allumée, sous le toit d'où part Céleste ; elle salue. Un passant n'est dans un monde étrange que s'il est un écho (`memory`).
+- **Le système** : un passant peut dépendre de l'histoire (`when`, comme les objets de l'histoire) ; quand l'histoire avance (la marée, le soir de la fête), les passants sont replacés au prochain noir. `illustratedBox` (familyArt) : où est dessinée l'image d'un personnage, partagé avec le fil de pêche.

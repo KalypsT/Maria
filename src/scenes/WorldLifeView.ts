@@ -48,8 +48,44 @@ const FLAG_FRAMES = 6;
 const FAN_FRAMES = 4;
 const TARP_FRAMES = 6;
 /** Pigeon de la cour (D-79) : debout, tête baissée, ailes ouvertes. */
-const PIGEON_TEXTURE = 'life-pigeon';
 const PIGEON_FRAMES = 3;
+/**
+ * Les oiseaux qui s'envolent quand Céleste approche : le pigeon (D-79), la mouette de la promenade
+ * et le merle du jardin (D-155) ; même dessin, leurs couleurs et leur taille.
+ */
+const BIRDS = {
+  pigeon: {
+    texture: 'life-pigeon',
+    body: '#8a8f9a',
+    head: '#6f7480',
+    beak: '#e8b23a',
+    wing: '#5b6070',
+    legs: '#d0674f',
+    size: 1,
+  },
+  seagull: {
+    texture: 'life-seagull',
+    body: '#f2f2ee',
+    head: '#fafaf6',
+    beak: '#f2c230',
+    wing: '#9aa3ad',
+    legs: '#e8a04a',
+    size: 1.35,
+  },
+  blackbird: {
+    texture: 'life-blackbird',
+    body: '#2a2622',
+    head: '#1f1c19',
+    beak: '#f0a020',
+    wing: '#3d3832',
+    legs: '#5a4a3a',
+    size: 0.85,
+  },
+} as const;
+type BirdKind = keyof typeof BIRDS;
+/** Le hérisson du jardin (D-155) : deux pas, roulé en boule. */
+const HEDGEHOG_TEXTURE = 'life-hedgehog';
+const HEDGEHOG_FRAMES = 3;
 const FRAME_NAMES = Array.from({ length: Math.max(LAUNDRY_FRAMES, LEAF_FRAMES) }, (_, i) =>
   String(i),
 );
@@ -212,6 +248,16 @@ interface Pigeon {
   goneAtMs: number;
 }
 
+/** Le hérisson du jardin (D-155) : il va et vient le long de la pergola ; il se roule en boule. */
+interface Hedgehog {
+  readonly image: Phaser.GameObjects.Image;
+  readonly minX: number;
+  readonly maxX: number;
+  x: number;
+  dir: number;
+  curled: boolean;
+}
+
 /** Le poisson rouge de la classe (D-79), dans son bocal. */
 interface Fish {
   readonly image: Phaser.GameObjects.Image;
@@ -257,6 +303,7 @@ export class WorldLifeView {
   private readonly flickers: Flicker[] = [];
   private readonly flaps: Flap[] = [];
   private readonly pigeons: Pigeon[] = [];
+  private readonly hedgehogs: Hedgehog[] = [];
   private readonly fishes: Fish[] = [];
   /** Textures propres à la salle, retirées avec elle. */
   private readonly roomTextures: string[] = [];
@@ -327,7 +374,7 @@ export class WorldLifeView {
       flap.image.destroy();
     }
     this.flaps.length = 0;
-    for (const list of [this.pigeons, this.fishes]) {
+    for (const list of [this.pigeons, this.fishes, this.hedgehogs]) {
       for (const item of list) {
         item.image.destroy();
       }
@@ -363,8 +410,14 @@ export class WorldLifeView {
         swingsetSeats(level, r).forEach((seat, k) => {
           this.makeSwing(`${level.id}-${String(i)}-${String(k)}`, seat, palette, artScale);
         });
-      } else if (d.kind === 'pigeon') {
-        this.makePigeon(r);
+      } else if (d.kind === 'pigeon' || d.kind === 'seagull') {
+        this.makeBird(r, d.kind);
+      } else if (d.kind === 'blackbird') {
+        this.makeBird(r, 'blackbird');
+      } else if (d.kind === 'hedgehog') {
+        // Le jardin n'a qu'une lumière, celle du jour (`GARDEN_PALETTE`) : le hérisson se promène
+        // de jour.
+        this.makeHedgehog(r);
       } else if (d.kind === 'fishbowl') {
         this.ensureSprites();
         const image = this.scene.add
@@ -848,13 +901,17 @@ export class WorldLifeView {
     this.framed.push({ image, kind: 'flag' });
   }
 
-  /** Le pigeon de la cour (D-79) : trois images dessinées d'avance (debout, il picore, il vole). */
-  private makePigeon(r: { x: number; y: number; w: number; h: number }): void {
-    if (!this.scene.textures.exists(PIGEON_TEXTURE)) {
+  /**
+   * Un oiseau (le pigeon de la cour D-79, la mouette, le merle D-155) : trois images dessinées
+   * d'avance (debout, il picore, il vole).
+   */
+  private makeBird(r: { x: number; y: number; w: number; h: number }, kind: BirdKind): void {
+    const bird = BIRDS[kind];
+    if (!this.scene.textures.exists(bird.texture)) {
       let frame = 0;
       framedTexture(
         this.scene,
-        PIGEON_TEXTURE,
+        bird.texture,
         PIGEON_FRAMES,
         16,
         12,
@@ -864,18 +921,18 @@ export class WorldLifeView {
         () => 0,
         (ctx) => {
           const pose = frame++;
-          ctx.fillStyle = '#8a8f9a';
+          ctx.fillStyle = bird.body;
           ctx.beginPath();
           ctx.ellipse(0, -4, 5, 3.2, 0, 0, Math.PI * 2);
           ctx.fill();
           const head = pose === 1 ? { x: 5, y: -1.5 } : { x: 4.5, y: -7.5 };
-          ctx.fillStyle = '#6f7480';
+          ctx.fillStyle = bird.head;
           ctx.beginPath();
           ctx.arc(head.x, head.y, 2.2, 0, Math.PI * 2);
           ctx.fill();
-          ctx.fillStyle = '#e8b23a';
+          ctx.fillStyle = bird.beak;
           ctx.fillRect(head.x + 1.8, head.y - 0.3, 1.6, 0.9);
-          ctx.fillStyle = '#5b6070';
+          ctx.fillStyle = bird.wing;
           if (pose === 2) {
             ctx.beginPath();
             ctx.moveTo(-2, -5);
@@ -887,7 +944,7 @@ export class WorldLifeView {
             ctx.fill();
           } else {
             ctx.fillRect(-5, -5, 6, 2);
-            ctx.fillStyle = '#d0674f';
+            ctx.fillStyle = bird.legs;
             ctx.fillRect(-1, -1, 0.8, 1.5);
             ctx.fillRect(1, -1, 0.8, 1.5);
           }
@@ -897,11 +954,83 @@ export class WorldLifeView {
     const homeX = r.x + r.w / 2;
     const homeY = r.y + r.h;
     const image = this.scene.add
-      .image(homeX, homeY, PIGEON_TEXTURE, FRAME_NAMES[0])
+      .image(homeX, homeY, bird.texture, FRAME_NAMES[0])
       .setOrigin(0.5, 11 / 12)
-      .setScale(1 / 4)
+      .setScale(bird.size / 4)
       .setDepth(LEAF_DEPTH);
     this.pigeons.push({ image, homeX, homeY, x: homeX, y: homeY, state: 'idle', goneAtMs: 0 });
+  }
+
+  /** Le hérisson (D-155) : deux images de marche, une roulé en boule. */
+  private makeHedgehog(r: { x: number; y: number; w: number; h: number }): void {
+    if (!this.scene.textures.exists(HEDGEHOG_TEXTURE)) {
+      let frame = 0;
+      framedTexture(
+        this.scene,
+        HEDGEHOG_TEXTURE,
+        HEDGEHOG_FRAMES,
+        18,
+        10,
+        9,
+        9.5,
+        4,
+        () => 0,
+        (ctx) => {
+          const pose = frame++;
+          if (pose === 2) {
+            ctx.fillStyle = '#6b5440';
+            ctx.beginPath();
+            ctx.arc(0, -4, 4.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#4a3a2c';
+            ctx.lineWidth = 0.6;
+            for (let k = 0; k < 9; k++) {
+              const a = (k / 9) * Math.PI * 2;
+              ctx.beginPath();
+              ctx.moveTo(Math.cos(a) * 3, -4 + Math.sin(a) * 3);
+              ctx.lineTo(Math.cos(a) * 5, -4 + Math.sin(a) * 5);
+              ctx.stroke();
+            }
+            return;
+          }
+          ctx.fillStyle = '#4a3a2c';
+          const step = pose === 0 ? 0.8 : -0.8;
+          ctx.fillRect(-3 + step, -1.5, 1, 1.5);
+          ctx.fillRect(2 - step, -1.5, 1, 1.5);
+          ctx.fillStyle = '#6b5440';
+          ctx.beginPath();
+          ctx.ellipse(-0.5, -3.5, 5.5, 3.2, 0, Math.PI, 0);
+          ctx.lineTo(5, -1.5);
+          ctx.lineTo(-6, -1.5);
+          ctx.fill();
+          ctx.strokeStyle = '#4a3a2c';
+          ctx.lineWidth = 0.6;
+          for (let x = -5; x <= 3; x += 1.6) {
+            ctx.beginPath();
+            ctx.moveTo(x, -3.5);
+            ctx.lineTo(x - 1.2, -6.4);
+            ctx.stroke();
+          }
+          ctx.fillStyle = '#c9a98a';
+          ctx.beginPath();
+          ctx.ellipse(5.5, -2.6, 2.4, 1.6, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#1f1a16';
+          ctx.fillRect(7.5, -2.9, 0.9, 0.9);
+          ctx.fillRect(5.6, -3.4, 0.6, 0.6);
+        },
+      );
+    }
+    const y = r.y + r.h;
+    const minX = r.x + 8;
+    const maxX = r.x + r.w - 8;
+    const x = (minX + maxX) / 2;
+    const image = this.scene.add
+      .image(x, y, HEDGEHOG_TEXTURE, FRAME_NAMES[0])
+      .setOrigin(0.5, 9.5 / 10)
+      .setScale(1 / 4)
+      .setDepth(LEAF_DEPTH);
+    this.hedgehogs.push({ image, minX, maxX, x, dir: 1, curled: false });
   }
 
   /** Pigeon (il s'envole quand Céleste approche, revient quand elle est loin) et poisson rouge. */
@@ -945,6 +1074,25 @@ export class WorldLifeView {
           pigeon.image.setPosition(pigeon.x, pigeon.y).setVisible(true);
         }
       }
+    }
+    // Le hérisson trottine d'un bout à l'autre ; Céleste tout près, il se roule en boule.
+    const hog = WORLD_LIFE.hedgehog;
+    for (const hedgehog of this.hedgehogs) {
+      const near = Math.hypot(playerX - hedgehog.x, playerY - hedgehog.image.y);
+      hedgehog.curled = hedgehog.curled ? near < hog.uncurlPx : near < hog.curlPx;
+      if (hedgehog.curled) {
+        hedgehog.image.setFrame(FRAME_NAMES[2] ?? '0', false, false);
+        continue;
+      }
+      hedgehog.x += hedgehog.dir * hog.walkPxPerS * dt;
+      if (hedgehog.x > hedgehog.maxX || hedgehog.x < hedgehog.minX) {
+        hedgehog.dir = -hedgehog.dir;
+        hedgehog.x = Math.min(hedgehog.maxX, Math.max(hedgehog.minX, hedgehog.x));
+      }
+      hedgehog.image
+        .setPosition(hedgehog.x, hedgehog.image.y)
+        .setFlipX(hedgehog.dir < 0)
+        .setFrame(FRAME_NAMES[Math.floor(nowMs / 260) % 2] ?? '0', false, false);
     }
     const swim = (nowMs / WORLD_LIFE.fish.periodMs) * Math.PI * 2;
     for (const fish of this.fishes) {

@@ -1,5 +1,6 @@
 import type { PasserbyReaction, PasserbySpot, PasserbyTuning } from '../core/world/passersby';
 import type { PasserbyKind } from '../core/story/story';
+import { StoryFlag as F } from './story';
 
 /**
  * Les passants et les animaux (D-155), salle par salle. Règles : jamais près d'un passage où
@@ -42,6 +43,64 @@ export const PASSERSBY: readonly PasserbySpot[] = [
     flip: true,
     times: ['morning'],
   },
+  // La rue d'autrefois (D-113), dans la maison de la nounou : la voisine pâlie, à une fenêtre allumée
+  // sous le toit d'où part Céleste ; un écho de la rue.
+  {
+    id: 'nanny-street-neighbor',
+    room: 'nanny-street',
+    kind: 'neighbor-window',
+    col: 6,
+    row: 12,
+    alpha: 0.55,
+    memory: true,
+  },
+  // Le hall de la gare (D-66), le jour : le voyageur sous le tableau des départs, la voyageuse sur
+  // sa valise, après le banc de droite.
+  {
+    id: 'hall-board',
+    room: 'station-hall',
+    kind: 'traveler-board',
+    col: 24,
+    row: 37,
+    times: ['morning'],
+  },
+  {
+    id: 'hall-suitcase',
+    room: 'station-hall',
+    kind: 'traveler-suitcase',
+    col: 65,
+    row: 37,
+    times: ['morning'],
+  },
+  // La promenade (D-98), le jour : le vieux couple sur son banc, entre deux bacs à fleurs.
+  {
+    id: 'promenade-couple',
+    room: 'sea-promenade',
+    kind: 'old-couple',
+    col: 144,
+    row: 24,
+    times: ['morning'],
+  },
+  // Le port (D-100) : le pêcheur au bord du quai, au-dessus de l'échelle ; à marée haute seulement
+  // (à marée basse, la vase).
+  {
+    id: 'port-fisherman',
+    room: 'sea-port',
+    kind: 'fisherman',
+    col: 130,
+    row: 17,
+    times: ['morning'],
+    when: { all: [F.TideHigh] },
+  },
+  // La jetée (D-101), le soir de la fête : le forain derrière son chariot, entre les deux stands.
+  {
+    id: 'jetty-candyfloss',
+    room: 'sea-jetty',
+    kind: 'candyfloss-vendor',
+    col: 181,
+    row: 15,
+    when: { all: [F.SeaEvening], none: [F.SeaStrangeDone] },
+  },
 ];
 
 /** Comment chacun réagit quand Céleste passe tout près (rien : il ne réagit pas). */
@@ -50,6 +109,10 @@ export const PASSERBY_REACTIONS: Readonly<Partial<Record<PasserbyKind, PasserbyR
   'dog-walker': { bubble: 'heart' },
   'neighbor-window': { pose: 'neighbor-wave', bubble: 'heart', column: true },
   cashier: { bubble: 'heart' },
+  'traveler-suitcase': { pose: 'traveler-wave', bubble: 'heart' },
+  'old-couple': { bubble: 'heart' },
+  fisherman: { pose: 'fisherman-nod', bubble: 'heart' },
+  'candyfloss-vendor': { bubble: 'heart' },
   // Le chat, haut sur son rebord : il file dès que Céleste monte sur le toit de l'abribus, pas
   // quand elle passe sur le trottoir.
   'ginger-cat-sit': { pose: 'ginger-cat-leap', flee: true, nearPx: 128 },
@@ -73,19 +136,37 @@ export const PASSERBY_TUNING: PasserbyTuning & {
 };
 
 /**
- * Passants dessinés dans un cadre plus grand que leur taille (`PROP_SIZE`) : la voisine, dans sa
- * fenêtre ouverte (l'embrasure, le rebord fleuri). `inner` : où est posé son buste dans le cadre.
+ * Passants dessinés dans un cadre plus grand que leur taille (`PROP_SIZE`), avec ce qui les entoure :
+ * la voisine dans sa fenêtre ouverte (l'embrasure, le rebord fleuri) ; le forain derrière son
+ * chariot (l'auvent rayé, le comptoir). `inner` : où est posé le buste dans le cadre.
  */
 export const PASSERBY_FRAMES: Readonly<
   Partial<
     Record<
       PasserbyKind,
-      { readonly w: number; readonly h: number; readonly inner: { x: number; y: number } }
+      {
+        readonly style: 'window' | 'cart';
+        readonly w: number;
+        readonly h: number;
+        readonly inner: { x: number; y: number };
+      }
     >
   >
 > = {
-  'neighbor-window': { w: 40, h: 44, inner: { x: 5, y: 6 } },
-  'neighbor-wave': { w: 40, h: 44, inner: { x: 5, y: 6 } },
+  'neighbor-window': { style: 'window', w: 40, h: 44, inner: { x: 5, y: 6 } },
+  'neighbor-wave': { style: 'window', w: 40, h: 44, inner: { x: 5, y: 6 } },
+  'candyfloss-vendor': { style: 'cart', w: 64, h: 88, inner: { x: 8, y: 12 } },
+};
+
+/**
+ * Le fil de pêche (D-155) : il pend du bout de la canne (`tip`, fraction de l'image) jusqu'à
+ * `below` px sous l'assise (la mer à marée haute, sous le bord du quai).
+ */
+export const PASSERBY_LINES: Readonly<
+  Partial<Record<PasserbyKind, { readonly tip: { x: number; y: number }; readonly below: number }>>
+> = {
+  fisherman: { tip: { x: 0.007, y: 0.001 }, below: 66 },
+  'fisherman-nod': { tip: { x: 0.007, y: 0.001 }, below: 66 },
 };
 
 /** Passants assis sur un tabouret dessiné sous eux (la caissière). */

@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Les passants et l'Educaville** (D-155, demande de l'utilisateur) : proposition validée en 3 PR (l'Educaville à la place de la boîte à formes, son téléphone qui sonne ; le système des passants, la rue et la supérette ; la gare, la mer, le jardin, la rue d'autrefois). Prompts des images dans `docs/PROMPTS_PERSONNAGES.md` (section D-155), sur `ccr-fd60fab4-k0uhko`. **PR 2 faite : le système des passants, la rue et la supérette** (avant la PR 1, qui attend l'image du jouet). Suite : les images (le jouet ; la voisine, le chat roux, la dame au chien et le vieux couple sur fond blanc, les secondes poses) ; la PR 3 ; la sonnerie de jouet à fournir.
+**Les passants et l'Educaville** (D-155, demande de l'utilisateur) : proposition validée en 3 PR (l'Educaville à la place de la boîte à formes, son téléphone qui sonne ; le système des passants, la rue et la supérette ; la gare, la mer, le jardin, la rue d'autrefois). Prompts des images dans `docs/PROMPTS_PERSONNAGES.md` (section D-155), sur `ccr-fd60fab4-k0uhko`. **PR 2 faite : le système des passants, la rue et la supérette** et **PR 3 faite : la gare, la mer, le jardin, la rue d'autrefois** (avant la PR 1, qui attend l'image du jouet ; les deux bruitages du téléphone sont fournis). Suite : la PR 1 (l'Educaville) ; l'image du vieux couple à refaire.
 
 **Les stats** (D-153, demande de l'utilisateur, avant la diffusion) : plan validé en 2 PR (le système ; la page du cahier). **PR 1 faite : le système** (temps de jeu, évanouissements, fil discret, par salle ; dans la sauvegarde sans migration ; DEBUG → « Stats »), sur `ccr-dae061c9-3hvwy2`. **PR 2 faite : la page « Mon voyage » du cahier** (le temps, les coquilles, les souvenirs, les lieux, les évanouissements : une petite lune), validée par l'utilisateur telle quelle. **Les stats sont complètes.** Suite : essai sur téléphone ; une vraie partie d'essai, chiffres du debug à l'appui.
 
@@ -39,6 +39,12 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les passants, PR 3 : la gare, la mer, le jardin, la rue d'autrefois (D-155)
+
+- Le voyageur et la voyageuse du hall ; le vieux couple sur son banc (silhouettes provisoires) et deux mouettes sur la promenade ; le pêcheur au bord du quai (marée haute) ; le forain et son chariot (le soir de la fête) ; le merle et le hérisson de la terrasse ; la voisine pâlie dans la rue d'autrefois.
+- Vérifié dans Chromium : chacun à sa place, au bon moment de l'histoire.
+- [ ] À vérifier sur téléphone : le hérisson se voit-il (petit) ? Le fil de pêche se voit-il ? La voisine pâlie, dans le noir de la rue d'autrefois : un écho, ou une gêne ?
 
 ### Les passants, PR 2 : le système, la rue, la supérette (D-155)
 

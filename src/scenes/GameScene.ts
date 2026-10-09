@@ -483,6 +483,8 @@ export class GameScene extends Phaser.Scene {
   private storyView!: StoryView;
   /** Les passants et les animaux (D-155). */
   private passersby!: PasserbyView;
+  /** L'histoire a avancé (la marée, le soir de la fête) : passants replacés au prochain noir. */
+  private passersbyStale = false;
   /** Effets du monde étrange (D-35) : présage, scintillements, tremblements, vie des salles. */
   private fx!: StrangeFxView;
   private readonly fxView = new Phaser.Geom.Rectangle();
@@ -551,9 +553,11 @@ export class GameScene extends Phaser.Scene {
     this.story = new StoryDirector(HOUSE_STORY, {
       flagCleared: (id) => {
         void this.session.removeStoryFlag(id);
+        this.passersbyStale = true;
       },
       flagSet: (id) => {
         void this.session.addStoryFlag(id);
+        this.passersbyStale = true;
         // Croissance : posée dans le noir d'un fondu, avant que le script ne replace Céleste.
         this.applyGrowth();
       },
@@ -2154,10 +2158,12 @@ export class GameScene extends Phaser.Scene {
 
   /** Les passants de la salle (D-155), à ce moment de la journée ; personne dans un monde étrange. */
   private loadPassersby(): void {
+    this.passersbyStale = false;
     this.passersby.load(
       this.level.id,
       this.story.timeOfDay(),
       this.strangeWorld || isStrangeRoom(this.level),
+      this.story.flags,
       this.artScale,
       this.artImages(),
     );
@@ -2678,6 +2684,8 @@ export class GameScene extends Phaser.Scene {
     }
     if (veil >= 1 && (story.timeOfDay() !== this.drawnTime || this.isDim() !== this.drawnDim)) {
       this.redrawArt();
+    } else if (veil >= 1 && this.passersbyStale && !memory) {
+      this.loadPassersby();
     }
     // La marée a tourné (D-95) : dans le noir d'un fondu (le banc), ou tout de suite hors script
     // (outil de debug). Céleste reste où elle est (le banc est au sec aux deux marées).

@@ -1,4 +1,10 @@
-import type { PasserbyKind, ThoughtIcon, TimeOfDay } from '../story/story';
+import {
+  checkCondition,
+  type FlagCondition,
+  type PasserbyKind,
+  type ThoughtIcon,
+  type TimeOfDay,
+} from '../story/story';
 
 /**
  * Les passants et les animaux (D-155) : de la vie dans le monde réel, hors de l'histoire et de la
@@ -19,6 +25,12 @@ export interface PasserbySpot {
   readonly flip?: boolean;
   /** Moments de la journée où il est là (tous si absent). */
   readonly times?: readonly TimeOfDay[];
+  /** Étapes de l'histoire où il est là (le soir de la fête, la marée haute…). */
+  readonly when?: FlagCondition;
+  /** Un peu passé (de 0 à 1) : un écho, dans un souvenir. */
+  readonly alpha?: number;
+  /** Là aussi dans un monde étrange (un écho de la rue, dans la rue d'autrefois). */
+  readonly memory?: boolean;
 }
 
 export interface PasserbyReaction {
@@ -117,15 +129,22 @@ export function stepPasserby(
   return false;
 }
 
-/** Les passants d'une salle à ce moment de la journée (aucun dans un monde étrange). */
+/**
+ * Les passants d'une salle à ce moment de la journée et de l'histoire ; dans un monde étrange,
+ * seulement les échos (`memory`).
+ */
 export function passersbyIn(
   spots: readonly PasserbySpot[],
   room: string,
   time: TimeOfDay,
   strange: boolean,
+  flags: ReadonlySet<string>,
 ): PasserbySpot[] {
-  if (strange) {
-    return [];
-  }
-  return spots.filter((s) => s.room === room && (s.times === undefined || s.times.includes(time)));
+  return spots.filter(
+    (s) =>
+      s.room === room &&
+      (s.memory ?? false) === strange &&
+      (s.times === undefined || s.times.includes(time)) &&
+      (s.when === undefined || checkCondition(flags, s.when)),
+  );
 }
