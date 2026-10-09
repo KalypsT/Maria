@@ -8,6 +8,9 @@
 ; la chambre (D-142, `finale-sky`). Ni danger, ni ennemi, ni trouvaille. Facile (mesuré) : le
 ; moyen est dans le ciel de la chambre.
 ; @name: La chambre immense
+; @lantern: finale-bed-cabin 36 12
+; @lantern: finale-bed-headboard 22 17
+; @lantern: finale-bed-nightlamp 70 37
 ; @world: strange
 ; @palette: nightlight
 ; @music: strange

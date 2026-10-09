@@ -3,6 +3,7 @@
 ; placard sous le palier). Au-dessus du palier, la cage monte jusqu'au grenier (sortie 3, en haut à
 ; gauche), qui est au-dessus du couloir. La grande fenêtre éclaire la volée.
 ; @name: Escalier
+; @lantern: staircase-coatstand 62 39
 ; @icon: stairs
 ; @ambient: #282b36
 ; @note: embranchement vers le grenier (sortie 3) : placard au-dessus de la porte, étagère murale, palier du grenier, en grimpant (D-27).

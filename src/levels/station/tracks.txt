@@ -5,6 +5,7 @@
 ; @name: Les voies
 ; @shell: tracks-gantry 58 14 medium
 ; @shell: tracks-signal-box 84 12 medium hook
+; @lantern: station-tracks-shelter 8 24
 ; @icon: train
 ; @world: street
 ; @music: station

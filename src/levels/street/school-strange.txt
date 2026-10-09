@@ -7,6 +7,10 @@
 ; flottantes, puis le couvercle géant d'une boîte à formes et son trou (difficile). Sur le couvercle,
 ; la boîte à formes. On y arrive par l'histoire (l'oculus de l'école), jamais par une porte.
 ; @name: École étrange
+; @lantern: school-strange-sorter 38 11
+; @lantern: school-strange-tables 47 29
+; @lantern: school-strange-ruler 35 33
+; @lantern: school-strange-entry 3 43
 ; @world: strange
 ; @music: strange
 ; @hazard: pencils

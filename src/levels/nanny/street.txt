@@ -7,6 +7,8 @@
 ; boîte à formes retrouvée ; porte (4), sous l'abribus, vers le train d'autrefois (îlot 3), ouverte
 ; une fois le cube turquoise trouvé.
 ; @name: La rue d'autrefois
+; @lantern: nanny-street-houses 4 5
+; @lantern: nanny-street-busstop 74 19
 ; @world: strange
 ; @mapped: yes
 ; @music: strange

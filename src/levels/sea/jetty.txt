@@ -9,6 +9,8 @@
 ; sous la fente entre les deux pieux (D-148).
 ; @name: La jetée
 ; @shell: jetty-piles 162 19 easy wall-jump tide
+; @lantern: sea-jetty-swings 145 15
+; @lantern: sea-jetty-end 208 15
 ; @icon: sea
 ; @world: street
 ; @backdrop: sea

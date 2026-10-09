@@ -16,6 +16,8 @@
 ; @shell: street-scaffold 193 3 medium from 180,27
 ; @shell: street-hoarding 195 27 easy slide
 ; @shell: street-laundry 6 16 medium hook
+; @lantern: street-gate 4 27
+; @lantern: street-busstop 73 27
 ; @hide: washing 3 14 9 4
 ; @icon: street
 ; @world: street

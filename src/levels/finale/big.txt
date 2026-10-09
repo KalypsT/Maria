@@ -4,6 +4,8 @@
 ; la porte de la chambre : la vraie chambre. Le berceau, sous le mobile, sur le coffre à jouets :
 ; ses côtés sont trop hauts pour voir dedans. Ni danger, ni ennemi, ni trouvaille. Facile.
 ; @name: La chambre grande
+; @lantern: finale-big-shelf 82 15
+; @lantern: finale-big-rug 41 39
 ; @world: strange
 ; @palette: nightlight-soft
 ; @music: strange

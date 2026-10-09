@@ -8,6 +8,8 @@
 ; l'histoire (le carrousel de la jetée, le soir), jamais par une porte. Tomber dans l'eau ramène au
 ; dernier appui.
 ; @name: La fête engloutie
+; @lantern: sea-strange-fair-carousel 27 3
+; @lantern: sea-strange-fair-stall 113 13
 ; @world: strange
 ; @outdoor: yes
 ; @music: strange

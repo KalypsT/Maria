@@ -6,6 +6,7 @@
 ; depuis le haut de l'armoire.
 ; @name: Objets trouvés
 ; @shell: lost-lockers 42 27 easy slide
+; @lantern: station-lost-counter 6 27
 ; @hide: coats 37 23 6 5
 ; @icon: umbrella
 ; @world: street

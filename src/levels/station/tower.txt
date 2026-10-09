@@ -4,6 +4,9 @@
 ; pile de valises qui le fait trébucher ; une dernière cheminée et des valises jusqu'en haut, où
 ; Roger, la peluche singe, est assis. Une veilleuse au début de chaque phase.
 ; @name: Tour des objets perdus
+; @lantern: station-tower-high 4 59
+; @lantern: station-tower-middle 12 73
+; @lantern: station-tower-bottom 3 97
 ; @world: strange
 ; @music: strange
 ; @difficulty: medium

@@ -2,6 +2,8 @@
 ; première (moyenne) le long de la haie, avec un escargot ; la seconde (difficile) juste après la
 ; veilleuse turquoise. En haut, le bonnet de Maria. Maria est assise de l'autre côté du vide.
 ; @name: La ronce
+; @lantern: garden-thorns-bush 6 19
+; @lantern: garden-thorns-bottom 3 37
 ; @world: strange
 ; @outdoor: yes
 ; @difficulty: hard

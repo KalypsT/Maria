@@ -6,6 +6,7 @@
 ; grande lentille (posée sur son socle, on passe dessous), par un saut mural contre le mur.
 ; @name: Le phare
 ; @shell: lighthouse-lens 23 4 medium wall-jump
+; @lantern: sea-lighthouse-keeper 6 43
 ; @icon: sea
 ; @world: street
 ; @indoor: yes

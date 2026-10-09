@@ -5,6 +5,7 @@
 ; Céleste l'imite (la bascule). Dans le souvenir, des patères mènent à l'étagère à chapeaux et à sa
 ; trouvaille (on les voit en contour fantôme avant d'avoir la bascule). Sortie (1) vers la maison.
 ; @name: L'entrée
+; @lantern: nanny-entry-door 11 22
 ; @world: strange
 ; @mapped: yes
 ; @music: strange

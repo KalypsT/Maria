@@ -7,6 +7,8 @@
 ; une trouvaille. Sorties : (1) vers la maison, (2) vers le jardin renversé ; porte (3) vers la
 ; rue d'autrefois (îlot 2), ouverte une fois le cube jaune trouvé.
 ; @name: La chambre d'autrefois
+; @lantern: nanny-bed-wardrobe 37 12
+; @lantern: nanny-bed-rug 68 36
 ; @world: strange
 ; @mapped: yes
 ; @music: strange

@@ -8,6 +8,7 @@
 ; @name: La voiture-couchettes
 ; @shell: couchettes-net 54 3 medium
 ; @shell: couchettes-curtain 67 9 easy
+; @lantern: train-couchettes-nightlight 24 18
 ; @icon: train
 ; @vehicle: train
 ; @music: train

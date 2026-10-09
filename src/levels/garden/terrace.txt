@@ -7,6 +7,7 @@
 ; @shell: terrace-planter 2 8 easy hook
 ; @shell: terrace-table 37 21 easy slide crawl
 ; @shell: terrace-wisteria 45 15 easy from 8,21
+; @lantern: garden-terrace-table 4 21
 ; @hide: wisteria 43 10 5 7
 ; @icon: sun
 ; @world: garden

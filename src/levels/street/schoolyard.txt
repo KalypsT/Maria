@@ -7,6 +7,7 @@
 ; ballon, un pigeon ; au crépuscule, quelques fenêtres de l'école allumées.
 ; @name: Cour de l'école
 ; @shell: schoolyard-hoop 34 12 medium umbrella
+; @lantern: schoolyard-bench 10 23
 ; @icon: school
 ; @world: street
 ; @difficulty: easy

@@ -4,6 +4,7 @@
 ; Refaite (D-79) : les étagères vers l'oculus deviennent des casiers posés au sol ; poutres, suspensions,
 ; frise de formes, dessins ; un poisson rouge sous l'oculus.
 ; @name: École
+; @lantern: school-corridor 54 21
 ; @icon: school
 ; @world: street
 ; @indoor: yes

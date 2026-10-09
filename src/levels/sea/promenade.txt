@@ -9,6 +9,7 @@
 ; trouvaille, à côté de l'enseigne.
 ; @name: La promenade
 ; @shell: promenade-roof 122 3 medium
+; @lantern: sea-promenade-balustrade 57 24
 ; @icon: sea
 ; @world: street
 ; @backdrop: sea

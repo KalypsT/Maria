@@ -8,6 +8,7 @@
 ; @name: Le hall
 ; @shell: station-hall-ledge 67 25 easy hook
 ; @shell: station-kiosk 43 37 easy slide crawl
+; @lantern: station-hall-clock 36 37
 ; @icon: clock
 ; @world: street
 ; @indoor: yes

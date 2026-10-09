@@ -6,6 +6,8 @@
 ; quatrième, il se dissout et la porte de la salle de jeux s'ouvre. Pas d'attaque. Sortie (1) vers
 ; la cage d'escalier ; porte (2) vers la maison. Hors carte.
 ; @name: La salle de jeux
+; @lantern: nanny-playroom-entry 6 14
+; @lantern: nanny-playroom-blocks 35 14
 ; @world: strange
 ; @music: strange
 ; @difficulty: medium

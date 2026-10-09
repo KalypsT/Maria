@@ -9,6 +9,8 @@
 ; l'étagère de la réserve ; un escalier de secours en zigzag (paliers traversables) descend au sol.
 ; @name: Chantier
 ; @shell: site-lamp 7 5 hard umbrella
+; @lantern: site-scaffold 31 13
+; @lantern: site-entry 6 41
 ; @icon: crane
 ; @world: street
 ; @difficulty: hard

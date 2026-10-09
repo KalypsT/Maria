@@ -21,8 +21,8 @@ import { serializeDisplaySettings } from '../src/core/settings/displaySettings';
 
 function sample(): SaveData {
   const data = createNewSave('premiers-pas', 1_700_000_000_000);
-  data.checkpoint = { levelId: 'checkpoints', checkpointId: checkpointId(12, 7) };
-  data.activatedCheckpoints = ['checkpoints:c12-7', 'checkpoints:c3-7'];
+  data.checkpoint = { levelId: 'kitchen', checkpointId: 'kitchen-counter' };
+  data.activatedCheckpoints = ['kitchen:kitchen-counter', 'bedroom:bedroom-toybox'];
   data.settings.controls.buttonScale = 1.2;
   data.settings.display.renderMode = 'screen';
   data.story.flags = ['evening.played'];
@@ -39,7 +39,7 @@ describe('saveData', () => {
   it('détecte un contenu modifié, tronqué ou étranger', () => {
     const text = serializeSave(sample());
     const record = JSON.parse(text) as { payload: string };
-    record.payload = record.payload.replace('checkpoints', 'checkpointz');
+    record.payload = record.payload.replace('kitchen-counter', 'kitchen-sink');
     expect(deserializeSave(JSON.stringify(record))).toEqual({ ok: false, problem: 'checksum' });
     expect(deserializeSave(text.slice(0, text.length - 5))).toEqual({
       ok: false,
@@ -71,7 +71,7 @@ describe('saveData', () => {
     expect(
       validateSaveData({ ...data, progression: { ...data.progression, abilities: [3] } }),
     ).toBeNull();
-    expect(validateSaveData({ ...data, version: 3 })).toBeNull();
+    expect(validateSaveData({ ...data, version: 4 })).toBeNull();
     expect(validateSaveData({ ...data, story: undefined })).toBeNull();
     expect(validateSaveData({ ...data, story: { flags: [''] } })).toBeNull();
     const odd = validateSaveData({
@@ -164,7 +164,13 @@ describe('saveData', () => {
     delete v1['story'];
     const payload = JSON.stringify(v1);
     const record = { format: 'maria-save', version: 1, checksum: checksum(payload), payload };
-    const expected: SaveData = { ...current, story: { flags: [...LEGACY_STORY_FLAGS] } };
+    // Puis v2 → v3 (D-152) : les lanternes repérées par leur tuile sont oubliées.
+    const expected: SaveData = {
+      ...current,
+      checkpoint: { levelId: 'kitchen', checkpointId: null },
+      activatedCheckpoints: [],
+      story: { flags: [...LEGACY_STORY_FLAGS] },
+    };
     expect(deserializeSave(JSON.stringify(record))).toEqual({ ok: true, data: expected });
     const bytes = new TextEncoder().encode(payload);
     const base64 = btoa(String.fromCharCode(...bytes))
@@ -175,8 +181,35 @@ describe('saveData', () => {
       ok: true,
       data: expected,
     });
-    expect(migrateSaveData(v1)).toMatchObject({ version: 2 });
+    expect(migrateSaveData(v1)).toMatchObject({ version: 3 });
     expect(migrateSaveData('texte')).toBe('texte');
+  });
+
+  it('migre une sauvegarde de la version 2 (D-152) : point de retour au départ de la salle', () => {
+    const current = sample();
+    const v2 = {
+      ...current,
+      version: 2,
+      checkpoint: { levelId: 'kitchen', checkpointId: 'c46-16' },
+      activatedCheckpoints: ['kitchen:c46-16'],
+    };
+    const payload = JSON.stringify(v2);
+    const record = { format: 'maria-save', version: 2, checksum: checksum(payload), payload };
+    expect(deserializeSave(JSON.stringify(record))).toEqual({
+      ok: true,
+      data: {
+        ...current,
+        checkpoint: { levelId: 'kitchen', checkpointId: null },
+        activatedCheckpoints: [],
+      },
+    });
+  });
+
+  it("l'identifiant d'une lanterne : son nom fixe (D-152), sinon sa tuile (parcours d'essai)", () => {
+    expect(checkpointId({ type: 'checkpoint', col: 4, row: 7, name: 'hall-clock' })).toBe(
+      'hall-clock',
+    );
+    expect(checkpointId({ type: 'checkpoint', col: 4, row: 7 })).toBe('c4-7');
   });
 
   it('une nouvelle partie commence avant le prologue', () => {

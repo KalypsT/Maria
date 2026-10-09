@@ -5,6 +5,10 @@
 ; avant chaque passage ; tomber dans la mare d'ombre ramène au dernier appui (D-97). Tout en
 ; haut, le petit lit de la sieste et le torchon blanc. Porte (1) vers la maison.
 ; @name: La chambre de la sieste
+; @lantern: nanny-nap-right 71 26
+; @lantern: nanny-nap-left 29 27
+; @lantern: nanny-nap-middle 55 29
+; @lantern: nanny-nap-entry 7 30
 ; @world: strange
 ; @mapped: yes
 ; @music: strange

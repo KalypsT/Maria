@@ -130,7 +130,7 @@ export function buildMapModel(zone: Zone, progress: MapProgress, page: string = 
           continue;
         }
         if (entity.type === EntityType.Checkpoint) {
-          const cp = checkpointId(entity.col, entity.row);
+          const cp = checkpointId(entity);
           if (progress.activatedCheckpoints.includes(`${id}:${cp}`)) {
             const current =
               progress.checkpoint.levelId === id && progress.checkpoint.checkpointId === cp;

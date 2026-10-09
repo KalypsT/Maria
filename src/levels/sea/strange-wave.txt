@@ -6,6 +6,10 @@
 ; cheminée au-dessus de l'eau ; les chevaux dans l'eau, puis la digue où la vague se brise. Après la
 ; digue, le toit du carrousel étrange et le livre musical.
 ; @name: La vague
+; @lantern: sea-strange-wave-stall-1 43 8
+; @lantern: sea-strange-wave-stall-2 120 8
+; @lantern: sea-strange-wave-deck-1 6 18
+; @lantern: sea-strange-wave-deck-2 90 18
 ; @world: strange
 ; @outdoor: yes
 ; @music: strange

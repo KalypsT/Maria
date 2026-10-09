@@ -5,6 +5,7 @@
 ; @name: Grenier
 ; @shell: attic-ridge 6 5 medium
 ; @shell: attic-sheet 38 19 easy
+; @lantern: attic-trunk 51 19
 ; @hide: sheet 36 15 4 5
 ; @icon: roof
 ; @ambient: #2c2a31

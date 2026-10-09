@@ -129,6 +129,12 @@ const ERASE_STEP = /^([a-z0-9-]+(?:\s*,\s*[a-z0-9-]+)*)$/;
  * déplacer ne la fait pas oublier.
  */
 const SHELL = /^([a-z0-9]+(?:-[a-z0-9]+)*)\s+(\d+)\s+(\d+)((?:\s+[\w,-]+)*)$/;
+/**
+ * Nom fixe d'une lanterne (D-152), répétable : `; @lantern: hall-clock 36 37` (nom, colonne et ligne
+ * de son `C`). Le nom est son identifiant dans la sauvegarde : la déplacer ne fait pas perdre le
+ * point de retour.
+ */
+const LANTERN = /^([a-z0-9]+(?:-[a-z0-9]+)*)\s+(\d+)\s+(\d+)$/;
 /** Cachette (D-148), répétable : `; @hide: sheet 36 15 4 5` (dessin, colonne, ligne, largeur, hauteur). */
 const HIDE = DECOR;
 /** Zone d'une seule couche (D-107), répétable : `; @shift: memory 10 4 6 2`. */
@@ -138,7 +144,7 @@ const SHIFT = /^(present|memory)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/;
  * Convertit une carte ASCII (décision D-06) en `LevelData`.
  * Lignes vides en début et fin ignorées, lignes commençant par `;` ignorées (commentaires).
  * Légende : `#` plein, `=` traversable par le dessous, `.` vide, `P` départ (une seule fois),
- * `G` arrivée d'un parcours (au plus une fois), `e` patrouilleur, `a` araignée (D-46), `o` escargot (D-49), `C` checkpoint, `^` danger qui pique, `!` ronces, qui piquent aussi (D-51, D-56),
+ * `G` arrivée d'un parcours (au plus une fois), `e` patrouilleur, `a` araignée (D-46), `o` escargot (D-49), `C` checkpoint (nommé par `; @lantern:`, D-152), `^` danger qui pique, `!` ronces, qui piquent aussi (D-51, D-56),
  * `b` bois, `t` tissu et `v` feuillage (pleins, D-46), `-` étagère (traversable), `1`-`9` sortie dans un mur latéral,
  * `A` objet de capacité (au plus un, capacité nommée par `; @ability:`), `S` coquille (nommée par
  * `; @shell:`, D-148),
@@ -156,6 +162,8 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
   const trains: LevelTrain[] = [];
   /** Noms et intentions des coquilles (D-148), par tuile `col,ligne`. */
   const shellNames = new Map<string, { name: string; intent: ShellIntent | undefined }>();
+  /** Noms des lanternes (D-152), par tuile `col,ligne`. */
+  const lanternNames = new Map<string, string>();
   const hides: LevelHide[] = [];
   let chaseEnd = -1;
   let chaseDir = 'up' as ChaseDir;
@@ -216,6 +224,17 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         .split(/\s+/)
         .filter((w) => w !== '');
       shellNames.set(at, { name, intent: parseShellIntent(id, index + 1, name, words) });
+    } else if (match?.[1] === 'lantern' && match[2] !== undefined) {
+      const m = LANTERN.exec(match[2].trim());
+      if (!m?.[1]) {
+        throw new Error(`Niveau ${id}, ligne ${index + 1} : @lantern attend « nom col ligne »`);
+      }
+      const at = `${m[2] ?? ''},${m[3] ?? ''}`;
+      const name = m[1];
+      if (lanternNames.has(at) || [...lanternNames.values()].includes(name)) {
+        throw new Error(`Niveau ${id}, ligne ${index + 1} : @lantern ${name} en double`);
+      }
+      lanternNames.set(at, name);
     } else if (match?.[1] === 'hide' && match[2] !== undefined) {
       const h = HIDE.exec(match[2].trim());
       if (!h?.[1]) {
@@ -428,7 +447,12 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
       }
       const entity = ENTITIES[char];
       const named = entity === EntityType.Shell ? shellNames.get(`${col},${row}`) : undefined;
-      if (entity && named !== undefined) {
+      const lantern =
+        entity === EntityType.Checkpoint ? lanternNames.get(`${col},${row}`) : undefined;
+      if (entity && lantern !== undefined) {
+        entities.push({ type: entity, col, row, name: lantern });
+        lanternNames.delete(`${col},${row}`);
+      } else if (entity && named !== undefined) {
         entities.push({
           type: entity,
           col,
@@ -453,6 +477,13 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
     const [at, { name }] = orphan;
     throw new Error(
       `Niveau ${id} : @shell ${name} ${at.replace(',', ' ')} sans « S » à cette place`,
+    );
+  }
+  const [lonely] = lanternNames;
+  if (lonely) {
+    const [at, name] = lonely;
+    throw new Error(
+      `Niveau ${id} : @lantern ${name} ${at.replace(',', ' ')} sans « C » à cette place`,
     );
   }
   for (const h of hides) {
