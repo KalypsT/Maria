@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Les coquilles** (les trouvailles revues, D-148) : audit fait (`docs/COQUILLES.md`), choix de l'utilisateur et plan validés en 6 PR (le système ; la carte et le cahier ; la boîte à coquilles et la fin ; la liste vérifiée, la maison et le jardin ; le quartier et la gare ; le train et la mer). **PR 1 faite : le système** (les noms fixes, la coquille posée et son scintillement, le compteur au ramassage, le debug), **PR 2 faite : la carte et le cahier** (les coquilles vues en pointillés, « n/N » du lieu, la page qui se colorie) et **PR 3 faite : le bocal à coquilles dans la chambre et le petit escargot de la fin** et **PR 4 faite : la liste vérifiée (l'intention de chaque coquille, un seul test), les cachettes et les traces de bave, les coquilles retirées des lieux sans retour, la maison (8) et le jardin (7) replacés**, sur `ccr-c9ed5a1e-fyh3vf`. Suite : la PR 5 (le quartier et la gare). Rien au bout des défis de la nounou pour l'instant (choix de l'utilisateur).
+**Les coquilles** (les trouvailles revues, D-148) : audit fait (`docs/COQUILLES.md`), choix de l'utilisateur et plan validés en 6 PR (le système ; la carte et le cahier ; la boîte à coquilles et la fin ; la liste vérifiée, la maison et le jardin ; le quartier et la gare ; le train et la mer). **PR 1 faite : le système** (les noms fixes, la coquille posée et son scintillement, le compteur au ramassage, le debug), **PR 2 faite : la carte et le cahier** (les coquilles vues en pointillés, « n/N » du lieu, la page qui se colorie) et **PR 3 faite : le bocal à coquilles dans la chambre et le petit escargot de la fin** et **PR 4 faite : la liste vérifiée (l'intention de chaque coquille, un seul test), les cachettes et les traces de bave, les coquilles retirées des lieux sans retour, la maison (8) et le jardin (7) replacés** et **PR 5 faite : le quartier (9) et la gare (8)**, sur `ccr-c9ed5a1e-fyh3vf`. Suite : la PR 6 (le train et la station balnéaire, les revisites par l'état du monde). Rien au bout des défis de la nounou pour l'instant (choix de l'utilisateur).
 
 **Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139) , **PR 2 faite : la berceuse, le moteur et le parcours d'essai 17** (D-140), **PR 3 faite : la chambre immense, le lit et le coffre** (D-141), **PR 4 faite : le ciel de la chambre** (D-142), **PR 5 faite : la chambre grande, la vraie chambre la nuit, Maria retrouvée** (D-143), **PR 6 faite : le matin et le dernier plan** (D-144) et **PR 7 faite : après la fin** (D-145), sur `ccr-06b9800a-238lrq`. **Le niveau 8 est complet : le jeu se joue du premier soir à la fin.** Suite : **essai sur téléphone** (le parcours 17, tout le monde de Maria, toute la fin) ; à fournir : le thème de fin (`ending`), le jingle de Maria, Céleste en phase 4 illustrée.
 
@@ -33,6 +33,14 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les coquilles, PR 5 : le quartier et la gare (D-148)
+
+- Le quartier (9) : le nichoir de l'aire de jeux rapproché (moyen, plus une deuxième difficile) ; nouvelle : derrière le linge qui sèche à une fenêtre de la rue (crochet, depuis le nid du platane ; une trace monte sur la façade). Une seule difficile : la lampe du chantier. 3 revisites sur 9.
+- La gare (8) : nouvelles : sous les casiers des objets trouvés, derrière un portant de manteaux oubliés (glissade, une trace au sol) ; sous un banc de l'abri du quai (glissade). Une seule difficile : le pilier des quais. 3 revisites sur 8.
+- Tests : `shellsStreet.test.ts`, `shellsStation.test.ts` (le test des intentions, par lieu), `slideRevisits.test.ts` (le banc). Total du jeu : 46.
+- Vérifié dans Chromium : le linge et sa trace sur la façade, le portant de manteaux (la niche cachée jusqu'au sol) et sa trace, le banc de l'abri, le nichoir.
+- [ ] À vérifier sur téléphone : le linge se devine-t-il comme une cachette ? Le banc du quai gêne-t-il le passage le long du quai ?
 
 ### Les coquilles, PR 4 : la liste vérifiée, la maison et le jardin (D-148)
 

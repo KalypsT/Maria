@@ -1050,8 +1050,10 @@ const DRAWERS: Readonly<Record<string, (a: ArtContext, r: Rect) => void>> = {
       const wave = Math.sin(k * length * 0.7) * 0.8;
       return { x: x0 + (x1 - x0) * k + nx * wave, y: y0 + (y1 - y0) * k + ny * wave };
     };
+    // Un liseré sombre dessous, pour qu'elle se voie aussi sur un mur clair.
     for (const [width, color] of [
       [3.4, 'rgba(255, 255, 255, 0.18)'],
+      [2.2, 'rgba(70, 80, 100, 0.35)'],
       [1.3, 'rgba(232, 242, 250, 0.82)'],
     ] as const) {
       ctx.strokeStyle = color;

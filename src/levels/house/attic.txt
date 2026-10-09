@@ -6,7 +6,6 @@
 ; @shell: attic-ridge 6 5 medium
 ; @shell: attic-sheet 38 19 easy
 ; @hide: sheet 36 15 4 5
-; @decor: slimetrail 39 19 3 1
 ; @icon: roof
 ; @ambient: #2c2a31
 ; @note: poutres de la charpente jusqu'au recoin sous le faîte : secret de plateforme, difficulté moyenne (D-27).
@@ -26,6 +25,7 @@
 ; @decor: atticbeam 21 9 3 11
 ; @decor: atticbeam 13 7 3 13
 ; @decor: collartie 4 1 6 6
+; @decor: slimetrail 39 19 3 1
 ; Légende : # mur/sol, b bois et t tissu (pleins), - étagère et = planche (traversables), ^ briques de jeu (danger), e jouet mécanique, C veilleuse (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 ########################################################
 ########.....###########################################
