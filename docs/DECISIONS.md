@@ -2226,3 +2226,20 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Un souvenir** (`alpha`) : la nounou est un peu passée (90 %), comme le voulait D-118 ; son visage est net.
 - **Eden caché** (`eden-peek`) : sa tête qui rit, découpée dans l'image debout, petite (9 px) en bas du cadre.
 - Eden, de face quand il rit ou lève les bras (pas de profil) : c'est voulu, il regarde Céleste.
+
+## D-155 — Les passants, les animaux ; l'Educaville à la place de la boîte à formes
+
+Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des animaux), et l'Educaville (Fisher-Price, 1994, jouet de son enfance) à la place de la boîte à formes. Proposition validée telle quelle, options comprises.
+
+- **L'Educaville** remplace la boîte à formes partout : au bout de l'école étrange, sur l'abribus de l'îlot 2, pâli dans la salle de jeux, dans le cahier. **Son téléphone sonne tout seul** ; Céleste fait Agir : la sonnerie s'arrête, le combiné jaune se soulève, une lueur turquoise en sort, **silence** (choix de l'utilisateur, pas de notes de berceuse), une bulle « ? ». Le trou en forme de Maria disparaît ; Maria n'est ni montrée ni entendue (pilier 5).
+  - Le couvercle géant de l'école étrange devient le jouet géant en silhouettes : **mêmes plateformes, même trou** (aucun changement de parcours).
+  - **L'identifiant `shape-box` reste** dans la sauvegarde (invisible du joueur ; le renommer demanderait une migration).
+  - **Ni nom ni logo** de la marque (le jeu est public) : un jouet d'après l'Educaville. Le téléphone de la photo est un clavier (pas un cadran) avec un gros combiné jaune sur le flanc gauche : c'est lui qui se soulève.
+  - Le jouet passe de 40 × 32 à environ 56 × 38 px (il est en largeur).
+  - Un son de sonnerie de jouet à fournir (`docs/BRUITAGES.md`) ; d'ici là, une vibration et la lueur.
+- **Les passants** : des images fixes (deux poses pour certains), derrière Céleste, sans collision, qui ne cachent jamais une coquille ni un passage. Quand Céleste passe tout près, une fois : ils changent de pose (un salut, un regard), une petite bulle sans texte (cœur, main). Le chat roux bondit et disparaît ; les oiseaux s'envolent et reviennent (comme le pigeon de la cour, D-79).
+  - **Règles** : aucun adulte près d'un passage où Céleste grimpe (le chantier reste vide) ; personne dans les mondes étranges, la nuit, ni au bureau des objets trouvés.
+  - **La rue** : la voisine à sa fenêtre, le monsieur de l'abribus, la dame au petit chien, le chat roux (il remplace la queue dessinée de D-77), des pigeons. **La supérette** : la caissière. **La gare** (le hall, de jour) : la voyageuse sur sa valise, le voyageur au tableau des départs. **La station balnéaire** : le vieux couple sur le banc de la promenade, le pêcheur au ponton, le forain de la barbe à papa (le soir), des mouettes. **Le jardin** : un merle le jour, un hérisson le soir (dessinés par le code). **La rue d'autrefois** : la voisine pâlie à sa fenêtre.
+  - Le train et la maison ne changent pas.
+- **Plan en 3 PR** : l'Educaville ; le système des passants, la rue et la supérette ; la gare, la station balnéaire, le jardin et la rue d'autrefois.
+- Prompts : `docs/PROMPTS_PERSONNAGES.md`, section D-155.

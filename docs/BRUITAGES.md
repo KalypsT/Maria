@@ -106,3 +106,12 @@ Facultative, jamais de mots, jouée rarement pour ne pas lasser.
 Une **boucle** peut être envoyée telle quelle : je la prépare avec `--sfx --loop`, qui mêle sa fin à
 son début en fondu enchaîné (D-131). Il suffit qu'elle dure au moins 1 s, sans attaque ni fin
 marquée.
+
+## À venir : l'Educaville (D-155)
+
+Pas encore branché : l'emplacement sera créé avec le jouet (D-155, PR 1).
+
+| Emplacement        | Quand                                                                                                                                              | Variantes |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `toy-phone-ring`   | le téléphone du jouet sonne tout seul, au bout de l'école étrange (**boucle**) : une sonnerie électronique de jouet des années 90, un peu fatiguée | 1         |
+| `toy-phone-pickup` | Céleste décroche : le petit clic du combiné en plastique, puis le silence                                                                          | 1         |

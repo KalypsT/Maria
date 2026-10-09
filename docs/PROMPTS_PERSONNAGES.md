@@ -428,10 +428,10 @@ pure white background, no shadow, no text:
 Si ChatGPT redessine une paire de jambes : `Only ONE leg. A single leg alone, as if cut from the body
 at the hip.` Si une manche reste sur le torse : `No arm, no sleeve, no hand on the torso.`
 
-## Proposition D-155 (à valider) : les passants, les animaux, l'Educaville
+## D-155 : les passants, les animaux, l'Educaville
 
-Rien n'est intégré tant que l'utilisateur n'a pas validé la proposition : si un passant est refusé,
-on saute son prompt. Même méthode que les adultes du train : une conversation par personnage, la
+Proposition validée telle quelle par l'utilisateur, options comprises (le jardin, la voisine pâlie
+de la rue d'autrefois : sans nouvelle image). Même méthode que les adultes du train : une conversation par personnage, la
 première image validée sert de référence pour sa seconde pose.
 
 ### Les passants (joindre `dad-stand.png`)
@@ -533,10 +533,16 @@ background, no shadow, no text. Landscape format, high resolution.
 
 ### L'Educaville (joindre la photo du jouet et `roger.png`)
 
-Dans le jeu, le jouet est **petit** (environ 40 × 32 px dans le monde étrange, à peine plus dans
-le cahier) : il faut des formes franches et peu de détails, et surtout **le téléphone bien
-visible**. Pas de nom ni de logo (marque déposée, le jeu est public) : un jouet « d'après »
-l'Educaville, que l'on reconnaît à ses formes et à ses couleurs.
+D'après la photo de l'utilisateur : **recadrer la photo sur le jouet** avant de l'envoyer (pas de
+salon ni de personne derrière). Le téléphone n'a pas de cadran : c'est un **clavier bleu** (1 à 9,
+\*, 0, #) avec un **gros combiné jaune** accroché sur le flanc gauche ; c'est ce combiné qui se
+soulève quand il sonne (D-155).
+
+Dans le jeu, le jouet est **petit** (environ 56 × 38 px) : il faut des formes franches, peu de
+détails. On garde ce qui se reconnaît de loin : l'anse en arc, les toits rouges, la tour bleue et
+son horloge jaune, le clavier bleu, le bloc jaune de l'alphabet, l'auvent rayé rouge et blanc, les
+formes à encastrer, le socle bleu, le combiné jaune. **Pas de nom de marque ni de logo** (marque
+déposée, le jeu est public) : l'anse reste lisse, avec seulement son petit arc-en-ciel.
 
 `toy-town.png` (référence) :
 
@@ -547,22 +553,30 @@ the elements, same colors) and the second attached image as the strict reference
 detail), draw this vintage 1990s electronic educational toy as a picture-book object, not a
 realistic photo.
 
-Simplify it so that it stays readable when very small: bold shapes, few details, big chunky
-buttons. The little toy telephone with its rotary dial and its handset must be clearly visible and
-a bit enlarged. Remove every brand name, logo and printed letter or word: no text at all (keep
-simple pictograms or colored shapes instead of letters).
+The toy is a small plastic town on a long teal-blue base: a carrying handle arching over the top
+(plain cream, with only a tiny rainbow on its right foot); on the left, a house with a red roof and a
+blue telephone keypad (big rounded buttons) with a big curved yellow telephone handset hanging on
+the left side of the toy; in the middle, a blue clock tower with a round yellow clock face, and
+below it a yellow block of alphabet tiles with red letters; on the right, red chimneys, a
+red-and-white striped awning, and a shape sorter with a red circle, a yellow triangle, a blue
+diamond, a green square, an orange star and a purple heart.
 
-View: straight front view, slightly from above, the whole toy, nothing cropped. Plain pure white
-background, no shadow, no text. Landscape format, high resolution.
+Simplify it so that it stays readable when very small: bold shapes, few details, big chunky
+elements, fewer stickers. The yellow telephone handset must be clearly visible. Remove every brand
+name and logo: the handle has NO text at all.
+
+View: straight front view, the whole toy, nothing cropped. Plain pure white background, no shadow,
+no text other than the alphabet tiles and keypad numbers. Landscape format, high resolution.
 ```
 
 `toy-town-ringing.png` (joindre `toy-town.png`) :
 
 ```
 Using the attached image as the strict reference, draw the SAME toy, same view, same framing, same
-style, same colors, with only one change: the handset of the little telephone is lifted off its
-base and floats slightly above it, its curly cord stretched. Nothing else changes. Plain pure white
-background, no shadow, no text. Landscape format, high resolution.
+style, same colors, with only one change: the big yellow telephone handset on the left side is
+lifted off its hook and floats a little above and to the left of it, its curly cord stretched.
+Nothing else changes. Plain pure white background, no shadow, no text. Landscape format, high
+resolution.
 ```
 
 Je dessine moi-même, par le code : la lueur turquoise qui sort du combiné, la version pâlie de la
