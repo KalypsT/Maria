@@ -4,13 +4,13 @@
 
 **Les coquilles** (les trouvailles revues, D-148) : audit fait (`docs/COQUILLES.md`), choix de l'utilisateur et plan validés en 6 PR (le système ; la carte et le cahier ; la boîte à coquilles et la fin ; la liste vérifiée, la maison et le jardin ; le quartier et la gare ; le train et la mer). **PR 1 faite : le système** (les noms fixes, la coquille posée et son scintillement, le compteur au ramassage, le debug), **PR 2 faite : la carte et le cahier** (les coquilles vues en pointillés, « n/N » du lieu, la page qui se colorie) et **PR 3 faite : le bocal à coquilles dans la chambre et le petit escargot de la fin** et **PR 4 faite : la liste vérifiée (l'intention de chaque coquille, un seul test), les cachettes et les traces de bave, les coquilles retirées des lieux sans retour, la maison (8) et le jardin (7) replacés** et **PR 5 faite : le quartier (9) et la gare (8)** et **PR 6 faite : le train (6) et la station balnéaire (9), les revisites par la marée**, sur `ccr-c9ed5a1e-fyh3vf`. **Le plan des coquilles est complet : 47 coquilles.** Suite : essai sur téléphone (les traces de bave, les cachettes, le compteur, le bocal). Le « train à quai » n'ouvre aucun chemin : le train n'a pas de revisite (signalé, D-148 PR 6). Rien au bout des défis de la nounou pour l'instant (choix de l'utilisateur).
 
-**Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139) , **PR 2 faite : la berceuse, le moteur et le parcours d'essai 17** (D-140), **PR 3 faite : la chambre immense, le lit et le coffre** (D-141), **PR 4 faite : le ciel de la chambre** (D-142), **PR 5 faite : la chambre grande, la vraie chambre la nuit, Maria retrouvée** (D-143), **PR 6 faite : le matin et le dernier plan** (D-144) et **PR 7 faite : après la fin** (D-145), sur `ccr-06b9800a-238lrq`. **Le niveau 8 est complet : le jeu se joue du premier soir à la fin.** Suite : **essai sur téléphone** (le parcours 17, tout le monde de Maria, toute la fin) ; à fournir : le thème de fin (`ending`), le jingle de Maria, Céleste en phase 4 illustrée.
+**Le dernier niveau** (niveau 8, le monde de Maria, D-138) : plan validé en 7 PR, **« la chambre qui rapetisse »** : le premier soir rejoué sans Maria, l'entrée par le berceau vide, la chambre du premier soir de plus en plus petite (immense en deux salles, avec un vrai parcours ; grande ; la vraie chambre la nuit, où Maria dort dans son berceau), le matin (le tapis, l'étagère, le dernier câlin), le dernier plan, puis continuer à jouer. Facile à moyen, sans boss. **PR 1 faite : le soir de la phase 4, la nuit, le berceau vide** (D-139) , **PR 2 faite : la berceuse, le moteur et le parcours d'essai 17** (D-140), **PR 3 faite : la chambre immense, le lit et le coffre** (D-141), **PR 4 faite : le ciel de la chambre** (D-142), **PR 5 faite : la chambre grande, la vraie chambre la nuit, Maria retrouvée** (D-143), **PR 6 faite : le matin et le dernier plan** (D-144) et **PR 7 faite : après la fin** (D-145), sur `ccr-06b9800a-238lrq`. **Le niveau 8 est complet : le jeu se joue du premier soir à la fin.** Suite : **essai sur téléphone** (le parcours 17, tout le monde de Maria, toute la fin) ; à fournir : le thème de fin (`ending`), le jingle de Maria.
 
 **La cohérence des niveaux** (D-132 à D-137, demande de l'utilisateur) : la maison, le jardin, le quartier et la gare faits et fusionnés ; **le train** (D-136) et **la station balnéaire** (D-137 : l'aile du centre, les pieds de la grue, la pêche aux canards, les rochers percés, le mât d'amarrage) faits, sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (la maison de la nounou), même méthode.
 
 **Sensations, son, aide et mondes étranges** (D-124) : chantiers **A** (fluidité et sensations), **B** (bruitages et vibrations) et **C** (le fil discret) faits et fusionnés (D-124 à D-129). **Chantier D, PR 1 faite : trois maquettes de la gare étrange** (D-130), sur `ccr-9d90352a-xuwhs1`. Suite : **le choix de l'utilisateur** (A, B, C ou un mélange), puis la gare étrange refaite (D2) et les autres mondes étranges un par un. En attente : essais sur téléphone (compteur de saccades, sensations, sons de test, vibrations, fil discret) ; les sons à fournir (`docs/BRUITAGES.md`) ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades.
 
-**Les personnages illustrés** (D-123, D-146, D-147) : papa et maman illustrés partout ; **Céleste illustrée en pyjama** (pièces de papier découpé), sur `ccr-142ffd96-q5pgli`. Suite : essai sur téléphone, puis la robe et la veste (pièces reçues), puis le chat, la nounou, Eden.
+**Les personnages illustrés** (D-123, D-146 à D-151) : papa, maman, Céleste dans ses quatre tenues, les adultes du train et de l'école, les enfants de la classe et le chien, sur `ccr-142ffd96-q5pgli`. Reste : le chat, la nounou, Eden (prompts prêts, photos de l'utilisateur).
 
 **Le niveau 7 plus lisible** (retour d'essai, D-122) : les quatre cubes de la tour d'Eden à la place des objets déjà vus, la porte de la sieste et ses creux, le regard vers la porte, la carte, la salle de jeux où la tour monte, le souvenir d'Eden retravaillé (la tour chacun son tour, le cache-cache avec un compte), Eden blond à la coupe au bol, sur `ccr-abfc1233-t31o4v`. Suite : **essai sur téléphone**.
 
@@ -33,6 +33,24 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les adultes du train, les enfants, le chien (D-151)
+
+- La maîtresse, le contrôleur, la maman au bébé, le voyageur endormi ; la camarade, le garçon à la casquette, la fille au carré (assis, couchés, au quai) ; le chien. Assis : `height` (les pieds au sol sur une banquette) ; le quai : `group`.
+- Vérifié dans Chromium : la voiture-couchettes (soir et nuit), les compartiments, le fourgon ; les poses assises et le groupe dessinés à part.
+- [ ] À vérifier sur téléphone : les enfants se lisent-ils à leur petite taille ? La maman au bébé, le voyageur : bien assis sur la banquette ?
+
+### La tenue de la fin, phase 4 (D-150)
+
+- Phase 4 : t-shirt vert, jean, baskets blanches à fleurs, queue de cheval (`tee`), en pièces illustrées et sur l'écran de départ.
+- Vérifié dans Chromium : à l'arrêt, en course, en saut (« Premiers pas », phase 4).
+- [ ] À vérifier sur téléphone : la tenue se lit-elle ? La queue de cheval se voit-elle assez ? L'écran de départ après la fin.
+
+### Céleste illustrée : la robe et la veste (D-149)
+
+- Robe (phase 2) et veste (phases 3 et 4) en pièces illustrées ; jupe et short en pièces de hanche ; attaches des couettes et de la queue de cheval par tenue (`PROFILE_LAYOUTS`).
+- Vérifié dans Chromium : chaque tenue à l'arrêt, en course, en saut (« Premiers pas », phases 2, 3 et 4).
+- [ ] À vérifier sur téléphone : le haut de la robe (large) et la veste, tassés, se lisent-ils ? La jupe et le short suivent-ils assez les jambes en course ?
 
 ### Les coquilles, PR 6 : le train et la station balnéaire (D-148)
 

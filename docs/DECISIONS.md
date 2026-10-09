@@ -2157,3 +2157,28 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **La station balnéaire (9)** : les mêmes places ; **les revisites par la marée**, vérifiées (`tide`) : la balise au large (marée haute ; moyenne, depuis l'escalier de la plage, comme tout chemin à marée haute ; vue dès la première visite, à marée basse), la grotte de la plage, la buse du port (on arrive au port à marée haute : on s'assoit sur le banc pour la baisser), la grotte des rochers et le dessous de la jetée (marée basse). **Le dessous de la jetée devient le secret d'observation** : un rideau d'algues pend entre les deux pieux et cache la coquille (cachette `seaweed`) ; une trace de bave mène sur le sable jusque sous la fente. **La grotte des rochers passe de 50 ms (difficile, au plancher) à moyenne (158 ms)** : la flaque perd une tuile (4 au lieu de 5). Sous le plafond bas de la grotte, il n'y a rien entre les deux : 5 tuiles, 50 ms ; 4, 158 ms ; une stalactite ferme le saut ; le plafond relevé d'une tuile le rend facile, même avec une flaque de 7. Aucune difficile dans la mer (la règle est « au plus une »).
 - **Cachettes** : `curtain` (un rideau bleu nuit à plis, ses anneaux sur la tringle), `seaweed` (des lanières brun-vert ondulées et serrées, leurs flotteurs). Comme le drap et la glycine, l'ourlet laisse deviner la lueur rose de la coquille. Une trace de bave sur une tuile pleine ne se voit pas (le décor est dessiné derrière) : celle de la jetée reste sur le sable.
 - **Bilan** : **47 coquilles** (maison 8, jardin 7, quartier 9, gare 8, train 6, mer 9) ; 2 difficiles (la lampe du chantier, 92 ms ; le pilier des quais, 67 ms) ; une cachette et sa trace par niveau ; revisites : 6 sur 15 à « Ma maison », 3 sur 9 au quartier, 3 sur 8 à la gare, et 5 coquilles de la mer qui demandent une marée.
+
+## D-149 — Céleste illustrée : la robe et la veste
+
+- **La robe** (phase 2) et **la veste** (phases 3 et 4) prennent leurs pièces illustrées, comme le pyjama (D-147). Les planches de l'utilisateur, plus les jambes refaites une à une ; composées par `scripts/celeste-parts.py`.
+- **Retouches** : couette et queue de cheval détourées à part (liseré clair entre les mèches) ; le blanc derrière les verres des lunettes retiré ; le haut de la robe coupé à la taille (la jupe est une pièce) ; la planche de la veste avait une paire de jambes sous le short : le short seul est gardé.
+- **Pièces de hanche** : la jupe de la robe et **le short de la veste** (`skirt`), de la taille à mi-cuisse, posés devant le haut des jambes. La jupe passe sur la taille de la robe ; le short sous le bas de la veste.
+- **Dessinés de trois quarts** par le générateur, le haut de la robe et la veste sont tassés en largeur (35 % et 20 %) pour aller avec les autres pièces, de profil.
+- **Les attaches** (`PROFILE_LAYOUTS`, par tenue) : les couettes de la robe basses sur la nuque, derrière l'oreille ; la queue de cheval haut derrière la tête.
+- La phase 4 garde la veste. **La tenue de la fin** (t-shirt vert, jean, d'après l'illustration de l'utilisateur) viendra avec ses pièces (prompts dans `docs/PROMPTS_PERSONNAGES.md`).
+
+## D-150 — La tenue de la fin (phase 4)
+
+- **D'après l'illustration de l'utilisateur** : en phase 4, Céleste porte une nouvelle tenue, `tee` (queue de cheval au chouchou rose, t-shirt vert, jean droit bleu clair, baskets blanches à petites fleurs roses, sans logo) au lieu de la veste (le PLACEHOLDER de D-119). Hitbox, mouvement et proportions de la phase 4 inchangés.
+- **En jeu** : pièces illustrées (tête, queue de cheval, torse, bras, jambe), composées par `scripts/celeste-parts.py` ; le jean va jusqu'à la basket, pas de pièce de hanche. **Écran de départ** : l'illustration détourée, `public/art/celeste-tee.png` (`TITLE_IMAGES.tee`).
+- **Retouches** : les pièces de ChatGPT imitent du papier découpé : le trou de rivet en haut de la jambe et l'emmanchure découpée dans le t-shirt sont rebouchés (texture voisine), l'œillet du chouchou repeint ; le liseré de papier blanc autour de la queue de cheval retiré. Les baskets blanches : `--white` (seuil du fond) les garde.
+- **Sans pièces** (fichier manquant), la tenue reprend le dessin par code de la veste.
+
+## D-151 — Les adultes du train et de l'école, les enfants de la classe, le chien illustrés
+
+- **Images de l'utilisateur** (ChatGPT, prompts de `docs/PROMPTS_PERSONNAGES.md`) : la maîtresse, le contrôleur, la maman au bébé, le voyageur endormi ; la camarade (debout, glissée, endormie, au quai), le garçon à la casquette et la fille au carré (assis, au quai), la fille au carré endormie ; le chien du fourgon. Toutes à la place du dessin par code (`CHARACTER_IMAGES`).
+- **Retournées** au détourage pour regarder vers la droite comme les autres : la maman au bébé et la camarade endormie (la tête du côté de l'oreiller dessiné par le code). La surface du lit dessinée sous la fille endormie est retirée.
+- **Assis** (`height`) : sur une banquette du compartiment (2 tuiles), la maman et le voyageur sont dessinés à la hauteur qui pose leurs pieds au sol (91 et 89 px, environ trois quarts d'un adulte debout, la taille d'un adulte assis) ; sur une couchette, les enfants gardent une taille d'enfant assis (23 px), les jambes pendent.
+- **Le groupe du quai** (`group`) : les trois enfants au sac à dos, chacun dans un tiers du cadre (`kids-quay`, aussi sur la plage et la jetée).
+- Les poses debout seules du garçon à la casquette et de la fille au carré ne servent pas encore (aucune scène ne les montre debout sans sac) ; gardées hors du dépôt.
+- Le petit mouvement en boucle de ces personnages (une respiration, un bras) disparaît : les images sont fixes.

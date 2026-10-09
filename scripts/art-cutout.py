@@ -2,7 +2,7 @@
 
 Usage : python3 scripts/art-cutout.py entrée.png sortie.png [--height 900] [--seed x,y ...]
         [--keep x,y ...] [--holes N] [--largest] [--ring 120] [--reach 4]
-        [--halo 0.3]
+        [--white 222] [--halo 0.3]
 
 - Le fond : le blanc relié aux bords de l'image.
 - --seed : un point d'un blanc enfermé à retirer aussi (entre les jambes, sous un bras), en px de
@@ -14,6 +14,8 @@ Usage : python3 scripts/art-cutout.py entrée.png sortie.png [--height 900] [--s
   fines (120 par défaut).
 - --reach N : distance (px) entre une poche claire et le fond, au plus (4 par défaut ; plus pour
   des mèches épaisses).
+- --white N : seuil du blanc du fond (222 par défaut) ; plus haut quand le personnage porte du blanc
+  (des baskets blanches) que le fond ne doit pas manger.
 - --halo : fraction du haut de la silhouette (les cheveux) où le liseré clair laissé par le
   générateur est rongé ; le bas (semelles blanches) est épargné.
 - Bord adouci, image recadrée sur le personnage puis ramenée à --height px de haut.
@@ -40,12 +42,13 @@ def main() -> None:
     parser.add_argument("--largest", action="store_true")
     parser.add_argument("--ring", type=int, default=120)
     parser.add_argument("--reach", type=int, default=4)
+    parser.add_argument("--white", type=int, default=222)
     args = parser.parse_args()
 
     rgb = np.asarray(Image.open(args.src).convert("RGB")).astype(np.int16)
     lo = rgb.min(axis=2)
     spread = rgb.max(axis=2) - lo
-    near_white = (lo > 222) & (spread < 30)
+    near_white = (lo > args.white) & (spread < 30)
     light = (lo > 190) & (spread < 45)
 
     labels, _ = ndimage.label(near_white)

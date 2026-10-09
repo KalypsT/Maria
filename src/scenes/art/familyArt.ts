@@ -512,10 +512,26 @@ export function drawCharacter(
 ): void {
   const size = PROP_SIZE[kind];
   const illustrated = CHARACTER_IMAGES[kind];
-  const image = illustrated && images?.get(illustrated.file);
-  if (illustrated && image instanceof HTMLImageElement) {
-    drawIllustrated(ctx, illustrated, image, size, frame);
-    return;
+  if (illustrated?.group) {
+    // Un groupe (D-151) : chacun dans sa part du cadre, s'ils sont tous chargés.
+    const members = illustrated.group;
+    const loaded = members.map((member) => images?.get(member.file));
+    if (loaded.every((image) => image instanceof HTMLImageElement)) {
+      const part = { w: size.w / members.length, h: size.h };
+      members.forEach((member, i) => {
+        ctx.save();
+        ctx.translate(i * part.w, 0);
+        drawIllustrated(ctx, member, loaded[i] as HTMLImageElement, part, frame);
+        ctx.restore();
+      });
+      return;
+    }
+  } else {
+    const image = illustrated && images?.get(illustrated.file);
+    if (illustrated && image instanceof HTMLImageElement) {
+      drawIllustrated(ctx, illustrated, image, size, frame);
+      return;
+    }
   }
   const { w, h, pad } = DRAWN_SIZE[kind] ?? { ...size, pad: 0 };
   ctx.save();
@@ -533,8 +549,9 @@ const STANDING_H = PROP_SIZE['dad-door'].h;
  * l'assise ; la texture est agrandie d'autant vers le bas.
  */
 export function characterOverhang(kind: PropKind): number {
-  const seat = CHARACTER_IMAGES[kind]?.seat;
-  return seat === undefined ? 0 : Math.ceil((1 - seat) * STANDING_H);
+  const character = CHARACTER_IMAGES[kind];
+  const seat = character?.seat;
+  return seat === undefined ? 0 : Math.ceil((1 - seat) * (character?.height ?? STANDING_H));
 }
 
 /** Taille de la vapeur au-dessus d'une tasse illustrée (le dessin par code est en ×2). */
@@ -546,14 +563,14 @@ const STEAM_SCALE = 1.1;
  */
 function drawIllustrated(
   ctx: CanvasRenderingContext2D,
-  character: CharacterImage,
+  character: Pick<CharacterImage, 'footX' | 'steam' | 'seat' | 'height'>,
   image: HTMLImageElement,
   size: { w: number; h: number },
   frame: number,
 ): void {
   const { naturalWidth: width, naturalHeight: height } = image;
   const seat = character.seat;
-  const drawnH = seat === undefined ? size.h : STANDING_H;
+  const drawnH = seat === undefined ? size.h : (character.height ?? STANDING_H);
   const top = seat === undefined ? 0 : size.h - seat * drawnH;
   const scale = drawnH / height;
   const drawn = width * scale;
