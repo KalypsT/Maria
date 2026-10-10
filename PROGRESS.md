@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Le trou du grillage de l'aire de jeux** (D-158, sur `claude/game-test-issues-e7pomv`) : le ballon de la cour coincé dedans, un pigeon qui s'envole par le trou depuis le toit de la tour. Le chantier attendra (bulles des personnages). **Le sac à dos** (D-159) : orientations validées ; maquette interactive publiée (https://claude.ai/artifact/DE58ednNNhcjxdPUsuLd6T) : en attente du choix de l'utilisateur (onglets A ou B, choix du lieu 1 ou 2, la liste des pièces, la maison et le jardin séparés ?), puis le plan en PR.
+**Le trou du grillage de l'aire de jeux** (D-158, sur `claude/game-test-issues-e7pomv`) : le ballon de la cour coincé dedans, un pigeon qui s'envole par le trou depuis le toit de la tour. Le chantier attendra (bulles des personnages). **Le sac à dos** (D-159, D-160) : maquette interactive (https://claude.ai/artifact/DE58ednNNhcjxdPUsuLd6T), choix de l'utilisateur et plan validés en 3 PR (le sac ; la carte ; les trésors). **PR 1 faite : le sac** (un seul bouton, la poche et ses trois objets, le cahier, les trésors d'avant, les réglages de l'ancienne pause). Suite : PR 2, la carte (les lieux en rangée à gauche, feuilleter les lieux visités, un « ? » pour le prochain, les trésors aperçus) ; l'image du sac (prompt fourni).
 
 **Retour d'essai, nouvelle partie depuis le début** (D-157, sur `claude/game-test-issues-e7pomv`) : **faits** : maman assise n'a plus la tête coupée (canapé, banc de l'aire de jeux ; toutes les poses assises) ; le monsieur de l'abribus et la dame au chien plus petits (75 %) ; se rattraper au mur quitté après un saut mural raté (une fois retombée sous le point du saut) ; la seconde cheminée de la ronce et celle de l'école étrange resserrées de 5 à 4 tuiles (la ronce passe de difficile à moyen) ; le son de Maria baissé. **En attente** : le nouveau son des trouvailles (fichier de l'utilisateur, `found`) ; le quartier (trouver l'entrée de l'école, aller au fond du chantier) : propositions à valider ; le cahier (pages et contenu) : à revoir avec l'utilisateur.
 
@@ -45,6 +45,12 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le sac à dos, PR 1 : le sac (D-160)
+
+- Un seul bouton en haut à gauche (le sac) ; ouvert, le jeu est en pause : le cahier (la carte, Mon voyage, Mes capacités), les trésors (les trois pages d'avant), les réglages (l'ancienne pause, deux colonnes).
+- Vérifié dans Chromium (844 × 390) : chaque onglet, la croix, Échap (les réglages), M (la carte).
+- [ ] À vérifier sur téléphone : le bouton du sac se voit-il ? Le sac tient-il dans l'écran (encoche) ? Les réglages défilent-ils bien ? Le sac qui s'efface pendant le réglage des boutons.
 
 ### Le trou du grillage de l'aire de jeux (D-158)
 

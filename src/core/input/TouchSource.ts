@@ -30,6 +30,8 @@ export class TouchSource implements InputSource {
   private readonly joystickBase: HTMLElement;
   private readonly joystickKnob: HTMLElement;
   private readonly buttonElements = new Map<ButtonAction, HTMLElement>();
+  /** Un dessin à la place du libellé (le sac, D-159), et son nom pour l'accessibilité. */
+  private readonly icons = new Map<ButtonAction, { html: string; label: string }>();
   private shownMask = 0;
   private showAbility = false;
   private showShift = false;
@@ -93,6 +95,16 @@ export class TouchSource implements InputSource {
     if (dimmed !== this.shiftDimmed) {
       this.shiftDimmed = dimmed;
       this.buttonElements.get('Shift')?.classList.toggle('dimmed', dimmed);
+    }
+  }
+
+  /** Un dessin (SVG) à la place du libellé d'un bouton : le sac à dos (D-159). */
+  setIcon(action: ButtonAction, html: string, label: string): void {
+    this.icons.set(action, { html, label });
+    const element = this.buttonElements.get(action);
+    if (element) {
+      element.innerHTML = html;
+      element.setAttribute('aria-label', label);
     }
   }
 
@@ -208,7 +220,13 @@ export class TouchSource implements InputSource {
       if (!element) {
         element = document.createElement('div');
         element.className = `touch-button touch-${b.action.toLowerCase()}`;
-        element.textContent = LABELS[b.action];
+        const icon = this.icons.get(b.action);
+        if (icon) {
+          element.innerHTML = icon.html;
+          element.setAttribute('aria-label', icon.label);
+        } else {
+          element.textContent = LABELS[b.action];
+        }
         if (b.action === 'Shift') {
           element.classList.toggle('dimmed', this.shiftDimmed);
         }

@@ -589,3 +589,36 @@ resolution.
 En attendant ces deux images, le jeu dessine le jouet par le code (D-155, PR 1). Je dessine aussi,
 par le code : la lueur turquoise qui sort du combiné, le tremblement du téléphone qui sonne, le
 jouet géant en silhouettes du monde étrange de l'école.
+
+## D-159 : le sac à dos de Céleste (l'icône du menu)
+
+Le sac remplace « II » et « Carte » en haut à gauche de l'écran : on le touche pour ouvrir le
+menu (le cahier, les trésors, les réglages). Dans le jeu, il est **tout petit** (environ 34 px, dans
+un rond de 50 px, sur le décor de nuit) : il faut une silhouette franche, peu de détails, des
+couleurs qui ressortent sur un fond sombre. Le rose est la couleur de Céleste (ses lunettes) : le
+sac est à elle. L'étincelle « nouveau » est dessinée par le jeu, pas sur l'image. **Pas de marque,
+pas de texte.**
+
+`backpack.png` (joindre `celeste.png`, la référence de style) :
+
+```
+Using the attached image as the strict reference for the style (same children's picture-book
+illustration style, soft texture, thin warm outlines, same colors and level of finish), draw the
+small backpack of the little girl in the image, as a single object.
+
+A small, rounded child's backpack in soft pink, with a lighter pink front pocket closed by a little
+round yellow button, two short straps folded at the top, a small loop handle on top, and a tiny
+yellow star keyring hanging from the zip. Slightly chubby, soft and friendly, a little worn as if
+it had been on many adventures.
+
+Simplify it so that it stays readable when very small (about 32 pixels): bold simple shape, clear
+outline, few details, no thin lines that would disappear. No brand, no logo, no text, no letters.
+
+View: straight front view, the whole backpack, nothing cropped, centered. Plain pure white
+background, no shadow on the ground, no other element. Square format, high resolution.
+```
+
+Si l'image plaît mais se lit mal en petit, demander dans la même conversation : `Same backpack,
+same style, but simpler: thicker outline, fewer details, bigger pocket and button.`
+
+Je fais ensuite le détourage et l'intégration ; en attendant, le jeu dessine le sac par le code.

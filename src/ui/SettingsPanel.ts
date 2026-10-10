@@ -6,9 +6,8 @@ import {
 } from '../config/controls';
 import type { DisplaySettings, RenderMode } from '../config/display';
 import type { AudioSettings } from '../config/audio';
-import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 
-export interface PauseMenuOptions {
+export interface SettingsPanelOptions {
   settings: ControlSettings;
   display: DisplaySettings;
   onDisplayChange: (settings: DisplaySettings) => void;
@@ -19,10 +18,14 @@ export interface PauseMenuOptions {
   showTouchSettings: boolean;
   /** Le navigateur sait vibrer (Android) : le réglage des vibrations est proposé (D-128). */
   canVibrate: boolean;
+  /** Fermer le sac (reprendre le jeu), après le choix d'un parcours d'essai. */
   onResume: () => void;
-  /** Ouvrir la carte (§24) ; absent : pas de bouton. */
-  onOpenMap?: () => void;
   onSettingsChange: (settings: ControlSettings) => void;
+  /**
+   * Un curseur des commandes tactiles est tenu (vrai) ou lâché : le sac s'efface pour montrer les
+   * commandes pendant le réglage.
+   */
+  onPreview: (active: boolean) => void;
   /** Code de sauvegarde (D-22) : afficher pour copier, ou importer. */
   onExportSave: () => void;
   onImportSave: () => void;
@@ -59,35 +62,29 @@ function element<K extends keyof HTMLElementTagNameMap>(
 }
 
 /**
- * Menu pause en DOM (D-59, allégé) : reprendre, carte, accueil, son, commandes tactiles,
- * sauvegarde, mode debug. Les réglages d'essai ne sont que dans le build de debug.
+ * Les réglages du sac (D-159, l'ancien menu pause, D-59) : aide, son, commandes tactiles,
+ * sauvegarde, retour à l'accueil, mode debug, sur deux colonnes. Les réglages d'essai ne sont que
+ * dans le build de debug.
  */
-export class PauseMenu {
-  private readonly root: HTMLElement;
+export class SettingsPanel {
+  readonly element: HTMLElement;
   private readonly refreshers: (() => void)[] = [];
   private settings: ControlSettings;
 
-  constructor(private readonly options: PauseMenuOptions) {
+  constructor(private readonly options: SettingsPanelOptions) {
     this.settings = { ...options.settings };
-    this.root = document.createElement('div');
-    this.root.id = 'pause-menu';
-    this.root.setAttribute(UI_OVERLAY_ATTRIBUTE, '');
-    this.root.hidden = true;
-    const panel = element('div', this.root, 'pause-panel');
-    const header = element('div', panel, 'pause-header');
-    element('h2', header, undefined, 'Pause');
-    const resume = element('button', header, 'pause-primary', 'Reprendre');
-    resume.addEventListener('click', options.onResume);
-    const topRow = element('div', panel, 'pause-levels');
-    const openMap = options.onOpenMap;
-    if (openMap) {
-      element('button', topRow, undefined, 'Carte').addEventListener('click', openMap);
+    this.element = document.createElement('div');
+    this.element.className = 'settings';
+    const left = element('div', this.element, 'settings-column');
+    const right = element('div', this.element, 'settings-column');
+    element('h3', left, undefined, 'Aide');
+    this.addChoice(left, 'Aide discrète', 'hint');
+    this.addAudio(left);
+    if (options.debugTools) {
+      this.addRenderChoice(left);
     }
-    this.addQuit(topRow);
-    this.addAudio(panel);
-    element('h3', panel, undefined, 'Aide');
-    this.addChoice(panel, 'Aide discrète', 'hint');
 
+    const panel = right;
     if (options.showTouchSettings) {
       element('h3', panel, undefined, 'Commandes tactiles');
       this.addSlider(panel, 'Taille des boutons', 'buttonScale', (v) => `${Math.round(v * 100)} %`);
@@ -108,7 +105,7 @@ export class PauseMenu {
       });
     }
     element('h3', panel, undefined, 'Sauvegarde');
-    const saveRow = element('div', panel, 'pause-levels');
+    const saveRow = element('div', panel, 'settings-buttons');
     element('button', saveRow, undefined, 'Code de sauvegarde').addEventListener(
       'click',
       options.onExportSave,
@@ -117,11 +114,8 @@ export class PauseMenu {
       'click',
       options.onImportSave,
     );
-    if (options.debugTools) {
-      this.addRenderChoice(panel);
-      if (options.levels.length > 1) {
-        this.addLevelChoice(panel);
-      }
+    if (options.debugTools && options.levels.length > 1) {
+      this.addLevelChoice(panel);
     }
     element('h3', panel, undefined, 'Mode debug');
     const debug = element(
@@ -134,26 +128,15 @@ export class PauseMenu {
       debug.disabled = true;
       options.onSwitchDebug();
     });
-    document.body.appendChild(this.root);
+    // Retour à l'accueil, en bas des réglages (choix de l'utilisateur, D-159).
+    this.addQuit(panel);
   }
 
-  get isOpen(): boolean {
-    return !this.root.hidden;
-  }
-
-  open(): void {
-    this.root.hidden = false;
+  /** Remet chaque réglage à jour (à l'ouverture du sac). */
+  refresh(): void {
     this.refreshers.forEach((refresh) => {
       refresh();
     });
-  }
-
-  close(): void {
-    this.root.hidden = true;
-  }
-
-  destroy(): void {
-    this.root.remove();
   }
 
   private commit(): void {
@@ -167,10 +150,10 @@ export class PauseMenu {
     format: (value: number) => string,
   ): void {
     const range = CONTROL_SETTING_RANGES[key];
-    const row = element('label', parent, 'pause-row');
+    const row = element('label', parent, 'settings-row');
     element('span', row, undefined, label);
-    const value = element('span', row, 'pause-value');
     const slider = element('input', row);
+    const value = element('span', row, 'settings-value');
     slider.type = 'range';
     slider.min = String(range.min);
     slider.max = String(range.max);
@@ -184,15 +167,23 @@ export class PauseMenu {
       value.textContent = format(this.settings[key]);
       this.commit();
     });
+    slider.addEventListener('pointerdown', () => {
+      this.options.onPreview(true);
+    });
+    for (const end of ['pointerup', 'pointercancel', 'change'] as const) {
+      slider.addEventListener(end, () => {
+        this.options.onPreview(false);
+      });
+    }
     refresh();
     this.refreshers.push(refresh);
   }
 
   /** Un réglage oui ou non : les vibrations (D-128), le fil discret (D-129). */
   private addChoice(parent: HTMLElement, label: string, key: 'vibration' | 'hint'): void {
-    const row = element('div', parent, 'pause-row');
+    const row = element('div', parent, 'settings-row');
     element('span', row, undefined, label);
-    const group = element('div', row, 'pause-choice');
+    const group = element('div', row, 'settings-choice');
     const choices: readonly [boolean, string][] = [
       [true, 'Oui'],
       [false, 'Non'],
@@ -216,9 +207,9 @@ export class PauseMenu {
   }
 
   private addModeChoice(parent: HTMLElement): void {
-    const row = element('div', parent, 'pause-row');
+    const row = element('div', parent, 'settings-row');
     element('span', row, undefined, 'Joystick');
-    const group = element('div', row, 'pause-choice');
+    const group = element('div', row, 'settings-choice');
     const choices: readonly [JoystickMode, string][] = [
       ['digital', 'Numérique'],
       ['analog', 'Analogique'],
@@ -245,18 +236,18 @@ export class PauseMenu {
   private addAudio(parent: HTMLElement): void {
     element('h3', parent, undefined, 'Son');
     const audio = { ...this.options.audio };
-    const row = element('label', parent, 'pause-row');
+    const row = element('label', parent, 'settings-row');
     element('span', row, undefined, 'Volume');
-    const value = element('span', row, 'pause-value');
     const slider = element('input', row);
+    const value = element('span', row, 'settings-value');
     slider.type = 'range';
     slider.min = '0';
     slider.max = '1';
     slider.step = '0.05';
-    const sfxRow = element('label', parent, 'pause-row');
+    const sfxRow = element('label', parent, 'settings-row');
     element('span', sfxRow, undefined, 'Bruitages');
-    const sfxValue = element('span', sfxRow, 'pause-value');
     const sfxSlider = element('input', sfxRow);
+    const sfxValue = element('span', sfxRow, 'settings-value');
     sfxSlider.type = 'range';
     sfxSlider.min = '0';
     sfxSlider.max = '1';
@@ -299,9 +290,9 @@ export class PauseMenu {
   /** Résolution de rendu (D-18) : logique (par défaut) ou écran (déplacements plus fins). */
   private addRenderChoice(parent: HTMLElement): void {
     element('h3', parent, undefined, 'Affichage');
-    const row = element('div', parent, 'pause-row');
+    const row = element('div', parent, 'settings-row');
     element('span', row, undefined, 'Résolution');
-    const group = element('div', row, 'pause-choice');
+    const group = element('div', row, 'settings-choice');
     let current = this.options.display.renderMode;
     const choices: readonly [RenderMode, string][] = [
       ['logical', 'Logique'],
@@ -329,7 +320,7 @@ export class PauseMenu {
    * déjà sauvegardée à chaque lanterne et chaque événement, on la reprend à la dernière lanterne.
    */
   private addQuit(parent: HTMLElement): void {
-    const quit = element('button', parent, 'pause-quit', "Retour à l'accueil");
+    const quit = element('button', parent, 'settings-quit', "Retour à l'accueil");
     let confirming = false;
     quit.addEventListener('click', () => {
       if (!confirming) {
@@ -349,7 +340,7 @@ export class PauseMenu {
   /** Parcours d'essai : en choisir un y replace Céleste et reprend le jeu. */
   private addLevelChoice(parent: HTMLElement): void {
     element('h3', parent, undefined, "Parcours d'essai");
-    const group = element('div', parent, 'pause-levels');
+    const group = element('div', parent, 'settings-buttons');
     const buttons = this.options.levels.map(({ id, name }) => {
       const button = element('button', group, undefined, name);
       button.addEventListener('click', () => {

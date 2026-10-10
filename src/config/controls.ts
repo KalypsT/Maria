@@ -56,7 +56,8 @@ export const TOUCH_BUTTONS_ENABLED: Readonly<Record<ButtonAction, boolean>> = {
   Attack: true,
   Ability: false,
   Interact: false,
-  Pause: true,
+  // Un seul bouton en haut à gauche, le sac (D-159) : il ouvre la carte ; la pause est dedans.
+  Pause: false,
   Map: true,
   Shift: false,
 };

@@ -21,7 +21,8 @@ const button = (action: string) => {
 };
 const jump = button('Jump');
 const attack = button('Attack');
-const pause = button('Pause');
+/** Le sac (D-159) : le seul bouton du haut, l'action Carte. */
+const bag = button('Map');
 const zone = layout.joystickZone;
 const zoneX = (zone.left + zone.right) / 2;
 const zoneY = (zone.top + zone.bottom) / 2;
@@ -130,17 +131,17 @@ describe('TouchController : combinaisons (spec §12.3)', () => {
     expect(readInput(c).held).toBe(BUTTON_BIT.Attack);
   });
 
-  it('déplacement + saut + attaque + pause : quatre doigts simultanés', () => {
+  it('déplacement + saut + attaque + sac : quatre doigts simultanés', () => {
     const c = make();
     c.pointerDown(1, zoneX, zoneY);
     c.pointerMove(1, zoneX + layout.joystickRadius, zoneY);
     c.pointerDown(2, jump.x, jump.y);
     c.pointerDown(3, attack.x, attack.y);
-    c.pointerDown(4, pause.x, pause.y);
+    c.pointerDown(4, bag.x, bag.y);
     expect(c.activeCount).toBe(4);
     const raw = readInput(c);
     expect(raw.moveX).toBe(1);
-    expect(raw.held).toBe(BUTTON_BIT.Jump | BUTTON_BIT.Attack | BUTTON_BIT.Pause);
+    expect(raw.held).toBe(BUTTON_BIT.Jump | BUTTON_BIT.Attack | BUTTON_BIT.Map);
   });
 
   it('le bas du joystick + Saut : traversée d’une plateforme', () => {

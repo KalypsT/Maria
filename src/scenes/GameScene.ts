@@ -98,7 +98,6 @@ import { ShellJarView } from './ShellJarView';
 import { HideoutView } from './HideoutView';
 import { hideAt } from '../core/fx/hideouts';
 import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
-import { PauseMenu } from '../ui/PauseMenu';
 import {
   ART_IMAGES,
   CELESTE_PART_IMAGES,
@@ -146,7 +145,10 @@ import { WaterView } from './WaterView';
 import { ShiftLayerView } from './ShiftLayerView';
 import { LullabyView } from './LullabyView';
 import { RideView } from './RideView';
-import { MapPage } from '../ui/MapPage';
+import { Backpack } from '../ui/Backpack';
+import { BAG_ICON } from '../ui/bagIcons';
+import { openingPage, type BackpackTrigger } from '../core/world/backpack';
+import type { NotebookContent } from '../ui/NotebookPages';
 import { RecordPicker } from '../ui/RecordPicker';
 import { isRecordSlot } from '../config/records';
 import { canPlayRecords, recordShelf, type RecordChoice } from '../core/audio/records';
@@ -362,17 +364,6 @@ export class GameScene extends Phaser.Scene {
   private ride!: RideView;
   /** Échelle des textures dessinées (habillage, Céleste) : celle de l'écran, plafonnée. */
   private artScale = 1;
-  /** Carte (§24) et salles déjà dessinées lors d'une ouverture précédente (tracé animé). */
-  private readonly mapPage = new MapPage(
-    () => {
-      this.closeMap();
-    },
-    (id) => {
-      // Un souvenir jouable touché dans le cahier (D-89) : on le rejoue, puis on revient ici.
-      this.closeMap();
-      this.playMemory(id, false);
-    },
-  );
   /** Le tourne-disque du grenier (D-121) : le jeu est arrêté pendant le choix, comme la carte. */
   private readonly recordPicker = new RecordPicker(
     (choice) => {
@@ -466,7 +457,8 @@ export class GameScene extends Phaser.Scene {
   paused = false;
   /** Réglages d'affichage courants (D-18). */
   displaySettings!: DisplaySettings;
-  private pauseMenu?: PauseMenu;
+  /** Le sac à dos (D-159) : le cahier, les trésors et les réglages ; ouvert, le jeu est en pause. */
+  private backpack!: Backpack;
   /** Céleste en « papier découpé » (D-29). */
   private puppet!: CelestePuppet;
   /** Animation de la marionnette, modifiable par l'overlay. */
@@ -713,81 +705,85 @@ export class GameScene extends Phaser.Scene {
     const forceTouch = __DEBUG_TOOLS__ && new URLSearchParams(location.search).has('touch');
     if (forceTouch || TouchSource.isTouchDevice()) {
       this.touch = new TouchSource(document.body, controlSettings);
+      this.touch.setIcon('Map', BAG_ICON, 'Le sac');
       this.controls.sources.push(this.touch);
       detachTouch = this.touch.attach(window);
     }
     this.displaySettings = { ...save.settings.display };
-    this.pauseMenu = new PauseMenu({
-      settings: controlSettings,
-      display: this.displaySettings,
-      onDisplayChange: (settings) => {
-        this.setDisplaySettings(settings);
-      },
-      audio: save.settings.audio,
-      onAudioChange: (settings, persist) => {
-        this.audio.setSettings(settings);
-        if (persist) {
-          void this.session.setAudio(settings);
-        }
-      },
-      showTouchSettings: this.touch !== undefined,
-      canVibrate: canVibrate(),
-      onResume: () => {
+    this.backpack = new Backpack({
+      onClose: () => {
         this.setPaused(false);
       },
-      onOpenMap: () => {
+      onPlayMemory: (id) => {
+        // Un souvenir jouable touché dans le cahier (D-89) : on le rejoue, puis on revient ici.
         this.setPaused(false);
-        this.openMap();
+        this.playMemory(id, false);
       },
-      onSettingsChange: (settings) => {
-        void this.session.setControls(settings);
-        this.touch?.setSettings(settings);
-        this.haptics.enabled = settings.vibration;
-      },
-      onExportSave: () => {
-        showExportDialog(this.session.data);
-      },
-      onImportSave: () => {
-        void showImportDialog().then(async (data) => {
-          if (data) {
-            // La partie importée remplace l'actuelle (qui devient l'état précédent), puis relance.
-            await this.session.replace(data);
-            location.reload();
+      settings: {
+        settings: controlSettings,
+        display: this.displaySettings,
+        onDisplayChange: (settings) => {
+          this.setDisplaySettings(settings);
+        },
+        audio: save.settings.audio,
+        onAudioChange: (settings, persist) => {
+          this.audio.setSettings(settings);
+          if (persist) {
+            void this.session.setAudio(settings);
           }
-        });
-      },
-      debugTools: __DEBUG_TOOLS__,
-      onSwitchDebug: () => {
-        // Même site, donc même sauvegarde : on reprend à la dernière lanterne dans l'autre version.
-        void this.session.manager.flush().then(() => {
-          location.assign(debugSwitchUrl(import.meta.env.BASE_URL, __DEBUG_TOOLS__));
-        });
-      },
-      onQuitToTitle: () => {
-        // Écritures en cours terminées, puis relance : le démarrage affiche l'accueil.
-        void this.session.manager.flush().then(() => {
-          location.reload();
-        });
-      },
-      levels: [
-        { id: HOME_CHOICE, name: 'La maison (partie)' },
-        ...LEVELS.map((level) => ({ id: level.id, name: levelName(level) })),
-      ],
-      currentLevelId: () => (this.zone ? HOME_CHOICE : this.level.id),
-      onLevelChange: (id) => {
-        if (id === HOME_CHOICE) {
-          this.returnToSaved();
-          return;
-        }
-        const level = LEVELS.find((candidate) => candidate.id === id);
-        if (level) {
-          this.loadLevel(level);
-        }
+        },
+        showTouchSettings: this.touch !== undefined,
+        canVibrate: canVibrate(),
+        onSettingsChange: (settings) => {
+          void this.session.setControls(settings);
+          this.touch?.setSettings(settings);
+          this.haptics.enabled = settings.vibration;
+        },
+        onExportSave: () => {
+          showExportDialog(this.session.data);
+        },
+        onImportSave: () => {
+          void showImportDialog().then(async (data) => {
+            if (data) {
+              // La partie importée remplace l'actuelle (qui devient l'état précédent), puis relance.
+              await this.session.replace(data);
+              location.reload();
+            }
+          });
+        },
+        debugTools: __DEBUG_TOOLS__,
+        onSwitchDebug: () => {
+          // Même site, donc même sauvegarde : on reprend à la dernière lanterne dans l'autre version.
+          void this.session.manager.flush().then(() => {
+            location.assign(debugSwitchUrl(import.meta.env.BASE_URL, __DEBUG_TOOLS__));
+          });
+        },
+        onQuitToTitle: () => {
+          // Écritures en cours terminées, puis relance : le démarrage affiche l'accueil.
+          void this.session.manager.flush().then(() => {
+            location.reload();
+          });
+        },
+        levels: [
+          { id: HOME_CHOICE, name: 'La maison (partie)' },
+          ...LEVELS.map((level) => ({ id: level.id, name: levelName(level) })),
+        ],
+        currentLevelId: () => (this.zone ? HOME_CHOICE : this.level.id),
+        onLevelChange: (id) => {
+          if (id === HOME_CHOICE) {
+            this.returnToSaved();
+            return;
+          }
+          const level = LEVELS.find((candidate) => candidate.id === id);
+          if (level) {
+            this.loadLevel(level);
+          }
+        },
       },
     });
     const onVisibility = () => {
       if (document.hidden) {
-        this.setPaused(true);
+        this.setPaused(true, 'hidden');
       }
     };
     document.addEventListener('visibilitychange', onVisibility);
@@ -799,8 +795,7 @@ export class GameScene extends Phaser.Scene {
       detachKeyboard();
       detachTouch?.();
       document.removeEventListener('visibilitychange', onVisibility);
-      this.pauseMenu?.destroy();
-      this.mapPage.destroy();
+      this.backpack.destroy();
       this.recordPicker.destroy();
       this.hud.destroy();
       this.flashbackView.destroy();
@@ -822,25 +817,21 @@ export class GameScene extends Phaser.Scene {
     const frameSeconds = Math.min(this.game.loop.rawDelta / 1000, MAX_FRAME_SECONDS);
     this.controls.update();
     const mapPressed = this.controls.consumePressed('Map');
-    if (this.mapPage.isOpen) {
-      // Carte ouverte (§24) : Carte ou Pause la referment, le jeu reste arrêté.
-      if (mapPressed || this.controls.consumePressed('Pause')) {
-        this.closeMap();
+    const pausePressed = this.controls.consumePressed('Pause');
+    if (this.paused) {
+      // Le sac ouvert (D-159) : Carte ou Pause le referment, le jeu reste arrêté.
+      if (mapPressed || pausePressed) {
+        this.setPaused(false);
       }
       return;
     }
     if (this.recordPicker.isOpen()) {
-      this.stepRecordPicker(mapPressed);
+      this.stepRecordPicker(mapPressed || pausePressed);
       return;
     }
-    if (this.controls.consumePressed('Pause') && !this.memoryPlay) {
-      this.setPaused(!this.paused);
-    }
-    if (this.paused) {
-      return;
-    }
-    if (mapPressed && !this.story.locked) {
-      this.openMap();
+    if ((mapPressed || pausePressed) && !this.memoryPlay) {
+      // Le bouton du sac (Carte) l'ouvre sur la carte, Pause sur les réglages (D-159).
+      this.setPaused(true, mapPressed ? 'bag' : 'pause');
       return;
     }
     if (__DEBUG_TOOLS__) {
@@ -1182,15 +1173,23 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Carte dessinée par Céleste (§24) : salles visitées et devinées, veilleuses allumées,
-   * coquilles trouvées et vues (D-148), Céleste. Seulement dans une zone (pas dans les parcours d'essai).
+   * Ce que montre le cahier du sac (D-159) : la carte dessinée par Céleste (§24 : salles visitées
+   * et devinées, veilleuses allumées, coquilles trouvées et vues, D-148, Céleste), seulement dans
+   * une zone (pas dans les parcours d'essai) ; les souvenirs, les capacités, les chiffres du voyage.
    */
-  openMap(): void {
+  private notebookContent(): { content: NotebookContent; title: string } {
     const zone = this.zone;
-    if (!zone) {
-      return;
-    }
     const data = this.session.data;
+    const base = {
+      memories: data.progression.memories,
+      abilities: this.ownedAbilities(),
+    };
+    if (!zone) {
+      return {
+        content: { ...base, model: null, bounds: { x: 0, y: 0, w: 1, h: 1 }, figures: null },
+        title: '',
+      };
+    }
     const box = this.player.box;
     // Page du cahier de la salle ; dans le monde étrange (hors carte), celle de la zone.
     const page = mapPage(zone, this.level.id) ?? zone.id;
@@ -1215,18 +1214,15 @@ export class GameScene extends Phaser.Scene {
     for (const room of data.progression.mapRevealed) {
       this.mapSeen.add(room);
     }
-    this.clock.reset();
-    this.touch?.releaseAll();
-    this.audio.sfx.stopLoops();
-    this.mapPage.open(
-      model,
-      MAP_TITLES[page] ?? page,
-      mapBounds(zone, page),
-      data.progression.memories,
-      this.ownedAbilities(),
-      notebookFigures(zone, data),
-    );
-    this.audio.sfx.play('map-open');
+    return {
+      content: {
+        ...base,
+        model,
+        bounds: mapBounds(zone, page),
+        figures: notebookFigures(zone, data),
+      },
+      title: MAP_TITLES[page] ?? page,
+    };
   }
 
   /**
@@ -1249,9 +1245,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** Devant le tourne-disque : gauche et droite, Agir, Action ou Saut ; Pause ou Carte referment. */
-  private stepRecordPicker(mapPressed: boolean): void {
+  private stepRecordPicker(closePressed: boolean): void {
     const controls = this.controls;
-    if (mapPressed || controls.consumePressed('Pause')) {
+    if (closePressed) {
       this.closeRecords();
       return;
     }
@@ -1287,13 +1283,6 @@ export class GameScene extends Phaser.Scene {
     this.controls.consumePressed('Attack');
   }
 
-  private closeMap(): void {
-    this.mapPage.close();
-    this.audio.sfx.play('map-close');
-    this.clock.reset();
-    this.controls.consumePressed('Jump');
-  }
-
   /**
    * Les stats (D-153) : le temps de jeu de la salle, hors pause et carte (la mise à jour s'arrête
    * avant), scènes et souvenirs compris ; seulement dans la partie (pas les parcours d'essai).
@@ -1310,8 +1299,11 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  /** Met le jeu en pause (simulation arrêtée, menu affiché) ou le reprend. */
-  setPaused(paused: boolean): void {
+  /**
+   * Met le jeu en pause (simulation arrêtée, le sac ouvert, D-159) ou le reprend. `trigger` : ce qui
+   * ouvre le sac, qui choisit sa page (la carte, ou les réglages pour la touche Pause).
+   */
+  setPaused(paused: boolean, trigger: BackpackTrigger = 'pause'): void {
     if (paused === this.paused) {
       return;
     }
@@ -1326,9 +1318,12 @@ export class GameScene extends Phaser.Scene {
         this.statsUnsavedMs = 0;
         void this.session.persist();
       }
-      this.pauseMenu?.open();
+      const { content, title } = this.notebookContent();
+      this.backpack.open(openingPage(trigger, content.model !== null), content, title);
+      this.audio.sfx.play('map-open');
     } else {
-      this.pauseMenu?.close();
+      this.backpack.close();
+      this.audio.sfx.play('map-close');
       // Une pression de saut faite pendant la pause ne doit pas partir à la reprise.
       this.controls.consumePressed('Jump');
     }

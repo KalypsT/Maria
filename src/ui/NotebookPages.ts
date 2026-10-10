@@ -1,4 +1,3 @@
-import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 import type { MapModel, MapPoint, MapRoom } from '../core/world/mapModel';
 import type { MapBox } from '../core/world/zone';
 import { ABILITY_HINTS, Ability } from '../config/abilities';
@@ -49,27 +48,34 @@ function seeded(text: string): () => number {
   };
 }
 
-/**
- * Carte dessinée par Céleste (§24), page du cahier en plein écran. Le jeu est en pause tant
- * qu'elle est ouverte ; un toucher ou le bouton Carte la referme. Dessinée au crayon : salles
- * visitées, salles devinées (« ? »), passages, veilleuses allumées, trouvailles, Céleste.
- */
-type NotebookPage = 'map' | 'memories' | 'maria' | 'strange' | 'abilities' | 'journey';
+/** Les pages dessinées du sac (D-159) : celles de l'ancien cahier, sur un canvas. */
+export type NotebookPage = 'map' | 'memories' | 'maria' | 'strange' | 'abilities' | 'journey';
 
-export class MapPage {
-  private readonly root: HTMLElement;
-  private readonly canvas: HTMLCanvasElement;
-  private readonly title: HTMLButtonElement;
-  private readonly memoriesTab: HTMLButtonElement;
-  private readonly mariaTab: HTMLButtonElement;
-  private readonly strangeTab: HTMLButtonElement;
-  private readonly abilitiesTab: HTMLButtonElement;
-  private readonly journeyTab: HTMLButtonElement;
+/** Ce que montrent les pages : la carte du lieu, les souvenirs, les capacités, les chiffres. */
+export interface NotebookContent {
+  readonly model: MapModel | null;
+  /** Boîte englobant toutes les salles de la page de carte (disposition stable). */
+  readonly bounds: MapBox;
+  /** Souvenirs trouvés (les trois familles de l'ancien cahier). */
+  readonly memories: readonly string[];
+  /** Capacités acquises (D-62), pour la page « Mes capacités ». */
+  readonly abilities: readonly string[];
+  /** Les chiffres de la page « Mon voyage » (D-153). */
+  readonly figures: NotebookFigures | null;
+}
+
+/**
+ * Les pages du cahier dessinées par Céleste (§24, D-38, D-62, D-153), sur un canvas que le sac
+ * place dans sa page (D-159). Dessinées au crayon : la carte (salles visitées, salles devinées
+ * « ? », passages, veilleuses allumées, trouvailles, Céleste), les souvenirs, les capacités, les
+ * chiffres du voyage.
+ */
+export class NotebookPages {
+  readonly canvas: HTMLCanvasElement;
   /** Les chiffres de la page « Mon voyage » (D-153). */
   private figures: NotebookFigures | null = null;
   /** Capacités acquises (D-62), pour la page « Mes capacités ». */
   private abilities: ReadonlySet<string> = new Set();
-  /** Page affichée : la carte, les souvenirs (D-38) ou les affaires de Maria (D-58). */
   private page: NotebookPage = 'map';
   private found: ReadonlySet<string> = new Set();
   /** Souvenir affiché en grand (null : la grille). */
@@ -84,101 +90,34 @@ export class MapPage {
   private bounds: MapBox = { x: 0, y: 0, w: 1, h: 1 };
 
   constructor(
-    private readonly onClose: () => void,
-    /** Un souvenir jouable touché dans le cahier (D-89) : le cahier se ferme, il se rejoue. */
+    /** Un souvenir jouable touché (D-89) : le sac se ferme, il se rejoue. */
     private readonly onPlayMemory: (id: PlayableMemoryId) => void = () => undefined,
   ) {
     this.shellImage.src = `art/${ART_IMAGES['shell'] ?? 'shell.png'}`;
-    this.root = document.createElement('div');
-    this.root.id = 'map-page';
-    this.root.setAttribute(UI_OVERLAY_ATTRIBUTE, '');
-    this.root.hidden = true;
-    const panel = document.createElement('div');
-    panel.className = 'map-panel';
-    // Onglets manuscrits : la carte, les souvenirs (D-38), les affaires de Maria (D-58), le monde
-    // étrange (D-64) et les capacités acquises (D-62).
-    const tabs = document.createElement('div');
-    tabs.className = 'map-tabs';
-    this.title = document.createElement('button');
-    this.title.className = 'map-title';
-    this.memoriesTab = document.createElement('button');
-    this.memoriesTab.className = 'map-title';
-    this.memoriesTab.textContent = 'Mes souvenirs';
-    this.mariaTab = document.createElement('button');
-    this.mariaTab.className = 'map-title';
-    this.mariaTab.textContent = 'Les affaires de Maria';
-    this.strangeTab = document.createElement('button');
-    this.strangeTab.className = 'map-title';
-    this.strangeTab.textContent = 'Monde étrange';
-    this.abilitiesTab = document.createElement('button');
-    this.abilitiesTab.className = 'map-title';
-    this.abilitiesTab.textContent = 'Mes capacités';
-    this.journeyTab = document.createElement('button');
-    this.journeyTab.className = 'map-title';
-    this.journeyTab.textContent = 'Mon voyage';
-    tabs.append(
-      this.title,
-      this.memoriesTab,
-      this.mariaTab,
-      this.strangeTab,
-      this.abilitiesTab,
-      this.journeyTab,
-    );
-    for (const [tab, page] of [
-      [this.title, 'map'],
-      [this.memoriesTab, 'memories'],
-      [this.mariaTab, 'maria'],
-      [this.strangeTab, 'strange'],
-      [this.abilitiesTab, 'abilities'],
-      [this.journeyTab, 'journey'],
-    ] as const) {
-      tab.type = 'button';
-      tab.addEventListener('pointerup', (event) => {
-        event.stopPropagation();
-        this.show(page);
-      });
-    }
     this.canvas = document.createElement('canvas');
-    this.canvas.className = 'map-canvas';
-    this.canvas.addEventListener('pointerup', (event) => {
-      if (this.memoryList() !== null && this.touchMemories(event)) {
-        event.stopPropagation();
+    this.canvas.className = 'notebook-canvas';
+    this.canvas.addEventListener('click', (event) => {
+      if (this.memoryList() !== null) {
+        this.touchMemories(event);
       }
     });
-    panel.append(tabs, this.canvas);
-    this.root.append(panel);
-    this.root.addEventListener('pointerup', () => {
-      this.onClose();
-    });
-    document.body.appendChild(this.root);
   }
 
-  get isOpen(): boolean {
-    return !this.root.hidden;
-  }
-
-  /**
-   * Ouvre le cahier sur la carte. `bounds` : boîte englobant toute la zone (disposition stable) ;
-   * `memories` : souvenirs trouvés ; `abilities` : capacités acquises ; `figures` : les chiffres
-   * de la page « Mon voyage » (D-153).
-   */
-  open(
-    model: MapModel,
-    title: string,
-    bounds: MapBox,
-    memories: readonly string[] = [],
-    abilities: readonly string[] = [],
-    figures: NotebookFigures | null = null,
-  ): void {
-    this.model = model;
-    this.figures = figures;
-    this.bounds = bounds;
-    this.title.textContent = title;
-    this.found = new Set(memories);
-    this.abilities = new Set(abilities);
-    this.show('map');
-    this.root.hidden = false;
+  /** Le contenu de cette ouverture du sac ; les salles découvertes depuis la dernière se tracent. */
+  setContent(content: NotebookContent): void {
+    this.model = content.model;
+    this.bounds = content.bounds;
+    this.found = new Set(content.memories);
+    this.abilities = new Set(content.abilities);
+    this.figures = content.figures;
     this.openedAt = performance.now();
+  }
+
+  /** Affiche une page et (re)lance le dessin, une image par rafraîchissement de l'écran. */
+  show(page: NotebookPage): void {
+    this.page = page;
+    this.selected = null;
+    this.cells = [];
     const tick = () => {
       this.draw(performance.now() - this.openedAt);
       this.frame = requestAnimationFrame(tick);
@@ -187,27 +126,9 @@ export class MapPage {
     this.frame = requestAnimationFrame(tick);
   }
 
-  close(): void {
-    this.root.hidden = true;
+  /** Arrête le dessin (le sac est fermé, ou une page sans canvas est affichée). */
+  stop(): void {
     cancelAnimationFrame(this.frame);
-    this.model = null;
-  }
-
-  destroy(): void {
-    this.close();
-    this.root.remove();
-  }
-
-  private show(page: NotebookPage): void {
-    this.page = page;
-    this.selected = null;
-    this.cells = [];
-    this.title.classList.toggle('active', page === 'map');
-    this.memoriesTab.classList.toggle('active', page === 'memories');
-    this.mariaTab.classList.toggle('active', page === 'maria');
-    this.strangeTab.classList.toggle('active', page === 'strange');
-    this.abilitiesTab.classList.toggle('active', page === 'abilities');
-    this.journeyTab.classList.toggle('active', page === 'journey');
   }
 
   /**
@@ -336,7 +257,7 @@ export class MapPage {
   }
 
   /** Toucher sur la page des souvenirs : ouvre ou referme un souvenir ; vrai s'il est traité. */
-  private touchMemories(event: PointerEvent): boolean {
+  private touchMemories(event: MouseEvent): boolean {
     if (this.selected !== null) {
       // Un souvenir jouable (D-89), affiché en grand : le toucher encore le rejoue.
       const playable = playableOf(this.selected);
@@ -430,11 +351,7 @@ export class MapPage {
   }
 
   private draw(elapsedMs: number): void {
-    const model = this.model;
     const canvas = this.canvas;
-    if (!model) {
-      return;
-    }
     const ratio = window.devicePixelRatio || 1;
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
@@ -462,6 +379,10 @@ export class MapPage {
     const list = this.memoryList();
     if (list !== null) {
       this.drawMemories(ctx, width, height, list);
+      return;
+    }
+    const model = this.model;
+    if (!model) {
       return;
     }
     const margin = 18;

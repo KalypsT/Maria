@@ -89,11 +89,11 @@ describe('computeTouchLayout', () => {
     expect(shift.y).toBeGreaterThan(ability.y);
   });
 
-  it('place Action dans le coin bas droit, Saut au-dessus, Pause en haut à gauche', () => {
+  it('place Action dans le coin bas droit, Saut au-dessus, le sac (Carte) en haut à gauche', () => {
     const { buttons } = computeTouchLayout(844, 390, NO_INSETS, DEFAULT_CONTROL_SETTINGS);
     const jump = buttons.find((b) => b.action === 'Jump');
     const attack = buttons.find((b) => b.action === 'Attack');
-    const pause = buttons.find((b) => b.action === 'Pause');
+    const pause = buttons.find((b) => b.action === 'Map');
     if (!jump || !attack || !pause) {
       throw new Error('boutons manquants');
     }
@@ -107,15 +107,15 @@ describe('computeTouchLayout', () => {
   it('éloigne les boutons du bord droit (marge d’au moins rightMargin)', () => {
     for (const insets of [NO_INSETS, NOTCH]) {
       const { buttons } = computeTouchLayout(844, 390, insets, DEFAULT_CONTROL_SETTINGS);
-      for (const b of buttons.filter((candidate) => candidate.action !== 'Pause')) {
+      for (const b of buttons.filter((candidate) => candidate.action !== 'Map')) {
         expect(844 - insets.right - (b.x + b.r)).toBeGreaterThanOrEqual(TOUCH_METRICS.rightMargin);
       }
     }
   });
 
-  it('n’affiche pas les boutons désactivés (Capacité, Interaction)', () => {
+  it('n’affiche pas les boutons désactivés (Capacité, Interaction, Pause : dans le sac, D-159)', () => {
     const { buttons } = computeTouchLayout(844, 390, NO_INSETS, DEFAULT_CONTROL_SETTINGS);
-    expect(buttons.map((b) => b.action).sort()).toEqual(['Attack', 'Jump', 'Map', 'Pause']);
+    expect(buttons.map((b) => b.action).sort()).toEqual(['Attack', 'Jump', 'Map']);
   });
 
   it('agrandit les boutons avec l’échelle', () => {
