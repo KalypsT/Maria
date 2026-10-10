@@ -1892,6 +1892,8 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. Essai de la glissade (parcours 11) et du départ du train sur téléphone, réglages exportés du DEBUG.
-2. Le train, PR 3 à 6 (D-83).
-3. Avant d'offrir le jeu : la branche « avant diffusion » (D-152 : lanternes nommées, faites ; la revue des lanternes), puis les stats.
+Voir l'état des lieux du 10 octobre 2026 : `docs/RESTE_A_FAIRE.md`.
+
+1. Une partie complète sur téléphone (build de debug), avec les stats (DEBUG → « Stats »).
+2. Les réponses de l'utilisateur : la gare étrange (D-130), les lanternes dehors et les débuts des mondes étranges (`docs/LANTERNES.md`, questions 3 et 4), la diffusion.
+3. Une branche « retours de la partie », puis le chantier D (mondes étranges), puis le ménage et la diffusion.
