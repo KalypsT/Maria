@@ -87,16 +87,14 @@ describe('derrière la haie (D-49)', () => {
   });
 
   it(
-    'chemin jusqu’au bonnet : difficile exactement, la cheminée difficile juste après la veilleuse',
+    'chemin jusqu’au bonnet : moyen exactement (D-157 : la seconde cheminée resserrée)',
     { timeout: TIMEOUT },
     () => {
-      const hard = hedgeGraph(byDifficulty('hard'));
       const medium = hedgeGraph(byDifficulty('medium'));
-      expect(reachable(hard, arrival()).has(bonnet()), 'trop difficile').toBe(true);
-      expect(reachable(medium, arrival()).has(bonnet()), 'trop facile').toBe(false);
-      // Jusqu'à la dernière veilleuse, c'est moyen ; après, c'est le passage difficile.
-      expect(reachable(medium, arrival()).has(lastLamp()), 'avant la veilleuse').toBe(true);
-      expect(reachable(hard, lastLamp()).has(bonnet())).toBe(true);
+      const easy = hedgeGraph(byDifficulty('easy'));
+      expect(reachable(medium, arrival()).has(bonnet()), 'trop difficile').toBe(true);
+      expect(reachable(easy, arrival()).has(bonnet()), 'trop facile').toBe(false);
+      expect(reachable(medium, lastLamp()).has(bonnet())).toBe(true);
     },
   );
 
