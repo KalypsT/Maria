@@ -19,6 +19,7 @@
 ; @decor: drawings 2 7 6 3
 ; @decor: dust 13 7 7 6
 ; @decor: cushions 2 13 3 1
+; @decor: wallshelf 14 7 3 1
 ; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (danger), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 ##############################
 ################.............#
