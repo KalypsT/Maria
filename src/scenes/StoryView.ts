@@ -20,7 +20,7 @@ import {
   type ThoughtIcon,
 } from '../core/story/story';
 import { drawLoopObject } from './art/memoryArt';
-import { characterOverhang, drawCharacter } from './art/familyArt';
+import { characterHeadroom, characterOverhang, drawCharacter } from './art/familyArt';
 import {
   SPARKLE_SIZE,
   THOUGHT_SIZE,
@@ -102,8 +102,10 @@ export class StoryView {
       if (isLooping(kind)) {
         // Deux images pour le petit mouvement en boucle (D-37, D-38).
         const below = characterOverhang(kind);
+        const above = characterHeadroom(kind);
         for (const frame of [0, 1]) {
-          this.texture(`prop-${kind}-${String(frame)}`, w, h + below, (ctx) => {
+          this.texture(`prop-${kind}-${String(frame)}`, w, above + h + below, (ctx) => {
+            ctx.translate(0, above);
             if (kind === 'toy-town') {
               // Le téléphone de l'Educaville sonne (D-155) : le combiné tremble.
               drawToyTown(ctx, w, h, frame === 0 ? 'ring0' : 'ring1', images);
@@ -168,7 +170,7 @@ export class StoryView {
       const box = this.stage.boxes[i];
       const key = isLooping(prop.kind) ? `prop-${prop.kind}-0` : `prop-${prop.kind}`;
       return this.scene.add
-        .image(box ? box.x : 0, box ? box.y : 0, key)
+        .image(box ? box.x : 0, (box ? box.y : 0) - characterHeadroom(prop.kind), key)
         .setOrigin(0, 0)
         .setScale(1 / this.artScale)
         .setFlipX(prop.flip ?? false)
@@ -230,6 +232,9 @@ export class StoryView {
       thought.setVisible(false);
     }
     const speechBox = this.stage.boxes[this.speechProp];
+    // Une tête qui dépasse du cadre (pose assise illustrée) : la bulle part de plus haut.
+    const speechKind = this.stage.props[this.speechProp]?.kind;
+    const speechLift = speechKind ? characterHeadroom(speechKind) : 0;
     if (now < this.speechEnd && speechBox) {
       const fade = STORY_TIMING.thoughtFadeMs;
       const alpha = Math.min(1, (now - this.speechStart) / fade, (this.speechEnd - now) / fade);
@@ -237,7 +242,7 @@ export class StoryView {
         .setVisible(true)
         .setAlpha(Math.max(0, alpha))
         // La traîne de la bulle (en bas à gauche) part du milieu du personnage : sa tête.
-        .setPosition(speechBox.x + speechBox.width * 0.5 - 4, speechBox.y + 4);
+        .setPosition(speechBox.x + speechBox.width * 0.5 - 4, speechBox.y + 4 - speechLift);
     } else if (this.speech.visible) {
       this.speech.setVisible(false);
     }
