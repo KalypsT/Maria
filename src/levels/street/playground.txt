@@ -4,6 +4,9 @@
 ; grillage de l'école et son trou, trop loin de la tour sans le parapluie : en planant depuis le toit
 ; de la tour, on passe dans la cour de l'école (sortie 2, D-64).
 ; Refaite (D-78) : du ciel au-dessus (le feuillage seulement en haut du platane), les balançoires au vent.
+; D-158 (retour d'essai : le trou du grillage ne se voyait pas) : le ballon de la cour coincé dans le
+; trou, visible depuis le sol ; un pigeon sur le toit de la tour s'envole tout droit par le trou quand
+; Céleste y arrive.
 ; @name: Aire de jeux
 ; @shell: playground-birdhouse 53 10 medium
 ; @lantern: playground-bench 5 27
@@ -24,6 +27,7 @@
 ; @decor: slidetower 58 12 14 16
 ; @decor: springrider 12 25 2 3
 ; @decor: schoolfence 76 1 4 27
+; @decor: holepigeon 60 10 3 2
 ; @decor: butterfly 4 12 30 10
 ; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 v.............vvvvvvvvvvvvv.................................................vvvv

@@ -226,6 +226,8 @@ export const DECOR_KINDS: Readonly<
   /** La mouette de la promenade, le merle et le hérisson du jardin (D-155). */
   seagull: { furniture: false },
   blackbird: { furniture: false },
+  /** Le pigeon du toit de la tour du toboggan : il s'envole par le trou du grillage (D-158). */
+  holepigeon: { furniture: false },
   hedgehog: { furniture: false },
   /** Casiers de la classe posés au sol (fond) ; leur dessus est `cubbytop`. */
   cubbybody: { furniture: false },

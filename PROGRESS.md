@@ -2,6 +2,8 @@
 
 ## Phase en cours
 
+**Le trou du grillage de l'aire de jeux** (D-158, sur `claude/game-test-issues-e7pomv`) : le ballon de la cour coincé dedans, un pigeon qui s'envole par le trou depuis le toit de la tour. Le chantier attendra (bulles des personnages). **Le sac à dos** (le cahier, la pause, les collections) : questions posées à l'utilisateur, avant tout plan.
+
 **Retour d'essai, nouvelle partie depuis le début** (D-157, sur `claude/game-test-issues-e7pomv`) : **faits** : maman assise n'a plus la tête coupée (canapé, banc de l'aire de jeux ; toutes les poses assises) ; le monsieur de l'abribus et la dame au chien plus petits (75 %) ; se rattraper au mur quitté après un saut mural raté (une fois retombée sous le point du saut) ; la seconde cheminée de la ronce et celle de l'école étrange resserrées de 5 à 4 tuiles (la ronce passe de difficile à moyen) ; le son de Maria baissé. **En attente** : le nouveau son des trouvailles (fichier de l'utilisateur, `found`) ; le quartier (trouver l'entrée de l'école, aller au fond du chantier) : propositions à valider ; le cahier (pages et contenu) : à revoir avec l'utilisateur.
 
 **Les deux derniers disques** (D-156) : « Céleste petite étoile » sur l'étagère de la cabane dans l'arbre (moyen), « Avant même ta naissance » sur l'armoire du dortoir de la mer (pas chez la nounou : sans retour), sur `ccr-fd60fab4-k0uhko`. **Les trois disques sont dans le jeu.** Les images de l'Educaville et du vieux couple (détouré automatiquement) intégrées. Suite : essai sur téléphone.
@@ -43,6 +45,12 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le trou du grillage de l'aire de jeux (D-158)
+
+- Le ballon coincé au fond du trou (`schoolfence`) ; le pigeon du toit de la tour (`holepigeon`, envol à l'horizontale).
+- Vérifié dans Chromium : le ballon se voit depuis le sol ; le pigeon traverse le trou.
+- [ ] À vérifier sur téléphone : le ballon attire-t-il l'œil ? Le pigeon part-il au bon moment (ni trop tôt, ni trop lentement) ?
 
 ### Retour d'essai : maman, les passants, le saut mural, le son de Maria (D-157)
 
