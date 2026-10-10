@@ -1,3 +1,4 @@
+import { TREASURES } from '../core/world/treasures';
 import { RECORDS, recordSlot } from '../config/records';
 import { StoryFlag } from '../config/story';
 import Phaser from 'phaser';
@@ -1733,6 +1734,17 @@ export function installDebugOverlay(scene: GameScene): void {
     'click',
     (event) => {
       scene.playMemory('eden', false);
+      (event.currentTarget as HTMLElement).blur();
+    },
+  );
+  // Les trésors (D-162) : le suivant trouvé, dans l'ordre des familles du sac.
+  element('button', panel, undefined, 'Trouver le trésor suivant').addEventListener(
+    'click',
+    (event) => {
+      const next = TREASURES.find((id) => !scene.session.data.progression.memories.includes(id));
+      if (next) {
+        void scene.session.addMemory(next);
+      }
       (event.currentTarget as HTMLElement).blur();
     },
   );

@@ -8,9 +8,10 @@ import {
   type BackpackTab,
 } from '../core/world/backpack';
 import { MAP_PLACES } from '../config/places';
-import { NOTEBOOK_ICON, PLACE_ICONS, POUCH_ICON, TREASURE_BOX_ICON } from './bagIcons';
+import { NOTEBOOK_ICON, PLACE_ICONS, POUCH_ICON, SPARK_ICON, TREASURE_BOX_ICON } from './bagIcons';
 import { NotebookPages, type NotebookContent } from './NotebookPages';
 import { SettingsPanel, type SettingsPanelOptions } from './SettingsPanel';
+import { TreasuresPage } from './TreasuresPage';
 
 const TABS: Readonly<Record<BackpackTab, { label: string; icon: string }>> = {
   notebook: { label: 'Le cahier', icon: NOTEBOOK_ICON },
@@ -22,9 +23,7 @@ const PAGE_LABELS: Readonly<Record<BackpackPage, string>> = {
   map: 'La carte',
   journey: 'Mon voyage',
   abilities: 'Mes capacités',
-  memories: 'Mes souvenirs',
-  maria: 'Les affaires de Maria',
-  strange: 'Monde étrange',
+  treasures: 'Mes trésors',
   settings: 'Réglages',
 };
 
@@ -34,6 +33,8 @@ export interface BackpackOptions {
   readonly onClose: () => void;
   /** Un souvenir jouable touché (D-89) : le sac se ferme, il se rejoue. */
   readonly onPlayMemory: (id: PlayableMemoryId) => void;
+  /** La page des trésors a été regardée : ces trésors ne sont plus nouveaux (D-162). */
+  readonly onTreasuresViewed: (ids: readonly string[]) => void;
 }
 
 /**
@@ -52,7 +53,11 @@ export class Backpack {
   private readonly mapColumn: HTMLElement;
   private readonly placeName: HTMLElement;
   private readonly notebook: NotebookPages;
+  private readonly treasures: TreasuresPage;
   private readonly settings: SettingsPanel;
+  private readonly onTreasuresViewed: (ids: readonly string[]) => void;
+  /** Un trésor nouveau, pas encore regardé : une étincelle sur la boîte à trésors. */
+  private treasuresNew = false;
   private page: BackpackPage = 'map';
   private hasMap = false;
   private content: NotebookContent | null = null;
@@ -73,6 +78,12 @@ export class Backpack {
       button.type = 'button';
       button.className = 'bag-object';
       button.innerHTML = `${TABS[tab].icon}<span>${TABS[tab].label}</span>`;
+      if (tab === 'treasures') {
+        const spark = document.createElement('span');
+        spark.className = 'bag-spark';
+        spark.innerHTML = SPARK_ICON;
+        button.append(spark);
+      }
       button.addEventListener('click', () => {
         if (tabOf(this.page) !== tab) {
           this.show(this.firstPage(tab));
@@ -113,7 +124,9 @@ export class Backpack {
         options.onClose();
       }
     });
-    this.notebook = new NotebookPages(options.onPlayMemory);
+    this.notebook = new NotebookPages();
+    this.treasures = new TreasuresPage(options.onPlayMemory);
+    this.onTreasuresViewed = options.onTreasuresViewed;
     this.settings = new SettingsPanel({
       ...options.settings,
       onResume: options.onClose,
@@ -135,6 +148,12 @@ export class Backpack {
   open(page: BackpackPage, content: NotebookContent): void {
     this.content = content;
     this.hasMap = content.startPlace !== null;
+    this.treasuresNew = content.treasures?.hasNew ?? false;
+    // Sans partie (un parcours d'essai), pas de trésors.
+    const treasuresTab = this.tabButtons.get('treasures');
+    if (treasuresTab) {
+      treasuresTab.hidden = content.treasures === null;
+    }
     this.notebook.setContent(content);
     this.showPlace(content.startPlace);
     this.settings.refresh();
@@ -166,8 +185,12 @@ export class Backpack {
   private show(page: BackpackPage): void {
     this.page = page;
     const tab = tabOf(page);
+    if (page === 'treasures') {
+      this.treasuresNew = false;
+    }
     for (const [key, button] of this.tabButtons) {
       button.classList.toggle('active', key === tab);
+      button.classList.toggle('new', key === 'treasures' && this.treasuresNew);
     }
     const pages = this.pagesOf(tab);
     this.head.replaceChildren(
@@ -190,6 +213,11 @@ export class Backpack {
       this.body.replaceChildren(this.settings.element);
       return;
     }
+    if (page === 'treasures') {
+      this.notebook.stop();
+      this.showTreasures();
+      return;
+    }
     if (page === 'map') {
       this.mapColumn.replaceChildren(this.placeName, this.notebook.canvas);
       this.body.replaceChildren(this.mapLayout);
@@ -197,6 +225,29 @@ export class Backpack {
       this.body.replaceChildren(this.notebook.canvas);
     }
     this.notebook.show(page);
+  }
+
+  /**
+   * La page des trésors (D-162) : leur compte en haut ; les trésors trouvés sont regardés (leurs
+   * points « nouveau » restent pour cette ouverture du sac).
+   */
+  private showTreasures(): void {
+    const book = this.content?.treasures;
+    if (!book || !this.content) {
+      this.body.replaceChildren();
+      return;
+    }
+    this.treasures.render(book, this.content.names);
+    const total = document.createElement('span');
+    total.className = 'bag-total';
+    total.textContent = this.treasures.total;
+    this.head.append(total);
+    this.body.replaceChildren(this.treasures.element);
+    this.onTreasuresViewed(
+      [...book.families.flatMap((family) => family.cells), ...book.records]
+        .filter((cell) => cell.found)
+        .map((cell) => cell.id),
+    );
   }
 
   /** Feuillette le cahier jusqu'à la carte d'un lieu visité (D-160). */

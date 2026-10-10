@@ -43,6 +43,11 @@ export interface SaveData {
      * migration).
      */
     seenTreasures: string[];
+    /**
+     * Trésors et disques trouvés déjà regardés dans le sac (D-162) : les autres sont « nouveaux ».
+     * Absent des sauvegardes plus anciennes : vide (aucune migration).
+     */
+    viewedTreasures: string[];
     memories: string[];
     mapRevealed: string[];
   };
@@ -116,6 +121,7 @@ export function createNewSave(
       collectibles: [],
       seenCollectibles: [],
       seenTreasures: [],
+      viewedTreasures: [],
       memories: [],
       mapRevealed: [],
     },
@@ -200,11 +206,14 @@ export function validateSaveData(raw: unknown): SaveData | null {
   const seenCollectibles = seen === undefined ? [] : stringList(seen);
   const seenT = progression['seenTreasures'];
   const seenTreasures = seenT === undefined ? [] : stringList(seenT);
+  const viewedT = progression['viewedTreasures'];
+  const viewedTreasures = viewedT === undefined ? [] : stringList(viewedT);
   if (
     !abilities ||
     !collectibles ||
     !seenCollectibles ||
     !seenTreasures ||
+    !viewedTreasures ||
     !memories ||
     !mapRevealed
   ) {
@@ -225,6 +234,7 @@ export function validateSaveData(raw: unknown): SaveData | null {
       collectibles,
       seenCollectibles,
       seenTreasures,
+      viewedTreasures,
       memories,
       mapRevealed,
     },

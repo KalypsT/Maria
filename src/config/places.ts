@@ -15,6 +15,19 @@ export const MAP_PLACES = [
 
 export type PlaceIcon = (typeof MAP_PLACES)[number]['icon'];
 
+/**
+ * Le lieu des salles hors carte (les mondes étranges, D-64… ; la salle de jeux de la nounou), par
+ * le début de leur identifiant : pour l'indice de lieu d'un trésor (D-160).
+ */
+export const STRANGE_ROOM_PLACES: Readonly<Record<string, string>> = {
+  garden: 'house',
+  school: 'street',
+  station: 'station',
+  train: 'train',
+  sea: 'sea',
+  nanny: 'nanny',
+};
+
 /** Le nom d'une page de carte. */
 export function placeTitle(page: string): string {
   return MAP_PLACES.find((place) => place.id === page)?.title ?? page;

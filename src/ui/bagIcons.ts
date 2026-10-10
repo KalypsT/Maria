@@ -60,3 +60,7 @@ export const PLACE_ICONS: Readonly<Record<PlaceIcon, string>> = {
 <path d="M7 20c0-2 1-3 3-3s3 1 3 3v3h14v-3c0-2 1-3 3-3s3 1 3 3v9H7z" fill="#ddd0ee" stroke="${INK}" stroke-width="2.2" stroke-linejoin="round"/>
 <path d="M10 29v4M30 29v4" stroke="${INK}" stroke-width="2.2" stroke-linecap="round"/></svg>`,
 };
+
+/** L'étincelle « nouveau » (D-162) : sur le sac, sur la boîte à trésors. */
+export const SPARK_ICON = `<svg viewBox="0 0 20 20" aria-hidden="true">
+<path d="M10 0 12.2 7.8 20 10 12.2 12.2 10 20 7.8 12.2 0 10 7.8 7.8Z" fill="#f2c879" stroke="${INK}" stroke-width="0.8"/></svg>`;

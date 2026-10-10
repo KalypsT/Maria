@@ -1,20 +1,12 @@
 import type { MapModel, MapPoint, MapRoom } from '../core/world/mapModel';
 import type { MapBox } from '../core/world/zone';
 import { ABILITY_HINTS, Ability } from '../config/abilities';
-import {
-  MARIA_THINGS,
-  MEMORIES,
-  STRANGE_THINGS,
-  flashbackOf,
-  type MemoryId,
-} from '../config/memories';
 import { drawAbility } from '../scenes/art/abilityArt';
-import { drawFlashback } from '../scenes/art/flashbackArt';
-import { playableOf, type PlayableMemoryId } from '../config/playableMemories';
-import { drawMemory } from '../scenes/art/memoryArt';
 import { drawShellFallback, drawShellOutline } from '../scenes/art/shellArt';
 import { ART_IMAGES } from '../config/art';
 import type { NotebookPlace } from '../core/world/backpack';
+import type { TreasureBook } from '../core/world/treasureBook';
+import type { TreasureNames } from './TreasuresPage';
 import type { NotebookFigures } from '../core/world/notebookFigures';
 import { formatPlayTime } from '../core/save/stats';
 import { drawFigureIcon, type FigureIcon } from '../scenes/art/figureArt';
@@ -50,7 +42,7 @@ function seeded(text: string): () => number {
 }
 
 /** Les pages dessinées du sac (D-159) : celles de l'ancien cahier, sur un canvas. */
-export type NotebookPage = 'map' | 'memories' | 'maria' | 'strange' | 'abilities' | 'journey';
+export type NotebookPage = 'map' | 'abilities' | 'journey';
 
 /** La carte d'un lieu (une page du cahier, D-60). */
 export interface NotebookMap {
@@ -71,8 +63,10 @@ export interface NotebookContent {
   readonly places: readonly NotebookPlace[];
   /** Le lieu ouvert d'abord : celui de Céleste (null sans carte). */
   readonly startPlace: string | null;
-  /** Souvenirs trouvés (les trois familles de l'ancien cahier). */
-  readonly memories: readonly string[];
+  /** La page des trésors (D-162 ; null dans un parcours d'essai). */
+  readonly treasures: TreasureBook | null;
+  /** Les noms des lieux et des salles, pour les trésors. */
+  readonly names: TreasureNames;
   /** Capacités acquises (D-62), pour la page « Mes capacités ». */
   readonly abilities: readonly string[];
   /** Les chiffres de la page « Mon voyage » (D-153). */
@@ -92,11 +86,6 @@ export class NotebookPages {
   /** Capacités acquises (D-62), pour la page « Mes capacités ». */
   private abilities: ReadonlySet<string> = new Set();
   private page: NotebookPage = 'map';
-  private found: ReadonlySet<string> = new Set();
-  /** Souvenir affiché en grand (null : la grille). */
-  private selected: MemoryId | null = null;
-  /** Cases de la grille des souvenirs (px CSS du canvas), pour les touchers. */
-  private cells: { id: MemoryId; x: number; y: number; size: number }[] = [];
   private frame = 0;
   private openedAt = 0;
   private model: MapModel | null = null;
@@ -104,23 +93,14 @@ export class NotebookPages {
   private readonly shellImage = new Image();
   private bounds: MapBox = { x: 0, y: 0, w: 1, h: 1 };
 
-  constructor(
-    /** Un souvenir jouable touché (D-89) : le sac se ferme, il se rejoue. */
-    private readonly onPlayMemory: (id: PlayableMemoryId) => void = () => undefined,
-  ) {
+  constructor() {
     this.shellImage.src = `art/${ART_IMAGES['shell'] ?? 'shell.png'}`;
     this.canvas = document.createElement('canvas');
     this.canvas.className = 'notebook-canvas';
-    this.canvas.addEventListener('click', (event) => {
-      if (this.memoryList() !== null) {
-        this.touchMemories(event);
-      }
-    });
   }
 
   /** Le contenu de cette ouverture du sac (les souvenirs, les capacités, les chiffres). */
   setContent(content: NotebookContent): void {
-    this.found = new Set(content.memories);
     this.abilities = new Set(content.abilities);
     this.figures = content.figures;
   }
@@ -135,8 +115,6 @@ export class NotebookPages {
   /** Affiche une page et (re)lance le dessin, une image par rafraîchissement de l'écran. */
   show(page: NotebookPage): void {
     this.page = page;
-    this.selected = null;
-    this.cells = [];
     const tick = () => {
       this.draw(performance.now() - this.openedAt);
       this.frame = requestAnimationFrame(tick);
@@ -261,114 +239,6 @@ export class NotebookPages {
     });
   }
 
-  /** Cases de la page affichée, si c'est une page de souvenirs (null : carte ou capacités). */
-  private memoryList(): readonly MemoryId[] | null {
-    switch (this.page) {
-      case 'memories':
-        return MEMORIES;
-      case 'maria':
-        return MARIA_THINGS;
-      case 'strange':
-        return STRANGE_THINGS;
-      default:
-        return null;
-    }
-  }
-
-  /** Toucher sur la page des souvenirs : ouvre ou referme un souvenir ; vrai s'il est traité. */
-  private touchMemories(event: MouseEvent): boolean {
-    if (this.selected !== null) {
-      // Un souvenir jouable (D-89), affiché en grand : le toucher encore le rejoue.
-      const playable = playableOf(this.selected);
-      this.selected = null;
-      if (playable) {
-        this.onPlayMemory(playable);
-      }
-      return true;
-    }
-    const bounds = this.canvas.getBoundingClientRect();
-    const x = event.clientX - bounds.left;
-    const y = event.clientY - bounds.top;
-    for (const cell of this.cells) {
-      const half = cell.size / 2;
-      if (Math.abs(x - cell.x) <= half && Math.abs(y - cell.y) <= half) {
-        if (this.found.has(cell.id)) {
-          this.selected = cell.id;
-        }
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Page des souvenirs (D-38) : une case par souvenir, dessiné s'il est trouvé, en pointillés
-   * sinon (complétion explicite, §23) ; un souvenir touché s'affiche en grand.
-   */
-  private drawMemories(
-    ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number,
-    list: readonly MemoryId[],
-  ): void {
-    const pencil = themeColor('--pencil');
-    const ink = themeColor('--ink');
-    ctx.lineCap = 'round';
-    if (this.selected !== null) {
-      // Un souvenir qui a son court souvenir (D-68) : la vignette se rejoue en grand.
-      const flashback = flashbackOf(this.selected);
-      if (flashback) {
-        drawFlashback(ctx, flashback, width / 2, height / 2, width * 0.86, height * 0.86);
-        return;
-      }
-      const size = Math.min(width, height) * 0.82;
-      ctx.strokeStyle = ink;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.roundRect(width / 2 - size / 2, height / 2 - size / 2, size, size, 12);
-      ctx.stroke();
-      drawMemory(ctx, this.selected, width / 2, height / 2, size * 0.85);
-      if (playableOf(this.selected)) {
-        // Un souvenir jouable (D-89) : un petit triangle « lecture », sans texte.
-        const r = size * 0.08;
-        const cx = width / 2 + size / 2 - r * 1.8;
-        const cy = height / 2 + size / 2 - r * 1.8;
-        ctx.fillStyle = ink;
-        ctx.beginPath();
-        ctx.moveTo(cx - r * 0.6, cy - r);
-        ctx.lineTo(cx + r, cy);
-        ctx.lineTo(cx - r * 0.6, cy + r);
-        ctx.closePath();
-        ctx.fill();
-      }
-      return;
-    }
-    const cols = list.length <= 4 ? list.length : 3;
-    const rows = Math.ceil(list.length / cols);
-    const size = Math.min((width - 24) / cols, (height - 12) / rows) * 0.84;
-    const gapX = (width - cols * size) / (cols + 1);
-    const gapY = (height - rows * size) / (rows + 1);
-    this.cells = list.map((id, i) => ({
-      id,
-      x: gapX + (i % cols) * (size + gapX) + size / 2,
-      y: gapY + Math.floor(i / cols) * (size + gapY) + size / 2,
-      size,
-    }));
-    for (const cell of this.cells) {
-      const found = this.found.has(cell.id);
-      ctx.strokeStyle = found ? ink : pencil;
-      ctx.lineWidth = found ? 2 : 1.6;
-      ctx.setLineDash(found ? [] : [6, 5]);
-      ctx.beginPath();
-      ctx.roundRect(cell.x - size / 2, cell.y - size / 2, size, size, 10);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      if (found) {
-        drawMemory(ctx, cell.id, cell.x, cell.y, size * 0.82);
-      }
-    }
-  }
-
   private draw(elapsedMs: number): void {
     const canvas = this.canvas;
     const ratio = window.devicePixelRatio || 1;
@@ -393,11 +263,6 @@ export class NotebookPages {
     }
     if (this.page === 'journey') {
       this.drawJourney(ctx, width, height);
-      return;
-    }
-    const list = this.memoryList();
-    if (list !== null) {
-      this.drawMemories(ctx, width, height, list);
       return;
     }
     const model = this.model;

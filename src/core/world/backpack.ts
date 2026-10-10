@@ -7,16 +7,15 @@
 /** Les trois objets de la poche du sac. */
 export type BackpackTab = 'notebook' | 'treasures' | 'settings';
 
-/** Une page du sac. Les trésors gardent pour l'instant les trois pages de l'ancien cahier. */
-export type BackpackPage =
-  'map' | 'journey' | 'abilities' | 'memories' | 'maria' | 'strange' | 'settings';
+/** Une page du sac. */
+export type BackpackPage = 'map' | 'journey' | 'abilities' | 'treasures' | 'settings';
 
 export const BACKPACK_TABS: readonly BackpackTab[] = ['notebook', 'treasures', 'settings'];
 
 /** Les pages de chaque onglet, dans l'ordre des sous-onglets ; la première s'ouvre d'abord. */
 export const BACKPACK_PAGES: Readonly<Record<BackpackTab, readonly BackpackPage[]>> = {
   notebook: ['map', 'journey', 'abilities'],
-  treasures: ['memories', 'maria', 'strange'],
+  treasures: ['treasures'],
   settings: ['settings'],
 };
 

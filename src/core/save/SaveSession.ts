@@ -85,6 +85,17 @@ export class SaveSession {
     return this.persist();
   }
 
+  /** Trésors regardés dans le sac (D-162) : ils ne sont plus « nouveaux ». Écrits s'il y en a. */
+  addViewedTreasures(ids: readonly string[]): Promise<void> {
+    const viewed = this.current.progression.viewedTreasures;
+    const fresh = ids.filter((id) => !viewed.includes(id));
+    if (fresh.length === 0) {
+      return Promise.resolve();
+    }
+    viewed.push(...fresh);
+    return this.persist();
+  }
+
   /** Outil de debug (D-148) : une coquille redevient à trouver. */
   removeCollectible(id: string): Promise<void> {
     const collectibles = this.current.progression.collectibles;

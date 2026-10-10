@@ -1,4 +1,5 @@
 import { MARIA_THINGS, MEMORIES, STRANGE_THINGS, type MemoryId } from '../../config/memories';
+import { RECORD_SLOTS } from '../../config/records';
 import type { FlagCondition, StoryData } from '../story/story';
 
 /**
@@ -7,9 +8,9 @@ import type { FlagCondition, StoryData } from '../story/story';
  */
 export const TREASURES: readonly MemoryId[] = [...MEMORIES, ...MARIA_THINGS, ...STRANGE_THINGS];
 
-/** Où se trouve un trésor : la salle et la tuile de son déclencheur, et quand il est là. */
+/** Où se trouve un trésor (ou un disque) : la salle et la tuile de son déclencheur, et quand il est là. */
 export interface TreasureSpot {
-  readonly id: MemoryId;
+  readonly id: string;
   readonly room: string;
   readonly col: number;
   readonly row: number;
@@ -18,10 +19,13 @@ export interface TreasureSpot {
 
 /**
  * Les trésors des déclencheurs de l'histoire (une étape `memory`) : leur étincelle (`mark`), sinon
- * le milieu de leur zone. Pur.
+ * le milieu de leur zone. `ids` : les trésors cherchés (les disques, avec `RECORD_SLOTS`). Pur.
  */
-export function treasureSpots(story: StoryData): TreasureSpot[] {
-  const treasures = new Set<string>(TREASURES);
+export function treasureSpots(
+  story: StoryData,
+  ids: readonly string[] = TREASURES,
+): TreasureSpot[] {
+  const treasures = new Set<string>(ids);
   const spots: TreasureSpot[] = [];
   for (const trigger of story.triggers) {
     for (const step of trigger.steps) {
@@ -38,7 +42,7 @@ export function treasureSpots(story: StoryData): TreasureSpot[] {
           : null);
       if (at && !spots.some((s) => s.id === step.id && s.room === trigger.room)) {
         spots.push({
-          id: step.id as MemoryId,
+          id: step.id,
           room: trigger.room,
           col: at.col,
           row: at.row,
@@ -48,4 +52,9 @@ export function treasureSpots(story: StoryData): TreasureSpot[] {
     }
   }
   return spots;
+}
+
+/** Les disques (D-121) : leur place, pour leur fiche dans le sac (ni carte ni compte). */
+export function recordSpots(story: StoryData): TreasureSpot[] {
+  return treasureSpots(story, RECORD_SLOTS);
 }
