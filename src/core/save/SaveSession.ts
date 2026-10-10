@@ -75,6 +75,16 @@ export class SaveSession {
     return this.persist();
   }
 
+  /** Trésor vu mais pas pris (D-160), pour la carte ; écrit seulement s'il est nouveau. */
+  addSeenTreasure(id: string): Promise<void> {
+    const seen = this.current.progression.seenTreasures;
+    if (seen.includes(id) || this.current.progression.memories.includes(id)) {
+      return Promise.resolve();
+    }
+    seen.push(id);
+    return this.persist();
+  }
+
   /** Outil de debug (D-148) : une coquille redevient à trouver. */
   removeCollectible(id: string): Promise<void> {
     const collectibles = this.current.progression.collectibles;

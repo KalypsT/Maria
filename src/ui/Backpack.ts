@@ -7,7 +7,8 @@ import {
   type BackpackPage,
   type BackpackTab,
 } from '../core/world/backpack';
-import { NOTEBOOK_ICON, POUCH_ICON, TREASURE_BOX_ICON } from './bagIcons';
+import { MAP_PLACES } from '../config/places';
+import { NOTEBOOK_ICON, PLACE_ICONS, POUCH_ICON, TREASURE_BOX_ICON } from './bagIcons';
 import { NotebookPages, type NotebookContent } from './NotebookPages';
 import { SettingsPanel, type SettingsPanelOptions } from './SettingsPanel';
 
@@ -45,11 +46,18 @@ export class Backpack {
   private readonly tabButtons = new Map<BackpackTab, HTMLButtonElement>();
   private readonly head: HTMLElement;
   private readonly body: HTMLElement;
-  private readonly place: HTMLElement;
+  /** La carte (D-160) : la rangée des lieux à gauche, le nom du lieu et sa page à droite. */
+  private readonly mapLayout: HTMLElement;
+  private readonly places: HTMLElement;
+  private readonly mapColumn: HTMLElement;
+  private readonly placeName: HTMLElement;
   private readonly notebook: NotebookPages;
   private readonly settings: SettingsPanel;
   private page: BackpackPage = 'map';
   private hasMap = false;
+  private content: NotebookContent | null = null;
+  /** Le lieu dont la carte est affichée. */
+  private place: string | null = null;
 
   constructor(options: BackpackOptions) {
     this.root = document.createElement('div');
@@ -87,8 +95,15 @@ export class Backpack {
     this.head.className = 'bag-head';
     this.body = document.createElement('div');
     this.body.className = 'bag-body';
-    this.place = document.createElement('h2');
-    this.place.className = 'bag-place';
+    this.mapLayout = document.createElement('div');
+    this.mapLayout.className = 'bag-map';
+    this.places = document.createElement('nav');
+    this.places.className = 'bag-places';
+    this.mapColumn = document.createElement('div');
+    this.mapColumn.className = 'bag-map-page';
+    this.placeName = document.createElement('h2');
+    this.placeName.className = 'bag-place';
+    this.mapLayout.append(this.places, this.mapColumn);
     page.append(close, this.head, this.body);
     bag.append(pocket, page);
     this.root.append(bag);
@@ -114,13 +129,14 @@ export class Backpack {
   }
 
   /**
-   * Ouvre le sac sur une page. `content` : la carte du lieu (null sans carte, dans un parcours
-   * d'essai), les souvenirs, les capacités, les chiffres ; `placeTitle` : le nom du lieu.
+   * Ouvre le sac sur une page. `content` : les cartes des lieux visités (aucune dans un parcours
+   * d'essai), la rangée des lieux, les souvenirs, les capacités, les chiffres.
    */
-  open(page: BackpackPage, content: NotebookContent, placeTitle: string): void {
-    this.hasMap = content.model !== null;
-    this.place.textContent = placeTitle;
+  open(page: BackpackPage, content: NotebookContent): void {
+    this.content = content;
+    this.hasMap = content.startPlace !== null;
     this.notebook.setContent(content);
+    this.showPlace(content.startPlace);
     this.settings.refresh();
     this.root.classList.remove('previewing');
     this.root.hidden = false;
@@ -174,7 +190,67 @@ export class Backpack {
       this.body.replaceChildren(this.settings.element);
       return;
     }
-    this.body.replaceChildren(...(page === 'map' ? [this.place] : []), this.notebook.canvas);
+    if (page === 'map') {
+      this.mapColumn.replaceChildren(this.placeName, this.notebook.canvas);
+      this.body.replaceChildren(this.mapLayout);
+    } else {
+      this.body.replaceChildren(this.notebook.canvas);
+    }
     this.notebook.show(page);
+  }
+
+  /** Feuillette le cahier jusqu'à la carte d'un lieu visité (D-160). */
+  private showPlace(place: string | null): void {
+    const map = place !== null ? this.content?.maps.get(place) : undefined;
+    this.place = map ? place : null;
+    this.placeName.textContent = map?.title ?? '';
+    this.notebook.setMap(map ?? null);
+    this.renderPlaces();
+  }
+
+  /**
+   * La rangée des lieux, à gauche de la carte (choix de l'utilisateur, D-160) : un pictogramme par
+   * lieu visité (celui de Céleste marqué d'un point rose ; tout trouvé, il se colorie), puis un « ? »
+   * pour le prochain.
+   */
+  private renderPlaces(): void {
+    const content = this.content;
+    if (!content) {
+      return;
+    }
+    this.places.replaceChildren(
+      ...content.places.map((place) => {
+        const info = MAP_PLACES.find((candidate) => candidate.id === place.id);
+        if (place.state === 'next' || !info) {
+          const unknown = document.createElement('span');
+          unknown.className = 'bag-place-icon unknown';
+          unknown.textContent = '?';
+          return unknown;
+        }
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'bag-place-icon';
+        button.innerHTML = PLACE_ICONS[info.icon];
+        button.setAttribute('aria-label', info.title);
+        button.title = info.title;
+        const shells = content.maps.get(place.id)?.model.shells;
+        button.classList.toggle('active', place.id === this.place);
+        button.classList.toggle(
+          'complete',
+          !!shells && shells.total > 0 && shells.found === shells.total,
+        );
+        if (place.here) {
+          const dot = document.createElement('span');
+          dot.className = 'bag-here';
+          button.append(dot);
+        }
+        button.addEventListener('click', () => {
+          if (place.id !== this.place) {
+            this.showPlace(place.id);
+          }
+        });
+        return button;
+      }),
+    );
   }
 }

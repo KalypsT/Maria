@@ -2,6 +2,7 @@ import { TILE_SIZE as T } from '../../config/display';
 import { EntityType } from '../level/LevelData';
 import { checkpointId } from '../save/saveData';
 import { shellId } from './Pickups';
+import type { TreasureSpot } from './treasures';
 import { isMappedRoom, mapPage, type MapBox, type Zone } from './zone';
 
 /** Point sur la carte (unités de carte). */
@@ -26,6 +27,8 @@ export interface MapRoom {
   readonly seenShells: readonly MapPoint[];
   /** Cubes de la tour d'Eden trouvés dans cette salle (D-122), de leur couleur. */
   readonly cubes: readonly (MapPoint & { readonly color: string })[];
+  /** Trésors vus mais pas pris (D-160), en pointillés, comme les coquilles. */
+  readonly seenTreasures: readonly MapPoint[];
   /** Icône de la salle (`; @icon:`), dessinée par la carte. */
   readonly icon: string | null;
 }
@@ -59,6 +62,12 @@ export interface MapProgress {
   readonly collectibles: readonly string[];
   /** Coquilles vues mais pas prises (D-148). */
   readonly seenCollectibles?: readonly string[];
+  /** Les trésors (D-160) : où ils sont, ceux qui ont été vus, ceux qui sont pris. */
+  readonly treasures?: {
+    readonly spots: readonly TreasureSpot[];
+    readonly seen: readonly string[];
+    readonly taken: readonly string[];
+  };
   /** Salle et position de Céleste (px), ou null. */
   readonly celeste: { readonly room: string; readonly x: number; readonly y: number } | null;
   /** Cubes de la tour d'Eden trouvés (D-122) : leur salle, leur tuile, leur couleur. */
@@ -146,6 +155,19 @@ export function buildMapModel(zone: Zone, progress: MapProgress, page: string = 
         }
       }
     }
+    const treasures: MapPoint[] = [];
+    if (isVisited && progress.treasures) {
+      const { spots, seen: seenIds, taken } = progress.treasures;
+      for (const spot of spots) {
+        const center =
+          spot.room === id && seenIds.includes(spot.id) && !taken.includes(spot.id)
+            ? at(id, (spot.col + 0.5) * T, (spot.row + 0.5) * T)
+            : null;
+        if (center) {
+          treasures.push(center);
+        }
+      }
+    }
     const cubes: (MapPoint & { color: string })[] = [];
     for (const cube of progress.cubes ?? []) {
       const center =
@@ -164,6 +186,7 @@ export function buildMapModel(zone: Zone, progress: MapProgress, page: string = 
       shells,
       seenShells: seen,
       cubes,
+      seenTreasures: treasures,
       icon: level.meta.icon ?? null,
     });
   }

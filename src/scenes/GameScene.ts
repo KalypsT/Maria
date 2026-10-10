@@ -126,7 +126,7 @@ import {
 import { STORY_TIMING, StoryFlag, TOWER_CUBES, TOY_PHONE } from '../config/story';
 import { PropStage } from '../core/story/PropStage';
 import { StoryDirector } from '../core/story/StoryDirector';
-import { holdsMaria, type TimeOfDay } from '../core/story/story';
+import { checkCondition, holdsMaria, type TimeOfDay } from '../core/story/story';
 import { STRANGE_FX } from '../config/strangeFx';
 import { HOUSE_STORY } from '../levels/house/story';
 import { ISLET_CUBES } from '../levels/nanny/story';
@@ -147,8 +147,10 @@ import { LullabyView } from './LullabyView';
 import { RideView } from './RideView';
 import { Backpack } from '../ui/Backpack';
 import { BAG_ICON } from '../ui/bagIcons';
-import { openingPage, type BackpackTrigger } from '../core/world/backpack';
-import type { NotebookContent } from '../ui/NotebookPages';
+import { notebookPlaces, openingPage, type BackpackTrigger } from '../core/world/backpack';
+import { treasureSpots, type TreasureSpot } from '../core/world/treasures';
+import { MAP_PLACES, placeTitle } from '../config/places';
+import type { NotebookContent, NotebookMap } from '../ui/NotebookPages';
 import { RecordPicker } from '../ui/RecordPicker';
 import { isRecordSlot } from '../config/records';
 import { canPlayRecords, recordShelf, type RecordChoice } from '../core/audio/records';
@@ -230,16 +232,18 @@ const SOLID_COLORS: Readonly<Partial<Record<number, SolidColors>>> = {
   [Material.Leaf]: { fill: PLACEHOLDER_COLORS.leaf, edge: PLACEHOLDER_COLORS.leafEdge },
 };
 
-/** Titre de la carte de chaque zone (écrit par Céleste). */
-const MAP_TITLES: Readonly<Record<string, string>> = {
-  house: 'Ma maison',
-  street: 'Mon quartier',
-  station: 'La gare',
-  train: 'Le train',
-  sea: 'La mer',
-  // L'avant-dernier niveau (D-107) : la maison de la nounou et ses îlots de mémoire.
-  nanny: 'Chez la nounou',
-};
+/** Les trésors (D-160), salle par salle : où ils sont, pour les voir et les montrer sur la carte. */
+const TREASURES_BY_ROOM: ReadonlyMap<string, readonly TreasureSpot[]> = (() => {
+  const byRoom = new Map<string, TreasureSpot[]>();
+  for (const spot of treasureSpots(HOUSE_STORY)) {
+    const list = byRoom.get(spot.room) ?? [];
+    list.push(spot);
+    byRoom.set(spot.room, list);
+  }
+  return byRoom;
+})();
+const TREASURE_SPOTS = [...TREASURES_BY_ROOM.values()].flat();
+const PLACE_ORDER: readonly string[] = MAP_PLACES.map((place) => place.id);
 
 /** Boîte englobant toutes les salles d'une page de la carte (disposition stable). */
 function mapBounds(zone: Zone, page: string): MapBox {
@@ -1039,6 +1043,7 @@ export class GameScene extends Phaser.Scene {
     this.worldView.render();
     this.hideouts.update(box, this.game.loop.delta);
     this.noticeShells();
+    this.noticeTreasures();
     this.dust.update();
     const hintTarget = this.hintTarget;
     this.hintView.update(
@@ -1177,7 +1182,7 @@ export class GameScene extends Phaser.Scene {
    * et devinées, veilleuses allumées, coquilles trouvées et vues, D-148, Céleste), seulement dans
    * une zone (pas dans les parcours d'essai) ; les souvenirs, les capacités, les chiffres du voyage.
    */
-  private notebookContent(): { content: NotebookContent; title: string } {
+  private notebookContent(): NotebookContent {
     const zone = this.zone;
     const data = this.session.data;
     const base = {
@@ -1185,43 +1190,54 @@ export class GameScene extends Phaser.Scene {
       abilities: this.ownedAbilities(),
     };
     if (!zone) {
-      return {
-        content: { ...base, model: null, bounds: { x: 0, y: 0, w: 1, h: 1 }, figures: null },
-        title: '',
-      };
+      return { ...base, maps: new Map(), places: [], startPlace: null, figures: null };
     }
     const box = this.player.box;
-    // Page du cahier de la salle ; dans le monde étrange (hors carte), celle de la zone.
-    const page = mapPage(zone, this.level.id) ?? zone.id;
-    const model = buildMapModel(
-      zone,
-      {
-        visited: data.progression.mapRevealed,
-        seen: this.mapSeen,
-        activatedCheckpoints: data.activatedCheckpoints,
-        checkpoint: data.checkpoint,
-        collectibles: data.progression.collectibles,
-        seenCollectibles: data.progression.seenCollectibles,
-        celeste: { room: this.level.id, x: box.x + box.width / 2, y: box.y + box.height },
-        cubes: ISLET_CUBES.flatMap((cube, k) =>
-          this.story.flags.has(cube.flag)
-            ? [{ room: cube.room, ...cube.at, color: TOWER_CUBES[k]?.color ?? '#ec8fab' }]
-            : [],
-        ),
+    const progress = {
+      visited: data.progression.mapRevealed,
+      seen: this.mapSeen,
+      activatedCheckpoints: data.activatedCheckpoints,
+      checkpoint: data.checkpoint,
+      collectibles: data.progression.collectibles,
+      seenCollectibles: data.progression.seenCollectibles,
+      treasures: {
+        spots: TREASURE_SPOTS,
+        seen: data.progression.seenTreasures,
+        taken: data.progression.memories,
       },
-      page,
+      celeste: { room: this.level.id, x: box.x + box.width / 2, y: box.y + box.height },
+      cubes: ISLET_CUBES.flatMap((cube, k) =>
+        this.story.flags.has(cube.flag)
+          ? [{ room: cube.room, ...cube.at, color: TOWER_CUBES[k]?.color ?? '#ec8fab' }]
+          : [],
+      ),
+    };
+    // Les lieux visités (D-160) : une page de carte chacun, qu'on feuillette.
+    const visited = new Set(
+      data.progression.mapRevealed.flatMap((room) => mapPage(zone, room) ?? []),
     );
+    const maps = new Map<string, NotebookMap>();
+    for (const page of PLACE_ORDER) {
+      if (visited.has(page)) {
+        maps.set(page, {
+          model: buildMapModel(zone, progress, page),
+          bounds: mapBounds(zone, page),
+          title: placeTitle(page),
+        });
+      }
+    }
     for (const room of data.progression.mapRevealed) {
       this.mapSeen.add(room);
     }
+    // La page de Céleste ; dans le monde étrange (hors carte), le lieu visité le plus loin.
+    const here = mapPage(zone, this.level.id);
+    const furthest = PLACE_ORDER.filter((page) => visited.has(page)).pop() ?? null;
     return {
-      content: {
-        ...base,
-        model,
-        bounds: mapBounds(zone, page),
-        figures: notebookFigures(zone, data),
-      },
-      title: MAP_TITLES[page] ?? page,
+      ...base,
+      maps,
+      places: notebookPlaces(PLACE_ORDER, visited, here),
+      startPlace: here !== null && maps.has(here) ? here : furthest,
+      figures: notebookFigures(zone, data),
     };
   }
 
@@ -1318,8 +1334,8 @@ export class GameScene extends Phaser.Scene {
         this.statsUnsavedMs = 0;
         void this.session.persist();
       }
-      const { content, title } = this.notebookContent();
-      this.backpack.open(openingPage(trigger, content.model !== null), content, title);
+      const content = this.notebookContent();
+      this.backpack.open(openingPage(trigger, content.startPlace !== null), content);
       this.audio.sfx.play('map-open');
     } else {
       this.backpack.close();
@@ -1647,6 +1663,38 @@ export class GameScene extends Phaser.Scene {
       ) {
         item.seen = true;
         void this.session.addSeenCollectible(item.id);
+      }
+    }
+  }
+
+  /**
+   * Un trésor passé à l'écran, quand il est là (son déclencheur est possible), est vu (D-160) :
+   * Céleste le dessinera en pointillés sur la carte tant qu'elle ne l'a pas pris.
+   */
+  private noticeTreasures(): void {
+    const spots = TREASURES_BY_ROOM.get(this.level.id);
+    if (!this.zone || !spots || this.hud.black) {
+      return;
+    }
+    const { memories, seenTreasures } = this.session.data.progression;
+    const view = this.cameras.main.worldView;
+    for (const spot of spots) {
+      if (
+        memories.includes(spot.id) ||
+        seenTreasures.includes(spot.id) ||
+        !checkCondition(this.story.flags, spot.when)
+      ) {
+        continue;
+      }
+      const x = (spot.col + 0.5) * TILE_SIZE;
+      const y = (spot.row + 0.5) * TILE_SIZE;
+      if (
+        x > view.x + TILE_SIZE &&
+        x < view.right - TILE_SIZE &&
+        y > view.y + TILE_SIZE &&
+        y < view.bottom - TILE_SIZE
+      ) {
+        void this.session.addSeenTreasure(spot.id);
       }
     }
   }

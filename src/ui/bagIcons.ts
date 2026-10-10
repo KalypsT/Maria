@@ -1,3 +1,5 @@
+import type { PlaceIcon } from '../config/places';
+
 /**
  * Les dessins du sac à dos (D-159), en SVG, PLACEHOLDER : le sac (le bouton en haut à gauche, en
  * attendant l'image de l'utilisateur), et les trois objets de sa poche : le cahier, la boîte à
@@ -30,3 +32,31 @@ export const POUCH_ICON = `<svg viewBox="0 0 60 48" aria-hidden="true">
 <path d="M10 19h40" stroke="${INK}" stroke-width="1.6" stroke-dasharray="3 2"/>
 <circle cx="46" cy="19" r="2.6" fill="#f3ead7" stroke="${INK}" stroke-width="1.4"/>
 <path d="M18 8l14 14" stroke="#f2c879" stroke-width="4" stroke-linecap="round"/></svg>`;
+
+/**
+ * Les pictogrammes des lieux (D-160), dans la rangée à gauche de la carte : un dessin d'enfant par
+ * page du cahier (`MAP_PLACES`).
+ */
+export const PLACE_ICONS: Readonly<Record<PlaceIcon, string>> = {
+  house: `<svg viewBox="0 0 40 40" aria-hidden="true">
+<path d="M7 19 20 8l13 11v14H7z" fill="none" stroke="${INK}" stroke-width="2.2" stroke-linejoin="round"/>
+<rect x="16" y="24" width="8" height="9" fill="#d9788f"/></svg>`,
+  swing: `<svg viewBox="0 0 40 40" aria-hidden="true">
+<path d="M8 34 13 8h14l5 26M15 8v16M25 8v16" fill="none" stroke="${INK}" stroke-width="2.2" stroke-linejoin="round"/>
+<path d="M13 25h14" stroke="#d9788f" stroke-width="3.2" stroke-linecap="round"/></svg>`,
+  clock: `<svg viewBox="0 0 40 40" aria-hidden="true">
+<circle cx="20" cy="17" r="10" fill="none" stroke="${INK}" stroke-width="2.2"/>
+<path d="M20 11v6l4 3" stroke="${INK}" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+<path d="M10 34h20" stroke="#4f6f8f" stroke-width="3"/></svg>`,
+  train: `<svg viewBox="0 0 40 40" aria-hidden="true">
+<rect x="8" y="9" width="24" height="20" rx="5" fill="none" stroke="${INK}" stroke-width="2.2"/>
+<rect x="12" y="13" width="16" height="7" fill="#c9dcef" stroke="${INK}" stroke-width="1.4"/>
+<circle cx="14" cy="33" r="2.5" fill="${INK}"/><circle cx="26" cy="33" r="2.5" fill="${INK}"/></svg>`,
+  sea: `<svg viewBox="0 0 40 40" aria-hidden="true">
+<circle cx="27" cy="12" r="5" fill="#f2c879" stroke="${INK}" stroke-width="1.6"/>
+<path d="M5 24q4-4 8 0t8 0 8 0 8 0M5 31q4-4 8 0t8 0 8 0 8 0" fill="none" stroke="#4f6f8f" stroke-width="2.4" stroke-linecap="round"/></svg>`,
+  armchair: `<svg viewBox="0 0 40 40" aria-hidden="true">
+<path d="M11 21v-8c0-3 2-5 5-5h8c3 0 5 2 5 5v8" fill="#ddd0ee" stroke="${INK}" stroke-width="2.2" stroke-linejoin="round"/>
+<path d="M7 20c0-2 1-3 3-3s3 1 3 3v3h14v-3c0-2 1-3 3-3s3 1 3 3v9H7z" fill="#ddd0ee" stroke="${INK}" stroke-width="2.2" stroke-linejoin="round"/>
+<path d="M10 29v4M30 29v4" stroke="${INK}" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+};

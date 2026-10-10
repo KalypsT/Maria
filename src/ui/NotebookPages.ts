@@ -14,6 +14,7 @@ import { playableOf, type PlayableMemoryId } from '../config/playableMemories';
 import { drawMemory } from '../scenes/art/memoryArt';
 import { drawShellFallback, drawShellOutline } from '../scenes/art/shellArt';
 import { ART_IMAGES } from '../config/art';
+import type { NotebookPlace } from '../core/world/backpack';
 import type { NotebookFigures } from '../core/world/notebookFigures';
 import { formatPlayTime } from '../core/save/stats';
 import { drawFigureIcon, type FigureIcon } from '../scenes/art/figureArt';
@@ -51,11 +52,25 @@ function seeded(text: string): () => number {
 /** Les pages dessinées du sac (D-159) : celles de l'ancien cahier, sur un canvas. */
 export type NotebookPage = 'map' | 'memories' | 'maria' | 'strange' | 'abilities' | 'journey';
 
-/** Ce que montrent les pages : la carte du lieu, les souvenirs, les capacités, les chiffres. */
-export interface NotebookContent {
-  readonly model: MapModel | null;
-  /** Boîte englobant toutes les salles de la page de carte (disposition stable). */
+/** La carte d'un lieu (une page du cahier, D-60). */
+export interface NotebookMap {
+  readonly model: MapModel;
+  /** Boîte englobant toutes les salles de la page (disposition stable). */
   readonly bounds: MapBox;
+  readonly title: string;
+}
+
+/**
+ * Ce que montrent les pages : les cartes des lieux visités (D-160), les souvenirs, les capacités,
+ * les chiffres.
+ */
+export interface NotebookContent {
+  /** Les lieux visités et leur carte (aucun dans un parcours d'essai). */
+  readonly maps: ReadonlyMap<string, NotebookMap>;
+  /** La rangée des lieux : les visités, puis le prochain (« ? »). */
+  readonly places: readonly NotebookPlace[];
+  /** Le lieu ouvert d'abord : celui de Céleste (null sans carte). */
+  readonly startPlace: string | null;
   /** Souvenirs trouvés (les trois familles de l'ancien cahier). */
   readonly memories: readonly string[];
   /** Capacités acquises (D-62), pour la page « Mes capacités ». */
@@ -103,13 +118,17 @@ export class NotebookPages {
     });
   }
 
-  /** Le contenu de cette ouverture du sac ; les salles découvertes depuis la dernière se tracent. */
+  /** Le contenu de cette ouverture du sac (les souvenirs, les capacités, les chiffres). */
   setContent(content: NotebookContent): void {
-    this.model = content.model;
-    this.bounds = content.bounds;
     this.found = new Set(content.memories);
     this.abilities = new Set(content.abilities);
     this.figures = content.figures;
+  }
+
+  /** La carte d'un lieu ; ses salles découvertes depuis la dernière ouverture se tracent. */
+  setMap(map: NotebookMap | null): void {
+    this.model = map?.model ?? null;
+    this.bounds = map?.bounds ?? { x: 0, y: 0, w: 1, h: 1 };
     this.openedAt = performance.now();
   }
 
@@ -492,6 +511,11 @@ export class NotebookPages {
       for (const s of room.seenShells) {
         const p = px(s);
         drawShellOutline(ctx, p.x, p.y, MAP_SHELL_PX * 0.9, pencil);
+      }
+      // Les trésors vus mais pas pris (D-160) : une étoile en pointillés, au crayon rose.
+      for (const t of room.seenTreasures) {
+        const p = px(t);
+        drawTreasureOutline(ctx, p.x, p.y, MAP_SHELL_PX * 0.75, rose, paper);
       }
       // Les cubes de la tour d'Eden trouvés (D-122) : un petit carré de leur couleur, cerné d'encre.
       for (const cube of room.cubes) {
@@ -886,6 +910,32 @@ function drawIcon(
       ctx.arc(x, y, s * 0.3, 0, Math.PI * 2);
   }
   ctx.stroke();
+}
+
+/** Un trésor aperçu (D-160) : une étoile à quatre branches, en pointillés. */
+function drawTreasureOutline(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  r: number,
+  color: string,
+  paper: string,
+): void {
+  ctx.beginPath();
+  for (let i = 0; i < 8; i++) {
+    const a = (i * Math.PI) / 4 - Math.PI / 2;
+    const d = i % 2 === 0 ? r : r * 0.42;
+    ctx.lineTo(x + Math.cos(a) * d, y + Math.sin(a) * d);
+  }
+  ctx.closePath();
+  // Le papier dessous : l'étoile se lit par-dessus le dessin de la pièce.
+  ctx.fillStyle = paper;
+  ctx.fill();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.6;
+  ctx.setLineDash([3, 2]);
+  ctx.stroke();
+  ctx.setLineDash([]);
 }
 
 /** Coupe un texte en lignes qui tiennent dans `maxWidth` (px), mot par mot. */

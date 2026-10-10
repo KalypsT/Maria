@@ -30,6 +30,8 @@
   --bag: #5f7f92;
   --bag-deep: #4a6676;
   --bag-stitch: rgb(248 243 232 / 45%);
+  /* Un lieu complet (D-160) : le lavis vert des crayons de Céleste. */
+  --wash-done: #cfe5c4;
   --scrim: rgb(20 22 27 / 55%);
   /* Bord « dessiné à la main » (irrégulier). */
   --sketch-radius: 255px 18px 225px 18px / 18px 225px 18px 255px;
@@ -939,6 +941,80 @@ body {
 .notebook-canvas {
   flex: 1;
   width: 100%;
+  min-height: 0;
+}
+
+/* La carte (D-160) : la rangée des lieux à gauche, la page du lieu à droite. */
+.bag-map {
+  display: flex;
+  flex: 1;
+  gap: 8px;
+  min-height: 0;
+}
+
+.bag-places {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 6px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.bag-place-icon {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: clamp(34px, 5.2vw, 44px);
+  height: clamp(34px, 5.2vw, 44px);
+  padding: 0;
+  border: 1.5px solid var(--pencil);
+  border-radius: 10px;
+  background: var(--paper-light);
+  color: var(--pencil);
+  font: 700 1rem / 1 var(--ui-font);
+  cursor: pointer;
+}
+
+.bag-place-icon svg {
+  width: 68%;
+  height: 68%;
+}
+
+.bag-place-icon.active {
+  border-color: var(--ink);
+  background: var(--crayon-rose-soft);
+}
+
+/* Toutes les coquilles du lieu trouvées : le pictogramme se colorie, comme la page (D-148). */
+.bag-place-icon.complete:not(.active) {
+  background: var(--wash-done);
+}
+
+.bag-place-icon.unknown {
+  border-style: dashed;
+  background: transparent;
+  cursor: default;
+}
+
+/* Céleste est ici. */
+.bag-here {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--paper-light);
+  border-radius: 50%;
+  background: var(--crayon-rose);
+}
+
+.bag-map-page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
   min-height: 0;
 }
 

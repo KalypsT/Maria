@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Le trou du grillage de l'aire de jeux** (D-158, sur `claude/game-test-issues-e7pomv`) : le ballon de la cour coincé dedans, un pigeon qui s'envole par le trou depuis le toit de la tour. Le chantier attendra (bulles des personnages). **Le sac à dos** (D-159, D-160) : maquette interactive (https://claude.ai/artifact/DE58ednNNhcjxdPUsuLd6T), choix de l'utilisateur et plan validés en 3 PR (le sac ; la carte ; les trésors). **PR 1 faite : le sac** (un seul bouton, la poche et ses trois objets, le cahier, les trésors d'avant, les réglages de l'ancienne pause). Suite : PR 2, la carte (les lieux en rangée à gauche, feuilleter les lieux visités, un « ? » pour le prochain, les trésors aperçus) ; l'image du sac (prompt fourni).
+**Le trou du grillage de l'aire de jeux** (D-158, sur `claude/game-test-issues-e7pomv`) : le ballon de la cour coincé dedans, un pigeon qui s'envole par le trou depuis le toit de la tour. Le chantier attendra (bulles des personnages). **Le sac à dos** (D-159, D-160) : maquette interactive (https://claude.ai/artifact/DE58ednNNhcjxdPUsuLd6T), choix de l'utilisateur et plan validés en 3 PR (le sac ; la carte ; les trésors). **PR 1 faite : le sac** (un seul bouton, la poche et ses trois objets, le cahier, les trésors d'avant, les réglages de l'ancienne pause) et **PR 2 faite : la carte** (D-161 : la rangée des lieux à gauche, feuilleter, un « ? », le point rose, les trésors aperçus). Suite : PR 3, les trésors ; l'image du sac (prompt fourni).
 
 **Retour d'essai, nouvelle partie depuis le début** (D-157, sur `claude/game-test-issues-e7pomv`) : **faits** : maman assise n'a plus la tête coupée (canapé, banc de l'aire de jeux ; toutes les poses assises) ; le monsieur de l'abribus et la dame au chien plus petits (75 %) ; se rattraper au mur quitté après un saut mural raté (une fois retombée sous le point du saut) ; la seconde cheminée de la ronce et celle de l'école étrange resserrées de 5 à 4 tuiles (la ronce passe de difficile à moyen) ; le son de Maria baissé. **En attente** : le nouveau son des trouvailles (fichier de l'utilisateur, `found`) ; le quartier (trouver l'entrée de l'école, aller au fond du chantier) : propositions à valider ; le cahier (pages et contenu) : à revoir avec l'utilisateur.
 
@@ -45,6 +45,12 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le sac à dos, PR 2 : la carte (D-161)
+
+- La rangée des lieux visités à gauche de la carte, puis un « ? » ; le point rose de Céleste ; un lieu complet se colorie ; on feuillette d'un lieu à l'autre. Les trésors aperçus mais pas pris : une étoile rose en pointillés (sauvegarde : `seenTreasures`, sans migration).
+- Vérifié dans Chromium (844 × 390).
+- [ ] À vérifier sur téléphone : les pictogrammes se reconnaissent-ils ? Les étoiles roses se voient-elles sans gêner la carte ?
 
 ### Le sac à dos, PR 1 : le sac (D-160)
 

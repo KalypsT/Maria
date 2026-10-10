@@ -1,0 +1,51 @@
+import { MARIA_THINGS, MEMORIES, STRANGE_THINGS, type MemoryId } from '../../config/memories';
+import type { FlagCondition, StoryData } from '../story/story';
+
+/**
+ * Les trésors (D-159) : les souvenirs, les affaires de Maria, le monde étrange. Les disques restent
+ * secrets (D-121) : ni sur la carte, ni comptés.
+ */
+export const TREASURES: readonly MemoryId[] = [...MEMORIES, ...MARIA_THINGS, ...STRANGE_THINGS];
+
+/** Où se trouve un trésor : la salle et la tuile de son déclencheur, et quand il est là. */
+export interface TreasureSpot {
+  readonly id: MemoryId;
+  readonly room: string;
+  readonly col: number;
+  readonly row: number;
+  readonly when: FlagCondition;
+}
+
+/**
+ * Les trésors des déclencheurs de l'histoire (une étape `memory`) : leur étincelle (`mark`), sinon
+ * le milieu de leur zone. Pur.
+ */
+export function treasureSpots(story: StoryData): TreasureSpot[] {
+  const treasures = new Set<string>(TREASURES);
+  const spots: TreasureSpot[] = [];
+  for (const trigger of story.triggers) {
+    for (const step of trigger.steps) {
+      if (step.do !== 'memory' || !treasures.has(step.id)) {
+        continue;
+      }
+      const at =
+        trigger.mark ??
+        (trigger.area
+          ? {
+              col: trigger.area.col + Math.floor(trigger.area.w / 2),
+              row: trigger.area.row + Math.floor(trigger.area.h / 2),
+            }
+          : null);
+      if (at && !spots.some((s) => s.id === step.id && s.room === trigger.room)) {
+        spots.push({
+          id: step.id as MemoryId,
+          room: trigger.room,
+          col: at.col,
+          row: at.row,
+          when: trigger.when,
+        });
+      }
+    }
+  }
+  return spots;
+}
