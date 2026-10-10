@@ -1,5 +1,7 @@
 ; Jardin : la cabane dans l'arbre (D-46). Le saut mural s'y trouve, et une petite cheminée pour l'essayer.
 ; Refaite (D-76) : un toit en appentis, une lanterne, les dessins de Céleste au mur.
+; Sous le toit, au bord de la fenêtre, une petite étagère et le disque « Céleste petite étoile »
+; (D-156) : on y saute depuis le haut du coffre suspendu (moyen).
 ; @name: Cabane
 ; @shell: treehouse-chest 22 3 easy wall-jump
 ; @icon: house
@@ -25,7 +27,7 @@
 #######..............bbbb....#
 ####.................bbbb....#
 #....................bbbb....#
-#....................bbbb....#
+#.............---....bbbb....#
 #....................bbbb....#
 #....................bbbb....#
 #....................bbbb....#

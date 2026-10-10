@@ -78,7 +78,9 @@ export const PASSERSBY: readonly PasserbySpot[] = [
     room: 'sea-promenade',
     kind: 'old-couple',
     col: 144,
-    row: 24,
+    row: 23,
+    // L'assise du banc, 23 px au-dessus de la promenade (leurs jambes jusqu'au sol).
+    dy: -7,
     times: ['morning'],
   },
   // Le port (D-100) : le pêcheur au bord du quai, au-dessus de l'échelle ; à marée haute seulement
@@ -169,8 +171,14 @@ export const PASSERBY_LINES: Readonly<
   'fisherman-nod': { tip: { x: 0.007, y: 0.001 }, below: 66 },
 };
 
-/** Passants assis sur un tabouret dessiné sous eux (la caissière). */
-export const PASSERBY_STOOLS: ReadonlySet<PasserbyKind> = new Set<PasserbyKind>(['cashier']);
+/**
+ * Passants assis sur un siège dessiné sous eux, jusqu'au sol : la caissière sur son tabouret, le
+ * vieux couple sur son banc (le leur, à part du banc des marées).
+ */
+export const PASSERBY_SEATS: Readonly<Partial<Record<PasserbyKind, 'stool' | 'bench'>>> = {
+  cashier: 'stool',
+  'old-couple': 'bench',
+};
 
 /** Devant le décor et la lumière, derrière les personnages de l'histoire (5) et Céleste. */
 export const PASSERBY_DEPTH = 4.9;

@@ -2,6 +2,8 @@
 
 ## Phase en cours
 
+**Les deux derniers disques** (D-156) : « Céleste petite étoile » sur l'étagère de la cabane dans l'arbre (moyen), « Avant même ta naissance » sur l'armoire du dortoir de la mer (pas chez la nounou : sans retour), sur `ccr-fd60fab4-k0uhko`. **Les trois disques sont dans le jeu.** Les images de l'Educaville et du vieux couple (détouré automatiquement) intégrées. Suite : essai sur téléphone.
+
 **Les passants et l'Educaville** (D-155, demande de l'utilisateur) : proposition validée en 3 PR (l'Educaville à la place de la boîte à formes, son téléphone qui sonne ; le système des passants, la rue et la supérette ; la gare, la mer, le jardin, la rue d'autrefois). Prompts des images dans `docs/PROMPTS_PERSONNAGES.md` (section D-155), sur `ccr-fd60fab4-k0uhko`. **PR 2 faite : le système des passants, la rue et la supérette** et **PR 3 faite : la gare, la mer, le jardin, la rue d'autrefois** et **PR 1 faite : l'Educaville** (dessinée par le code en attendant son image ; sa sonnerie et le clic du combiné, sons de l'utilisateur). **Le plan D-155 est complet.** Suite : les images du jouet et du vieux couple ; essai sur téléphone.
 
 **Les stats** (D-153, demande de l'utilisateur, avant la diffusion) : plan validé en 2 PR (le système ; la page du cahier). **PR 1 faite : le système** (temps de jeu, évanouissements, fil discret, par salle ; dans la sauvegarde sans migration ; DEBUG → « Stats »), sur `ccr-dae061c9-3hvwy2`. **PR 2 faite : la page « Mon voyage » du cahier** (le temps, les coquilles, les souvenirs, les lieux, les évanouissements : une petite lune), validée par l'utilisateur telle quelle. **Les stats sont complètes.** Suite : essai sur téléphone ; une vraie partie d'essai, chiffres du debug à l'appui.
@@ -39,6 +41,13 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les deux derniers disques ; l'Educaville et le vieux couple en images (D-155, D-156)
+
+- « Céleste petite étoile » : l'étagère sous le toit de la cabane (moyen, depuis le coffre suspendu). « Avant même ta naissance » : l'armoire du dortoir de la mer (facile, au-dessus du regard).
+- L'Educaville en images (raccrochée, décrochée, même cadre) ; le vieux couple détouré automatiquement, sur son banc.
+- Vérifié dans Chromium : les deux disques à leur place ; le jouet dans ses trois états ; le couple sur la promenade.
+- [ ] À vérifier sur téléphone : le saut vers l'étagère de la cabane (moyen ?) ; le disque sur l'armoire se remarque-t-il ? Les deux musiques au tourne-disque (volume par rapport aux thèmes).
 
 ### L'Educaville, PR 1 (D-155)
 

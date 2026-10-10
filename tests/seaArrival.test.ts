@@ -74,10 +74,12 @@ describe('la station balnéaire : l’arrivée (D-98)', () => {
   });
 
   it('la classe : sur le quai jusqu’au départ, puis au centre', () => {
+    // Les personnages (pas le disque caché sur l'armoire du dortoir, D-156).
     const shown = (flags: readonly string[], room: string) =>
       HOUSE_STORY.props
         .filter((p) => p.room === room && checkCondition(new Set(flags), p.when))
-        .map((p) => p.kind);
+        .map((p) => p.kind)
+        .filter((kind) => !kind.startsWith('record-'));
     expect(shown(ARRIVED, 'sea-station')).toEqual(expect.arrayContaining(['teacher', 'kids-quay']));
     expect(shown(SETTLED, 'sea-station')).not.toContain('teacher');
     expect(shown(ARRIVED, 'sea-centre')).toEqual([]);

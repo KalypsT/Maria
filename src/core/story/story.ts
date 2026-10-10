@@ -410,6 +410,10 @@ export const PROP_KINDS = [
   'record-player',
   /** « Les Aventures de Céleste » (D-121), un disque perdu dans sa pochette rose, debout. */
   'record-adventures',
+  /** « Céleste petite étoile » (D-156), sur l'étagère de la cabane dans l'arbre. */
+  'record-early',
+  /** « Avant même ta naissance » (D-156), sur l'armoire du dortoir de la classe de mer. */
+  'record-lullaby',
   ...PASSERBY_KINDS,
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];

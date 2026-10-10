@@ -2272,3 +2272,16 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
 - **Le souvenir** garde son nom dans la sauvegarde (`shape-box`) ; la case du cahier montre l'Educaville.
 - **L'école étrange** : le couvercle géant devient le dessus de l'Educaville géante (de grosses touches de clavier et le cadran de l'horloge sur sa tranche) ; mêmes plateformes, même trou. La frise de formes de l'école reste (l'Educaville a ses formes à encastrer).
 - Chez la nounou, la boîte à formes avait déjà laissé sa place aux cubes de la tour d'Eden (D-122) : rien à changer.
+
+### D-155, suite : les images du jouet et du vieux couple
+
+- **L'Educaville** : les deux images de l'utilisateur (raccrochée, décrochée), détourées **sur le même cadre** (le jouet ne bouge pas quand Céleste décroche) ; deux touches du clavier, trouées par le détourage (leur blanc ressemblait au fond), rebouchées. Elles remplacent le dessin par le code dans le monde étrange ; le cahier garde le dessin par le code (comme Roger). Le cadre du jouet passe à 72 × 32 px (sa hauteur ne change pas) : la place de la lueur du combiné et des ondes de la sonnerie, qui sinon étaient coupées net au bord.
+- **Le vieux couple** : l'image, encore avec la mer derrière, **détourée automatiquement** (`rembg`, modèle `isnet-general-use`, hors du dépôt) ; leurs pieds, dans les herbes de la dune, un peu coupés. Assis sur **un banc dessiné par le code** (comme le tabouret de la caissière : `PASSERBY_SEATS`, tabouret ou banc), ils regardent à gauche ; le test vérifie que leurs pieds touchent la promenade.
+
+## D-156 — Les deux derniers disques du tourne-disque
+
+- **Musiques de l'utilisateur** : « Céleste petite étoile » (`record-early`, 2 min 58) et « Avant même ta naissance » (`record-lullaby`, 1 min 59), préparées par `audio:prepare` (−14,5 → −18 LUFS ; écart de sonie faible, 4,6 et 5,4 LU, aucun silence : rien à retravailler). 2,2 et 1,4 Mo ; la musique pèse 20 Mo (limite 32).
+- **« Céleste petite étoile »** (choix de l'utilisateur : la cabane dans l'arbre) : sur une petite étagère sous le toit de la cabane, au bord de la fenêtre (ligne 7, colonnes 14 à 16, une planche traversable). On y saute depuis le haut du coffre suspendu, où mène la cheminée du saut mural : **moyen exactement** avec les capacités du premier passage (escalade, saut mural, phase 2) ; on en redescend facilement. La coquille du coffre reste facile.
+- **« Avant même ta naissance »** : **pas chez la nounou** (choix de l'utilisateur : on n'y revient jamais, un disque raté y serait perdu pour toujours) ; au niveau précédent, un peu caché : **sur l'armoire du dortoir de la classe de mer**, au bout des couchettes (une berceuse au dortoir). Facile depuis la couchette du haut, mais au-dessus du regard.
+- Même prise que le disque de la gare (D-121, PR 3) : Agir, l'étape (`record.early`, `record.lullaby`, ajoutées à la liste figée de la sauvegarde), le disque rangé dans les souvenirs, une bulle « musique ». Les pochettes dans leur couleur (vert d'eau, mauve).
+- Tests (`records.test.ts`) : les trois disques ont leur musique ; chaque disque à sa place, pris avec Agir, la difficulté exacte, le retour au sol.

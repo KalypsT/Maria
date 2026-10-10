@@ -66,6 +66,8 @@ flag nanny.station-done
 flag nanny.wake
 flag prologue.slept
 flag record.adventures
+flag record.early
+flag record.lullaby
 flag school.done
 flag school.open
 flag school.phone

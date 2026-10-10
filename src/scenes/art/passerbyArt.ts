@@ -1,5 +1,5 @@
 import { CHARACTER_IMAGES } from '../../config/art';
-import { PASSERBY_FRAMES, PASSERBY_LINES, PASSERBY_STOOLS } from '../../config/passersby';
+import { PASSERBY_FRAMES, PASSERBY_LINES, PASSERBY_SEATS } from '../../config/passersby';
 import { PROP_SIZE } from '../../config/story';
 import type { PasserbyKind } from '../../core/story/story';
 import { characterOverhang, drawCharacter, illustratedBox } from './familyArt';
@@ -56,8 +56,11 @@ export function drawPasserby(
     }
     return;
   }
-  if (PASSERBY_STOOLS.has(kind)) {
+  const seat = PASSERBY_SEATS[kind];
+  if (seat === 'stool') {
     stool(ctx, w / 2, h, below);
+  } else if (seat === 'bench') {
+    bench(ctx, w / 2, h, below);
   }
   const line = PASSERBY_LINES[kind];
   const character = CHARACTER_IMAGES[kind];
@@ -99,9 +102,8 @@ export function drawPasserby(
       adult(ctx, w / 2, h, ADULTS.board);
       break;
     case 'old-couple':
-      bench(ctx, w, h);
-      seatedAdult(ctx, w * 0.36, h - 22, 18, ADULTS.oldMan);
-      seatedAdult(ctx, w * 0.6, h - 22, 18, ADULTS.oldWoman);
+      seatedAdult(ctx, w * 0.42, h, below, ADULTS.oldMan);
+      seatedAdult(ctx, w * 0.62, h, below, ADULTS.oldWoman);
       break;
     case 'fisherman':
     case 'fisherman-nod':
@@ -189,15 +191,18 @@ function suitcase(ctx: CanvasRenderingContext2D, cx: number, floor: number): voi
   disc(ctx, cx + 10, floor - 1.5, 1.6);
 }
 
-/** Le banc du vieux couple (le leur, à part du banc des marées). */
-function bench(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+/**
+ * Le banc du vieux couple (le leur, à part du banc des marées), vu de côté : l'assise sous leurs
+ * hanches, le dossier derrière leur dos (ils regardent à gauche), deux pieds jusqu'au sol.
+ */
+function bench(ctx: CanvasRenderingContext2D, cx: number, seat: number, height: number): void {
   ctx.fillStyle = '#4f5d6b';
-  ctx.fillRect(w * 0.18, h - 22, 2, 22);
-  ctx.fillRect(w * 0.82 - 2, h - 22, 2, 22);
+  ctx.fillRect(cx - 16, seat, 2, height);
+  ctx.fillRect(cx + 14, seat, 2, height);
+  ctx.fillRect(cx + 16, seat - 26, 2, 26);
   ctx.fillStyle = '#8c6a4a';
-  ctx.fillRect(w * 0.14, h - 24, w * 0.72, 4);
-  ctx.fillRect(w * 0.14, h - 40, w * 0.72, 3);
-  ctx.fillRect(w * 0.14, h - 33, w * 0.72, 3);
+  ctx.fillRect(cx - 20, seat - 1, 40, 4);
+  ctx.fillRect(cx + 15, seat - 24, 4, 9);
 }
 
 interface AdultColors {

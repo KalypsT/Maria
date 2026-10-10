@@ -559,6 +559,23 @@ export const HOUSE_STORY: StoryData = {
       ],
     },
     {
+      // Le disque « Céleste petite étoile » (D-156), sur l'étagère sous le toit de la cabane : Agir le
+      // ramasse ; il ira sur le tourne-disque du grenier.
+      id: 'take-record-early',
+      room: 'garden-treehouse',
+      on: 'interact',
+      area: { col: 14, row: 5, w: 3, h: 2 },
+      mark: { col: 14, row: 5 },
+      when: { none: [F.RecordEarly] },
+      lock: true,
+      steps: [
+        { do: 'flag', id: F.RecordEarly },
+        { do: 'memory', id: 'record-early' },
+        { do: 'thought', icon: 'music', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
+      ],
+    },
+    {
       // La cabane dans l'arbre (D-46) : Céleste y trouve le saut mural.
       id: 'treehouse-find',
       room: 'garden-treehouse',
@@ -949,6 +966,16 @@ export const HOUSE_STORY: StoryData = {
     ...NANNY_STORY.props,
     // Le dernier niveau, le monde de Maria (D-139).
     ...FINALE_STORY.props,
+    // Le disque « Céleste petite étoile » (D-156), sur l'étagère de la cabane dans l'arbre.
+    {
+      id: 'record-early',
+      room: 'garden-treehouse',
+      kind: 'record-early',
+      col: 14,
+      row: 6,
+      instant: true,
+      when: { none: [F.RecordEarly] },
+    },
     // La toise de la chambre (D-43), au mur près de la porte.
     {
       id: 'height-chart',

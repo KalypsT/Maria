@@ -438,7 +438,8 @@ première image validée sert de référence pour sa seconde pose.
 
 - Intégrées : le monsieur de l'abribus (deux poses), la caissière, la dame au chien (la flaque retirée), la voisine (deux poses), le chat roux (assis, en plein bond).
 - Faites, pour la PR 3 : le pêcheur (deux poses ; tourné vers la gauche, le jeu le retourne ; le fil de pêche, trop fin, est redessiné par le code), la voyageuse (deux poses), le voyageur, le forain.
-- **À refaire** : `old-couple-bench.png`, deux fois rendu avec la mer derrière. Essayer dans une nouvelle conversation, sans joindre d'image de la mer, en commençant par : `On a plain pure white background (like a sticker, no scenery at all):` ; ou demander les deux personnages séparément, assis, chacun sur fond blanc.
+- Le vieux couple : la troisième image (encore avec la mer derrière) a été détourée automatiquement (`rembg`, hors du dépôt) ; rien à refaire.
+- L'Educaville : intégrée (raccrochée, décrochée, même cadre).
 
 ### Les passants (joindre `dad-stand.png`)
 

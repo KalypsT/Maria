@@ -49,6 +49,7 @@ describe('la nuit, le couloir en boucle, la fin (D-105)', () => {
     const shown = HOUSE_STORY.props
       .filter((p) => p.room === 'sea-centre' && checkCondition(night, p.when))
       .map((p) => p.kind)
+      .filter((kind) => !kind.startsWith('record-'))
       .sort();
     expect(shown).toEqual(['classmate-asleep', 'kid-asleep', 'kid-asleep']);
     const day = new Set<string>([F.SeaArrived]);

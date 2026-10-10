@@ -697,6 +697,12 @@ export const ART_IMAGES: Readonly<Record<string, string>> = {
   roger: 'roger.png',
   /** La coquille d'escargot (D-148) : image fournie par l'utilisateur, détourée. */
   shell: 'shell.png',
+  /**
+   * L'Educaville (D-155) : images fournies par l'utilisateur, détourées sur le même cadre (le
+   * combiné raccroché, puis décroché : le jouet ne bouge pas de l'une à l'autre).
+   */
+  'toy-town': 'toy-town.png',
+  'toy-town-lifted': 'toy-town-lifted.png',
 };
 
 /**
@@ -864,6 +870,9 @@ export const CHARACTER_IMAGES: Readonly<Partial<Record<PropKind, CharacterImage>
   fisherman: { file: 'fisherman.png', footX: 0.75, seat: 0.62, height: 118 },
   'fisherman-nod': { file: 'fisherman-nod.png', footX: 0.75, seat: 0.62, height: 118 },
   'candyfloss-vendor': { file: 'candyfloss-vendor.png', footX: 0.4 },
+  // Le vieux couple (détouré automatiquement : la mer était derrière), assis sur son banc ; ses
+  // jambes jusqu'au sol, 23 px sous l'assise.
+  'old-couple': { file: 'old-couple.png', footX: 0.65, seat: 0.77, height: 100 },
 };
 
 /**

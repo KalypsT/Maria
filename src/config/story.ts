@@ -235,6 +235,10 @@ export const StoryFlag = {
    * gare : il quitte la salle pour le tourne-disque du grenier.
    */
   RecordAdventures: 'record.adventures',
+  /** Le disque « Céleste petite étoile » ramassé (D-156), sur l'étagère de la cabane dans l'arbre. */
+  RecordEarly: 'record.early',
+  /** Le disque « Avant même ta naissance » ramassé (D-156), sur l'armoire du dortoir de la mer. */
+  RecordLullaby: 'record.lullaby',
   /**
    * Le niveau 8 (D-138, D-139) : le premier soir rejoué sans Maria. Céleste s'est assise sur le
    * tapis vide, là où elles jouaient.
@@ -443,8 +447,9 @@ export const PROP_SIZE = {
   'dad-hall': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // L'Educaville (D-155), dans le monde étrange ; la grue au loin par la fenêtre de la chambre ;
   // la palissade du chantier ouverte, le lendemain.
-  'toy-town': { w: 48, h: 32 },
-  'toy-town-lifted': { w: 48, h: 32 },
+  // Plus large que le jouet : la place de la lueur du combiné et des ondes de la sonnerie.
+  'toy-town': { w: 72, h: 32 },
+  'toy-town-lifted': { w: 72, h: 32 },
   'far-crane': { w: 44, h: 34 },
   'site-gap': { w: 80, h: 64 },
   // Le train à quai (D-69), quelques mois après la gare : une voiture et le nez de la suivante.
@@ -524,6 +529,8 @@ export const PROP_SIZE = {
   'record-player': { w: 20, h: 12 },
   // Un disque perdu dans sa pochette (D-121).
   'record-adventures': { w: 10, h: 10 },
+  'record-early': { w: 10, h: 10 },
+  'record-lullaby': { w: 10, h: 10 },
   plant: { w: 10, h: 16 },
   'baby-photo': { w: 11, h: 10 },
   'height-chart': { w: 7, h: 40 },
@@ -551,7 +558,7 @@ export const PROP_SIZE = {
   'traveler-suitcase': { w: 40 * PARENT_SCALE, h: 46 * PARENT_SCALE },
   'traveler-wave': { w: 40 * PARENT_SCALE, h: 46 * PARENT_SCALE },
   'traveler-board': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
-  'old-couple': { w: 56 * PARENT_SCALE, h: 46 * PARENT_SCALE },
+  'old-couple': { w: 96, h: 77 },
   fisherman: { w: 40 * PARENT_SCALE, h: 37 * PARENT_SCALE },
   'fisherman-nod': { w: 40 * PARENT_SCALE, h: 37 * PARENT_SCALE },
   'candyfloss-vendor': { w: 48, h: 52 },

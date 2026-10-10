@@ -875,6 +875,13 @@ export function drawProp(
     case 'record-adventures':
       drawRecordSleeve(ctx, w, h, '#e38aa0');
       break;
+    // Les deux autres disques (D-156), dans la couleur de leur pochette (`RECORDS`).
+    case 'record-early':
+      drawRecordSleeve(ctx, w, h, '#7fb3a6');
+      break;
+    case 'record-lullaby':
+      drawRecordSleeve(ctx, w, h, '#b7a3d6');
+      break;
     default:
       break;
   }
@@ -1600,23 +1607,36 @@ export function drawToyTown(
     const dh = image.naturalHeight * k;
     ctx.save();
     ctx.translate(w / 2, h);
-    if (phone === 'ring0' || phone === 'ring1') {
+    const ringing = phone === 'ring0' || phone === 'ring1';
+    if (ringing) {
       ctx.rotate(phone === 'ring0' ? -0.02 : 0.02);
     }
     ctx.drawImage(image, -dw / 2, -dh, dw, dh);
+    if (ringing) {
+      // Les ondes de la sonnerie, à gauche du combiné (sur le flanc gauche de l'image).
+      ctx.strokeStyle = 'rgba(255, 244, 200, 0.85)';
+      ctx.lineWidth = 0.8;
+      for (let k = 0; k < 2; k++) {
+        const r = dh * (0.1 + k * 0.08 + (phone === 'ring1' ? 0.03 : 0));
+        ctx.beginPath();
+        ctx.arc(-dw * 0.44, -dh * 0.45, r, Math.PI * 0.75, Math.PI * 1.25);
+        ctx.stroke();
+      }
+    }
     if (phone === 'lifted') {
+      // La lueur sort du combiné décroché, en haut à gauche de l'image.
       const light = ctx.createRadialGradient(
-        -dw * 0.35,
-        -dh * 0.7,
+        -dw * 0.37,
+        -dh * 0.75,
         0,
-        -dw * 0.35,
-        -dh * 0.7,
-        dh * 0.5,
+        -dw * 0.37,
+        -dh * 0.75,
+        dh * 0.42,
       );
       light.addColorStop(0, 'rgba(120, 236, 220, 0.5)');
       light.addColorStop(1, 'rgba(120, 236, 220, 0)');
       ctx.fillStyle = light;
-      ctx.fillRect(-dw / 2, -dh, dw, dh);
+      ctx.fillRect(-dw * 0.37 - dh * 0.42, -dh * 0.75 - dh * 0.42, dh * 0.84, dh * 0.84);
     }
     ctx.restore();
     return;

@@ -2,10 +2,11 @@ import { describe, expect, it } from 'vitest';
 import {
   PASSERBY_FRAMES,
   PASSERBY_REACTIONS,
-  PASSERBY_STOOLS,
+  PASSERBY_SEATS,
   PASSERBY_TUNING,
   PASSERSBY,
 } from '../src/config/passersby';
+import { CHARACTER_IMAGES } from '../src/config/art';
 import { PROP_SIZE } from '../src/config/story';
 import { EntityType, Tile, tileAt } from '../src/core/level/LevelData';
 import {
@@ -117,6 +118,17 @@ describe('les passants : emplacements (D-155)', () => {
               bottom <= (d.row + d.height) * T,
           ),
         ).toBe(true);
+      } else if (PASSERBY_SEATS[spot.kind]) {
+        // Sur un siège (le tabouret de la caissière, le banc du couple) : le sol juste sous leurs
+        // pieds, rien entre l'assise et le sol.
+        const image = CHARACTER_IMAGES[spot.kind];
+        const below = Math.ceil((1 - (image?.seat ?? 1)) * (image?.height ?? 0));
+        const feet = bottom + below;
+        expect(feet % T, 'les pieds au ras du sol').toBe(0);
+        expect(tileAt(level, spot.col, feet / T)).toBe(Tile.Solid);
+        for (let row = spot.row; row < feet / T; row++) {
+          expect(tileAt(level, spot.col, row)).toBe(Tile.Empty);
+        }
       } else if (spot.dy !== undefined) {
         // Sur un rebord dessiné (le chat).
         expect(
@@ -124,12 +136,6 @@ describe('les passants : emplacements (D-155)', () => {
             (d) => d.kind === 'cat' && Math.abs((d.row + d.height) * T - bottom) <= T / 2,
           ),
         ).toBe(true);
-      } else if (PASSERBY_STOOLS.has(spot.kind)) {
-        // Sur un tabouret (la caissière) : le sol 3 tuiles sous l'assise, rien entre les deux.
-        for (let row = spot.row; row <= spot.row + 3; row++) {
-          expect(tileAt(level, spot.col, row)).toBe(Tile.Empty);
-        }
-        expect(tileAt(level, spot.col, spot.row + 4)).toBe(Tile.Solid);
       } else {
         // Debout : sur le sol, rien de solide à la place de ses pieds.
         expect([Tile.Solid, Tile.OneWay]).toContain(tileAt(level, spot.col, spot.row + 1));

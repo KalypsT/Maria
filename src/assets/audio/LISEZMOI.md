@@ -24,6 +24,7 @@ sonie (−18 LUFS) et produit `garden.m4a` (AAC 96 kbit/s, lu partout, y compris
 partir de `garden.mp3` ou `f9d40126-garden.mp3`. `--max 5` raccourcit un son à 5 s avec un
 fondu de sortie (le jingle `memory`). Formats lus : `.ogg` / `.opus`, `.m4a`, `.mp3`.
 Un emplacement sans fichier reste silencieux (un disque sans fichier est caché). Les disques
-sont listés dans `src/config/records.ts` ; `record-adventures` : « Les Aventures de Céleste ». Poids total maximal : `AUDIO_BUDGET_BYTES`
+sont listés dans `src/config/records.ts` ; `record-adventures` : « Les Aventures de Céleste » ; `record-early` : « Céleste petite étoile » ;
+`record-lullaby` : « Avant même ta naissance ». Poids total maximal : `AUDIO_BUDGET_BYTES`
 (`src/config/audio.ts`), vérifié par les tests, car tout est précaché pour le hors ligne.
 Les thèmes bouclent en fondu enchaîné avec leur propre fin (`loopCrossfadeMs`).
