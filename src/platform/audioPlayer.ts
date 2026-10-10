@@ -1,4 +1,10 @@
-import { AUDIO_MIX, type AudioSettings, type Jingle, type MusicTrack } from '../config/audio';
+import {
+  AUDIO_MIX,
+  JINGLE_GAIN,
+  type AudioSettings,
+  type Jingle,
+  type MusicTrack,
+} from '../config/audio';
 import {
   AudioMix,
   MUSIC_SLOTS,
@@ -250,6 +256,8 @@ export class AudioPlayer {
   private readonly voices = new Map<MusicSlot, Voice>();
   private readonly jingles = new Map<Jingle, HTMLAudioElement>();
   private activeJingle: HTMLAudioElement | null = null;
+  /** Volume propre du jingle en cours (`JINGLE_GAIN`). */
+  private activeJingleGain = 1;
   private unlocked = false;
   private lastFrame = 0;
 
@@ -374,8 +382,9 @@ export class AudioPlayer {
     }
     this.activeJingle?.pause();
     this.activeJingle = player;
+    this.activeJingleGain = JINGLE_GAIN[jingle];
     player.currentTime = 0;
-    player.volume = clampVolume(this.mix.jingleVolume);
+    player.volume = clampVolume(this.mix.jingleVolume * this.activeJingleGain);
     player.play().catch(() => {
       this.activeJingle = null;
     });
@@ -387,7 +396,7 @@ export class AudioPlayer {
     const mix = this.mix;
     mix.update(dt);
     if (this.activeJingle) {
-      this.activeJingle.volume = clampVolume(mix.jingleVolume);
+      this.activeJingle.volume = clampVolume(mix.jingleVolume * this.activeJingleGain);
     }
     for (const slot of MUSIC_SLOTS) {
       const presence = mix.presenceOf(slot);
