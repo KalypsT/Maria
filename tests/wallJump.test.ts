@@ -197,6 +197,25 @@ describe('saut mural (D-44)', () => {
     expect(kickY - highest).toBeLessThanOrEqual(DEFAULT_MOVEMENT.wallJumpHeightTiles * T + 1);
   });
 
+  it('un saut raté se rattrape au mur quitté, une fois retombée sous le point du saut', () => {
+    const player = makePlayer(singleWall());
+    jumpToRightWall(player);
+    step(player, 1);
+    const kickY = player.box.y;
+    step(player, 1, true);
+    let caughtY = Number.NaN;
+    for (let i = 0; i < 400 && !player.grounded; i++) {
+      // Le verrou passé, revient vers le mur quitté.
+      step(player, 1);
+      if (player.state === PlayerState.WallSlide) {
+        caughtY = player.box.y;
+        break;
+      }
+    }
+    expect(player.state).toBe(PlayerState.WallSlide);
+    expect(caughtY).toBeGreaterThanOrEqual(kickY + DEFAULT_MOVEMENT.wallRegrabDropTiles * T);
+  });
+
   it('le sol rend le mur à nouveau utilisable', () => {
     const player = makePlayer(singleWall());
     jumpToRightWall(player);
