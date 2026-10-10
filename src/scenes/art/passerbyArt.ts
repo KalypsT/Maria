@@ -2,7 +2,7 @@ import { CHARACTER_IMAGES } from '../../config/art';
 import { PASSERBY_FRAMES, PASSERBY_LINES, PASSERBY_SEATS } from '../../config/passersby';
 import { PROP_SIZE } from '../../config/story';
 import type { PasserbyKind } from '../../core/story/story';
-import { characterOverhang, drawCharacter, illustratedBox } from './familyArt';
+import { characterHeadroom, characterOverhang, drawCharacter, illustratedBox } from './familyArt';
 
 /**
  * Les passants (D-155) : l'image fournie (`CHARACTER_IMAGES`), sinon une silhouette provisoire
@@ -19,12 +19,25 @@ export function passerbyIllustrated(
   return character !== undefined && images.get(character.file) instanceof HTMLImageElement;
 }
 
-/** Taille du dessin (px logiques) : le cadre, et ce qui pend dessous (jambes, tabouret). */
-export function passerbySize(kind: PasserbyKind): { w: number; h: number; below: number } {
+/**
+ * Taille du dessin (px logiques) : le cadre, ce qui pend dessous (jambes, tabouret) et ce qui
+ * dépasse au-dessus (une tête assise ; la texture le dessine avant le cadre).
+ */
+export function passerbySize(kind: PasserbyKind): {
+  w: number;
+  h: number;
+  below: number;
+  above: number;
+} {
   const frame = PASSERBY_FRAMES[kind];
   const size = frame ?? PROP_SIZE[kind];
   const below = Math.max(characterOverhang(kind), PASSERBY_LINES[kind]?.below ?? 0);
-  return { w: size.w, h: size.h, below: frame ? 0 : below };
+  return {
+    w: size.w,
+    h: size.h,
+    below: frame ? 0 : below,
+    above: frame ? 0 : characterHeadroom(kind),
+  };
 }
 
 export function drawPasserby(

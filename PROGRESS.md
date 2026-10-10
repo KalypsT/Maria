@@ -2,6 +2,8 @@
 
 ## Phase en cours
 
+**Retour d'essai, nouvelle partie depuis le début** (D-157, sur `claude/game-test-issues-e7pomv`) : **faits** : maman assise n'a plus la tête coupée (canapé, banc de l'aire de jeux ; toutes les poses assises) ; le monsieur de l'abribus et la dame au chien plus petits (75 %) ; se rattraper au mur quitté après un saut mural raté (une fois retombée sous le point du saut) ; la seconde cheminée de la ronce et celle de l'école étrange resserrées de 5 à 4 tuiles (la ronce passe de difficile à moyen) ; le son de Maria baissé. **En attente** : le nouveau son des trouvailles (fichier de l'utilisateur, `found`) ; le quartier (trouver l'entrée de l'école, aller au fond du chantier) : propositions à valider ; le cahier (pages et contenu) : à revoir avec l'utilisateur.
+
 **Les deux derniers disques** (D-156) : « Céleste petite étoile » sur l'étagère de la cabane dans l'arbre (moyen), « Avant même ta naissance » sur l'armoire du dortoir de la mer (pas chez la nounou : sans retour), sur `ccr-fd60fab4-k0uhko`. **Les trois disques sont dans le jeu.** Les images de l'Educaville et du vieux couple (détouré automatiquement) intégrées. Suite : essai sur téléphone.
 
 **Les passants et l'Educaville** (D-155, demande de l'utilisateur) : proposition validée en 3 PR (l'Educaville à la place de la boîte à formes, son téléphone qui sonne ; le système des passants, la rue et la supérette ; la gare, la mer, le jardin, la rue d'autrefois). Prompts des images dans `docs/PROMPTS_PERSONNAGES.md` (section D-155), sur `ccr-fd60fab4-k0uhko`. **PR 2 faite : le système des passants, la rue et la supérette** et **PR 3 faite : la gare, la mer, le jardin, la rue d'autrefois** et **PR 1 faite : l'Educaville** (dessinée par le code en attendant son image ; sa sonnerie et le clic du combiné, sons de l'utilisateur). **Le plan D-155 est complet.** Suite : les images du jouet et du vieux couple ; essai sur téléphone.
@@ -41,6 +43,13 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Retour d'essai : maman, les passants, le saut mural, le son de Maria (D-157)
+
+- Les poses assises illustrées ne sont plus coupées en haut (`characterHeadroom`) ; les passants de la rue à 75 % (`STREET_PASSERBY_SCALE`) ; `wallRegrabDropTiles` (0,5 tuile) ; deux cheminées à 4 tuiles ; `JINGLE_GAIN` (Maria 0,5).
+- Mesuré par l'analyse : les cheminées à 5 tuiles étaient à 67 ms (ronce) et 83 ms (école), à 4 tuiles 300 et 375 ms ; pas de largeur intermédiaire sur la grille (les variantes mixtes restent soit faciles, soit difficiles).
+- Vérifié dans Chromium : chaque pose assise dessinée en entier (maman près du banc, sur le canapé, la caissière, le vieux couple, le chat roux) ; les passants de la rue à côté de papa.
+- [ ] À vérifier sur téléphone : la tête de maman près du banc et sur le canapé ; la taille des passants à côté de l'abribus ; se rattraper au mur après un saut raté (assez tôt ? trop permissif ?) ; les deux cheminées (trop faciles ?) ; le volume du son de Maria.
 
 ### Les deux derniers disques ; l'Educaville et le vieux couple en images (D-155, D-156)
 

@@ -56,6 +56,16 @@ export const JINGLES = [
 ] as const;
 export type Jingle = (typeof JINGLES)[number];
 
+/**
+ * Volume propre de chaque jingle (sous `jingleGain`). Maria : trop fort au retour d'essai, baissé
+ * d'environ 6 dB. PROVISOIRE, à régler sur téléphone.
+ */
+export const JINGLE_GAIN: Readonly<Record<Jingle, number>> = {
+  found: 1,
+  memory: 1,
+  maria: 0.5,
+};
+
 /** Formats acceptés, par ordre de préférence si un emplacement en a plusieurs. */
 export const AUDIO_EXTENSIONS = ['ogg', 'opus', 'm4a', 'mp3'] as const;
 

@@ -554,6 +554,20 @@ export function characterOverhang(kind: PropKind): number {
   return seat === undefined ? 0 : Math.ceil((1 - seat) * (character?.height ?? STANDING_H));
 }
 
+/**
+ * Px logiques au-dessus du cadre d'un personnage illustré assis : à l'échelle d'un adulte debout,
+ * sa tête peut dépasser un cadre bas (maman accroupie près du banc) ; la texture est agrandie
+ * d'autant vers le haut, pour ne pas la couper.
+ */
+export function characterHeadroom(kind: PropKind): number {
+  const character = CHARACTER_IMAGES[kind];
+  const seat = character?.seat;
+  if (seat === undefined) {
+    return 0;
+  }
+  return Math.max(0, Math.ceil(seat * (character?.height ?? STANDING_H) - PROP_SIZE[kind].h));
+}
+
 /** Taille de la vapeur au-dessus d'une tasse illustrée (le dessin par code est en ×2). */
 const STEAM_SCALE = 1.1;
 

@@ -415,6 +415,12 @@ export const PARENT_SCALE = 2;
  * à celle de Céleste. PROVISOIRE, à régler sur téléphone.
  */
 export const CAT_SCALE = 2;
+/**
+ * Les passants de la rue (le monsieur de l'abribus, la dame au chien), par rapport aux parents :
+ * à leur taille, ils écrasaient l'abribus et les façades (retour d'essai). PROVISOIRE, à régler
+ * sur téléphone.
+ */
+export const STREET_PASSERBY_SCALE = 0.75;
 
 /**
  * Taille des objets de mise en scène (px logiques). Maria est un peu plus grande qu'un vrai poupon à
@@ -544,9 +550,18 @@ export const PROP_SIZE = {
   // Les passants (D-155), à hauteur d'enfant comme les parents. La caissière : jusqu'à l'assise de
   // son tabouret (ses jambes pendent dessous) ; la voisine : son buste, dans l'embrasure de sa
   // fenêtre (`PASSERBY_FRAMES`) ; le chat roux : comme le chat gris, sa queue pend du rebord.
-  'busstop-man': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
-  'busstop-man-look': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
-  'dog-walker': { w: 64 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  'busstop-man': {
+    w: Math.round(42 * PARENT_SCALE * STREET_PASSERBY_SCALE),
+    h: Math.round(62 * PARENT_SCALE * STREET_PASSERBY_SCALE),
+  },
+  'busstop-man-look': {
+    w: Math.round(42 * PARENT_SCALE * STREET_PASSERBY_SCALE),
+    h: Math.round(62 * PARENT_SCALE * STREET_PASSERBY_SCALE),
+  },
+  'dog-walker': {
+    w: Math.round(64 * PARENT_SCALE * STREET_PASSERBY_SCALE),
+    h: Math.round(62 * PARENT_SCALE * STREET_PASSERBY_SCALE),
+  },
   'neighbor-window': { w: 30, h: 30 },
   'neighbor-wave': { w: 30, h: 30 },
   cashier: { w: 40 * PARENT_SCALE, h: 36 * PARENT_SCALE },

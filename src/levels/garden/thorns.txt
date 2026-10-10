@@ -1,12 +1,13 @@
 ; Derrière la haie (D-49) : la ronce. Une montée par deux cheminées au-dessus des épines : la
-; première (moyenne) le long de la haie, avec un escargot ; la seconde (difficile) juste après la
-; veilleuse turquoise. En haut, le bonnet de Maria. Maria est assise de l'autre côté du vide.
+; première (moyenne) le long de la haie, avec un escargot ; la seconde juste après la veilleuse
+; turquoise (resserrée à 4 tuiles, D-157 : elle était difficile). En haut, le bonnet de Maria.
+; Maria est assise de l'autre côté du vide.
 ; @name: La ronce
 ; @lantern: garden-thorns-bush 6 19
 ; @lantern: garden-thorns-bottom 3 37
 ; @world: strange
 ; @outdoor: yes
-; @difficulty: hard
+; @difficulty: medium
 ; @ambient: #1a1f2c
 ; @note: Maria (rebord de droite) : jamais atteignable, même en grimpant et avec le saut mural.
 ; @decor: canopy 0 0 46 1
@@ -14,7 +15,7 @@
 ; @decor: hedge 45 1 1 37
 ; @decor: bush 5 20 5 14
 ; @decor: bush 1 6 4 9
-; @decor: bush 10 6 2 10
+; @decor: bush 9 6 2 10
 ; @decor: deck 17 8 10 1
 ; @decor: branch 10 36 3 1
 ; @decor: branch 16 36 3 1
@@ -33,16 +34,16 @@ v............................................v
 v............................................v
 v.......................................bbb..v
 v............................................v
-vvvvv.....vv.................................v
-vvvvv.....vv.................................v
-vvvvv.....vv.....bbbbbbbbbb..................v
-vvvvv.....vv.................................v
-vvvvv.....vv.................................v
-vvvvv.....vv.................................v
-vvvvv.....vv.................................v
-vvvvv.....vv.................................v
-vvvvv.....vv.................................v
-v.........vv.................................v
+vvvvv....vv..................................v
+vvvvv....vv..................................v
+vvvvv....vv......bbbbbbbbbb..................v
+vvvvv....vv..................................v
+vvvvv....vv..................................v
+vvvvv....vv..................................v
+vvvvv....vv..................................v
+vvvvv....vv..................................v
+vvvvv....vv..................................v
+v........vv..................................v
 v............................................v
 v............................................v
 v............................................v

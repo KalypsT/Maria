@@ -931,7 +931,9 @@ class MoveExplorer {
   private wallNodeOf(player: PlayerPhysics): number {
     const key = `${String(player.wallDir)}:${String(player.wallCol)}:${String(
       Math.round(player.box.y / WALL_SEARCH.heightStepPx),
-    )}:${String(player.releasedWall)}:${player.collisionLevel === this.levels[0] ? 'p' : 'm'}`;
+    )}:${String(player.releasedWall)}:${String(
+      Math.round(player.releasedWallY / WALL_SEARCH.heightStepPx),
+    )}:${player.collisionLevel === this.levels[0] ? 'p' : 'm'}`;
     const known = this.wallIds.get(key);
     if (known !== undefined) {
       return known;

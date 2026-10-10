@@ -98,6 +98,11 @@ export interface MovementParams {
   /** Saut mural encore permis après avoir quitté le contact du mur (ms). */
   wallCoyoteMs: number;
   /**
+   * Le mur quitté par un saut mural retient de nouveau Céleste une fois retombée de cette hauteur
+   * sous le point du saut (tuiles) : un saut raté se rattrape, un seul mur ne se remonte pas.
+   */
+  wallRegrabDropTiles: number;
+  /**
    * Parapluie (D-62, D-65) : il s'ouvre au sommet d'un saut tenu, ou par une nouvelle pression de
    * Saut en l'air ; tant que Saut est tenu, la chute est ramenée à cette vitesse (px/s).
    */
@@ -188,6 +193,7 @@ export const DEFAULT_MOVEMENT: Readonly<MovementParams> = {
   wallJumpSpeedX: 150,
   wallJumpLockMs: 130,
   wallCoyoteMs: 80,
+  wallRegrabDropTiles: 0.5,
   glideFallSpeed: 50,
   glideBrake: 1600,
   glideAutoDelayMs: 40,
@@ -250,6 +256,7 @@ export const MOVEMENT_PARAM_RANGES: Readonly<
   wallJumpSpeedX: { min: 40, max: 400, step: 5 },
   wallJumpLockMs: { min: 0, max: 400, step: 10 },
   wallCoyoteMs: { min: 0, max: 250, step: 5 },
+  wallRegrabDropTiles: { min: 0, max: 4, step: 0.25 },
   glideFallSpeed: { min: 10, max: 380, step: 5 },
   glideBrake: { min: 100, max: 6000, step: 50 },
   glideAutoDelayMs: { min: 0, max: 300, step: 5 },

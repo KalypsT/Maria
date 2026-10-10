@@ -145,7 +145,7 @@ export class PasserbyView {
     };
     const image = (kind: PasserbyKind): Phaser.GameObjects.Image =>
       this.scene.add
-        .image(box.x, box.y, `passerby-${kind}`)
+        .image(box.x, box.y - passerbySize(kind).above, `passerby-${kind}`)
         .setOrigin(0, 0)
         .setScale(1 / this.artScale)
         .setFlipX(spot.flip ?? false)
@@ -189,7 +189,11 @@ export class PasserbyView {
       .setAlpha((1 - t * t) * passerby.alpha)
       .setPosition(
         box.x + (w - leapW) / 2 + passerby.fleeDir * dxPx * t,
-        box.y + (alt ? box.height - alt.height / this.artScale : 0) - Math.sin(Math.PI * t) * hopPx,
+        box.y +
+          (alt
+            ? box.height - alt.height / this.artScale
+            : -passerbySize(passerby.spot.kind).above) -
+          Math.sin(Math.PI * t) * hopPx,
       );
   }
 
@@ -208,7 +212,7 @@ export class PasserbyView {
     this.bubble
       .setVisible(true)
       .setAlpha(Math.max(0, alpha))
-      .setPosition(box.x + box.width * 0.5 - 4, box.y + 4);
+      .setPosition(box.x + box.width * 0.5 - 4, box.y + 4 - passerbySize(owner.spot.kind).above);
   }
 
   private texture(
@@ -216,16 +220,17 @@ export class PasserbyView {
     images: ReadonlyMap<string, CanvasImageSource>,
     evening: boolean,
   ): void {
-    const { w, h, below } = passerbySize(kind);
+    const { w, h, below, above } = passerbySize(kind);
     const key = `passerby-${kind}`;
     const canvas = document.createElement('canvas');
     canvas.width = Math.ceil(w * this.artScale);
-    canvas.height = Math.ceil((h + below) * this.artScale);
+    canvas.height = Math.ceil((above + h + below) * this.artScale);
     const ctx = canvas.getContext('2d');
     if (!ctx) {
       return;
     }
     ctx.scale(this.artScale, this.artScale);
+    ctx.translate(0, above);
     drawPasserby(ctx, kind, images, evening);
     const textures = this.scene.textures;
     if (textures.exists(key)) {

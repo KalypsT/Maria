@@ -134,10 +134,13 @@ export class PlayerPhysics {
   private wallLockSteps = 0;
   /**
    * Mur quitté par le dernier saut mural (côté, colonne) : il ne retient plus Céleste avant
-   * qu'elle ait touché le sol, un rebord ou un autre mur. Un seul mur ne se remonte donc pas.
+   * qu'elle ait touché le sol, un rebord ou un autre mur, ou qu'elle soit retombée nettement plus
+   * bas que le point du saut (`noCatchY`, haut de la hitbox ; `wallRegrabDropTiles`). Un seul mur
+   * ne se remonte donc pas, mais un saut raté se rattrape au mur qu'on vient de quitter.
    */
   private noCatchDir = 0;
   private noCatchCol = 0;
+  private noCatchY = 0;
   private ledge: Ledge = Ledge.None;
   private ledgeSteps = 0;
   /** Côté du rebord (1 : à droite de Céleste). */
@@ -290,6 +293,7 @@ export class PlayerPhysics {
     this.wallLockSteps = other.wallLockSteps;
     this.noCatchDir = other.noCatchDir;
     this.noCatchCol = other.noCatchCol;
+    this.noCatchY = other.noCatchY;
     this.canGlide = other.canGlide;
     this.glideOpen = other.glideOpen;
     this.canHook = other.canHook;
@@ -436,6 +440,11 @@ export class PlayerPhysics {
    */
   get releasedWall(): number {
     return this.noCatchDir === 0 ? 0 : this.noCatchDir * (this.noCatchCol + 1);
+  }
+
+  /** Haut de la hitbox au moment du dernier saut mural (analyse de faisabilité). */
+  get releasedWallY(): number {
+    return this.noCatchDir === 0 ? 0 : this.noCatchY;
   }
 
   /**
@@ -606,6 +615,7 @@ export class PlayerPhysics {
       this.wallLockSteps = d.wallJumpLockSteps;
       this.noCatchDir = this.lastWallDir;
       this.noCatchCol = this.lastWallCol;
+      this.noCatchY = this.box.y;
       this.wallDir = 0;
       this.stepsSinceWall = NEVER;
       this.stepsSinceJumpPressed = NEVER;
@@ -980,10 +990,15 @@ export class PlayerPhysics {
           ? Math.floor((box.x + box.width + WALL_CONTACT_PX) / T)
           : Math.floor((box.x - WALL_CONTACT_PX) / T);
       const row = Math.floor((box.y + WALL_GRIP_FROM_TOP_PX) / T);
+      const released = dir === this.noCatchDir && col === this.noCatchCol;
       if (
         tileAt(this.level, col, row) === Tile.Solid &&
-        (dir !== this.noCatchDir || col !== this.noCatchCol)
+        (!released || box.y >= this.noCatchY + p.wallRegrabDropTiles * T)
       ) {
+        if (released) {
+          // Retombée assez bas : le mur quitté retient de nouveau, comme un mur neuf.
+          this.noCatchDir = 0;
+        }
         this.wallDir = dir;
         this.lastWallDir = dir;
         this.lastWallCol = col;
