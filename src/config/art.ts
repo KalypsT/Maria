@@ -223,6 +223,10 @@ export const DECOR_KINDS: Readonly<
   ball: { furniture: false },
   /** Pigeon qui picore, puis s'envole quand Céleste approche (animé). */
   pigeon: { furniture: false },
+  /** La mouette de la promenade, le merle et le hérisson du jardin (D-155). */
+  seagull: { furniture: false },
+  blackbird: { furniture: false },
+  hedgehog: { furniture: false },
   /** Casiers de la classe posés au sol (fond) ; leur dessus est `cubbytop`. */
   cubbybody: { furniture: false },
   /** Dessus des casiers (planche traversable). */
@@ -372,7 +376,10 @@ export const DECOR_KINDS: Readonly<
   bookstack: { furniture: true },
   /** Chaise d'écolier qui flotte (assise pleine). */
   floatchair: { furniture: true },
-  /** Couvercle géant d'une boîte à formes (plein, avec son trou). */
+  /**
+   * Le dessus de l'Educaville géante (D-155 ; le couvercle de la boîte à formes de D-64), plein,
+   * avec son trou.
+   */
   sorterlid: { furniture: true },
   cushions: { furniture: false },
   // Revisites avec le crochet (D-66).
@@ -690,6 +697,12 @@ export const ART_IMAGES: Readonly<Record<string, string>> = {
   roger: 'roger.png',
   /** La coquille d'escargot (D-148) : image fournie par l'utilisateur, détourée. */
   shell: 'shell.png',
+  /**
+   * L'Educaville (D-155) : images fournies par l'utilisateur, détourées sur le même cadre (le
+   * combiné raccroché, puis décroché : le jouet ne bouge pas de l'une à l'autre).
+   */
+  'toy-town': 'toy-town.png',
+  'toy-town-lifted': 'toy-town-lifted.png',
 };
 
 /**
@@ -837,6 +850,29 @@ export const CHARACTER_IMAGES: Readonly<Partial<Record<PropKind, CharacterImage>
   'eden-cheer': { file: 'eden-cheer.png', footX: 0.5 },
   'eden-laugh': { file: 'eden-laugh.png', footX: 0.5 },
   'eden-peek': { file: 'eden-peek.png', footX: 0.5, seat: 1, height: 9 },
+  // Les passants (D-155). La caissière sur son tabouret : les hanches au milieu du cadre (au-dessus
+  // du tabouret), les jambes pendent 3 tuiles sous l'assise jusqu'au sol.
+  'busstop-man': { file: 'busstop-man.png', footX: 0.39 },
+  'busstop-man-look': { file: 'busstop-man-look.png', footX: 0.36 },
+  'dog-walker': { file: 'dog-walker.png', footX: 0.5 },
+  cashier: { file: 'cashier.png', footX: 0.3, seat: 0.6, height: 120 },
+  // La voisine : son buste, dans l'embrasure de sa fenêtre (même cadrage pour les deux poses).
+  'neighbor-window': { file: 'neighbor-window.png', footX: 0.45 },
+  'neighbor-wave': { file: 'neighbor-wave.png', footX: 0.45 },
+  // Le chat roux : les pattes sur le rebord (le bas du cadre), la queue pend dessous.
+  'ginger-cat-sit': { file: 'ginger-cat-sit.png', footX: 0.5, seat: 0.83, height: 34 },
+  'ginger-cat-leap': { file: 'ginger-cat-leap.png', footX: 0.5 },
+  // La gare et la mer (D-155). Le pêcheur : les hanches au milieu du cadre, sur le bord du quai ;
+  // les jambes pendent 44 px sous l'assise ; le haut de sa canne : `rodTip`, d'où pend le fil.
+  'traveler-suitcase': { file: 'traveler-suitcase.png', footX: 0.55 },
+  'traveler-wave': { file: 'traveler-wave.png', footX: 0.55 },
+  'traveler-board': { file: 'traveler-board.png', footX: 0.45 },
+  fisherman: { file: 'fisherman.png', footX: 0.75, seat: 0.62, height: 118 },
+  'fisherman-nod': { file: 'fisherman-nod.png', footX: 0.75, seat: 0.62, height: 118 },
+  'candyfloss-vendor': { file: 'candyfloss-vendor.png', footX: 0.4 },
+  // Le vieux couple (détouré automatiquement : la mer était derrière), assis sur son banc ; ses
+  // jambes jusqu'au sol, 23 px sous l'assise.
+  'old-couple': { file: 'old-couple.png', footX: 0.65, seat: 0.77, height: 100 },
 };
 
 /**
@@ -1397,9 +1433,8 @@ export const WORLD_LIFE = {
   garland: { swayPx: 2.5 },
   /** Fumée des cheminées de la rue (D-77) : volutes par cheminée, montée (px/s), dérive au vent. */
   smoke: { count: 5, risePxPerS: 7, windPx: 14, alpha: 0.6 },
-  /** Drapeau de l'école (D-77) : une vague (ms). Queue du chat : un aller-retour (ms). */
+  /** Drapeau de l'école (D-77) : une vague (ms). */
   flag: { periodMs: 900 },
-  catTail: { periodMs: 2600, swingRad: 0.35 },
   /** Supérette (D-78) : tour du ventilateur (ms) ; clignotement du tube de la réserve. */
   fan: { periodMs: 700 },
   tubeFlicker: { everyMs: [4000, 9000] as [number, number], blinkMs: 90, blinks: 3 },
@@ -1409,6 +1444,8 @@ export const WORLD_LIFE = {
   tarp: { periodMs: 1100 },
   /** Pigeon de la cour (D-79) : distance d'envol (px), vol (px/s), retour (ms, Céleste loin). */
   pigeon: { scareDistancePx: 48, flyPxPerS: 90, returnMs: 15000, returnDistancePx: 160 },
+  /** Le hérisson du jardin (D-155) : sa marche (px/s), roulé en boule en deçà, déroulé au-delà (px). */
+  hedgehog: { walkPxPerS: 6, curlPx: 40, uncurlPx: 72 },
   /** Poisson rouge (D-79) : un aller-retour dans le bocal (ms). */
   fish: { periodMs: 5200 },
 } as const;

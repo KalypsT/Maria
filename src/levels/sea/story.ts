@@ -93,6 +93,23 @@ function tideBench(id: string, room: string, seat: { col: number; row: number })
 
 const TRIGGERS: StoryTrigger[] = [
   {
+    // Le disque « Avant même ta naissance » (D-156), sur l'armoire du dortoir, au-dessus des
+    // couchettes : Agir le ramasse ; il ira sur le tourne-disque du grenier.
+    id: 'take-record-lullaby',
+    room: 'sea-centre',
+    on: 'interact',
+    area: { col: 69, row: 1, w: 2, h: 2 },
+    mark: { col: 70, row: 1 },
+    when: { none: [F.RecordLullaby] },
+    lock: true,
+    steps: [
+      { do: 'flag', id: F.RecordLullaby },
+      { do: 'memory', id: 'record-lullaby' },
+      { do: 'thought', icon: 'music', ms: S.thoughtMs },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
+  {
     // L'arrivée de la classe (D-98) : Agir près de la maîtresse. Céleste demande (« ? ») ; la
     // maîtresse sourit (le soleil). Dans le noir, la classe part au centre : le dortoir, les sacs
     // posés au pied des couchettes, la camarade et les enfants. Céleste pense à Maria (le début d'un
@@ -395,6 +412,16 @@ const TRIGGERS: StoryTrigger[] = [
 ];
 
 const PROPS: StoryProp[] = [
+  // Le disque « Avant même ta naissance » (D-156), sur l'armoire du dortoir.
+  {
+    id: 'record-lullaby',
+    room: 'sea-centre',
+    kind: 'record-lullaby',
+    col: 70,
+    row: 2,
+    instant: true,
+    when: { none: [F.RecordLullaby] },
+  },
   // Le livre musical (D-104), sur le toit du carrousel étrange, tant qu'on ne l'a pas trouvé.
   {
     id: 'music-book',

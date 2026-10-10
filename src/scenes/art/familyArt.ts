@@ -557,6 +557,22 @@ export function characterOverhang(kind: PropKind): number {
 /** Taille de la vapeur au-dessus d'une tasse illustrée (le dessin par code est en ×2). */
 const STEAM_SCALE = 1.1;
 
+/** Où est dessinée l'image d'un personnage illustré dans son cadre (px logiques). */
+export function illustratedBox(
+  character: Pick<CharacterImage, 'footX' | 'seat' | 'height'>,
+  image: HTMLImageElement,
+  size: { w: number; h: number },
+): { left: number; top: number; w: number; h: number } {
+  const { naturalWidth: width, naturalHeight: height } = image;
+  const seat = character.seat;
+  const drawnH = seat === undefined ? size.h : (character.height ?? STANDING_H);
+  const top = seat === undefined ? 0 : size.h - seat * drawnH;
+  const drawn = width * (drawnH / height);
+  const centered = size.w / 2 - character.footX * drawn;
+  const left = drawn <= size.w ? Math.min(Math.max(centered, 0), size.w - drawn) : centered;
+  return { left, top, w: drawn, h: drawnH };
+}
+
 /**
  * Personnage illustré (D-123) : l'image remplit la hauteur du cadre, l'axe des pieds au milieu (là où
  * se tient le corps dessiné). Seule la vapeur de la tasse change d'une image à l'autre.
@@ -568,14 +584,7 @@ function drawIllustrated(
   size: { w: number; h: number },
   frame: number,
 ): void {
-  const { naturalWidth: width, naturalHeight: height } = image;
-  const seat = character.seat;
-  const drawnH = seat === undefined ? size.h : (character.height ?? STANDING_H);
-  const top = seat === undefined ? 0 : size.h - seat * drawnH;
-  const scale = drawnH / height;
-  const drawn = width * scale;
-  const centered = size.w / 2 - character.footX * drawn;
-  const left = drawn <= size.w ? Math.min(Math.max(centered, 0), size.w - drawn) : centered;
+  const { left, top, w: drawn, h: drawnH } = illustratedBox(character, image, size);
   ctx.save();
   ctx.globalAlpha = character.alpha ?? 1;
   ctx.drawImage(image, left, top, drawn, drawnH);

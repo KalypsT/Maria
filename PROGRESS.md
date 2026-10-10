@@ -2,6 +2,10 @@
 
 ## Phase en cours
 
+**Les deux derniers disques** (D-156) : « Céleste petite étoile » sur l'étagère de la cabane dans l'arbre (moyen), « Avant même ta naissance » sur l'armoire du dortoir de la mer (pas chez la nounou : sans retour), sur `ccr-fd60fab4-k0uhko`. **Les trois disques sont dans le jeu.** Les images de l'Educaville et du vieux couple (détouré automatiquement) intégrées. Suite : essai sur téléphone.
+
+**Les passants et l'Educaville** (D-155, demande de l'utilisateur) : proposition validée en 3 PR (l'Educaville à la place de la boîte à formes, son téléphone qui sonne ; le système des passants, la rue et la supérette ; la gare, la mer, le jardin, la rue d'autrefois). Prompts des images dans `docs/PROMPTS_PERSONNAGES.md` (section D-155), sur `ccr-fd60fab4-k0uhko`. **PR 2 faite : le système des passants, la rue et la supérette** et **PR 3 faite : la gare, la mer, le jardin, la rue d'autrefois** et **PR 1 faite : l'Educaville** (dessinée par le code en attendant son image ; sa sonnerie et le clic du combiné, sons de l'utilisateur). **Le plan D-155 est complet.** Suite : les images du jouet et du vieux couple ; essai sur téléphone.
+
 **Les stats** (D-153, demande de l'utilisateur, avant la diffusion) : plan validé en 2 PR (le système ; la page du cahier). **PR 1 faite : le système** (temps de jeu, évanouissements, fil discret, par salle ; dans la sauvegarde sans migration ; DEBUG → « Stats »), sur `ccr-dae061c9-3hvwy2`. **PR 2 faite : la page « Mon voyage » du cahier** (le temps, les coquilles, les souvenirs, les lieux, les évanouissements : une petite lune), validée par l'utilisateur telle quelle. **Les stats sont complètes.** Suite : essai sur téléphone ; une vraie partie d'essai, chiffres du debug à l'appui.
 
 **Avant diffusion** (D-152, demande de l'utilisateur) : plan validé en 5 PR (les noms des lanternes ; la revue des lanternes, salle par salle, dans `docs/LANTERNES.md`, à valider par l'utilisateur ; puis trois PR qui l'appliquent : maison et jardin ; quartier, gare et train ; mer, nounou et monde de Maria). **PR 1 faite : les 97 lanternes nommées (`; @lantern:`), la sauvegarde en version 3, les identifiants de la sauvegarde figés par un test, la version sur l'écran de départ**, sur `ccr-dae061c9-3hvwy2`. **PR 2 faite : la revue des lanternes** (`docs/LANTERNES.md`, l'outil DEBUG → « Lanternes »). **PR 3 faite : la lanterne de la plage** (oui pour la plage, non pour l'arbre ; la règle : des lanternes utiles, sans trop simplifier). Suite : la réponse sur l'aspect des lanternes dehors (une variante par lieu ?) ; la suite complète des tests à faire passer par la CI. Ensuite, dans une branche à part : les stats. Ensuite, dans une branche à part, avant la diffusion : un système de stats (à définir avec l'utilisateur : pour qui, où, lesquelles).
@@ -37,6 +41,31 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les deux derniers disques ; l'Educaville et le vieux couple en images (D-155, D-156)
+
+- « Céleste petite étoile » : l'étagère sous le toit de la cabane (moyen, depuis le coffre suspendu). « Avant même ta naissance » : l'armoire du dortoir de la mer (facile, au-dessus du regard).
+- L'Educaville en images (raccrochée, décrochée, même cadre) ; le vieux couple détouré automatiquement, sur son banc.
+- Vérifié dans Chromium : les deux disques à leur place ; le jouet dans ses trois états ; le couple sur la promenade.
+- [ ] À vérifier sur téléphone : le saut vers l'étagère de la cabane (moyen ?) ; le disque sur l'armoire se remarque-t-il ? Les deux musiques au tourne-disque (volume par rapport aux thèmes).
+
+### L'Educaville, PR 1 (D-155)
+
+- L'Educaville à la place de la boîte à formes, au bout de l'école étrange : son téléphone sonne quand Céleste approche ; elle décroche (Agir) : le clic, le combiné se soulève dans une lueur turquoise, le silence, un « ? ». Le cahier, le dessus du jouet géant. Dessin provisoire par le code.
+- Vérifié dans Chromium : le jouet posé sur le dessus géant ; ses trois états dessinés à part (au repos, qui sonne, décroché), en grand et à sa taille.
+- [ ] À vérifier sur téléphone : la sonnerie (volume, boucle, distance) ; le décroché se comprend-il sans texte ? Le jouet se reconnaît-il à 48 px ?
+
+### Les passants, PR 3 : la gare, la mer, le jardin, la rue d'autrefois (D-155)
+
+- Le voyageur et la voyageuse du hall ; le vieux couple sur son banc (silhouettes provisoires) et deux mouettes sur la promenade ; le pêcheur au bord du quai (marée haute) ; le forain et son chariot (le soir de la fête) ; le merle et le hérisson de la terrasse ; la voisine pâlie dans la rue d'autrefois.
+- Vérifié dans Chromium : chacun à sa place, au bon moment de l'histoire.
+- [ ] À vérifier sur téléphone : le hérisson se voit-il (petit) ? Le fil de pêche se voit-il ? La voisine pâlie, dans le noir de la rue d'autrefois : un écho, ou une gêne ?
+
+### Les passants, PR 2 : le système, la rue, la supérette (D-155)
+
+- La voisine à sa fenêtre (elle salue), le monsieur de l'abribus (image, une bulle), la dame au petit chien, le chat roux qui bondit, deux pigeons ; la caissière (image) sur son tabouret. Silhouettes provisoires pour les images à venir.
+- Vérifié dans Chromium : la voisine dans sa fenêtre, le monsieur et sa bulle, le bond du chat (ralenti pour l'essai), la dame au chien, la caissière.
+- [ ] À vérifier sur téléphone : les passants gênent-ils la lecture du parcours ? La bulle vient-elle au bon moment (ni trop tôt, ni trop souvent) ? Le chat file-t-il quand on monte sur l'abribus ?
 
 ### Musique : l'accueil, la rue, le train, la fin
 

@@ -57,8 +57,13 @@ export const StoryFlag = {
   /** L'école étrange (D-64) : Céleste y est passée par l'oculus (première fois). */
   SchoolStrange: 'school.strange',
   /**
-   * Fin de l'école étrange (D-64) : la boîte à formes ; Céleste dans la cour au crépuscule, maman
-   * vient la chercher ; la nuit, une lueur au loin par la fenêtre.
+   * Au bout de l'école étrange (D-155) : Céleste a décroché le téléphone de l'Educaville, qui
+   * sonnait tout seul.
+   */
+  SchoolPhone: 'school.phone',
+  /**
+   * Fin de l'école étrange (D-64, D-155) : l'Educaville et son téléphone ; Céleste dans la cour au
+   * crépuscule, maman vient la chercher ; la nuit, une lueur au loin par la fenêtre.
    */
   SchoolDone: 'school.done',
   /** Le lendemain matin (D-64) : la palissade du chantier s'est ouverte. */
@@ -230,6 +235,10 @@ export const StoryFlag = {
    * gare : il quitte la salle pour le tourne-disque du grenier.
    */
   RecordAdventures: 'record.adventures',
+  /** Le disque « Céleste petite étoile » ramassé (D-156), sur l'étagère de la cabane dans l'arbre. */
+  RecordEarly: 'record.early',
+  /** Le disque « Avant même ta naissance » ramassé (D-156), sur l'armoire du dortoir de la mer. */
+  RecordLullaby: 'record.lullaby',
   /**
    * Le niveau 8 (D-138, D-139) : le premier soir rejoué sans Maria. Céleste s'est assise sur le
    * tapis vide, là où elles jouaient.
@@ -380,7 +389,18 @@ export const END_SCREEN = {
 } as const;
 
 /** Période du petit mouvement en boucle des personnages (ms), D-37. */
-export const CHARACTER_LOOP_MS = { parent: 1600, cat: 2400 } as const;
+export const CHARACTER_LOOP_MS = {
+  parent: 1600,
+  cat: 2400,
+  /** Le téléphone de l'Educaville qui sonne (D-155) : le combiné tremble vite. */
+  ring: 90,
+} as const;
+
+/**
+ * Le téléphone de l'Educaville (D-155), au bout de l'école étrange : il sonne tant qu'il n'est pas
+ * décroché, quand Céleste est à moins de `ringPx` (px) du jouet (pas pendant toute la montée).
+ */
+export const TOY_PHONE = { room: 'school-strange', col: 13, row: 7, ringPx: 300 } as const;
 
 /** Agrandissement des bulles de pensée (retour de l'utilisateur : mieux lisibles sur téléphone). */
 export const THOUGHT_SCALE = 1.9;
@@ -425,9 +445,11 @@ export const PROP_SIZE = {
   'mom-yard': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
   // Sous l'horloge du hall de la gare, la nuit (D-69), papa vient chercher Céleste.
   'dad-hall': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
-  // La boîte à formes (D-64), dans le monde étrange ; la grue au loin par la fenêtre de la chambre ;
+  // L'Educaville (D-155), dans le monde étrange ; la grue au loin par la fenêtre de la chambre ;
   // la palissade du chantier ouverte, le lendemain.
-  'shape-box': { w: 40, h: 32 },
+  // Plus large que le jouet : la place de la lueur du combiné et des ondes de la sonnerie.
+  'toy-town': { w: 72, h: 32 },
+  'toy-town-lifted': { w: 72, h: 32 },
   'far-crane': { w: 44, h: 34 },
   'site-gap': { w: 80, h: 64 },
   // Le train à quai (D-69), quelques mois après la gare : une voiture et le nez de la suivante.
@@ -507,6 +529,8 @@ export const PROP_SIZE = {
   'record-player': { w: 20, h: 12 },
   // Un disque perdu dans sa pochette (D-121).
   'record-adventures': { w: 10, h: 10 },
+  'record-early': { w: 10, h: 10 },
+  'record-lullaby': { w: 10, h: 10 },
   plant: { w: 10, h: 16 },
   'baby-photo': { w: 11, h: 10 },
   'height-chart': { w: 7, h: 40 },
@@ -517,4 +541,25 @@ export const PROP_SIZE = {
   // Le portillon au bout du passage sous le vieux mur (D-60), fermé puis ouvert.
   gate: { w: 14, h: 46 },
   'gate-open': { w: 14, h: 46 },
+  // Les passants (D-155), à hauteur d'enfant comme les parents. La caissière : jusqu'à l'assise de
+  // son tabouret (ses jambes pendent dessous) ; la voisine : son buste, dans l'embrasure de sa
+  // fenêtre (`PASSERBY_FRAMES`) ; le chat roux : comme le chat gris, sa queue pend du rebord.
+  'busstop-man': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  'busstop-man-look': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  'dog-walker': { w: 64 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  'neighbor-window': { w: 30, h: 30 },
+  'neighbor-wave': { w: 30, h: 30 },
+  cashier: { w: 40 * PARENT_SCALE, h: 36 * PARENT_SCALE },
+  'ginger-cat-sit': { w: 12 * CAT_SCALE, h: 14 * CAT_SCALE },
+  'ginger-cat-leap': { w: 30 * CAT_SCALE, h: 12 * CAT_SCALE },
+  // La gare et la mer (D-155). Assise sur sa valise, la voyageuse a la hauteur d'un adulte assis ;
+  // le pêcheur, jusqu'à l'assise (le bord du quai), ses jambes pendent dessous ; le forain : son
+  // buste derrière son chariot (`PASSERBY_FRAMES`).
+  'traveler-suitcase': { w: 40 * PARENT_SCALE, h: 46 * PARENT_SCALE },
+  'traveler-wave': { w: 40 * PARENT_SCALE, h: 46 * PARENT_SCALE },
+  'traveler-board': { w: 42 * PARENT_SCALE, h: 62 * PARENT_SCALE },
+  'old-couple': { w: 96, h: 77 },
+  fisherman: { w: 40 * PARENT_SCALE, h: 37 * PARENT_SCALE },
+  'fisherman-nod': { w: 40 * PARENT_SCALE, h: 37 * PARENT_SCALE },
+  'candyfloss-vendor': { w: 48, h: 52 },
 } as const satisfies Readonly<Record<PropKind, { w: number; h: number }>>;

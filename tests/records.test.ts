@@ -66,12 +66,12 @@ describe('les disques : données (D-121)', () => {
     expect(unknown).toEqual(['record-autre.m4a']);
   });
 
-  it('« Les Aventures de Céleste » a son fichier ; les deux autres attendent leur musique', () => {
+  it('les trois disques ont leur musique (D-121, D-156)', () => {
     const files = import.meta.glob('../src/assets/audio/record-*.*');
     const { slots } = audioFileMap(Object.fromEntries(Object.keys(files).map((p) => [p, p])));
-    expect(slots.has('record-adventures')).toBe(true);
-    expect(slots.has('record-early')).toBe(false);
-    expect(slots.has('record-lullaby')).toBe(false);
+    for (const slot of RECORD_SLOTS) {
+      expect(slots.has(slot), slot).toBe(true);
+    }
   });
 });
 
@@ -326,3 +326,96 @@ describe('le disque aux objets trouvés de la gare (D-121)', () => {
     },
   );
 });
+
+/**
+ * Un disque caché (D-156) : posé là, Agir le ramasse (il quitte la salle), et le chemin depuis
+ * `from` jusqu'à lui est exactement de la difficulté voulue ; on en redescend.
+ */
+function describeHiddenRecord(
+  id: 'early' | 'lullaby',
+  room: string,
+  at: { col: number; row: number },
+  from: { col: number; row: number },
+  difficulty: 'easy' | 'medium',
+  abilities: Parameters<typeof analysis>,
+): void {
+  describe(`le disque ${id} (D-156)`, () => {
+    it('posé à sa place ; Agir le ramasse, il quitte la salle', () => {
+      const prop = HOUSE_STORY.props.find((p) => p.kind === `record-${id}`);
+      expect(prop).toMatchObject({ room, col: at.col, row: at.row, instant: true });
+      const trigger = HOUSE_STORY.triggers.find((t) => t.id === `take-record-${id}`);
+      expect(trigger?.room).toBe(room);
+      const flag = trigger?.steps.find((s) => s.do === 'flag');
+      expect(flag?.do === 'flag' && prop?.when.none?.includes(flag.id)).toBe(true);
+      const memories: string[] = [];
+      const host: StoryHost = {
+        flagSet: () => undefined,
+        place: () => undefined,
+        room: () => undefined,
+        pose: () => undefined,
+        think: () => undefined,
+        sparkle: () => undefined,
+        shake: () => undefined,
+        memory: (m) => memories.push(m),
+        hush: () => undefined,
+        ability: () => undefined,
+        play: () => undefined,
+      };
+      const director = new StoryDirector(HOUSE_STORY, host);
+      const box = {
+        x: (at.col + 0.5) * T - PLAYER_HITBOX.width / 2,
+        y: (at.row + 1) * T - PLAYER_HITBOX.height,
+        width: PLAYER_HITBOX.width,
+        height: PLAYER_HITBOX.height,
+      };
+      director.step(room, box, true);
+      expect(memories).toEqual([recordSlot(id)]);
+    });
+
+    it(`${difficulty} exactement, et on en redescend`, { timeout: ANALYSIS_TIMEOUT_MS }, () => {
+      const a = analysis(...abilities);
+      const start = nodeAt(room, from.col, from.row);
+      const spot = nodeAt(room, at.col, at.row);
+      const graph = (min: number) => {
+        const g = new Map<string, Set<string>>();
+        for (const m of a.moves) {
+          if (m.windowMs >= min) {
+            const set = g.get(node(room, m.from)) ?? new Set<string>();
+            set.add(node(room, m.to));
+            g.set(node(room, m.from), set);
+          }
+        }
+        return g;
+      };
+      expect(reachable(graph(DIFFICULTY_MIN_WINDOW_MS[difficulty]), start).has(spot)).toBe(true);
+      if (difficulty === 'medium') {
+        expect(
+          reachable(graph(DIFFICULTY_MIN_WINDOW_MS.easy), start).has(spot),
+          'trop facile',
+        ).toBe(false);
+      }
+      expect(reachable(graph(DIFFICULTY_MIN_WINDOW_MS.easy), spot).has(start)).toBe(true);
+    });
+  });
+}
+
+// « Céleste petite étoile » : sur l'étagère sous le toit de la cabane, en sautant depuis le haut du
+// coffre suspendu (le saut mural, trouvé dans la cabane), moyen.
+describeHiddenRecord(
+  'early',
+  'garden-treehouse',
+  { col: 14, row: 6 },
+  { col: 4, row: 13 },
+  'medium',
+  ['garden-treehouse', true, 2, true],
+);
+// « Avant même ta naissance » : sur l'armoire du dortoir de la mer, depuis la couchette du haut,
+// facile (un peu caché, hors du regard), avec les capacités qu'on a à la mer.
+describeHiddenRecord('lullaby', 'sea-centre', { col: 70, row: 2 }, { col: 50, row: 11 }, 'easy', [
+  'sea-centre',
+  true,
+  3,
+  true,
+  true,
+  true,
+]);

@@ -13,7 +13,8 @@ import {
   redPanda,
   teaCup,
   roger,
-  shapeBox,
+  toyTown,
+  type ToyPhone,
   whiteCloth,
 } from './memoryArt';
 
@@ -760,12 +761,9 @@ export function drawProp(
       // Photo encadrée posée debout, en haut de la bibliothèque.
       drawMemory(ctx, 'bookcase', w / 2, h / 2, Math.min(w / 0.8, h / 0.88));
       break;
-    case 'shape-box':
-      // Au monde étrange : la boîte à formes, une lueur sort du trou à la forme de Maria (D-64).
-      ctx.save();
-      ctx.translate(w / 2, h - Math.min(w, h / 0.72) * 0.36);
-      shapeBox(ctx, Math.min(w, h / 0.72), true);
-      ctx.restore();
+    case 'toy-town-lifted':
+      // Au monde étrange (D-155) : le téléphone décroché, une lueur turquoise sort du combiné.
+      drawToyTown(ctx, w, h, 'lifted', images);
       break;
     case 'far-crane':
       drawFarCrane(ctx, w, h);
@@ -876,6 +874,13 @@ export function drawProp(
       break;
     case 'record-adventures':
       drawRecordSleeve(ctx, w, h, '#e38aa0');
+      break;
+    // Les deux autres disques (D-156), dans la couleur de leur pochette (`RECORDS`).
+    case 'record-early':
+      drawRecordSleeve(ctx, w, h, '#7fb3a6');
+      break;
+    case 'record-lullaby':
+      drawRecordSleeve(ctx, w, h, '#b7a3d6');
       break;
     default:
       break;
@@ -1580,5 +1585,65 @@ function drawTeaTable(
   ctx.save();
   ctx.translate(w * 0.83, h - plush * 0.55);
   redPanda(ctx, plush);
+  ctx.restore();
+}
+
+/**
+ * L'Educaville posée dans le monde étrange (D-155) : l'image de l'utilisateur (`toy-town`, et
+ * `toy-town-lifted` décroché) si elle est chargée, sinon le dessin par le code. Qui sonne, le jouet
+ * tremble un peu.
+ */
+export function drawToyTown(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  phone: ToyPhone,
+  images: ReadonlyMap<string, CanvasImageSource>,
+): void {
+  const image = images.get(phone === 'lifted' ? 'toy-town-lifted' : 'toy-town');
+  if (image instanceof HTMLImageElement) {
+    const k = Math.min(w / image.naturalWidth, h / image.naturalHeight);
+    const dw = image.naturalWidth * k;
+    const dh = image.naturalHeight * k;
+    ctx.save();
+    ctx.translate(w / 2, h);
+    const ringing = phone === 'ring0' || phone === 'ring1';
+    if (ringing) {
+      ctx.rotate(phone === 'ring0' ? -0.02 : 0.02);
+    }
+    ctx.drawImage(image, -dw / 2, -dh, dw, dh);
+    if (ringing) {
+      // Les ondes de la sonnerie, à gauche du combiné (sur le flanc gauche de l'image).
+      ctx.strokeStyle = 'rgba(255, 244, 200, 0.85)';
+      ctx.lineWidth = 0.8;
+      for (let k = 0; k < 2; k++) {
+        const r = dh * (0.1 + k * 0.08 + (phone === 'ring1' ? 0.03 : 0));
+        ctx.beginPath();
+        ctx.arc(-dw * 0.44, -dh * 0.45, r, Math.PI * 0.75, Math.PI * 1.25);
+        ctx.stroke();
+      }
+    }
+    if (phone === 'lifted') {
+      // La lueur sort du combiné décroché, en haut à gauche de l'image.
+      const light = ctx.createRadialGradient(
+        -dw * 0.37,
+        -dh * 0.75,
+        0,
+        -dw * 0.37,
+        -dh * 0.75,
+        dh * 0.42,
+      );
+      light.addColorStop(0, 'rgba(120, 236, 220, 0.5)');
+      light.addColorStop(1, 'rgba(120, 236, 220, 0)');
+      ctx.fillStyle = light;
+      ctx.fillRect(-dw * 0.37 - dh * 0.42, -dh * 0.75 - dh * 0.42, dh * 0.84, dh * 0.84);
+    }
+    ctx.restore();
+    return;
+  }
+  const size = Math.min(w, h / 0.72);
+  ctx.save();
+  ctx.translate(w / 2, h - size * 0.3);
+  toyTown(ctx, size, phone);
   ctx.restore();
 }

@@ -427,3 +427,165 @@ pure white background, no shadow, no text:
 
 Si ChatGPT redessine une paire de jambes : `Only ONE leg. A single leg alone, as if cut from the body
 at the hip.` Si une manche reste sur le torse : `No arm, no sleeve, no hand on the torso.`
+
+## D-155 : les passants, les animaux, l'Educaville
+
+Proposition validée telle quelle par l'utilisateur, options comprises (le jardin, la voisine pâlie
+de la rue d'autrefois : sans nouvelle image). Même méthode que les adultes du train : une conversation par personnage, la
+première image validée sert de référence pour sa seconde pose.
+
+### Où en sont les images
+
+- Intégrées : le monsieur de l'abribus (deux poses), la caissière, la dame au chien (la flaque retirée), la voisine (deux poses), le chat roux (assis, en plein bond).
+- Faites, pour la PR 3 : le pêcheur (deux poses ; tourné vers la gauche, le jeu le retourne ; le fil de pêche, trop fin, est redessiné par le code), la voyageuse (deux poses), le voyageur, le forain.
+- Le vieux couple : la troisième image (encore avec la mer derrière) a été détourée automatiquement (`rembg`, hors du dépôt) ; rien à refaire.
+- L'Educaville : intégrée (raccrochée, décrochée, même cadre).
+
+### Les passants (joindre `dad-stand.png`)
+
+Début et fin communs : ceux des adultes du train (« Using the attached image as the strict
+reference for the style only… » ; « Strict side profile facing right… Portrait format, high
+resolution. »), sauf pour la voisine à sa fenêtre et le forain (prompts complets plus bas).
+
+| Fichier                 | Lieu                      | Description et pose                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ----------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `busstop-man.png`       | la rue, l'abribus         | `A calm man in his sixties, dark brown skin, short grey hair, a small grey moustache, a beige raincoat over a brown sweater, dark trousers, brown shoes, a flat tweed cap. Pose: standing, reading a folded newspaper held in both hands at chest height (no readable text on the newspaper, only grey lines), patient face.`                                                                                                    |
+| `dog-walker.png`        | la rue, le trottoir       | `A young woman in her twenties, light skin, red hair in a short ponytail, a mustard-yellow raincoat, dark blue jeans, green rubber boots, holding a red leash; at her feet, a small white dog with brown ears and a brown patch on its back, sitting and looking up at her, tail raised. Draw the woman AND the dog. Landscape format.`                                                                                          |
+| `cashier.png`           | la supérette, la caisse   | `A friendly cashier in her fifties, olive skin, black curly hair with grey streaks tied back, small round earrings, a plain cherry-red work apron (no logo, no text) over a white t-shirt. Pose: sitting on a high stool (do not draw the stool: she sits on nothing), front hand resting at waist height as if on a counter, warm smile.`                                                                                       |
+| `traveler-suitcase.png` | la gare, le hall          | `A young woman in her thirties, East Asian features, black hair in a long low braid, a long camel coat, a teal scarf, dark trousers, ankle boots. Pose: sitting on her own upright dark-red suitcase (DRAW the suitcase, seen from the side), holding a small paper train ticket in her lap with both hands, looking ahead, waiting, a little dreamy.`                                                                           |
+| `traveler-board.png`    | la gare, le hall          | `A tall man in his forties, fair skin, short blond hair, glasses, a navy puffer jacket, grey trousers, sneakers, a small black backpack on his back. Pose: standing, head raised high, looking up at something above him (a departure board), one hand holding the backpack strap.`                                                                                                                                              |
+| `old-couple-bench.png`  | la mer, la promenade      | `An elderly couple in their seventies, sitting side by side, close together, on a bench (do not draw the bench: they sit on nothing): the woman in front, white hair in a short perm, a powder-blue cardigan, a beige skirt; the man behind her, bald with white sides, a navy sweater, beige trousers, a straw hat. Both look ahead at the sea, peaceful, the woman's head slightly leaning on his shoulder. Landscape format.` |
+| `fisherman.png`         | la mer, le ponton du port | `A weathered fisherman in his sixties, ruddy fair skin, a white beard, a navy knitted beanie, a yellow oilskin jacket, dark blue overalls, black rubber boots. Pose: sitting on the edge of a pier (do not draw the pier), legs dangling over the edge, holding a long thin fishing rod angled forward and up, the fishing line hanging straight down from its tip, calm and patient.`                                           |
+
+Seconde pose (joindre l'image validée, début de message des poses des enfants : « Using the
+attached image as the strict reference, draw the SAME… New pose: ») :
+
+| Fichier                | Fin du message                                                                                                                                  |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `busstop-man-look.png` | `he lowers the newspaper a little and looks down to his front with a kind, amused smile, as if at a small child.`                               |
+| `traveler-wave.png`    | `still sitting on her suitcase, she raises her front hand in a small friendly wave, gentle smile.`                                              |
+| `fisherman-nod.png`    | `still sitting, he turns his head down toward the viewer's right side and touches the brim of his beanie with his free hand, a quiet greeting.` |
+
+### La voisine à sa fenêtre (joindre `dad-stand.png`)
+
+Le code dessine la fenêtre et le rebord : on ne demande que le buste, de trois quarts (elle
+regarde la rue, comme Eden regarde Céleste).
+
+`neighbor-window.png` :
+
+```
+Using the attached image as the strict reference for the style only (same picture-book
+illustration style, same rendering, same level of detail), draw a NEW character: a sweet elderly
+woman in her eighties, fair skin, white hair in a soft bun, small gold-rimmed glasses, a lilac
+cardigan over a flowered blouse. Draw ONLY her upper body, from the top of her head down to the
+waist, cut by a straight horizontal line at the bottom, as if seen through an open window. Pose:
+three-quarter view facing right, both forearms resting flat in front of her on an invisible
+windowsill, hands crossed, looking down at the street with a gentle curious smile. Do not draw the
+window. Plain pure white background, no shadow, no text, no other element. Square format, high
+resolution.
+```
+
+`neighbor-wave.png` (joindre `neighbor-window.png`) :
+
+```
+Using the attached image as the strict reference, draw the SAME elderly woman, same framing (upper
+body only, cut at the waist by a straight line), same clothes, same style, same colors. New pose:
+one forearm still resting on the invisible windowsill, the other hand raised at shoulder height,
+waving softly, a warm smile. Plain pure white background, no shadow, no text. Square format, high
+resolution.
+```
+
+### Le forain de la barbe à papa (joindre `dad-stand.png`)
+
+Le comptoir du stand est déjà dessiné devant lui : seulement le haut du corps.
+
+`candyfloss-vendor.png` :
+
+```
+Using the attached image as the strict reference for the style only (same picture-book
+illustration style, same rendering, same level of detail), draw a NEW character: a cheerful
+fairground candyfloss seller in his fifties, tanned skin, a thick black moustache, curly black hair
+with grey temples, a red-and-white striped shirt with rolled-up sleeves, a small white paper cap.
+Draw ONLY his upper body, from the top of his head down to the waist, cut by a straight horizontal
+line at the bottom, as if standing behind a counter. Pose: strict side profile facing right,
+holding up in his front hand a big pink candyfloss on a stick, proud friendly smile. Plain pure
+white background, no shadow, no text, no other element. Square format, high resolution.
+```
+
+### Le chat roux de la rue (joindre `cat-sit.png`)
+
+Un autre chat que celui de la famille : même style, pas les mêmes couleurs.
+
+`ginger-cat-sit.png` :
+
+```
+Using the attached image as the strict reference for the style only (same children's picture-book
+illustration style, soft texture, thin warm outlines, same level of detail, same size of cat),
+draw a DIFFERENT cat: an orange ginger tabby with darker orange stripes, a white chest and white
+paws, green eyes, a long striped tail. Pose: sitting upright, strict side profile facing right,
+tail hanging down behind it (as if sitting on the edge of a ledge), calm, eyes half-closed. Whole
+cat, nothing cropped. Plain pure white background, no ground shadow, no text. Square format, high
+resolution.
+```
+
+`ginger-cat-leap.png` (joindre `ginger-cat-sit.png`) :
+
+```
+Using the attached image as the strict reference, draw the SAME ginger cat (same fur, same stripes,
+same white chest and paws, same style, same colors), now leaping away to the right: body stretched
+long in mid-air, front paws reaching forward, back legs pushing, tail straight out behind, ears
+flattened a little. Strict side profile facing right, whole cat, nothing cropped. Plain pure white
+background, no shadow, no text. Landscape format, high resolution.
+```
+
+### L'Educaville (joindre la photo du jouet et `roger.png`)
+
+D'après la photo de l'utilisateur : **recadrer la photo sur le jouet** avant de l'envoyer (pas de
+salon ni de personne derrière). Le téléphone n'a pas de cadran : c'est un **clavier bleu** (1 à 9,
+\*, 0, #) avec un **gros combiné jaune** accroché sur le flanc gauche ; c'est ce combiné qui se
+soulève quand il sonne (D-155).
+
+Dans le jeu, le jouet est **petit** (48 × 32 px) : il faut des formes franches, peu de
+détails. On garde ce qui se reconnaît de loin : l'anse en arc, les toits rouges, la tour bleue et
+son horloge jaune, le clavier bleu, le bloc jaune de l'alphabet, l'auvent rayé rouge et blanc, les
+formes à encastrer, le socle bleu, le combiné jaune. **Pas de nom de marque ni de logo** (marque
+déposée, le jeu est public) : l'anse reste lisse, avec seulement son petit arc-en-ciel.
+
+`toy-town.png` (référence) :
+
+```
+Using the first attached photo as the reference for the toy (same overall shape, same layout of
+the elements, same colors) and the second attached image as the strict reference for the style
+(same children's picture-book illustration style, soft texture, thin warm outlines, same level of
+detail), draw this vintage 1990s electronic educational toy as a picture-book object, not a
+realistic photo.
+
+The toy is a small plastic town on a long teal-blue base: a carrying handle arching over the top
+(plain cream, with only a tiny rainbow on its right foot); on the left, a house with a red roof and a
+blue telephone keypad (big rounded buttons) with a big curved yellow telephone handset hanging on
+the left side of the toy; in the middle, a blue clock tower with a round yellow clock face, and
+below it a yellow block of alphabet tiles with red letters; on the right, red chimneys, a
+red-and-white striped awning, and a shape sorter with a red circle, a yellow triangle, a blue
+diamond, a green square, an orange star and a purple heart.
+
+Simplify it so that it stays readable when very small: bold shapes, few details, big chunky
+elements, fewer stickers. The yellow telephone handset must be clearly visible. Remove every brand
+name and logo: the handle has NO text at all.
+
+View: straight front view, the whole toy, nothing cropped. Plain pure white background, no shadow,
+no text other than the alphabet tiles and keypad numbers. Landscape format, high resolution.
+```
+
+`toy-town-lifted.png` (joindre `toy-town.png`) :
+
+```
+Using the attached image as the strict reference, draw the SAME toy, same view, same framing, same
+style, same colors, with only one change: the big yellow telephone handset on the left side is
+lifted off its hook and floats a little above and to the left of it, its curly cord stretched.
+Nothing else changes. Plain pure white background, no shadow, no text. Landscape format, high
+resolution.
+```
+
+En attendant ces deux images, le jeu dessine le jouet par le code (D-155, PR 1). Je dessine aussi,
+par le code : la lueur turquoise qui sort du combiné, le tremblement du téléphone qui sonne, le
+jouet géant en silhouettes du monde étrange de l'école.

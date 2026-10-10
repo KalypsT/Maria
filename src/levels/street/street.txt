@@ -9,6 +9,8 @@
 ; Refaite (D-77) : du ciel au-dessus des toits (le feuillage seulement en haut du platane, devant les
 ; façades) ; lampadaires, enseigne, toit de l'école et échafaudage tiennent ; cheminées qui fument, linge,
 ; drapeau, chat roux ; au crépuscule, lampadaires et quelques fenêtres allumés.
+; Les passants (D-155, `config/passersby.ts`) : la voisine à sa fenêtre, le monsieur de l'abribus,
+; la dame au petit chien, le chat roux sur son rebord (il bondit) ; deux pigeons sur le trottoir.
 ; @name: La rue
 ; @shell: street-nest 20 9 medium hook
 ; @shell: street-school-roof 100 7 medium
@@ -63,6 +65,8 @@
 ; @decor: washline 3 14 9 2
 ; @decor: flag 84 1 3 5
 ; @decor: cat 69 13 2 2
+; @decor: pigeon 44 26 2 2
+; @decor: pigeon 90 26 2 2
 ; @decor: sill 5 17 3 1
 ; @decor: slimetrail 6 18 1 7
 ; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).

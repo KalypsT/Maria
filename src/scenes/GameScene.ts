@@ -124,7 +124,7 @@ import {
   CHASE_VIEW,
   SHELL_ART,
 } from '../config/art';
-import { STORY_TIMING, StoryFlag, TOWER_CUBES } from '../config/story';
+import { STORY_TIMING, StoryFlag, TOWER_CUBES, TOY_PHONE } from '../config/story';
 import { PropStage } from '../core/story/PropStage';
 import { StoryDirector } from '../core/story/StoryDirector';
 import { holdsMaria, type TimeOfDay } from '../core/story/story';
@@ -132,6 +132,7 @@ import { STRANGE_FX } from '../config/strangeFx';
 import { HOUSE_STORY } from '../levels/house/story';
 import { ISLET_CUBES } from '../levels/nanny/story';
 import type { Box } from '../core/physics/gridCollision';
+import { PasserbyView } from './PasserbyView';
 import { StoryView } from './StoryView';
 import { StrangeFxView } from './StrangeFxView';
 import { CombatView } from './CombatView';
@@ -480,6 +481,10 @@ export class GameScene extends Phaser.Scene {
   story!: StoryDirector;
   readonly props = new PropStage();
   private storyView!: StoryView;
+  /** Les passants et les animaux (D-155). */
+  private passersby!: PasserbyView;
+  /** L'histoire a avancé (la marée, le soir de la fête) : passants replacés au prochain noir. */
+  private passersbyStale = false;
   /** Effets du monde étrange (D-35) : présage, scintillements, tremblements, vie des salles. */
   private fx!: StrangeFxView;
   private readonly fxView = new Phaser.Geom.Rectangle();
@@ -548,9 +553,15 @@ export class GameScene extends Phaser.Scene {
     this.story = new StoryDirector(HOUSE_STORY, {
       flagCleared: (id) => {
         void this.session.removeStoryFlag(id);
+        this.passersbyStale = true;
       },
       flagSet: (id) => {
         void this.session.addStoryFlag(id);
+        this.passersbyStale = true;
+        if (id === StoryFlag.SchoolPhone) {
+          // Céleste décroche le téléphone de l'Educaville (D-155) : le clic, puis le silence.
+          this.audio.sfx.play('toy-phone-pickup');
+        }
         // Croissance : posée dans le noir d'un fondu, avant que le script ne replace Céleste.
         this.applyGrowth();
       },
@@ -675,6 +686,7 @@ export class GameScene extends Phaser.Scene {
     this.props.load(this.story.data.props, this.level.id, this.story.flags);
     this.storyView = new StoryView(this, this.props, this.story);
     this.storyView.setArt(this.artScale, this.artImages());
+    this.passersby = new PasserbyView(this);
     this.fx = new StrangeFxView(this);
     this.fx.load(
       this.level,
@@ -1025,6 +1037,12 @@ export class GameScene extends Phaser.Scene {
     );
     this.chaseView.render(camera.prevY + (camera.y - camera.prevY) * alpha + camera.viewHeight / 2);
     this.storyView.render(this.puppet.x, this.puppet.y, box.height);
+    this.passersby.update(
+      this.time.now,
+      this.game.loop.delta,
+      this.puppet.x,
+      this.puppet.y - box.height / 2,
+    );
     this.shiftView.render(this.time.now, this.puppet.x, this.puppet.y - box.height / 2, this.erase);
     this.lullaby.render(this.time.now, this.erase);
     this.worldView.render();
@@ -2006,6 +2024,7 @@ export class GameScene extends Phaser.Scene {
     this.props.load(this.story.data.props, level.id, this.story.flags);
     this.storyView.rebuild();
     this.storyView.clearThought();
+    this.loadPassersby();
     this.poser.sitting = false;
     this.fx.reset();
     this.fx.load(level, isStrangeRoom(level), this.palette(), this.story.timeOfDay() === 'morning');
@@ -2141,6 +2160,37 @@ export class GameScene extends Phaser.Scene {
     this.redrawArt();
   }
 
+  /**
+   * Le téléphone de l'Educaville sonne (D-155) : au bout de l'école étrange, tant que Céleste ne l'a
+   * pas décroché, quand elle approche.
+   */
+  private toyPhoneRinging(): boolean {
+    const flags = this.story.flags;
+    if (
+      this.level.id !== TOY_PHONE.room ||
+      !flags.has(StoryFlag.SchoolStrange) ||
+      flags.has(StoryFlag.SchoolPhone)
+    ) {
+      return false;
+    }
+    const dx = this.puppet.x - (TOY_PHONE.col + 0.5) * TILE_SIZE;
+    const dy = this.puppet.y - (TOY_PHONE.row + 1) * TILE_SIZE;
+    return Math.hypot(dx, dy) < TOY_PHONE.ringPx;
+  }
+
+  /** Les passants de la salle (D-155), à ce moment de la journée ; personne dans un monde étrange. */
+  private loadPassersby(): void {
+    this.passersbyStale = false;
+    this.passersby.load(
+      this.level.id,
+      this.story.timeOfDay(),
+      this.strangeWorld || isStrangeRoom(this.level),
+      this.story.flags,
+      this.artScale,
+      this.artImages(),
+    );
+  }
+
   /** Redessine la salle et Céleste (échelle ou palette changée). */
   private redrawArt(): void {
     this.drawnTime = this.story.timeOfDay();
@@ -2150,6 +2200,7 @@ export class GameScene extends Phaser.Scene {
     this.shellJar.load(this.level.id, this.shellCount(), this.artScale);
     this.hideouts.load(this.level, this.artScale, this.story.timeOfDay() === 'evening');
     this.storyView.setArt(this.artScale, this.artImages());
+    this.loadPassersby();
     this.combatView.setArt(this.artScale, this.palette());
     this.trainView.setArt(this.artScale);
     this.rideView.setArt(this.artScale);
@@ -2510,6 +2561,7 @@ export class GameScene extends Phaser.Scene {
       this.haptics.pulse('chaseWake');
     }
     sfx.loop('chase-rumble', chase !== null && chase.placed && !chase.done && !chase.paused);
+    sfx.loop('toy-phone-ring', this.toyPhoneRinging());
     const trains = this.level.trains;
     for (let i = 0; i < trains.length && i < this.trainWatches.length; i++) {
       const cue = this.trainWatches[i]?.step(
@@ -2655,6 +2707,8 @@ export class GameScene extends Phaser.Scene {
     }
     if (veil >= 1 && (story.timeOfDay() !== this.drawnTime || this.isDim() !== this.drawnDim)) {
       this.redrawArt();
+    } else if (veil >= 1 && this.passersbyStale && !memory) {
+      this.loadPassersby();
     }
     // La marée a tourné (D-95) : dans le noir d'un fondu (le banc), ou tout de suite hors script
     // (outil de debug). Céleste reste où elle est (le banc est au sec aux deux marées).

@@ -2226,3 +2226,62 @@ Retours d'écoute de l'utilisateur sur téléphone.
 - **Un souvenir** (`alpha`) : la nounou est un peu passée (90 %), comme le voulait D-118 ; son visage est net.
 - **Eden caché** (`eden-peek`) : sa tête qui rit, découpée dans l'image debout, petite (9 px) en bas du cadre.
 - Eden, de face quand il rit ou lève les bras (pas de profil) : c'est voulu, il regarde Céleste.
+
+## D-155 — Les passants, les animaux ; l'Educaville à la place de la boîte à formes
+
+Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des animaux), et l'Educaville (Fisher-Price, 1994, jouet de son enfance) à la place de la boîte à formes. Proposition validée telle quelle, options comprises.
+
+- **L'Educaville** remplace la boîte à formes partout : au bout de l'école étrange, sur l'abribus de l'îlot 2, pâli dans la salle de jeux, dans le cahier. **Son téléphone sonne tout seul** ; Céleste fait Agir : la sonnerie s'arrête, le combiné jaune se soulève, une lueur turquoise en sort, **silence** (choix de l'utilisateur, pas de notes de berceuse), une bulle « ? ». Le trou en forme de Maria disparaît ; Maria n'est ni montrée ni entendue (pilier 5).
+  - Le couvercle géant de l'école étrange devient le jouet géant en silhouettes : **mêmes plateformes, même trou** (aucun changement de parcours).
+  - **L'identifiant `shape-box` reste** dans la sauvegarde (invisible du joueur ; le renommer demanderait une migration).
+  - **Ni nom ni logo** de la marque (le jeu est public) : un jouet d'après l'Educaville. Le téléphone de la photo est un clavier (pas un cadran) avec un gros combiné jaune sur le flanc gauche : c'est lui qui se soulève.
+  - Le jouet passe de 40 × 32 à 48 × 32 px (il est en largeur ; un objet de l'histoire ne dépasse pas 2 tuiles de haut).
+  - Un son de sonnerie de jouet à fournir (`docs/BRUITAGES.md`) ; d'ici là, une vibration et la lueur.
+- **Les passants** : des images fixes (deux poses pour certains), derrière Céleste, sans collision, qui ne cachent jamais une coquille ni un passage. Quand Céleste passe tout près, une fois : ils changent de pose (un salut, un regard), une petite bulle sans texte (cœur, main). Le chat roux bondit et disparaît ; les oiseaux s'envolent et reviennent (comme le pigeon de la cour, D-79).
+  - **Règles** : aucun adulte près d'un passage où Céleste grimpe (le chantier reste vide) ; personne dans les mondes étranges, la nuit, ni au bureau des objets trouvés.
+  - **La rue** : la voisine à sa fenêtre, le monsieur de l'abribus, la dame au petit chien, le chat roux (il remplace la queue dessinée de D-77), des pigeons. **La supérette** : la caissière. **La gare** (le hall, de jour) : la voyageuse sur sa valise, le voyageur au tableau des départs. **La station balnéaire** : le vieux couple sur le banc de la promenade, le pêcheur au ponton, le forain de la barbe à papa (le soir), des mouettes. **Le jardin** : un merle le jour, un hérisson le soir (dessinés par le code). **La rue d'autrefois** : la voisine pâlie à sa fenêtre.
+  - Le train et la maison ne changent pas.
+- **Plan en 3 PR** : l'Educaville ; le système des passants, la rue et la supérette ; la gare, la station balnéaire, le jardin et la rue d'autrefois.
+- Prompts : `docs/PROMPTS_PERSONNAGES.md`, section D-155.
+
+### D-155, PR 2 : le système des passants, la rue, la supérette
+
+- **Le système** (`config/passersby.ts`, `core/world/passersby.ts`, `PasserbyView`) : hors de l'histoire et de la sauvegarde. Chaque passant a sa salle, sa tuile, ses moments de la journée ; sa réaction (`PASSERBY_REACTIONS`) : une seconde pose en fondu tant que Céleste est tout près (30 px, quittée au-delà de 60), une bulle sans texte une fois par visite, ou la fuite (le chat). Une seconde pose n'est prise que si elle est dessinée comme la première (deux images ou deux silhouettes).
+- **Les passants sont des sortes d'objets de l'histoire** (`PASSERBY_KINDS` dans `PROP_KINDS`) : leur taille (`PROP_SIZE`), leur image (`CHARACTER_IMAGES`), sans texture dans `StoryView`. Silhouettes provisoires par le code (`passerbyArt.ts`) tant que l'image manque.
+- **La rue** : la voisine dans une fenêtre ouverte dessinée par le code (volets, la pièce derrière, allumée le soir, la jardinière), posée sur une fenêtre de la façade jaune ; elle salue quand Céleste passe dessous (proximité en largeur). Le monsieur de l'abribus (image) ; la dame au petit chien devant l'école ; deux pigeons sur le trottoir (ceux de la cour, D-79). Le matin seulement, sauf la voisine et le chat.
+- **Le chat roux** remplace la queue animée de D-77 (le rebord reste dessiné) : il file (un bond en arc, à l'opposé de Céleste, effacé, 650 ms) dès qu'elle monte sur le toit de l'abribus (128 px), pas quand elle passe sur le trottoir ; il revient à la visite suivante.
+- **La supérette** : la caissière (image) assise sur un tabouret haut dessiné par le code, au bout du comptoir, tournée vers l'entrée.
+- `tests/passersby.test.ts` : les réactions ; chaque passant posé (sol, fenêtre sur une façade, rebord du chat, tabouret), sans coquille, lanterne ni objet sous lui, loin des portes.
+- **Images** : le monsieur de l'abribus (deux poses), la caissière, la dame au chien (la flaque grise retirée au détourage), la voisine (deux poses), le chat roux (assis : les pattes sur le rebord, la queue pend dessous et s'efface ; en plein bond). Les petites (la voisine, le chat) ramenées à 320 px de haut (240 pour le bond) : elles s'affichent à moins de 40 px. Le vieux couple : à refaire (la mer derrière).
+
+### D-155, PR 3 : la gare, la mer, le jardin, la rue d'autrefois
+
+- **Le hall de la gare**, le jour : le voyageur qui lève les yeux vers le tableau des départs ; la voyageuse sur sa valise (elle fait un petit signe, une bulle).
+- **La promenade**, le jour : le vieux couple sur son banc (le leur, dessiné avec eux, entre deux bacs à fleurs, loin du banc des marées) ; silhouettes provisoires (l'image est à refaire). Deux mouettes sur la promenade (les pigeons de D-79, en blanc).
+- **Le port** : le pêcheur assis au bord du quai, au-dessus de l'échelle, à marée haute seulement (à marée basse, la vase) ; il touche son bonnet ; son fil de pêche, trop fin pour le détourage, est redessiné par le code, du bout de la canne jusqu'à l'eau.
+- **La jetée**, le soir de la fête seulement (pas la nuit qui suit) : le forain derrière un chariot de barbe à papa dessiné par le code (auvent rayé, ampoules le soir, comptoir rose, la cuve), entre les deux stands. Les stands de la jetée sont des blocs fermés (on glisse dessous) : impossible d'y mettre un vendeur.
+- **Le jardin** : un merle sur la terrasse (il s'envole) ; un hérisson qui trottine sous la pergola et se roule en boule quand Céleste approche. **De jour** : le jardin n'a qu'une lumière (`GARDEN_PALETTE`), il n'a jamais de soir.
+- **La rue d'autrefois** (monde étrange) : la voisine pâlie (55 %) à une fenêtre allumée, sous le toit d'où part Céleste ; elle salue. Un passant n'est dans un monde étrange que s'il est un écho (`memory`).
+- **Le système** : un passant peut dépendre de l'histoire (`when`, comme les objets de l'histoire) ; quand l'histoire avance (la marée, le soir de la fête), les passants sont replacés au prochain noir. `illustratedBox` (familyArt) : où est dessinée l'image d'un personnage, partagé avec le fil de pêche.
+
+### D-155, PR 1 : l'Educaville
+
+- **L'Educaville** (`toy-town`, `toy-town-lifted`, objets de l'histoire) à la place de la boîte à formes, au bout de l'école étrange, sur le dessus de l'Educaville géante. Dessinée par le code (PLACEHOLDER, d'après la photo de l'utilisateur, sans nom ni logo) tant que son image manque : le jeu prendra `toy-town.png` et `toy-town-lifted.png` dès qu'elles seront dans `ART_IMAGES`.
+- **Le téléphone sonne** (`toy-phone-ring`, boucle, le son de l'utilisateur) tant qu'il n'est pas décroché, quand Céleste est à moins de 300 px du jouet (`TOY_PHONE`) : pas pendant toute la montée. Le combiné tremble (deux images, 90 ms), des ondes à côté.
+- **Céleste décroche** (Agir) : l'étape `school.phone` (nouvelle, ajoutée à la liste figée de la sauvegarde) ; le clic du combiné (`toy-phone-pickup`) ; le combiné se soulève aussitôt devant elle (`instant`), son fil en spirale, une lueur turquoise ; le silence, une bulle « ? » (au lieu de la bulle de Maria). La suite ne change pas (la cour au crépuscule, maman).
+- **Le souvenir** garde son nom dans la sauvegarde (`shape-box`) ; la case du cahier montre l'Educaville.
+- **L'école étrange** : le couvercle géant devient le dessus de l'Educaville géante (de grosses touches de clavier et le cadran de l'horloge sur sa tranche) ; mêmes plateformes, même trou. La frise de formes de l'école reste (l'Educaville a ses formes à encastrer).
+- Chez la nounou, la boîte à formes avait déjà laissé sa place aux cubes de la tour d'Eden (D-122) : rien à changer.
+
+### D-155, suite : les images du jouet et du vieux couple
+
+- **L'Educaville** : les deux images de l'utilisateur (raccrochée, décrochée), détourées **sur le même cadre** (le jouet ne bouge pas quand Céleste décroche) ; deux touches du clavier, trouées par le détourage (leur blanc ressemblait au fond), rebouchées. Elles remplacent le dessin par le code dans le monde étrange ; le cahier garde le dessin par le code (comme Roger). Le cadre du jouet passe à 72 × 32 px (sa hauteur ne change pas) : la place de la lueur du combiné et des ondes de la sonnerie, qui sinon étaient coupées net au bord.
+- **Le vieux couple** : l'image, encore avec la mer derrière, **détourée automatiquement** (`rembg`, modèle `isnet-general-use`, hors du dépôt) ; leurs pieds, dans les herbes de la dune, un peu coupés. Assis sur **un banc dessiné par le code** (comme le tabouret de la caissière : `PASSERBY_SEATS`, tabouret ou banc), ils regardent à gauche ; le test vérifie que leurs pieds touchent la promenade.
+
+## D-156 — Les deux derniers disques du tourne-disque
+
+- **Musiques de l'utilisateur** : « Céleste petite étoile » (`record-early`, 2 min 58) et « Avant même ta naissance » (`record-lullaby`, 1 min 59), préparées par `audio:prepare` (−14,5 → −18 LUFS ; écart de sonie faible, 4,6 et 5,4 LU, aucun silence : rien à retravailler). 2,2 et 1,4 Mo ; la musique pèse 20 Mo (limite 32).
+- **« Céleste petite étoile »** (choix de l'utilisateur : la cabane dans l'arbre) : sur une petite étagère murale sous le toit de la cabane, au bord de la fenêtre (ligne 7, colonnes 14 à 16, une planche traversable habillée en `wallshelf`). On y saute depuis le haut du coffre suspendu, où mène la cheminée du saut mural : **moyen exactement** avec les capacités du premier passage (escalade, saut mural, phase 2) ; on en redescend facilement. La coquille du coffre reste facile.
+- **« Avant même ta naissance »** : **pas chez la nounou** (choix de l'utilisateur : on n'y revient jamais, un disque raté y serait perdu pour toujours) ; au niveau précédent, un peu caché : **sur l'armoire du dortoir de la classe de mer**, au bout des couchettes (une berceuse au dortoir). Facile depuis la couchette du haut, mais au-dessus du regard.
+- Même prise que le disque de la gare (D-121, PR 3) : Agir, l'étape (`record.early`, `record.lullaby`, ajoutées à la liste figée de la sauvegarde), le disque rangé dans les souvenirs, une bulle « musique ». Les pochettes dans leur couleur (vert d'eau, mauve).
+- Tests (`records.test.ts`) : les trois disques ont leur musique ; chaque disque à sa place, pris avec Agir, la difficulté exacte, le retour au sol.

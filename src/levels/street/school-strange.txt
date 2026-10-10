@@ -4,8 +4,9 @@
 ; on redescend dans la classe, des plateformes basses mènent aux tables qui flottent
 ; (moyen) jusqu'à une veilleuse turquoise ;
 ; une cheminée entre deux piles de livres géants (difficile) ; une veilleuse ; deux chaises
-; flottantes, puis le couvercle géant d'une boîte à formes et son trou (difficile). Sur le couvercle,
-; la boîte à formes. On y arrive par l'histoire (l'oculus de l'école), jamais par une porte.
+; flottantes, puis le dessus d'une Educaville géante et son trou (difficile). Dessus, l'Educaville et
+; son téléphone qui sonne (D-155, à la place de la boîte à formes de D-64). On y arrive par
+; l'histoire (l'oculus de l'école), jamais par une porte.
 ; @name: École étrange
 ; @lantern: school-strange-sorter 38 11
 ; @lantern: school-strange-tables 47 29

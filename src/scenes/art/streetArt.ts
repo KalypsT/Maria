@@ -638,32 +638,8 @@ export function streetDrawers({ tileShape, rounded }: ShapeTools): Record<string
       ctx.fill();
     },
     cat(a, r) {
-      // Chat roux du voisinage, assis sur un rebord de fenêtre (pas celui de la famille, gris).
-      const { ctx } = a;
-      const base = r.y + r.h;
-      ledgeDraw(ctx, r.x - 2, base - 3, r.w + 4);
-      const cx = r.x + r.w / 2;
-      ctx.fillStyle = '#d98a4a';
-      ctx.beginPath();
-      ctx.ellipse(cx, base - 9, 6, 6.5, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(cx + 1, base - 17, 4.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(cx - 2.5, base - 20);
-      ctx.lineTo(cx - 1.5, base - 24);
-      ctx.lineTo(cx + 0.5, base - 20.5);
-      ctx.moveTo(cx + 2, base - 20.5);
-      ctx.lineTo(cx + 4, base - 24);
-      ctx.lineTo(cx + 5, base - 19.5);
-      ctx.fill();
-      ctx.fillStyle = '#b86a33';
-      ctx.fillRect(cx - 4, base - 11, 8, 1.2);
-      ctx.fillRect(cx - 3.5, base - 7, 7, 1.2);
-      ctx.fillStyle = '#3a3330';
-      ctx.fillRect(cx - 0.5, base - 18, 1, 1);
-      ctx.fillRect(cx + 2.5, base - 18, 1, 1);
+      // Le rebord du chat roux du voisinage (D-155 : le chat lui-même est un passant, il bondit).
+      ledgeDraw(a.ctx, r.x - 2, r.y + r.h - 3, r.w + 4);
     },
     scaffold(a, r) {
       const { ctx, level } = a;

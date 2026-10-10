@@ -74,6 +74,12 @@ export const SFX_SLOTS = [
   // Monde.
   /** Une porte de façade s'ouvre (D-61). */
   'door',
+  /**
+   * Le téléphone de l'Educaville, au bout de l'école étrange (D-155) : il sonne tout seul (boucle),
+   * Céleste décroche (le clic du combiné, puis le silence).
+   */
+  'toy-phone-ring',
+  'toy-phone-pickup',
   /** Une bulle de pensée apparaît. */
   'thought',
   /** Le fil discret se montre (D-129) : un tintement très doux. */
@@ -131,7 +137,12 @@ export const SFX_GAIN: Readonly<Partial<Record<SfxSlot, number>>> = {
 };
 
 /** Sons joués en boucle tant que dure leur situation (glisser, poursuite). */
-export const SFX_LOOPS: readonly SfxSlot[] = ['wall-slide', 'cable-slide', 'chase-rumble'];
+export const SFX_LOOPS: readonly SfxSlot[] = [
+  'wall-slide',
+  'cable-slide',
+  'chase-rumble',
+  'toy-phone-ring',
+];
 
 /**
  * Marge (s) au début et à la fin d'un fichier de boucle, que le lecteur saute : le motif y est
@@ -239,6 +250,8 @@ export const TEST_TONES: Readonly<
   erase: { from: 1200, to: 200, ms: 400, wave: 'sine' },
   lullaby: { from: 1320, to: 1320, ms: 380, wave: 'sine' },
   door: { from: 350, to: 250, ms: 120, wave: 'triangle' },
+  'toy-phone-ring': { from: 880, to: 880, ms: 0, wave: 'square' },
+  'toy-phone-pickup': { from: 600, to: 300, ms: 40, wave: 'square' },
   thought: { from: 1200, to: 1500, ms: 50, wave: 'sine' },
   hint: { from: 1500, to: 1900, ms: 180, wave: 'sine' },
   'voice-hop': { from: 600, to: 900, ms: 80, wave: 'triangle' },

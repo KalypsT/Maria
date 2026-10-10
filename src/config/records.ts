@@ -11,11 +11,11 @@
 export const RECORDS = [
   {
     /**
-     * PLACEHOLDER (pas encore de musique) : le premier disque, au jardin ou au quartier, choisi
-     * quand le morceau existera. L'identifiant peut changer tant qu'il n'est pas placé.
+     * « Céleste petite étoile » (D-156) : sur l'étagère sous le toit de la cabane dans l'arbre, au
+     * jardin (niveau 2).
      */
     id: 'early',
-    title: 'Disque',
+    title: 'Céleste petite étoile',
     sleeve: 0x7fb3a6,
   },
   {
@@ -26,11 +26,12 @@ export const RECORDS = [
   },
   {
     /**
-     * PLACEHOLDER (pas encore de musique) : chez la nounou (niveau 7), près de son tourne-disque
-     * d'autrefois, dans le souvenir ; idéalement une berceuse.
+     * « Avant même ta naissance » (D-156), une berceuse : sur l'armoire du dortoir de la classe de
+     * mer (niveau 6). Pas chez la nounou (niveau 7) : on n'y revient jamais, un disque raté y serait
+     * perdu.
      */
     id: 'lullaby',
-    title: 'Disque',
+    title: 'Avant même ta naissance',
     sleeve: 0xb7a3d6,
   },
 ] as const;

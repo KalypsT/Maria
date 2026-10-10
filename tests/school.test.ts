@@ -199,12 +199,20 @@ describe('l’école et son monde étrange (D-64)', () => {
     },
   );
 
-  it('la boîte à formes : un souvenir du monde étrange, qui y reste ; Maria n’y est pas', () => {
+  it('l’Educaville (D-155) : un souvenir du monde étrange, qui y reste ; son téléphone décroché ; Maria n’y est pas', () => {
     expect(STRANGE_THINGS).toContain('shape-box');
     const box = trigger('school-box');
     expect(box.steps.some((s) => s.do === 'memory' && s.id === 'shape-box')).toBe(true);
-    expect(prop('shape-box')?.when).toEqual({});
-    expect(prop('shape-box')?.room).toBe('school-strange');
+    // Le téléphone sonne jusqu'à ce que Céleste décroche (au premier pas du script) : le jouet
+    // raccroché, puis décroché, aussitôt (devant elle).
+    const phone = box.steps.findIndex((s) => s.do === 'flag' && s.id === F.SchoolPhone);
+    expect(phone).toBeGreaterThanOrEqual(0);
+    expect(phone).toBeLessThan(box.steps.findIndex((s) => s.do === 'memory'));
+    expect(prop('toy-town')?.when).toEqual({ none: [F.SchoolPhone] });
+    expect(prop('toy-town-lifted')?.when).toEqual({ all: [F.SchoolPhone] });
+    expect(prop('toy-town')?.instant).toBe(true);
+    expect(prop('toy-town-lifted')?.instant).toBe(true);
+    expect(prop('toy-town')?.room).toBe('school-strange');
     const shown = HOUSE_STORY.props.filter((p) => p.room === 'school-strange');
     expect(shown.some((p) => p.kind.startsWith('maria'))).toBe(false);
     const rooms = box.steps.flatMap((s) => (s.do === 'room' ? [s] : []));
