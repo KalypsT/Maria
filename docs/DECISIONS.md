@@ -2301,3 +2301,14 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
 - **Un pigeon sur le toit de la tour** (`holepigeon`) : quand Céleste arrive sur le toit, il s'envole tout droit vers la droite et passe par le trou (les autres oiseaux s'envolent en diagonale vers le haut). Il revient comme le pigeon de la cour, quand Céleste est loin. Pas effrayé depuis la plateforme de la tour, en dessous.
 - Le chantier ne change pas pour l'instant (choix de l'utilisateur : à traiter avec les bulles des personnages).
 - Test : `playgroundFence.test.ts` (rien de plein sur la trajectoire du pigeon, jusqu'à l'autre côté du grillage). Vérifié dans Chromium : le ballon vu du sol, l'envol du pigeon à travers le trou.
+
+## D-159 — Le sac à dos (orientations, avant les maquettes)
+
+- **Demande de l'utilisateur** : un menu efficace, utile, qui donne envie de le consulter et de continuer à jouer. Le cahier devient **un sac à dos** ; la pause y entre.
+- **Choix de l'utilisateur** (questions du chantier) :
+  - **un seul bouton, le sac** (en haut à gauche), à la place de « II » et « Carte » ; l'ouvrir met le jeu en pause ; il s'ouvre **toujours sur la carte** ; une **étincelle** sur le sac quand il y a du nouveau, jusqu'à ce qu'on l'ouvre ; l'icône provisoire d'abord, l'image de l'utilisateur ensuite ;
+  - **trois onglets dessinés comme des objets** : le cahier (la carte, Mon voyage, Mes capacités), les trésors, les réglages (le contenu de la pause ; « Reprendre » devient fermer le sac ; « Retour à l'accueil » en bas des réglages) ;
+  - **la carte** : par niveau, la liste des pièces, peut-être un toucher de plus pour choisir le niveau ; **feuilleter les lieux déjà visités** ; montrer les trésors **aperçus mais pas pris** (comme les coquilles) ;
+  - **les trésors** regroupent les souvenirs, les affaires de Maria, le monde étrange, **les coquilles** et **les disques** (ceux-ci seulement une fois trouvés : ils restent secrets) ; **rangés par type**, une couleur par famille ; les silhouettes en pointillés, **le lieu d'un trésor manquant** comme indice, un compteur par famille et un total, « nouveau » sur ce qui n'a pas été regardé, le trésor en grand (et son souvenir rejoué) ; une récompense par famille complète plus tard (pas d'idée pour l'instant) ; les noms des trésors : à revoir après ;
+  - **le contenu** (les objets des souvenirs, peut-être leurs lieux ; les affaires de Maria plus loin dans le jeu) : l'utilisateur le redéfinit, chantier séparé, après le sac.
+- **Maquette interactive** (hors du dépôt : https://claude.ai/artifact/DE58ednNNhcjxdPUsuLd6T) : le vrai décor, les vrais dessins, les cartes actuelles ; deux variantes d'onglets (A : les objets dans la poche, à gauche ; B : en haut) et deux façons de choisir le lieu (1 : un sommaire ; 2 : une rangée de pictos à côté de la carte), une vue « Liste » des pièces. **En attente du choix de l'utilisateur** avant le plan en PR.

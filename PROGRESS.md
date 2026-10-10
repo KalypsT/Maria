@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Le trou du grillage de l'aire de jeux** (D-158, sur `claude/game-test-issues-e7pomv`) : le ballon de la cour coincé dedans, un pigeon qui s'envole par le trou depuis le toit de la tour. Le chantier attendra (bulles des personnages). **Le sac à dos** (le cahier, la pause, les collections) : questions posées à l'utilisateur, avant tout plan.
+**Le trou du grillage de l'aire de jeux** (D-158, sur `claude/game-test-issues-e7pomv`) : le ballon de la cour coincé dedans, un pigeon qui s'envole par le trou depuis le toit de la tour. Le chantier attendra (bulles des personnages). **Le sac à dos** (D-159) : orientations validées ; maquette interactive publiée (https://claude.ai/artifact/DE58ednNNhcjxdPUsuLd6T) : en attente du choix de l'utilisateur (onglets A ou B, choix du lieu 1 ou 2, la liste des pièces, la maison et le jardin séparés ?), puis le plan en PR.
 
 **Retour d'essai, nouvelle partie depuis le début** (D-157, sur `claude/game-test-issues-e7pomv`) : **faits** : maman assise n'a plus la tête coupée (canapé, banc de l'aire de jeux ; toutes les poses assises) ; le monsieur de l'abribus et la dame au chien plus petits (75 %) ; se rattraper au mur quitté après un saut mural raté (une fois retombée sous le point du saut) ; la seconde cheminée de la ronce et celle de l'école étrange resserrées de 5 à 4 tuiles (la ronce passe de difficile à moyen) ; le son de Maria baissé. **En attente** : le nouveau son des trouvailles (fichier de l'utilisateur, `found`) ; le quartier (trouver l'entrée de l'école, aller au fond du chantier) : propositions à valider ; le cahier (pages et contenu) : à revoir avec l'utilisateur.
 
