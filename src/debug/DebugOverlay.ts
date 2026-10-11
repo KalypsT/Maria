@@ -1940,6 +1940,58 @@ export function installDebugOverlay(scene: GameScene): void {
     }
   }
 
+  // Le voyage rapide (D-163) : d'ici, peut-on partir ? Chaque veilleuse principale et son état ;
+  // voyager (avec les règles) ou forcer.
+  const travelSection = element('details', panel);
+  element('summary', travelSection, undefined, 'Voyage');
+  const travelList = element('div', travelSection);
+  const departure: Readonly<Record<string, string>> = {
+    zone: 'hors partie',
+    strange: 'monde étrange',
+    busy: 'Céleste occupée',
+    story: "pas en ce moment (l'histoire)",
+    lantern: 'pas de lanterne allumée à portée',
+  };
+  const travelStates: Readonly<Record<string, string>> = {
+    locked: 'pas encore',
+    here: 'ici',
+    far: 'pas à pied',
+    open: 'ouverte',
+  };
+  const refreshTravel = () => {
+    const { options, problem } = scene.travelState();
+    travelList.replaceChildren();
+    element(
+      'div',
+      travelList,
+      'dbg-stats',
+      `Départ : ${problem ? (departure[problem] ?? problem) : 'possible'}`,
+    );
+    for (const { point, state } of options) {
+      const row = element('div', travelList, 'dbg-actions');
+      element('span', row, undefined, `${point.level} · ${travelStates[state] ?? state}`);
+      for (const [label, force] of [
+        ['Voyager', false],
+        ['Forcer', true],
+      ] as const) {
+        element('button', row, undefined, label).addEventListener('click', (event) => {
+          scene.travelTo(point.lantern, force);
+          (event.currentTarget as HTMLElement).blur();
+          refreshTravel();
+        });
+      }
+    }
+  };
+  travelSection.addEventListener('toggle', () => {
+    if (travelSection.open) {
+      refreshTravel();
+    }
+  });
+  element('button', travelSection, undefined, 'Actualiser').addEventListener(
+    'click',
+    refreshTravel,
+  );
+
   // Les coquilles (D-148) : par lieu, trouvées ou non ; y aller, cocher, tout ou rien.
   const shellSection = element('details', panel);
   const shellSummary = element('summary', shellSection, undefined, 'Coquilles');

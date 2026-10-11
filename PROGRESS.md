@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Le voyage rapide** (D-163, demande de l'utilisateur, sur `ccr-6f15c4bd-qxtl81`) : orientations choisies (les veilleuses qui se répondent : une veilleuse principale par niveau, turquoise, depuis n'importe quelle lanterne allumée, débloquée après le monde étrange du lieu). Suite : la validation du plan (les veilleuses choisies, le geste, les PR).
+**Le voyage rapide** (D-163, demande de l'utilisateur, sur `ccr-6f15c4bd-qxtl81`) : les veilleuses qui se répondent, une veilleuse principale par niveau (six, le train compris), turquoise, depuis n'importe quelle lanterne allumée du monde réel, débloquée après le monde étrange du niveau. Plan validé en 2 PR. **PR 1 faite : le système** (les règles, le voyage, DEBUG → « Voyage »). Suite : PR 2, dans le jeu (la veilleuse turquoise, l'étincelle d'Agir, la carte du sac en mode voyage, les yeux fermés).
 
 **Le trou du grillage de l'aire de jeux** (D-158, sur `claude/game-test-issues-e7pomv`) : le ballon de la cour coincé dedans, un pigeon qui s'envole par le trou depuis le toit de la tour. Le chantier attendra (bulles des personnages). **Le sac à dos** (D-159, D-160) : maquette interactive (https://claude.ai/artifact/DE58ednNNhcjxdPUsuLd6T), choix de l'utilisateur et plan validés en 3 PR (le sac ; la carte ; les trésors). **PR 1 faite : le sac** (un seul bouton, la poche et ses trois objets, le cahier, les trésors d'avant, les réglages de l'ancienne pause) et **PR 2 faite : la carte** (D-161 : la rangée des lieux à gauche, feuilleter, un « ? », le point rose, les trésors aperçus) et **PR 3 faite : les trésors** (D-162 : une page par type et en couleurs, les indices, la fiche et le nom, « nouveau », l'étincelle). **Le plan du sac est complet.** Suite : essai sur téléphone ; l'image du sac (prompt fourni) ; le contenu (les objets des souvenirs, leurs lieux), à redéfinir par l'utilisateur ; une récompense par famille complète (à trouver).
 
@@ -47,6 +47,12 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le voyage rapide, PR 1 : le système (D-163)
+
+- Les six veilleuses principales (`TRAVEL_LANTERNS`), leur déblocage, la règle « là où l'on pourrait aller à pied maintenant », les moments sans voyage (`TRAVEL_BLOCKED`), le départ depuis une lanterne allumée ; `GameScene.travelTo` ; DEBUG → « Voyage ».
+- Vérifié dans Chromium (844 × 390) : refusé loin d'une lanterne ; la mer, puis la gare.
+- [ ] À vérifier sur téléphone (après la PR 2) : DEBUG → « Voyage » → « Voyager » depuis une lanterne ; l'arrivée devient-elle bien le point de retour après un rechargement ?
 
 ### Le sac à dos, PR 3 : les trésors (D-162)
 

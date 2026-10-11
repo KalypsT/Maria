@@ -91,6 +91,16 @@ import {
   type Zone,
 } from '../core/world/zone';
 import { shellTally, zoneShells } from '../core/world/shells';
+import {
+  departureProblem,
+  litLanternNear,
+  travelOptions,
+  travelPoints,
+  type DepartureProblem,
+  type TravelOption,
+  type TravelPoint,
+} from '../core/world/travel';
+import { TRAVEL_LANTERNS } from '../config/travel';
 import { FlashbackView } from '../ui/FlashbackView';
 import { Hud } from '../ui/Hud';
 import { showEndScreen } from '../ui/EndScreen';
@@ -1819,6 +1829,77 @@ export class GameScene extends Phaser.Scene {
     );
     this.feel.reset(this.player);
     this.resetCamera();
+  }
+
+  /** Les veilleuses principales du voyage rapide (D-163), lues une fois dans la zone. */
+  private travelPointsCache: TravelPoint[] | null = null;
+
+  private travelPoints(zone: Zone): TravelPoint[] {
+    this.travelPointsCache ??= travelPoints(zone, TRAVEL_LANTERNS);
+    return this.travelPointsCache;
+  }
+
+  /**
+   * Le voyage rapide (D-163) : chaque veilleuse principale et son état depuis la salle de Céleste,
+   * et ce qui l'empêche de partir d'ici (null : rien). Hors d'une zone : aucune veilleuse.
+   */
+  travelState(): { options: TravelOption[]; problem: DepartureProblem | null } {
+    const zone = this.zone;
+    const flags = this.story.flags;
+    const lit = this.session.data.activatedCheckpoints;
+    const lantern = zone
+      ? litLanternNear(this.level, this.player.box, (key) => lit.includes(key))
+      : null;
+    const problem = departureProblem({
+      level: zone ? this.level : null,
+      busy:
+        this.story.busy ||
+        this.transition.leaving ||
+        this.run.fainting ||
+        this.run.splashing ||
+        this.memoryPlay !== null ||
+        this.celesteGone ||
+        this.ended,
+      flags,
+      lantern,
+    });
+    const options = zone
+      ? travelOptions(zone, this.travelPoints(zone), this.level.id, flags, (room, exit) =>
+          this.story.exitsLocked(room, exit),
+        )
+      : [];
+    return { options, problem };
+  }
+
+  /**
+   * Voyage vers une veilleuse principale (D-163) : elle devient le point de retour (allumée,
+   * sauvegardé) et Céleste y réapparaît, comme après un évanouissement. `force` (debug) : sans
+   * vérifier les règles. Faux si le voyage est refusé.
+   */
+  travelTo(lantern: string, force = false): boolean {
+    const zone = this.zone;
+    const point = zone ? this.travelPoints(zone).find((p) => p.lantern === lantern) : undefined;
+    if (!point) {
+      return false;
+    }
+    if (!force) {
+      const { options, problem } = this.travelState();
+      if (problem !== null || options.find((o) => o.point === point)?.state !== 'open') {
+        return false;
+      }
+    }
+    const room = zoneRoom(point.room);
+    if (!room) {
+      return false;
+    }
+    this.abortMemory();
+    this.story.cancel();
+    void this.session.setCheckpoint(point.room, point.lantern);
+    // La salle relue même si Céleste y est déjà (debug) : son point de retour change.
+    this.setRoom(room.level, room.zone, point.lantern);
+    this.respawn();
+    this.reappearAtMs = this.time.now;
+    return true;
   }
 
   /** Outil de debug (D-148) : les coquilles de la salle relues dans la sauvegarde. */
