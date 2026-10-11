@@ -699,3 +699,89 @@ beside them. Straight front view, landscape format.
 - La toise, la photo et la boîte à musique restent dessinées dans le décor par le code (la toise y
   gagne un trait à chaque croissance) ; les deux dessins au mur prennent leur image quand elle
   arrive.
+
+## Les autres trésors encore dessinés par le code (suite de D-164)
+
+Même conversation que les souvenirs (même début commun, ci-dessus), un objet par message. Pour les
+affaires de Maria, **joindre aussi `maria.png`** : ses affaires reprennent son rose et son tissu
+fleuri.
+
+### Les affaires de Maria (joindre `maria.png`)
+
+| Fichier               | Fin du message                                                                                                                                                                                                                                |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `memory-slipper.png`  | `The object: one tiny doll's slipper belonging to the baby doll in the attached photo: soft pink felt, a pale cream sole, a small white pompom on the toe, a lining of the same small floral fabric as her clothes. Three-quarter side view.` |
+| `memory-bottle.png`   | `The object: a tiny doll's baby bottle for the baby doll in the attached photo: a small clear bottle with a little milk inside, a pink screw ring with a tiny flower, a soft beige teat, lying slightly tilted. Three-quarter view.`          |
+| `memory-headband.png` | `The object: the headband of the baby doll in the attached photo, alone: the same soft pink stretchy headband with the same fabric bow (small pink and green flowers on cream), laid flat in a loose oval. Seen slightly from above.`         |
+| `memory-bonnet.png`   | `The object: a tiny knitted baby bonnet for the baby doll in the attached photo: soft pink wool, a ribbed edge, a little white pompom on top, two short ties. Front view.`                                                                    |
+
+### Le monde étrange (les jouets de la petite enfance)
+
+| Fichier                   | Fin du message                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `memory-pink-kitchen.png` | `The object: a toddler's toy play kitchen from the 1990s, pink plastic with rounded corners: on top two round hot plates, a tiny saucepan and a teapot; at the back a small splashback with round knobs; below, an oven door with a round window and a small cupboard door. A little worn, much loved. Straight front view.`                       |
+| `memory-music-book.png`   | `The object: a thick children's board book with rounded corners and a padded cover, sky blue with a big yellow musical note on the cover (no title, no letters); along the side edge, a row of five big round colorful push buttons (red, yellow, green, blue, pink) that play music. Three-quarter view.`                                         |
+| `memory-white-cloth.png`  | `The object: a toddler's comfort cloth, a soft square of white cotton muslin folded in two and a little crumpled, a thin pale blue border along its edges, one corner hanging down. Give it a clear warm outline all around and soft grey-blue shadows in the folds, so that it stands out on the white background. Seen slightly from above.`     |
+| `memory-eden-tower.png`   | `The object: a little tower of four chunky wooden toy cubes with rounded edges, stacked a bit crooked, soft faded colors: at the bottom a pink cube with a white circle on its face, then a yellow cube with a white triangle, then a turquoise cube with a white diamond, on top a blue cube with a white star. No letters. Straight front view.` |
+
+Le torchon blanc : si le détourage le mange (blanc sur blanc), redemander le même objet `on a plain
+light grey background`.
+
+### Les pochettes des disques (facultatif)
+
+Aujourd'hui, une pochette est un carré de couleur. Une image par disque, sans texte (le titre est
+écrit dans le sac) :
+
+| Fichier                 | Disque                   | Fin du message                                                                                                                                                                                                                         |
+| ----------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `record-early.png`      | Céleste petite étoile    | `The object: a small 45 rpm vinyl record sliding half out of its square cardboard sleeve; the sleeve is soft sea-green, decorated with a naive drawing of a small smiling yellow star above a crescent moon. No text.`                 |
+| `record-adventures.png` | Les Aventures de Céleste | `The object: a small 45 rpm vinyl record sliding half out of its square cardboard sleeve; the sleeve is soft pink, decorated with a naive drawing of a little girl with round glasses running under a small yellow umbrella. No text.` |
+| `record-lullaby.png`    | Avant même ta naissance  | `The object: a small 45 rpm vinyl record sliding half out of its square cardboard sleeve; the sleeve is soft lilac, decorated with a naive drawing of a crescent moon and little stars above an empty wooden cradle. No text.`         |
+
+## Les courts souvenirs (D-68) en images
+
+Les trois courts souvenirs (Roger, le livre musical, le torchon blanc) occupent presque tout l'écran
+pendant 7 s, et reviennent dans le sac (« Revoir le souvenir ») : ce sont les dessins par le code
+les plus exposés du jeu. Une illustration par souvenir, **sans cadre** : le jeu garde son
+traitement de vieille photo (coins arrondis, voile chaud, bords qui s'effacent, lent zoom).
+**Maria n'y est jamais** (pilier 5), **aucun texte** (pilier 6).
+
+Une conversation à part. Joindre `celeste.png` au premier message, valider d'abord Céleste toute
+petite (sa référence), puis chaque scène avec elle en référence.
+
+### `celeste-toddler.png` (joindre `celeste.png`)
+
+```
+Using the attached image as the strict reference for the style and for the character, draw the
+SAME girl when she was a toddler of about 2 years old: same face shape and features, same brown
+eyes, freckles, chubby cheeks, the same chestnut hair but short and soft with two tiny tufts tied
+with small pink ribbons, the same round pink glasses (smaller, child-size), a soft pale yellow
+toddler romper with short sleeves. Pose: sitting on the floor, legs out in front of her, calm
+smile. Full body, three-quarter view facing right, nothing cropped. Plain pure white background, no
+shadow, no text. Square format, high resolution.
+```
+
+### Les scènes (joindre `celeste-toddler.png`)
+
+Début de chaque message :
+
+```
+Using the attached image as the strict reference for the character (the same toddler, same face,
+same short hair with two tiny tufts and pink ribbons, same round pink glasses, same pale yellow
+romper) and for the style (children's picture-book illustration, soft texture, thin warm
+outlines), draw a full illustration of a tender childhood memory, as if remembered years later:
+warm, slightly faded golden colors, soft light, a dreamy feeling, a gently blurred background. No
+text, no letters, no frame, no border, no other person or doll than described. Keep the girl and
+the main object in the central area; keep the edges calm and simple (they will fade softly).
+Landscape format 16:9, high resolution.
+```
+
+| Fichier                     | Fin du message                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `flashback-roger.png`       | Joindre aussi `roger.png`. `The scene: evening in a cosy child's bedroom. The toddler sits on a soft rug and hugs tightly against her cheek the plush monkey of the second attached image (same monkey: ginger fur, cream face, long dangling arms and legs), her eyes closed, a peaceful smile. Behind her, the wooden bars of a baby crib and a small lamp glowing warm.`                                                                     |
+| `flashback-music-book.png`  | Joindre aussi `memory-music-book.png` s'il est fait. `The scene: a sunny afternoon in a living room. The toddler sits alone on a patterned rug with a thick children's board book open in front of her (big round colorful buttons along its edge); she presses a button with one finger, eyes wide open with delight, mouth in a little "oh"; small drawn musical notes float up from the book. A pale window with light curtains behind her.` |
+| `flashback-white-cloth.png` | Joindre aussi `memory-white-cloth.png` s'il est fait. `The scene: nap time, an afternoon at the nanny's house. The toddler lies on her side in a small wooden crib with bars, eyes closed, asleep, holding a soft white cotton cloth with a thin pale blue border against her cheek. The curtain is drawn; soft warm afternoon light filters through it. Nobody else in the room. Calm and safe.`                                               |
+
+Je fais ensuite l'intégration : l'image remplit la vignette, le traitement de vieille photo reste
+dessiné par le code ; une image allégée (pas de transparence : un format compressé, ajouté au cache
+hors ligne).
