@@ -5,6 +5,7 @@ import { spawnPosition, type LevelData } from '../level/LevelData';
 import { parseAsciiLevel } from '../level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../player/PlayerPhysics';
 import { mulberry32, ramp, seedOf } from './random';
+import { ARCADE_ROOM_META } from './roomMeta';
 
 type Hitbox = Readonly<{ width: number; height: number }>;
 
@@ -445,6 +446,7 @@ export function generateCablesLevel(
     `; Console (D-166) : les tyroliennes, niveau ${String(n)}. Généré (graine fixe) : ne pas modifier à la main.`,
     `; @name: Tyroliennes · niveau ${String(n)}`,
     `; @abilities: ${abilities.join(' ')}`,
+    ...ARCADE_ROOM_META,
   ];
   const pieces: Piece[] = [
     { kind: 'post', col: 1, width: C.start.width, top: C.start.top, goal: false },

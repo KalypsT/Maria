@@ -2017,8 +2017,8 @@ export function installDebugOverlay(scene: GameScene): void {
     },
   );
 
-  // La console (D-166) : les niveaux générés, joués comme un parcours d'essai (sauvegarde
-  // inchangée) ; mesurés par l'analyse de faisabilité ; les records de la partie.
+  // La console (D-166) : l'allumer ; les niveaux générés, joués comme un parcours d'essai
+  // (sauvegarde inchangée) ; mesurés par l'analyse de faisabilité ; les records de la partie.
   const arcadeSection = element('details', panel);
   element('summary', arcadeSection, undefined, 'Console');
   const arcadeRow = element('div', arcadeSection, 'dbg-actions');
@@ -2050,6 +2050,15 @@ export function installDebugOverlay(scene: GameScene): void {
       : 'Aucun niveau';
   };
   const arcadeActions = element('div', arcadeSection, 'dbg-actions');
+  // Allumer la console comme le fera la télé de la chambre (D-166, PR 3).
+  element('button', arcadeActions, undefined, 'Allumer la console').addEventListener(
+    'click',
+    (event) => {
+      (event.currentTarget as HTMLElement).blur();
+      panel.hidden = true;
+      scene.openConsole();
+    },
+  );
   element('button', arcadeActions, undefined, 'Jouer').addEventListener('click', (event) => {
     const level = currentArcade();
     if (level) {

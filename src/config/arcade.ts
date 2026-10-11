@@ -1,4 +1,5 @@
 import { Ability } from './abilities';
+import type { SynthTone } from './sfx';
 import { StoryFlag } from './story';
 
 /**
@@ -174,3 +175,56 @@ export const ARCADE_CABLES = {
   /** Largeur d'un poteau (tuiles). */
   postWidth: { from: 4, to: 2 } satisfies Ramp,
 };
+
+/** Le nom de la console, sur son écran d'accueil (PLACEHOLDER, D-166). */
+export const ARCADE_TITLE = 'Les jeux de Céleste';
+
+/** Rythme d'une partie (ms). PROVISOIRE, à régler sur téléphone. */
+export const ARCADE_TIMING = {
+  /** « Niveau n » affiché, Céleste immobile, avant de jouer. */
+  introMs: 900,
+  /** « Niveau n réussi » sur le fanion, avant le niveau suivant. */
+  clearedMs: 1200,
+  /** Après une chute, avant l'écran « Oups ! ». */
+  fallMs: 700,
+};
+
+/**
+ * Les bips de la console (D-166) : des sons synthétisés, dans tous les builds, en attendant la
+ * musique de l'utilisateur. PLACEHOLDER.
+ */
+export const ARCADE_CHIMES = {
+  /** Le choix se déplace dans un menu. */
+  move: { from: 880, to: 880, ms: 40, wave: 'square' },
+  /** Un choix validé. */
+  select: { from: 660, to: 990, ms: 90, wave: 'square' },
+  /** Un niveau commence. */
+  start: { from: 523, to: 784, ms: 160, wave: 'triangle' },
+  /** Le fanion atteint. */
+  cleared: { from: 784, to: 1568, ms: 260, wave: 'triangle' },
+  /** Une chute. */
+  fall: { from: 620, to: 140, ms: 420, wave: 'triangle' },
+  /** Un nouveau record. */
+  record: { from: 1046, to: 2093, ms: 380, wave: 'square' },
+} satisfies Record<string, SynthTone>;
+export type ArcadeChime = keyof typeof ARCADE_CHIMES;
+
+/** Volume des bips (0–1), sous le volume des bruitages. */
+export const ARCADE_CHIME_GAIN = 0.12;
+
+/**
+ * Couleurs des tuiles dans les salles de la console (D-166) : le style pastel de la maquette (les
+ * salles de la console ne sont pas habillées). PLACEHOLDER.
+ */
+export const CONSOLE_TILE_COLORS = {
+  /** Le cadre de l'écran (murs, plafond, sol). */
+  frame: 0xe7c6dd,
+  frameEdge: 0xf6dceb,
+  /** Les poteaux. */
+  post: 0x9b7fd1,
+  postEdge: 0xfff6fa,
+  /** Les briques de jeu (l'erreur). */
+  hazard: 0xff6f9f,
+  /** Le fanion. */
+  goal: 0xff3d86,
+} as const;

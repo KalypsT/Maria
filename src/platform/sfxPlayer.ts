@@ -7,6 +7,7 @@ import {
   SFX_SLOTS,
   TEST_TONES,
   type SfxSlot,
+  type SynthTone,
 } from '../config/sfx';
 import { pickVariant, sfxFileMap } from '../core/audio/sfx';
 
@@ -298,9 +299,30 @@ export class SfxPlayer {
     };
   }
 
+  /**
+   * Un bip de la console (D-166) : un son synthétisé, dans tous les builds, au volume des bruitages
+   * (`gain` en plus). Ignoré tant que le son n'est pas débloqué, ou au-delà du nombre de voix.
+   */
+  chime(tone: Readonly<SynthTone>, gain: number): void {
+    const context = this.context;
+    if (
+      !context ||
+      context.state !== 'running' ||
+      document.hidden ||
+      this.voices >= SFX_MIX.maxVoices
+    ) {
+      return;
+    }
+    this.synth(context, tone, gain);
+  }
+
   /** Son de test (build de debug) : un court glissando, différent pour chaque emplacement. */
   private tone(context: AudioContext, slot: SfxSlot, gain: number): void {
-    const { from, to, ms, wave } = TEST_TONES[slot];
+    this.synth(context, TEST_TONES[slot], TEST_TONE_GAIN * gain);
+  }
+
+  private synth(context: AudioContext, tone: Readonly<SynthTone>, gain: number): void {
+    const { from, to, ms, wave } = tone;
     const start = context.currentTime;
     const end = start + ms / 1000;
     const oscillator = context.createOscillator();
@@ -308,7 +330,7 @@ export class SfxPlayer {
     oscillator.frequency.setValueAtTime(from, start);
     oscillator.frequency.exponentialRampToValueAtTime(to, end);
     const envelope = context.createGain();
-    envelope.gain.setValueAtTime(TEST_TONE_GAIN * gain, start);
+    envelope.gain.setValueAtTime(gain, start);
     envelope.gain.exponentialRampToValueAtTime(0.001, end);
     oscillator.connect(envelope);
     this.route(oscillator, envelope);

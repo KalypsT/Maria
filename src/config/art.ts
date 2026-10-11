@@ -1055,6 +1055,29 @@ export const MEMORY_PALETTE: Readonly<ArtPalette> = {
 };
 
 /**
+ * La console de Céleste (D-166) : le style pastel choisi sur la maquette, à part du reste du jeu ;
+ * un fond rose, des poteaux mauves, un liseré net. PLACEHOLDER.
+ */
+export const CONSOLE_PALETTE: Readonly<ArtPalette> = {
+  ...DAY_PALETTE,
+  wallTop: '#fde6ef',
+  wallBottom: '#f6d3e2',
+  wallpaper: 'rgba(255,255,255,0.18)',
+  wainscot: '#f1c9db',
+  floor: '#9b7fd1',
+  floorEdge: '#b9a1e6',
+  structure: '#6e52a8',
+  wood: '#9b7fd1',
+  woodLight: '#b9a1e6',
+  woodDark: '#6e52a8',
+  rim: 'rgba(255,255,255,0.85)',
+  darkness: 0,
+  glow: 0,
+  vignette: 0.12,
+  vignetteColor: '160,90,130',
+};
+
+/**
  * Monde étrange (D-28, D-36 : palette « crépuscule » choisie par l'utilisateur) : fonds violets et
  * bleu nuit, halos roses, bords des surfaces praticables en turquoise (lisibilité, pilier 1).
  */
