@@ -238,6 +238,11 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
         ctx.fill();
       }
     },
+    napexit(a, r) {
+      // La sortie de la chambre de la sieste (D-164, revue des portes) : l'arche de la maison de la
+      // nounou, sans dessin dessus : elle ramène à la maison.
+      arch(a, r);
+    },
     bedgate(a, r) {
       // Le raccourci de l'îlot 1 (D-112) : une petite arche basse, à hauteur de tout-petit, la tête
       // d'un lit dessinée dessus, des feuilles de haie au pied. Elle ne mène nulle part tant que Roger

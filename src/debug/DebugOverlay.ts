@@ -2006,6 +2006,27 @@ export function installDebugOverlay(scene: GameScene): void {
     },
   );
 
+  // Les portes de façade (D-164) : par salle ; y aller (la revue visuelle des portes).
+  const doorSection = element('details', panel);
+  element('summary', doorSection, undefined, 'Portes');
+  for (const zone of ZONES) {
+    for (const [id, level] of zone.rooms) {
+      if (level.doors.length === 0) {
+        continue;
+      }
+      element('div', doorSection, 'dbg-stats', level.meta.name ?? id);
+      for (const door of level.doors) {
+        const target = zone.destination(id, door.id);
+        const row = element('div', doorSection, 'dbg-actions');
+        element('span', row, undefined, `${id}:${String(door.id)} → ${target?.room ?? '?'}`);
+        element('button', row, undefined, 'Aller').addEventListener('click', (event) => {
+          scene.teleportToDoor(id, door.id);
+          (event.currentTarget as HTMLElement).blur();
+        });
+      }
+    }
+  }
+
   // Les coquilles (D-148) : par lieu, trouvées ou non ; y aller, cocher, tout ou rien.
   const shellSection = element('details', panel);
   const shellSummary = element('summary', shellSection, undefined, 'Coquilles');

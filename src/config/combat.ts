@@ -384,6 +384,30 @@ export const SNAIL_HITBOX = { width: 10, height: 12 } as const;
  */
 export const TUNNEL_CLEAR_PX = 18;
 
+/**
+ * L'annonce du tunnel (D-164, retour d'essai : « pas clair ») : la bouche du tunnel arrive de
+ * l'avant pendant l'annonce, sa voûte au ras du toit, et touche Céleste au moment où il passe ; les
+ * abris du toit (les creux, le soufflet) s'éclairent. PROVISOIRE, à régler sur téléphone.
+ */
+export const TUNNEL_VIEW = {
+  /** La paroi au-dessus de la voûte (pierre sombre), et le noir sous la voûte, devant le train. */
+  wallColor: 0x2a2530,
+  insideDark: 0.55,
+  /** Le front de pierre de la bouche : sa largeur (px) et ce qu'il dépasse sur la paroi. */
+  faceWidthPx: 14,
+  faceOverlapPx: 4,
+  /** D'où la bouche part au début de l'annonce : au-delà du bord avant de la vue (px). */
+  startBeyondPx: 24,
+  /** L'image qui s'assombrit un peu à l'approche (au plus fort, juste avant le tunnel). */
+  warnDark: 0.2,
+  /** Hauteur de la lueur d'un abri (tuiles), son battement (ms), ses alphas. */
+  glowTiles: 2,
+  glowBeatMs: 140,
+  glowMin: 0.35,
+  glowSwing: 0.4,
+  glowPassAlpha: 0.5,
+} as const;
+
 /** Moment d'un danger à cycle (tunnel), comme les trains : calme, annonce, passage. */
 export function cyclePhase(ms: number, period: number, warn: number, pass: number): TrainPhase {
   const span = Math.max(period, warn + pass + 1);

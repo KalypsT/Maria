@@ -198,6 +198,7 @@ import { PhaseCue, PhaseWatch, SfxCue, SfxDirector } from '../core/audio/sfx';
 import { ChaseView } from './ChaseView';
 import { TrainView } from './TrainView';
 import { TrainRideView } from './TrainRideView';
+import { tunnelShelters } from '../core/combat/tunnelShelters';
 import { WorldView } from './WorldView';
 import type { AudioPlayer } from '../platform/audioPlayer';
 import { isMusicTrack, type MusicTrack } from '../config/audio';
@@ -1064,6 +1065,9 @@ export class GameScene extends Phaser.Scene {
       camera.viewWidth,
       camera.viewHeight,
       this.cameras.main.zoom,
+      this.cameras.main.worldView.x,
+      this.cameras.main.worldView.y,
+      this.puppet.x,
     );
     this.chaseView.render(camera.prevY + (camera.y - camera.prevY) * alpha + camera.viewHeight / 2);
     this.storyView.render(this.puppet.x, this.puppet.y, box.height);
@@ -1991,6 +1995,26 @@ export class GameScene extends Phaser.Scene {
     return null;
   }
 
+  /**
+   * Outil de debug (D-164) : Céleste devant une porte de façade (là où l'on arrive par elle), pour
+   * la revue visuelle des portes.
+   */
+  teleportToDoor(room: string, door: number): void {
+    this.teleportToRoom(room);
+    if (this.level.id !== room || !this.level.doors.some((d) => d.id === door)) {
+      return;
+    }
+    const { x, y } = arrivalPosition(
+      this.level,
+      door,
+      this.growth.hitbox.width,
+      this.growth.hitbox.height,
+    );
+    this.player.reset(x, y, this.level);
+    this.feel.reset(this.player);
+    this.resetCamera();
+  }
+
   /** Outil de debug (D-148) : les coquilles de la salle relues dans la sauvegarde. */
   reloadPickups(): void {
     const { abilities, collectibles, seenCollectibles } = this.session.data.progression;
@@ -2280,6 +2304,10 @@ export class GameScene extends Phaser.Scene {
     this.combatView.rebuild();
     this.trainView.rebuild();
     this.rideView.rebuild();
+    // Les abris du toit (D-164), éclairés à l'annonce d'un tunnel.
+    this.rideView.setShelters(
+      tunnelShelters(level, this.combat.tunnelRow, this.growth.hitbox.height),
+    );
     this.chaseView.rebuild();
     this.applyRoomCamera();
     this.run.load(level, this.session.data.activatedCheckpoints, checkpointId);

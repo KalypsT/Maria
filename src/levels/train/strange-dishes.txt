@@ -14,7 +14,11 @@
 ; @difficulty: easy
 ; @ambient: #1d1a2c
 ; @chase: right 117
-; @chase-phase: 117 7
+; Plus tendu que la tour de la gare (D-164, retour d'essai) : une vitesse par tronçon, rapide au
+; premier (il gagne sur Céleste), puis le croc-en-jambe du milieu, un peu moins vite au dernier.
+; @chase-phase: 48 10
+; @chase-phase: 84 8.5
+; @chase-phase: 117 8
 ; @chase-trip: 56 11 8 1
 ; @decor: upsidedining 1 1 124 5
 ; @decor: dishshelf 14 1 3 10

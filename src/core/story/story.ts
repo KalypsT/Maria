@@ -304,6 +304,8 @@ export const PROP_KINDS = [
   'quay-train',
   /** Le train à quai, de jour (D-90) : la porte ouverte, sans lueur ; il relie les deux gares. */
   'quay-train-day',
+  /** La lueur sous la porte du dortoir, la nuit (D-105, retour d'essai) : un trait de lumière. */
+  'door-glow',
   // Objets à regarder (D-38), avec un petit mouvement en boucle.
   'music-box',
   'plant',
@@ -444,6 +446,7 @@ export const WALL_PROP_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'site-gap',
   'quay-train',
   'quay-train-day',
+  'door-glow',
 ]);
 
 /** Vus par une fenêtre (D-64) : posés sur le mur, sans surface sous eux. */

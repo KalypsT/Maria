@@ -2376,3 +2376,56 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
 - **Tests** (`travel.test.ts`) : l'arrivée à côté de chaque veilleuse (debout, au sol, tournée vers elle, et c'est bien elle qui devient le point de retour) ; le script (son ordre, les règles des scripts de l'histoire, `storyProblems`) ; proposé avec deux veilleuses ; Agir ouvre la carte.
 - **Vérifié dans Chromium** (844 × 390, histoire « après la fin ») : la veilleuse turquoise de la chambre et l'étincelle au-dessus ; Agir, la carte en mode voyage (la chambre et la terrasse en turquoise) ; feuilleter jusqu'au quartier, toucher deux fois la veilleuse de la rue ; Céleste assise sous l'abribus à côté de la veilleuse turquoise, le point de retour `street:street-busstop`.
 - **Sauvegarde** : aucun changement.
+
+## D-164 — Retour d'essai : le toit du train, le boss du train, le dortoir, l'escalier de la plage, le phare
+
+- **Retour de l'utilisateur** (essai jusqu'à la mer) : les tunnels du toit du train ne sont pas clairs, il faut un meilleur avertissement ; le boss du train est trop facile ; au dortoir, une action pour sortir mais pas de porte visible ; l'escalier de la mer n'est pas compréhensible ; il manque la porte en bas, dans le phare.
+- **Choix de l'utilisateur** (les recommandations) : trois PR sur la même branche :
+  1. **le phare, le dortoir, l'escalier** (du dessin) ;
+  2. **les tunnels** : l'entrée du tunnel visible au loin, qui grossit pendant l'annonce, et les creux du toit qui s'éclairent ;
+  3. **le boss du train** : pas un vrai défi (gardé pour le boss final), mais **plus tendu que la tour de la gare** (jugée « pas trop mal dosée, un peu simple », le premier boss).
+
+### D-164, PR 1 : le phare, le dortoir, l'escalier de la plage
+
+- **Le phare** : la porte du pied (`; @door: 1`) n'avait aucun dessin à l'intérieur (l'étincelle d'Agir sur un mur nu). Nouveau décor `lighthousedoor` (PLACEHOLDER) : une porte cintrée en bois cloutée, son encadrement de pierre, un filet de jour autour.
+- **Le dortoir** : la porte existait (`door`, entre la deuxième et la troisième couchette) mais, en bois sombre la nuit, on la prenait pour un placard ; la « lueur sous la porte » n'était qu'un scintillement, une fois. Nouveau décor `dormdoor` (une porte peinte en clair, un chambranle, une poignée, une plaque) ; nouvel objet de mise en scène **`door-glow`**, un trait de lumière pâle sous la porte et son halo, **toute la nuit** (`NIGHT`), au-dessus de l'obscurité de la salle.
+- **L'escalier de la plage** :
+  - **la chaîne** de la promenade était toujours dessinée (« la ferme pour l'instant », d'une PR d'avant la plage) alors que l'escalier est ouvert : **retirée** ;
+  - **en haut** (`beachstairs`, la promenade) : on lisait des gradins blancs ; maintenant un **portique bleu** entre deux piliers, avec le pictogramme de la plage (un parasol, des vagues) et une **flèche qui descend** ; dans l'ouverture (opaque : la balustrade ne passe plus à travers), des **marches qui s'enfoncent** entre deux rampes (les plus proches larges et claires, les plus loin étroites et dans l'ombre) ;
+  - **en bas** (`beachstairsfoot`, la plage) : on lisait un mur rayé ; maintenant la digue et **l'escalier qui la descend en biais**, sous sa rampe, jusqu'à la porte, et **le même portique bleu**, sa flèche vers le haut.
+- **Revue des portes** : une recherche automatique des portes sans dessin ne suffit pas (le dessin de l'escalier du phare « couvrait » sa porte) ; elle signale aussi la porte de la chambre de la sieste (chez la nounou), à regarder lors d'une revue visuelle si l'utilisateur la demande.
+- **Tests** : `doors.test.ts` (chaque porte de la mer a son dessin à sa place ; le dortoir n'a plus la porte sombre) ; `seaNight.test.ts` (la lueur, toute la nuit).
+- **Vérifié dans Chromium** (844 × 390) : la porte claire et sa lueur la nuit ; le portique et les marches sur la promenade ; l'escalier de la digue sur la plage ; la porte cintrée du phare.
+- **Sauvegarde** : aucun changement.
+
+### D-164, PR 2 : l'annonce des tunnels du toit
+
+- **Avant** : pendant l'annonce (2,6 s), l'image s'assombrissait seulement ; on ne savait ni qu'un tunnel arrivait, ni d'où, ni quoi faire.
+- **La bouche du tunnel** (`TrainRideView`, `TUNNEL_VIEW`, PLACEHOLDER) : pendant l'annonce, une paroi de pierre sombre **arrive de l'avant** (le train roule vers la droite), son front de pierre, sa **voûte au ras du toit** (la ligne que le tunnel balaie : debout, la tête dépasse ; couchée, non), le noir dessous ; elle **touche Céleste au moment où le tunnel passe**. L'image ne s'assombrit plus qu'un peu (0,2 au lieu de 0,5).
+- **Les abris s'éclairent** (`tunnelShelters`, pur, testé : les sols sous la ligne du toit où Céleste debout n'est pas balayée, la même règle que `CombatWorld` : les trois creux et le soufflet, à toutes les tailles de Céleste) : une lumière chaude au fond de chaque creux, qui bat pendant l'annonce et reste allumée dans le tunnel.
+- **Gardé** : les durées (10 s, 2,6 s, 2,4 s), le danger et ses règles ; pas de bulle « glissade » (la recommandation était a + b).
+- **Correction en route** : quand l'échelle de l'écran change, les textures sont recréées ; la bouche et les lueurs les reprennent (sinon le jeu s'arrêtait sur le toit, vu dans Chromium).
+- **Vérifié dans Chromium** (844 × 390, « le train, la nuit ») : un cycle complet image par image : le calme, les creux qui s'allument, la bouche qui avance, les arches dans le noir.
+- **Sauvegarde** : aucun changement.
+
+### D-164, PR 3 : le boss du train plus tendu
+
+- **Demande** : pas un vrai défi (gardé pour le boss final), mais **plus tendu que la tour de la gare**.
+- **Mesure** (la vraie simulation, `chaseRun`, phase 3) : la **tolérance** de chaque tronçon, c'est-à-dire de combien un joueur peut être plus lent que le chemin le plus rapide sans être touché. La tour : **+24 %, +62 %, +24 %**. Le chariot à 7 tuiles/s : **+62 %, +92 %, +32 %**, bien plus indulgent. Une seule vitesse ne suffisait pas : à 8,5, le dernier tronçon tombait à +12 % (presque un vrai défi) quand le premier restait à +38 %.
+- **Une vitesse par tronçon** (`; @chase-phase:`, déjà prévu par le format) : **10 tuiles/s** jusqu'à la deuxième veilleuse (il gagne sur Céleste, qui court à 9), **8,5** jusqu'à la troisième, **8** jusqu'au bout. Tolérances : **+22 %, +72 %, +18 %** : plus tendu que la tour au premier et au dernier tronçon ; celui du milieu reste une respiration (le croc-en-jambe : le chariot se cogne à la poutre et s'arrête 2,5 s).
+- **Gardé** : le joueur parfait n'est jamais touché (6 tuiles d'avance) ; chaque tronçon prend **63 %, 78 % et 75 %** du temps du chariot (40 à 80 % exigés) ; 50 % plus lent, il est touché. Les réglages communs des poursuites (départ, écart, croc-en-jambe) ne changent pas : la tour, la vague et les parcours d'essai restent les mêmes.
+- **Test** (`trainStrange.test.ts`) : le temps du chariot se calcule avec la vitesse du tronçon.
+- **Sauvegarde** : aucun changement.
+
+### D-164, PR 4 : la revue visuelle des portes
+
+- **Demande de l'utilisateur** : la revue de toutes les portes, après celle du phare.
+- **La méthode** : un nouvel outil DEBUG → **« Portes »** (chaque porte de façade, par salle, sa destination, « Aller » : Céleste devant elle) ; une photo de chacune des **41 portes** dans Chromium (844 × 390), le monde réel avec l'histoire « après la fin », chez la nounou avec « l'effacement dissous » (toutes les portes y existent).
+- **38 portes se voient** : le portillon de l'aire de jeux, la supérette, les deux portes de l'école, la palissade du chantier, le train à quai, les objets trouvés, les portes et les échelles du train, la trappe du toit, la gare de la mer, le centre, l'escalier de la plage (refait, PR 1), le phare (refait, PR 1), l'arche du port, les arches et la trappe de chez la nounou, la porte de la salle de jeux.
+- **Trois portes n'avaient aucun dessin**, maintenant dessinées :
+  - **l'entrée du centre, vue de l'intérieur** (`sea-centre:1`) : Céleste agissait devant un mur nu, entre le portemanteau et une table : une porte claire (`dormdoor`, comme celle du dortoir) ;
+  - **le retour de la jetée vers le port** (`sea-jetty:1`) : l'arche à ampoules du côté du port (`jettygate`) existe maintenant aussi du côté de la jetée ;
+  - **la sortie de la chambre de la sieste** (`nanny-nap:1`) : l'arche de la maison de la nounou (`napexit`), sans dessin dessus.
+- **Un test général** (`doors.test.ts`, renommé de `seaDoors.test.ts`) : chaque porte de façade a un décor qui recouvre sa case, ou un objet de mise en scène posé devant elle (le train à quai). Il aurait trouvé les trois portes ; pas celle du phare (le grand décor de l'escalier la couvrait), d'où les vérifications précises de la mer.
+- **Lisibles mais petites**, à voir sur téléphone : la trappe du toit du train (`roofhatch`).
+- **Sauvegarde** : aucun changement.
