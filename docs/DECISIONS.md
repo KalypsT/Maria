@@ -2397,3 +2397,13 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
 - **Tests** : `seaDoors.test.ts` (chaque porte de la mer a son dessin à sa place ; le dortoir n'a plus la porte sombre) ; `seaNight.test.ts` (la lueur, toute la nuit).
 - **Vérifié dans Chromium** (844 × 390) : la porte claire et sa lueur la nuit ; le portique et les marches sur la promenade ; l'escalier de la digue sur la plage ; la porte cintrée du phare.
 - **Sauvegarde** : aucun changement.
+
+### D-164, PR 2 : l'annonce des tunnels du toit
+
+- **Avant** : pendant l'annonce (2,6 s), l'image s'assombrissait seulement ; on ne savait ni qu'un tunnel arrivait, ni d'où, ni quoi faire.
+- **La bouche du tunnel** (`TrainRideView`, `TUNNEL_VIEW`, PLACEHOLDER) : pendant l'annonce, une paroi de pierre sombre **arrive de l'avant** (le train roule vers la droite), son front de pierre, sa **voûte au ras du toit** (la ligne que le tunnel balaie : debout, la tête dépasse ; couchée, non), le noir dessous ; elle **touche Céleste au moment où le tunnel passe**. L'image ne s'assombrit plus qu'un peu (0,2 au lieu de 0,5).
+- **Les abris s'éclairent** (`tunnelShelters`, pur, testé : les sols sous la ligne du toit où Céleste debout n'est pas balayée, la même règle que `CombatWorld` : les trois creux et le soufflet, à toutes les tailles de Céleste) : une lumière chaude au fond de chaque creux, qui bat pendant l'annonce et reste allumée dans le tunnel.
+- **Gardé** : les durées (10 s, 2,6 s, 2,4 s), le danger et ses règles ; pas de bulle « glissade » (la recommandation était a + b).
+- **Correction en route** : quand l'échelle de l'écran change, les textures sont recréées ; la bouche et les lueurs les reprennent (sinon le jeu s'arrêtait sur le toit, vu dans Chromium).
+- **Vérifié dans Chromium** (844 × 390, « le train, la nuit ») : un cycle complet image par image : le calme, les creux qui s'allument, la bouche qui avance, les arches dans le noir.
+- **Sauvegarde** : aucun changement.

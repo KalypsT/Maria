@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Retour d'essai jusqu'à la mer** (D-164, sur `ccr-6f15c4bd-qxtl81`) : plan validé en 3 PR. **PR 1 faite : le phare (sa porte), le dortoir (une porte claire, sa lueur toute la nuit), l'escalier de la plage (sans chaîne, un portique et sa flèche, les marches)**. Suite : PR 2, les tunnels du toit du train (l'entrée visible au loin, les creux qui s'éclairent) ; PR 3, le boss du train (plus tendu que la tour de la gare).
+**Retour d'essai jusqu'à la mer** (D-164, sur `ccr-6f15c4bd-qxtl81`) : plan validé en 3 PR. **PR 1 faite : le phare (sa porte), le dortoir (une porte claire, sa lueur toute la nuit), l'escalier de la plage (sans chaîne, un portique et sa flèche, les marches)** et **PR 2 faite : l'annonce des tunnels (la bouche qui arrive de l'avant, les creux qui s'éclairent)**. Suite : PR 3, le boss du train (plus tendu que la tour de la gare).
 
 **Le voyage rapide** (D-163, demande de l'utilisateur, sur `ccr-6f15c4bd-qxtl81`) : les veilleuses qui se répondent, une veilleuse principale par niveau (six, le train compris), turquoise, depuis n'importe quelle lanterne allumée du monde réel, débloquée après le monde étrange du niveau. Plan validé en 2 PR. **PR 1 faite : le système** (les règles, le voyage, DEBUG → « Voyage ») et **PR 2 faite : dans le jeu** (la veilleuse turquoise, l'étincelle d'Agir à une lanterne, la carte du sac en mode voyage, Céleste qui s'assoit, le noir, l'arrivée assise). **Le voyage rapide est complet.** Suite : essai sur téléphone (les durées, la portée de 2 tuiles, la veilleuse turquoise et le fil discret).
 
@@ -49,6 +49,12 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Retour d'essai, PR 2 : l'annonce des tunnels du toit (D-164)
+
+- La bouche du tunnel arrive de l'avant pendant l'annonce, sa voûte au ras du toit ; les creux et le soufflet s'éclairent.
+- Vérifié dans Chromium (844 × 390) : un cycle complet.
+- [ ] À vérifier sur téléphone : comprend-on qu'il faut se coucher ou aller dans un creux ? La bouche arrive-t-elle assez tôt ? La lumière des creux se voit-elle ?
 
 ### Retour d'essai, PR 1 : le phare, le dortoir, l'escalier de la plage (D-164)
 
