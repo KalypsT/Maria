@@ -699,6 +699,8 @@ export const ART_IMAGES: Readonly<Record<string, string>> = {
   roger: 'roger.png',
   /** La coquille d'escargot (D-148) : image fournie par l'utilisateur, détourée. */
   shell: 'shell.png',
+  /** Le sac à dos de Céleste (D-163), le bouton du menu : image fournie par l'utilisateur, détourée. */
+  backpack: 'backpack.png',
   /**
    * L'Educaville (D-155) : images fournies par l'utilisateur, détourées sur le même cadre (le
    * combiné raccroché, puis décroché : le jouet ne bouge pas de l'une à l'autre).

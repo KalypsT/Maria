@@ -146,7 +146,7 @@ import { ShiftLayerView } from './ShiftLayerView';
 import { LullabyView } from './LullabyView';
 import { RideView } from './RideView';
 import { Backpack } from '../ui/Backpack';
-import { BAG_ICON, SPARK_ICON } from '../ui/bagIcons';
+import { BAG_IMAGE, SPARK_ICON } from '../ui/bagIcons';
 import { notebookPlaces, openingPage, type BackpackTrigger } from '../core/world/backpack';
 import { recordSpots, treasureSpots, type TreasureSpot } from '../core/world/treasures';
 import { hasNewTreasure, roomPlace, treasureBook } from '../core/world/treasureBook';
@@ -715,7 +715,7 @@ export class GameScene extends Phaser.Scene {
     const forceTouch = __DEBUG_TOOLS__ && new URLSearchParams(location.search).has('touch');
     if (forceTouch || TouchSource.isTouchDevice()) {
       this.touch = new TouchSource(document.body, controlSettings);
-      this.touch.setIcon('Map', BAG_ICON, 'Le sac');
+      this.touch.setIcon('Map', BAG_IMAGE, 'Le sac');
       this.refreshBagSpark();
       this.controls.sources.push(this.touch);
       detachTouch = this.touch.attach(window);

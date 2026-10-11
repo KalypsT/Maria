@@ -1469,6 +1469,13 @@ body {
 }
 
 /* Le sac, seul bouton en haut à gauche (D-159). */
+.touch-map img {
+  width: 82%;
+  height: 82%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
 .touch-map svg {
   width: 72%;
   height: 72%;
