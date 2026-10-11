@@ -667,6 +667,29 @@ Square format, high resolution.
 | `memory-postcard.png`       | la mer, le dortoir       | `The object: a postcard drawn by a 6-year-old for her parents, seen from the front: a white card with a slightly rounded corner, covered with a naive crayon drawing of the seaside: blue waves, a small sailing boat, a big sun, two seagulls drawn as small Vs, a striped beach towel on the sand. A small corner of a stamp with a wavy postmark shows behind it (no text). Slightly tilted.`                                                                                                                                                                                             |
 | `memory-family-drawing.png` | la maison, après la fin  | `The object: a big child's crayon drawing on a sheet of white paper, held on the wall by two strips of tape, the most careful drawing of the little girl: the whole family standing side by side on green grass under a big yellow sun: a tall father with chestnut hair and a beard, a mother with long curly dark hair, the girl with round pink glasses and two pigtails, holding in her arms a baby doll with brown skin, a pink headband and a pink top; the grey cat at their feet; small pink hearts and flowers around them. Naive, joyful, colorful. Straight front view.`          |
 
+### Reçues (première partie)
+
+Détourées dans `public/art/` (360 px de haut) : `memory-height.png`, `memory-photo.png`,
+`memory-watering-can.png`, `memory-ticket.png`, `memory-letter.png`. Restent : la boîte à
+musique, la carte postale, le dessin de la famille au complet, et **le dessin de l'école, à
+refaire** : la première version était une photo (une feuille sur une table), avec le titre « MY
+FAMILY », et la petite fille ressemblait à un garçon. Message de reprise, dans la même conversation
+(rejoindre `celeste.png`) :
+
+```
+Redo this object. This time it must NOT be a photograph: draw the sheet of paper as an
+illustration, in the same children's picture-book style as the previous objects of this
+conversation, on a plain pure white background (no table, no wall, no wood, no shadow).
+ABSOLUTELY NO TEXT: no title, no words, no letters, no signature.
+
+The object: a child's crayon drawing on a sheet of cream paper, pinned at the top by a red
+pushpin, one corner slightly curled. The drawing, naive and colorful like a 6-year-old's: a house
+with a pink roof, a big yellow sun with rays, green grass, and the family holding hands: a tall
+father with chestnut hair and a short beard, a mother with long curly dark-brown hair, and a
+little GIRL with two pigtails tied with pink bows, round pink glasses and a pink dress; a grey cat
+beside them. Straight front view, landscape format.
+```
+
 ### Après
 
 - Je fais le détourage et la mise à l'échelle (`scripts/art-cutout.py`), puis l'intégration : la
