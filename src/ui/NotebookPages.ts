@@ -2,6 +2,7 @@ import type { MapModel, MapPoint, MapRoom } from '../core/world/mapModel';
 import type { MapBox } from '../core/world/zone';
 import { ABILITY_HINTS, Ability } from '../config/abilities';
 import { drawAbility } from '../scenes/art/abilityArt';
+import { drawSticker } from '../scenes/art/stickerArt';
 import { drawShellFallback, drawShellOutline } from '../scenes/art/shellArt';
 import { ART_IMAGES } from '../config/art';
 import type { NotebookPlace } from '../core/world/backpack';
@@ -199,8 +200,8 @@ export class NotebookPages {
 
   /**
    * Page « Mes capacités » (D-62, demande de l'utilisateur) : une ligne par capacité, dans l'ordre
-   * où on les trouve. Acquise : son pictogramme et comment s'en servir ; sinon une case vide en
-   * pointillés, sans rien dévoiler (complétion explicite, §23).
+   * où on les trouve. Acquise : son pictogramme, sa gommette étoile (D-164) et comment s'en
+   * servir ; sinon une case vide en pointillés, sans rien dévoiler (complétion explicite, §23).
    */
   private drawAbilities(ctx: CanvasRenderingContext2D, width: number, height: number): void {
     const ink = themeColor('--ink');
@@ -226,6 +227,8 @@ export class NotebookPages {
         return;
       }
       drawAbility(ctx, ability, left + box / 2, cy, box * 0.8, ink, rose);
+      // Sa gommette étoile (D-164), collée sur le coin de la case.
+      drawSticker(ctx, left + box - 3, cy - box / 2 + 3, Math.min(14, box * 0.2));
       ctx.fillStyle = ink;
       ctx.font = `italic 600 ${String(Math.round(Math.min(17, rowH * 0.2)))}px ${font}`;
       ctx.textBaseline = 'middle';

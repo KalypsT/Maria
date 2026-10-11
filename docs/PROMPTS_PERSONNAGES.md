@@ -692,10 +692,10 @@ beside them. Straight front view, landscape format.
 
 ### Après
 
-- Je fais le détourage et la mise à l'échelle (`scripts/art-cutout.py`), puis l'intégration : la
-  case de la boîte, la fiche, et l'envol vers le sac (à valider).
-- Les objets qu'on emporterait (proposition : l'arrosoir, le billet, la lettre, la carte postale)
-  sont aussi l'image dans le décor, en petit. Ceux qui resteraient en place (la toise, la photo, la
-  boîte à musique, les deux dessins) restent dessinés dans le décor par le code : la toise y gagne
-  un trait à chaque croissance.
-- En attendant les images, le jeu dessine les souvenirs par le code.
+- Détourage et mise à l'échelle (`scripts/art-cutout.py --height 360 --largest`, `--holes 200`
+  pour un trou ou une anse), puis une ligne dans `MEMORY_IMAGES` (`src/config/art.ts`) : l'image
+  remplace le dessin par le code dans le sac (la case, la fiche), dans l'envol vers le sac (D-164),
+  et dans le décor pour l'arrosoir, le billet, la lettre et la carte postale.
+- La toise, la photo et la boîte à musique restent dessinées dans le décor par le code (la toise y
+  gagne un trait à chaque croissance) ; les deux dessins au mur prennent leur image quand elle
+  arrive.

@@ -1,22 +1,30 @@
 /**
- * Souvenirs (spec §22.1, D-38) : objets de la maison qu'on regarde (Agir) et qu'on revoit ensuite
- * dans le cahier de Céleste. PLACEHOLDER : la liste est ouverte (§45). L'ordre est celui des cases
- * de la page ; un souvenir pas encore trouvé est une case vide en pointillés (complétion
- * explicite, §23).
+ * Mes souvenirs (spec §22.1, D-38, refaits en D-164) : la vie de famille de Céleste, au moins un
+ * par lieu du voyage, chacun lié à papa, à maman ou à la maison. Liste validée par l'utilisateur
+ * (la liste reste ouverte, §45). L'ordre est celui des cases (l'ordre du voyage) ; un souvenir pas
+ * encore trouvé est une case vide en pointillés (complétion explicite, §23). Ceux qu'on peut porter
+ * (l'arrosoir, le billet, la lettre, la carte postale) quittent le décor quand Céleste les prend ;
+ * les autres restent en place, on les regarde autant qu'on veut.
  */
 export const MEMORIES = [
-  /** La photo de famille (salon) : papa, maman, Céleste et le chat. */
-  'photo',
-  /** Le dessin de Céleste punaisé au mur de sa chambre. */
-  'drawing',
-  /** La boîte à musique sur l'étagère au-dessus du lit. */
-  'music-box',
-  /** La plante de la cuisine. */
-  'plant',
-  /** En haut de la bibliothèque du salon, après le monde étrange : Céleste bébé avec Maria. */
-  'bookcase',
-  /** Quelques mois plus tard (D-43) : la toise de la chambre, avec un nouveau trait. */
+  /** La toise de la chambre : un trait de plus à chaque croissance (D-43). */
   'height',
+  /** La photo de famille du salon : papa, maman, Céleste et le chat. */
+  'photo',
+  /** La boîte à musique sur l'étagère au-dessus du lit : sa berceuse revient à la fin. */
+  'music-box',
+  /** Le petit arrosoir rose, dans le potager où papa arrose. */
+  'watering-can',
+  /** Le dessin de Céleste, punaisé au mur de la classe. */
+  'school-drawing',
+  /** Le billet de train, sur le banc du quai, le soir du départ en classe de mer. */
+  'ticket',
+  /** La lettre de maman, sur la couchette du haut, dans le train. */
+  'letter',
+  /** La carte postale que Céleste a dessinée pour ses parents, sur sa couchette du dortoir. */
+  'postcard',
+  /** Après la fin : le dessin de la famille au complet, Maria dans les bras, au mur de la chambre. */
+  'family-drawing',
 ] as const;
 
 /**
@@ -64,16 +72,19 @@ export type MemoryId =
   (typeof MEMORIES)[number] | (typeof MARIA_THINGS)[number] | (typeof STRANGE_THINGS)[number];
 
 /**
- * Le nom de chaque trésor, sur sa fiche dans le sac (D-160, noms validés par l'utilisateur,
- * PLACEHOLDER tant que les souvenirs ne sont pas redéfinis).
+ * Le nom de chaque trésor, sur sa fiche dans le sac (D-160, noms validés par l'utilisateur ; ceux
+ * des souvenirs de D-164 sont des PLACEHOLDERS).
  */
 export const MEMORY_NAMES: Readonly<Record<MemoryId, string>> = {
-  photo: 'La photo de famille',
-  drawing: 'Mon dessin',
-  'music-box': 'La boîte à musique',
-  plant: 'La plante',
-  bookcase: 'La bibliothèque',
   height: 'La toise',
+  photo: 'La photo de famille',
+  'music-box': 'La boîte à musique',
+  'watering-can': 'Le petit arrosoir',
+  'school-drawing': 'Mon dessin de l’école',
+  ticket: 'Le billet de train',
+  letter: 'La lettre de maman',
+  postcard: 'La carte postale',
+  'family-drawing': 'Toute la famille',
   slipper: 'Le chausson de Maria',
   bottle: 'Le biberon de Maria',
   headband: 'Le bandeau de Maria',

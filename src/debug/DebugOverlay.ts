@@ -2002,6 +2002,31 @@ export function installDebugOverlay(scene: GameScene): void {
     });
   });
 
+  // Les trésors (D-164) : trouvés ou non ; y aller (sous l'étincelle de leur déclencheur).
+  const treasureSection = element('details', panel);
+  const treasureSummary = element('summary', treasureSection, undefined, 'Trésors');
+  const treasureList = element('div', treasureSection);
+  const refreshTreasures = () => {
+    const found = scene.session.data.progression.memories;
+    treasureSummary.textContent = `Trésors (${String(
+      TREASURES.filter((id) => found.includes(id)).length,
+    )}/${String(TREASURES.length)})`;
+    treasureList.replaceChildren();
+    for (const id of TREASURES) {
+      const row = element('div', treasureList, 'dbg-actions');
+      element('span', row, undefined, `${found.includes(id) ? '✓' : '·'} ${id}`);
+      element('button', row, undefined, 'Aller').addEventListener('click', (event) => {
+        scene.teleportToTreasure(id);
+        (event.currentTarget as HTMLElement).blur();
+      });
+    }
+  };
+  treasureSection.addEventListener('toggle', () => {
+    if (treasureSection.open) {
+      refreshTreasures();
+    }
+  });
+
   // Les stats (D-153) : le temps de jeu, les évanouissements, le fil discret ; par lieu et par salle.
   const statsSection = element('details', panel);
   element('summary', statsSection, undefined, 'Stats');

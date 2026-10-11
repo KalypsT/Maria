@@ -23,6 +23,8 @@ const UNDER_CLOCK = { col: 36, row: 37 };
 const DAD_HALL = { col: 32, row: 37 };
 /** La porte ouverte du train à quai (D-69), sur le quai de droite des quais. */
 const TRAIN_DOOR = { col: 55, row: 26 };
+/** Le billet de train (D-164), posé sur le banc du quai de droite. */
+const TICKET = { col: 65, row: 24 };
 /** Arrivée dans le monde étrange de la gare (dans le noir). */
 const STRANGE_ARRIVAL: StoryStep = {
   do: 'room',
@@ -201,6 +203,23 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.lookMs },
     ],
   },
+  {
+    // Le billet de train (D-164), sur le banc du quai, à partir du soir du départ en classe de
+    // mer : Agir le prend ; il quitte le décor pour le sac. Céleste pense à la mer.
+    id: 'take-ticket',
+    room: 'station-platforms',
+    on: 'interact',
+    area: { col: TICKET.col - 2, row: TICKET.row - 2, w: 6, h: 3 },
+    mark: { col: TICKET.col, row: TICKET.row - 2 },
+    when: { all: [F.GrownOlder], none: [F.TicketTaken] },
+    lock: true,
+    steps: [
+      { do: 'flag', id: F.TicketTaken },
+      { do: 'memory', id: 'ticket' },
+      { do: 'thought', icon: 'sea', ms: S.thoughtMs },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
 ];
 
 const OMENS: StoryOmen[] = [
@@ -245,6 +264,14 @@ const PROPS: StoryProp[] = [
     kind: 'quay-train',
     ...TRAIN_DOOR,
     when: { all: [F.GrownOlder], none: [F.TrainDeparted] },
+  },
+  {
+    id: 'ticket',
+    room: 'station-platforms',
+    kind: 'ticket',
+    ...TICKET,
+    instant: true,
+    when: { all: [F.GrownOlder], none: [F.TicketTaken] },
   },
 ];
 

@@ -9,7 +9,7 @@ import type {
   TreasureWhere,
 } from '../core/world/treasureBook';
 import { drawFlashback } from '../scenes/art/flashbackArt';
-import { drawMemory } from '../scenes/art/memoryArt';
+import { drawnCanvas, treasureDrawing } from './treasureDrawing';
 
 /** Les noms des lieux et des salles, pour les indices et les fiches. */
 export interface TreasureNames {
@@ -42,26 +42,6 @@ function element<K extends keyof HTMLElementTagNameMap>(
   }
   parent.appendChild(el);
   return el;
-}
-
-/** Un canvas net à la densité de l'écran, de `w` × `h` px CSS ; `draw` y dessine en px CSS. */
-function drawnCanvas(
-  className: string,
-  w: number,
-  h: number,
-  draw: (ctx: CanvasRenderingContext2D) => void,
-): HTMLCanvasElement {
-  const canvas = document.createElement('canvas');
-  canvas.className = className;
-  const ratio = window.devicePixelRatio || 1;
-  canvas.width = Math.round(w * ratio);
-  canvas.height = Math.round(h * ratio);
-  const ctx = canvas.getContext('2d');
-  if (ctx) {
-    ctx.scale(ratio, ratio);
-    draw(ctx);
-  }
-  return canvas;
 }
 
 /**
@@ -172,11 +152,7 @@ export class TreasuresPage {
     const box = element('span', button, 'treasure-box');
     if (cell.found && isMemory(cell.id)) {
       const id = cell.id;
-      box.append(
-        drawnCanvas('treasure-drawing', 42, 42, (ctx) => {
-          drawMemory(ctx, id, 21, 21, 38);
-        }),
-      );
+      box.append(treasureDrawing('treasure-drawing', id, 42));
       if (flashbackOf(id) || playableOf(id)) {
         element('span', button, 'treasure-play', '▶');
       }
@@ -218,11 +194,7 @@ export class TreasuresPage {
     const memory = cell.found && isMemory(id) ? id : null;
     const record = family === 'records' ? RECORDS.find((r) => recordSlot(r.id) === id) : undefined;
     if (memory) {
-      big.append(
-        drawnCanvas('treasure-big-drawing', 150, 150, (ctx) => {
-          drawMemory(ctx, memory, 75, 75, 136);
-        }),
-      );
+      big.append(treasureDrawing('treasure-big-drawing', memory, 150));
     } else if (record) {
       const sleeve = element('span', big, 'treasure-sleeve big');
       sleeve.style.setProperty('--sleeve', `#${record.sleeve.toString(16).padStart(6, '0')}`);

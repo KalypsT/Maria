@@ -145,7 +145,8 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: 2000 },
       ],
     },
-    // Les affaires de Maria (D-58) : Agir les ramasse ; elles quittent le jeu pour le cahier.
+    // Les affaires de Maria (D-58) : Agir les ramasse ; elles quittent le jeu pour le sac. Céleste
+    // pense à Maria (D-164, plus un cœur).
     {
       id: 'take-slipper',
       room: 'hall',
@@ -158,7 +159,7 @@ export const HOUSE_STORY: StoryData = {
         { do: 'flag', id: F.TraceHall },
         { do: 'flag', id: F.SlipperTaken },
         { do: 'memory', id: 'slipper' },
-        { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
         { do: 'wait', ms: S.lookMs },
       ],
     },
@@ -174,7 +175,7 @@ export const HOUSE_STORY: StoryData = {
         { do: 'flag', id: F.TraceStairs },
         { do: 'flag', id: F.BottleTaken },
         { do: 'memory', id: 'bottle' },
-        { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
         { do: 'wait', ms: S.lookMs },
       ],
     },
@@ -190,7 +191,7 @@ export const HOUSE_STORY: StoryData = {
       steps: [
         { do: 'flag', id: F.HeadbandTaken },
         { do: 'memory', id: 'headband' },
-        { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
         { do: 'wait', ms: S.lookMs },
       ],
     },
@@ -206,7 +207,7 @@ export const HOUSE_STORY: StoryData = {
       steps: [
         { do: 'flag', id: F.BonnetTaken },
         { do: 'memory', id: 'bonnet' },
-        { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
         { do: 'wait', ms: S.lookMs },
       ],
     },
@@ -852,8 +853,9 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: S.lookMs },
       ],
     },
-    // Objets à regarder (D-38) : la première fois, ils deviennent des souvenirs du cahier ; on
-    // peut les regarder autant qu'on veut.
+    // Objets à regarder (D-38) : la première fois, ils deviennent des souvenirs du sac ; on peut
+    // les regarder autant qu'on veut. La plante, le dessin de la chambre et la photo de Céleste
+    // bébé ne sont plus des souvenirs (D-164) : ils restent dans le décor.
     {
       id: 'look-photo',
       room: 'living',
@@ -867,21 +869,6 @@ export const HOUSE_STORY: StoryData = {
       steps: [
         { do: 'memory', id: 'photo' },
         { do: 'thought', icon: 'family', ms: S.thoughtMs },
-        { do: 'wait', ms: S.lookMs },
-      ],
-    },
-    {
-      id: 'look-drawing',
-      room: 'bedroom',
-      on: 'interact',
-      area: { col: 36, row: 8, w: 5, h: 12 },
-      mark: { col: 38, row: 4 },
-      when: {},
-      lock: true,
-      repeat: true,
-      steps: [
-        { do: 'memory', id: 'drawing' },
-        { do: 'thought', icon: 'drawing', ms: S.thoughtMs },
         { do: 'wait', ms: S.lookMs },
       ],
     },
@@ -914,34 +901,37 @@ export const HOUSE_STORY: StoryData = {
       steps: [{ do: 'records' }],
     },
     {
-      id: 'look-plant',
-      room: 'kitchen',
+      // Le petit arrosoir rose de Céleste (D-164), sur le premier bac du potager, là où papa
+      // arrose : Agir le prend ; il quitte le décor pour le sac. Elle pense à papa.
+      id: 'take-watering-can',
+      room: 'garden-vegetables',
       on: 'interact',
-      area: { col: 39, row: 13, w: 6, h: 4 },
-      mark: { col: 42, row: 13 },
-      when: {},
+      area: { col: 9, row: 16, w: 5, h: 3 },
+      mark: { col: 11, row: 16 },
+      when: { none: [F.WateringCanTaken] },
       lock: true,
-      repeat: true,
       steps: [
-        { do: 'memory', id: 'plant' },
-        { do: 'thought', icon: 'flower', ms: S.thoughtMs },
+        { do: 'flag', id: F.WateringCanTaken },
+        { do: 'memory', id: 'watering-can' },
+        { do: 'thought', icon: 'dad', ms: S.thoughtMs },
         { do: 'wait', ms: S.lookMs },
       ],
     },
     {
-      // Souvenir en haut de la bibliothèque (D-39) : une raison de revenir au salon.
-      id: 'look-baby-photo',
-      room: 'living',
+      // Son dessin, punaisé au mur de la classe (D-164), à hauteur d'enfant : on le regarde autant
+      // qu'on veut.
+      id: 'look-school-drawing',
+      room: 'school',
       on: 'interact',
-      area: LIVING_TOP,
-      mark: { col: 51, row: 6 },
-      when: { all: [F.StrangeDone] },
+      area: { col: 17, row: 17, w: 5, h: 5 },
+      mark: { col: 19, row: 16 },
+      when: {},
       lock: true,
       repeat: true,
       steps: [
-        { do: 'memory', id: 'bookcase' },
-        { do: 'thought', icon: 'baby', ms: S.thoughtMs + 800 },
-        { do: 'wait', ms: S.lookMs + 400 },
+        { do: 'memory', id: 'school-drawing' },
+        { do: 'thought', icon: 'drawing', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
       ],
     },
     // La gare (D-66).
@@ -1168,6 +1158,18 @@ export const HOUSE_STORY: StoryData = {
     { id: 'music-box', room: 'bedroom', kind: 'music-box', col: 12, row: 12, when: {} },
     { id: 'record-player', room: 'attic', kind: 'record-player', col: 44, row: 17, when: {} },
     { id: 'plant', room: 'kitchen', kind: 'plant', col: 42, row: 16, when: {} },
+    // Les souvenirs de Céleste (D-164) : le petit arrosoir sur le premier bac du potager (pris, il
+    // disparaît aussitôt), son dessin au mur de la classe.
+    {
+      id: 'watering-can',
+      room: 'garden-vegetables',
+      kind: 'watering-can',
+      col: 11,
+      row: 18,
+      instant: true,
+      when: { none: [F.WateringCanTaken] },
+    },
+    { id: 'school-drawing', room: 'school', kind: 'school-drawing', col: 19, row: 19, when: {} },
     // Derrière la haie (D-49) : Maria de l'autre côté du vide, hors d'atteinte ; elle est là dès
     // l'arrivée dans la ronce et ne bouge jamais (pilier 5). Le bonnet, au bout du chemin, puis
     // accroché à une branche du grand arbre.

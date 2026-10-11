@@ -52,6 +52,8 @@ const STRANGE_ARRIVAL: StoryStep = {
 const MUSIC_BOOK = { col: 181, row: 13 };
 /** Assise sur sa couchette, au dortoir (fin provisoire du monde étrange, D-104). */
 const BUNK_SEAT = { col: 45, row: 9 };
+/** La carte postale (D-164), au bout de sa couchette, côté oreiller. */
+const POSTCARD = { col: 47, row: 9 };
 /** Le monde étrange, en cours (avant le livre musical). */
 const IN_STRANGE = { all: [F.SeaStrange], none: [F.SeaStrangeDone] };
 /** La nuit au dortoir (D-105), après le livre musical, jusqu'à la fin du niveau. */
@@ -409,6 +411,24 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.thoughtMs },
     ],
   },
+  {
+    // La carte postale (D-164) que Céleste a dessinée pour ses parents, sur sa couchette du
+    // dortoir : Agir la prend ; elle quitte le décor pour le sac. Loin de chez elle, elle pense à
+    // la maison.
+    id: 'take-postcard',
+    room: 'sea-centre',
+    on: 'interact',
+    area: { col: POSTCARD.col - 4, row: POSTCARD.row - 1, w: 6, h: 4 },
+    mark: { col: POSTCARD.col, row: POSTCARD.row - 2 },
+    when: { all: [F.SeaArrived], none: [F.PostcardTaken] },
+    lock: true,
+    steps: [
+      { do: 'flag', id: F.PostcardTaken },
+      { do: 'memory', id: 'postcard' },
+      { do: 'thought', icon: 'home', ms: S.thoughtMs },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
 ];
 
 const PROPS: StoryProp[] = [
@@ -518,6 +538,14 @@ const PROPS: StoryProp[] = [
   },
   { id: 'kid-night-1', room: 'sea-centre', kind: 'kid-asleep', col: 55, row: 9, when: NIGHT_ON },
   { id: 'kid-night-2', room: 'sea-centre', kind: 'kid-asleep', col: 65, row: 9, when: NIGHT_ON },
+  {
+    id: 'postcard',
+    room: 'sea-centre',
+    kind: 'postcard',
+    ...POSTCARD,
+    instant: true,
+    when: { all: [F.SeaArrived], none: [F.PostcardTaken] },
+  },
 ];
 
 /**

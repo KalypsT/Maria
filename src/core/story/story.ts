@@ -88,6 +88,10 @@ export const THOUGHT_ICONS = [
   'cubes',
   /** Maria assise sur l'étagère du surmeuble (D-144) : là où la ranger. */
   'maria-shelf',
+  /** La mer, son soleil et une vague (D-164) : là où part le train de la classe. */
+  'sea',
+  /** La maison, sa fenêtre allumée (D-164) : Céleste y pense, loin de chez elle. */
+  'home',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
@@ -414,6 +418,17 @@ export const PROP_KINDS = [
   'record-early',
   /** « Avant même ta naissance » (D-156), sur l'armoire du dortoir de la classe de mer. */
   'record-lullaby',
+  /**
+   * Les souvenirs de Céleste (D-164) : ceux qu'on emporte (posés, ils quittent le décor quand on les
+   * prend), puis ceux qui restent au mur (son dessin à l'école ; après la fin, toute la famille, à
+   * la place de son dessin de la chambre).
+   */
+  'watering-can',
+  'ticket',
+  'letter',
+  'postcard',
+  'school-drawing',
+  'family-drawing',
   ...PASSERBY_KINDS,
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
@@ -446,8 +461,13 @@ export const WALL_PROP_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'quay-train-day',
 ]);
 
-/** Vus par une fenêtre (D-64) : posés sur le mur, sans surface sous eux. */
+/**
+ * Vus par une fenêtre (D-64), ou accrochés au mur (les dessins de Céleste, D-164) : posés sur le
+ * mur, sans surface sous eux.
+ */
 export const WINDOW_PROP_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
+  'school-drawing',
+  'family-drawing',
   'far-crane',
   'nap-cube-bed',
   'nap-cube-school',

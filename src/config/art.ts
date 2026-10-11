@@ -1,4 +1,5 @@
 import type { PropKind } from '../core/story/story';
+import type { MemoryId } from './memories';
 import type { CelesteOutfit } from './growth';
 
 /**
@@ -689,10 +690,31 @@ export const WALL_STYLES = ['dots', 'stripes', 'planks', 'tiles', 'clocks', 'tag
 export type WallStyle = (typeof WALL_STYLES)[number];
 
 /**
+ * Les images des souvenirs de Céleste (D-164), fournies par l'utilisateur, détourées : dans le sac
+ * (la case, la fiche), dans leur envol vers le sac, et dans le décor pour ceux qu'on emporte. Un
+ * souvenir absent de cette liste est dessiné par le code.
+ */
+export const MEMORY_IMAGES: Readonly<Partial<Record<MemoryId, string>>> = {
+  height: 'memory-height.png',
+  photo: 'memory-photo.png',
+  'watering-can': 'memory-watering-can.png',
+  ticket: 'memory-ticket.png',
+  letter: 'memory-letter.png',
+};
+
+/** Le nom d'élément de l'image d'un souvenir, dans `ART_IMAGES`. */
+export function memoryImageKey(id: MemoryId): string {
+  return `memory-${id}`;
+}
+
+/**
  * Images fournies (voir le document « Créer des images pour le jeu ») : nom d'élément → fichier
  * sous `public/art/`. Un élément absent de cette liste est dessiné par le code.
  */
 export const ART_IMAGES: Readonly<Record<string, string>> = {
+  ...Object.fromEntries(
+    Object.entries(MEMORY_IMAGES).map(([id, file]) => [memoryImageKey(id as MemoryId), file]),
+  ),
   /** Maria (D-31) : image fournie par l'utilisateur, détourée. */
   maria: 'maria.png',
   /** Roger, la peluche singe de Céleste (D-68, D-69) : image fournie par l'utilisateur, détourée. */
@@ -730,6 +752,51 @@ export const SHELL_ART = {
   /** Au ramassage : la coquille file vers le cahier (ms), puis « n/N » du lieu reste affiché (ms). */
   flyMs: 620,
   countMs: 2200,
+} as const;
+
+/**
+ * La gommette étoile des capacités (D-164, choix de l'utilisateur), à la place de la petite lueur :
+ * posée au-dessus de son appui, elle flotte en se balançant, scintille de temps en temps, et une
+ * flaque de lumière au sol la signale de loin. PROVISOIRE : à juger sur téléphone.
+ */
+export const ABILITY_STICKER = {
+  /** Diamètre de la gommette (px logiques ; Céleste en fait 24 à 28). */
+  sizePx: 17,
+  /** Halo doré autour d'elle (px) et son opacité au centre. */
+  haloPx: 6,
+  haloAlpha: 0.5,
+  /** Flottement : amplitude (px) et période (ms) ; balancement : angle (rad) et période (ms). */
+  bobPx: 2,
+  bobMs: 1600,
+  swayRad: 0.16,
+  swayMs: 2600,
+  /** Scintillement : période et durée (ms). */
+  glintPeriodMs: 2400,
+  glintMs: 520,
+  /** La flaque de lumière au sol : largeur, hauteur (px) et opacité, qui respire un peu. */
+  poolW: 26,
+  poolH: 6,
+  poolAlpha: 0.42,
+  /** Diamètre de la gommette qui s'envole vers le sac (px CSS). */
+  flyPx: 40,
+} as const;
+
+/**
+ * L'envol vers le sac (D-164) : un trésor trouvé, une gommette de capacité, monte un instant
+ * au-dessus de là où il était, puis file vers le bouton du sac, qui sursaute à son arrivée.
+ * PROVISOIRE : à juger sur téléphone.
+ */
+export const TREASURE_FLY = {
+  /** Taille du dessin qui s'envole (px CSS). */
+  sizePx: 54,
+  /** Il monte d'autant (px CSS), apparaît et reste un instant (ms)… */
+  liftPx: 30,
+  showMs: 650,
+  /** … puis file vers le sac (ms), où il arrive à cette échelle. */
+  flyMs: 720,
+  arriveScale: 0.35,
+  /** Le sursaut du sac à son arrivée (ms). */
+  bumpMs: 320,
 } as const;
 
 /**

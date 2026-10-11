@@ -1,4 +1,4 @@
-import { ART_IMAGES, SHELL_ART } from '../config/art';
+import { ART_IMAGES, SHELL_ART, TREASURE_FLY } from '../config/art';
 import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 
 /** Image de la coquille (D-148), servie avec les autres images fournies. */
@@ -19,6 +19,9 @@ export class Hud {
   private readonly shellText: HTMLElement;
   private readonly shellFly: HTMLImageElement;
   private shellTimers: number[] = [];
+  /** Les trésors en vol vers le sac (D-164). */
+  private readonly flights = new Set<HTMLElement>();
+  private bumpTimer = 0;
   private dots: HTMLElement[] = [];
   private shownFear = -1;
   private shownMax = -1;
@@ -26,7 +29,7 @@ export class Hud {
   private veiledBlack = false;
   private shownBackground = '';
 
-  constructor(parent: HTMLElement = document.body) {
+  constructor(private readonly parent: HTMLElement = document.body) {
     this.gauge = document.createElement('div');
     this.gauge.id = 'fear-gauge';
     this.gauge.setAttribute('aria-label', 'Peur');
@@ -172,7 +175,64 @@ export class Hud {
     this.shellTimers.push(window.setTimeout(show, SHELL_ART.flyMs));
   }
 
+  /**
+   * Un trésor trouvé ou une gommette de capacité (D-164) : `content` apparaît en `from` (px CSS de
+   * la page), monte un instant, puis file vers le bouton du sac (en haut à gauche sans commandes
+   * tactiles), qui sursaute ; `onArrive` à son arrivée.
+   */
+  flyToBag(content: HTMLElement, from: { x: number; y: number }, onArrive?: () => void): void {
+    const fly = document.createElement('div');
+    fly.className = 'treasure-fly';
+    fly.style.width = `${String(TREASURE_FLY.sizePx)}px`;
+    fly.style.height = `${String(TREASURE_FLY.sizePx)}px`;
+    fly.append(content);
+    this.parent.append(fly);
+    this.flights.add(fly);
+    const bag = document.querySelector<HTMLElement>('.touch-map');
+    const box = bag?.getBoundingClientRect();
+    const to =
+      box && box.width > 0
+        ? { x: box.left + box.width / 2, y: box.top + box.height / 2 }
+        : { x: 40, y: 40 };
+    const at = (x: number, y: number, scale: number) =>
+      `translate(${String(x)}px, ${String(y)}px) translate(-50%, -50%) scale(${String(scale)})`;
+    const { showMs, flyMs, liftPx } = TREASURE_FLY;
+    const total = showMs + flyMs;
+    const up = { x: from.x, y: from.y - liftPx };
+    const animation = fly.animate(
+      [
+        { transform: at(from.x, from.y, 0.5), opacity: 0, easing: 'ease-out' },
+        { transform: at(up.x, up.y, 1), opacity: 1, offset: (showMs * 0.55) / total },
+        {
+          transform: at(up.x, up.y, 1),
+          opacity: 1,
+          offset: showMs / total,
+          easing: 'cubic-bezier(0.45, 0, 0.3, 1)',
+        },
+        { transform: at(to.x, to.y, TREASURE_FLY.arriveScale), opacity: 0.85 },
+      ],
+      { duration: total, fill: 'forwards' },
+    );
+    animation.onfinish = () => {
+      fly.remove();
+      this.flights.delete(fly);
+      if (bag) {
+        bag.classList.add('bump');
+        window.clearTimeout(this.bumpTimer);
+        this.bumpTimer = window.setTimeout(() => {
+          bag.classList.remove('bump');
+        }, TREASURE_FLY.bumpMs);
+      }
+      onArrive?.();
+    };
+  }
+
   destroy(): void {
+    window.clearTimeout(this.bumpTimer);
+    for (const fly of this.flights) {
+      fly.remove();
+    }
+    this.flights.clear();
     window.clearTimeout(this.hintTimer);
     for (const timer of this.shellTimers) {
       window.clearTimeout(timer);

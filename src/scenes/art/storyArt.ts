@@ -1,9 +1,11 @@
+import { memoryImageKey } from '../../config/art';
 import { PROP_SIZE, TOWER_CUBES } from '../../config/story';
 import type { PropKind, ThoughtIcon } from '../../core/story/story';
 import {
   bonnet,
   dadHead,
   drawMemory,
+  drawSketch,
   drawNotes,
   heightChart,
   momHead,
@@ -443,6 +445,35 @@ function drawContained(
   ctx.drawImage(image, (w - iw * k) / 2, h - ih * k, iw * k, ih * k);
 }
 
+/** La part du carré de dessin d'un souvenir (`drawMemory`) qu'occupe l'objet, en largeur et en hauteur. */
+const MEMORY_SPAN: Readonly<Record<MemoryProp, readonly [number, number]>> = {
+  'watering-can': [0.9, 0.6],
+  ticket: [0.85, 0.6],
+  letter: [0.55, 0.78],
+  postcard: [0.88, 0.62],
+  'school-drawing': [0.9, 0.72],
+  'family-drawing': [0.94, 0.76],
+};
+type MemoryProp =
+  'watering-can' | 'ticket' | 'letter' | 'postcard' | 'school-drawing' | 'family-drawing';
+
+/** Un souvenir de Céleste dans le décor (D-164) : son image fournie, ou son dessin par le code. */
+function drawMemoryProp(
+  ctx: CanvasRenderingContext2D,
+  kind: MemoryProp,
+  w: number,
+  h: number,
+  images: ReadonlyMap<string, CanvasImageSource>,
+): void {
+  const image = images.get(memoryImageKey(kind));
+  if (image) {
+    drawContained(ctx, image, w, h);
+    return;
+  }
+  const [sw, sh] = MEMORY_SPAN[kind];
+  drawMemory(ctx, kind, w / 2, h / 2, Math.min(w / sw, h / sh));
+}
+
 /**
  * Les cubes de la tour d'Eden (D-118, D-122) : les quatre couleurs des îlots (`TOWER_CUBES`), une
  * forme simple sur la face (un rond, un triangle, un losange, une étoile), sans lettre. PLACEHOLDER.
@@ -759,9 +790,17 @@ export function drawProp(
     case 'gate-open':
       drawGate(ctx, w, h, true);
       break;
+    case 'watering-can':
+    case 'ticket':
+    case 'letter':
+    case 'postcard':
+    case 'school-drawing':
+    case 'family-drawing':
+      drawMemoryProp(ctx, kind, w, h, images);
+      break;
     case 'baby-photo':
       // Photo encadrée posée debout, en haut de la bibliothèque.
-      drawMemory(ctx, 'bookcase', w / 2, h / 2, Math.min(w / 0.8, h / 0.88));
+      drawSketch(ctx, 'baby-photo', w / 2, h / 2, Math.min(w / 0.8, h / 0.88));
       break;
     case 'toy-town-lifted':
       // Au monde étrange (D-155) : le téléphone décroché, une lueur turquoise sort du combiné.
@@ -1074,19 +1113,54 @@ function drawIcon(
       drawMemory(ctx, 'photo', cx, cy, 18);
       break;
     case 'drawing':
-      drawMemory(ctx, 'drawing', cx, cy, 18);
+      drawMemory(ctx, 'school-drawing', cx, cy, 18);
       break;
     case 'music':
       drawNotes(ctx, cx, cy, 11);
       break;
     case 'flower':
-      drawMemory(ctx, 'plant', cx, cy + 1, 17);
+      drawSketch(ctx, 'plant', cx, cy + 1, 17);
       break;
     case 'baby':
-      drawMemory(ctx, 'bookcase', cx, cy, 17);
+      drawSketch(ctx, 'baby-photo', cx, cy, 17);
       break;
     case 'height':
       drawMemory(ctx, 'height', cx, cy, 18);
+      break;
+    case 'sea': {
+      // La mer (D-164) : un soleil au-dessus de deux vagues.
+      ctx.fillStyle = '#f2c14e';
+      ctx.beginPath();
+      ctx.arc(cx + 3, cy - 3.5, 3.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#4f7fb8';
+      ctx.lineWidth = 1.4;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (const y of [cy + 1.5, cy + 5]) {
+        ctx.moveTo(cx - 8, y);
+        for (let x = cx - 8; x < cx + 8; x += 4) {
+          ctx.quadraticCurveTo(x + 1, y - 2, x + 2, y);
+          ctx.quadraticCurveTo(x + 3, y + 2, x + 4, y);
+        }
+      }
+      ctx.stroke();
+      break;
+    }
+    case 'home':
+      // La maison (D-164) : le toit rose, la fenêtre allumée.
+      ctx.fillStyle = '#f3ead7';
+      ctx.fillRect(cx - 6, cy - 1, 12, 8);
+      ctx.fillStyle = '#d9788f';
+      ctx.beginPath();
+      ctx.moveTo(cx - 8, cy - 0.5);
+      ctx.lineTo(cx, cy - 7.5);
+      ctx.lineTo(cx + 8, cy - 0.5);
+      ctx.fill();
+      ctx.fillStyle = '#f2c14e';
+      ctx.fillRect(cx - 4, cy + 1, 3.5, 3);
+      ctx.fillStyle = WOOD_DARK;
+      ctx.fillRect(cx + 1.5, cy + 2, 3, 5);
       break;
     case 'handle': {
       // Une porte, la poignée tout en haut, et une petite main qui n'y arrive pas (D-46).
