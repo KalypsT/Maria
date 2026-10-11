@@ -1,8 +1,10 @@
+import type { ArcadeGameId, ArcadeMode } from '../../config/arcade';
 import type { AudioSettings } from '../../config/audio';
 import type { ControlSettings } from '../../config/controls';
 import type { DisplaySettings } from '../../config/display';
 import type { SaveData } from './saveData';
 import type { SaveManager } from './SaveManager';
+import { submitArcadeScore } from './arcade';
 import { addFaint, addHint, addPlayTime, createStats } from './stats';
 
 /**
@@ -176,6 +178,18 @@ export class SaveSession {
   resetStats(): Promise<void> {
     this.current.stats = createStats();
     return this.persist();
+  }
+
+  /**
+   * Fin d'une partie de la console (D-166) : garde le meilleur score du jeu dans ce mode. Retourne
+   * true pour un nouveau record (écrit seulement dans ce cas).
+   */
+  async recordArcadeScore(game: ArcadeGameId, mode: ArcadeMode, meters: number): Promise<boolean> {
+    if (!submitArcadeScore(this.current.arcade, game, mode, meters)) {
+      return false;
+    }
+    await this.persist();
+    return true;
   }
 
   /** Remplace toute la partie (import d'un code de sauvegarde). */

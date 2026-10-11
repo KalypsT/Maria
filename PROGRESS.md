@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La console de Céleste** (D-166, demande de l'utilisateur, sur `ccr-e9f3d38a-x4umy1`) : un mode à part, des jeux par capacité (niveaux qui s'enchaînent, de plus en plus durs, record en mètres). Maquette (https://claude.ai/artifact/2Pb1PC7arwM1ESAByVLc9T) et choix de l'utilisateur faits : la console de salon offerte par papa au premier passage au potager, installée dans la chambre ; le style pastel ; d'abord le mode Niveaux, le mode Sans fin plus tard. Suite : **la validation du plan** (proposé dans la conversation), le moment du jeu « le monstre ».
+**La console de Céleste** (D-166, demande de l'utilisateur, sur `ccr-e9f3d38a-x4umy1`) : un mode à part, un jeu par capacité (des niveaux qui s'enchaînent, de plus en plus durs, record en mètres). Maquette (https://claude.ai/artifact/2Pb1PC7arwM1ESAByVLc9T), choix de l'utilisateur et plan validés en 9 PR pour le mode Niveaux (le système ; l'écran de la console ; le cadeau et la chambre ; puis un jeu par PR) ; le mode Sans fin plus tard. **PR 1 faite : le système et les tyroliennes** (les jeux, le générateur et son témoin, les records dans la sauvegarde sans migration, DEBUG → « Console »). Suite : la PR 2, l'écran de la console ; essayer les tyroliennes sur téléphone (DEBUG → « Console » → « Jouer »).
 
 **Les bulles** (D-165, demande de l'utilisateur, sur `ccr-3b45ec98-n8x7xk`) : la revue de toutes les bulles. Choix de l'utilisateur faits (un nuage pour Céleste, une bulle de parole pour les autres ; Maria aux seuls moments-pivots et la boucle de la maison cassée ; la photo de Maria gardée ; six nouveaux pictogrammes et le lit à « z » ; **le style « papier découpé »** ; pas de bulle pour les affaires de Maria). Faits : l'inventaire (`docs/BULLES.md`), la maquette (https://claude.ai/artifact/AgbA6JRNEMACrZzPv7Rfim) **la PR 1 : le rendu** (le nuage et la bulle de parole en papier découpé, le recadrage des pictogrammes, le côté de la bulle, la lune qui ne troue plus, les nouveaux pictogrammes ; aucun changement de contenu) et **la PR 2 : la maison, le jardin, le quartier** (la boucle « où est Maria ? » cassée, les cœurs de fin d'indice retirés, le manque, pas de bulle pour les affaires de Maria, les portes fermées). L'inventaire est validé. **PR 3 faite : la gare, le train, la mer** (plus de Maria au début des niveaux, le sourire, « chut », l'émerveillement, le manque, les portes) et **PR 4 faite : la nounou, le monde de Maria, les passants, les portes**. **Le plan des bulles est complet.** Suite : essai sur téléphone.
 
@@ -53,6 +53,13 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### La console, PR 1 : le système et les tyroliennes (D-166)
+
+- Les huit jeux (`src/config/arcade.ts`), leur déblocage et leur phase ; `arcadeLevel(jeu, n)`, toujours le même niveau (graine fixe, valeurs de mouvement par défaut) ; le générateur des tyroliennes, chaque pièce prouvée par un témoin (la vraie physique) ; les records dans la sauvegarde (`arcade`, sans migration) ; DEBUG → « Console ».
+- Mesuré par l'analyse : les 20 premiers niveaux faisables ; passage le plus dur de ~600 ms (niveau 1) à ~200–340 ms (à partir du niveau 7). L'analyse ne voit pas tout ce qui durcit le jeu (enchaînements, sauts depuis le câble).
+- Vérifié dans Chromium (844 × 390) : un niveau joué et mesuré depuis le debug.
+- [ ] À vérifier sur téléphone : les tyroliennes (DEBUG → « Console » → « Jouer », niveaux 1, 5, 10, 20) : la difficulté monte-t-elle assez ? Les câbles se voient-ils ? Le niveau descend-il trop vers les briques ? (Céleste y garde sa phase du moment : la phase 2 jusqu'à la gare.)
 
 ### Les bulles, PR 4 : la nounou, le monde de Maria, les passants, les portes (D-165)
 

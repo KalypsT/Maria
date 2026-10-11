@@ -5,6 +5,14 @@ ability shift
 ability slide
 ability umbrella
 ability wall-jump
+arcade cables
+arcade chimney
+arcade climb
+arcade corridor
+arcade jumps
+arcade monster
+arcade wind
+arcade worlds
 flag cat.petted
 flag end.dad
 flag end.mom-hug
