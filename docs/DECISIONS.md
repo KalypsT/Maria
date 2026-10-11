@@ -2407,3 +2407,12 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
 - **Correction en route** : quand l'échelle de l'écran change, les textures sont recréées ; la bouche et les lueurs les reprennent (sinon le jeu s'arrêtait sur le toit, vu dans Chromium).
 - **Vérifié dans Chromium** (844 × 390, « le train, la nuit ») : un cycle complet image par image : le calme, les creux qui s'allument, la bouche qui avance, les arches dans le noir.
 - **Sauvegarde** : aucun changement.
+
+### D-164, PR 3 : le boss du train plus tendu
+
+- **Demande** : pas un vrai défi (gardé pour le boss final), mais **plus tendu que la tour de la gare**.
+- **Mesure** (la vraie simulation, `chaseRun`, phase 3) : la **tolérance** de chaque tronçon, c'est-à-dire de combien un joueur peut être plus lent que le chemin le plus rapide sans être touché. La tour : **+24 %, +62 %, +24 %**. Le chariot à 7 tuiles/s : **+62 %, +92 %, +32 %**, bien plus indulgent. Une seule vitesse ne suffisait pas : à 8,5, le dernier tronçon tombait à +12 % (presque un vrai défi) quand le premier restait à +38 %.
+- **Une vitesse par tronçon** (`; @chase-phase:`, déjà prévu par le format) : **10 tuiles/s** jusqu'à la deuxième veilleuse (il gagne sur Céleste, qui court à 9), **8,5** jusqu'à la troisième, **8** jusqu'au bout. Tolérances : **+22 %, +72 %, +18 %** : plus tendu que la tour au premier et au dernier tronçon ; celui du milieu reste une respiration (le croc-en-jambe : le chariot se cogne à la poutre et s'arrête 2,5 s).
+- **Gardé** : le joueur parfait n'est jamais touché (6 tuiles d'avance) ; chaque tronçon prend **63 %, 78 % et 75 %** du temps du chariot (40 à 80 % exigés) ; 50 % plus lent, il est touché. Les réglages communs des poursuites (départ, écart, croc-en-jambe) ne changent pas : la tour, la vague et les parcours d'essai restent les mêmes.
+- **Test** (`trainStrange.test.ts`) : le temps du chariot se calcule avec la vitesse du tronçon.
+- **Sauvegarde** : aucun changement.

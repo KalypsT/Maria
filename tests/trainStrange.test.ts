@@ -167,7 +167,6 @@ describe('le monde étrange du train (D-88)', () => {
       const room = level(DISHES);
       const a = analysis(DISHES);
       const run = phaseMovement(DEFAULT_MOVEMENT, P3).maxRunSpeed;
-      const speed = room.chase?.phases[0]?.speed ?? 0;
       const entry: TilePos = { col: 2, row: 11 };
       const goal: TilePos = { col: 118, row: 11 };
       const lamps = room.entities.filter((e) => e.type === EntityType.Checkpoint && e.col > 10);
@@ -177,6 +176,8 @@ describe('le monde étrange du train (D-88)', () => {
         const to = stops[i + 1] ?? goal;
         const label = `colonnes ${String(from.col)} à ${String(to.col)}`;
         const perfect = chaseRun(room, a, from, to, easy, 1, DEFAULT_COMBAT, P3.hitbox, run);
+        // Une vitesse par tronçon (D-164) : celle de la phase où le tronçon commence.
+        const speed = room.chase?.phases.find((p) => from.col < p.until)?.speed ?? 0;
         const chaserMs =
           DEFAULT_COMBAT.chaseSideStartDelayMs +
           ((DEFAULT_COMBAT.chaseSideRestartGapTiles + to.col - from.col) / speed) * 1000;
