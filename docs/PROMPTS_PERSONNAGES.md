@@ -623,31 +623,56 @@ same style, but simpler: thicker outline, fewer details, bigger pocket and butto
 
 Je fais ensuite le détourage et l'intégration ; en attendant, le jeu dessine le sac par le code.
 
-## D-163 : les images des capacités (proposition, à valider)
+## Les souvenirs de Céleste (images des trésors, retour d'essai après D-163)
 
-La page « Mes capacités » du sac montre aujourd'hui un petit pictogramme dessiné par le code pour
-chaque capacité. Proposition : **Céleste en train de faire le geste**, une image par capacité,
-dans le style de l'écran de départ. Dans le sac, chaque image fait environ 60 à 80 px : une pose
-franche, lisible en petit, sans décor (seulement l'élément du geste : un rebord, un mur, un câble…).
+Les six images de capacités proposées en D-163 (Céleste qui fait chaque geste) sont abandonnées :
+l'utilisateur garde les pictogrammes du cahier.
 
-Une seule conversation, joindre `celeste.png` au premier message. Début de chaque message :
+Neuf souvenirs, un ou plusieurs par lieu du voyage (liste validée par l'utilisateur). Chaque image
+sert **en petit** (la case de la boîte à trésors, environ 40 px ; l'objet qui s'envole vers le sac)
+et **en grand** (la fiche du trésor, environ 150 px, 300 px sur un écran net). Il faut donc une
+forme franche et peu de détails, mais un objet assez joli pour être regardé en grand. **Pas de
+texte, ni lettre, ni chiffre** (pilier 6, et le jeu est en français) : un mot écrit se lirait mal en
+petit et figerait l'histoire.
+
+Méthode : **une seule conversation pour les neuf objets**, pour garder le même style. Au premier
+message, joindre `celeste.png` (le style, et Céleste) et `toy-town.png` (un objet déjà fait dans ce
+style). Ensuite, un objet par message, en recommençant par le début commun. Si un objet dérive,
+rejoindre `celeste.png` au message.
+
+### Début commun
 
 ```
-Using the attached image as the strict reference, draw the SAME little girl: same face, same round
-pink glasses, same hair, same clothes, same children's picture-book illustration style, same colors,
-same level of finish. Full body, side view, a clear and simple pose that stays readable when very
-small. Only the element named below, drawn simply in the same style; no other background. Plain pure
-white background, no shadow on the ground, no text. Square format, high resolution.
+Using the attached images as the strict reference for the style (same children's picture-book
+illustration style, soft texture, thin warm outlines, same colors and level of finish), draw ONE
+single object, described below. It is a keepsake of a 6-year-old girl, shown in a game's treasure
+box: it must stay readable when very small (about 40 pixels) and still look lovely when large.
+Bold simple shapes, a clear outline, few details, no thin lines that would disappear. No brand, no
+logo, no readable text, no letters, no numbers. The whole object, nothing cropped, centered,
+filling most of the image. Plain pure white background, no shadow on the ground, no other element.
+Square format, high resolution.
 ```
 
-| Fichier                | Fin du message                                                                                                                                                                               |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ability-climb.png`    | `Pose: she hangs by both hands from the edge of a high wooden ledge and pulls herself up, one knee raised, determined.`                                                                      |
-| `ability-wall.png`     | `Pose: she kicks off a tall plain wall with one foot, leaping away from it in mid-air, arms open, a few small motion lines between her foot and the wall.`                                   |
-| `ability-umbrella.png` | `Pose: she floats gently down in mid-air, both hands holding an open pink umbrella above her head, legs dangling, a calm smile.`                                                             |
-| `ability-hook.png`     | `Pose: she slides along a taut cable hanging under it, holding her pink umbrella whose curved handle is hooked over the cable, legs swinging forward, delighted.`                            |
-| `ability-slide.png`    | `Pose: she slides fast along the ground on her back and side, feet first, under a low bar just above her, arms tucked, hair flying behind.`                                                  |
-| `ability-shift.png`    | `Pose: she stands with one hand reaching forward; the front half of her body is normal, the back half fades into a pale turquoise outline with a few sparkles, as if passing into a memory.` |
+### Les neuf objets (fin du message)
 
-Je fais ensuite le détourage et l'intégration ; une capacité pas encore acquise reste une case vide
-en pointillés.
+| Fichier                     | Lieu                     | Fin du message                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| --------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `memory-height.png`         | la maison, la chambre    | `The object: a child's height chart that hangs on a bedroom wall, a tall narrow strip of cream-painted wood with a slightly darker light-wood edge on the left and small graduation ticks without any numbers. Four short horizontal marks at different heights, drawn by a parent: the three lowest in grey pencil, the highest one in pink with a tiny pink heart beside it. Straight front view, upright, filling the height of the image.`                                                                                                                                               |
+| `memory-photo.png`          | la maison, le salon      | `The object: a family photo in a simple warm wooden frame, slightly tilted. Inside the frame, in the same picture-book style, a sunny garden: a man with wavy chestnut hair, a short beard and a navy t-shirt; a woman with long curly dark-brown hair and a pink t-shirt; in front of them, a smaller little girl of about 4 with round pink glasses, freckles and two low chestnut pigtails tied with pink ribbon bows, laughing; a fluffy dark-grey long-haired cat with amber eyes sitting at her feet. The parents' hands rest on the girl's shoulders. Simple faces, readable shapes.` |
+| `memory-music-box.png`      | la maison, la chambre    | `The object: an old wooden music box, plum-pink with a thin golden band, its lid open: inside the lid a small round mirror, and on the box a tiny ballerina in a pale pink tutu, one arm raised. Three small musical notes float above it. Three-quarter front view.`                                                                                                                                                                                                                                                                                                                        |
+| `memory-watering-can.png`   | le jardin, le potager    | `The object: a child's small metal watering can, pastel pink, with a round body, a long thin spout ending in a rose with little holes, a curved handle on top, and a small hand-painted white daisy on its side. A little worn, a few tiny water drops on the spout. Side view, spout to the right.`                                                                                                                                                                                                                                                                                         |
+| `memory-school-drawing.png` | le quartier, la classe   | `The object: a child's crayon drawing on a sheet of cream paper, pinned at the top by a red pushpin, a corner slightly curled. The drawing, naive and colorful like a 6-year-old's: a house with a pink roof, a big yellow sun with rays, three stick-figure people holding hands (a tall one, a long-haired one, and a small one with round pink glasses) and a grey cat. Straight front view.`                                                                                                                                                                                             |
+| `memory-ticket.png`         | la gare                  | `The object: a small old-fashioned rectangular train ticket made of thick cream card, slightly bent, with a pale blue stripe across it, a tiny printed train silhouette, a round punched hole near one end, and a few short grey lines where text would be (not readable). Three-quarter view, slightly tilted.`                                                                                                                                                                                                                                                                             |
+| `memory-letter.png`         | le train, dans la valise | `The object: a letter from a mother to her little girl, a sheet of pale blue paper folded in three and half opened. On the visible part, no words, only a simple hand-drawn heart in pink ink and, below it, a tiny drawing of a woman with long curly hair holding the hand of a little girl with round glasses. A small dried flower is tucked in the fold. Three-quarter view.`                                                                                                                                                                                                           |
+| `memory-postcard.png`       | la mer, le dortoir       | `The object: a postcard drawn by a 6-year-old for her parents, seen from the front: a white card with a slightly rounded corner, covered with a naive crayon drawing of the seaside: blue waves, a small sailing boat, a big sun, two seagulls drawn as small Vs, a striped beach towel on the sand. A small corner of a stamp with a wavy postmark shows behind it (no text). Slightly tilted.`                                                                                                                                                                                             |
+| `memory-family-drawing.png` | la maison, après la fin  | `The object: a big child's crayon drawing on a sheet of white paper, held on the wall by two strips of tape, the most careful drawing of the little girl: the whole family standing side by side on green grass under a big yellow sun: a tall father with chestnut hair and a beard, a mother with long curly dark hair, the girl with round pink glasses and two pigtails, holding in her arms a baby doll with brown skin, a pink headband and a pink top; the grey cat at their feet; small pink hearts and flowers around them. Naive, joyful, colorful. Straight front view.`          |
+
+### Après
+
+- Je fais le détourage et la mise à l'échelle (`scripts/art-cutout.py`), puis l'intégration : la
+  case de la boîte, la fiche, et l'envol vers le sac (à valider).
+- Les objets qu'on emporterait (proposition : l'arrosoir, le billet, la lettre, la carte postale)
+  sont aussi l'image dans le décor, en petit. Ceux qui resteraient en place (la toise, la photo, la
+  boîte à musique, les deux dessins) restent dessinés dans le décor par le code : la toise y gagne
+  un trait à chaque croissance.
+- En attendant les images, le jeu dessine les souvenirs par le code.
