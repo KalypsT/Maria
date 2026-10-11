@@ -2505,3 +2505,21 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
 - **Le plan des bulles est complet** : rendu (PR 1) et tout l'inventaire (PR 2 à 4).
 - **Tests mis à jour** (ils vérifiaient les anciennes bulles, D-70) : le prologue, le salon qui bascule, les mois plus tard, l'arrivée sur les voies, l'arrivée du train à la mer, l'arrivée au dortoir, l'entrée chez la nounou, la fin du niveau 7, les cubes des îlots. `bubble.test.ts` fige les règles de chaque niveau.
 - **Sauvegarde** : aucun changement.
+
+## D-166 — La console de Céleste (orientations, avant le plan)
+
+- **Demande de l'utilisateur** : une fois l'histoire finie, un mode plus fun et compétitif. Une console de Céleste qui permet de jouer des niveaux d'entraînement et d'évaluation des capacités. Elle se débloque au fil des acquis. Les niveaux sont théoriquement infinis, de plus en plus durs, avec un compteur et le meilleur score enregistré. **Changement de la progression, de la sauvegarde et de la boucle de jeu, signalé et accepté.**
+- **Maquette** : https://claude.ai/artifact/2Pb1PC7arwM1ESAByVLc9T (le cadeau en quatre vignettes, le menu des jeux, les tyroliennes jouables dans les deux modes, trois styles d'écran, deux compteurs). La physique de la maquette est approchée et ses parcours ne sont pas vérifiés.
+- **Constat** : une bonne partie existe déjà. Les parcours d'essai se jouent hors partie avec des capacités prêtées (D-25). L'analyse de faisabilité sait planer et s'accrocher aux câbles. La poursuite (D-67) fournit le monstre. La sauvegarde accepte un champ de plus sans migration (D-153). Ce qui manque : un générateur, l'écran de la console et la place dans l'histoire. Le défilement sans coupure demande de retoucher le chargement des salles : c'est pourquoi le mode Sans fin vient après.
+- **Choix de l'utilisateur** :
+  - **deux modes par jeu** :
+    - **Niveaux** (la proposition B) : des niveaux courts et numérotés qui s'enchaînent, chacun un peu plus dur, avec un palier et un fanion entre chacun ; une erreur, et on reprend au niveau 1 ;
+    - **Sans fin** (la proposition C) : un seul parcours continu, de plus en plus dur avec la distance ;
+    - **d'abord Niveaux, Sans fin plus tard** (son propre plan) ;
+  - **un jeu par capacité**, débloqué avec elle, joué avec la Céleste de la phase où la capacité s'obtient. **Le monstre** est le seul jeu où quelque chose pousse. Il se débloque vers le milieu ou la fin, à un moment sans nouvelle capacité (proposé : à la mer, après la vague, à valider). Pas de Maria. Pas de récompense dans l'histoire : c'est un mode à part ;
+  - **le cadeau** : au **tout premier passage devant papa au potager**, il l'appelle et lui offre **une console de salon avec une petite télé**, qu'il installe **dans la chambre**. Tout doit être clair, et sans texte ;
+  - **on n'y joue que dans la chambre**. Elle n'est donc pas accessible pendant les moments sans voyage (D-163) ;
+  - **le style pastel** (les lunettes restent roses), qui diffère de celui du jeu ;
+  - **le compteur en mètres** pour tous les jeux. **Un record par jeu et par mode.** **Quitter compte comme une chute** : le score atteint compte ;
+  - **des niveaux toujours les mêmes** pour le mode Niveaux (une graine fixe). Le choix pour le mode Sans fin (les mêmes ou aléatoires) se fera à son tour ; le générateur part d'une graine, ce qui permet les deux ;
+  - pas d'accès depuis l'écran titre. Le nom « Les jeux de Céleste » est un PLACEHOLDER. Des bips de console en attendant la musique de l'utilisateur.
