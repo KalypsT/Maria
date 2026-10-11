@@ -2467,3 +2467,16 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
 - **Taille** : un dessin plus grand (46 × 40 au lieu de 34 × 31), un agrandissement plus petit (`THOUGHT_SCALE` 1,7 au lieu de 1,9) : à l'écran, le nuage est un peu plus large qu'avant (environ 15 %) et le pictogramme plus gros.
 - **Mémoire** : les textures des bulles sont dessinées **à la demande**, la première fois qu'elles servent, et gardées jusqu'au prochain changement d'échelle (avant : 50 textures dessinées d'avance à chaque redessin du décor ; maintenant il y en aurait plus de 170, une par forme, pictogramme et côté). Les passants utilisent les mêmes (`BubbleSource`).
 - **Sauvegarde** : aucun changement.
+
+### D-165, PR 2 : la maison, le jardin, le quartier
+
+- **L'inventaire est validé** par l'utilisateur tel quel (`docs/BULLES.md`).
+- **Appliqué** (B-001 à B-061, P-01 à P-07) :
+  - **la boucle « où est Maria ? » cassée** : Maria disparue seulement au berceau vide et à la première question, à papa (qui console d'un cœur) ; ensuite Céleste demande d'un « ? » (maman sur le canapé, maman au jardin, maman à l'aire de jeux), et l'échange finit sur l'indice du parent ;
+  - **les cœurs de fin d'indice retirés** (maman et papa au jardin, sur le banc, à la supérette : neuf cœurs) ; la bulle de l'indice reste affichée en entier avant de rendre la main ;
+  - **le manque** au câlin de maman et au réveil des « mois plus tard » (à la place de Maria disparue) ; un « ? » quand le salon bascule (Maria vient d'être vue) ;
+  - **pas de bulle** pour le chausson, le biberon, le bandeau et le bonnet (et pas d'attente après) ;
+  - au coucher du premier soir, le premier cœur retiré (trois de suite) : Céleste s'assoit un instant, puis maman ;
+  - **la porte fermée** (cadenas) à la palissade du chantier et aux deux portes de l'école.
+- **Test** (`bubble.test.ts`) : la suite des bulles de chaque échange, Maria disparue à ses deux seuls moments, aucune bulle pour les affaires de Maria, les portes du quartier.
+- **Sauvegarde** : aucun changement (aucune étape ni drapeau modifié).

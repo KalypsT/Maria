@@ -1,6 +1,6 @@
 # Les bulles : inventaire et propositions (D-165)
 
-Revue de toutes les bulles du jeu, demandée par l'utilisateur une fois l'histoire terminée. **À valider ligne par ligne** : chaque ligne peut être acceptée, changée ou refusée (noter la réponse dans la colonne « Proposé » ou à côté du numéro). Rien n'est appliqué tant que ce document n'est pas validé.
+Revue de toutes les bulles du jeu, demandée par l'utilisateur une fois l'histoire terminée. **Validé par l'utilisateur** tel quel. Appliqué : le rendu (PR 1), la maison, le jardin et le quartier (PR 2) ; à venir : la gare, le train et la mer (PR 3), la nounou, le monde de Maria, les passants et les portes restantes (PR 4).
 
 ## Les règles choisies par l'utilisateur
 
