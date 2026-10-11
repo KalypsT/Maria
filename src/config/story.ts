@@ -402,8 +402,11 @@ export const CHARACTER_LOOP_MS = {
  */
 export const TOY_PHONE = { room: 'school-strange', col: 13, row: 7, ringPx: 300 } as const;
 
-/** Agrandissement des bulles de pensée (retour de l'utilisateur : mieux lisibles sur téléphone). */
-export const THOUGHT_SCALE = 1.9;
+/**
+ * Agrandissement des bulles (retour de l'utilisateur : mieux lisibles sur téléphone, D-50). D-165 :
+ * le dessin de la bulle est plus grand (46 × 40), son nuage un peu plus large qu'avant à l'écran.
+ */
+export const THOUGHT_SCALE = 1.7;
 
 /**
  * Agrandissement des parents (D-37) par rapport à leur dessin de référence (62 px debout, environ

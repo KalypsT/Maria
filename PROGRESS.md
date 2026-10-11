@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Les bulles** (D-165, demande de l'utilisateur, sur `ccr-3b45ec98-n8x7xk`) : la revue de toutes les bulles. Choix de l'utilisateur faits (un nuage pour Céleste, une bulle de parole pour les autres ; Maria aux seuls moments-pivots et la boucle de la maison cassée ; la photo de Maria gardée ; sept nouveaux pictogrammes). **Faits : l'inventaire ligne par ligne** (`docs/BULLES.md`) et **la maquette** (https://claude.ai/artifact/AgbA6JRNEMACrZzPv7Rfim : la chambre avant/après, trois styles). **En attente de l'utilisateur** : le style (net, crayon, papier découpé), la validation de l'inventaire, les affaires de Maria ramassées (pas de bulle par défaut). Puis le plan en 4 PR (le rendu ; la maison ; la gare, le train et la mer ; la nounou, la fin, les passants et les portes).
+**Les bulles** (D-165, demande de l'utilisateur, sur `ccr-3b45ec98-n8x7xk`) : la revue de toutes les bulles. Choix de l'utilisateur faits (un nuage pour Céleste, une bulle de parole pour les autres ; Maria aux seuls moments-pivots et la boucle de la maison cassée ; la photo de Maria gardée ; six nouveaux pictogrammes et le lit à « z » ; **le style « papier découpé »** ; pas de bulle pour les affaires de Maria). Faits : l'inventaire (`docs/BULLES.md`), la maquette (https://claude.ai/artifact/AgbA6JRNEMACrZzPv7Rfim) et **la PR 1 : le rendu** (le nuage et la bulle de parole en papier découpé, le recadrage des pictogrammes, le côté de la bulle, la lune qui ne troue plus, les nouveaux pictogrammes ; aucun changement de contenu). **En attente de l'utilisateur** : la validation de l'inventaire ligne par ligne, avant les PR 2 (la maison, le jardin, le quartier), 3 (la gare, le train, la mer) et 4 (la nounou, la fin, les passants, les portes).
 
 **Retour d'essai jusqu'à la mer** (D-164, sur `ccr-6f15c4bd-qxtl81`) : plan validé en 3 PR. **PR 1 faite : le phare (sa porte), le dortoir (une porte claire, sa lueur toute la nuit), l'escalier de la plage (sans chaîne, un portique et sa flèche, les marches)** et **PR 2 faite : l'annonce des tunnels (la bouche qui arrive de l'avant, les creux qui s'éclairent)** et **PR 3 faite : le boss du train plus tendu (10, 8,5 puis 8 tuiles/s selon le tronçon)**. **Le retour d'essai est traité.** Puis **PR 4 faite : la revue visuelle des 41 portes** (trois portes sans dessin, maintenant dessinées : l'entrée du centre vue de l'intérieur, le retour de la jetée, la sortie de la chambre de la sieste ; DEBUG → « Portes »). Suite : essai sur téléphone ; le boss de la mer (pas encore essayé).
 
@@ -51,6 +51,11 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les bulles, PR 1 : le rendu (D-165)
+
+- Céleste pense dans un nuage, les autres parlent dans une bulle ronde ; le style « papier découpé » (une ombre portée, un papier grainé, sans trait) ; chaque pictogramme mesuré et posé dans une zone sûre (plus de débordement) ; la bulle part vers la gauche au bord droit d'une salle ; le lit à « z », la lune sans trou ; six nouveaux pictogrammes (pas encore utilisés). Textures dessinées à la demande.
+- [ ] À vérifier sur téléphone : la taille des bulles (un peu plus larges qu'avant) ; le papier découpé sur les fonds clairs (le jour, la plage, l'école) : la bulle se détache-t-elle assez ? Un petit à-coup à la première apparition d'une bulle ?
 
 ### Retour d'essai, PR 4 : la revue des portes (D-164)
 

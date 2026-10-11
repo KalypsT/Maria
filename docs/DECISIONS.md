@@ -2448,3 +2448,22 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
 - **À choisir par l'utilisateur** : le style ; les lignes de l'inventaire ; les affaires de Maria (règle 5).
 - **Plan proposé** (après validation) : **PR 1, le rendu** (le nuage, la bulle de parole, le recadrage, le côté de la bulle, les nouveaux pictogrammes, le style choisi ; aucun changement de contenu) ; **PR 2, le contenu de la maison, du jardin et du quartier** ; **PR 3, la gare, le train et la mer** ; **PR 4, la nounou, le monde de Maria, les passants et les portes**. Un test qui fige les règles (pas de bulle « Maria » hors des moments-pivots, plus de cœur chez les inconnus).
 - **Sauvegarde** : aucun changement (les bulles ne sont pas sauvegardées).
+
+### D-165, choix de l'utilisateur sur la maquette
+
+- **Le style : « papier découpé »**.
+- **Les affaires de Maria ramassées : pas de bulle** (confirmé).
+- L'inventaire reste à valider ligne par ligne avant les PR de contenu (2 à 4).
+
+### D-165, PR 1 : le rendu des bulles
+
+- **Aucun changement de contenu** : les scripts montrent les mêmes pictogrammes qu'avant ; seule leur forme change.
+- **Penser, parler** : Céleste pense dans un **nuage** (dix lobes, sa traîne de deux petites bulles vers la tête) ; un personnage qui a une bulle (`by`), un passant ou une porte gardée par un parent **parle** dans une **bulle ronde** et sa pointe vers la bouche. Même papier, même taille.
+- **Le style « papier découpé »** (`drawBubble`, `src/scenes/art/storyArt.ts`) : sans trait, une **ombre portée nette** décalée, un **papier grainé** (toujours le même grain).
+- **Le recadrage** : chaque pictogramme est dessiné une fois à part, ses pixels mesurés (une fois par pictogramme, mis en cache) ; il est ensuite posé au centre d'une **zone sûre** de la bulle, agrandi au plus 1,5 fois (`fitScale`, `src/core/story/bubble.ts`, testé). Plus rien ne déborde (la cabane, la grue, le carrousel, les cubes, le crochet, le tourne-disque, la photo de famille).
+- **La lune** ne s'efface plus dans ce qui est dessous (elle trouait la bulle) : sa morsure est un masque. **Le lit** perd sa lune : des « z ».
+- **Le côté** (`bubbleSide`, testé) : la bulle part vers la droite, sauf si elle sortirait de la salle (papa à la porte de la chambre) : elle part alors vers la gauche (la forme en miroir, jamais le pictogramme).
+- **Six nouveaux pictogrammes**, pas encore utilisés (ils viennent avec les PR de contenu) : `smile`, `wave`, `hush`, `wonder`, `miss`, `locked`.
+- **Taille** : un dessin plus grand (46 × 40 au lieu de 34 × 31), un agrandissement plus petit (`THOUGHT_SCALE` 1,7 au lieu de 1,9) : à l'écran, le nuage est un peu plus large qu'avant (environ 15 %) et le pictogramme plus gros.
+- **Mémoire** : les textures des bulles sont dessinées **à la demande**, la première fois qu'elles servent, et gardées jusqu'au prochain changement d'échelle (avant : 50 textures dessinées d'avance à chaque redessin du décor ; maintenant il y en aurait plus de 170, une par forme, pictogramme et côté). Les passants utilisent les mêmes (`BubbleSource`).
+- **Sauvegarde** : aucun changement.

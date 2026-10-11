@@ -22,7 +22,8 @@ Revue de toutes les bulles du jeu, demandée par l'utilisateur une fois l'histoi
 
    Le **lit** perd sa lune (qui trouait la bulle) : des « z » à la place.
 
-5. **Les affaires de Maria ramassées** (chausson, biberon, bandeau, bonnet) : réponse « Ok » de l'utilisateur à une question à trois options. **Retenu par défaut : pas de bulle** (l'étincelle, le son et la page du cahier suffisent). À confirmer (B-008 à B-011).
+5. **Les affaires de Maria ramassées** (chausson, biberon, bandeau, bonnet) : **pas de bulle** (l'étincelle, le son et la page du cahier suffisent), confirmé par l'utilisateur (B-008 à B-011).
+6. **Le style : « papier découpé »** (sans trait, une ombre portée nette, un papier grainé), choisi par l'utilisateur sur la maquette.
 
 ## Les chiffres
 
