@@ -17,12 +17,26 @@ import {
   type PasserbySpot,
   type PasserbyState,
 } from '../core/world/passersby';
-import { PASSERBY_KINDS, type PasserbyKind, type TimeOfDay } from '../core/story/story';
+import {
+  PASSERBY_KINDS,
+  type PasserbyKind,
+  type ThoughtIcon,
+  type TimeOfDay,
+} from '../core/story/story';
+import type { BubbleKind, BubbleSide } from '../core/story/bubble';
 import { drawPasserby, passerbyIllustrated, passerbySize } from './art/passerbyArt';
 
 /** Les bulles au-dessus des personnages (celles de l'histoire, `StoryView`). */
 const BUBBLE_DEPTH = 12;
 const NO_REACTION: PasserbyReaction = {};
+/** Décalage de la pointe de la bulle par rapport à la tête (px du monde), comme `StoryView`. */
+const BUBBLE_NUDGE = 4;
+
+/** Les bulles dessinées par `StoryView` (D-165). */
+export interface BubbleSource {
+  bubbleTexture(kind: BubbleKind, icon: ThoughtIcon, side: BubbleSide): string;
+  side(x: number): BubbleSide;
+}
 
 interface Passerby {
   readonly spot: PasserbySpot;
@@ -50,10 +64,14 @@ export class PasserbyView {
   private bubbleOf: Passerby | null = null;
   private bubbleStart = -1;
   private bubbleEnd = -1;
+  private bubbleSide: BubbleSide = 1;
   private artScale = 1;
   private illustrated = new Set<PasserbyKind>();
 
-  constructor(private readonly scene: Phaser.Scene) {
+  constructor(
+    private readonly scene: Phaser.Scene,
+    private readonly bubbles: BubbleSource,
+  ) {
     this.bubble = scene.add
       .image(0, 0, '__DEFAULT')
       .setOrigin(0, 1)
@@ -103,7 +121,8 @@ export class PasserbyView {
     this.passersby = [];
     this.bubbleOf = null;
     this.bubbleEnd = -1;
-    this.bubble.setVisible(false);
+    // Sa texture a pu être retirée (nouvelle échelle) : plus aucune référence vers elle.
+    this.bubble.setVisible(false).setTexture('__DEFAULT');
   }
 
   /** Une image : Céleste au point (x, y) (son centre). */
@@ -117,8 +136,12 @@ export class PasserbyView {
       const fleeing = state.fleeMs >= 0;
       const distance = passerbyDistance(x, y, box, reaction.column);
       if (stepPasserby(state, distance, dtMs, reaction, tuning) && reaction.bubble) {
+        // Un passant parle à Céleste (D-165) : une bulle de parole, vers l'intérieur de la salle.
         this.bubbleOf = passerby;
-        this.bubble.setTexture(`thought-${reaction.bubble}`);
+        this.bubbleSide = this.bubbles.side(box.x + box.width * 0.5);
+        this.bubble
+          .setTexture(this.bubbles.bubbleTexture('speech', reaction.bubble, this.bubbleSide))
+          .setOrigin(this.bubbleSide > 0 ? 0 : 1, 1);
         this.bubbleStart = nowMs;
         this.bubbleEnd = nowMs + tuning.bubbleMs;
       }
@@ -208,11 +231,14 @@ export class PasserbyView {
     const fade = STORY_TIMING.thoughtFadeMs;
     const alpha = Math.min(1, (nowMs - this.bubbleStart) / fade, (this.bubbleEnd - nowMs) / fade);
     const { box } = owner;
-    // La traîne de la bulle (en bas à gauche) part du haut du personnage, au-dessus de sa tête.
+    // La pointe de la bulle part du haut du personnage, au-dessus de sa tête.
     this.bubble
       .setVisible(true)
       .setAlpha(Math.max(0, alpha))
-      .setPosition(box.x + box.width * 0.5 - 4, box.y + 4 - passerbySize(owner.spot.kind).above);
+      .setPosition(
+        box.x + box.width * 0.5 - BUBBLE_NUDGE * this.bubbleSide,
+        box.y + 4 - passerbySize(owner.spot.kind).above,
+      );
   }
 
   private texture(

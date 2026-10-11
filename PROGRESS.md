@@ -2,6 +2,8 @@
 
 ## Phase en cours
 
+**Les bulles** (D-165, demande de l'utilisateur, sur `ccr-3b45ec98-n8x7xk`) : la revue de toutes les bulles. Choix de l'utilisateur faits (un nuage pour Céleste, une bulle de parole pour les autres ; Maria aux seuls moments-pivots et la boucle de la maison cassée ; la photo de Maria gardée ; six nouveaux pictogrammes et le lit à « z » ; **le style « papier découpé »** ; pas de bulle pour les affaires de Maria). Faits : l'inventaire (`docs/BULLES.md`), la maquette (https://claude.ai/artifact/AgbA6JRNEMACrZzPv7Rfim) **la PR 1 : le rendu** (le nuage et la bulle de parole en papier découpé, le recadrage des pictogrammes, le côté de la bulle, la lune qui ne troue plus, les nouveaux pictogrammes ; aucun changement de contenu) et **la PR 2 : la maison, le jardin, le quartier** (la boucle « où est Maria ? » cassée, les cœurs de fin d'indice retirés, le manque, pas de bulle pour les affaires de Maria, les portes fermées). L'inventaire est validé. **PR 3 faite : la gare, le train, la mer** (plus de Maria au début des niveaux, le sourire, « chut », l'émerveillement, le manque, les portes) et **PR 4 faite : la nounou, le monde de Maria, les passants, les portes**. **Le plan des bulles est complet.** Suite : essai sur téléphone.
+
 **Retour d'essai jusqu'à la mer** (D-164, sur `ccr-6f15c4bd-qxtl81`) : plan validé en 3 PR. **PR 1 faite : le phare (sa porte), le dortoir (une porte claire, sa lueur toute la nuit), l'escalier de la plage (sans chaîne, un portique et sa flèche, les marches)** et **PR 2 faite : l'annonce des tunnels (la bouche qui arrive de l'avant, les creux qui s'éclairent)** et **PR 3 faite : le boss du train plus tendu (10, 8,5 puis 8 tuiles/s selon le tronçon)**. **Le retour d'essai est traité.** Puis **PR 4 faite : la revue visuelle des 41 portes** (trois portes sans dessin, maintenant dessinées : l'entrée du centre vue de l'intérieur, le retour de la jetée, la sortie de la chambre de la sieste ; DEBUG → « Portes »). Suite : essai sur téléphone ; le boss de la mer (pas encore essayé).
 
 **Le voyage rapide** (D-163, demande de l'utilisateur, sur `ccr-6f15c4bd-qxtl81`) : les veilleuses qui se répondent, une veilleuse principale par niveau (six, le train compris), turquoise, depuis n'importe quelle lanterne allumée du monde réel, débloquée après le monde étrange du niveau. Plan validé en 2 PR. **PR 1 faite : le système** (les règles, le voyage, DEBUG → « Voyage ») et **PR 2 faite : dans le jeu** (la veilleuse turquoise, l'étincelle d'Agir à une lanterne, la carte du sac en mode voyage, Céleste qui s'assoit, le noir, l'arrivée assise). **Le voyage rapide est complet.** Suite : essai sur téléphone (les durées, la portée de 2 tuiles, la veilleuse turquoise et le fil discret).
@@ -49,6 +51,26 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les bulles, PR 4 : la nounou, le monde de Maria, les passants, les portes (D-165)
+
+- Plus de Maria à l'arrivée chez la nounou ni juste après Eden (elle revient au réveil) ; le reflet sourit ; les cubes émerveillent ; le manque aux derniers mois plus tard et devant le berceau refait ; l'émerveillement dans le berceau immense ; les passants sourient ou font coucou ; le cadenas à la salle de jeux, les cubes qui manquent à la porte de la sieste.
+- [ ] À vérifier sur téléphone : la bulle des cubes à la porte de la sieste (fermée) se comprend-elle ? Le coucou des passants se lit-il à leur taille ?
+
+### Les bulles, PR 3 : la gare, le train, la mer (D-165)
+
+- Plus de bulle « Maria » au début des niveaux (Maria reste à la fin des mondes étranges) ; le sourire (la camarade, la maîtresse), « chut » (le contrôleur), l'émerveillement (la cuisine rose, la mer à la fenêtre, le livre musical), le manque (les mois plus tard, la maman au bébé) ; le cadenas aux portes du train et de la mer.
+- [ ] À vérifier sur téléphone : sans bulle « Maria » au début du train et de la mer, le fil reste-t-il présent ? « Chut » du contrôleur se lit-il ? L'arrivée sur les voies de la gare, sans arrêt, passe-t-elle inaperçue (voulu) ?
+
+### Les bulles, PR 2 : la maison, le jardin, le quartier (D-165)
+
+- Maria disparue seulement au berceau vide et à la première question (papa) ; ensuite un « ? » ; les échanges avec les parents finissent sur leur indice (neuf cœurs retirés) ; le manque au câlin de maman et aux mois plus tard ; pas de bulle pour les affaires de Maria ; le cadenas aux portes du quartier.
+- [ ] À vérifier sur téléphone : comprend-on encore que Céleste demande où est Maria (le « ? » seul, après la première fois) ? Le manque (le petit nuage gris) se lit-il ? Sans cœur, les parents paraissent-ils froids ?
+
+### Les bulles, PR 1 : le rendu (D-165)
+
+- Céleste pense dans un nuage, les autres parlent dans une bulle ronde ; le style « papier découpé » (une ombre portée, un papier grainé, sans trait) ; chaque pictogramme mesuré et posé dans une zone sûre (plus de débordement) ; la bulle part vers la gauche au bord droit d'une salle ; le lit à « z », la lune sans trou ; six nouveaux pictogrammes (pas encore utilisés). Textures dessinées à la demande.
+- [ ] À vérifier sur téléphone : la taille des bulles (un peu plus larges qu'avant) ; le papier découpé sur les fonds clairs (le jour, la plage, l'école) : la bulle se détache-t-elle assez ? Un petit à-coup à la première apparition d'une bulle ?
 
 ### Retour d'essai, PR 4 : la revue des portes (D-164)
 

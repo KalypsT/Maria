@@ -107,14 +107,15 @@ export const PASSERSBY: readonly PasserbySpot[] = [
 
 /** Comment chacun réagit quand Céleste passe tout près (rien : il ne réagit pas). */
 export const PASSERBY_REACTIONS: Readonly<Partial<Record<PasserbyKind, PasserbyReaction>>> = {
-  'busstop-man': { pose: 'busstop-man-look', bubble: 'heart' },
-  'dog-walker': { bubble: 'heart' },
-  'neighbor-window': { pose: 'neighbor-wave', bubble: 'heart', column: true },
-  cashier: { bubble: 'heart' },
-  'traveler-suitcase': { pose: 'traveler-wave', bubble: 'heart' },
-  'old-couple': { bubble: 'heart' },
-  fisherman: { pose: 'fisherman-nod', bubble: 'heart' },
-  'candyfloss-vendor': { bubble: 'heart' },
+  // Des inconnus : un sourire ou un coucou, jamais un cœur (D-165).
+  'busstop-man': { pose: 'busstop-man-look', bubble: 'smile' },
+  'dog-walker': { bubble: 'wave' },
+  'neighbor-window': { pose: 'neighbor-wave', bubble: 'wave', column: true },
+  cashier: { bubble: 'smile' },
+  'traveler-suitcase': { pose: 'traveler-wave', bubble: 'wave' },
+  'old-couple': { bubble: 'smile' },
+  fisherman: { pose: 'fisherman-nod', bubble: 'smile' },
+  'candyfloss-vendor': { bubble: 'smile' },
   // Le chat, haut sur son rebord : il file dès que Céleste monte sur le toit de l'abribus, pas
   // quand elle passe sur le trottoir.
   'ginger-cat-sit': { pose: 'ginger-cat-leap', flee: true, nearPx: 128 },

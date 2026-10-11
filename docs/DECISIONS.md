@@ -2429,3 +2429,79 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
 - **Un test général** (`doors.test.ts`, renommé de `seaDoors.test.ts`) : chaque porte de façade a un décor qui recouvre sa case, ou un objet de mise en scène posé devant elle (le train à quai). Il aurait trouvé les trois portes ; pas celle du phare (le grand décor de l'escalier la couvrait), d'où les vérifications précises de la mer.
 - **Lisibles mais petites**, à voir sur téléphone : la trappe du toit du train (`roofhatch`).
 - **Sauvegarde** : aucun changement.
+
+## D-165 — Les bulles : la revue complète (orientations, avant le plan)
+
+- **Demande de l'utilisateur** (l'histoire terminée) : revoir toutes les bulles (pensées, dialogues) ; trop de bulles « Maria » ; trop de cœurs, certains illogiques ; certaines bulles pas esthétiques : peut-on les améliorer par le code ou faut-il une image ?
+- **Constat** (le code et une planche rendue) : 150 bulles dans les scripts d'histoire, dont **50 cœurs** (plus 8 passants) et **26 bulles de Maria** (16 « Maria », 10 « Maria disparue », dont 8 dans la maison, le jardin et le quartier : la boucle « Maria disparue → ? → cœur » auprès des parents). Le cœur sert à quatre choses : la tendresse, la fin d'un indice des parents (9 fois), le salut d'inconnus (le contrôleur, les passants), les affaires de Maria ramassées. Le « ? » veut dire trois choses (un parent ne sait pas, Céleste se demande, une porte est fermée). Le rendu : des pictogrammes qui débordent du nuage, la lune qui troue la bulle (dessinée en effaçant), un contour seulement sur la traîne, la même bulle de pensée pour tout le monde, toujours en bas à gauche.
+- **Réponse sur le rendu** : tout se corrige **par le code** (les bulles sont dessinées une fois, au chargement) ; une image n'aurait de sens que pour une texture peinte à la main.
+- **Choix de l'utilisateur** :
+  1. **pensée ou parole** : un nuage pour Céleste, une bulle de parole (ronde, une pointe) pour les autres personnages ;
+  2. **Maria** : **a et b** ensemble : la boucle de la maison cassée (Maria disparue et le cœur du parent la première fois seulement), et Maria seulement aux moments-pivots (la disparition, la fin de chaque monde étrange, le monde de Maria) ; les bulles « Maria » du début des niveaux (D-70) sont retirées ;
+  3. **la photo de Maria est gardée** dans les bulles ;
+  4. **de nouveaux pictogrammes** : sourire, coucou, chut, étincelle (l'émerveillement), un petit nuage de pluie (le manque), « z » (le lit sans la lune), une porte et son cadenas (les portes fermées) ;
+  5. **les affaires de Maria ramassées** : « Ok » à une question à trois options (pas de bulle, l'objet, le manque) ; retenu par défaut : **pas de bulle**, à confirmer ;
+  6. **la méthode** : comme les lanternes et les coquilles : un inventaire ligne par ligne (`docs/BULLES.md`, à valider), une maquette visuelle, puis des PR séparées (le rendu d'abord, puis le contenu niveau par niveau).
+- **L'inventaire** (`docs/BULLES.md`) : 157 lignes de bulles, 21 portes fermées, les passants ; proposé : 131 bulles d'histoire au lieu de 150, 8 « Maria » au lieu de 16, 2 « Maria disparue » au lieu de 10, 25 cœurs au lieu de 58, un seul « ? » de porte au lieu de 10.
+- **La maquette** (https://claude.ai/artifact/AgbA6JRNEMACrZzPv7Rfim, son code dans `prototype-bulles.txt`) : la chambre du premier soir (une capture du jeu), avant et après ; trois styles au choix (« net » : un trait d'encre et une ombre douce ; « crayon » : un double trait et un papier grainé ; « papier découpé » : sans trait, une ombre portée nette) ; chaque pictogramme dessiné à part, mesuré, puis posé dans une zone sûre (il ne déborde plus, la lune ne troue plus rien) ; la bulle de parole peut partir vers la gauche (un personnage au bord de la salle).
+- **Pilier 6** (« aucun texte ») : les « z » du lit sont un pictogramme de bande dessinée, pas un mot (validé par l'utilisateur avec la liste).
+- **À choisir par l'utilisateur** : le style ; les lignes de l'inventaire ; les affaires de Maria (règle 5).
+- **Plan proposé** (après validation) : **PR 1, le rendu** (le nuage, la bulle de parole, le recadrage, le côté de la bulle, les nouveaux pictogrammes, le style choisi ; aucun changement de contenu) ; **PR 2, le contenu de la maison, du jardin et du quartier** ; **PR 3, la gare, le train et la mer** ; **PR 4, la nounou, le monde de Maria, les passants et les portes**. Un test qui fige les règles (pas de bulle « Maria » hors des moments-pivots, plus de cœur chez les inconnus).
+- **Sauvegarde** : aucun changement (les bulles ne sont pas sauvegardées).
+
+### D-165, choix de l'utilisateur sur la maquette
+
+- **Le style : « papier découpé »**.
+- **Les affaires de Maria ramassées : pas de bulle** (confirmé).
+- L'inventaire reste à valider ligne par ligne avant les PR de contenu (2 à 4).
+
+### D-165, PR 1 : le rendu des bulles
+
+- **Aucun changement de contenu** : les scripts montrent les mêmes pictogrammes qu'avant ; seule leur forme change.
+- **Penser, parler** : Céleste pense dans un **nuage** (dix lobes, sa traîne de deux petites bulles vers la tête) ; un personnage qui a une bulle (`by`), un passant ou une porte gardée par un parent **parle** dans une **bulle ronde** et sa pointe vers la bouche. Même papier, même taille.
+- **Le style « papier découpé »** (`drawBubble`, `src/scenes/art/storyArt.ts`) : sans trait, une **ombre portée nette** décalée, un **papier grainé** (toujours le même grain).
+- **Le recadrage** : chaque pictogramme est dessiné une fois à part, ses pixels mesurés (une fois par pictogramme, mis en cache) ; il est ensuite posé au centre d'une **zone sûre** de la bulle, agrandi au plus 1,5 fois (`fitScale`, `src/core/story/bubble.ts`, testé). Plus rien ne déborde (la cabane, la grue, le carrousel, les cubes, le crochet, le tourne-disque, la photo de famille).
+- **La lune** ne s'efface plus dans ce qui est dessous (elle trouait la bulle) : sa morsure est un masque. **Le lit** perd sa lune : des « z ».
+- **Le côté** (`bubbleSide`, testé) : la bulle part vers la droite, sauf si elle sortirait de la salle (papa à la porte de la chambre) : elle part alors vers la gauche (la forme en miroir, jamais le pictogramme).
+- **Six nouveaux pictogrammes**, pas encore utilisés (ils viennent avec les PR de contenu) : `smile`, `wave`, `hush`, `wonder`, `miss`, `locked`.
+- **Taille** : un dessin plus grand (46 × 40 au lieu de 34 × 31), un agrandissement plus petit (`THOUGHT_SCALE` 1,7 au lieu de 1,9) : à l'écran, le nuage est un peu plus large qu'avant (environ 15 %) et le pictogramme plus gros.
+- **Mémoire** : les textures des bulles sont dessinées **à la demande**, la première fois qu'elles servent, et gardées jusqu'au prochain changement d'échelle (avant : 50 textures dessinées d'avance à chaque redessin du décor ; maintenant il y en aurait plus de 170, une par forme, pictogramme et côté). Les passants utilisent les mêmes (`BubbleSource`).
+- **Sauvegarde** : aucun changement.
+
+### D-165, PR 2 : la maison, le jardin, le quartier
+
+- **L'inventaire est validé** par l'utilisateur tel quel (`docs/BULLES.md`).
+- **Appliqué** (B-001 à B-063, P-01 à P-07) :
+  - **la boucle « où est Maria ? » cassée** : Maria disparue seulement au berceau vide et à la première question, à papa (qui console d'un cœur) ; ensuite Céleste demande d'un « ? » (maman sur le canapé, maman au jardin, maman à l'aire de jeux), et l'échange finit sur l'indice du parent ;
+  - **les cœurs de fin d'indice retirés** (maman et papa au jardin, sur le banc, à la supérette : neuf cœurs) ; la bulle de l'indice reste affichée en entier avant de rendre la main ;
+  - **le manque** au câlin de maman et au réveil des « mois plus tard » (à la place de Maria disparue) ; un « ? » quand le salon bascule (Maria vient d'être vue) ;
+  - **pas de bulle** pour le chausson, le biberon, le bandeau et le bonnet (et pas d'attente après) ;
+  - au coucher du premier soir, le premier cœur retiré (trois de suite) : Céleste s'assoit un instant, puis maman ;
+  - **la porte fermée** (cadenas) à la palissade du chantier et aux deux portes de l'école.
+- **Test** (`bubble.test.ts`) : la suite des bulles de chaque échange, Maria disparue à ses deux seuls moments, aucune bulle pour les affaires de Maria, les portes du quartier.
+- **Sauvegarde** : aucun changement (aucune étape ni drapeau modifié).
+
+### D-165, PR 3 : la gare, le train, la mer
+
+- **Appliqué** (B-064 à B-116, P-08 à P-14) :
+  - **plus de bulle « Maria » au début des niveaux** : l'arrivée sur les voies de la gare (le déclencheur ne fait plus que noter l'étape, sans bloquer Céleste), le train qui s'ébranle, le train qui s'arrête à la mer, l'arrivée au dortoir ; Maria reste à la fin des trois mondes étranges (Roger, la cuisine rose, le livre musical) ;
+  - **le manque** au réveil des « mois plus tard » après la gare, et devant la maman qui berce son bébé (et son poupon) ;
+  - **le sourire** pour la camarade (au train, au dortoir, sur la jetée) et la maîtresse (sur la promenade) ; **« chut »** pour le contrôleur, la nuit ;
+  - **l'émerveillement** devant la cuisine rose, la mer à la fenêtre du train, le livre musical ;
+  - **le cœur gardé** pour la tendresse : papa sous l'horloge, maman sur le quai, Roger, le chien du fourgon ;
+  - **la porte fermée** (cadenas) à la grille du fourgon, à la porte du wagon-restaurant, à l'arche de la jetée et à la grille du port ; la maîtresse garde son « ? » à la sortie de la gare de la mer (« où vas-tu ? »).
+- **Reste pour la PR 4** : l'arrivée chez la nounou (`NANNY_ENTER`), aussi jouée par la porte du couloir de la mer.
+- **Test** (`bubble.test.ts`) : Maria seulement à la fin des mondes étranges, la suite des bulles de chaque personnage, les portes.
+- **Sauvegarde** : aucun changement (l'étape `station.arrived` est toujours notée au même endroit).
+
+### D-165, PR 4 : la nounou, le monde de Maria, les passants, les portes
+
+- **Appliqué** (B-117 à B-157, P-15 à P-21) :
+  - **l'arrivée chez la nounou** sans bulle « Maria » (la dernière bulle de début de niveau, aussi jouée par la porte du couloir de la mer) ; après le souvenir d'Eden, la bulle « Maria » retirée (doublon : elle revient au réveil au dortoir, dix secondes plus tard, et y reste) ;
+  - **le sourire** du reflet ; **l'émerveillement** devant chaque cube (au bout des îlots, puis rallumé dans la salle de jeux) ; **le manque** aux derniers « mois plus tard » ;
+  - **le monde de Maria** : le manque devant le berceau refait pour personne (deux photos de Maria à la suite sinon) ; l'émerveillement dans le berceau devenu immense ; Maria reste au tapis vide, aux portes du matin et à la fin ;
+  - **les passants** : un sourire ou un coucou (la dame au chien, la voisine, la voyageuse font coucou ; les autres sourient), jamais un cœur ;
+  - **les portes** : le cadenas à la porte de la salle de jeux ; **les cubes qui manquent** à la petite porte de la sieste (au lieu d'un « ? »).
+- **Le plan des bulles est complet** : rendu (PR 1) et tout l'inventaire (PR 2 à 4).
+- **Tests mis à jour** (ils vérifiaient les anciennes bulles, D-70) : le prologue, le salon qui bascule, les mois plus tard, l'arrivée sur les voies, l'arrivée du train à la mer, l'arrivée au dortoir, l'entrée chez la nounou, la fin du niveau 7, les cubes des îlots. `bubble.test.ts` fige les règles de chaque niveau.
+- **Sauvegarde** : aucun changement.

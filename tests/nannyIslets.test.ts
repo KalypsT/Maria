@@ -235,14 +235,14 @@ describe('les îlots de mémoire de la maison de la nounou (D-112, D-113)', () =
         ).toBe(false);
       });
 
-      it('son cube : un cœur, il rejoint la tour (la bulle des cubes) ; aucun objet déjà vu', () => {
+      it('son cube : l’émerveillement, il rejoint la tour (la bulle des cubes) ; aucun objet déjà vu', () => {
         const t = trigger(islet.trigger);
         expect(t.room).toBe(islet.object.room);
         expect(t.on).toBe('interact');
         expect(t.when).toEqual({ all: [F.NannyHouse], none: [islet.done] });
         // Les anciens souvenirs (Roger, la boîte à formes…) ne sont plus rejoués (D-122).
         expect(t.steps.some((s) => s.do === 'flashback')).toBe(false);
-        expect(t.steps.some((s) => s.do === 'thought' && s.icon === 'heart')).toBe(true);
+        expect(t.steps.some((s) => s.do === 'thought' && s.icon === 'wonder')).toBe(true);
         // L'étape vient avant la bulle : elle montre le nouveau cube déjà en place.
         const flag = t.steps.findIndex((s) => s.do === 'flag' && s.id === islet.done);
         const cubes = t.steps.findIndex((s) => s.do === 'thought' && s.icon === 'cubes');

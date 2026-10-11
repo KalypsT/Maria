@@ -49,9 +49,12 @@ describe('la fin du niveau 7 : le réveil, le retour, la phase 4 (D-119)', () =>
     const grow = eden.steps.findIndex((s) => s.do === 'flag' && s.id === F.GrownFourth);
     expect(grow).toBeGreaterThan(order.lastIndexOf('fadeOut'));
     expect(grow).toBeLessThan(order.lastIndexOf('room'));
-    // La dernière bulle : Maria qui manque ; le soir du niveau 8 suit (D-139).
+    // La dernière bulle : le manque (D-165) ; le soir du niveau 8 suit (D-139).
     const last = [...eden.steps].reverse().find((s) => s.do === 'thought');
-    expect(last).toMatchObject({ do: 'thought', icon: 'maria-missing' });
+    expect(last).toMatchObject({ do: 'thought', icon: 'miss' });
+    // Maria une seule fois, au réveil au dortoir (la fin des mondes étranges).
+    const maria = eden.steps.filter((s) => s.do === 'thought' && s.icon === 'maria');
+    expect(maria).toHaveLength(1);
   });
 
   it('le jour revient au réveil ; le train roule le temps de la scène', () => {

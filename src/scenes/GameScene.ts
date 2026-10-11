@@ -704,7 +704,7 @@ export class GameScene extends Phaser.Scene {
     this.props.load(this.story.data.props, this.level.id, this.story.flags);
     this.storyView = new StoryView(this, this.props, this.story);
     this.storyView.setArt(this.artScale, this.artImages());
-    this.passersby = new PasserbyView(this);
+    this.passersby = new PasserbyView(this, this.storyView);
     this.fx = new StrangeFxView(this);
     this.fx.load(
       this.level,

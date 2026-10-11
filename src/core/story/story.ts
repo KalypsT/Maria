@@ -88,6 +88,19 @@ export const THOUGHT_ICONS = [
   'cubes',
   /** Maria assise sur l'étagère du surmeuble (D-144) : là où la ranger. */
   'maria-shelf',
+  // Les sentiments et les portes (D-165) : le cœur garde son sens, la tendresse.
+  /** Un visage qui sourit : la gentillesse (la maîtresse, la camarade, des passants). */
+  'smile',
+  /** Une main qui fait coucou : un salut (des passants). */
+  'wave',
+  /** Un visage, un doigt sur la bouche : « chut » (le contrôleur, la nuit). */
+  'hush',
+  /** Une grande étincelle dorée et deux petites : l'émerveillement, une découverte. */
+  'wonder',
+  /** Un petit nuage gris et sa pluie : le manque, la tristesse douce. */
+  'miss',
+  /** Une porte et son cadenas : une porte fermée. */
+  'locked',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
