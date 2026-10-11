@@ -579,6 +579,9 @@ export const DECOR_KINDS: Readonly<
   cave: { furniture: false },
   beachcabin: { furniture: true },
   beachstairsfoot: { furniture: false },
+  // Retour d'essai : la porte du dortoir, celle du pied du phare (vue de l'intérieur).
+  dormdoor: { furniture: false },
+  lighthousedoor: { furniture: false },
   lifeguardchair: { furniture: true },
   groynepost: { furniture: true },
   buoy: { furniture: true },

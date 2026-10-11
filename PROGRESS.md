@@ -2,6 +2,8 @@
 
 ## Phase en cours
 
+**Retour d'essai jusqu'à la mer** (D-164, sur `ccr-6f15c4bd-qxtl81`) : plan validé en 3 PR. **PR 1 faite : le phare (sa porte), le dortoir (une porte claire, sa lueur toute la nuit), l'escalier de la plage (sans chaîne, un portique et sa flèche, les marches)**. Suite : PR 2, les tunnels du toit du train (l'entrée visible au loin, les creux qui s'éclairent) ; PR 3, le boss du train (plus tendu que la tour de la gare).
+
 **Le voyage rapide** (D-163, demande de l'utilisateur, sur `ccr-6f15c4bd-qxtl81`) : les veilleuses qui se répondent, une veilleuse principale par niveau (six, le train compris), turquoise, depuis n'importe quelle lanterne allumée du monde réel, débloquée après le monde étrange du niveau. Plan validé en 2 PR. **PR 1 faite : le système** (les règles, le voyage, DEBUG → « Voyage ») et **PR 2 faite : dans le jeu** (la veilleuse turquoise, l'étincelle d'Agir à une lanterne, la carte du sac en mode voyage, Céleste qui s'assoit, le noir, l'arrivée assise). **Le voyage rapide est complet.** Suite : essai sur téléphone (les durées, la portée de 2 tuiles, la veilleuse turquoise et le fil discret).
 
 **Le trou du grillage de l'aire de jeux** (D-158, sur `claude/game-test-issues-e7pomv`) : le ballon de la cour coincé dedans, un pigeon qui s'envole par le trou depuis le toit de la tour. Le chantier attendra (bulles des personnages). **Le sac à dos** (D-159, D-160) : maquette interactive (https://claude.ai/artifact/DE58ednNNhcjxdPUsuLd6T), choix de l'utilisateur et plan validés en 3 PR (le sac ; la carte ; les trésors). **PR 1 faite : le sac** (un seul bouton, la poche et ses trois objets, le cahier, les trésors d'avant, les réglages de l'ancienne pause) et **PR 2 faite : la carte** (D-161 : la rangée des lieux à gauche, feuilleter, un « ? », le point rose, les trésors aperçus) et **PR 3 faite : les trésors** (D-162 : une page par type et en couleurs, les indices, la fiche et le nom, « nouveau », l'étincelle). **Le plan du sac est complet.** Suite : essai sur téléphone ; l'image du sac (prompt fourni) ; le contenu (les objets des souvenirs, leurs lieux), à redéfinir par l'utilisateur ; une récompense par famille complète (à trouver).
@@ -47,6 +49,12 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Retour d'essai, PR 1 : le phare, le dortoir, l'escalier de la plage (D-164)
+
+- La porte du pied du phare dessinée ; la porte du dortoir claire et sa lueur toute la nuit ; l'escalier de la plage : la chaîne retirée, un portique bleu (parasol, vagues, flèche), les marches, en haut comme en bas.
+- Vérifié dans Chromium (844 × 390).
+- [ ] À vérifier sur téléphone : la porte du dortoir se voit-elle tout de suite la nuit ? L'escalier se comprend-il (Agir pour descendre) ? Le portique est-il trop voyant ?
 
 ### Le voyage rapide, PR 2 : dans le jeu (D-163)
 

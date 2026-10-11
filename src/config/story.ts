@@ -461,6 +461,8 @@ export const PROP_SIZE = {
   // Le train à quai (D-69), quelques mois après la gare : une voiture et le nez de la suivante.
   'quay-train': { w: 200, h: 66 },
   'quay-train-day': { w: 200, h: 66 },
+  // La lueur sous la porte du dortoir (retour d'essai) : la largeur de la porte, et son halo.
+  'door-glow': { w: 64, h: 16 },
   // Roger, la peluche singe (D-68), tout en haut de la tour des objets perdus.
   roger: { w: 16, h: 18 },
   // La cuisine rose (D-88), la dînette d'enfance, à peu près à hauteur de Céleste.

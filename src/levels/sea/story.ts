@@ -412,6 +412,15 @@ const TRIGGERS: StoryTrigger[] = [
 ];
 
 const PROPS: StoryProp[] = [
+  // La lueur sous la porte du dortoir, toute la nuit (D-105, retour d'essai) : la porte à ouvrir.
+  {
+    id: 'dorm-door-glow',
+    room: 'sea-centre',
+    kind: 'door-glow',
+    col: DORM_DOOR.col,
+    row: DORM_DOOR.row,
+    when: NIGHT,
+  },
   // Le disque « Avant même ta naissance » (D-156), sur l'armoire du dortoir.
   {
     id: 'record-lullaby',

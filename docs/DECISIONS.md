@@ -2376,3 +2376,24 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
 - **Tests** (`travel.test.ts`) : l'arrivée à côté de chaque veilleuse (debout, au sol, tournée vers elle, et c'est bien elle qui devient le point de retour) ; le script (son ordre, les règles des scripts de l'histoire, `storyProblems`) ; proposé avec deux veilleuses ; Agir ouvre la carte.
 - **Vérifié dans Chromium** (844 × 390, histoire « après la fin ») : la veilleuse turquoise de la chambre et l'étincelle au-dessus ; Agir, la carte en mode voyage (la chambre et la terrasse en turquoise) ; feuilleter jusqu'au quartier, toucher deux fois la veilleuse de la rue ; Céleste assise sous l'abribus à côté de la veilleuse turquoise, le point de retour `street:street-busstop`.
 - **Sauvegarde** : aucun changement.
+
+## D-164 — Retour d'essai : le toit du train, le boss du train, le dortoir, l'escalier de la plage, le phare
+
+- **Retour de l'utilisateur** (essai jusqu'à la mer) : les tunnels du toit du train ne sont pas clairs, il faut un meilleur avertissement ; le boss du train est trop facile ; au dortoir, une action pour sortir mais pas de porte visible ; l'escalier de la mer n'est pas compréhensible ; il manque la porte en bas, dans le phare.
+- **Choix de l'utilisateur** (les recommandations) : trois PR sur la même branche :
+  1. **le phare, le dortoir, l'escalier** (du dessin) ;
+  2. **les tunnels** : l'entrée du tunnel visible au loin, qui grossit pendant l'annonce, et les creux du toit qui s'éclairent ;
+  3. **le boss du train** : pas un vrai défi (gardé pour le boss final), mais **plus tendu que la tour de la gare** (jugée « pas trop mal dosée, un peu simple », le premier boss).
+
+### D-164, PR 1 : le phare, le dortoir, l'escalier de la plage
+
+- **Le phare** : la porte du pied (`; @door: 1`) n'avait aucun dessin à l'intérieur (l'étincelle d'Agir sur un mur nu). Nouveau décor `lighthousedoor` (PLACEHOLDER) : une porte cintrée en bois cloutée, son encadrement de pierre, un filet de jour autour.
+- **Le dortoir** : la porte existait (`door`, entre la deuxième et la troisième couchette) mais, en bois sombre la nuit, on la prenait pour un placard ; la « lueur sous la porte » n'était qu'un scintillement, une fois. Nouveau décor `dormdoor` (une porte peinte en clair, un chambranle, une poignée, une plaque) ; nouvel objet de mise en scène **`door-glow`**, un trait de lumière pâle sous la porte et son halo, **toute la nuit** (`NIGHT`), au-dessus de l'obscurité de la salle.
+- **L'escalier de la plage** :
+  - **la chaîne** de la promenade était toujours dessinée (« la ferme pour l'instant », d'une PR d'avant la plage) alors que l'escalier est ouvert : **retirée** ;
+  - **en haut** (`beachstairs`, la promenade) : on lisait des gradins blancs ; maintenant un **portique bleu** entre deux piliers, avec le pictogramme de la plage (un parasol, des vagues) et une **flèche qui descend** ; dans l'ouverture (opaque : la balustrade ne passe plus à travers), des **marches qui s'enfoncent** entre deux rampes (les plus proches larges et claires, les plus loin étroites et dans l'ombre) ;
+  - **en bas** (`beachstairsfoot`, la plage) : on lisait un mur rayé ; maintenant la digue et **l'escalier qui la descend en biais**, sous sa rampe, jusqu'à la porte, et **le même portique bleu**, sa flèche vers le haut.
+- **Revue des portes** : une recherche automatique des portes sans dessin ne suffit pas (le dessin de l'escalier du phare « couvrait » sa porte) ; elle signale aussi la porte de la chambre de la sieste (chez la nounou), à regarder lors d'une revue visuelle si l'utilisateur la demande.
+- **Tests** : `seaDoors.test.ts` (chaque porte de la mer a son dessin à sa place ; le dortoir n'a plus la porte sombre) ; `seaNight.test.ts` (la lueur, toute la nuit).
+- **Vérifié dans Chromium** (844 × 390) : la porte claire et sa lueur la nuit ; le portique et les marches sur la promenade ; l'escalier de la digue sur la plage ; la porte cintrée du phare.
+- **Sauvegarde** : aucun changement.

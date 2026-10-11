@@ -259,26 +259,83 @@ export function seaDrawers({ rounded, tileShape }: ShapeTools): Record<string, D
     },
     beachstairs(a, r) {
       const { ctx } = a;
-      // L'escalier de la plage (fond) : la balustrade s'ouvre, des marches descendent derrière, une
-      // chaîne tendue entre deux poteaux la ferme pour l'instant (la plage vient avec la PR 3).
-      ctx.fillStyle = STONE_DARK;
-      ctx.fillRect(r.x, r.y + 4, r.w, r.h - 4);
-      for (let k = 0; k < 5; k++) {
-        const y = r.y + 10 + k * 10;
+      // L'escalier de la plage (fond, retour d'essai) : la balustrade s'ouvre entre deux piliers ;
+      // un portique bleu porte le pictogramme de la plage (un parasol sur les vagues) et une flèche
+      // qui descend ; dans l'ouverture, des marches qui s'enfoncent vers la plage (les plus proches
+      // en bas, larges et claires ; les plus loin plus étroites et dans l'ombre), entre deux rampes.
+      // Plus de chaîne : elle faisait croire l'escalier fermé.
+      const pillar = 5;
+      const inner = { x: r.x + pillar, w: r.w - 2 * pillar };
+      const top = r.y + 14;
+      const bottom = r.y + r.h;
+      const shade = ctx.createLinearGradient(0, top, 0, bottom);
+      // Opaque : la balustrade, dessinée avant, ne passe pas à travers l'ouverture.
+      shade.addColorStop(0, '#6f6b63');
+      shade.addColorStop(1, STONE_DARK);
+      ctx.fillStyle = shade;
+      ctx.fillRect(inner.x, top, inner.w, bottom - top);
+      const cx = r.x + r.w / 2;
+      const steps = 6;
+      for (let k = 0; k < steps; k++) {
+        // k = 0 : la marche la plus proche, en bas.
+        const depth = k / steps;
+        const half = (inner.w / 2 - 2) * (1 - depth * 0.6);
+        const y = bottom - 4 - k * ((bottom - top - 6) / steps);
         ctx.fillStyle = k % 2 === 0 ? STONE_LIGHT : STONE;
-        ctx.fillRect(r.x + 4 + k * 6, y, r.w - 8 - k * 6, 6);
+        ctx.globalAlpha = 1 - depth * 0.55;
+        ctx.fillRect(cx - half, y, 2 * half, 3);
         ctx.fillStyle = STONE_DARK;
-        ctx.fillRect(r.x + 4 + k * 6, y + 6, r.w - 8 - k * 6, 1.5);
+        ctx.fillRect(cx - half, y + 3, 2 * half, 1);
       }
-      ctx.fillStyle = WHITE;
-      ctx.fillRect(r.x, r.y, 4, r.h);
-      ctx.fillRect(r.x + r.w - 4, r.y, 4, r.h);
-      ctx.strokeStyle = '#8a8f96';
-      ctx.lineWidth = 1.5;
+      ctx.globalAlpha = 1;
+      // Les rampes, qui se rapprochent en descendant au loin.
+      ctx.strokeStyle = IRON;
+      ctx.lineWidth = 1.2;
       ctx.beginPath();
-      ctx.moveTo(r.x + 4, r.y + 8);
-      ctx.quadraticCurveTo(r.x + r.w / 2, r.y + 20, r.x + r.w - 4, r.y + 8);
+      ctx.moveTo(inner.x + 1, bottom - 10);
+      ctx.lineTo(cx - inner.w * 0.2, top + 2);
+      ctx.moveTo(inner.x + inner.w - 1, bottom - 10);
+      ctx.lineTo(cx + inner.w * 0.2, top + 2);
       ctx.stroke();
+      // Les piliers et le portique.
+      ctx.fillStyle = WHITE;
+      ctx.fillRect(r.x, r.y + 4, pillar, r.h - 4);
+      ctx.fillRect(r.x + r.w - pillar, r.y + 4, pillar, r.h - 4);
+      ctx.fillStyle = WHITE_SHADE;
+      ctx.fillRect(r.x + pillar - 1.5, r.y + 4, 1.5, r.h - 4);
+      ctx.fillRect(r.x + r.w - 1.5, r.y + 4, 1.5, r.h - 4);
+      ctx.fillStyle = NAVY;
+      rounded(ctx, { x: r.x + 2, y: r.y, w: r.w - 4, h: 12 }, 2);
+      ctx.fill();
+      if (a.palette.silhouettes) {
+        return;
+      }
+      // Le pictogramme : un parasol rayé planté dans le sable, deux vagues, puis la flèche.
+      const px = cx - 14;
+      ctx.fillStyle = '#ef7a76';
+      ctx.beginPath();
+      ctx.arc(px, r.y + 6, 5, Math.PI, 0);
+      ctx.fill();
+      ctx.fillStyle = WHITE;
+      ctx.fillRect(px - 0.5, r.y + 6, 1, 5);
+      ctx.strokeStyle = MINT;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      for (let k = 0; k < 2; k++) {
+        const wx = px + 7 + k * 6;
+        ctx.moveTo(wx, r.y + 8);
+        ctx.quadraticCurveTo(wx + 1.5, r.y + 5, wx + 3, r.y + 8);
+        ctx.quadraticCurveTo(wx + 4.5, r.y + 11, wx + 6, r.y + 8);
+      }
+      ctx.stroke();
+      const ax = cx + 14;
+      ctx.fillStyle = WHITE;
+      ctx.fillRect(ax - 1, r.y + 2, 2, 5);
+      ctx.beginPath();
+      ctx.moveTo(ax - 4, r.y + 6);
+      ctx.lineTo(ax + 4, r.y + 6);
+      ctx.lineTo(ax, r.y + 10.5);
+      ctx.fill();
     },
     telescope(a, r) {
       const { ctx } = a;
@@ -591,16 +648,116 @@ export function seaDrawers({ rounded, tileShape }: ShapeTools): Record<string, D
       ctx.fill();
     },
     beachstairsfoot(a, r) {
-      // Le bas de l'escalier de la digue (fond) : la digue de pierre, des marches, la porte (1).
+      // Le bas de l'escalier de la digue (fond, retour d'essai) : la digue de pierre, et l'escalier
+      // qui la descend en biais, du haut à droite jusqu'au sable, à la porte (1), sous sa rampe ;
+      // le même portique bleu qu'en haut, sur la promenade, pour qu'on reconnaisse l'escalier.
       const { ctx } = a;
       ctx.fillStyle = STONE_DARK;
       ctx.fillRect(r.x, r.y, r.w, r.h);
-      for (let k = 0; k < 8; k++) {
-        ctx.fillStyle = k % 2 === 0 ? STONE_LIGHT : STONE;
-        ctx.fillRect(r.x + 4 + k * 6, r.y + 10 + k * 22, r.w - 8 - k * 6, 8);
+      ctx.fillStyle = 'rgba(0,0,0,0.07)';
+      for (let y = r.y + 6; y < r.y + r.h; y += 12) {
+        ctx.fillRect(r.x, y, r.w, 1);
       }
       ctx.fillStyle = WHITE;
       ctx.fillRect(r.x, r.y, r.w, 4);
+      // La porte d'arrivée est à la 5ᵉ colonne (`; @door: 1`) : la dernière marche y touche le sable.
+      const foot = { x: r.x + 3 * T, y: r.y + r.h };
+      const head = { x: r.x + r.w - 2, y: r.y + 10 };
+      const steps = 14;
+      const dx = (head.x - foot.x) / steps;
+      const dy = (head.y - foot.y) / steps;
+      for (let k = 0; k < steps; k++) {
+        const x = foot.x + k * dx;
+        const y = foot.y + (k + 1) * dy;
+        ctx.fillStyle = k % 2 === 0 ? STONE_LIGHT : STONE;
+        ctx.fillRect(x, y, dx + 1, -dy);
+        ctx.fillStyle = WHITE;
+        ctx.fillRect(x, y, dx + 1, 1.5);
+      }
+      ctx.strokeStyle = IRON;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(foot.x + 2, foot.y - 14);
+      ctx.lineTo(head.x - 2, head.y - 12);
+      for (let k = 1; k < 6; k++) {
+        const x = foot.x + 2 + ((head.x - foot.x - 4) * k) / 6;
+        const y = foot.y - 14 + ((head.y - foot.y + 2) * k) / 6;
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y + 12);
+      }
+      ctx.stroke();
+      ctx.fillStyle = NAVY;
+      rounded(ctx, { x: foot.x - 2 * T, y: foot.y - 3 * T - 6, w: 2 * T, h: 8 }, 2);
+      ctx.fill();
+      if (!a.palette.silhouettes) {
+        // La flèche qui monte : par là, la promenade.
+        const ax = foot.x - T;
+        const ay = foot.y - 3 * T - 2;
+        ctx.fillStyle = WHITE;
+        ctx.beginPath();
+        ctx.moveTo(ax - 3, ay + 1.5);
+        ctx.lineTo(ax + 3, ay + 1.5);
+        ctx.lineTo(ax, ay - 2.5);
+        ctx.fill();
+      }
+    },
+    dormdoor(a, r) {
+      // La porte du dortoir (retour d'essai) : peinte en clair, comme dans un centre de vacances,
+      // un chambranle, une poignée, une plaque ; elle se détache des couchettes même la nuit.
+      const { ctx } = a;
+      ctx.fillStyle = WOOD;
+      rounded(ctx, { x: r.x - 3, y: r.y - 3, w: r.w + 6, h: r.h + 3 }, [3, 3, 0, 0]);
+      ctx.fill();
+      ctx.fillStyle = a.palette.silhouettes ? WHITE_SHADE : '#e4ecef';
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+      ctx.strokeStyle = 'rgba(40, 60, 80, 0.25)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(r.x + 4, r.y + 5, r.w - 8, r.h * 0.38);
+      ctx.strokeRect(r.x + 4, r.y + r.h * 0.52, r.w - 8, r.h * 0.4);
+      ctx.fillStyle = IRON;
+      ctx.fillRect(r.x + r.w - 9, r.y + r.h * 0.48, 6, 2);
+      ctx.fillStyle = NAVY;
+      ctx.fillRect(r.x + r.w / 2 - 4, r.y + 9, 8, 5);
+    },
+    lighthousedoor(a, r) {
+      // La porte du pied du phare, vue de l'intérieur (retour d'essai) : une porte cintrée en bois
+      // cloutée, dans un encadrement de pierre ; un filet de jour passe autour et dessous.
+      const { ctx } = a;
+      ctx.fillStyle = STONE_DARK;
+      rounded(ctx, { x: r.x - 4, y: r.y - 4, w: r.w + 8, h: r.h + 4 }, [
+        r.w / 2 + 4,
+        r.w / 2 + 4,
+        0,
+        0,
+      ]);
+      ctx.fill();
+      ctx.fillStyle = '#fff1c4';
+      rounded(ctx, { x: r.x - 1, y: r.y - 1, w: r.w + 2, h: r.h + 1 }, [
+        r.w / 2 + 1,
+        r.w / 2 + 1,
+        0,
+        0,
+      ]);
+      ctx.fill();
+      ctx.fillStyle = WOOD;
+      rounded(ctx, { x: r.x + 1, y: r.y + 1, w: r.w - 2, h: r.h - 2 }, [
+        r.w / 2 - 1,
+        r.w / 2 - 1,
+        0,
+        0,
+      ]);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,0.12)';
+      for (let x = r.x + 1 + (r.w - 2) / 4; x < r.x + r.w - 2; x += (r.w - 2) / 4) {
+        ctx.fillRect(x, r.y + 6, 1, r.h - 8);
+      }
+      ctx.fillStyle = IRON;
+      for (const y of [r.y + r.h * 0.35, r.y + r.h * 0.75]) {
+        ctx.fillRect(r.x + 2, y, r.w - 4, 1.5);
+      }
+      ctx.beginPath();
+      ctx.arc(r.x + r.w - 7, r.y + r.h * 0.55, 2, 0, Math.PI * 2);
+      ctx.fill();
     },
     lifeguardchair(a, r) {
       // La chaise du maître-nageur : quatre pieds blancs, une échelle, le siège (on s'y pose), le

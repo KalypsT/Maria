@@ -350,6 +350,29 @@ function drawSiteGap(ctx: CanvasRenderingContext2D, w: number, h: number): void 
  * voiture entière, le bout des voisines ; au milieu, la porte grande ouverte, l'intérieur dans
  * l'ombre et une lueur turquoise qui déborde sur le quai. Le bas est au niveau du quai.
  */
+/**
+ * La lueur sous la porte du dortoir (D-105, retour d'essai) : un trait de lumière pâle au ras du
+ * sol, sous la porte (48 px), et son halo qui remonte un peu sur le bas de la porte.
+ */
+function drawDoorGlow(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  const door = 46;
+  const x = (w - door) / 2;
+  const halo = ctx.createLinearGradient(0, h, 0, 0);
+  halo.addColorStop(0, 'rgba(190, 245, 236, 0.55)');
+  halo.addColorStop(1, 'rgba(190, 245, 236, 0)');
+  ctx.fillStyle = halo;
+  ctx.beginPath();
+  ctx.moveTo(0, h);
+  ctx.lineTo(x, h - 2);
+  ctx.lineTo(x, 0);
+  ctx.lineTo(x + door, 0);
+  ctx.lineTo(x + door, h - 2);
+  ctx.lineTo(w, h);
+  ctx.fill();
+  ctx.fillStyle = '#e6fffa';
+  ctx.fillRect(x, h - 2, door, 2);
+}
+
 function drawQuayTrain(ctx: CanvasRenderingContext2D, w: number, h: number, day = false): void {
   const top = 6;
   const car = (x: number, cw: number, radius: number | number[]) => {
@@ -859,6 +882,9 @@ export function drawProp(
       break;
     case 'quay-train-day':
       drawQuayTrain(ctx, w, h, true);
+      break;
+    case 'door-glow':
+      drawDoorGlow(ctx, w, h);
       break;
     case 'height-chart':
     case 'height-chart-grown':

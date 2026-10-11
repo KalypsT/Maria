@@ -17,6 +17,7 @@
 ; @leg: 10,69 6,43 easy
 ; @leg: 6,43 32,11 easy wall-jump
 ; @leg: 6,43 23,4 medium wall-jump
+; @decor: lighthousedoor 9 66 3 4
 ; @decor: lighthousecore 15 44 4 26
 ; @decor: lighthousestair 1 46 31 24
 ; @decor: keeperfloor 1 44 32 2
