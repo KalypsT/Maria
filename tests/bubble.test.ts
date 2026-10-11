@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { THOUGHT_ICONS } from '../src/core/story/story';
 import { bubbleKey, bubbleSide, fitScale } from '../src/core/story/bubble';
+import { PASSERBY_REACTIONS } from '../src/config/passersby';
+import { FINALE_STORY } from '../src/levels/finale/story';
 import { HOUSE_STORY } from '../src/levels/house/story';
+import { NANNY_ENTER, NANNY_STORY } from '../src/levels/nanny/story';
 import { SEA_STORY } from '../src/levels/sea/story';
 import { STATION_STORY } from '../src/levels/station/story';
 import { TRAIN_STORY } from '../src/levels/train/story';
@@ -118,12 +121,7 @@ describe('les bulles de la gare, du train et de la mer (D-165, PR 3)', () => {
       .filter((t) => t.steps.some((s) => s.do === 'thought' && s.icon === 'maria'))
       .map((t) => t.id)
       .sort();
-    // `sea-end-door` et `sea-end-later` mènent chez la nounou (`NANNY_ENTER`) : la PR 4.
-    expect(maria.filter((id) => !id.startsWith('sea-end'))).toEqual([
-      'sea-music-book',
-      'station-roger',
-      'train-pink-kitchen',
-    ]);
+    expect(maria).toEqual(['sea-music-book', 'station-roger', 'train-pink-kitchen']);
     expect(
       all.some((t) => t.steps.some((s) => s.do === 'thought' && s.icon === 'maria-missing')),
     ).toBe(false);
@@ -157,5 +155,53 @@ describe('les bulles de la gare, du train et de la mer (D-165, PR 3)', () => {
       .map((l) => `${l.speaker ?? 'C'}:${l.icon ?? ''}`);
     expect(icons.filter((i) => i === 'C:question')).toEqual([]);
     expect(icons).toContain('teacher-sea:question');
+  });
+});
+
+describe('les bulles de la nounou, du monde de Maria et des passants (D-165, PR 4)', () => {
+  const all = [...NANNY_STORY.triggers, ...FINALE_STORY.triggers];
+  const thoughts = (id: string) => {
+    const t = all.find((x) => x.id === id);
+    if (!t) throw new Error(id);
+    return t.steps.flatMap((s) => (s.do === 'thought' ? [`${s.by ?? 'C'}:${s.icon}`] : []));
+  };
+
+  it('montrent Maria une fois à la fin des mondes étranges, puis dans son monde', () => {
+    expect(NANNY_ENTER.some((s) => s.do === 'thought')).toBe(false);
+    expect(thoughts('nanny-eden')).toEqual(['C:heart', 'C:heart', 'C:maria', 'C:train', 'C:miss']);
+    expect(thoughts('finale-rug')).toEqual(['C:maria', 'C:cradle']);
+    expect(thoughts('finale-cradle')).toEqual(['C:miss', 'C:bed']);
+    expect(thoughts('finale-enter')).toEqual(['C:wonder']);
+  });
+
+  it('le reflet sourit ; les cubes émerveillent', () => {
+    expect(thoughts('nanny-mirror')).toEqual([
+      'C:question',
+      'nanny-reflection:smile',
+      'nanny-reflection-through:shift',
+    ]);
+    // Les cubes au bout des îlots, puis rallumés dans la salle de jeux.
+    const cubes = NANNY_STORY.triggers.filter(
+      (t) => t.id.startsWith('nanny-islet') || t.id.startsWith('nanny-play-'),
+    );
+    expect(cubes).toHaveLength(8);
+    for (const t of cubes) {
+      expect(thoughts(t.id)[0], t.id).toBe('C:wonder');
+    }
+  });
+
+  it('montrent une porte fermée, et les cubes qui manquent à la porte de la sieste', () => {
+    const icons = NANNY_STORY.lockedRooms.flatMap((l) => (l.icon ? [l.icon] : []));
+    expect(icons).not.toContain('question');
+    expect(icons).toContain('locked');
+    expect(icons).toContain('cubes');
+  });
+
+  it('ne donnent jamais de cœur aux passants', () => {
+    const bubbles = Object.values(PASSERBY_REACTIONS).flatMap((r) => (r.bubble ? [r.bubble] : []));
+    expect(bubbles.length).toBe(8);
+    for (const b of bubbles) {
+      expect(['smile', 'wave']).toContain(b);
+    }
   });
 });

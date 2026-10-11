@@ -48,7 +48,7 @@ const ARRIVED = [F.TrainMorning, F.TrainArrived];
 const SETTLED = [...ARRIVED, F.SeaArrived];
 
 describe('la station balnéaire : l’arrivée (D-98)', () => {
-  it('Agir près de la maîtresse : la classe part au centre, dans le noir ; Céleste pense à Maria', () => {
+  it('Agir près de la maîtresse : la classe part au centre, dans le noir ; la camarade sourit', () => {
     const t = trigger('sea-arrival');
     expect(t.room).toBe('sea-station');
     expect(t.when).toEqual({ all: [F.TrainArrived], none: [F.SeaArrived] });
@@ -59,7 +59,9 @@ describe('la station balnéaire : l’arrivée (D-98)', () => {
     expect(room).toMatchObject({ room: 'sea-centre', returnPoint: true });
     expect(order.indexOf('room')).toBeLessThan(order.indexOf('fadeIn'));
     const thoughts = t.steps.filter((s) => s.do === 'thought').map((s) => s.icon);
-    expect(thoughts[thoughts.length - 1]).toBe('maria');
+    // Plus de bulle « Maria » au début d'un niveau (D-165).
+    expect(thoughts[thoughts.length - 1]).toBe('smile');
+    expect(thoughts).not.toContain('maria');
     // Ni parent ni Eden : la maîtresse et la classe seulement.
     const people = HOUSE_STORY.props.filter((p) => p.room.startsWith('sea-')).map((p) => p.kind);
     expect(people.some((k) => k.startsWith('mom') || k.startsWith('dad'))).toBe(false);

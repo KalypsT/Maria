@@ -62,7 +62,7 @@ describe('le dernier niveau : le premier soir, sans Maria (D-139)', () => {
     const eden = trigger('nanny-eden');
     const thoughts = eden.steps.flatMap((s) => (s.do === 'thought' ? [s.icon] : []));
     expect(thoughts).not.toContain('question');
-    expect(thoughts.at(-1)).toBe('maria-missing');
+    expect(thoughts.at(-1)).toBe('miss');
   });
 
   it('le rituel, dans l’ordre : le tapis, le berceau, le lit', () => {

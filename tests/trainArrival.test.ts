@@ -120,7 +120,7 @@ function journey(flags: readonly string[]): Map<Node, Set<Node>> {
 }
 
 describe('le train, PR 6a : le matin, la gare de la mer, le train à quai (D-90)', () => {
-  it('au matin : Agir sur sa couchette après la cuisine rose ; la maîtresse, la mer, l’arrêt, Maria, la gare de la mer', () => {
+  it('au matin : Agir sur sa couchette après la cuisine rose ; la maîtresse, la mer, l’arrêt, la gare de la mer', () => {
     const t = trigger('train-morning');
     expect(t.room).toBe('train-couchettes');
     expect(t.when).toEqual({ all: [F.TrainStrangeDone], none: [F.TrainMorning] });
@@ -128,15 +128,17 @@ describe('le train, PR 6a : le matin, la gare de la mer, le train à quai (D-90)
     const morning = steps.findIndex((s) => s.do === 'flag' && s.id === F.TrainMorning);
     const arrived = steps.findIndex((s) => s.do === 'flag' && s.id === F.TrainArrived);
     const teacher = steps.findIndex((s) => s.do === 'thought' && s.by === 'teacher-morning');
-    const maria = steps.findIndex((s) => s.do === 'thought' && s.icon === 'maria' && !s.by);
+    const sea = steps.findIndex((s) => s.do === 'thought' && s.icon === 'wonder' && !s.by);
     const room = steps.findIndex((s) => s.do === 'room');
     expect(morning).toBeGreaterThan(-1);
     expect(steps[morning - 1]).toMatchObject({ do: 'fadeOut' });
     expect(teacher).toBeGreaterThan(morning);
-    expect(arrived).toBeGreaterThan(teacher);
-    expect(maria).toBeGreaterThan(arrived);
+    // La mer à la fenêtre (l'émerveillement), puis l'arrêt ; plus de bulle « Maria » (D-165).
+    expect(sea).toBeGreaterThan(teacher);
+    expect(arrived).toBeGreaterThan(sea);
+    expect(steps.some((s) => s.do === 'thought' && s.icon === 'maria')).toBe(false);
     expect(steps[room]).toMatchObject({ room: SEA, returnPoint: true });
-    expect(room).toBeGreaterThan(maria);
+    expect(room).toBeGreaterThan(arrived);
   });
 
   it('le matin rallume les lumières ; à l’arrivée, le train ne roule plus ; de jour', () => {

@@ -123,7 +123,8 @@ const TRIGGERS: StoryTrigger[] = [
   },
   {
     // Le berceau, défait depuis le premier matin (D-31) : Céleste le refait, la couverture bien
-    // bordée, pour personne. Elle le regarde, pense à Maria ; puis l'heure du lit.
+    // bordée, pour personne. Elle le regarde : le manque (D-165, sans remontrer Maria juste après le
+    // tapis) ; puis l'heure du lit.
     id: 'finale-cradle',
     room: 'bedroom',
     on: 'interact',
@@ -137,7 +138,7 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'place', ...CRADLE_SIDE, facing: -1 },
       { do: 'fadeIn', ms: S.fadeMs },
       { do: 'wait', ms: S.lookMs },
-      { do: 'thought', icon: 'maria', ms: S.holdMs },
+      { do: 'thought', icon: 'miss', ms: S.holdMs },
       { do: 'wait', ms: S.holdMs + 200 },
       { do: 'thought', icon: 'bed', ms: S.thoughtMs },
     ],
@@ -204,7 +205,8 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.nightBlackMs },
       { do: 'fadeIn', ms: S.nightFadeInMs, shape: 'iris' },
       { do: 'wait', ms: S.lookMs },
-      { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+      // Dans le berceau devenu immense : l'émerveillement (D-165).
+      { do: 'thought', icon: 'wonder', ms: S.thoughtMs },
       { do: 'wait', ms: S.thoughtMs },
     ],
   },
