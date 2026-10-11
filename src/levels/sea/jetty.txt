@@ -25,6 +25,7 @@
 ; @cable: 91 8 73 10
 ; @cable: 62 3 122 6
 ; @sweep: 144 12 20 3
+; @decor: jettygate 210 10 5 6
 ; @decor: harbourmud 1 26 218 1
 ; @decor: jettydeck 1 16 69 2
 ; @decor: jettydeck 112 16 10 2

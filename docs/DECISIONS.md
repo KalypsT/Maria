@@ -2394,7 +2394,7 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
   - **en haut** (`beachstairs`, la promenade) : on lisait des gradins blancs ; maintenant un **portique bleu** entre deux piliers, avec le pictogramme de la plage (un parasol, des vagues) et une **flèche qui descend** ; dans l'ouverture (opaque : la balustrade ne passe plus à travers), des **marches qui s'enfoncent** entre deux rampes (les plus proches larges et claires, les plus loin étroites et dans l'ombre) ;
   - **en bas** (`beachstairsfoot`, la plage) : on lisait un mur rayé ; maintenant la digue et **l'escalier qui la descend en biais**, sous sa rampe, jusqu'à la porte, et **le même portique bleu**, sa flèche vers le haut.
 - **Revue des portes** : une recherche automatique des portes sans dessin ne suffit pas (le dessin de l'escalier du phare « couvrait » sa porte) ; elle signale aussi la porte de la chambre de la sieste (chez la nounou), à regarder lors d'une revue visuelle si l'utilisateur la demande.
-- **Tests** : `seaDoors.test.ts` (chaque porte de la mer a son dessin à sa place ; le dortoir n'a plus la porte sombre) ; `seaNight.test.ts` (la lueur, toute la nuit).
+- **Tests** : `doors.test.ts` (chaque porte de la mer a son dessin à sa place ; le dortoir n'a plus la porte sombre) ; `seaNight.test.ts` (la lueur, toute la nuit).
 - **Vérifié dans Chromium** (844 × 390) : la porte claire et sa lueur la nuit ; le portique et les marches sur la promenade ; l'escalier de la digue sur la plage ; la porte cintrée du phare.
 - **Sauvegarde** : aucun changement.
 
@@ -2415,4 +2415,17 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
 - **Une vitesse par tronçon** (`; @chase-phase:`, déjà prévu par le format) : **10 tuiles/s** jusqu'à la deuxième veilleuse (il gagne sur Céleste, qui court à 9), **8,5** jusqu'à la troisième, **8** jusqu'au bout. Tolérances : **+22 %, +72 %, +18 %** : plus tendu que la tour au premier et au dernier tronçon ; celui du milieu reste une respiration (le croc-en-jambe : le chariot se cogne à la poutre et s'arrête 2,5 s).
 - **Gardé** : le joueur parfait n'est jamais touché (6 tuiles d'avance) ; chaque tronçon prend **63 %, 78 % et 75 %** du temps du chariot (40 à 80 % exigés) ; 50 % plus lent, il est touché. Les réglages communs des poursuites (départ, écart, croc-en-jambe) ne changent pas : la tour, la vague et les parcours d'essai restent les mêmes.
 - **Test** (`trainStrange.test.ts`) : le temps du chariot se calcule avec la vitesse du tronçon.
+- **Sauvegarde** : aucun changement.
+
+### D-164, PR 4 : la revue visuelle des portes
+
+- **Demande de l'utilisateur** : la revue de toutes les portes, après celle du phare.
+- **La méthode** : un nouvel outil DEBUG → **« Portes »** (chaque porte de façade, par salle, sa destination, « Aller » : Céleste devant elle) ; une photo de chacune des **41 portes** dans Chromium (844 × 390), le monde réel avec l'histoire « après la fin », chez la nounou avec « l'effacement dissous » (toutes les portes y existent).
+- **38 portes se voient** : le portillon de l'aire de jeux, la supérette, les deux portes de l'école, la palissade du chantier, le train à quai, les objets trouvés, les portes et les échelles du train, la trappe du toit, la gare de la mer, le centre, l'escalier de la plage (refait, PR 1), le phare (refait, PR 1), l'arche du port, les arches et la trappe de chez la nounou, la porte de la salle de jeux.
+- **Trois portes n'avaient aucun dessin**, maintenant dessinées :
+  - **l'entrée du centre, vue de l'intérieur** (`sea-centre:1`) : Céleste agissait devant un mur nu, entre le portemanteau et une table : une porte claire (`dormdoor`, comme celle du dortoir) ;
+  - **le retour de la jetée vers le port** (`sea-jetty:1`) : l'arche à ampoules du côté du port (`jettygate`) existe maintenant aussi du côté de la jetée ;
+  - **la sortie de la chambre de la sieste** (`nanny-nap:1`) : l'arche de la maison de la nounou (`napexit`), sans dessin dessus.
+- **Un test général** (`doors.test.ts`, renommé de `seaDoors.test.ts`) : chaque porte de façade a un décor qui recouvre sa case, ou un objet de mise en scène posé devant elle (le train à quai). Il aurait trouvé les trois portes ; pas celle du phare (le grand décor de l'escalier la couvrait), d'où les vérifications précises de la mer.
+- **Lisibles mais petites**, à voir sur téléphone : la trappe du toit du train (`roofhatch`).
 - **Sauvegarde** : aucun changement.

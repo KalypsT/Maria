@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { buildZone } from '../src/core/world/zone';
+import { HOUSE_STORY } from '../src/levels/house/story';
 import { HOUSE } from '../src/levels/house/zone';
 
 /**
- * Retour d'essai : les portes de la mer se voient. Chaque porte où l'on agit a son dessin à sa
- * place : la porte du pied du phare (vue de l'intérieur), celle du dortoir, les deux bouts de
- * l'escalier de la plage.
+ * Les portes se voient (D-164, retour d'essai et revue des portes) : chaque porte où l'on agit a son
+ * dessin à sa place. Le test général ne voit pas un grand décor qui couvre une porte sans la dessiner
+ * (l'escalier du phare couvrait la sienne) : d'où les vérifications précises de la mer.
  */
 
 const zone = buildZone(HOUSE);
@@ -46,5 +47,31 @@ describe('les portes de la mer', () => {
     const centre = zone.rooms.get('sea-centre');
     expect(centre?.decor.some((d) => d.kind === 'dormdoor')).toBe(true);
     expect(centre?.decor.some((d) => d.kind === 'door')).toBe(false);
+  });
+});
+
+describe('toutes les portes de façade (la revue des portes, D-164)', () => {
+  it('chaque porte a un dessin qui recouvre sa case, ou un objet posé devant elle', () => {
+    const missing: string[] = [];
+    for (const [roomId, level] of zone.rooms) {
+      for (const d of level.doors) {
+        const drawn = level.decor.some(
+          (decor) =>
+            decor.col <= d.col &&
+            d.col < decor.col + decor.width &&
+            decor.row <= d.row &&
+            d.row < decor.row + decor.height,
+        );
+        // Ou un objet de mise en scène posé devant elle (le train à quai, D-90 : la porte n'existe
+        // qu'avec lui).
+        const prop = HOUSE_STORY.props.some(
+          (p) => p.room === roomId && p.col === d.col && p.row === d.row,
+        );
+        if (!drawn && !prop) {
+          missing.push(`${roomId}:${String(d.id)}`);
+        }
+      }
+    }
+    expect(missing).toEqual([]);
   });
 });

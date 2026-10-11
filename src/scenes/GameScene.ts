@@ -1995,6 +1995,26 @@ export class GameScene extends Phaser.Scene {
     return null;
   }
 
+  /**
+   * Outil de debug (D-164) : Céleste devant une porte de façade (là où l'on arrive par elle), pour
+   * la revue visuelle des portes.
+   */
+  teleportToDoor(room: string, door: number): void {
+    this.teleportToRoom(room);
+    if (this.level.id !== room || !this.level.doors.some((d) => d.id === door)) {
+      return;
+    }
+    const { x, y } = arrivalPosition(
+      this.level,
+      door,
+      this.growth.hitbox.width,
+      this.growth.hitbox.height,
+    );
+    this.player.reset(x, y, this.level);
+    this.feel.reset(this.player);
+    this.resetCamera();
+  }
+
   /** Outil de debug (D-148) : les coquilles de la salle relues dans la sauvegarde. */
   reloadPickups(): void {
     const { abilities, collectibles, seenCollectibles } = this.session.data.progression;

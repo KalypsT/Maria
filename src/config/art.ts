@@ -581,6 +581,8 @@ export const DECOR_KINDS: Readonly<
   beachstairsfoot: { furniture: false },
   // Retour d'essai : la porte du dortoir, celle du pied du phare (vue de l'intérieur).
   dormdoor: { furniture: false },
+  // La revue des portes (D-164) : la sortie de la chambre de la sieste, chez la nounou.
+  napexit: { furniture: false },
   lighthousedoor: { furniture: false },
   lifeguardchair: { furniture: true },
   groynepost: { furniture: true },

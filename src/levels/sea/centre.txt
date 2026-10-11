@@ -16,6 +16,7 @@
 ; @door: 1 5 23
 ; @leg: 5,23 50,11 easy
 ; @leg: 50,11 23,3 medium
+; @decor: dormdoor 4 20 2 4
 ; @decor: colonyfloor 39 12 32 2
 ; @decor: stairs 17 13 23 11
 ; @decor: coatstand 2 18 2 6

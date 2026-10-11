@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Retour d'essai jusqu'à la mer** (D-164, sur `ccr-6f15c4bd-qxtl81`) : plan validé en 3 PR. **PR 1 faite : le phare (sa porte), le dortoir (une porte claire, sa lueur toute la nuit), l'escalier de la plage (sans chaîne, un portique et sa flèche, les marches)** et **PR 2 faite : l'annonce des tunnels (la bouche qui arrive de l'avant, les creux qui s'éclairent)** et **PR 3 faite : le boss du train plus tendu (10, 8,5 puis 8 tuiles/s selon le tronçon)**. **Le retour d'essai est traité.** Suite : essai sur téléphone ; le boss de la mer (pas encore essayé).
+**Retour d'essai jusqu'à la mer** (D-164, sur `ccr-6f15c4bd-qxtl81`) : plan validé en 3 PR. **PR 1 faite : le phare (sa porte), le dortoir (une porte claire, sa lueur toute la nuit), l'escalier de la plage (sans chaîne, un portique et sa flèche, les marches)** et **PR 2 faite : l'annonce des tunnels (la bouche qui arrive de l'avant, les creux qui s'éclairent)** et **PR 3 faite : le boss du train plus tendu (10, 8,5 puis 8 tuiles/s selon le tronçon)**. **Le retour d'essai est traité.** Puis **PR 4 faite : la revue visuelle des 41 portes** (trois portes sans dessin, maintenant dessinées : l'entrée du centre vue de l'intérieur, le retour de la jetée, la sortie de la chambre de la sieste ; DEBUG → « Portes »). Suite : essai sur téléphone ; le boss de la mer (pas encore essayé).
 
 **Le voyage rapide** (D-163, demande de l'utilisateur, sur `ccr-6f15c4bd-qxtl81`) : les veilleuses qui se répondent, une veilleuse principale par niveau (six, le train compris), turquoise, depuis n'importe quelle lanterne allumée du monde réel, débloquée après le monde étrange du niveau. Plan validé en 2 PR. **PR 1 faite : le système** (les règles, le voyage, DEBUG → « Voyage ») et **PR 2 faite : dans le jeu** (la veilleuse turquoise, l'étincelle d'Agir à une lanterne, la carte du sac en mode voyage, Céleste qui s'assoit, le noir, l'arrivée assise). **Le voyage rapide est complet.** Suite : essai sur téléphone (les durées, la portée de 2 tuiles, la veilleuse turquoise et le fil discret).
 
@@ -49,6 +49,11 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Retour d'essai, PR 4 : la revue des portes (D-164)
+
+- Les 41 portes de façade photographiées ; trois sans dessin, maintenant dessinées (l'entrée du centre, le retour de la jetée, la sortie de la chambre de la sieste) ; un test général ; DEBUG → « Portes ».
+- [ ] À vérifier sur téléphone : la trappe du toit du train se voit-elle ? Les trois nouvelles portes.
 
 ### Retour d'essai, PR 3 : le boss du train plus tendu (D-164)
 
