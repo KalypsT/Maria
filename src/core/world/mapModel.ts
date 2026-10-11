@@ -31,6 +31,11 @@ export interface MapRoom {
   readonly seenTreasures: readonly MapPoint[];
   /** Icône de la salle (`; @icon:`), dessinée par la carte. */
   readonly icon: string | null;
+  /**
+   * La veilleuse principale débloquée de la salle (D-163), turquoise ; `open` : on peut y aller
+   * d'ici (le voyage, depuis une lanterne).
+   */
+  readonly travel: (MapPoint & { readonly lantern: string; readonly open: boolean }) | null;
 }
 
 export interface MapLink {
@@ -76,6 +81,14 @@ export interface MapProgress {
     readonly col: number;
     readonly row: number;
     readonly color: string;
+  }[];
+  /** Les veilleuses principales débloquées (D-163) : leur salle, leur tuile, si on peut y aller. */
+  readonly travel?: readonly {
+    readonly room: string;
+    readonly col: number;
+    readonly row: number;
+    readonly lantern: string;
+    readonly open: boolean;
   }[];
 }
 
@@ -176,7 +189,10 @@ export function buildMapModel(zone: Zone, progress: MapProgress, page: string = 
         cubes.push({ ...center, color: cube.color });
       }
     }
+    const point = isVisited ? progress.travel?.find((t) => t.room === id) : undefined;
+    const center = point ? at(id, (point.col + 0.5) * T, (point.row + 0.5) * T) : null;
     rooms.push({
+      travel: point && center ? { ...center, lantern: point.lantern, open: point.open } : null,
       id,
       name: level.meta.name ?? id,
       box,

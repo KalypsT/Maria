@@ -91,6 +91,21 @@ import {
   type Zone,
 } from '../core/world/zone';
 import { shellTally, zoneShells } from '../core/world/shells';
+import {
+  departureProblem,
+  litLanternNear,
+  nearLantern,
+  travelArrival,
+  travelOffered,
+  travelOptions,
+  travelPoints,
+  travelScript,
+  travelUnlocked,
+  type DepartureProblem,
+  type TravelOption,
+  type TravelPoint,
+} from '../core/world/travel';
+import { TRAVEL_LANTERNS } from '../config/travel';
 import { FlashbackView } from '../ui/FlashbackView';
 import { Hud } from '../ui/Hud';
 import { showEndScreen } from '../ui/EndScreen';
@@ -909,7 +924,10 @@ export class GameScene extends Phaser.Scene {
       const story = this.story;
       const seen = this.zone && !story.busy ? doorAt(this.level, this.player.box) : 0;
       const door = seen !== 0 && story.doorHidden(this.level.id, seen) ? 0 : seen;
-      const near = story.interactable >= 0 || door !== 0;
+      // Le voyage rapide (D-163) : près d'une lanterne allumée, si aucun déclencheur ni porte.
+      const lantern = this.zone && !story.busy && door === 0 ? this.travelLanternNear() : -1;
+      const travel = lantern >= 0 && story.interactable < 0;
+      const near = story.interactable >= 0 || door !== 0 || travel;
       const interact = this.controls.consumePressed('Interact');
       const action = this.controls.consumePressed('Attack');
       const pressed = interact || (near && action);
@@ -922,6 +940,13 @@ export class GameScene extends Phaser.Scene {
       this.nearDoor = story.interactable < 0 && !story.busy ? door : 0;
       if (this.nearDoor !== 0 && pressed && this.player.grounded) {
         this.openDoor(this.nearDoor);
+      }
+      this.nearTravel = travel && !story.busy ? lantern : -1;
+      if (this.nearTravel >= 0 && pressed && this.player.grounded) {
+        // La carte du sac, en mode voyage : le jeu s'arrête jusqu'au choix.
+        this.setPaused(true, 'travel');
+        this.freezeInterpolation();
+        break;
       }
       const locked = story.locked;
       input.moveX = locked ? 0 : this.controls.moveX;
@@ -1050,6 +1075,7 @@ export class GameScene extends Phaser.Scene {
     );
     this.shiftView.render(this.time.now, this.puppet.x, this.puppet.y - box.height / 2, this.erase);
     this.lullaby.render(this.time.now, this.erase);
+    this.worldView.travelLantern = this.roomTravelLantern();
     this.worldView.render();
     this.hideouts.update(box, this.game.loop.delta);
     this.noticeShells();
@@ -1231,6 +1257,19 @@ export class GameScene extends Phaser.Scene {
           ? [{ room: cube.room, ...cube.at, color: TOWER_CUBES[k]?.color ?? '#ec8fab' }]
           : [],
       ),
+      // Les veilleuses principales débloquées (D-163) ; celles où l'on peut aller d'ici.
+      travel: (() => {
+        const { options, problem } = this.travelState();
+        return options
+          .filter((o) => o.state !== 'locked')
+          .map(({ point, state }) => ({
+            room: point.room,
+            col: point.col,
+            row: point.row,
+            lantern: point.lantern,
+            open: problem === null && state === 'open',
+          }));
+      })(),
     };
     // Les lieux visités (D-160) : une page de carte chacun, qu'on feuillette.
     const visited = new Set(
@@ -1376,7 +1415,16 @@ export class GameScene extends Phaser.Scene {
         void this.session.persist();
       }
       const content = this.notebookContent();
-      this.backpack.open(openingPage(trigger, content.startPlace !== null), content);
+      this.backpack.open(
+        openingPage(trigger, content.startPlace !== null),
+        content,
+        trigger === 'travel'
+          ? (lantern) => {
+              this.setPaused(false);
+              this.travelTo(lantern);
+            }
+          : null,
+      );
       // Le sac ouvert : ses trésors sont connus, son étincelle s'éteint (D-162).
       for (const id of this.session.data.progression.memories) {
         this.bagKnown.add(id);
@@ -1819,6 +1867,128 @@ export class GameScene extends Phaser.Scene {
     );
     this.feel.reset(this.player);
     this.resetCamera();
+  }
+
+  /** Les veilleuses principales du voyage rapide (D-163), lues une fois dans la zone. */
+  private travelPointsCache: TravelPoint[] | null = null;
+  /** Le voyage proposé à la lanterne `index` de la salle `room`, pour ces étapes (D-163). */
+  private readonly travelCache = { room: '', index: -1, flags: -1, offered: false };
+  /** La lanterne d'où partir en voyage, à portée de Céleste (index dans la salle, -1 : aucune). */
+  private nearTravel = -1;
+
+  private travelPoints(zone: Zone): TravelPoint[] {
+    this.travelPointsCache ??= travelPoints(zone, TRAVEL_LANTERNS);
+    return this.travelPointsCache;
+  }
+
+  /**
+   * Le voyage rapide (D-163) : chaque veilleuse principale et son état depuis la salle de Céleste,
+   * et ce qui l'empêche de partir d'ici (null : rien). Hors d'une zone : aucune veilleuse.
+   */
+  travelState(): { options: TravelOption[]; problem: DepartureProblem | null } {
+    const zone = this.zone;
+    const flags = this.story.flags;
+    const lit = this.session.data.activatedCheckpoints;
+    const lantern = zone
+      ? litLanternNear(this.level, this.player.box, (key) => lit.includes(key))
+      : null;
+    const problem = departureProblem({
+      level: zone ? this.level : null,
+      busy:
+        this.story.busy ||
+        this.transition.leaving ||
+        this.run.fainting ||
+        this.run.splashing ||
+        this.memoryPlay !== null ||
+        this.celesteGone ||
+        this.ended,
+      flags,
+      lantern,
+    });
+    const options = zone
+      ? travelOptions(zone, this.travelPoints(zone), this.level.id, flags, (room, exit) =>
+          this.story.exitsLocked(room, exit),
+        )
+      : [];
+    return { options, problem };
+  }
+
+  /**
+   * Voyage vers une veilleuse principale (D-163) : elle devient le point de retour (allumée,
+   * sauvegardé) et Céleste y réapparaît, comme après un évanouissement. `force` (debug) : sans
+   * vérifier les règles. Faux si le voyage est refusé.
+   */
+  travelTo(lantern: string, force = false): boolean {
+    const zone = this.zone;
+    const point = zone ? this.travelPoints(zone).find((p) => p.lantern === lantern) : undefined;
+    if (!point) {
+      return false;
+    }
+    if (!force) {
+      const { options, problem } = this.travelState();
+      if (problem !== null || options.find((o) => o.point === point)?.state !== 'open') {
+        return false;
+      }
+    }
+    const room = zoneRoom(point.room);
+    if (!room) {
+      return false;
+    }
+    if (force) {
+      this.abortMemory();
+      this.story.cancel();
+    }
+    // Céleste s'assoit, le noir ; elle arrive assise à côté de la veilleuse, son point de retour.
+    this.story.run(travelScript(point, travelArrival(room.level, point)));
+    return true;
+  }
+
+  /**
+   * La lanterne allumée près de Céleste d'où partir en voyage (D-163) : son index dans la salle,
+   * ou -1. Le voyage doit être proposé (`travelOffered`), ce qui n'est recalculé qu'en changeant de
+   * lanterne, de salle ou d'étapes. Sans allocation tant que rien ne change.
+   */
+  private travelLanternNear(): number {
+    const checkpoints = this.run.checkpoints;
+    const box = this.player.box;
+    let index = -1;
+    for (let i = 0; i < checkpoints.length; i++) {
+      const c = checkpoints[i];
+      if (c?.activated && nearLantern(c.col, c.row, box)) {
+        index = i;
+        break;
+      }
+    }
+    if (index < 0) {
+      return -1;
+    }
+    const cache = this.travelCache;
+    if (
+      cache.room !== this.level.id ||
+      cache.index !== index ||
+      cache.flags !== this.story.flags.size
+    ) {
+      cache.room = this.level.id;
+      cache.index = index;
+      cache.flags = this.story.flags.size;
+      const { options, problem } = this.travelState();
+      cache.offered = problem === null && travelOffered(options);
+    }
+    return cache.offered ? index : -1;
+  }
+
+  /** La veilleuse principale débloquée de la salle (D-163), turquoise ; null sinon. */
+  private roomTravelLantern(): string | null {
+    const zone = this.zone;
+    if (!zone) {
+      return null;
+    }
+    for (const point of this.travelPoints(zone)) {
+      if (point.room === this.level.id && travelUnlocked(point, this.story.flags)) {
+        return point.lantern;
+      }
+    }
+    return null;
   }
 
   /** Outil de debug (D-148) : les coquilles de la salle relues dans la sauvegarde. */
@@ -2816,7 +2986,7 @@ export class GameScene extends Phaser.Scene {
     }
     const near = memory
       ? memory.interactable >= 0
-      : (story.interactable >= 0 || this.nearDoor !== 0) && !story.busy;
+      : (story.interactable >= 0 || this.nearDoor !== 0 || this.nearTravel >= 0) && !story.busy;
     this.touch?.setLabel('Attack', near ? 'Agir' : null);
     const door = this.level.doors.find((d) => d.id === this.nearDoor);
     const mark = this.storyView.doorMark;
@@ -2824,7 +2994,13 @@ export class GameScene extends Phaser.Scene {
       // Souvenir jouable : l'étincelle montre l'action à faire.
       this.storyView.doorMark = memory.markShown ? (memory.current?.mark ?? null) : null;
     } else if (!door) {
-      this.storyView.doorMark = null;
+      // Une lanterne d'où partir (D-163) : l'étincelle au-dessus d'elle.
+      const lamp = this.nearTravel >= 0 ? this.run.checkpoints[this.nearTravel] : undefined;
+      if (!lamp || story.busy) {
+        this.storyView.doorMark = null;
+      } else if (mark?.col !== lamp.col || mark.row !== lamp.row - 2) {
+        this.storyView.doorMark = { col: lamp.col, row: lamp.row - 2 };
+      }
     } else if (mark?.col !== door.col || mark.row !== door.row - 3) {
       this.storyView.doorMark = { col: door.col, row: door.row - 3 };
     }

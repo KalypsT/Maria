@@ -249,6 +249,11 @@ export class StoryDirector {
     }
   }
 
+  /** Lance un script hors des déclencheurs de l'histoire (le voyage rapide, D-163). */
+  run(trigger: StoryTrigger): void {
+    this.start(trigger);
+  }
+
   private ready(trigger: StoryTrigger, box: Box): boolean {
     const area = trigger.area;
     return area !== undefined && areaOverlaps(area, box, TILE_SIZE) && this.check(trigger.when);

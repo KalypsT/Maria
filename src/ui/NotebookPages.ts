@@ -10,9 +10,12 @@ import type { TreasureNames } from './TreasuresPage';
 import type { NotebookFigures } from '../core/world/notebookFigures';
 import { formatPlayTime } from '../core/save/stats';
 import { drawFigureIcon, type FigureIcon } from '../scenes/art/figureArt';
+import { TRAVEL } from '../config/travel';
 
 /** Taille d'une coquille sur la carte (px CSS, D-148). */
 const MAP_SHELL_PX = 14;
+/** Rayon (px CSS) dans lequel un toucher choisit une veilleuse du voyage (D-163). */
+const TRAVEL_HIT_PX = 22;
 /**
  * La page d'un lieu dont toutes les coquilles sont trouvées se colorie (D-148) : un lavis par salle,
  * dans les couleurs des crayons de Céleste.
@@ -92,11 +95,53 @@ export class NotebookPages {
   /** La coquille fournie (D-148), pour la carte ; dessinée par le code tant qu'elle manque. */
   private readonly shellImage = new Image();
   private bounds: MapBox = { x: 0, y: 0, w: 1, h: 1 };
+  /** Le voyage rapide (D-163) : une veilleuse touchée deux fois y emmène Céleste ; null sinon. */
+  private travel: ((lantern: string) => void) | null = null;
+  /** La veilleuse touchée une première fois (null : aucune). */
+  private travelPick: string | null = null;
+  /** Les veilleuses où l'on peut aller, à leur place sur la page dessinée (px CSS). */
+  private travelSpots: { x: number; y: number; lantern: string }[] = [];
 
   constructor() {
     this.shellImage.src = `art/${ART_IMAGES['shell'] ?? 'shell.png'}`;
     this.canvas = document.createElement('canvas');
     this.canvas.className = 'notebook-canvas';
+    this.canvas.addEventListener('click', (event) => {
+      this.pickTravel(event);
+    });
+  }
+
+  /**
+   * Le voyage rapide (D-163) : la carte s'ouvre depuis une lanterne, les veilleuses où l'on peut
+   * aller palpitent ; un premier toucher en choisit une, un second y emmène Céleste. null : la
+   * carte ordinaire.
+   */
+  setTravel(onTravel: ((lantern: string) => void) | null): void {
+    this.travel = onTravel;
+    this.travelPick = null;
+  }
+
+  private pickTravel(event: MouseEvent): void {
+    if (!this.travel || this.page !== 'map') {
+      return;
+    }
+    const rect = this.canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    let best: string | null = null;
+    let distance = TRAVEL_HIT_PX;
+    for (const spot of this.travelSpots) {
+      const d = Math.hypot(spot.x - x, spot.y - y);
+      if (d <= distance) {
+        best = spot.lantern;
+        distance = d;
+      }
+    }
+    if (best !== null && best === this.travelPick) {
+      this.travel(best);
+      return;
+    }
+    this.travelPick = best;
   }
 
   /** Le contenu de cette ouverture du sac (les souvenirs, les capacités, les chiffres). */
@@ -345,6 +390,7 @@ export class NotebookPages {
     }
 
     // Veilleuses, coquilles, Céleste.
+    this.travelSpots.length = 0;
     for (const room of model.rooms) {
       if (room.fresh && drawIn < 1) {
         continue;
@@ -366,6 +412,40 @@ export class NotebookPages {
           ctx.beginPath();
           ctx.arc(p.x, p.y, 7, 0, Math.PI * 2);
           ctx.stroke();
+        }
+      }
+      // La veilleuse principale débloquée (D-163), turquoise ; depuis une lanterne, celles où l'on
+      // peut aller palpitent, et la veilleuse choisie est cerclée.
+      if (room.travel) {
+        const p = px(room.travel);
+        const open = this.travel !== null && room.travel.open;
+        const beat = open ? 0.5 + 0.5 * Math.sin(elapsedMs / 260) : 0;
+        const r = 9 + 5 * beat;
+        const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
+        glow.addColorStop(0, `${TRAVEL.mapColor}cc`);
+        glow.addColorStop(1, `${TRAVEL.mapColor}00`);
+        ctx.fillStyle = glow;
+        ctx.fillRect(p.x - r, p.y - r, 2 * r, 2 * r);
+        ctx.fillStyle = TRAVEL.mapColor;
+        ctx.strokeStyle = ink;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        if (open) {
+          this.travelSpots.push({ x: p.x, y: p.y, lantern: room.travel.lantern });
+        }
+        if (open && this.travelPick === room.travel.lantern) {
+          ctx.strokeStyle = TRAVEL.mapColor;
+          ctx.lineWidth = 2.5;
+          ctx.setLineDash([4, 3]);
+          ctx.lineDashOffset = -elapsedMs / 60;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 14, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.lineDashOffset = 0;
         }
       }
       // Les coquilles (D-148) : trouvées, dessinées ; vues mais pas prises, en pointillés.
