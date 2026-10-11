@@ -2339,3 +2339,13 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
 - **Sauvegarde** (validé par l'utilisateur) : `progression.viewedTreasures`, optionnelle, vide dans une sauvegarde plus ancienne (aucune migration, testé). Une partie en cours verra donc ses trésors déjà trouvés « nouveaux » une fois.
 - Pur et testé (`treasureBook.ts`) : les familles, les compteurs, l'indice, les disques secrets, « nouveau », l'étincelle. Debug : « Trouver le trésor suivant ».
 - Vérifié dans Chromium (844 × 390) : l'étincelle du sac, la page (compteurs, total, familles, coquilles, disques), les indices, les fiches (manquant, trouvé, disque), plus de « nouveau » à l'ouverture suivante.
+
+## D-163 — Le voyage rapide (orientations, avant le plan)
+
+- **Demande de l'utilisateur** : un voyage rapide entre les niveaux, cohérent, pas trop abusif et pratique (repoussé par D-124 et D-148, à penser avec l'histoire et les trouvailles). **Changement de la boucle de jeu, signalé et accepté.**
+- **Constat** : le monde est une seule chaîne de salles (chambre → … → rue → gare → train → gare de la mer) ; de la chambre à la gare de la mer, une quinzaine de salles et environ 1 100 tuiles, 2 min de course pure, 3 à 4 min en vrai (estimé, pas mesuré). Le coût vient surtout des **revisites** (coquilles de la glissade dans la maison, le jardin, la rue et la gare, ramassées depuis le train ou la mer) et de l'après-fin.
+- **Choix de l'utilisateur** : **les veilleuses qui se répondent** (proposition A ; écartés : le cahier seul, les portes turquoise et le couloir des lieux, un véhicule) :
+  - **une seule veilleuse de voyage par niveau**, qui devient **la veilleuse principale** du niveau ; elle **devient turquoise** dans le monde réel (un peu d'étrange resté accroché, jamais expliqué) ;
+  - le train a la sienne (réponse « oui pour l'entraînement », comprise comme « oui pour le train », à confirmer) ;
+  - les règles proposées, acceptées : on ne voyage que **vers une veilleuse principale débloquée**, **depuis n'importe quelle lanterne allumée** du monde réel ; **déblocage lieu par lieu, une fois son monde étrange traversé** ; jamais dans un monde étrange, une poursuite, une scène, ni quand l'histoire ferme les portes ; jamais vers un lieu sans retour (le passage d'ombres, chez la nounou, le monde de Maria) ; la veilleuse d'arrivée devient le point de retour ; le déblocage déduit des étapes de l'histoire (aucune migration de sauvegarde).
+- **À valider** : le choix des veilleuses principales, le geste, le plan en PR (proposés à l'utilisateur).
