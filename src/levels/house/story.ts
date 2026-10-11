@@ -1350,16 +1350,10 @@ export const HOUSE_STORY: StoryData = {
     ...FINALE_STORY.lockedRooms,
   ],
   omens: [
-    // L'oculus de l'école (D-64) : en montant les étagères, tant que la fin n'est pas vécue.
-    { room: 'school', when: { none: [F.SchoolDone] }, col: 46, row: 7, radius: 10 },
-    // Le lendemain, près de la palissade ouverte du chantier : la suite (jusqu'à la gare, D-66).
-    {
-      room: 'street',
-      when: { all: [F.StreetMorning], none: [F.StationArrived] },
-      col: 167,
-      row: 26,
-      radius: 12,
-    },
+    // L'oculus de l'école (D-64) : en montant les étagères, jusqu'au premier passage dans l'école
+    // étrange (D-163 : une fois passée, plus d'ombre). Le passage vers la gare, dans la rue, n'a pas
+    // de présage : la gare n'est pas un monde étrange (D-163).
+    { room: 'school', when: { none: [F.SchoolStrange] }, col: 46, row: 7, radius: 10 },
     // Derrière la haie (D-49) : en approchant du trou, une fois le saut mural trouvé.
     {
       room: 'garden-tree',

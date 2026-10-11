@@ -622,3 +622,32 @@ Si l'image plaît mais se lit mal en petit, demander dans la même conversation 
 same style, but simpler: thicker outline, fewer details, bigger pocket and button.`
 
 Je fais ensuite le détourage et l'intégration ; en attendant, le jeu dessine le sac par le code.
+
+## D-163 : les images des capacités (proposition, à valider)
+
+La page « Mes capacités » du sac montre aujourd'hui un petit pictogramme dessiné par le code pour
+chaque capacité. Proposition : **Céleste en train de faire le geste**, une image par capacité,
+dans le style de l'écran de départ. Dans le sac, chaque image fait environ 60 à 80 px : une pose
+franche, lisible en petit, sans décor (seulement l'élément du geste : un rebord, un mur, un câble…).
+
+Une seule conversation, joindre `celeste.png` au premier message. Début de chaque message :
+
+```
+Using the attached image as the strict reference, draw the SAME little girl: same face, same round
+pink glasses, same hair, same clothes, same children's picture-book illustration style, same colors,
+same level of finish. Full body, side view, a clear and simple pose that stays readable when very
+small. Only the element named below, drawn simply in the same style; no other background. Plain pure
+white background, no shadow on the ground, no text. Square format, high resolution.
+```
+
+| Fichier                | Fin du message                                                                                                                                                                               |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ability-climb.png`    | `Pose: she hangs by both hands from the edge of a high wooden ledge and pulls herself up, one knee raised, determined.`                                                                      |
+| `ability-wall.png`     | `Pose: she kicks off a tall plain wall with one foot, leaping away from it in mid-air, arms open, a few small motion lines between her foot and the wall.`                                   |
+| `ability-umbrella.png` | `Pose: she floats gently down in mid-air, both hands holding an open pink umbrella above her head, legs dangling, a calm smile.`                                                             |
+| `ability-hook.png`     | `Pose: she slides along a taut cable hanging under it, holding her pink umbrella whose curved handle is hooked over the cable, legs swinging forward, delighted.`                            |
+| `ability-slide.png`    | `Pose: she slides fast along the ground on her back and side, feet first, under a low bar just above her, arms tucked, hair flying behind.`                                                  |
+| `ability-shift.png`    | `Pose: she stands with one hand reaching forward; the front half of her body is normal, the back half fades into a pale turquoise outline with a few sparkles, as if passing into a memory.` |
+
+Je fais ensuite le détourage et l'intégration ; une capacité pas encore acquise reste une case vide
+en pointillés.

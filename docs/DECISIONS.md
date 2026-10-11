@@ -2339,3 +2339,12 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
 - **Sauvegarde** (validé par l'utilisateur) : `progression.viewedTreasures`, optionnelle, vide dans une sauvegarde plus ancienne (aucune migration, testé). Une partie en cours verra donc ses trésors déjà trouvés « nouveaux » une fois.
 - Pur et testé (`treasureBook.ts`) : les familles, les compteurs, l'indice, les disques secrets, « nouveau », l'étincelle. Debug : « Trouver le trésor suivant ».
 - Vérifié dans Chromium (844 × 390) : l'étincelle du sac, la page (compteurs, total, familles, coquilles, disques), les indices, les fiches (manquant, trouvé, disque), plus de « nouveau » à l'ouverture suivante.
+
+## D-163 — Retour d'essai (suite) : les fichiers de l'utilisateur, la cheminée de l'école étrange, le passage vers la gare
+
+- **Fichiers de l'utilisateur** : **l'image du sac** (un sac licorne rose), détourée (`public/art/backpack.png`, 256 px), sur le bouton du menu à la place du dessin par le code ; le **jingle des trouvailles** (`found`) remplacé ; **l'allumage d'une lanterne** (`checkpoint`) : le fichier contenait deux fois le bruitage, seul le premier est gardé (0,45 s) ; **quatre pas sur le bois** (`step-wood-1` à `4`), tirés d'une série. Préparés par `audio:prepare`.
+- **La cheminée de l'école étrange** (retour : « maintenant simple, une difficulté intermédiaire ? ») : **étroite en bas** (4 tuiles, 8 rangées), **une marche**, puis **plus large en haut** (5 tuiles, 7 rangées). Mesuré par l'analyse : **133 ms, moyen** (5 tuiles partout : 83 ms, difficile ; 4 tuiles partout : 375 ms, facile). La marche est un palier : un saut raté en haut y fait retomber, pas au pied de la cheminée. La salle reste difficile après la veilleuse (les chaises, l'Educaville).
+- **Le passage vers la gare** (retour : « ressemble à un monde étrange ») : plus de présage près de la palissade ouverte de la rue ; dans l'ouverture, le passage dans la lumière du matin, plus la lueur turquoise. La gare est le monde réel.
+- **L'ombre du monde étrange dans le quartier** (retour : « la retirer une fois passé ») : le présage de l'oculus de l'école s'arrête au premier passage dans l'école étrange (avant : à la fin de l'école étrange).
+- **Les images des capacités** : proposition de six prompts (Céleste qui fait chaque geste), dans `docs/PROMPTS_PERSONNAGES.md`, à valider par l'utilisateur.
+- Tests : `school.test.ts` (plus de présage dans la rue). Vérifié dans Chromium : la palissade ouverte le lendemain de l'école.

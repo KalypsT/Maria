@@ -317,20 +317,22 @@ function drawFarCrane(ctx: CanvasRenderingContext2D, w: number, h: number): void
 }
 
 /**
- * Le lendemain matin (D-64) : la porte de la palissade du chantier est ouverte ; dedans, l'ombre
- * et un reflet turquoise. Le battant (à gauche) est rabattu contre la palissade.
+ * Le lendemain matin (D-64) : la porte de la palissade du chantier est ouverte ; dedans, le passage
+ * vers la gare, dans la lumière du matin. Le battant (à gauche) est rabattu contre la palissade.
  */
 function drawSiteGap(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   const door = 16;
+  // Derrière la palissade, le passage vers la gare, dans la lumière du matin (D-163 : pas la lueur
+  // turquoise d'un monde étrange, la gare est le monde réel).
   const inside = ctx.createLinearGradient(door, 0, w, 0);
-  inside.addColorStop(0, '#20262f');
-  inside.addColorStop(1, '#2c3440');
+  inside.addColorStop(0, '#5d5a55');
+  inside.addColorStop(1, '#8a8478');
   ctx.fillStyle = inside;
   ctx.fillRect(door, 0, w - door, h);
-  const glimmer = ctx.createRadialGradient(door + 36, h * 0.55, 0, door + 36, h * 0.55, 30);
-  glimmer.addColorStop(0, 'rgba(120, 236, 220, 0.55)');
-  glimmer.addColorStop(1, 'rgba(120, 236, 220, 0)');
-  ctx.fillStyle = glimmer;
+  const daylight = ctx.createRadialGradient(door + 36, h * 0.55, 0, door + 36, h * 0.55, 34);
+  daylight.addColorStop(0, 'rgba(255, 236, 190, 0.6)');
+  daylight.addColorStop(1, 'rgba(255, 236, 190, 0)');
+  ctx.fillStyle = daylight;
   ctx.fillRect(door, 0, w - door, h);
   // Le battant ouvert, vu par la tranche.
   ctx.fillStyle = '#9a7352';
