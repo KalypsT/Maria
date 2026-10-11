@@ -8,6 +8,8 @@ import { drawShellFallback, drawShellGlint, shellSeed } from './art/shellArt';
 
 const CHECKPOINT_OFF = 'checkpoint-off-placeholder';
 const CHECKPOINT_ON = 'checkpoint-on-placeholder';
+const TRAVEL_OFF = 'travel-lamp-off';
+const TRAVEL_ON = 'travel-lamp-on';
 const PICKUP = 'ability-pickup-placeholder';
 const SHELL = 'shell-pickup';
 const SHELL_GLINT = 'shell-glint';
@@ -37,6 +39,19 @@ const STRANGE_LAMP: typeof REAL_LAMP = {
   cap: '#23343e',
   capLit: '#5ee6d2',
   dots: '#3a525c',
+  dotsLit: '#effffb',
+};
+
+/**
+ * La veilleuse principale débloquée (le voyage rapide, D-163) : la veilleuse du monde réel, son
+ * chapeau turquoise comme celles du monde étrange (un peu d'étrange resté accroché). PLACEHOLDER.
+ */
+const TRAVEL_LAMP: typeof REAL_LAMP = {
+  ...REAL_LAMP,
+  stemLit: '#d8fff6',
+  cap: '#4fa79b',
+  capLit: '#5ee6d2',
+  dots: '#a9ddd4',
   dotsLit: '#effffb',
 };
 
@@ -76,6 +91,8 @@ export class WorldView {
   private artScale = 1;
   /** Monde étrange (D-34) : veilleuse turquoise. */
   private strange = false;
+  /** Nom de la veilleuse principale débloquée de la salle (D-163), turquoise ; null sinon. */
+  travelLantern: string | null = null;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -198,7 +215,14 @@ export class WorldView {
       if (!sprite || !checkpoint) {
         continue;
       }
-      const key = checkpoint.activated ? CHECKPOINT_ON : CHECKPOINT_OFF;
+      const key =
+        checkpoint.id === this.travelLantern
+          ? checkpoint.activated
+            ? TRAVEL_ON
+            : TRAVEL_OFF
+          : checkpoint.activated
+            ? CHECKPOINT_ON
+            : CHECKPOINT_OFF;
       if (sprite.texture.key !== key) {
         sprite.setTexture(key);
       }
@@ -297,11 +321,13 @@ export class WorldView {
     make(SHELL_GLINT, SHELL_ART.glintPx, SHELL_ART.glintPx, (ctx) => {
       drawShellGlint(ctx, SHELL_ART.glintPx);
     });
-    for (const [key, lit] of [
-      [CHECKPOINT_OFF, false],
-      [CHECKPOINT_ON, true],
+    for (const [key, lit, travel] of [
+      [CHECKPOINT_OFF, false, false],
+      [CHECKPOINT_ON, true, false],
+      [TRAVEL_OFF, false, true],
+      [TRAVEL_ON, true, true],
     ] as const) {
-      const c = this.strange ? STRANGE_LAMP : REAL_LAMP;
+      const c = travel ? TRAVEL_LAMP : this.strange ? STRANGE_LAMP : REAL_LAMP;
       make(key, WIDTH, HEIGHT, (ctx) => {
         // Pied en bois, chapeau de champignon, petite fenêtre ronde.
         ctx.fillStyle = c.foot;

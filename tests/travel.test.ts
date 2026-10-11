@@ -6,12 +6,18 @@ import {
   departureProblem,
   litLanternNear,
   reachableRooms,
+  travelArrival,
   travelBlocked,
+  travelOffered,
   travelOptions,
   travelPoints,
+  travelScript,
   type TravelState,
 } from '../src/core/world/travel';
-import { buildZone, isMappedRoom, isStrangeRoom } from '../src/core/world/zone';
+import { buildZone, isMappedRoom, isStrangeRoom, returnLantern } from '../src/core/world/zone';
+import { Tile, tileAt } from '../src/core/level/LevelData';
+import { storyProblems } from '../src/core/story/storyProblems';
+import { openingPage } from '../src/core/world/backpack';
 import { TILE_SIZE as T } from '../src/config/display';
 import { HOUSE } from '../src/levels/house/zone';
 import { HOUSE_STORY } from '../src/levels/house/story';
@@ -221,5 +227,54 @@ describe('le départ', () => {
       'story',
     );
     expect(departureProblem({ level: bedroom, busy: false, flags, lantern: null })).toBe('lantern');
+  });
+});
+
+describe('le voyage dans le jeu (PR 2)', () => {
+  it('Céleste arrive debout à côté de chaque veilleuse, qui devient le point de retour', () => {
+    for (const point of points) {
+      const level = room(point.room);
+      const at = travelArrival(level, point);
+      expect(Math.abs(at.col - point.col), point.lantern).toBeGreaterThan(0);
+      expect(tileAt(level, at.col, at.row), point.lantern).toBe(Tile.Empty);
+      expect(tileAt(level, at.col, at.row - 1), point.lantern).toBe(Tile.Empty);
+      expect([Tile.Solid, Tile.OneWay], point.lantern).toContain(tileAt(level, at.col, at.row + 1));
+      // Tournée vers la veilleuse.
+      expect(Math.sign(point.col - at.col), point.lantern).toBe(at.facing);
+      expect(returnLantern(level, at.col, at.row)?.name, point.lantern).toBe(point.lantern);
+    }
+  });
+
+  it('le script : assise, le noir, la salle et son point de retour, l\u2019image revient', () => {
+    const triggers = points.map((point) =>
+      travelScript(point, travelArrival(room(point.room), point)),
+    );
+    const steps = triggers[0]?.steps.map((step) => step.do);
+    expect(steps).toEqual(['pose', 'wait', 'fadeOut', 'room', 'pose', 'wait', 'fadeIn']);
+    expect(triggers.every((t) => t.lock)).toBe(true);
+    // Les règles des scripts de l'histoire (la salle seulement dans le noir…), sauf celles d'un
+    // déclencheur posé dans une salle (sa zone, son étincelle, une seule fois) : le voyage se lance
+    // depuis la carte, autant de fois qu'on veut.
+    const placed = /sans zone|sans repère|ne se désactive pas/;
+    expect(
+      storyProblems(
+        { ...HOUSE_STORY, triggers: [...HOUSE_STORY.triggers, ...triggers] },
+        zone,
+      ).filter((problem) => !placed.test(problem)),
+    ).toEqual([]);
+  });
+
+  it('proposé avec deux veilleuses débloquées et une où aller', () => {
+    const flags = (list: readonly string[]) => new Set(list);
+    const options = (from: string, list: readonly string[]) =>
+      travelOptions(zone, points, from, flags(list), lockedBy(flags(list)));
+    const firstMorning = PHASE3.slice(0, PHASE3.indexOf(F.HedgeDone));
+    expect(travelOffered(options('kitchen', firstMorning))).toBe(false);
+    expect(travelOffered(options('kitchen', PHASE3))).toBe(true);
+    expect(travelOffered(options('bedroom', AFTER_END))).toBe(true);
+  });
+
+  it('Agir à une lanterne ouvre la carte', () => {
+    expect(openingPage('travel', true)).toBe('map');
   });
 });

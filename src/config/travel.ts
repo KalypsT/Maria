@@ -48,8 +48,17 @@ export const TRAVEL_BLOCKED: readonly FlagCondition[] = [
   { all: [F.GrownFourth], none: [F.FinaleGone] },
 ];
 
-/** Réglages du voyage. PROVISOIRES. */
+/** Réglages du voyage. PROVISOIRES, à régler sur téléphone. */
 export const TRAVEL = {
   /** Distance (tuiles) entre Céleste et une lanterne allumée pour partir. */
   reachTiles: 2,
+  /** Veilleuses débloquées qu'il faut au moins pour proposer le voyage (Agir à une lanterne). */
+  minUnlocked: 2,
+  /** La transition (D-163, PR 2) : Céleste s'assoit, le noir, elle est assise près de l'arrivée. */
+  sitMs: 450,
+  fadeOutMs: 500,
+  darkMs: 300,
+  fadeInMs: 650,
+  /** Couleur de la veilleuse principale débloquée, sur la carte du sac (comme le monde étrange). */
+  mapColor: '#3fc9b6',
 } as const;

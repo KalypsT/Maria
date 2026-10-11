@@ -11,7 +11,7 @@ import { ART_FINISH_RANGES, DEFAULT_ART_FINISH, type ArtFinish } from '../config
 import { EntityType } from '../core/level/LevelData';
 import { deserializeSave } from '../core/save/saveData';
 import { formatPlayTime, statsByPlace, totalFaints } from '../core/save/stats';
-import { mapPage } from '../core/world/zone';
+import { isMappedRoom, mapPage } from '../core/world/zone';
 import { HitchMonitor, type FrameWork } from '../core/perf/hitchMonitor';
 import { STRANGE_MOCKUPS, STRANGE_MOCKUP_NAMES } from '../config/strangeThemes';
 import { DEFAULT_MOVEMENT, MOVEMENT_PARAM_RANGES, type MovementParams } from '../config/movement';
@@ -1990,6 +1990,20 @@ export function installDebugOverlay(scene: GameScene): void {
   element('button', travelSection, undefined, 'Actualiser').addEventListener(
     'click',
     refreshTravel,
+  );
+  // Les histoires du debug ne dessinent pas la carte : toutes les salles du monde réel visitées.
+  element('button', travelSection, undefined, 'Révéler la carte').addEventListener(
+    'click',
+    (event) => {
+      for (const zone of ZONES) {
+        for (const [id, level] of zone.rooms) {
+          if (isMappedRoom(level)) {
+            void scene.session.revealRoom(id);
+          }
+        }
+      }
+      (event.currentTarget as HTMLElement).blur();
+    },
   );
 
   // Les coquilles (D-148) : par lieu, trouvées ou non ; y aller, cocher, tout ou rien.

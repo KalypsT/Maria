@@ -1,8 +1,8 @@
 import { TILE_SIZE as T } from '../../config/display';
 import { TRAVEL, TRAVEL_BLOCKED, type TravelLantern } from '../../config/travel';
-import { EntityType, type LevelData, type LevelEntity } from '../level/LevelData';
+import { EntityType, Tile, tileAt, type LevelData, type LevelEntity } from '../level/LevelData';
 import type { Box } from '../physics/gridCollision';
-import { checkCondition } from '../story/story';
+import { checkCondition, type StoryTrigger } from '../story/story';
 import { isStrangeRoom, type Zone } from './zone';
 
 /**
@@ -134,6 +134,21 @@ export function departureProblem(input: {
 }
 
 /**
+ * Céleste à `reachTiles` tuiles au plus de la lanterne (col, row) : de sa tuile et de celle du
+ * dessus jusqu'à la hitbox. Sans allocation : appelée à chaque pas.
+ */
+export function nearLantern(
+  col: number,
+  row: number,
+  box: Box,
+  reachTiles: number = TRAVEL.reachTiles,
+): boolean {
+  const dx = Math.max(col * T - (box.x + box.width), box.x - (col + 1) * T, 0);
+  const dy = Math.max((row - 1) * T - (box.y + box.height), box.y - (row + 1) * T, 0);
+  return dx * dx + dy * dy <= reachTiles * T * reachTiles * T;
+}
+
+/**
  * La lanterne allumée la plus proche de Céleste, à `TRAVEL.reachTiles` tuiles au plus de sa
  * hitbox (null : aucune). `lit` : la lanterne `salle:nom` est allumée (sauvegarde).
  */
@@ -143,21 +158,88 @@ export function litLanternNear(
   lit: (key: string) => boolean,
   reachTiles: number = TRAVEL.reachTiles,
 ): LevelEntity | null {
-  const reach = reachTiles * T;
+  const cx = box.x + box.width / 2;
   let best: LevelEntity | null = null;
   let distance = Infinity;
   for (const e of level.entities) {
     if (e.type !== EntityType.Checkpoint || e.name === undefined) {
       continue;
     }
-    // Écart entre la tuile de la lanterne (et celle du dessus) et la hitbox, 0 si elles se touchent.
-    const dx = Math.max(e.col * T - (box.x + box.width), box.x - (e.col + 1) * T, 0);
-    const dy = Math.max((e.row - 1) * T - (box.y + box.height), box.y - (e.row + 1) * T, 0);
-    const d = Math.hypot(dx, dy);
-    if (d <= reach && d < distance && lit(`${level.id}:${e.name}`)) {
+    const d = Math.abs((e.col + 0.5) * T - cx);
+    if (
+      d < distance &&
+      nearLantern(e.col, e.row, box, reachTiles) &&
+      lit(`${level.id}:${e.name}`)
+    ) {
       best = e;
       distance = d;
     }
   }
   return best;
+}
+
+/**
+ * Le voyage est proposé (l'étincelle d'Agir à une lanterne) : au moins `TRAVEL.minUnlocked`
+ * veilleuses débloquées, et au moins une où aller.
+ */
+export function travelOffered(options: readonly TravelOption[]): boolean {
+  const unlocked = options.filter((o) => o.state !== 'locked').length;
+  return unlocked >= TRAVEL.minUnlocked && options.some((o) => o.state === 'open');
+}
+
+/**
+ * Où Céleste arrive : debout à côté de la veilleuse (deux tuiles, sinon une, du côté du centre de
+ * la salle d'abord : jamais dans une sortie), tournée vers elle ; sinon sur sa tuile.
+ */
+export function travelArrival(
+  level: LevelData,
+  point: { readonly col: number; readonly row: number },
+): { col: number; row: number; facing: 1 | -1 } {
+  const free = (col: number, row: number) => tileAt(level, col, row) === Tile.Empty;
+  const ground = (col: number, row: number) => {
+    const tile = tileAt(level, col, row);
+    return tile === Tile.Solid || tile === Tile.OneWay;
+  };
+  const side = point.col < level.width / 2 ? 1 : -1;
+  for (const dx of [2 * side, side, -2 * side, -side]) {
+    const col = point.col + dx;
+    // Le chemin jusqu'à la veilleuse, au sol, sans mur entre les deux.
+    const steps = Array.from(
+      { length: Math.abs(dx) },
+      (_, k) => point.col + Math.sign(dx) * (k + 1),
+    );
+    if (
+      steps.every((c) => free(c, point.row) && free(c, point.row - 1) && ground(c, point.row + 1))
+    ) {
+      return { col, row: point.row, facing: dx > 0 ? -1 : 1 };
+    }
+  }
+  return { col: point.col, row: point.row, facing: side };
+}
+
+/**
+ * Le script du voyage (D-163) : Céleste s'assoit, le noir ; elle passe dans la salle de la
+ * veilleuse, à côté d'elle (qui devient le point de retour) ; assise, l'image revient. Elle se
+ * relève dès qu'on la fait bouger.
+ */
+export function travelScript(
+  point: TravelPoint,
+  arrival: { readonly col: number; readonly row: number; readonly facing: 1 | -1 },
+): StoryTrigger {
+  return {
+    id: `travel:${point.lantern}`,
+    room: point.room,
+    on: 'interact',
+    when: {},
+    lock: true,
+    steps: [
+      { do: 'pose', pose: 'sit' },
+      { do: 'wait', ms: TRAVEL.sitMs },
+      { do: 'fadeOut', ms: TRAVEL.fadeOutMs },
+      { do: 'room', room: point.room, ...arrival, returnPoint: true },
+      { do: 'pose', pose: 'sit' },
+      { do: 'wait', ms: TRAVEL.darkMs },
+      { do: 'fadeIn', ms: TRAVEL.fadeInMs },
+    ],
+  };
 }
