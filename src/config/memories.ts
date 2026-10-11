@@ -63,6 +63,29 @@ export const STRANGE_THINGS = [
 export type MemoryId =
   (typeof MEMORIES)[number] | (typeof MARIA_THINGS)[number] | (typeof STRANGE_THINGS)[number];
 
+/**
+ * Le nom de chaque trésor, sur sa fiche dans le sac (D-160, noms validés par l'utilisateur,
+ * PLACEHOLDER tant que les souvenirs ne sont pas redéfinis).
+ */
+export const MEMORY_NAMES: Readonly<Record<MemoryId, string>> = {
+  photo: 'La photo de famille',
+  drawing: 'Mon dessin',
+  'music-box': 'La boîte à musique',
+  plant: 'La plante',
+  bookcase: 'La bibliothèque',
+  height: 'La toise',
+  slipper: 'Le chausson de Maria',
+  bottle: 'Le biberon de Maria',
+  headband: 'Le bandeau de Maria',
+  bonnet: 'Le bonnet de Maria',
+  'shape-box': "L'Educaville",
+  roger: 'Roger',
+  'pink-kitchen': 'La cuisine rose',
+  'music-book': 'Le livre qui chante',
+  'white-cloth': 'Le torchon blanc',
+  'eden-tower': "La tour d'Eden",
+};
+
 /** Souvenirs dont l'obtention n'est pas encore en jeu (la case reste vide). */
 export const MEMORIES_LATER: readonly MemoryId[] = [];
 

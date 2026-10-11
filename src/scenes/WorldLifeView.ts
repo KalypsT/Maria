@@ -62,6 +62,19 @@ const BIRDS = {
     wing: '#5b6070',
     legs: '#d0674f',
     size: 1,
+    flight: { dx: 0.7, dy: -1 },
+  },
+  // Le pigeon du toit de la tour du toboggan (D-158) : il file tout droit, par le trou du grillage
+  // de l'école, quand Céleste arrive sur le toit (il montre le passage).
+  holepigeon: {
+    texture: 'life-pigeon',
+    body: '#8a8f9a',
+    head: '#6f7480',
+    beak: '#e8b23a',
+    wing: '#5b6070',
+    legs: '#d0674f',
+    size: 1,
+    flight: { dx: 1, dy: 0 },
   },
   seagull: {
     texture: 'life-seagull',
@@ -71,6 +84,7 @@ const BIRDS = {
     wing: '#9aa3ad',
     legs: '#e8a04a',
     size: 1.35,
+    flight: { dx: 0.7, dy: -1 },
   },
   blackbird: {
     texture: 'life-blackbird',
@@ -80,6 +94,7 @@ const BIRDS = {
     wing: '#3d3832',
     legs: '#5a4a3a',
     size: 0.85,
+    flight: { dx: 0.7, dy: -1 },
   },
 } as const;
 type BirdKind = keyof typeof BIRDS;
@@ -246,6 +261,8 @@ interface Pigeon {
   y: number;
   state: 'idle' | 'flying' | 'gone';
   goneAtMs: number;
+  /** Direction de l'envol (par unité de `flyPxPerS`). */
+  readonly flight: { readonly dx: number; readonly dy: number };
 }
 
 /** Le hérisson du jardin (D-155) : il va et vient le long de la pergola ; il se roule en boule. */
@@ -410,7 +427,7 @@ export class WorldLifeView {
         swingsetSeats(level, r).forEach((seat, k) => {
           this.makeSwing(`${level.id}-${String(i)}-${String(k)}`, seat, palette, artScale);
         });
-      } else if (d.kind === 'pigeon' || d.kind === 'seagull') {
+      } else if (d.kind === 'pigeon' || d.kind === 'seagull' || d.kind === 'holepigeon') {
         this.makeBird(r, d.kind);
       } else if (d.kind === 'blackbird') {
         this.makeBird(r, 'blackbird');
@@ -958,7 +975,16 @@ export class WorldLifeView {
       .setOrigin(0.5, 11 / 12)
       .setScale(bird.size / 4)
       .setDepth(LEAF_DEPTH);
-    this.pigeons.push({ image, homeX, homeY, x: homeX, y: homeY, state: 'idle', goneAtMs: 0 });
+    this.pigeons.push({
+      image,
+      homeX,
+      homeY,
+      x: homeX,
+      y: homeY,
+      state: 'idle',
+      goneAtMs: 0,
+      flight: bird.flight,
+    });
   }
 
   /** Le hérisson (D-155) : deux images de marche, une roulé en boule. */
@@ -1055,12 +1081,12 @@ export class WorldLifeView {
         }
       }
       if (pigeon.state === 'flying') {
-        pigeon.x += cfg.flyPxPerS * 0.7 * dt;
-        pigeon.y -= cfg.flyPxPerS * dt;
+        pigeon.x += cfg.flyPxPerS * pigeon.flight.dx * dt;
+        pigeon.y += cfg.flyPxPerS * pigeon.flight.dy * dt;
         pigeon.image
           .setPosition(pigeon.x, pigeon.y)
           .setFrame(FRAME_NAMES[Math.floor(nowMs / 90) % 2 === 0 ? 2 : 0] ?? '0', false, false);
-        if (pigeon.y < view.y - 20) {
+        if (pigeon.y < view.y - 20 || pigeon.x > view.x + view.w + 20 || pigeon.x < view.x - 20) {
           pigeon.state = 'gone';
           pigeon.goneAtMs = nowMs;
           pigeon.image.setVisible(false);

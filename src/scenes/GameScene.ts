@@ -98,7 +98,6 @@ import { ShellJarView } from './ShellJarView';
 import { HideoutView } from './HideoutView';
 import { hideAt } from '../core/fx/hideouts';
 import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
-import { PauseMenu } from '../ui/PauseMenu';
 import {
   ART_IMAGES,
   CELESTE_PART_IMAGES,
@@ -127,7 +126,7 @@ import {
 import { STORY_TIMING, StoryFlag, TOWER_CUBES, TOY_PHONE } from '../config/story';
 import { PropStage } from '../core/story/PropStage';
 import { StoryDirector } from '../core/story/StoryDirector';
-import { holdsMaria, type TimeOfDay } from '../core/story/story';
+import { checkCondition, holdsMaria, type TimeOfDay } from '../core/story/story';
 import { STRANGE_FX } from '../config/strangeFx';
 import { HOUSE_STORY } from '../levels/house/story';
 import { ISLET_CUBES } from '../levels/nanny/story';
@@ -146,7 +145,13 @@ import { WaterView } from './WaterView';
 import { ShiftLayerView } from './ShiftLayerView';
 import { LullabyView } from './LullabyView';
 import { RideView } from './RideView';
-import { MapPage } from '../ui/MapPage';
+import { Backpack } from '../ui/Backpack';
+import { BAG_ICON, SPARK_ICON } from '../ui/bagIcons';
+import { notebookPlaces, openingPage, type BackpackTrigger } from '../core/world/backpack';
+import { recordSpots, treasureSpots, type TreasureSpot } from '../core/world/treasures';
+import { hasNewTreasure, roomPlace, treasureBook } from '../core/world/treasureBook';
+import { MAP_PLACES, placeTitle } from '../config/places';
+import type { NotebookContent, NotebookMap } from '../ui/NotebookPages';
 import { RecordPicker } from '../ui/RecordPicker';
 import { isRecordSlot } from '../config/records';
 import { canPlayRecords, recordShelf, type RecordChoice } from '../core/audio/records';
@@ -228,16 +233,20 @@ const SOLID_COLORS: Readonly<Partial<Record<number, SolidColors>>> = {
   [Material.Leaf]: { fill: PLACEHOLDER_COLORS.leaf, edge: PLACEHOLDER_COLORS.leafEdge },
 };
 
-/** Titre de la carte de chaque zone (écrit par Céleste). */
-const MAP_TITLES: Readonly<Record<string, string>> = {
-  house: 'Ma maison',
-  street: 'Mon quartier',
-  station: 'La gare',
-  train: 'Le train',
-  sea: 'La mer',
-  // L'avant-dernier niveau (D-107) : la maison de la nounou et ses îlots de mémoire.
-  nanny: 'Chez la nounou',
-};
+/** Les trésors (D-160), salle par salle : où ils sont, pour les voir et les montrer sur la carte. */
+const TREASURES_BY_ROOM: ReadonlyMap<string, readonly TreasureSpot[]> = (() => {
+  const byRoom = new Map<string, TreasureSpot[]>();
+  for (const spot of treasureSpots(HOUSE_STORY)) {
+    const list = byRoom.get(spot.room) ?? [];
+    list.push(spot);
+    byRoom.set(spot.room, list);
+  }
+  return byRoom;
+})();
+const TREASURE_SPOTS = [...TREASURES_BY_ROOM.values()].flat();
+/** Les disques (D-121) : leur place, pour leur fiche dans le sac. */
+const RECORD_SPOTS = recordSpots(HOUSE_STORY);
+const PLACE_ORDER: readonly string[] = MAP_PLACES.map((place) => place.id);
 
 /** Boîte englobant toutes les salles d'une page de la carte (disposition stable). */
 function mapBounds(zone: Zone, page: string): MapBox {
@@ -362,17 +371,6 @@ export class GameScene extends Phaser.Scene {
   private ride!: RideView;
   /** Échelle des textures dessinées (habillage, Céleste) : celle de l'écran, plafonnée. */
   private artScale = 1;
-  /** Carte (§24) et salles déjà dessinées lors d'une ouverture précédente (tracé animé). */
-  private readonly mapPage = new MapPage(
-    () => {
-      this.closeMap();
-    },
-    (id) => {
-      // Un souvenir jouable touché dans le cahier (D-89) : on le rejoue, puis on revient ici.
-      this.closeMap();
-      this.playMemory(id, false);
-    },
-  );
   /** Le tourne-disque du grenier (D-121) : le jeu est arrêté pendant le choix, comme la carte. */
   private readonly recordPicker = new RecordPicker(
     (choice) => {
@@ -466,7 +464,10 @@ export class GameScene extends Phaser.Scene {
   paused = false;
   /** Réglages d'affichage courants (D-18). */
   displaySettings!: DisplaySettings;
-  private pauseMenu?: PauseMenu;
+  /** Le sac à dos (D-159) : le cahier, les trésors et les réglages ; ouvert, le jeu est en pause. */
+  private backpack!: Backpack;
+  /** Trésors connus depuis la dernière ouverture du sac : son étincelle s'éteint (D-162). */
+  private readonly bagKnown = new Set<string>();
   /** Céleste en « papier découpé » (D-29). */
   private puppet!: CelestePuppet;
   /** Animation de la marionnette, modifiable par l'overlay. */
@@ -591,6 +592,7 @@ export class GameScene extends Phaser.Scene {
           this.audio.playJingle(isRecordSlot(id) ? 'found' : 'memory');
         }
         void this.session.addMemory(id);
+        this.refreshBagSpark();
       },
       hush: (ms) => {
         this.audio.hush(ms);
@@ -713,81 +715,89 @@ export class GameScene extends Phaser.Scene {
     const forceTouch = __DEBUG_TOOLS__ && new URLSearchParams(location.search).has('touch');
     if (forceTouch || TouchSource.isTouchDevice()) {
       this.touch = new TouchSource(document.body, controlSettings);
+      this.touch.setIcon('Map', BAG_ICON, 'Le sac');
+      this.refreshBagSpark();
       this.controls.sources.push(this.touch);
       detachTouch = this.touch.attach(window);
     }
     this.displaySettings = { ...save.settings.display };
-    this.pauseMenu = new PauseMenu({
-      settings: controlSettings,
-      display: this.displaySettings,
-      onDisplayChange: (settings) => {
-        this.setDisplaySettings(settings);
-      },
-      audio: save.settings.audio,
-      onAudioChange: (settings, persist) => {
-        this.audio.setSettings(settings);
-        if (persist) {
-          void this.session.setAudio(settings);
-        }
-      },
-      showTouchSettings: this.touch !== undefined,
-      canVibrate: canVibrate(),
-      onResume: () => {
+    this.backpack = new Backpack({
+      onClose: () => {
         this.setPaused(false);
       },
-      onOpenMap: () => {
+      onPlayMemory: (id) => {
+        // Un souvenir jouable touché dans le cahier (D-89) : on le rejoue, puis on revient ici.
         this.setPaused(false);
-        this.openMap();
+        this.playMemory(id, false);
       },
-      onSettingsChange: (settings) => {
-        void this.session.setControls(settings);
-        this.touch?.setSettings(settings);
-        this.haptics.enabled = settings.vibration;
+      onTreasuresViewed: (ids) => {
+        void this.session.addViewedTreasures(ids);
       },
-      onExportSave: () => {
-        showExportDialog(this.session.data);
-      },
-      onImportSave: () => {
-        void showImportDialog().then(async (data) => {
-          if (data) {
-            // La partie importée remplace l'actuelle (qui devient l'état précédent), puis relance.
-            await this.session.replace(data);
-            location.reload();
+      settings: {
+        settings: controlSettings,
+        display: this.displaySettings,
+        onDisplayChange: (settings) => {
+          this.setDisplaySettings(settings);
+        },
+        audio: save.settings.audio,
+        onAudioChange: (settings, persist) => {
+          this.audio.setSettings(settings);
+          if (persist) {
+            void this.session.setAudio(settings);
           }
-        });
-      },
-      debugTools: __DEBUG_TOOLS__,
-      onSwitchDebug: () => {
-        // Même site, donc même sauvegarde : on reprend à la dernière lanterne dans l'autre version.
-        void this.session.manager.flush().then(() => {
-          location.assign(debugSwitchUrl(import.meta.env.BASE_URL, __DEBUG_TOOLS__));
-        });
-      },
-      onQuitToTitle: () => {
-        // Écritures en cours terminées, puis relance : le démarrage affiche l'accueil.
-        void this.session.manager.flush().then(() => {
-          location.reload();
-        });
-      },
-      levels: [
-        { id: HOME_CHOICE, name: 'La maison (partie)' },
-        ...LEVELS.map((level) => ({ id: level.id, name: levelName(level) })),
-      ],
-      currentLevelId: () => (this.zone ? HOME_CHOICE : this.level.id),
-      onLevelChange: (id) => {
-        if (id === HOME_CHOICE) {
-          this.returnToSaved();
-          return;
-        }
-        const level = LEVELS.find((candidate) => candidate.id === id);
-        if (level) {
-          this.loadLevel(level);
-        }
+        },
+        showTouchSettings: this.touch !== undefined,
+        canVibrate: canVibrate(),
+        onSettingsChange: (settings) => {
+          void this.session.setControls(settings);
+          this.touch?.setSettings(settings);
+          this.haptics.enabled = settings.vibration;
+        },
+        onExportSave: () => {
+          showExportDialog(this.session.data);
+        },
+        onImportSave: () => {
+          void showImportDialog().then(async (data) => {
+            if (data) {
+              // La partie importée remplace l'actuelle (qui devient l'état précédent), puis relance.
+              await this.session.replace(data);
+              location.reload();
+            }
+          });
+        },
+        debugTools: __DEBUG_TOOLS__,
+        onSwitchDebug: () => {
+          // Même site, donc même sauvegarde : on reprend à la dernière lanterne dans l'autre version.
+          void this.session.manager.flush().then(() => {
+            location.assign(debugSwitchUrl(import.meta.env.BASE_URL, __DEBUG_TOOLS__));
+          });
+        },
+        onQuitToTitle: () => {
+          // Écritures en cours terminées, puis relance : le démarrage affiche l'accueil.
+          void this.session.manager.flush().then(() => {
+            location.reload();
+          });
+        },
+        levels: [
+          { id: HOME_CHOICE, name: 'La maison (partie)' },
+          ...LEVELS.map((level) => ({ id: level.id, name: levelName(level) })),
+        ],
+        currentLevelId: () => (this.zone ? HOME_CHOICE : this.level.id),
+        onLevelChange: (id) => {
+          if (id === HOME_CHOICE) {
+            this.returnToSaved();
+            return;
+          }
+          const level = LEVELS.find((candidate) => candidate.id === id);
+          if (level) {
+            this.loadLevel(level);
+          }
+        },
       },
     });
     const onVisibility = () => {
       if (document.hidden) {
-        this.setPaused(true);
+        this.setPaused(true, 'hidden');
       }
     };
     document.addEventListener('visibilitychange', onVisibility);
@@ -799,8 +809,7 @@ export class GameScene extends Phaser.Scene {
       detachKeyboard();
       detachTouch?.();
       document.removeEventListener('visibilitychange', onVisibility);
-      this.pauseMenu?.destroy();
-      this.mapPage.destroy();
+      this.backpack.destroy();
       this.recordPicker.destroy();
       this.hud.destroy();
       this.flashbackView.destroy();
@@ -822,25 +831,21 @@ export class GameScene extends Phaser.Scene {
     const frameSeconds = Math.min(this.game.loop.rawDelta / 1000, MAX_FRAME_SECONDS);
     this.controls.update();
     const mapPressed = this.controls.consumePressed('Map');
-    if (this.mapPage.isOpen) {
-      // Carte ouverte (§24) : Carte ou Pause la referment, le jeu reste arrêté.
-      if (mapPressed || this.controls.consumePressed('Pause')) {
-        this.closeMap();
+    const pausePressed = this.controls.consumePressed('Pause');
+    if (this.paused) {
+      // Le sac ouvert (D-159) : Carte ou Pause le referment, le jeu reste arrêté.
+      if (mapPressed || pausePressed) {
+        this.setPaused(false);
       }
       return;
     }
     if (this.recordPicker.isOpen()) {
-      this.stepRecordPicker(mapPressed);
+      this.stepRecordPicker(mapPressed || pausePressed);
       return;
     }
-    if (this.controls.consumePressed('Pause') && !this.memoryPlay) {
-      this.setPaused(!this.paused);
-    }
-    if (this.paused) {
-      return;
-    }
-    if (mapPressed && !this.story.locked) {
-      this.openMap();
+    if ((mapPressed || pausePressed) && !this.memoryPlay) {
+      // Le bouton du sac (Carte) l'ouvre sur la carte, Pause sur les réglages (D-159).
+      this.setPaused(true, mapPressed ? 'bag' : 'pause');
       return;
     }
     if (__DEBUG_TOOLS__) {
@@ -1048,6 +1053,7 @@ export class GameScene extends Phaser.Scene {
     this.worldView.render();
     this.hideouts.update(box, this.game.loop.delta);
     this.noticeShells();
+    this.noticeTreasures();
     this.dust.update();
     const hintTarget = this.hintTarget;
     this.hintView.update(
@@ -1182,51 +1188,98 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Carte dessinée par Céleste (§24) : salles visitées et devinées, veilleuses allumées,
-   * coquilles trouvées et vues (D-148), Céleste. Seulement dans une zone (pas dans les parcours d'essai).
+   * Ce que montre le cahier du sac (D-159) : la carte dessinée par Céleste (§24 : salles visitées
+   * et devinées, veilleuses allumées, coquilles trouvées et vues, D-148, Céleste), seulement dans
+   * une zone (pas dans les parcours d'essai) ; les souvenirs, les capacités, les chiffres du voyage.
    */
-  openMap(): void {
+  private notebookContent(): NotebookContent {
     const zone = this.zone;
-    if (!zone) {
-      return;
-    }
     const data = this.session.data;
-    const box = this.player.box;
-    // Page du cahier de la salle ; dans le monde étrange (hors carte), celle de la zone.
-    const page = mapPage(zone, this.level.id) ?? zone.id;
-    const model = buildMapModel(
-      zone,
-      {
-        visited: data.progression.mapRevealed,
-        seen: this.mapSeen,
-        activatedCheckpoints: data.activatedCheckpoints,
-        checkpoint: data.checkpoint,
-        collectibles: data.progression.collectibles,
-        seenCollectibles: data.progression.seenCollectibles,
-        celeste: { room: this.level.id, x: box.x + box.width / 2, y: box.y + box.height },
-        cubes: ISLET_CUBES.flatMap((cube, k) =>
-          this.story.flags.has(cube.flag)
-            ? [{ room: cube.room, ...cube.at, color: TOWER_CUBES[k]?.color ?? '#ec8fab' }]
-            : [],
-        ),
+    const base = {
+      abilities: this.ownedAbilities(),
+      names: {
+        place: placeTitle,
+        room: (id: string) => this.zone?.rooms.get(id)?.meta.name ?? id,
       },
-      page,
+    };
+    if (!zone) {
+      return {
+        ...base,
+        maps: new Map(),
+        places: [],
+        startPlace: null,
+        figures: null,
+        treasures: null,
+      };
+    }
+    const box = this.player.box;
+    const progress = {
+      visited: data.progression.mapRevealed,
+      seen: this.mapSeen,
+      activatedCheckpoints: data.activatedCheckpoints,
+      checkpoint: data.checkpoint,
+      collectibles: data.progression.collectibles,
+      seenCollectibles: data.progression.seenCollectibles,
+      treasures: {
+        spots: TREASURE_SPOTS,
+        seen: data.progression.seenTreasures,
+        taken: data.progression.memories,
+      },
+      celeste: { room: this.level.id, x: box.x + box.width / 2, y: box.y + box.height },
+      cubes: ISLET_CUBES.flatMap((cube, k) =>
+        this.story.flags.has(cube.flag)
+          ? [{ room: cube.room, ...cube.at, color: TOWER_CUBES[k]?.color ?? '#ec8fab' }]
+          : [],
+      ),
+    };
+    // Les lieux visités (D-160) : une page de carte chacun, qu'on feuillette.
+    const visited = new Set(
+      data.progression.mapRevealed.flatMap((room) => mapPage(zone, room) ?? []),
     );
+    const maps = new Map<string, NotebookMap>();
+    for (const page of PLACE_ORDER) {
+      if (visited.has(page)) {
+        maps.set(page, {
+          model: buildMapModel(zone, progress, page),
+          bounds: mapBounds(zone, page),
+          title: placeTitle(page),
+        });
+      }
+    }
     for (const room of data.progression.mapRevealed) {
       this.mapSeen.add(room);
     }
-    this.clock.reset();
-    this.touch?.releaseAll();
-    this.audio.sfx.stopLoops();
-    this.mapPage.open(
-      model,
-      MAP_TITLES[page] ?? page,
-      mapBounds(zone, page),
-      data.progression.memories,
-      this.ownedAbilities(),
-      notebookFigures(zone, data),
+    // La page de Céleste ; dans le monde étrange (hors carte), le lieu visité le plus loin.
+    const here = mapPage(zone, this.level.id);
+    const furthest = PLACE_ORDER.filter((page) => visited.has(page)).pop() ?? null;
+    // Les trésors (D-162) : où ils sont, ce qui est trouvé, regardé, et les coquilles lieu par lieu.
+    const { memories, collectibles, viewedTreasures, mapRevealed } = data.progression;
+    const spots = new Map(
+      [...TREASURE_SPOTS, ...RECORD_SPOTS].map((spot) => [
+        spot.id,
+        { place: roomPlace(zone, spot.room), room: spot.room },
+      ]),
     );
-    this.audio.sfx.play('map-open');
+    const treasures = treasureBook({
+      found: new Set(memories),
+      viewed: new Set(viewedTreasures),
+      spots,
+      visitedRooms: new Set(mapRevealed),
+      visitedPlaces: new Set(mapRevealed.flatMap((room) => roomPlace(zone, room) ?? [])),
+      placeOrder: PLACE_ORDER,
+      shells: zoneShells(zone).map((shell) => ({
+        place: roomPlace(zone, shell.room),
+        found: collectibles.includes(shell.name),
+      })),
+    });
+    return {
+      ...base,
+      maps,
+      places: notebookPlaces(PLACE_ORDER, visited, here),
+      startPlace: here !== null && maps.has(here) ? here : furthest,
+      figures: notebookFigures(zone, data),
+      treasures,
+    };
   }
 
   /**
@@ -1249,9 +1302,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** Devant le tourne-disque : gauche et droite, Agir, Action ou Saut ; Pause ou Carte referment. */
-  private stepRecordPicker(mapPressed: boolean): void {
+  private stepRecordPicker(closePressed: boolean): void {
     const controls = this.controls;
-    if (mapPressed || controls.consumePressed('Pause')) {
+    if (closePressed) {
       this.closeRecords();
       return;
     }
@@ -1287,13 +1340,6 @@ export class GameScene extends Phaser.Scene {
     this.controls.consumePressed('Attack');
   }
 
-  private closeMap(): void {
-    this.mapPage.close();
-    this.audio.sfx.play('map-close');
-    this.clock.reset();
-    this.controls.consumePressed('Jump');
-  }
-
   /**
    * Les stats (D-153) : le temps de jeu de la salle, hors pause et carte (la mise à jour s'arrête
    * avant), scènes et souvenirs compris ; seulement dans la partie (pas les parcours d'essai).
@@ -1310,8 +1356,11 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  /** Met le jeu en pause (simulation arrêtée, menu affiché) ou le reprend. */
-  setPaused(paused: boolean): void {
+  /**
+   * Met le jeu en pause (simulation arrêtée, le sac ouvert, D-159) ou le reprend. `trigger` : ce qui
+   * ouvre le sac, qui choisit sa page (la carte, ou les réglages pour la touche Pause).
+   */
+  setPaused(paused: boolean, trigger: BackpackTrigger = 'pause'): void {
     if (paused === this.paused) {
       return;
     }
@@ -1326,9 +1375,17 @@ export class GameScene extends Phaser.Scene {
         this.statsUnsavedMs = 0;
         void this.session.persist();
       }
-      this.pauseMenu?.open();
+      const content = this.notebookContent();
+      this.backpack.open(openingPage(trigger, content.startPlace !== null), content);
+      // Le sac ouvert : ses trésors sont connus, son étincelle s'éteint (D-162).
+      for (const id of this.session.data.progression.memories) {
+        this.bagKnown.add(id);
+      }
+      this.refreshBagSpark();
+      this.audio.sfx.play('map-open');
     } else {
-      this.pauseMenu?.close();
+      this.backpack.close();
+      this.audio.sfx.play('map-close');
       // Une pression de saut faite pendant la pause ne doit pas partir à la reprise.
       this.controls.consumePressed('Jump');
     }
@@ -1652,6 +1709,48 @@ export class GameScene extends Phaser.Scene {
       ) {
         item.seen = true;
         void this.session.addSeenCollectible(item.id);
+      }
+    }
+  }
+
+  /**
+   * L'étincelle du sac (D-162) : un trésor trouvé que le joueur n'a pas encore vu dans le sac,
+   * jusqu'à ce qu'il l'ouvre (les coquilles n'en font pas).
+   */
+  private refreshBagSpark(): void {
+    const { memories, viewedTreasures } = this.session.data.progression;
+    const known = new Set([...viewedTreasures, ...this.bagKnown]);
+    this.touch?.setBadge('Map', hasNewTreasure(memories, known) ? SPARK_ICON : null);
+  }
+
+  /**
+   * Un trésor passé à l'écran, quand il est là (son déclencheur est possible), est vu (D-160) :
+   * Céleste le dessinera en pointillés sur la carte tant qu'elle ne l'a pas pris.
+   */
+  private noticeTreasures(): void {
+    const spots = TREASURES_BY_ROOM.get(this.level.id);
+    if (!this.zone || !spots || this.hud.black) {
+      return;
+    }
+    const { memories, seenTreasures } = this.session.data.progression;
+    const view = this.cameras.main.worldView;
+    for (const spot of spots) {
+      if (
+        memories.includes(spot.id) ||
+        seenTreasures.includes(spot.id) ||
+        !checkCondition(this.story.flags, spot.when)
+      ) {
+        continue;
+      }
+      const x = (spot.col + 0.5) * TILE_SIZE;
+      const y = (spot.row + 0.5) * TILE_SIZE;
+      if (
+        x > view.x + TILE_SIZE &&
+        x < view.right - TILE_SIZE &&
+        y > view.y + TILE_SIZE &&
+        y < view.bottom - TILE_SIZE
+      ) {
+        void this.session.addSeenTreasure(spot.id);
       }
     }
   }

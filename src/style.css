@@ -26,6 +26,18 @@
   --chalk: rgb(248 243 232 / 45%);
   --chalk-soft: rgb(248 243 232 / 12%);
   --chalk-text: rgb(248 243 232 / 85%);
+  /* Le sac à dos (D-159) : sa toile bleue, ses coutures. */
+  --bag: #5f7f92;
+  --bag-deep: #4a6676;
+  --bag-stitch: rgb(248 243 232 / 45%);
+  /* Un lieu complet (D-160) : le lavis vert des crayons de Céleste. */
+  --wash-done: #cfe5c4;
+  /* Les familles de trésors (D-162), une couleur chacune. */
+  --wash-memories: #f3c7d2;
+  --wash-maria: #f6e3a6;
+  --wash-strange: #c4ebe4;
+  --wash-shells: #ecdcc0;
+  --wash-records: #ddd0ee;
   --scrim: rgb(20 22 27 / 55%);
   /* Bord « dessiné à la main » (irrégulier). */
   --sketch-radius: 255px 18px 225px 18px / 18px 225px 18px 255px;
@@ -182,22 +194,6 @@ body {
   border: 2px solid var(--lamp);
 }
 
-/* Menu pause. Au-dessus du jeu et du debug, sous les commandes tactiles pour prévisualiser leurs réglages. */
-#pause-menu {
-  position: fixed;
-  inset: 0;
-  z-index: 30;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
-  background: var(--scrim);
-}
-
-#pause-menu[hidden] {
-  display: none;
-}
-
 .pause-panel {
   box-sizing: border-box;
   width: min(360px, 50vw);
@@ -235,55 +231,14 @@ body {
   font: inherit;
 }
 
-.pause-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 4px;
-}
-
-.pause-header h2 {
-  margin: 0;
-}
-
 .pause-panel button.pause-primary,
 .pause-panel button.selected {
   border-color: var(--crayon-rose);
   background: var(--crayon-rose-soft);
 }
 
-.pause-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 2px 8px;
-  margin: 8px 0;
-}
-
-.pause-row input[type='range'] {
-  grid-column: 1 / 3;
-  width: 100%;
-  height: 28px;
-}
-
-.pause-value {
-  color: var(--ink-soft);
-}
-
-.pause-row input[type='range'] {
-  accent-color: var(--crayon-blue);
-}
-
 .pause-choice {
   display: flex;
-  gap: 6px;
-}
-
-/* Choix des parcours d'essai (prototype, Phase 2). */
-.pause-levels {
-  display: flex;
-  flex-wrap: wrap;
   gap: 6px;
 }
 
@@ -777,10 +732,10 @@ body {
   opacity: 0.8;
 }
 
-/* Code de sauvegarde (export / import). */
+/* Code de sauvegarde (export / import), ouvert depuis le sac : au-dessus de lui. */
 .save-dialog {
   position: fixed;
-  z-index: 45;
+  z-index: 50;
   inset: 0;
   display: flex;
   align-items: center;
@@ -836,8 +791,12 @@ body {
   opacity: 0.85;
 }
 
-/* Carte dessinée par Céleste (§24) : une page du cahier, par-dessus le jeu en pause. */
-#map-page {
+/*
+ * Le sac à dos (D-159), par-dessus le jeu en pause et les commandes tactiles : à gauche, la poche
+ * et ses trois objets ; à droite, une page du cahier. Pendant un réglage des commandes tactiles,
+ * il s'efface pour les montrer.
+ */
+#backpack {
   position: fixed;
   inset: 0;
   z-index: 45;
@@ -846,64 +805,673 @@ body {
   justify-content: center;
   padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
   background: var(--scrim);
+  transition: background 150ms;
 }
 
-#map-page[hidden] {
+#backpack[hidden] {
   display: none;
 }
 
-.map-panel {
+#backpack.previewing {
+  background: transparent;
+}
+
+#backpack.previewing .bag {
+  opacity: 0.25;
+}
+
+.bag {
   box-sizing: border-box;
+  display: grid;
+  grid-template-columns: clamp(84px, 13vw, 116px) 1fr;
+  width: min(96vw, 900px);
+  height: min(94vh, 480px);
+  transition: opacity 150ms;
+}
+
+.bag-pocket {
   display: flex;
   flex-direction: column;
-  width: min(92vw, 820px);
-  height: min(90vh, 460px);
-  padding: 8px 14px 12px;
-  border: 2px solid var(--pencil);
-  border-radius: var(--sketch-radius-panel);
+  justify-content: center;
+  gap: clamp(2px, 1.5vh, 10px);
+  padding: 8px 6px;
+  border: 2px dashed var(--bag-stitch);
+  border-right: 0;
+  border-radius: 22px 0 0 22px;
+  outline: 3px solid var(--bag-deep);
+  outline-offset: -1px;
+  background: var(--bag);
+}
+
+.bag-object {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--paper);
+  font: italic 700 clamp(11px, 1.5vw, 14px) / 1.1 var(--ui-font);
+  cursor: pointer;
+  transition: transform 160ms;
+}
+
+.bag-object svg {
+  width: clamp(40px, 6vw, 56px);
+  height: auto;
+  filter: drop-shadow(0 2px 0 var(--drop-shadow));
+}
+
+.bag-object.active {
+  background: var(--chalk-soft);
+  transform: translateX(8px);
+}
+
+.bag-page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border-radius: 0 14px 14px 0;
   background:
     linear-gradient(
       90deg,
-      transparent 38px,
-      var(--paper-margin) 38px,
-      var(--paper-margin) 40px,
-      transparent 40px
+      transparent 22px,
+      var(--paper-margin) 22px,
+      var(--paper-margin) 24px,
+      transparent 24px
     ),
     repeating-linear-gradient(transparent 0 21px, var(--paper-line) 21px 22px), var(--paper);
   box-shadow: 3px 4px 0 var(--drop-shadow);
 }
 
-/* Onglets du cahier (D-38) : la carte et les souvenirs, écrits à la main. */
-.map-tabs {
+.bag-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid var(--pencil);
+  border-radius: 50%;
+  background: var(--paper-light);
+  color: var(--ink);
+  font: 700 1.2rem / 1 var(--ui-font);
+  cursor: pointer;
+}
+
+/* Sous-onglets écrits à la main : la carte, Mon voyage, Mes capacités… */
+.bag-head {
   display: flex;
-  gap: clamp(6px, 1.4vw, 18px);
-  margin: 0 0 4px clamp(10px, 3vw, 34px);
-  /* Six onglets (D-153) : sur un écran étroit, ils défilent sous le doigt plutôt que d'être coupés. */
+  gap: clamp(8px, 2vw, 20px);
+  min-height: 32px;
+  padding: 6px 52px 0 36px;
   overflow-x: auto;
   scrollbar-width: none;
 }
 
-.map-title {
-  padding: 2px 4px;
+.bag-sub {
+  padding: 2px 2px 3px;
   border: 0;
-  border-bottom: 2px solid transparent;
+  border-bottom: 2.5px solid transparent;
   background: none;
-  color: var(--ink-soft);
-  font: italic 600 clamp(11px, 1.55vw, 16px) / 1.2 var(--ui-font);
+  color: var(--pencil);
+  font: italic 700 clamp(12px, 1.7vw, 16px) / 1.2 var(--ui-font);
   white-space: nowrap;
-  opacity: 0.6;
   cursor: pointer;
 }
 
-.map-title.active {
+.bag-sub.active {
   border-bottom-color: var(--crayon-rose);
-  opacity: 1;
+  color: var(--ink);
 }
 
-.map-canvas {
+.bag-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: 2px 10px 10px 30px;
+}
+
+.bag-place {
+  margin: 2px 0 0;
+  color: var(--ink);
+  font: italic 700 clamp(13px, 1.8vw, 17px) / 1.2 var(--ui-font);
+}
+
+.notebook-canvas {
   flex: 1;
   width: 100%;
   min-height: 0;
+}
+
+/* La carte (D-160) : la rangée des lieux à gauche, la page du lieu à droite. */
+.bag-map {
+  display: flex;
+  flex: 1;
+  gap: 8px;
+  min-height: 0;
+}
+
+.bag-places {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 6px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.bag-place-icon {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: clamp(34px, 5.2vw, 44px);
+  height: clamp(34px, 5.2vw, 44px);
+  padding: 0;
+  border: 1.5px solid var(--pencil);
+  border-radius: 10px;
+  background: var(--paper-light);
+  color: var(--pencil);
+  font: 700 1rem / 1 var(--ui-font);
+  cursor: pointer;
+}
+
+.bag-place-icon svg {
+  width: 68%;
+  height: 68%;
+}
+
+.bag-place-icon.active {
+  border-color: var(--ink);
+  background: var(--crayon-rose-soft);
+}
+
+/* Toutes les coquilles du lieu trouvées : le pictogramme se colorie, comme la page (D-148). */
+.bag-place-icon.complete:not(.active) {
+  background: var(--wash-done);
+}
+
+.bag-place-icon.unknown {
+  border-style: dashed;
+  background: transparent;
+  cursor: default;
+}
+
+/* Céleste est ici. */
+.bag-here {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--paper-light);
+  border-radius: 50%;
+  background: var(--crayon-rose);
+}
+
+.bag-map-page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Les réglages (l'ancien menu pause) : deux colonnes, qui défilent si besoin. */
+.settings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 clamp(14px, 3vw, 32px);
+  overflow-y: auto;
+  color: var(--ink);
+  font-size: 0.9rem;
+  touch-action: pan-y;
+}
+
+.settings h3 {
+  margin: 8px 0 2px;
+  color: var(--ink-soft);
+  font: italic 700 0.92rem / 1.2 var(--ui-font);
+}
+
+.settings button {
+  min-height: 40px;
+  margin: 3px 0;
+  padding: 6px 12px;
+  border: 2px solid var(--pencil);
+  border-radius: var(--sketch-radius);
+  background: var(--paper-light);
+  color: var(--ink);
+  font: inherit;
+}
+
+.settings button.selected {
+  border-color: var(--crayon-rose);
+  background: var(--crayon-rose-soft);
+}
+
+.settings-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+}
+
+.settings-row input[type='range'] {
+  width: clamp(90px, 14vw, 150px);
+  height: 28px;
+  accent-color: var(--crayon-blue);
+}
+
+.settings-value {
+  min-width: 3.2em;
+  color: var(--ink-soft);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.settings-choice {
+  display: flex;
+  gap: 4px;
+}
+
+.settings-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 6px;
+}
+
+.settings button.settings-quit {
+  margin-top: 12px;
+  border-color: var(--warning-ink);
+  color: var(--warning-ink);
+}
+
+/* Les trésors (D-162) : deux colonnes, une couleur par famille. */
+.treasures {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 0 clamp(12px, 2.4vw, 26px);
+  min-height: 0;
+  overflow-y: auto;
+  color: var(--ink);
+  touch-action: pan-y;
+}
+
+.family-memories {
+  --wash: var(--wash-memories);
+}
+
+.family-maria {
+  --wash: var(--wash-maria);
+}
+
+.family-strange {
+  --wash: var(--wash-strange);
+}
+
+.family-shells {
+  --wash: var(--wash-shells);
+}
+
+.family-records {
+  --wash: var(--wash-records);
+}
+
+.treasure-family {
+  margin-bottom: 4px;
+}
+
+.treasure-family h3 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 4px 0 2px;
+  font: italic 700 clamp(12px, 1.7vw, 15px) / 1.2 var(--ui-font);
+}
+
+.treasure-swatch {
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--pencil);
+  border-radius: 3px;
+  background: var(--wash);
+}
+
+.treasure-count {
+  color: var(--ink-soft);
+  font-size: 0.85em;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.treasure-cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  padding: 3px 5px 1px;
+  border-radius: 10px;
+}
+
+/* Une famille complète se colorie (comme une page de coquilles, D-148). */
+.treasure-family.complete .treasure-cells {
+  background: var(--wash);
+}
+
+.treasure-cell {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  width: 50px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-soft);
+  font: 600 0.6rem / 1.15 var(--ui-font);
+  cursor: pointer;
+}
+
+.treasure-box {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1.4px solid var(--pencil);
+  border-radius: 10px;
+  background: var(--wash);
+  color: var(--pencil);
+  font: 700 1rem var(--ui-font);
+}
+
+.treasure-cell.missing .treasure-box {
+  border: 1.6px dashed var(--pencil);
+  background: transparent;
+}
+
+.treasure-drawing {
+  width: 42px;
+  height: 42px;
+}
+
+/* L'indice : sur deux lignes au plus (« Mon quartier »). */
+.treasure-hint {
+  display: -webkit-box;
+  max-width: 56px;
+  min-height: 0.7rem;
+  overflow: hidden;
+  text-align: center;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+/* Nouveau : trouvé, pas encore regardé dans le sac. */
+.treasure-new {
+  position: absolute;
+  top: -3px;
+  right: 0;
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid var(--paper-light);
+  border-radius: 50%;
+  background: var(--crayon-rose);
+}
+
+.treasure-play {
+  position: absolute;
+  right: 1px;
+  bottom: 13px;
+  display: grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 0.5rem;
+}
+
+.shell-rows {
+  display: grid;
+  gap: 1px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--wash) 55%, transparent);
+}
+
+.shell-row {
+  display: grid;
+  grid-template-columns: minmax(64px, auto) 1fr auto;
+  align-items: center;
+  gap: 6px;
+  font: 700 0.72rem / 1.5 var(--ui-font);
+}
+
+.shell-row.complete {
+  color: var(--crayon-rose);
+}
+
+.shell-glyphs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+}
+
+.shell-glyph {
+  width: 10px;
+  height: 10px;
+}
+
+.shell-glyph.missing {
+  box-sizing: border-box;
+  border: 1.3px dashed var(--pencil);
+  border-radius: 50%;
+}
+
+.shell-count {
+  font-variant-numeric: tabular-nums;
+}
+
+.record-sleeves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding: 4px 8px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--wash) 60%, transparent);
+}
+
+.treasure-record {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-soft);
+  font: 700 0.7rem / 1.2 var(--ui-font);
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Une pochette de disque (D-121) : sa couleur, le rond du disque. */
+.treasure-sleeve {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  background:
+    radial-gradient(
+      circle,
+      var(--paper) 0 3px,
+      var(--drop-shadow) 3.5px 5px,
+      transparent 5.5px 13px,
+      var(--drop-shadow) 13.5px 14.5px,
+      transparent 15px
+    ),
+    var(--sleeve);
+}
+
+.treasure-sleeve.big {
+  width: 120px;
+  height: 120px;
+  background:
+    radial-gradient(
+      circle,
+      var(--paper) 0 8px,
+      var(--drop-shadow) 9px 14px,
+      transparent 15px 40px,
+      var(--drop-shadow) 41px 43px,
+      transparent 44px
+    ),
+    var(--sleeve);
+}
+
+/* Le point « nouveau » d'un disque, sur le coin de sa pochette. */
+.treasure-record .treasure-new {
+  left: 32px;
+  right: auto;
+}
+
+.treasure-record-title {
+  max-width: 120px;
+}
+
+/* La fiche d'un trésor, par-dessus la page. */
+.treasure-sheet {
+  position: absolute;
+  inset: 2px 2px 4px 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: clamp(12px, 3vw, 28px);
+  padding: 12px clamp(14px, 3vw, 28px);
+  border: 1.8px solid var(--ink);
+  border-radius: var(--sketch-radius-panel);
+  background: var(--paper-light);
+}
+
+.treasure-big {
+  display: grid;
+  place-items: center;
+  width: clamp(120px, 20vw, 170px);
+  height: clamp(120px, 20vw, 170px);
+  border-radius: 22px;
+  background: var(--wash);
+  color: var(--pencil);
+  font: 700 3rem var(--ui-font);
+}
+
+.treasure-big.flashback {
+  width: auto;
+  padding: 6px;
+}
+
+.treasure-big-drawing {
+  max-width: 100%;
+  height: auto;
+}
+
+.treasure-sheet-text h4 {
+  margin: 0 0 6px;
+  font: italic 700 clamp(15px, 2.2vw, 20px) / 1.2 var(--ui-font);
+}
+
+.treasure-family-name {
+  margin: 0 0 4px;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.treasure-where {
+  margin: 0 0 10px;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+.treasure-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.treasure-actions button {
+  min-height: 40px;
+  padding: 6px 14px;
+  border: 2px solid var(--pencil);
+  border-radius: var(--sketch-radius);
+  background: var(--paper);
+  color: var(--ink);
+  font: 700 0.85rem var(--ui-font);
+  cursor: pointer;
+}
+
+/* Le compte des trésors, en haut de la page. */
+.bag-total {
+  margin-left: auto;
+  color: var(--ink);
+  font: 700 0.9rem / 1.6 var(--ui-font);
+  font-variant-numeric: tabular-nums;
+}
+
+/* L'étincelle « nouveau » (D-162) : sur la boîte à trésors, sur le sac. */
+.bag-spark,
+.touch-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 15px;
+  height: 15px;
+  animation: bag-twinkle 1.6s ease-in-out infinite;
+}
+
+.bag-spark {
+  display: none;
+  top: 2px;
+  right: 6px;
+}
+
+.bag-object.new .bag-spark {
+  display: block;
+}
+
+.bag-spark svg,
+.touch-badge svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes bag-twinkle {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(0.8);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* Le sac, seul bouton en haut à gauche (D-159). */
+.touch-map svg {
+  width: 72%;
+  height: 72%;
 }
 
 /* Le tourne-disque du grenier (D-121) : une rangée de pochettes, sans texte. */
@@ -995,6 +1563,11 @@ body {
   content: '';
 }
 @media (prefers-reduced-motion: reduce) {
+  .bag-spark,
+  .touch-badge {
+    animation: none;
+  }
+
   .record-sleeve.playing .record-disc {
     animation: none;
   }

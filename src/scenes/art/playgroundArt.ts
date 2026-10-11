@@ -314,9 +314,11 @@ export function playgroundDrawers({ tileShape }: ShapeTools): Record<string, Dra
       }
       ctx.strokeStyle = '#3f6b3d';
       ctx.lineWidth = 1.2;
+      let holeBottom = -1;
       for (let row = r.y / T; row < (r.y + r.h) / T; row++) {
         const col = r.x / T;
         if (tileAt(level, col, row) === Tile.Empty) {
+          holeBottom = row;
           ctx.beginPath();
           ctx.moveTo(col * T, row * T + 2);
           ctx.lineTo(col * T + 4, row * T + 6);
@@ -324,6 +326,29 @@ export function playgroundDrawers({ tileShape }: ShapeTools): Record<string, Dra
           ctx.lineTo(col * T + 5, row * T + T - 7);
           ctx.stroke();
         }
+      }
+      if (holeBottom >= 0) {
+        // Le ballon de la cour, coincé au fond du trou (D-158) : vu du sol, il montre le passage.
+        const radius = 7;
+        const cx = r.x + 1.3 * T;
+        const cy = (holeBottom + 1) * T - radius;
+        ctx.fillStyle = '#e2574c';
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fff6f0';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, -0.6, 0.9);
+        ctx.moveTo(cx - radius, cy);
+        ctx.lineTo(cx + radius, cy);
+        ctx.stroke();
+        // Une maille tordue par-dessus : il est bien coincé.
+        ctx.strokeStyle = '#3f6b3d';
+        ctx.beginPath();
+        ctx.moveTo(cx - radius - 2, cy + radius);
+        ctx.lineTo(cx + 2, cy + 1);
+        ctx.stroke();
       }
     },
   };

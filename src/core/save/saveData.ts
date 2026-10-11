@@ -37,6 +37,17 @@ export interface SaveData {
      * des sauvegardes plus anciennes : vide (aucune migration).
      */
     seenCollectibles: string[];
+    /**
+     * Trésors vus mais pas encore pris (D-160 : souvenirs, affaires de Maria, monde étrange),
+     * dessinés en pointillés sur la carte. Absent des sauvegardes plus anciennes : vide (aucune
+     * migration).
+     */
+    seenTreasures: string[];
+    /**
+     * Trésors et disques trouvés déjà regardés dans le sac (D-162) : les autres sont « nouveaux ».
+     * Absent des sauvegardes plus anciennes : vide (aucune migration).
+     */
+    viewedTreasures: string[];
     memories: string[];
     mapRevealed: string[];
   };
@@ -109,6 +120,8 @@ export function createNewSave(
       abilities: [],
       collectibles: [],
       seenCollectibles: [],
+      seenTreasures: [],
+      viewedTreasures: [],
       memories: [],
       mapRevealed: [],
     },
@@ -191,7 +204,19 @@ export function validateSaveData(raw: unknown): SaveData | null {
   const mapRevealed = stringList(progression['mapRevealed']);
   const seen = progression['seenCollectibles'];
   const seenCollectibles = seen === undefined ? [] : stringList(seen);
-  if (!abilities || !collectibles || !seenCollectibles || !memories || !mapRevealed) {
+  const seenT = progression['seenTreasures'];
+  const seenTreasures = seenT === undefined ? [] : stringList(seenT);
+  const viewedT = progression['viewedTreasures'];
+  const viewedTreasures = viewedT === undefined ? [] : stringList(viewedT);
+  if (
+    !abilities ||
+    !collectibles ||
+    !seenCollectibles ||
+    !seenTreasures ||
+    !viewedTreasures ||
+    !memories ||
+    !mapRevealed
+  ) {
     return null;
   }
   return {
@@ -204,7 +229,15 @@ export function validateSaveData(raw: unknown): SaveData | null {
       display: sanitizeDisplaySettings(settings['display']),
       audio: sanitizeAudioSettings(settings['audio']),
     },
-    progression: { abilities, collectibles, seenCollectibles, memories, mapRevealed },
+    progression: {
+      abilities,
+      collectibles,
+      seenCollectibles,
+      seenTreasures,
+      viewedTreasures,
+      memories,
+      mapRevealed,
+    },
     story: { flags },
     stats: sanitizeStats(raw['stats']),
   };

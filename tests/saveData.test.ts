@@ -142,6 +142,21 @@ describe('saveData', () => {
     ).toBeNull();
   });
 
+  it('les trésors vus (D-160) : gardés, vides dans une sauvegarde plus ancienne', () => {
+    const data = sample();
+    data.progression.seenTreasures = ['bookcase'];
+    expect(deserializeSave(serializeSave(data))).toMatchObject({
+      ok: true,
+      data: { progression: { seenTreasures: ['bookcase'] } },
+    });
+    const older: Partial<SaveData['progression']> = { ...data.progression };
+    delete older.seenTreasures;
+    expect(validateSaveData({ ...data, progression: older })?.progression.seenTreasures).toEqual(
+      [],
+    );
+    expect(validateSaveData({ ...data, progression: { ...older, seenTreasures: [3] } })).toBeNull();
+  });
+
   it('exporte et réimporte un code de sauvegarde, et refuse un code abîmé', () => {
     const data = sample();
     const code = encodeSaveCode(data);
