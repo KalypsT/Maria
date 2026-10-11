@@ -2480,3 +2480,16 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
   - **la porte fermée** (cadenas) à la palissade du chantier et aux deux portes de l'école.
 - **Test** (`bubble.test.ts`) : la suite des bulles de chaque échange, Maria disparue à ses deux seuls moments, aucune bulle pour les affaires de Maria, les portes du quartier.
 - **Sauvegarde** : aucun changement (aucune étape ni drapeau modifié).
+
+### D-165, PR 3 : la gare, le train, la mer
+
+- **Appliqué** (B-062 à B-103, P-08 à P-14) :
+  - **plus de bulle « Maria » au début des niveaux** : l'arrivée sur les voies de la gare (le déclencheur ne fait plus que noter l'étape, sans bloquer Céleste), le train qui s'ébranle, le train qui s'arrête à la mer, l'arrivée au dortoir ; Maria reste à la fin des trois mondes étranges (Roger, la cuisine rose, le livre musical) ;
+  - **le manque** au réveil des « mois plus tard » après la gare, et devant la maman qui berce son bébé (et son poupon) ;
+  - **le sourire** pour la camarade (au train, au dortoir, sur la jetée) et la maîtresse (sur la promenade) ; **« chut »** pour le contrôleur, la nuit ;
+  - **l'émerveillement** devant la cuisine rose, la mer à la fenêtre du train, le livre musical ;
+  - **le cœur gardé** pour la tendresse : papa sous l'horloge, maman sur le quai, Roger, le chien du fourgon ;
+  - **la porte fermée** (cadenas) à la grille du fourgon, à la porte du wagon-restaurant, à l'arche de la jetée et à la grille du port ; la maîtresse garde son « ? » à la sortie de la gare de la mer (« où vas-tu ? »).
+- **Reste pour la PR 4** : l'arrivée chez la nounou (`NANNY_ENTER`), aussi jouée par la porte du couloir de la mer.
+- **Test** (`bubble.test.ts`) : Maria seulement à la fin des mondes étranges, la suite des bulles de chaque personnage, les portes.
+- **Sauvegarde** : aucun changement (l'étape `station.arrived` est toujours notée au même endroit).

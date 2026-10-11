@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Les bulles** (D-165, demande de l'utilisateur, sur `ccr-3b45ec98-n8x7xk`) : la revue de toutes les bulles. Choix de l'utilisateur faits (un nuage pour Céleste, une bulle de parole pour les autres ; Maria aux seuls moments-pivots et la boucle de la maison cassée ; la photo de Maria gardée ; six nouveaux pictogrammes et le lit à « z » ; **le style « papier découpé »** ; pas de bulle pour les affaires de Maria). Faits : l'inventaire (`docs/BULLES.md`), la maquette (https://claude.ai/artifact/AgbA6JRNEMACrZzPv7Rfim) **la PR 1 : le rendu** (le nuage et la bulle de parole en papier découpé, le recadrage des pictogrammes, le côté de la bulle, la lune qui ne troue plus, les nouveaux pictogrammes ; aucun changement de contenu) et **la PR 2 : la maison, le jardin, le quartier** (la boucle « où est Maria ? » cassée, les cœurs de fin d'indice retirés, le manque, pas de bulle pour les affaires de Maria, les portes fermées). L'inventaire est validé. Suite : PR 3 (la gare, le train, la mer) et PR 4 (la nounou, la fin, les passants, les portes).
+**Les bulles** (D-165, demande de l'utilisateur, sur `ccr-3b45ec98-n8x7xk`) : la revue de toutes les bulles. Choix de l'utilisateur faits (un nuage pour Céleste, une bulle de parole pour les autres ; Maria aux seuls moments-pivots et la boucle de la maison cassée ; la photo de Maria gardée ; six nouveaux pictogrammes et le lit à « z » ; **le style « papier découpé »** ; pas de bulle pour les affaires de Maria). Faits : l'inventaire (`docs/BULLES.md`), la maquette (https://claude.ai/artifact/AgbA6JRNEMACrZzPv7Rfim) **la PR 1 : le rendu** (le nuage et la bulle de parole en papier découpé, le recadrage des pictogrammes, le côté de la bulle, la lune qui ne troue plus, les nouveaux pictogrammes ; aucun changement de contenu) et **la PR 2 : la maison, le jardin, le quartier** (la boucle « où est Maria ? » cassée, les cœurs de fin d'indice retirés, le manque, pas de bulle pour les affaires de Maria, les portes fermées). L'inventaire est validé. **PR 3 faite : la gare, le train, la mer** (plus de Maria au début des niveaux, le sourire, « chut », l'émerveillement, le manque, les portes). Suite : PR 4 (la nounou, la fin, les passants, les portes).
 
 **Retour d'essai jusqu'à la mer** (D-164, sur `ccr-6f15c4bd-qxtl81`) : plan validé en 3 PR. **PR 1 faite : le phare (sa porte), le dortoir (une porte claire, sa lueur toute la nuit), l'escalier de la plage (sans chaîne, un portique et sa flèche, les marches)** et **PR 2 faite : l'annonce des tunnels (la bouche qui arrive de l'avant, les creux qui s'éclairent)** et **PR 3 faite : le boss du train plus tendu (10, 8,5 puis 8 tuiles/s selon le tronçon)**. **Le retour d'essai est traité.** Puis **PR 4 faite : la revue visuelle des 41 portes** (trois portes sans dessin, maintenant dessinées : l'entrée du centre vue de l'intérieur, le retour de la jetée, la sortie de la chambre de la sieste ; DEBUG → « Portes »). Suite : essai sur téléphone ; le boss de la mer (pas encore essayé).
 
@@ -51,6 +51,11 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les bulles, PR 3 : la gare, le train, la mer (D-165)
+
+- Plus de bulle « Maria » au début des niveaux (Maria reste à la fin des mondes étranges) ; le sourire (la camarade, la maîtresse), « chut » (le contrôleur), l'émerveillement (la cuisine rose, la mer à la fenêtre, le livre musical), le manque (les mois plus tard, la maman au bébé) ; le cadenas aux portes du train et de la mer.
+- [ ] À vérifier sur téléphone : sans bulle « Maria » au début du train et de la mer, le fil reste-t-il présent ? « Chut » du contrôleur se lit-il ? L'arrivée sur les voies de la gare, sans arrêt, passe-t-elle inaperçue (voulu) ?
 
 ### Les bulles, PR 2 : la maison, le jardin, le quartier (D-165)
 

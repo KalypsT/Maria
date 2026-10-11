@@ -50,19 +50,14 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // En arrivant sur les voies : loin de la maison, Céleste pense à Maria.
+    // En arrivant sur les voies (l'étape notée). Plus de bulle « Maria » au début d'un niveau (D-165).
     id: 'station-arrived',
     room: 'station-tracks',
     on: 'touch',
     area: { col: 1, row: 22, w: 8, h: 3 },
     when: { none: [F.StationArrived] },
-    lock: true,
-    steps: [
-      { do: 'flag', id: F.StationArrived },
-      { do: 'wait', ms: 600 },
-      { do: 'thought', icon: 'maria', ms: S.thoughtMs + 600 },
-      { do: 'wait', ms: S.lookMs },
-    ],
+    lock: false,
+    steps: [{ do: 'flag', id: F.StationArrived }],
   },
   {
     // Le monde étrange de la gare (D-68) : en haut des casiers, la porte entrouverte et sa lueur.
@@ -174,7 +169,8 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.monthsBlackMs },
       { do: 'fadeIn', ms: S.monthsFadeInMs },
       { do: 'wait', ms: 1400 },
-      { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs + 800 },
+      // Le temps a passé, le manque reste (D-165).
+      { do: 'thought', icon: 'miss', ms: S.thoughtMs + 800 },
       { do: 'wait', ms: S.lookMs },
       { do: 'thought', icon: 'train', ms: S.thoughtMs + 800 },
       { do: 'wait', ms: S.lookMs },

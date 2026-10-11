@@ -46,7 +46,8 @@ const TRIGGERS: StoryTrigger[] = [
   {
     // Le soir du départ (D-85) : Agir à la porte ouverte du train à quai. Dans le noir, le soir
     // tombe sur les quais : la classe est là. Maman et papa disent au revoir ; la maîtresse fait
-    // monter les enfants. Le train part ; Céleste pense à Maria (le début d'un niveau, D-70).
+    // monter les enfants. Le train part (sans bulle « Maria » : D-165 retire celles du début des
+    // niveaux).
     id: 'train-board',
     room: 'station-platforms',
     on: 'interact',
@@ -90,8 +91,6 @@ const TRIGGERS: StoryTrigger[] = [
       // Le train s'ébranle : le paysage se met à défiler derrière les vitres.
       { do: 'flag', id: F.TrainDeparted },
       { do: 'wait', ms: 1600 },
-      { do: 'thought', icon: 'maria', ms: S.thoughtMs + 600 },
-      { do: 'wait', ms: S.lookMs },
     ],
   },
   {
@@ -105,7 +104,7 @@ const TRIGGERS: StoryTrigger[] = [
     when: { all: [F.TrainDeparted], none: [F.TrainSlide] },
     lock: true,
     steps: [
-      { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'classmate-play' },
+      { do: 'thought', icon: 'smile', ms: S.thoughtMs, by: 'classmate-play' },
       { do: 'wait', ms: S.thoughtMs },
       { do: 'fadeOut', ms: S.fadeMs },
       { do: 'flag', id: F.TrainSlide },
@@ -163,7 +162,8 @@ const TRIGGERS: StoryTrigger[] = [
     lock: true,
     steps: [
       { do: 'flag', id: F.TrainConductor },
-      { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'conductor' },
+      // « Chut » (D-165) : il la laisse passer, sans rien dire.
+      { do: 'thought', icon: 'hush', ms: S.thoughtMs, by: 'conductor' },
       { do: 'wait', ms: S.lookMs },
     ],
   },
@@ -178,7 +178,8 @@ const TRIGGERS: StoryTrigger[] = [
     lock: true,
     repeat: true,
     steps: [
-      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+      // Le bébé et son poupon : Céleste pense à Maria sans la voir, le manque (D-165).
+      { do: 'thought', icon: 'miss', ms: S.thoughtMs },
       { do: 'wait', ms: S.lookMs },
     ],
   },
@@ -277,7 +278,8 @@ const TRIGGERS: StoryTrigger[] = [
         ms: S.cradleSparkleMs + 600,
       },
       { do: 'wait', ms: S.cradleSparkleMs },
-      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+      // Elle la reconnaît : l'émerveillement (D-165).
+      { do: 'thought', icon: 'wonder', ms: S.thoughtMs },
       { do: 'wait', ms: S.thoughtMs + S.lookMs },
       { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
       // Le souvenir jouable (D-89) : Céleste toute petite, sa dînette, le thé pour Roger et ses
@@ -297,8 +299,8 @@ const TRIGGERS: StoryTrigger[] = [
   },
   {
     // Au matin (D-90) : après la cuisine rose, Agir sur sa couchette. La nuit passe ; la maîtresse
-    // réveille Céleste, la mer est à la fenêtre ; le train ralentit et s'arrête. Céleste pense à
-    // Maria (l'arrivée). Puis le quai de la gare de la mer.
+    // réveille Céleste, la mer est à la fenêtre (l'émerveillement) ; le train ralentit et s'arrête.
+    // Puis le quai de la gare de la mer (sans bulle « Maria » à l'arrivée, D-165).
     id: 'train-morning',
     room: 'train-couchettes',
     on: 'interact',
@@ -320,13 +322,12 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.thoughtMs },
       // La mer à la fenêtre.
       { do: 'wait', ms: S.seaLookMs },
-      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+      { do: 'thought', icon: 'wonder', ms: S.thoughtMs },
       { do: 'wait', ms: S.thoughtMs },
       // Le train ralentit et s'arrête : le paysage ne défile plus.
       { do: 'flag', id: F.TrainArrived },
       { do: 'wait', ms: S.trainStopMs },
-      { do: 'thought', icon: 'maria', ms: S.thoughtMs },
-      { do: 'wait', ms: S.thoughtMs + 300 },
+      { do: 'wait', ms: S.lookMs },
       { do: 'fadeOut', ms: S.nightFadeOutMs },
       { do: 'room', room: 'sea-station', ...SEA_ARRIVAL, facing: -1, returnPoint: true },
       { do: 'wait', ms: S.nightBlackMs },
@@ -609,8 +610,8 @@ const DIM: NonNullable<StoryData['dim']> = TRAIN_ROOMS.filter((room) => room !==
  */
 const LOCKED: StoryData['lockedRooms'] = [
   { room: 'train-couchettes', exit: 1, when: { none: [F.TrainNight] }, icon: 'bed' },
-  { room: 'train-baggage', exit: 2, when: { none: [F.TrainRestaurantOpen] }, icon: 'question' },
-  { room: 'train-restaurant', exit: 1, when: { none: [F.TrainRestaurantOpen] }, icon: 'question' },
+  { room: 'train-baggage', exit: 2, when: { none: [F.TrainRestaurantOpen] }, icon: 'locked' },
+  { room: 'train-restaurant', exit: 1, when: { none: [F.TrainRestaurantOpen] }, icon: 'locked' },
   // Les portes du train à quai (D-90) : elles n'existent qu'une fois le train arrivé ; avant, rien
   // ne les montre (le quai vide de la gare de la ville, le train en route).
   { room: 'train-couchettes', exit: 2, when: { none: [F.TrainArrived] }, hidden: true },

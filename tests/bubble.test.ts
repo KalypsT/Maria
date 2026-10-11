@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { THOUGHT_ICONS } from '../src/core/story/story';
 import { bubbleKey, bubbleSide, fitScale } from '../src/core/story/bubble';
 import { HOUSE_STORY } from '../src/levels/house/story';
+import { SEA_STORY } from '../src/levels/sea/story';
+import { STATION_STORY } from '../src/levels/station/story';
+import { TRAIN_STORY } from '../src/levels/train/story';
 
 describe('les bulles (D-165)', () => {
   it('partent vers la droite, sauf au bord droit de la salle', () => {
@@ -99,5 +102,60 @@ describe('les bulles de la maison, du jardin et du quartier (D-165, PR 2)', () =
       .filter((l) => l.room === 'street' || l.room === 'school')
       .map((l) => l.icon);
     expect(icons).toEqual(['locked', 'locked', 'locked']);
+  });
+});
+
+describe('les bulles de la gare, du train et de la mer (D-165, PR 3)', () => {
+  const all = [...STATION_STORY.triggers, ...TRAIN_STORY.triggers, ...SEA_STORY.triggers];
+  const thoughts = (id: string) => {
+    const t = all.find((x) => x.id === id);
+    if (!t) throw new Error(id);
+    return t.steps.flatMap((s) => (s.do === 'thought' ? [`${s.by ?? 'C'}:${s.icon}`] : []));
+  };
+
+  it('ne montrent plus Maria au début des niveaux, seulement à la fin des mondes étranges', () => {
+    const maria = all
+      .filter((t) => t.steps.some((s) => s.do === 'thought' && s.icon === 'maria'))
+      .map((t) => t.id)
+      .sort();
+    // `sea-end-door` et `sea-end-later` mènent chez la nounou (`NANNY_ENTER`) : la PR 4.
+    expect(maria.filter((id) => !id.startsWith('sea-end'))).toEqual([
+      'sea-music-book',
+      'station-roger',
+      'train-pink-kitchen',
+    ]);
+    expect(
+      all.some((t) => t.steps.some((s) => s.do === 'thought' && s.icon === 'maria-missing')),
+    ).toBe(false);
+  });
+
+  it('gardent le cœur pour la tendresse ; les autres sourient, ou font « chut »', () => {
+    expect(thoughts('train-board')).toEqual(['mom-quay:heart', 'C:heart', 'teacher-quay:train']);
+    expect(thoughts('train-classmate')[0]).toBe('classmate-play:smile');
+    expect(thoughts('train-conductor')).toEqual(['conductor:hush']);
+    expect(thoughts('train-mother')).toEqual(['C:miss']);
+    expect(thoughts('train-dog')).toEqual(['C:heart']);
+    expect(thoughts('sea-arrival')).toEqual([
+      'C:question',
+      'teacher-sea:sun',
+      'classmate-dorm:smile',
+    ]);
+    expect(thoughts('sea-tide-rises').at(-1)).toBe('teacher-promenade:smile');
+    expect(thoughts('sea-evening')).toContain('classmate-jetty:smile');
+  });
+
+  it("s'émerveillent devant la cuisine rose, la mer et le livre musical", () => {
+    expect(thoughts('train-pink-kitchen')[0]).toBe('C:wonder');
+    expect(thoughts('train-morning')).toEqual(['teacher-morning:sun', 'C:wonder']);
+    expect(thoughts('sea-music-book')[0]).toBe('C:wonder');
+    expect(thoughts('station-months')).toEqual(['C:miss', 'C:train']);
+  });
+
+  it('montrent une porte fermée, sauf la maîtresse qui demande où on va', () => {
+    const icons = [...TRAIN_STORY.lockedRooms, ...SEA_STORY.lockedRooms]
+      .filter((l) => l.icon !== undefined && l.icon !== 'bed')
+      .map((l) => `${l.speaker ?? 'C'}:${l.icon ?? ''}`);
+    expect(icons.filter((i) => i === 'C:question')).toEqual([]);
+    expect(icons).toContain('teacher-sea:question');
   });
 });
