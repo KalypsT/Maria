@@ -509,3 +509,16 @@ export const ARCADE_MONSTER = {
    */
   lead: { from: 8, to: 3 } satisfies Ramp,
 };
+
+/** Le mode Sans fin (D-167). PROVISOIRES, à régler sur téléphone. */
+export const ARCADE_ENDLESS = {
+  /**
+   * Plafond de la difficulté : le morceau n a celle du niveau n, jusqu'au plus dur vérifié par les
+   * tests ; au-delà, elle ne monte plus.
+   */
+  capLevel: ARCADE.verifiedLevels,
+  /** Niveau à atteindre dans le mode Niveaux d'un jeu pour ouvrir son mode Sans fin (PLACEHOLDER). */
+  unlockLevel: 5,
+  /** Un bip tous les… (m). */
+  milestoneMeters: 100,
+};
