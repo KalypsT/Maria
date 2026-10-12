@@ -3321,12 +3321,13 @@ export class GameScene extends Phaser.Scene {
     const live = run.playing;
     controls.consumePressed('Interact');
     controls.consumePressed('Attack');
-    controls.consumePressed('Shift');
     input.moveX = live ? controls.moveX : 0;
     input.moveY = live ? controls.moveY : 0;
     input.jumpPressed = controls.consumePressed('Jump') && live;
     input.jumpHeld = controls.isHeld('Jump') && live;
     input.abilityPressed = controls.consumePressed('Ability') && live;
+    // Les deux mondes (D-166) : la bascule, comme dans la partie ; les dangers suivent la couche.
+    this.stepShift(controls.consumePressed('Shift') && live);
     if (run.phase !== ArcadePhase.Fallen) {
       player.step(input);
     }

@@ -13,6 +13,7 @@ import { generateChimneyLevel } from './chimney';
 import { generateCorridorLevel } from './corridor';
 import { generateStepsLevel } from './steps';
 import { generateWindLevel } from './wind';
+import { generateWorldsLevel } from './worlds';
 
 /** Le jeu d'un identifiant (undefined : inconnu). */
 export function arcadeGame(id: string): ArcadeGame | undefined {
@@ -62,6 +63,7 @@ export const ARCADE_READY: readonly ArcadeGameId[] = [
   ArcadeGameId.Wind,
   ArcadeGameId.Cables,
   ArcadeGameId.Corridor,
+  ArcadeGameId.Worlds,
 ];
 
 /**
@@ -109,6 +111,17 @@ export function arcadeLevel(id: ArcadeGameId, n: number): ArcadeLevel | null {
   }
   if (id === ArcadeGameId.Wind) {
     const level = generateWindLevel(n, params, phase.hitbox, game.abilities);
+    return {
+      id: `arcade-${id}-${String(n)}`,
+      text: level.text,
+      game: id,
+      number: n,
+      lengthTiles: level.lengthTiles,
+      difficulty: level.difficulty,
+    };
+  }
+  if (id === ArcadeGameId.Worlds) {
+    const level = generateWorldsLevel(n, params, phase.hitbox, game.abilities);
     return {
       id: `arcade-${id}-${String(n)}`,
       text: level.text,

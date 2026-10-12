@@ -418,3 +418,48 @@ export const ARCADE_CORRIDOR = {
    */
   minWindowPx: { from: 16, to: 8 } satisfies Ramp,
 };
+
+/**
+ * Les deux mondes (D-166) : de poteau en poteau au-dessus des briques de jeu, comme les sauts, mais
+ * les poteaux n'existent souvent que dans une couche (le présent ou le souvenir, D-107) : on bascule
+ * en plein saut. Des portes de briques de jeu d'une seule couche resserrent le moment de la bascule ;
+ * plus tard, des murs d'une seule couche sur de larges poteaux communs : basculer en courant.
+ * Distances en tuiles. PROVISOIRES, à régler sur téléphone.
+ */
+export const ARCADE_WORLDS = {
+  rows: 22,
+  /** Lignes permises pour le haut des poteaux. */
+  postRows: { min: 10, max: 18 },
+  /** Poteau de départ (commun aux deux couches) : largeur et ligne du haut. */
+  start: { width: 6, top: 15 },
+  goalWidth: 6,
+  difficultyRate: 0.85,
+  /** Poteaux par niveau (sans le départ ni le fanion) : `first`, un de plus tous les `every`. */
+  posts: { first: 5, every: 2, max: 14 },
+  /** Écart visé entre deux poteaux (tuiles), et l'écart tiré en plus. */
+  gap: { from: 3, to: 4 } satisfies Ramp,
+  gapSpread: 1,
+  /** Différence de hauteur visée (tuiles), tirée jusqu'à cette valeur, vers le haut ou le bas. */
+  rise: { from: 0.5, to: 2 } satisfies Ramp,
+  /** Largeur d'un poteau, et la largeur tirée en plus. */
+  width: { from: 4, to: 2 } satisfies Ramp,
+  widthSpread: 1,
+  /** Chance d'un poteau commun aux deux couches (un répit : pas de bascule). */
+  restChance: { from: 0.15, to: 0.1 } satisfies Ramp,
+  /**
+   * Chance de portes autour d'un saut qui bascule : une porte de la couche d'arrivée près du départ
+   * (basculer trop tôt, c'est la toucher), une de la couche de départ près de l'arrivée (trop tard).
+   */
+  gateChance: { from: 0, to: 0.9 } satisfies Ramp,
+  /** Colonnes entre les deux portes (tuiles) : la place pour basculer. */
+  gateSpacing: { from: 4.4, to: 3 } satisfies Ramp,
+  /** Chance d'un large poteau commun avec deux murs d'une seule couche (basculer, puis revenir). */
+  wallsChance: { from: 0, to: 0.25 } satisfies Ramp,
+  /** Colonnes entre les deux murs (tuiles). */
+  wallSpacing: { from: 5, to: 3 } satisfies Ramp,
+  /**
+   * Plage de bascules (px) où le témoin passe, au moins : en dessous, le poteau n'est pas retenu.
+   * Le témoin bascule au milieu de la plage.
+   */
+  minWindowPx: { from: 24, to: 8 } satisfies Ramp,
+};
