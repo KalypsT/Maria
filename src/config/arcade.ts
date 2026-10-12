@@ -204,6 +204,8 @@ export const ARCADE_TIMING = {
   clearedMs: 1200,
   /** Après une chute, avant l'écran « Oups ! ». */
   fallMs: 700,
+  /** Le mode Sans fin (D-167) : « 100 m » affiché, à chaque repère. */
+  milestoneMs: 1000,
 };
 
 /**
@@ -221,6 +223,8 @@ export const ARCADE_CHIMES = {
   cleared: { from: 784, to: 1568, ms: 260, wave: 'triangle' },
   /** Une chute. */
   fall: { from: 620, to: 140, ms: 420, wave: 'triangle' },
+  /** Le mode Sans fin passe un repère (tous les 100 m, D-167). */
+  milestone: { from: 988, to: 1319, ms: 140, wave: 'triangle' },
   /** Le monstre se réveille. */
   wake: { from: 196, to: 147, ms: 260, wave: 'square' },
   /** Un nouveau record. */
@@ -508,4 +512,33 @@ export const ARCADE_MONSTER = {
    * de marge (à pleine course, une tuile se perd en un dixième de seconde).
    */
   lead: { from: 8, to: 3 } satisfies Ramp,
+  /**
+   * Le mode Sans fin (D-167) : la vitesse du monstre, une part de l'allure du témoin dans le morceau
+   * (les sauts et les blocs le ralentissent), qui monte avec la difficulté ; **sa laisse** : au-delà de `leashTiles` derrière Céleste, il rattrape (de
+   * `catchUpRate` tuiles/s par tuile de retard en plus, jusqu'à `catchUpMaxSpeed` tuiles/s).
+   */
+  endless: {
+    speed: { from: 0.7, to: 0.95 } satisfies Ramp,
+    leashTiles: 8,
+    catchUpRate: 1.5,
+    catchUpMaxSpeed: 16,
+  },
+};
+
+/** Le mode Sans fin (D-167). PROVISOIRES, à régler sur téléphone. */
+export const ARCADE_ENDLESS = {
+  /**
+   * Plafond de la difficulté : le morceau n a celle du niveau n, jusqu'au plus dur vérifié par les
+   * tests ; au-delà, elle ne monte plus.
+   */
+  capLevel: ARCADE.verifiedLevels,
+  /** Niveau à atteindre dans le mode Niveaux d'un jeu pour ouvrir son mode Sans fin (PLACEHOLDER). */
+  unlockLevel: 5,
+  /** Un bip tous les… (m). */
+  milestoneMeters: 100,
+  /**
+   * La cheminée (vers le haut) : il n'y a plus de fond qui pique ; retomber plus de ces lignes sous
+   * la meilleure hauteur atteinte, c'est l'erreur (deux sections).
+   */
+  fallRows: 12,
 };

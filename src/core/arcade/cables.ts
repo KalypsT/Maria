@@ -21,6 +21,7 @@ import {
 import { parseAsciiLevel } from '../level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../player/PlayerPhysics';
 import { mulberry32, ramp, seedOf } from './random';
+import { chunkLines, type EndlessChunk } from './endless';
 import { ARCADE_ROOM_META } from './roomMeta';
 
 export type { CableExit } from './course';
@@ -233,9 +234,15 @@ function postCandidates(
   goal: boolean,
   minCol: number,
   hitbox: Hitbox,
+  seam = false,
 ): Candidate<PostPiece>[] {
   const wanted = exitCol(from) + Math.round(ramp(C.gapBeforePost, d) + random() * C.gapSpread);
-  const width = goal ? C.goalWidth : Math.max(2, Math.round(ramp(C.postWidth, d) + random()));
+  // Le dernier poteau : le fanion, ou une jointure du mode Sans fin (D-167), comme le départ.
+  const width = goal
+    ? seam
+      ? C.start.width
+      : C.goalWidth
+    : Math.max(2, Math.round(ramp(C.postWidth, d) + random()));
   const slackTarget = ramp(C.slack, d) + random() * ramp(C.slackSpread, d);
   const out: Candidate<PostPiece>[] = [];
   const first = Math.max(minCol, exitCol(from) + 1);
@@ -253,7 +260,7 @@ function postCandidates(
       }
       const skippable = skip !== null && landsOn(skip, col, width, top, hitbox);
       out.push({
-        piece: { kind: 'post', col, width, top, goal },
+        piece: { kind: 'post', col, width, top, goal: goal && !seam },
         score:
           Math.abs(slack - slackTarget) + 8 * Math.abs(wanted - col) + (skippable ? SKIPPABLE : 0),
       });
@@ -294,28 +301,30 @@ function glideReach(path: Path): number {
   return (path.x[path.x.length - 1] ?? 0) + 2 * T;
 }
 
+/** Les pièces posées par le témoin : poteaux et câbles, du départ au dernier poteau. */
+interface Placement {
+  readonly pieces: Piece[];
+  readonly cables: CablePiece[];
+}
+
 /**
- * Le niveau n des tyroliennes (D-166), toujours le même : graine fixe, et chaque pièce placée
- * d'après le chemin du témoin (la vraie physique, la phase du jeu) puis vérifiée par lui. Un poteau
- * n'est jamais à portée du vol plané depuis le précédent : il faut passer par les câbles. Les tests
- * mesurent ensuite chaque niveau avec l'analyse de faisabilité (D-16).
+ * Les pièces du niveau `n` (sa difficulté, ses câbles), avec la graine `seed`, le poteau de départ
+ * en haut de la ligne `startTop` ; `seam` : le dernier poteau est une jointure du mode Sans fin
+ * (D-167), sans fanion.
  */
-export function generateCablesLevel(
+function placeCables(
   n: number,
+  seed: string,
+  startTop: number,
+  seam: boolean,
   params: Readonly<MovementParams>,
   hitbox: Hitbox,
-  abilities: readonly string[],
-): CablesLevel {
-  const random = mulberry32(seedOf(`cables:${String(n)}`));
+  header: readonly string[],
+): Placement {
+  const random = mulberry32(seedOf(seed));
   const d = cablesDifficulty(n);
-  const header = [
-    `; Console (D-166) : les tyroliennes, niveau ${String(n)}. Généré (graine fixe) : ne pas modifier à la main.`,
-    `; @name: Tyroliennes · niveau ${String(n)}`,
-    `; @abilities: ${abilities.join(' ')}`,
-    ...ARCADE_ROOM_META,
-  ];
   const pieces: Piece[] = [
-    { kind: 'post', col: 1, width: C.start.width, top: C.start.top, goal: false },
+    { kind: 'post', col: 1, width: C.start.width, top: startTop, goal: false },
   ];
   const cables: CablePiece[] = [];
   const parse = (list: readonly Piece[]) => {
@@ -365,7 +374,17 @@ export function generateCablesLevel(
   };
   const tryPost = (last: Piece, goal: boolean, minCol: number): boolean => {
     const path = pathAfter(saved, level, params, pieces, cables);
-    for (const { piece } of postCandidates(path, skip, last, d, random, goal, minCol, hitbox)) {
+    for (const { piece } of postCandidates(
+      path,
+      skip,
+      last,
+      d,
+      random,
+      goal,
+      minCol,
+      hitbox,
+      seam,
+    )) {
       const next = parse([...pieces, piece]);
       const placed = reach(saved, next, params, [...pieces, piece], cables);
       if (placed) {
@@ -414,6 +433,36 @@ export function generateCablesLevel(
     reachCol = Math.ceil(glideReach(pathAfter(saved, level, params, pieces, cables)) / T);
   }
 
+  return { pieces, cables };
+}
+
+/**
+ * Le niveau n des tyroliennes (D-166), toujours le même : graine fixe, et chaque pièce placée
+ * d'après le chemin du témoin (la vraie physique, la phase du jeu) puis vérifiée par lui. Un poteau
+ * n'est jamais à portée du vol plané depuis le précédent : il faut passer par les câbles. Les tests
+ * mesurent ensuite chaque niveau avec l'analyse de faisabilité (D-16).
+ */
+export function generateCablesLevel(
+  n: number,
+  params: Readonly<MovementParams>,
+  hitbox: Hitbox,
+  abilities: readonly string[],
+): CablesLevel {
+  const header = [
+    `; Console (D-166) : les tyroliennes, niveau ${String(n)}. Généré (graine fixe) : ne pas modifier à la main.`,
+    `; @name: Tyroliennes · niveau ${String(n)}`,
+    `; @abilities: ${abilities.join(' ')}`,
+    ...ARCADE_ROOM_META,
+  ];
+  const { pieces, cables } = placeCables(
+    n,
+    `cables:${String(n)}`,
+    C.start.top,
+    false,
+    params,
+    hitbox,
+    header,
+  );
   const goal = pieces[pieces.length - 1];
   const width = goal ? exitCol(goal) + 1 : LOOKAHEAD_COLS;
   const text = levelText(pieces, width, C.rows, header);
@@ -425,6 +474,80 @@ export function generateCablesLevel(
     lengthTiles: goalCol - spawnCol,
     cables: cables.length,
     posts: pieces.filter((p) => p.kind === 'post').length - 2,
-    difficulty: d,
+    difficulty: cablesDifficulty(n),
   };
+}
+
+/**
+ * Un morceau des tyroliennes pour le mode Sans fin (D-167) : de sa jointure (un poteau comme le
+ * départ, en haut de la ligne `entryTop`, là où a fini le morceau d'avant) à la suivante, non
+ * comprise, dont la hauteur est libre (le vol depuis un câble la choisit) : le morceau d'après en
+ * part. Les pièces sont posées comme celles du niveau `level`.
+ */
+export function generateCablesChunk(
+  index: number,
+  level: number,
+  runSeed: number,
+  entryTop: number,
+  params: Readonly<MovementParams>,
+  hitbox: Hitbox,
+): EndlessChunk {
+  const { pieces, cables } = placeCables(
+    level,
+    `endless:cables:${String(runSeed)}:${String(index)}`,
+    entryTop,
+    true,
+    params,
+    hitbox,
+    ARCADE_ROOM_META,
+  );
+  const next = pieces[pieces.length - 1];
+  const end = next?.kind === 'post' ? next.col : 1;
+  const lines = chunkLines(levelText(pieces.slice(0, -1), end + 1, C.rows, []), 1, end);
+  const exitTop = next?.kind === 'post' ? next.top : entryTop;
+  return {
+    index,
+    level,
+    lines,
+    width: end - 1,
+    difficulty: cablesDifficulty(level),
+    posts: pieces
+      .filter((p): p is PostPiece => p.kind === 'post')
+      .slice(0, -1)
+      .map((p) => ({ ...p, col: p.col - 1 })),
+    exit: { top: exitTop, layer: 'present' },
+    anchorIn: { col: 0, row: entryTop - 1 },
+    anchorOut: { col: end - 1, row: exitTop - 1 },
+    cables: cables.map((c) => ({ ...c, c1: c.c1 - 1, c2: c.c2 - 1 })),
+  };
+}
+
+/**
+ * Le témoin des tyroliennes traverse-t-il toute la salle, du départ au dernier poteau de `posts`,
+ * en suivant les sorties de `cables` (les tests : des morceaux collés, D-167) ?
+ */
+export function crossCables(
+  level: LevelData,
+  posts: readonly PostPiece[],
+  cables: readonly CablePiece[],
+  params: Readonly<MovementParams>,
+  hitbox: Hitbox,
+): boolean {
+  const spawn = spawnPosition(level, hitbox.width, hitbox.height);
+  const phys = new PlayerPhysics(level, params, spawn.x, spawn.y, hitbox);
+  phys.canGlide = true;
+  phys.canHook = true;
+  const w: Witness = { phys, pressNext: false, lastCable: -1 };
+  const target = posts[posts.length - 1];
+  for (let i = 0; i < MAX_STEPS * (posts.length + cables.length); i++) {
+    decide(w, posts, cables);
+    phys.step(input);
+    if (phys.box.y + phys.box.height > HAZARD_TOP) {
+      return false;
+    }
+    if (target && postUnder(phys, posts) === target) {
+      return true;
+    }
+  }
+  return false;
 }

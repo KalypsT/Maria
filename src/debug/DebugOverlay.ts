@@ -1,6 +1,7 @@
 import { Ability } from '../config/abilities';
 import {
   ARCADE_READY,
+  ENDLESS_READY,
   arcadeGame,
   arcadeLevel,
   arcadePhase,
@@ -2094,6 +2095,18 @@ export function installDebugOverlay(scene: GameScene): void {
     }
     (event.currentTarget as HTMLElement).blur();
   });
+  // Le mode Sans fin (D-167) : depuis le morceau n − 1 (le numéro du niveau), même fermé ; son
+  // score ne compte pas, sauf depuis le premier.
+  element('button', arcadeActions, undefined, 'Sans fin').addEventListener('click', (event) => {
+    const id = ENDLESS_READY.find((game) => game === arcadeSelect.value);
+    (event.currentTarget as HTMLElement).blur();
+    if (!id) {
+      describeArcade(' · pas encore de mode Sans fin pour ce jeu');
+      return;
+    }
+    panel.hidden = true;
+    scene.debugEndless(id, Math.max(1, Math.floor(Number(arcadeNumber.value)) || 1) - 1);
+  });
   arcadeSelect.addEventListener('change', () => {
     describeArcade();
   });
@@ -2536,6 +2549,10 @@ export function installDebugOverlay(scene: GameScene): void {
       stats.textContent +=
         `\nfil palier ${String(hint.stage)}  sans progrès ${(hint.idleMs / 1000).toFixed(0)} s` +
         (scene.hintGoalName ? `  → ${scene.hintGoalName}` : '');
+      const chunk = scene.endlessChunk;
+      if (chunk !== null) {
+        stats.textContent += `\nsans fin : morceau ${String(chunk)}`;
+      }
       const touch = scene.touch;
       if (touch) {
         const stick = touch.controller.joystick;

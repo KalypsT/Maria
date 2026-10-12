@@ -1,5 +1,6 @@
 import {
   ARCADE,
+  ARCADE_CABLES,
   ARCADE_CLIMB,
   ARCADE_GAMES,
   ARCADE_JUMPS,
@@ -8,13 +9,14 @@ import {
 } from '../../config/arcade';
 import { GROWTH_PHASES, phaseMovement, type GrowthPhase } from '../../config/growth';
 import { DEFAULT_MOVEMENT, type MovementParams } from '../../config/movement';
-import { generateCablesLevel } from './cables';
-import { generateChimneyLevel } from './chimney';
-import { generateCorridorLevel } from './corridor';
-import { generateMonsterLevel } from './monster';
-import { generateStepsLevel } from './steps';
-import { generateWindLevel } from './wind';
-import { generateWorldsLevel } from './worlds';
+import { generateCablesChunk, generateCablesLevel } from './cables';
+import { generateChimneyChunk, generateChimneyLevel } from './chimney';
+import { generateCorridorChunk, generateCorridorLevel } from './corridor';
+import { generateMonsterChunk, generateMonsterLevel } from './monster';
+import { endlessLevel, type EndlessChunk, type EndlessEntry } from './endless';
+import { generateStepsChunk, generateStepsLevel } from './steps';
+import { generateWindChunk, generateWindLevel } from './wind';
+import { generateWorldsChunk, generateWorldsLevel } from './worlds';
 
 /** Le jeu d'un identifiant (undefined : inconnu). */
 export function arcadeGame(id: string): ArcadeGame | undefined {
@@ -123,6 +125,75 @@ function generate(
       return generateWorldsLevel(n, params, hitbox, game.abilities);
     case ArcadeGameId.Monster:
       return generateMonsterLevel(n, params, hitbox, game.abilities);
+  }
+}
+
+/** Jeux qui ont leurs morceaux pour le mode Sans fin (D-167) : tous, depuis sa PR 5. */
+export const ENDLESS_READY: readonly ArcadeGameId[] = Object.values(ArcadeGameId);
+
+/**
+ * Le morceau `index` (0, 1, 2…) d'une partie Sans fin de graine `runSeed` (D-167) : généré, comme
+ * les niveaux, d'après les valeurs de mouvement par défaut de la phase du jeu. `entry` : où il
+ * commence (là où a fini le morceau d'avant : la hauteur de la jointure, la couche ; null : le
+ * premier). Null pour un jeu sans morceaux (encore) ou un rang invalide.
+ */
+export function endlessChunk(
+  id: ArcadeGameId,
+  index: number,
+  runSeed: number,
+  entry: EndlessEntry | null = null,
+): EndlessChunk | null {
+  const game = arcadeGame(id);
+  if (!game || !ENDLESS_READY.includes(id) || !Number.isInteger(index) || index < 0) {
+    return null;
+  }
+  const phase = arcadePhase(game);
+  const params = phaseMovement(DEFAULT_MOVEMENT, phase);
+  const level = endlessLevel(index);
+  switch (id) {
+    case ArcadeGameId.Climb:
+      return generateStepsChunk(
+        game.id,
+        game.name,
+        index,
+        level,
+        runSeed,
+        ARCADE_CLIMB,
+        params,
+        phase.hitbox,
+        game.abilities,
+      );
+    case ArcadeGameId.Chimney:
+      return generateChimneyChunk(index, level, runSeed, entry, params, phase.hitbox);
+    case ArcadeGameId.Wind:
+      return generateWindChunk(index, level, runSeed, params, phase.hitbox);
+    case ArcadeGameId.Cables:
+      return generateCablesChunk(
+        index,
+        level,
+        runSeed,
+        entry?.top ?? ARCADE_CABLES.start.top,
+        params,
+        phase.hitbox,
+      );
+    case ArcadeGameId.Corridor:
+      return generateCorridorChunk(index, level, runSeed, params, phase.hitbox);
+    case ArcadeGameId.Worlds:
+      return generateWorldsChunk(index, level, runSeed, entry, params, phase.hitbox);
+    case ArcadeGameId.Monster:
+      return generateMonsterChunk(index, level, runSeed, params, phase.hitbox);
+    default:
+      return generateStepsChunk(
+        game.id,
+        game.name,
+        index,
+        level,
+        runSeed,
+        ARCADE_JUMPS,
+        params,
+        phase.hitbox,
+        game.abilities,
+      );
   }
 }
 

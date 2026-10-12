@@ -2,6 +2,8 @@
 
 ## Phase en cours
 
+**La console, le mode Sans fin** (D-167, demande de l'utilisateur, sur `ccr-e9f3d38a-x4umy1`, reparti de `main` après la fusion du mode Niveaux) : un seul parcours continu fait de morceaux collés (une jointure entre chacun), une bande de trois morceaux chargée ; un nouveau parcours à chaque partie, la difficulté plafonnée au niveau 20, un repère fantôme du record et un bip tous les 100 m, débloqué après un niveau atteint en mode Niveaux (proposé : 5). Plan validé en 6 PR. **PR 1 faite : le moteur** (les morceaux des sauts et leurs jointures, la bande, purs et testés) et **PR 2 faite : le Sans fin dans la console** (les sauts : ouvert au niveau 5, la bande dans la scène, le dessin bloc par bloc, les morceaux en arrière-plan et hors ligne, le repère du record, le bip des 100 m). **Essai sur téléphone attendu** (une saccade au changement de morceau ?). **PR 3 faite : le couloir et les tyroliennes** en Sans fin (la jointure des tyroliennes à hauteur libre : le morceau suivant en part). **PR 4 faite : les deux mondes et le monstre** (le monstre tenu en laisse, écart au plan signalé). **Essai sur téléphone attendu** (le monstre, les deux mondes). **PR 5 faite : la bande en deux dimensions et les jeux verticaux** (la grimpette en escalier, la cheminée empilée, le grand vent en descente ; les huit jeux ont leur Sans fin). Suite : la PR 6, les réglages après les essais sur téléphone.
+
 **La console de Céleste** (D-166, demande de l'utilisateur, sur `ccr-e9f3d38a-x4umy1`) : un mode à part, un jeu par capacité (des niveaux qui s'enchaînent, de plus en plus durs, record en mètres). Maquette (https://claude.ai/artifact/2Pb1PC7arwM1ESAByVLc9T), choix de l'utilisateur et plan validés en 9 PR pour le mode Niveaux (le système ; l'écran de la console ; le cadeau et la chambre ; puis un jeu par PR) ; le mode Sans fin plus tard. **PR 1 faite : le système et les tyroliennes** (les jeux, le générateur et son témoin, les records dans la sauvegarde sans migration, DEBUG → « Console ») et **PR 2 faite : l'écran de la console** (le menu, le mode, la partie, « Oups ! » et le record, le style pastel, les bips ; DEBUG → « Console » → « Allumer la console ») et **PR 3 faite : le cadeau et la chambre** (papa au premier passage au potager, la télé sur le bureau, Agir, « nouveau ! » et l'étincelle) et **PR 4 faite : les sauts et la grimpette** (jouables dès le cadeau) et **PR 5 faite : la cheminée** (le saut mural, la hauteur au compteur) et **PR 6 faite : le grand vent** (le parapluie, des portes de briques de jeu) et **PR 7 faite : le couloir** (la glissade : des barres, des tunnels, des trous, le saut long) et **PR 8 faite : les deux mondes** (la bascule en plein saut, des portes et des murs d'une seule couche) et **PR 9 faite : le monstre** (après la vague de la mer : courir et sauter, poursuivie par une masse pastel). **Le mode Niveaux est complet** (huit jeux). Suite : essayer la console sur téléphone ; le mode Sans fin, avec son propre plan.
 
 **Les bulles** (D-165, demande de l'utilisateur, sur `ccr-3b45ec98-n8x7xk`) : la revue de toutes les bulles. Choix de l'utilisateur faits (un nuage pour Céleste, une bulle de parole pour les autres ; Maria aux seuls moments-pivots et la boucle de la maison cassée ; la photo de Maria gardée ; six nouveaux pictogrammes et le lit à « z » ; **le style « papier découpé »** ; pas de bulle pour les affaires de Maria). Faits : l'inventaire (`docs/BULLES.md`), la maquette (https://claude.ai/artifact/AgbA6JRNEMACrZzPv7Rfim) **la PR 1 : le rendu** (le nuage et la bulle de parole en papier découpé, le recadrage des pictogrammes, le côté de la bulle, la lune qui ne troue plus, les nouveaux pictogrammes ; aucun changement de contenu) et **la PR 2 : la maison, le jardin, le quartier** (la boucle « où est Maria ? » cassée, les cœurs de fin d'indice retirés, le manque, pas de bulle pour les affaires de Maria, les portes fermées). L'inventaire est validé. **PR 3 faite : la gare, le train, la mer** (plus de Maria au début des niveaux, le sourire, « chut », l'émerveillement, le manque, les portes) et **PR 4 faite : la nounou, le monde de Maria, les passants, les portes**. **Le plan des bulles est complet.** Suite : essai sur téléphone.
@@ -53,6 +55,35 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le mode Sans fin, PR 5 : la bande en deux dimensions, les jeux verticaux (D-167)
+
+- Chaque morceau a une entrée et une sortie : le suivant se place à côté, au-dessus ou en escalier ; la bande ajoute le cadre et remplit le reste ; au recul, tout se déplace en largeur et en hauteur. La grimpette (en escalier vers le haut), la cheminée (empilée, un rebord par morceau ; retomber de deux sections, c'est l'erreur), le grand vent (en escalier vers le bas).
+- Vérifié : la grimpette, 14 morceaux traversés, chaque jointure faisable par l'analyse ; la cheminée et le grand vent, chaque jointure passée par le témoin ; dans Chromium, quatre changements de morceau par jeu (3 à 6 ms).
+- [ ] À vérifier sur téléphone : les jeux verticaux en Sans fin (la cheminée : la chute de deux sections, juste ? les rebords ; le grand vent : le cadre plein au-dessus, lisible ?).
+
+### Le mode Sans fin, PR 4 : les deux mondes et le monstre (D-167)
+
+- Les deux mondes (une jointure commune aux deux couches, à hauteur libre ; le morceau suivant part de la couche où arrive le témoin ; les zones recalées, la vue des couches rechargée, Céleste reste dans sa couche) et le monstre (à une part de l'allure du témoin, de 70 à 95 %, tenu en laisse à 8 tuiles ; `Chase.reframe` au recul) en Sans fin.
+- Vérifié : 25 morceaux de chaque jeu traversés par le témoin (le monstre jamais à moins de 6 tuiles) ; chaque jointure faisable (les deux mondes de 300 à 167 ms) ; dans Chromium, quatre changements de morceau par jeu.
+- [ ] À vérifier sur téléphone : le monstre en Sans fin (la laisse de 8 tuiles : assez menaçant ? trop ?), les deux mondes (la fluidité au changement de morceau : la vue des couches est rechargée).
+
+### Le mode Sans fin, PR 3 : le couloir et les tyroliennes (D-167)
+
+- Le couloir (une jointure de sol plat) et les tyroliennes (une jointure à la hauteur où finit le morceau, le suivant en part ; les câbles recalés) en Sans fin ; la pose des pièces partagée avec les niveaux (inchangés).
+- Vérifié : le témoin traverse 25 morceaux de chaque jeu ; chaque jointure faisable (couloir 217 puis 108 ms, tyroliennes 550 à 317 ms) ; dans Chromium, quatre changements de morceau par jeu, les câbles à leur place.
+- [ ] À vérifier sur téléphone : le couloir et les tyroliennes en Sans fin (les jointures basses des tyroliennes, gênantes ?).
+
+### Le mode Sans fin, PR 2 : le Sans fin dans la console (D-167)
+
+- Les sauts en Sans fin : ouvert quand le niveau 5 est atteint en mode Niveaux (le niveau le plus haut atteint, gardé dans la sauvegarde sans migration) ; un nouveau parcours à chaque partie ; la bande de trois morceaux dans la scène (le recul invisible, le dessin bloc par bloc, rien de redessiné) ; les morceaux générés en arrière-plan (un worker, précaché, hors ligne), sur place sinon ; le repère fantôme du record ; un bip et la distance tous les 100 m ; DEBUG → « Console » → « Sans fin » (depuis un morceau), le morceau dans les infos.
+- Vérifié dans Chromium (844 × 390) : le mode fermé puis ouvert, une partie, quatre changements de morceau (le suivant toujours prêt, le recul en 1 à 2,5 ms), « Oups ! » et le record, « Rejouer » et le repère.
+- [ ] À vérifier sur téléphone : le Sans fin des sauts (une saccade au changement de morceau ? le repère du record lisible ? le bip des 100 m ? le niveau 5 pour l'ouvrir, juste ?).
+
+### Le mode Sans fin, PR 1 : le moteur (D-167)
+
+- Les morceaux des sauts (la pose des poteaux des niveaux, partagée ; une jointure à chaque bout), la difficulté du niveau n au morceau n jusqu'au plafond (20), une nouvelle graine à chaque partie ; le collage et la bande de trois morceaux (le recul, la distance).
+- Vérifié : le témoin traverse 30 morceaux d'affilée ; chaque jointure des 19 premiers faisable par l'analyse (de 458 à 200 ms) ; les niveaux des sauts et de la grimpette inchangés (mêmes empreintes).
 
 ### La console, PR 9 : le monstre (D-166)
 

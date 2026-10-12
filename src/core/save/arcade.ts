@@ -7,13 +7,18 @@ export interface ArcadeRecords {
 }
 
 /**
- * La console dans la sauvegarde (D-166) : les records, et les jeux déjà vus (l'étincelle d'un
- * nouveau jeu). Absente des sauvegardes plus anciennes : vide, sans migration.
+ * La console dans la sauvegarde (D-166) : les records, les jeux déjà vus (l'étincelle d'un nouveau
+ * jeu), et le niveau le plus haut atteint en mode Niveaux par jeu (D-167 : il ouvre le mode Sans
+ * fin). Absente des sauvegardes plus anciennes, ou sans `reached` : vide, sans migration.
  */
 export interface ArcadeSave {
   records: Partial<Record<ArcadeGameId, ArcadeRecords>>;
   seen: ArcadeGameId[];
+  reached: Partial<Record<ArcadeGameId, number>>;
 }
+
+/** Niveau atteint le plus grand gardé : une valeur aberrante de la sauvegarde est bornée. */
+const MAX_REACHED = 100_000;
 
 const GAME_IDS: ReadonlySet<string> = new Set(ARCADE_GAMES.map((game) => game.id));
 
@@ -28,7 +33,7 @@ function meters(value: unknown): number {
 }
 
 export function createArcade(): ArcadeSave {
-  return { records: {}, seen: [] };
+  return { records: {}, seen: [], reached: {} };
 }
 
 /**
@@ -55,7 +60,30 @@ export function sanitizeArcade(raw: unknown): ArcadeSave {
   if (Array.isArray(seen)) {
     arcade.seen = [...new Set(seen.filter(isGameId))];
   }
+  const reached = data['reached'];
+  if (typeof reached === 'object' && reached !== null && !Array.isArray(reached)) {
+    for (const [id, value] of Object.entries(reached as Record<string, unknown>)) {
+      if (isGameId(id) && typeof value === 'number' && Number.isFinite(value) && value >= 1) {
+        arcade.reached[id] = Math.min(Math.floor(value), MAX_REACHED);
+      }
+    }
+  }
   return arcade;
+}
+
+/** Niveau le plus haut atteint en mode Niveaux (0 : jamais joué, ou avant D-167). */
+export function arcadeReached(arcade: Readonly<ArcadeSave>, game: ArcadeGameId): number {
+  return arcade.reached[game] ?? 0;
+}
+
+/** Un niveau commence en mode Niveaux : retourne true s'il est plus haut que tous les autres. */
+export function reachArcadeLevel(arcade: ArcadeSave, game: ArcadeGameId, level: number): boolean {
+  const value = Math.min(Math.floor(level), MAX_REACHED);
+  if (!(value > arcadeReached(arcade, game))) {
+    return false;
+  }
+  arcade.reached[game] = value;
+  return true;
 }
 
 /** Record d'un jeu dans un mode (0 : jamais joué). */

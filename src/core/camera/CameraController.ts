@@ -124,6 +124,21 @@ export class CameraController {
     this.clampToBounds();
   }
 
+  /**
+   * Tout recule de (dx, dy) px (le mode Sans fin, D-167 : la bande retire un morceau) : la vue garde
+   * exactement sa place par rapport à Céleste, sans lissage ni saut.
+   */
+  translate(dx: number, dy: number): void {
+    this.x += dx;
+    this.prevX += dx;
+    this.focusX += dx;
+    this.y += dy;
+    this.prevY += dy;
+    this.focusY += dy;
+    this.refFeetY += dy;
+    this.groundFeetY += dy;
+  }
+
   /** Taille de la salle (px). */
   setBounds(width: number, height: number): void {
     this.boundsWidth = width;
