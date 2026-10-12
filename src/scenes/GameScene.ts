@@ -141,7 +141,14 @@ import {
   TREASURE_FLY,
   ABILITY_STICKER,
 } from '../config/art';
-import { PROP_SIZE, STORY_TIMING, StoryFlag, TOWER_CUBES, TOY_PHONE } from '../config/story';
+import {
+  PROP_SIZE,
+  STORY_TIMING,
+  STORY_ZOOM,
+  StoryFlag,
+  TOWER_CUBES,
+  TOY_PHONE,
+} from '../config/story';
 import { PropStage } from '../core/story/PropStage';
 import { StoryDirector } from '../core/story/StoryDirector';
 import { checkCondition, holdsMaria, type TimeOfDay } from '../core/story/story';
@@ -524,6 +531,9 @@ export class GameScene extends Phaser.Scene {
   /** Le très léger signe du dernier plan (D-144) : début (ms, -1 : aucun) et durée. */
   private glimmerAtMs = -1;
   private glimmerMs = 1;
+  /** La vue rapprochée par l'histoire (D-171) : le rapprochement actuel et celui visé. */
+  private storyZoom = 1;
+  private storyZoomTarget = 1;
   /** Maria dans les bras de Céleste (D-143) : l'image de Maria assise, tenue devant elle. */
   private heldMaria!: Phaser.GameObjects.Image;
   private readonly mapSeen = new Set<string>();
@@ -742,12 +752,17 @@ export class GameScene extends Phaser.Scene {
         this.poser.sitting = true;
         this.openConsole();
       },
-      look: (col, row) => {
+      look: (col, row, zoom) => {
         if (col === null || row === null) {
           this.camera.release();
+          this.storyZoomTarget = 1;
         } else {
           this.camera.focus((col + 0.5) * TILE_SIZE, (row + 0.5) * TILE_SIZE);
+          this.storyZoomTarget = zoom;
         }
+      },
+      haptic: (moment) => {
+        this.haptics.pulse(moment);
       },
       gone: () => {
         this.celesteGone = true;
@@ -1074,7 +1089,11 @@ export class GameScene extends Phaser.Scene {
       const interact = this.controls.consumePressed('Interact');
       const action = this.controls.consumePressed('Attack');
       const pressed = interact || (near && action);
-      story.step(this.level.id, this.player.box, pressed);
+      // Agir maintenu (D-171) : Agir, ou Action quand elle sert d'Agir.
+      const held =
+        this.controls.isHeld('Interact') ||
+        (story.interactable >= 0 && this.controls.isHeld('Attack'));
+      story.step(this.level.id, this.player.box, pressed, held);
       if (this.recordPicker.isOpen()) {
         // Le tourne-disque s'est ouvert (D-121) : le jeu s'arrête jusqu'au choix.
         this.freezeInterpolation();
@@ -1150,8 +1169,9 @@ export class GameScene extends Phaser.Scene {
       }
       camera.lookInput = input.moveY;
       if (!story.busy) {
-        // Un regard de l'histoire (D-122) ne survit pas à son script.
+        // Un regard de l'histoire (D-122) ne survit pas à son script, ni la vue rapprochée.
         camera.release();
+        this.storyZoomTarget = 1;
       }
       camera.step(this.player);
       feel.step(this.player);
@@ -1238,6 +1258,7 @@ export class GameScene extends Phaser.Scene {
       hintTarget.y,
     );
     const main = this.cameras.main;
+    this.stepStoryZoom(main);
     main.centerOn(
       camera.prevX + (camera.x - camera.prevX) * alpha,
       camera.prevY + (camera.y - camera.prevY) * alpha,
@@ -1672,6 +1693,23 @@ export class GameScene extends Phaser.Scene {
       this.appliedZoom = zoom;
       this.onResize();
     }
+  }
+
+  /**
+   * La vue rapprochée par l'histoire (D-171) : elle glisse vers le rapprochement voulu, en plus du
+   * zoom de la salle (le dessin n'est pas refait : un léger flou, le temps d'un regard).
+   */
+  private stepStoryZoom(main: Phaser.Cameras.Scene2D.Camera): void {
+    const target = this.storyZoomTarget;
+    if (this.storyZoom === target) {
+      return;
+    }
+    const k = Math.min(1, (this.game.loop.delta / STORY_ZOOM.easeMs) * 3);
+    this.storyZoom += (target - this.storyZoom) * k;
+    if (Math.abs(target - this.storyZoom) < 0.002) {
+      this.storyZoom = target;
+    }
+    main.setZoom(this.roomZoom * this.renderScale * this.storyZoom);
   }
 
   /** Zoom de la salle : celui des réglages, rapproché dans un souvenir jouable (D-89). */
@@ -2487,6 +2525,12 @@ export class GameScene extends Phaser.Scene {
       this.puppet.setAlpha(1);
     }
     this.glimmerAtMs = -1;
+    // La vue rapprochée ne survit pas à un changement de salle (D-171).
+    this.storyZoomTarget = 1;
+    if (this.storyZoom !== 1) {
+      this.storyZoom = 1;
+      this.cameras.main.setZoom(this.roomZoom * this.renderScale);
+    }
     this.audio.sfx.setStrange(this.strangeWorld || isStrangeRoom(level));
     this.audio.sfx.stopLoops();
     this.sfxDirector.reset(this.player);
@@ -2655,7 +2699,7 @@ export class GameScene extends Phaser.Scene {
   private readonly onResize = (): void => {
     const scale = this.renderScale;
     this.camera.setView(this.scale.width / scale, this.scale.height / scale);
-    this.cameras.main.setZoom(this.roomZoom * scale);
+    this.cameras.main.setZoom(this.roomZoom * scale * this.storyZoom);
     this.cameras.main.centerOn(this.camera.x, this.camera.y);
     const artScale = this.computeArtScale();
     if (artScale !== this.artScale) {
@@ -3286,7 +3330,9 @@ export class GameScene extends Phaser.Scene {
     music.street = isStreetRoom(this.level);
     const roomTrack = this.level.meta.music;
     music.room = isMusicTrack(roomTrack) ? roomTrack : null;
-    this.audio.setMusic(chooseMusic(music));
+    // L'histoire peut imposer sa musique, ou le silence (les retrouvailles, D-171).
+    const told = story.music();
+    this.audio.setMusic(told !== undefined ? told : chooseMusic(music));
   }
 
   /** Centre du fondu en cercle (D-35) : Céleste, en px CSS de la page. */

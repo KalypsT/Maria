@@ -21,8 +21,10 @@ import { drawLoopObject } from './art/memoryArt';
 import { characterHeadroom, characterOverhang, drawCharacter } from './art/familyArt';
 import {
   BUBBLE_SIZE,
+  HOLD_HEART_SIZE,
   SPARKLE_SIZE,
   drawBubble,
+  drawHoldHeart,
   drawProp,
   drawSparkle,
   drawToyTown,
@@ -38,6 +40,9 @@ function isLooping(kind: PropKind): boolean {
 const PROP_DEPTH = 5;
 const THOUGHT_DEPTH = 12;
 const SPARKLE_KEY = 'story-sparkle';
+/** Le cœur d'Agir maintenu (D-171) : vide, et plein (découvert de bas en haut). */
+const HEART_EMPTY_KEY = 'story-hold-heart';
+const HEART_FULL_KEY = 'story-hold-heart-full';
 /** Pulsation de l'étincelle (ms). */
 const SPARKLE_MS = 1300;
 
@@ -64,6 +69,8 @@ export class StoryView {
   private loopKeys: (readonly [string, string, number] | null)[] = [];
   private readonly thought: Phaser.GameObjects.Image;
   private readonly sparkle: Phaser.GameObjects.Image;
+  private readonly heartEmpty: Phaser.GameObjects.Image;
+  private readonly heartFull: Phaser.GameObjects.Image;
   /**
    * Étincelle d'une porte de façade à portée (D-61), tuile au-dessus de la porte ; posée par la
    * scène (null : aucune).
@@ -103,6 +110,14 @@ export class StoryView {
       .setDepth(THOUGHT_DEPTH)
       .setVisible(false);
     this.sparkle = scene.add
+      .image(0, 0, '__DEFAULT')
+      .setDepth(PROP_DEPTH + 1)
+      .setVisible(false);
+    this.heartEmpty = scene.add
+      .image(0, 0, '__DEFAULT')
+      .setDepth(PROP_DEPTH + 1)
+      .setVisible(false);
+    this.heartFull = scene.add
       .image(0, 0, '__DEFAULT')
       .setDepth(PROP_DEPTH + 1)
       .setVisible(false);
@@ -151,6 +166,14 @@ export class StoryView {
     this.showBubble(this.thought, this.thoughtSpec);
     this.showBubble(this.speech, this.speechSpec);
     this.sparkle.setTexture(SPARKLE_KEY).setScale(1 / scale);
+    this.texture(HEART_EMPTY_KEY, HOLD_HEART_SIZE, HOLD_HEART_SIZE, (ctx) => {
+      drawHoldHeart(ctx, false);
+    });
+    this.texture(HEART_FULL_KEY, HOLD_HEART_SIZE, HOLD_HEART_SIZE, (ctx) => {
+      drawHoldHeart(ctx, true);
+    });
+    this.heartEmpty.setTexture(HEART_EMPTY_KEY).setScale(1 / scale);
+    this.heartFull.setTexture(HEART_FULL_KEY).setScale(1 / scale);
     this.rebuild();
   }
 
@@ -311,6 +334,29 @@ export class StoryView {
     }
     const trigger = this.director.data.triggers[this.director.interactable];
     const mark = trigger?.mark ?? this.doorMark;
+    const hold = trigger?.hold !== undefined && trigger.mark !== undefined && !this.director.busy;
+    if (hold) {
+      // Agir maintenu (D-171) : un cœur qui se remplit, de bas en haut, à la place de l'étincelle.
+      const progress = this.director.holdProgress;
+      const pulse = 0.85 + 0.15 * Math.sin((now / SPARKLE_MS) * Math.PI * 2);
+      const x = (trigger.mark.col + 0.5) * T;
+      const y = (trigger.mark.row + 0.5) * T - pulse * 2;
+      const grow = (1 + 0.25 * progress) / this.artScale;
+      this.sparkle.setVisible(false);
+      this.heartEmpty.setVisible(true).setPosition(x, y).setScale(grow).setAlpha(pulse);
+      const frame = this.heartFull.frame;
+      const shown = Math.round(frame.height * progress);
+      this.heartFull
+        .setVisible(progress > 0)
+        .setPosition(x, y)
+        .setScale(grow)
+        .setCrop(0, frame.height - shown, frame.width, shown);
+      return;
+    }
+    if (this.heartEmpty.visible) {
+      this.heartEmpty.setVisible(false);
+      this.heartFull.setVisible(false);
+    }
     if (mark && !this.director.busy) {
       const pulse = 0.75 + 0.25 * Math.sin((now / SPARKLE_MS) * Math.PI * 2);
       this.sparkle

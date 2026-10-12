@@ -174,6 +174,63 @@ function drawCradle(
   }
 }
 
+/**
+ * Le berceau de poupée deux fois trop grand, sur le coffre de la chambre grande (D-143, D-171), dans
+ * un repère de 30 de large. Son côté monte plus haut que le bord : avant, on n'en voit que la
+ * couverture, bombée (`hidden`) ; vue de près, la tête de Maria sur l'oreiller (`maria`) ; puis
+ * vide, la couverture à plat (`empty`).
+ */
+function drawBigCradle(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  content: 'hidden' | 'maria' | 'empty',
+  image?: CanvasImageSource,
+): void {
+  const k = w / 30;
+  const u = h / k;
+  ctx.save();
+  ctx.scale(k, k);
+  ctx.strokeStyle = WOOD_DARK;
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(1, u - 3);
+  ctx.quadraticCurveTo(15, u + 1.5, 29, u - 3);
+  ctx.stroke();
+  if (content === 'maria') {
+    // L'oreiller et la tête de Maria, au-dessus du bord, du côté de la tête de lit.
+    ctx.fillStyle = '#f3ead7';
+    ctx.beginPath();
+    ctx.ellipse(9.5, u - 12.5, 4, 2.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    mariaHead(ctx, 10, u - 15, 3.6, image);
+  }
+  ctx.fillStyle = '#f19bb5';
+  ctx.beginPath();
+  if (content === 'empty') {
+    ctx.roundRect(6, u - 12.8, 19, 2, 1);
+  } else {
+    ctx.moveTo(content === 'maria' ? 12 : 6, u - 11);
+    ctx.quadraticCurveTo(13, u - 15, 20, u - 12.5);
+    ctx.quadraticCurveTo(24, u - 11.5, 25, u - 11);
+    ctx.lineTo(25, u - 9);
+    ctx.lineTo(content === 'maria' ? 12 : 6, u - 9);
+    ctx.closePath();
+  }
+  ctx.fill();
+  ctx.fillStyle = WOOD;
+  ctx.beginPath();
+  ctx.roundRect(3, u - 12, 24, 9, 2);
+  ctx.roundRect(2, u - 16, 4, 13, [2, 2, 0, 0]);
+  ctx.roundRect(24, u - 14, 4, 11, [2, 2, 0, 0]);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  for (let x = 9; x < 23; x += 4) {
+    ctx.fillRect(x, u - 11, 1, 7);
+  }
+  ctx.restore();
+}
+
 /** Chausson de poupée, rose. */
 function drawSlipper(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   ctx.fillStyle = '#f19bb5';
@@ -833,6 +890,15 @@ export function drawProp(
       break;
     case 'cradle-undone':
       drawCradle(ctx, w, h, 'undone');
+      break;
+    case 'big-cradle':
+      drawBigCradle(ctx, w, h, 'hidden');
+      break;
+    case 'big-cradle-maria':
+      drawBigCradle(ctx, w, h, 'maria', maria);
+      break;
+    case 'big-cradle-empty':
+      drawBigCradle(ctx, w, h, 'empty');
       break;
     case 'slipper':
       drawTreasureProp(ctx, memoryImageKey('slipper'), w, h, images, null, () => {
@@ -2201,6 +2267,40 @@ function moon(ctx: CanvasRenderingContext2D, x: number, y: number): void {
 
 /** Petite étincelle au-dessus de ce qu'on peut faire (Agir). */
 export const SPARKLE_SIZE = 7;
+/** Taille (px logiques) du cœur d'Agir maintenu (D-171). */
+export const HOLD_HEART_SIZE = 14;
+
+/**
+ * Le cœur d'Agir maintenu (D-171), à la place de l'étincelle : vide (un contour pâle, un halo), ou
+ * plein (rose) ; le plein se découvre de bas en haut à mesure qu'on maintient.
+ */
+export function drawHoldHeart(ctx: CanvasRenderingContext2D, filled: boolean): void {
+  const c = HOLD_HEART_SIZE / 2;
+  const path = () => {
+    ctx.beginPath();
+    ctx.moveTo(c, c + 5.5);
+    ctx.bezierCurveTo(c - 8.5, c - 1, c - 3.2, c - 7.5, c, c - 2.7);
+    ctx.bezierCurveTo(c + 3.2, c - 7.5, c + 8.5, c - 1, c, c + 5.5);
+  };
+  if (filled) {
+    ctx.fillStyle = PINK;
+    path();
+    ctx.fill();
+    return;
+  }
+  const halo = ctx.createRadialGradient(c, c, 0, c, c, c);
+  halo.addColorStop(0, 'rgba(255,236,190,0.55)');
+  halo.addColorStop(1, 'rgba(255,236,190,0)');
+  ctx.fillStyle = halo;
+  ctx.fillRect(0, 0, HOLD_HEART_SIZE, HOLD_HEART_SIZE);
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.strokeStyle = 'rgba(255,240,245,0.9)';
+  ctx.lineWidth = 1.2;
+  path();
+  ctx.fill();
+  ctx.stroke();
+}
+
 export function drawSparkle(ctx: CanvasRenderingContext2D): void {
   const c = SPARKLE_SIZE / 2;
   const halo = ctx.createRadialGradient(c, c, 0, c, c, c);

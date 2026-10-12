@@ -288,6 +288,11 @@ export const StoryFlag = {
   TicketTaken: 'memory.ticket',
   LetterTaken: 'memory.letter',
   PostcardTaken: 'memory.postcard',
+  /**
+   * Les retrouvailles (D-171) : au bout de la chambre grande, Céleste a regardé dans le berceau
+   * géant, Maria y dort. Elle la prend dans ses bras en maintenant Agir (`FinaleFound`).
+   */
+  FinaleCradleSeen: 'finale.cradle-seen',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -375,7 +380,20 @@ export const STORY_TIMING = {
   /** Le dernier plan : la vue reste sur Maria, puis un très léger signe du monde étrange. */
   lastShotMs: 2600,
   glimmerMs: 2800,
+  /**
+   * Les retrouvailles (D-171) : le regard dans le berceau géant, les temps longs du câlin, et
+   * combien de temps maintenir Agir pour prendre Maria dans ses bras (le cœur se remplit).
+   */
+  reunionLookMs: 2600,
+  reunionHoldMs: 3600,
+  hugHoldMs: 1600,
 } as const;
+
+/**
+ * La vue qui se rapproche (étape `look` avec `zoom`, D-171) : le rapprochement au plus près, et le
+ * temps pour y arriver ou en revenir (ms, à peu près). PROVISOIRE.
+ */
+export const STORY_ZOOM = { reunion: 1.5, easeMs: 900 } as const;
 
 /**
  * L'écran de fin (D-145), sans texte : Maria seule sur son étagère. Il apparaît lentement ; après
@@ -445,6 +463,10 @@ export const PROP_SIZE = {
   cradle: { w: 30, h: 16 },
   'cradle-maria': { w: 30, h: 16 },
   'cradle-undone': { w: 30, h: 16 },
+  // Le berceau de poupée, deux fois trop grand (la chambre grande, D-171).
+  'big-cradle': { w: 60, h: 32 },
+  'big-cradle-maria': { w: 60, h: 32 },
+  'big-cradle-empty': { w: 60, h: 32 },
   // Les affaires de Maria : à la forme de leur image (D-170).
   slipper: { w: 8, h: 6 },
   bottle: { w: 7, h: 9 },

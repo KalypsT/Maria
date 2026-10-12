@@ -1,3 +1,5 @@
+import type { MusicTrack } from '../../config/audio';
+import type { HapticMoment } from '../../config/haptics';
 import type { FlashbackId } from '../../config/memories';
 import type { PlayableMemoryId } from '../../config/playableMemories';
 import type { Box } from '../physics/gridCollision';
@@ -206,7 +208,15 @@ export type StoryStep =
    * Regard (D-122, non bloquant) : la vue glisse vers une tuile de la salle et y reste ; sans tuile,
    * elle revient sur Céleste. À suivre d'une attente ; la vue revient toujours à la fin du script.
    */
-  | { readonly do: 'look'; readonly col?: number; readonly row?: number }
+  | {
+      readonly do: 'look';
+      readonly col?: number;
+      readonly row?: number;
+      /** La vue se rapproche aussi (D-171), puis revient avec elle. */
+      readonly zoom?: number;
+    }
+  /** Une vibration (D-171, non bloquant), si le joueur les a gardées. */
+  | { readonly do: 'haptic'; readonly moment: HapticMoment }
   /**
    * Le tourne-disque du grenier (D-121, non bloquant) : le choix des disques trouvés, ou une bulle
    * (le plateau vide) s'il n'y en a aucun.
@@ -254,6 +264,11 @@ export interface StoryTrigger {
    * étapes sans effet sur l'histoire (bulles, attentes, souvenir).
    */
   readonly repeat?: boolean;
+  /**
+   * Agir maintenu (D-171, ms) : le script ne part qu'après ce temps, Agir tenu dans la zone ; un
+   * cœur se remplit à la place de l'étincelle. Lâché, il se vide doucement.
+   */
+  readonly hold?: number;
   readonly steps: readonly StoryStep[];
 }
 
@@ -297,6 +312,13 @@ export const PROP_KINDS = [
   'cradle',
   'cradle-maria',
   'cradle-undone',
+  /**
+   * Le berceau géant de la chambre grande (D-143, D-171) : son côté cache Maria (on ne voit que la
+   * couverture, bombée) ; vu de près, Maria y dort ; puis vide, la couverture à plat.
+   */
+  'big-cradle',
+  'big-cradle-maria',
+  'big-cradle-empty',
   'slipper',
   'bottle',
   'headband',
@@ -620,6 +642,14 @@ export interface StoryData {
    * s'éteignent ; seules les veilleuses restent. Changé dans le noir d'un fondu (salle redessinée).
    */
   readonly dim?: readonly { readonly room: string; readonly when: FlagCondition }[];
+  /**
+   * La musique selon l'histoire (D-171) : la première règle vraie remplace celle de la salle ;
+   * `null` : le silence.
+   */
+  readonly music?: readonly {
+    readonly when: FlagCondition;
+    readonly track: MusicTrack | null;
+  }[];
 }
 
 export function checkCondition(flags: ReadonlySet<string>, when: FlagCondition): boolean {

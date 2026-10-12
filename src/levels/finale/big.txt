@@ -1,8 +1,10 @@
-; Le dernier niveau (D-138, D-143), la chambre grande : la chambre du premier soir, deux fois trop
-; grande, la nuit ; l'étrange s'efface (pas de couches, la palette presque vraie). Céleste arrive par la petite porte du grenier, en haut à droite, sur l'étagère haute (une
-; veilleuse) ; elle redescend par le surmeuble et le bureau (le raccourci du retour, D-27) jusqu'à
-; la porte de la chambre : la vraie chambre. Le berceau, sous le mobile, sur le coffre à jouets :
-; ses côtés sont trop hauts pour voir dedans. Ni danger, ni ennemi, ni trouvaille. Facile.
+; Le dernier niveau (D-138, D-143, D-171), la chambre grande : la chambre du premier soir, deux fois
+; trop grande, la nuit ; l'étrange s'efface (pas de couches, la palette presque vraie). Céleste
+; arrive par la petite porte du grenier, en haut à droite, sur l'étagère haute (une veilleuse) ;
+; elle redescend par le surmeuble et le bureau (le raccourci du retour, D-27) jusqu'au coffre à
+; jouets : le berceau géant, sous le mobile (un objet de l'histoire). Ses côtés sont trop hauts pour
+; voir dedans ; de près, Maria y dort : les retrouvailles (D-171). Ni danger, ni ennemi, ni
+; trouvaille. Facile.
 ; @name: La chambre grande
 ; @lantern: finale-big-shelf 82 15
 ; @lantern: finale-big-rug 41 39
@@ -11,8 +13,8 @@
 ; @music: strange
 ; @difficulty: easy
 ; @ambient: #232a4a
-; Tronçon (D-96) : de l'étagère haute à la porte.
-; @leg: 86,15 85,39 easy
+; Tronçon (D-96) : de l'étagère haute au berceau géant, sur le coffre à jouets.
+; @leg: 86,15 50,35 easy
 ; Habillage (D-28), la vraie chambre (bedroom.txt) deux fois plus grande.
 ; @decor: window 48 6 18 14
 ; @decor: frame 28 10 6 4
@@ -26,7 +28,6 @@
 ; @decor: bed 14 32 22 8
 ; @decor: bedhouse 18 18 12 14
 ; @decor: toybox 44 36 8 4
-; @decor: bigcradle 45 34 4 2
 ; @decor: stool 52 34 6 6
 ; @decor: desk 58 30 18 10
 ; @decor: hutch 60 18 16 12

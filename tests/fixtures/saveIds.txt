@@ -23,6 +23,7 @@ flag evening.tucked
 flag finale.awake
 flag finale.big
 flag finale.cradle
+flag finale.cradle-seen
 flag finale.entered
 flag finale.found
 flag finale.gone

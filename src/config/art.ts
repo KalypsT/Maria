@@ -688,7 +688,6 @@ export const DECOR_KINDS: Readonly<
   giantdesk: { furniture: true },
   atticdoor: { furniture: false },
   // La chambre grande (D-143) : le berceau, ses côtés trop hauts pour voir dedans.
-  bigcradle: { furniture: false },
 };
 
 /** Revêtement du mur d'une salle (`; @wall:`), dessiné par le code. */

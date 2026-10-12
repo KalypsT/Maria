@@ -160,7 +160,8 @@ describe('le train, PR 6a : le matin, la gare de la mer, le train à quai (D-90)
   it('à quai, sans passagers : personne dans les voitures ; la classe est sur le quai de la gare de la mer', () => {
     const flags = new Set<string>(ARRIVED);
     const shown = HOUSE_STORY.props.filter((p) => checkCondition(flags, p.when));
-    expect(shown.filter((p) => TRAIN_CARS.includes(p.room))).toEqual([]);
+    // Personne : la lettre de maman (D-169), si elle n'a pas été prise, est un objet, pas un passager.
+    expect(shown.filter((p) => TRAIN_CARS.includes(p.room) && p.kind !== 'letter')).toEqual([]);
     const sea = shown.filter((p) => p.room === SEA).map((p) => p.kind);
     expect(sea).toEqual(expect.arrayContaining(['teacher', 'kids-quay', 'quay-train-day']));
     // Le même train, à quai à la gare de la ville.
