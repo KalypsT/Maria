@@ -358,7 +358,7 @@ body {
 }
 
 /*
- * L'envol vers le sac (D-164) : un trésor trouvé, une gommette de capacité, file vers le bouton du
+ * L'envol vers le sac (D-169) : un trésor trouvé, une gommette de capacité, file vers le bouton du
  * sac ; le sac sursaute à son arrivée.
  */
 .treasure-fly {
@@ -1234,7 +1234,7 @@ body {
   height: 42px;
 }
 
-/* L'image fournie d'un souvenir (D-164), entière dans sa case. */
+/* L'image fournie d'un souvenir (D-169), entière dans sa case. */
 .treasure-image {
   object-fit: contain;
 }

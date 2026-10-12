@@ -1,7 +1,7 @@
 import type { MemoryId } from '../../config/memories';
 
 /**
- * Dessins des souvenirs (D-38, D-164), PLACEHOLDERS : chaque souvenir tient dans un carré de côté
+ * Dessins des souvenirs (D-38, D-169), PLACEHOLDERS : chaque souvenir tient dans un carré de côté
  * `size` centré en (cx, cy). Ils servent en petit dans les bulles de pensée et en grand dans le sac
  * de Céleste, tant que l'image fournie manque (`MEMORY_IMAGES`). Aplats doux, comme le reste du
  * style D-28.
@@ -128,7 +128,7 @@ function drawing(ctx: CanvasRenderingContext2D, s: number): void {
 }
 
 /**
- * Le dessin de toute la famille (D-164), après la fin : le même dessin d'enfant, plus soigné, papa,
+ * Le dessin de toute la famille (D-169), après la fin : le même dessin d'enfant, plus soigné, papa,
  * maman, Céleste qui tient Maria dans ses bras, le chat, des cœurs. PLACEHOLDER.
  */
 function familyDrawing(ctx: CanvasRenderingContext2D, s: number): void {
@@ -205,7 +205,7 @@ function heart(ctx: CanvasRenderingContext2D, x: number, y: number, r: number): 
   ctx.fill();
 }
 
-/** Le petit arrosoir rose de Céleste (D-164), une pâquerette peinte. PLACEHOLDER. */
+/** Le petit arrosoir rose de Céleste (D-169), une pâquerette peinte. PLACEHOLDER. */
 function wateringCan(ctx: CanvasRenderingContext2D, s: number): void {
   const body = '#f2a7bd';
   ctx.strokeStyle = body;
@@ -246,7 +246,7 @@ function wateringCan(ctx: CanvasRenderingContext2D, s: number): void {
   ctx.fill();
 }
 
-/** Le billet de train (D-164) : un carton crème, deux bandes bleues, un trou poinçonné. PLACEHOLDER. */
+/** Le billet de train (D-169) : un carton crème, deux bandes bleues, un trou poinçonné. PLACEHOLDER. */
 function ticket(ctx: CanvasRenderingContext2D, s: number): void {
   ctx.save();
   ctx.rotate(-0.25);
@@ -265,7 +265,7 @@ function ticket(ctx: CanvasRenderingContext2D, s: number): void {
   ctx.restore();
 }
 
-/** La lettre de maman (D-164) : une feuille bleu pâle pliée, un cœur rose, sans un mot. PLACEHOLDER. */
+/** La lettre de maman (D-169) : une feuille bleu pâle pliée, un cœur rose, sans un mot. PLACEHOLDER. */
 function letter(ctx: CanvasRenderingContext2D, s: number): void {
   roundRect(ctx, -s * 0.2, -s * 0.34, s * 0.44, s * 0.68, s * 0.02, '#cfe0ef');
   roundRect(ctx, -s * 0.26, -s * 0.3, s * 0.4, s * 0.66, s * 0.02, '#e3eef8');
@@ -278,7 +278,7 @@ function letter(ctx: CanvasRenderingContext2D, s: number): void {
 }
 
 /**
- * La carte postale (D-164), dessinée par Céleste pour ses parents : la mer, un bateau, le soleil.
+ * La carte postale (D-169), dessinée par Céleste pour ses parents : la mer, un bateau, le soleil.
  * PLACEHOLDER.
  */
 function postcard(ctx: CanvasRenderingContext2D, s: number): void {
@@ -1303,7 +1303,7 @@ export function drawMemory(
 }
 
 /**
- * Dessins d'anciens souvenirs (D-164 : plus des trésors), gardés pour les bulles et le décor : la
+ * Dessins d'anciens souvenirs (D-169 : plus des trésors), gardés pour les bulles et le décor : la
  * plante de la cuisine, la photo de Céleste bébé avec Maria, centrés en (cx, cy), de taille `size`.
  */
 export function drawSketch(

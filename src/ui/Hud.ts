@@ -19,7 +19,7 @@ export class Hud {
   private readonly shellText: HTMLElement;
   private readonly shellFly: HTMLImageElement;
   private shellTimers: number[] = [];
-  /** Les trésors en vol vers le sac (D-164). */
+  /** Les trésors en vol vers le sac (D-169). */
   private readonly flights = new Set<HTMLElement>();
   private bumpTimer = 0;
   private dots: HTMLElement[] = [];
@@ -176,7 +176,7 @@ export class Hud {
   }
 
   /**
-   * Un trésor trouvé ou une gommette de capacité (D-164) : `content` apparaît en `from` (px CSS de
+   * Un trésor trouvé ou une gommette de capacité (D-169) : `content` apparaît en `from` (px CSS de
    * la page), monte un instant, puis file vers le bouton du sac (en haut à gauche sans commandes
    * tactiles), qui sursaute ; `onArrive` à son arrivée.
    */

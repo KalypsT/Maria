@@ -324,7 +324,7 @@ function drawFarCrane(ctx: CanvasRenderingContext2D, w: number, h: number): void
  */
 function drawSiteGap(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   const door = 16;
-  // Derrière la palissade, le passage vers la gare, dans la lumière du matin (D-163 : pas la lueur
+  // Derrière la palissade, le passage vers la gare, dans la lumière du matin (D-168 : pas la lueur
   // turquoise d'un monde étrange, la gare est le monde réel).
   const inside = ctx.createLinearGradient(door, 0, w, 0);
   inside.addColorStop(0, '#5d5a55');
@@ -457,7 +457,7 @@ const MEMORY_SPAN: Readonly<Record<MemoryProp, readonly [number, number]>> = {
 type MemoryProp =
   'watering-can' | 'ticket' | 'letter' | 'postcard' | 'school-drawing' | 'family-drawing';
 
-/** Un souvenir de Céleste dans le décor (D-164) : son image fournie, ou son dessin par le code. */
+/** Un souvenir de Céleste dans le décor (D-169) : son image fournie, ou son dessin par le code. */
 function drawMemoryProp(
   ctx: CanvasRenderingContext2D,
   kind: MemoryProp,
@@ -1128,7 +1128,7 @@ function drawIcon(
       drawMemory(ctx, 'height', cx, cy, 18);
       break;
     case 'sea': {
-      // La mer (D-164) : un soleil au-dessus de deux vagues.
+      // La mer (D-169) : un soleil au-dessus de deux vagues.
       ctx.fillStyle = '#f2c14e';
       ctx.beginPath();
       ctx.arc(cx + 3, cy - 3.5, 3.2, 0, Math.PI * 2);
@@ -1148,7 +1148,7 @@ function drawIcon(
       break;
     }
     case 'home':
-      // La maison (D-164) : le toit rose, la fenêtre allumée.
+      // La maison (D-169) : le toit rose, la fenêtre allumée.
       ctx.fillStyle = '#f3ead7';
       ctx.fillRect(cx - 6, cy - 1, 12, 8);
       ctx.fillStyle = '#d9788f';

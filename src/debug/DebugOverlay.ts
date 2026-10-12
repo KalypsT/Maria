@@ -2002,7 +2002,7 @@ export function installDebugOverlay(scene: GameScene): void {
     });
   });
 
-  // Les trésors (D-164) : trouvés ou non ; y aller (sous l'étincelle de leur déclencheur).
+  // Les trésors (D-169) : trouvés ou non ; y aller (sous l'étincelle de leur déclencheur).
   const treasureSection = element('details', panel);
   const treasureSummary = element('summary', treasureSection, undefined, 'Trésors');
   const treasureList = element('div', treasureSection);

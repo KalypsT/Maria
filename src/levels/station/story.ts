@@ -23,7 +23,7 @@ const UNDER_CLOCK = { col: 36, row: 37 };
 const DAD_HALL = { col: 32, row: 37 };
 /** La porte ouverte du train à quai (D-69), sur le quai de droite des quais. */
 const TRAIN_DOOR = { col: 55, row: 26 };
-/** Le billet de train (D-164), posé sur le banc du quai de droite. */
+/** Le billet de train (D-169), posé sur le banc du quai de droite. */
 const TICKET = { col: 65, row: 24 };
 /** Arrivée dans le monde étrange de la gare (dans le noir). */
 const STRANGE_ARRIVAL: StoryStep = {
@@ -204,7 +204,7 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // Le billet de train (D-164), sur le banc du quai, à partir du soir du départ en classe de
+    // Le billet de train (D-169), sur le banc du quai, à partir du soir du départ en classe de
     // mer : Agir le prend ; il quitte le décor pour le sac. Céleste pense à la mer.
     id: 'take-ticket',
     room: 'station-platforms',

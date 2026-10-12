@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Retour d'essai, suite** (D-163, D-164, sur `claude/game-test-issues-e7pomv`) : **faits** : l'image du sac, le jingle des trouvailles, la lanterne, les pas sur le bois (fichiers de l'utilisateur) ; la cheminée de l'école étrange en difficulté moyenne ; le passage vers la gare n'a plus l'air d'un monde étrange ; l'ombre de l'oculus s'arrête une fois passée ; **les souvenirs de Céleste refaits** (D-164 : neuf souvenirs sur tout le voyage, l'envol vers le sac pour tous les trésors, des bulles sans cœur, la gommette étoile des capacités). **En attente** : les images (prompts fournis, choix validés) : les souvenirs qui manquent (la boîte à musique, la carte postale, le dessin de toute la famille, le dessin de l'école à refaire), les affaires de Maria, les jouets du monde étrange, les pochettes des disques (facultatif), **les trois courts souvenirs** (Céleste à 2 ans en référence, une image par souvenir) ; essai sur téléphone.
+**Retour d'essai, suite** (D-168, D-169, sur `claude/game-test-issues-e7pomv`) : **faits** : l'image du sac, le jingle des trouvailles, la lanterne, les pas sur le bois (fichiers de l'utilisateur) ; la cheminée de l'école étrange en difficulté moyenne ; le passage vers la gare n'a plus l'air d'un monde étrange ; l'ombre de l'oculus s'arrête une fois passée ; **les souvenirs de Céleste refaits** (D-169 : neuf souvenirs sur tout le voyage, l'envol vers le sac pour tous les trésors, des bulles sans cœur, la gommette étoile des capacités). **En attente** : les images (prompts fournis, choix validés) : les souvenirs qui manquent (la boîte à musique, la carte postale, le dessin de toute la famille, le dessin de l'école à refaire), les affaires de Maria, les jouets du monde étrange, les pochettes des disques (facultatif), **les trois courts souvenirs** (Céleste à 2 ans en référence, une image par souvenir) ; essai sur téléphone.
 
 **Le trou du grillage de l'aire de jeux** (D-158, sur `claude/game-test-issues-e7pomv`) : le ballon de la cour coincé dedans, un pigeon qui s'envole par le trou depuis le toit de la tour. Le chantier attendra (bulles des personnages). **Le sac à dos** (D-159, D-160) : maquette interactive (https://claude.ai/artifact/DE58ednNNhcjxdPUsuLd6T), choix de l'utilisateur et plan validés en 3 PR (le sac ; la carte ; les trésors). **PR 1 faite : le sac** (un seul bouton, la poche et ses trois objets, le cahier, les trésors d'avant, les réglages de l'ancienne pause) et **PR 2 faite : la carte** (D-161 : la rangée des lieux à gauche, feuilleter, un « ? », le point rose, les trésors aperçus) et **PR 3 faite : les trésors** (D-162 : une page par type et en couleurs, les indices, la fiche et le nom, « nouveau », l'étincelle). **Le plan du sac est complet.** Suite : essai sur téléphone ; l'image du sac (prompt fourni) ; le contenu (les objets des souvenirs, leurs lieux), à redéfinir par l'utilisateur ; une récompense par famille complète (à trouver).
 
@@ -48,13 +48,13 @@
 
 ## Fait
 
-### Les souvenirs de Céleste refaits (D-164)
+### Les souvenirs de Céleste refaits (D-169)
 
 - Neuf souvenirs (la toise, la photo, la boîte à musique, l'arrosoir, le dessin de l'école, le billet, la lettre de maman, la carte postale, le dessin de toute la famille) ; la plante et la photo de Céleste bébé retirées ; on emporte ce qui se porte ; des bulles sans cœur (la mer, la maison, le visage de Maria) ; l'envol vers le sac pour tous les trésors ; cinq images de l'utilisateur ; la gommette étoile des capacités ; DEBUG → « Trésors ».
 - Vérifié dans Chromium : chaque souvenir à sa place, l'envol, la page des trésors, la gommette et son envol.
 - [ ] À vérifier sur téléphone : l'envol (durée, lisibilité), la gommette (assez visible ? sa flaque de lumière), les souvenirs se trouvent-ils sans aide ?
 
-### Retour d'essai, suite (D-163)
+### Retour d'essai, suite (D-168)
 
 - Le sac en image ; `found`, `checkpoint`, `step-wood` ×4 ; la cheminée de l'école étrange (133 ms, moyen) ; la palissade vers la gare sans présage ni lueur turquoise ; le présage de l'oculus jusqu'au premier passage.
 - Vérifié dans Chromium : la palissade ouverte ; le sac à 34 px.

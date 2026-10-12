@@ -19,14 +19,14 @@ import frozenText from './fixtures/saveIds.txt?raw';
  * rien (une migration de la sauvegarde, un équivalent…).
  */
 const RETIRED: Readonly<Record<string, string>> = {
-  // Les souvenirs refaits (D-164, choix de l'utilisateur) : restés dans la sauvegarde, sans effet
+  // Les souvenirs refaits (D-169, choix de l'utilisateur) : restés dans la sauvegarde, sans effet
   // (ni compte ni case) ; la partie se charge comme avant.
   'memory drawing':
-    'D-164 : le dessin de la chambre n’est plus un souvenir ; il devient celui de l’école (school-drawing)',
+    'D-169 : le dessin de la chambre n’est plus un souvenir ; il devient celui de l’école (school-drawing)',
   'memory plant':
-    'D-164 : la plante de la cuisine n’est plus un souvenir, elle reste dans le décor',
+    'D-169 : la plante de la cuisine n’est plus un souvenir, elle reste dans le décor',
   'memory bookcase':
-    'D-164 : la photo de Céleste bébé n’est plus un souvenir, elle reste dans le décor',
+    'D-169 : la photo de Céleste bébé n’est plus un souvenir, elle reste dans le décor',
 };
 
 function currentSaveIds(): string[] {

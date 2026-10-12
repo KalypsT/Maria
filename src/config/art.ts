@@ -690,7 +690,7 @@ export const WALL_STYLES = ['dots', 'stripes', 'planks', 'tiles', 'clocks', 'tag
 export type WallStyle = (typeof WALL_STYLES)[number];
 
 /**
- * Les images des souvenirs de Céleste (D-164), fournies par l'utilisateur, détourées : dans le sac
+ * Les images des souvenirs de Céleste (D-169), fournies par l'utilisateur, détourées : dans le sac
  * (la case, la fiche), dans leur envol vers le sac, et dans le décor pour ceux qu'on emporte. Un
  * souvenir absent de cette liste est dessiné par le code.
  */
@@ -721,7 +721,7 @@ export const ART_IMAGES: Readonly<Record<string, string>> = {
   roger: 'roger.png',
   /** La coquille d'escargot (D-148) : image fournie par l'utilisateur, détourée. */
   shell: 'shell.png',
-  /** Le sac à dos de Céleste (D-163), le bouton du menu : image fournie par l'utilisateur, détourée. */
+  /** Le sac à dos de Céleste (D-168), le bouton du menu : image fournie par l'utilisateur, détourée. */
   backpack: 'backpack.png',
   /**
    * L'Educaville (D-155) : images fournies par l'utilisateur, détourées sur le même cadre (le
@@ -755,7 +755,7 @@ export const SHELL_ART = {
 } as const;
 
 /**
- * La gommette étoile des capacités (D-164, choix de l'utilisateur), à la place de la petite lueur :
+ * La gommette étoile des capacités (D-169, choix de l'utilisateur), à la place de la petite lueur :
  * posée au-dessus de son appui, elle flotte en se balançant, scintille de temps en temps, et une
  * flaque de lumière au sol la signale de loin. PROVISOIRE : à juger sur téléphone.
  */
@@ -782,7 +782,7 @@ export const ABILITY_STICKER = {
 } as const;
 
 /**
- * L'envol vers le sac (D-164) : un trésor trouvé, une gommette de capacité, monte un instant
+ * L'envol vers le sac (D-169) : un trésor trouvé, une gommette de capacité, monte un instant
  * au-dessus de là où il était, puis file vers le bouton du sac, qui sursaute à son arrivée.
  * PROVISOIRE : à juger sur téléphone.
  */

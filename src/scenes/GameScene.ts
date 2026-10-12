@@ -599,7 +599,7 @@ export class GameScene extends Phaser.Scene {
         }
         void this.session.addMemory(id);
         if (found) {
-          // Il file vers le sac (D-164) ; l'étincelle du sac s'allume à son arrivée.
+          // Il file vers le sac (D-169) ; l'étincelle du sac s'allume à son arrivée.
           this.flyTreasure(id);
         } else {
           this.refreshBagSpark();
@@ -1735,7 +1735,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Un trésor trouvé (D-164) : son dessin monte au-dessus de là où il était (l'objet de l'histoire,
+   * Un trésor trouvé (D-169) : son dessin monte au-dessus de là où il était (l'objet de l'histoire,
    * sinon sa place, sinon Céleste), puis file vers le sac ; l'étincelle du sac s'allume à son arrivée.
    */
   private flyTreasure(id: string): void {
@@ -1837,7 +1837,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Outil de debug (D-164) : Céleste à la place d'un trésor (sous l'étincelle de son déclencheur,
+   * Outil de debug (D-169) : Céleste à la place d'un trésor (sous l'étincelle de son déclencheur,
    * sur le premier appui), pour le trouver ou le regarder.
    */
   teleportToTreasure(id: string): void {
@@ -2286,7 +2286,7 @@ export class GameScene extends Phaser.Scene {
 
   /**
    * Capacité obtenue (objet ramassé, D-26, ou apprise dans l'histoire, D-85) : sauvegardée,
-   * appliquée, indice de prototype et bulle d'aide. Sa gommette (D-164) file vers le sac, depuis
+   * appliquée, indice de prototype et bulle d'aide. Sa gommette (D-169) file vers le sac, depuis
    * l'objet ramassé (`from`, px du monde) ou, apprise dans une scène, au-dessus de Céleste.
    */
   private learnAbility(id: Ability, from: { x: number; y: number } | null = null): void {

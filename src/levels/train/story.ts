@@ -20,7 +20,7 @@ import type {
 const TRAIN_DOOR = { col: 55, row: 26 };
 /** La couchette de Céleste : celle du milieu, à gauche du compartiment de la classe. */
 const BUNK = { col: 11, row: 11, w: 5, h: 3 };
-/** La lettre de maman (D-164), sur la couchette du haut, au-dessus de la sienne. */
+/** La lettre de maman (D-169), sur la couchette du haut, au-dessus de la sienne. */
 const LETTER = { col: 12, row: 9 };
 /** La grille en accordéon entre les deux compartiments : on glisse dessous (D-84). */
 const GATE_SIDE = { col: 32, row: 16, w: 6, h: 3 };
@@ -337,7 +337,7 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // La lettre de maman (D-164), sur la couchette du haut, au-dessus de celle de Céleste : une
+    // La lettre de maman (D-169), sur la couchette du haut, au-dessus de celle de Céleste : une
     // feuille pliée, un cœur, sans un mot. Agir la prend ; elle quitte le décor pour le sac.
     id: 'take-letter',
     room: 'train-couchettes',

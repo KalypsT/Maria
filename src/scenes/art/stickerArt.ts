@@ -1,5 +1,5 @@
 /**
- * La gommette étoile des capacités (D-164, choix de l'utilisateur) : l'étoile dorée qu'on colle sur
+ * La gommette étoile des capacités (D-169, choix de l'utilisateur) : l'étoile dorée qu'on colle sur
  * le cahier d'un enfant quand il a appris quelque chose (et une étoile, pour Céleste). Bombée, un
  * bord blanc découpé qui la détache de tous les fonds, un reflet. PLACEHOLDER. La même partout :
  * dans le décor, dans son envol vers le sac, dans « Mes capacités ».

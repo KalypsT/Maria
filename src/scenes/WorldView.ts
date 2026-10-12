@@ -56,7 +56,7 @@ function shellFlipped(id: string): boolean {
 /**
  * Affichage des checkpoints (placeholder neutre, design ouvert §45) : un petit repère qui s'allume
  * quand il est activé, plus vif s'il est le point de retour courant. Objets de capacité (D-26) :
- * la gommette étoile (D-164), qui flotte en se balançant au-dessus d'une flaque de lumière ;
+ * la gommette étoile (D-169), qui flotte en se balançant au-dessus d'une flaque de lumière ;
  * coquilles (D-148) : posées sur leur appui, un halo rose, un scintillement de temps en temps.
  */
 export class WorldView {
@@ -199,7 +199,7 @@ export class WorldView {
       sprite.setVisible(!item.taken);
       const sticker = item.kind !== PickupKind.Shell;
       if (sticker) {
-        // La gommette (D-164) : elle flotte en se balançant ; sa flaque de lumière respire.
+        // La gommette (D-169) : elle flotte en se balançant ; sa flaque de lumière respire.
         sprite
           .setY(this.stickerY(item.row) + wave * s.bobPx)
           .setRotation(Math.sin((now / s.swayMs) * Math.PI * 2) * s.swayRad);
@@ -278,7 +278,7 @@ export class WorldView {
       textures.addCanvas(key, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
     };
     const css = (color: number) => `#${color.toString(16).padStart(6, '0')}`;
-    // La gommette (D-164), sur son halo doré ; la flaque de lumière de son appui.
+    // La gommette (D-169), sur son halo doré ; la flaque de lumière de son appui.
     make(PICKUP, PICKUP_SIZE, PICKUP_SIZE, (ctx) => {
       const c = PICKUP_SIZE / 2;
       const halo = ctx.createRadialGradient(c, c, 0, c, c, c);

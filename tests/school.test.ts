@@ -269,7 +269,7 @@ describe('l’école et son monde étrange (D-64)', () => {
     // La palissade (porte de façade 6) s'ouvre ce matin-là : la gare (D-66).
     const palisade = HOUSE_STORY.lockedRooms.find((l) => l.room === 'street' && l.exit === 6);
     expect(palisade?.when.none).toEqual([F.StreetMorning]);
-    // La gare n'est pas un monde étrange (D-163) : pas de présage près de la palissade.
+    // La gare n'est pas un monde étrange (D-168) : pas de présage près de la palissade.
     expect(HOUSE_STORY.omens.some((o) => o.room === 'street')).toBe(false);
     expect(
       trigger('street-mom-crane').steps.some((s) => s.do === 'thought' && s.icon === 'crane'),

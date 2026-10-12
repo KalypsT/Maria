@@ -52,7 +52,7 @@ const STRANGE_ARRIVAL: StoryStep = {
 const MUSIC_BOOK = { col: 181, row: 13 };
 /** Assise sur sa couchette, au dortoir (fin provisoire du monde étrange, D-104). */
 const BUNK_SEAT = { col: 45, row: 9 };
-/** La carte postale (D-164), au bout de sa couchette, côté oreiller. */
+/** La carte postale (D-169), au bout de sa couchette, côté oreiller. */
 const POSTCARD = { col: 47, row: 9 };
 /** Le monde étrange, en cours (avant le livre musical). */
 const IN_STRANGE = { all: [F.SeaStrange], none: [F.SeaStrangeDone] };
@@ -412,7 +412,7 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // La carte postale (D-164) que Céleste a dessinée pour ses parents, sur sa couchette du
+    // La carte postale (D-169) que Céleste a dessinée pour ses parents, sur sa couchette du
     // dortoir : Agir la prend ; elle quitte le décor pour le sac. Loin de chez elle, elle pense à
     // la maison.
     id: 'take-postcard',

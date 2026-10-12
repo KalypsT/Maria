@@ -277,7 +277,7 @@ export const StoryFlag = {
   FinaleShelved: 'finale.shelved',
   /** Céleste est sortie par la porte : le dernier plan, sur Maria (D-144). */
   FinaleGone: 'finale.gone',
-  /** Les souvenirs qu'on emporte (D-164) : pris, ils quittent le décor. */
+  /** Les souvenirs qu'on emporte (D-169) : pris, ils quittent le décor. */
   WateringCanTaken: 'memory.watering-can',
   TicketTaken: 'memory.ticket',
   LetterTaken: 'memory.letter',
@@ -544,7 +544,7 @@ export const PROP_SIZE = {
   'record-lullaby': { w: 10, h: 10 },
   plant: { w: 10, h: 16 },
   'baby-photo': { w: 11, h: 10 },
-  // Les souvenirs de Céleste (D-164). Le dessin de toute la famille couvre celui de la chambre.
+  // Les souvenirs de Céleste (D-169). Le dessin de toute la famille couvre celui de la chambre.
   'watering-can': { w: 13, h: 10 },
   ticket: { w: 11, h: 6 },
   letter: { w: 8, h: 11 },

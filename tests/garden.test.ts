@@ -229,7 +229,7 @@ describe('papa montre la suite (D-55)', () => {
   /** Pensée de papa (hors cœur) proposée au potager avec ces étapes vécues. */
   const dadHint = (flags: string[]) => {
     const set = new Set(flags);
-    // Les déclencheurs de papa (l'arrosoir, D-164, est à côté, sur le premier bac).
+    // Les déclencheurs de papa (l'arrosoir, D-169, est à côté, sur le premier bac).
     const active = HOUSE_STORY.triggers.filter(
       (t) =>
         t.room === 'garden-vegetables' &&

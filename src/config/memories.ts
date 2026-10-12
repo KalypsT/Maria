@@ -1,5 +1,5 @@
 /**
- * Mes souvenirs (spec §22.1, D-38, refaits en D-164) : la vie de famille de Céleste, au moins un
+ * Mes souvenirs (spec §22.1, D-38, refaits en D-169) : la vie de famille de Céleste, au moins un
  * par lieu du voyage, chacun lié à papa, à maman ou à la maison. Liste validée par l'utilisateur
  * (la liste reste ouverte, §45). L'ordre est celui des cases (l'ordre du voyage) ; un souvenir pas
  * encore trouvé est une case vide en pointillés (complétion explicite, §23). Ceux qu'on peut porter
@@ -73,7 +73,7 @@ export type MemoryId =
 
 /**
  * Le nom de chaque trésor, sur sa fiche dans le sac (D-160, noms validés par l'utilisateur ; ceux
- * des souvenirs de D-164 sont des PLACEHOLDERS).
+ * des souvenirs de D-169 sont des PLACEHOLDERS).
  */
 export const MEMORY_NAMES: Readonly<Record<MemoryId, string>> = {
   height: 'La toise',

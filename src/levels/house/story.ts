@@ -146,7 +146,7 @@ export const HOUSE_STORY: StoryData = {
       ],
     },
     // Les affaires de Maria (D-58) : Agir les ramasse ; elles quittent le jeu pour le sac. Céleste
-    // pense à Maria (D-164, plus un cœur).
+    // pense à Maria (D-169, plus un cœur).
     {
       id: 'take-slipper',
       room: 'hall',
@@ -855,7 +855,7 @@ export const HOUSE_STORY: StoryData = {
     },
     // Objets à regarder (D-38) : la première fois, ils deviennent des souvenirs du sac ; on peut
     // les regarder autant qu'on veut. La plante, le dessin de la chambre et la photo de Céleste
-    // bébé ne sont plus des souvenirs (D-164) : ils restent dans le décor.
+    // bébé ne sont plus des souvenirs (D-169) : ils restent dans le décor.
     {
       id: 'look-photo',
       room: 'living',
@@ -901,7 +901,7 @@ export const HOUSE_STORY: StoryData = {
       steps: [{ do: 'records' }],
     },
     {
-      // Le petit arrosoir rose de Céleste (D-164), sur le premier bac du potager, là où papa
+      // Le petit arrosoir rose de Céleste (D-169), sur le premier bac du potager, là où papa
       // arrose : Agir le prend ; il quitte le décor pour le sac. Elle pense à papa.
       id: 'take-watering-can',
       room: 'garden-vegetables',
@@ -918,7 +918,7 @@ export const HOUSE_STORY: StoryData = {
       ],
     },
     {
-      // Son dessin, punaisé au mur de la classe (D-164), à hauteur d'enfant : on le regarde autant
+      // Son dessin, punaisé au mur de la classe (D-169), à hauteur d'enfant : on le regarde autant
       // qu'on veut.
       id: 'look-school-drawing',
       room: 'school',
@@ -1158,7 +1158,7 @@ export const HOUSE_STORY: StoryData = {
     { id: 'music-box', room: 'bedroom', kind: 'music-box', col: 12, row: 12, when: {} },
     { id: 'record-player', room: 'attic', kind: 'record-player', col: 44, row: 17, when: {} },
     { id: 'plant', room: 'kitchen', kind: 'plant', col: 42, row: 16, when: {} },
-    // Les souvenirs de Céleste (D-164) : le petit arrosoir sur le premier bac du potager (pris, il
+    // Les souvenirs de Céleste (D-169) : le petit arrosoir sur le premier bac du potager (pris, il
     // disparaît aussitôt), son dessin au mur de la classe.
     {
       id: 'watering-can',
@@ -1353,8 +1353,8 @@ export const HOUSE_STORY: StoryData = {
   ],
   omens: [
     // L'oculus de l'école (D-64) : en montant les étagères, jusqu'au premier passage dans l'école
-    // étrange (D-163 : une fois passée, plus d'ombre). Le passage vers la gare, dans la rue, n'a pas
-    // de présage : la gare n'est pas un monde étrange (D-163).
+    // étrange (D-168 : une fois passée, plus d'ombre). Le passage vers la gare, dans la rue, n'a pas
+    // de présage : la gare n'est pas un monde étrange (D-168).
     { room: 'school', when: { none: [F.SchoolStrange] }, col: 46, row: 7, radius: 10 },
     // Derrière la haie (D-49) : en approchant du trou, une fois le saut mural trouvé.
     {

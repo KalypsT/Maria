@@ -8,7 +8,7 @@ import type { PlaceIcon } from '../config/places';
 
 const INK = '#3b3330';
 
-/** Le sac à dos de Céleste (D-163) : l'image de l'utilisateur, sur le bouton du menu. */
+/** Le sac à dos de Céleste (D-168) : l'image de l'utilisateur, sur le bouton du menu. */
 export const BAG_IMAGE = `<img src="art/${ART_IMAGES['backpack'] ?? 'backpack.png'}" alt="" draggable="false">`;
 
 export const NOTEBOOK_ICON = `<svg viewBox="0 0 60 48" aria-hidden="true">

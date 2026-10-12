@@ -93,7 +93,7 @@ const LEAVE_AREA: TileArea = { col: 41, row: 9, w: 4, h: 11 };
  * chambre (son départ) ; Céleste ne revient pas chercher Maria.
  */
 export const AFTER_END_ROOM = 'hall';
-/** Le dessin de toute la famille (D-164), au mur de la chambre, sur son ancien dessin. */
+/** Le dessin de toute la famille (D-169), au mur de la chambre, sur son ancien dessin. */
 const FAMILY_DRAWING = { col: 37, row: 5 };
 /** Le lit : Agir pour se coucher (le premier soir, D-37). */
 const BED_AREA: TileArea = { col: 7, row: 13, w: 11, h: 3 };
@@ -477,7 +477,7 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // Après la fin (D-164) : au mur de la chambre, à la place de son dessin, le dessin de toute la
+    // Après la fin (D-169) : au mur de la chambre, à la place de son dessin, le dessin de toute la
     // famille, Maria dans les bras de Céleste. Une raison de revenir chez elle ; on le regarde
     // autant qu'on veut.
     id: 'look-family-drawing',

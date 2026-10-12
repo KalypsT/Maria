@@ -623,9 +623,9 @@ same style, but simpler: thicker outline, fewer details, bigger pocket and butto
 
 Je fais ensuite le détourage et l'intégration ; en attendant, le jeu dessine le sac par le code.
 
-## Les souvenirs de Céleste (images des trésors, retour d'essai après D-163)
+## Les souvenirs de Céleste (images des trésors, retour d'essai après D-168)
 
-Les six images de capacités proposées en D-163 (Céleste qui fait chaque geste) sont abandonnées :
+Les six images de capacités proposées en D-168 (Céleste qui fait chaque geste) sont abandonnées :
 l'utilisateur garde les pictogrammes du cahier.
 
 Neuf souvenirs, un ou plusieurs par lieu du voyage (liste validée par l'utilisateur). Chaque image
@@ -694,13 +694,13 @@ beside them. Straight front view, landscape format.
 
 - Détourage et mise à l'échelle (`scripts/art-cutout.py --height 360 --largest`, `--holes 200`
   pour un trou ou une anse), puis une ligne dans `MEMORY_IMAGES` (`src/config/art.ts`) : l'image
-  remplace le dessin par le code dans le sac (la case, la fiche), dans l'envol vers le sac (D-164),
+  remplace le dessin par le code dans le sac (la case, la fiche), dans l'envol vers le sac (D-169),
   et dans le décor pour l'arrosoir, le billet, la lettre et la carte postale.
 - La toise, la photo et la boîte à musique restent dessinées dans le décor par le code (la toise y
   gagne un trait à chaque croissance) ; les deux dessins au mur prennent leur image quand elle
   arrive.
 
-## Les autres trésors encore dessinés par le code (suite de D-164)
+## Les autres trésors encore dessinés par le code (suite de D-169)
 
 Même conversation que les souvenirs (même début commun, ci-dessus), un objet par message. Pour les
 affaires de Maria, **joindre aussi `maria.png`** : ses affaires reprennent son rose et son tissu

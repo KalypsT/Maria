@@ -200,7 +200,7 @@ export class NotebookPages {
 
   /**
    * Page « Mes capacités » (D-62, demande de l'utilisateur) : une ligne par capacité, dans l'ordre
-   * où on les trouve. Acquise : son pictogramme, sa gommette étoile (D-164) et comment s'en
+   * où on les trouve. Acquise : son pictogramme, sa gommette étoile (D-169) et comment s'en
    * servir ; sinon une case vide en pointillés, sans rien dévoiler (complétion explicite, §23).
    */
   private drawAbilities(ctx: CanvasRenderingContext2D, width: number, height: number): void {
@@ -227,7 +227,7 @@ export class NotebookPages {
         return;
       }
       drawAbility(ctx, ability, left + box / 2, cy, box * 0.8, ink, rose);
-      // Sa gommette étoile (D-164), collée sur le coin de la case.
+      // Sa gommette étoile (D-169), collée sur le coin de la case.
       drawSticker(ctx, left + box - 3, cy - box / 2 + 3, Math.min(14, box * 0.2));
       ctx.fillStyle = ink;
       ctx.font = `italic 600 ${String(Math.round(Math.min(17, rowH * 0.2)))}px ${font}`;

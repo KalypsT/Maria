@@ -23,7 +23,7 @@ export function drawnCanvas(
 }
 
 /**
- * Le dessin d'un trésor : son image fournie (D-164), ou son dessin par le code, dans un carré de
+ * Le dessin d'un trésor : son image fournie (D-169), ou son dessin par le code, dans un carré de
  * `size` px CSS.
  */
 export function treasureDrawing(className: string, id: MemoryId, size: number): HTMLElement {
