@@ -374,3 +374,47 @@ export const ARCADE_WIND = {
   /** Lignes sous l'arrivée (le fond pique). */
   below: 3,
 };
+
+/**
+ * Le couloir (D-166) : courir sur un sol, glisser sous les barres de briques de jeu qui pendent du
+ * plafond (une tuile de passage), sous les tunnels (bouche de briques de jeu, plafond bas), sauter
+ * les trous, de plus en plus larges : les plus larges demandent un saut long depuis la glissade.
+ * Distances en tuiles. PROVISOIRES, à régler sur téléphone.
+ */
+export const ARCADE_CORRIDOR = {
+  /** Hauteur du niveau (tuiles) : tout l'écran. */
+  rows: 22,
+  /** Ligne du haut du sol, et dernière ligne du plafond (le couloir est entre les deux). */
+  floorRow: 17,
+  ceilingRow: 9,
+  /** Sol avant le premier obstacle, et après le dernier jusqu'au fanion (tuiles). */
+  startCols: 8,
+  goalCols: 6,
+  difficultyRate: 0.85,
+  /** Obstacles par niveau : `first`, un de plus tous les `every` niveaux, au plus `max`. */
+  obstacles: { first: 5, every: 2, max: 14 },
+  /** Sol entre deux obstacles (tuiles) visé, de plus en plus serré, et le sol tiré en plus. */
+  gap: { from: 7, to: 2 } satisfies Ramp,
+  gapSpread: 2,
+  /** Chances d'un trou, et d'un tunnel (sinon, une barre). */
+  pitChance: { from: 0.3, to: 0.4 } satisfies Ramp,
+  tunnelChance: { from: 0.15, to: 0.2 } satisfies Ramp,
+  /**
+   * Largeur d'une barre (tuiles) visée, et la largeur tirée en plus : plus elle est large, plus la
+   * glissade doit partir juste.
+   */
+  barWidth: { from: 1, to: 2.2 } satisfies Ramp,
+  barSpread: 0.45,
+  /** Longueur d'un tunnel (tuiles), sa bouche comprise. */
+  tunnelLength: { from: 3, to: 6 } satisfies Ramp,
+  /** Largeur d'un trou (tuiles) visée, et la largeur tirée en plus. */
+  pitWidth: { from: 2, to: 5 } satisfies Ramp,
+  pitSpread: 1,
+  /** Chance qu'un trou soit trop large pour un saut en courant : le saut long depuis la glissade. */
+  longJumpChance: { from: 0, to: 0.6 } satisfies Ramp,
+  /**
+   * Plage de départs du geste (px) où le témoin passe, au moins : en dessous, l'obstacle n'est pas
+   * retenu. Le témoin part au milieu de la plage.
+   */
+  minWindowPx: { from: 16, to: 8 } satisfies Ramp,
+};

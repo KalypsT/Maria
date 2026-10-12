@@ -10,6 +10,7 @@ import { GROWTH_PHASES, phaseMovement, type GrowthPhase } from '../../config/gro
 import { DEFAULT_MOVEMENT } from '../../config/movement';
 import { generateCablesLevel } from './cables';
 import { generateChimneyLevel } from './chimney';
+import { generateCorridorLevel } from './corridor';
 import { generateStepsLevel } from './steps';
 import { generateWindLevel } from './wind';
 
@@ -60,6 +61,7 @@ export const ARCADE_READY: readonly ArcadeGameId[] = [
   ArcadeGameId.Chimney,
   ArcadeGameId.Wind,
   ArcadeGameId.Cables,
+  ArcadeGameId.Corridor,
 ];
 
 /**
@@ -107,6 +109,17 @@ export function arcadeLevel(id: ArcadeGameId, n: number): ArcadeLevel | null {
   }
   if (id === ArcadeGameId.Wind) {
     const level = generateWindLevel(n, params, phase.hitbox, game.abilities);
+    return {
+      id: `arcade-${id}-${String(n)}`,
+      text: level.text,
+      game: id,
+      number: n,
+      lengthTiles: level.lengthTiles,
+      difficulty: level.difficulty,
+    };
+  }
+  if (id === ArcadeGameId.Corridor) {
+    const level = generateCorridorLevel(n, params, phase.hitbox, game.abilities);
     return {
       id: `arcade-${id}-${String(n)}`,
       text: level.text,

@@ -49,8 +49,9 @@ describe('les jeux de la console', () => {
       ArcadeGameId.Chimney,
       ArcadeGameId.Wind,
       ArcadeGameId.Cables,
+      ArcadeGameId.Corridor,
     ]);
-    expect(arcadeLevel(ArcadeGameId.Corridor, 1)).toBeNull();
+    expect(arcadeLevel(ArcadeGameId.Worlds, 1)).toBeNull();
     expect(arcadeLevel(ArcadeGameId.Cables, 0)).toBeNull();
     expect(arcadeLevel(ArcadeGameId.Cables, 1.5)).toBeNull();
     expect(arcadeLevel(ArcadeGameId.Cables, 3)?.id).toBe('arcade-cables-3');
