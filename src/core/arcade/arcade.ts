@@ -11,6 +11,7 @@ import { DEFAULT_MOVEMENT } from '../../config/movement';
 import { generateCablesLevel } from './cables';
 import { generateChimneyLevel } from './chimney';
 import { generateStepsLevel } from './steps';
+import { generateWindLevel } from './wind';
 
 /** Le jeu d'un identifiant (undefined : inconnu). */
 export function arcadeGame(id: string): ArcadeGame | undefined {
@@ -57,6 +58,7 @@ export const ARCADE_READY: readonly ArcadeGameId[] = [
   ArcadeGameId.Jumps,
   ArcadeGameId.Climb,
   ArcadeGameId.Chimney,
+  ArcadeGameId.Wind,
   ArcadeGameId.Cables,
 ];
 
@@ -94,6 +96,17 @@ export function arcadeLevel(id: ArcadeGameId, n: number): ArcadeLevel | null {
   }
   if (id === ArcadeGameId.Chimney) {
     const level = generateChimneyLevel(n, params, phase.hitbox, game.abilities);
+    return {
+      id: `arcade-${id}-${String(n)}`,
+      text: level.text,
+      game: id,
+      number: n,
+      lengthTiles: level.lengthTiles,
+      difficulty: level.difficulty,
+    };
+  }
+  if (id === ArcadeGameId.Wind) {
+    const level = generateWindLevel(n, params, phase.hitbox, game.abilities);
     return {
       id: `arcade-${id}-${String(n)}`,
       text: level.text,

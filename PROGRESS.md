@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La console de Céleste** (D-166, demande de l'utilisateur, sur `ccr-e9f3d38a-x4umy1`) : un mode à part, un jeu par capacité (des niveaux qui s'enchaînent, de plus en plus durs, record en mètres). Maquette (https://claude.ai/artifact/2Pb1PC7arwM1ESAByVLc9T), choix de l'utilisateur et plan validés en 9 PR pour le mode Niveaux (le système ; l'écran de la console ; le cadeau et la chambre ; puis un jeu par PR) ; le mode Sans fin plus tard. **PR 1 faite : le système et les tyroliennes** (les jeux, le générateur et son témoin, les records dans la sauvegarde sans migration, DEBUG → « Console ») et **PR 2 faite : l'écran de la console** (le menu, le mode, la partie, « Oups ! » et le record, le style pastel, les bips ; DEBUG → « Console » → « Allumer la console ») et **PR 3 faite : le cadeau et la chambre** (papa au premier passage au potager, la télé sur le bureau, Agir, « nouveau ! » et l'étincelle) et **PR 4 faite : les sauts et la grimpette** (jouables dès le cadeau) et **PR 5 faite : la cheminée** (le saut mural, la hauteur au compteur). Suite : la PR 6, le grand vent (parapluie) ; essayer la console sur téléphone.
+**La console de Céleste** (D-166, demande de l'utilisateur, sur `ccr-e9f3d38a-x4umy1`) : un mode à part, un jeu par capacité (des niveaux qui s'enchaînent, de plus en plus durs, record en mètres). Maquette (https://claude.ai/artifact/2Pb1PC7arwM1ESAByVLc9T), choix de l'utilisateur et plan validés en 9 PR pour le mode Niveaux (le système ; l'écran de la console ; le cadeau et la chambre ; puis un jeu par PR) ; le mode Sans fin plus tard. **PR 1 faite : le système et les tyroliennes** (les jeux, le générateur et son témoin, les records dans la sauvegarde sans migration, DEBUG → « Console ») et **PR 2 faite : l'écran de la console** (le menu, le mode, la partie, « Oups ! » et le record, le style pastel, les bips ; DEBUG → « Console » → « Allumer la console ») et **PR 3 faite : le cadeau et la chambre** (papa au premier passage au potager, la télé sur le bureau, Agir, « nouveau ! » et l'étincelle) et **PR 4 faite : les sauts et la grimpette** (jouables dès le cadeau) et **PR 5 faite : la cheminée** (le saut mural, la hauteur au compteur) et **PR 6 faite : le grand vent** (le parapluie, des portes de briques de jeu). Suite : la PR 7, le couloir (glissade) ; essayer la console sur téléphone.
 
 **Les bulles** (D-165, demande de l'utilisateur, sur `ccr-3b45ec98-n8x7xk`) : la revue de toutes les bulles. Choix de l'utilisateur faits (un nuage pour Céleste, une bulle de parole pour les autres ; Maria aux seuls moments-pivots et la boucle de la maison cassée ; la photo de Maria gardée ; six nouveaux pictogrammes et le lit à « z » ; **le style « papier découpé »** ; pas de bulle pour les affaires de Maria). Faits : l'inventaire (`docs/BULLES.md`), la maquette (https://claude.ai/artifact/AgbA6JRNEMACrZzPv7Rfim) **la PR 1 : le rendu** (le nuage et la bulle de parole en papier découpé, le recadrage des pictogrammes, le côté de la bulle, la lune qui ne troue plus, les nouveaux pictogrammes ; aucun changement de contenu) et **la PR 2 : la maison, le jardin, le quartier** (la boucle « où est Maria ? » cassée, les cœurs de fin d'indice retirés, le manque, pas de bulle pour les affaires de Maria, les portes fermées). L'inventaire est validé. **PR 3 faite : la gare, le train, la mer** (plus de Maria au début des niveaux, le sourire, « chut », l'émerveillement, le manque, les portes) et **PR 4 faite : la nounou, le monde de Maria, les passants, les portes**. **Le plan des bulles est complet.** Suite : essai sur téléphone.
 
@@ -53,6 +53,13 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### La console, PR 6 : le grand vent (D-166)
+
+- Une longue descente en planant à travers des portes de briques de jeu, ouvertes autour du vol du témoin (qui change d'allure : planer vite, freiner, fermer le parapluie un instant).
+- Vérifié par le vol du témoin rejoué dans les 20 premiers niveaux (l'analyse de faisabilité ne sait pas changer d'allure en plein vol).
+- Vérifié dans Chromium (844 × 390) : le niveau 8.
+- [ ] À vérifier sur téléphone : le grand vent (les ouvertures, assez larges pour un doigt ? fermer le parapluie et le rouvrir à temps : faisable ? les portes de briques de jeu, lisibles ?).
 
 ### La console, PR 5 : la cheminée (D-166)
 

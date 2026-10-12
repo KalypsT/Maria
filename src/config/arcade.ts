@@ -345,3 +345,32 @@ export const ARCADE_CHIMNEY = {
    */
   verifiedLevels: 12,
 };
+
+/**
+ * Le grand vent (D-166) : une longue descente en planant entre des portes de briques de jeu.
+ * PROVISOIRES, à régler sur téléphone.
+ */
+export const ARCADE_WIND = {
+  /** Poteau de départ, en haut à gauche : largeur et ligne du haut. */
+  start: { width: 5, top: 5 },
+  goalWidth: 6,
+  difficultyRate: 0.85,
+  /** Portes par niveau : `first`, une de plus tous les `every` niveaux, au plus `max`. */
+  gates: { first: 4, every: 2, max: 12 },
+  /** Écart entre deux portes (tuiles) visé, et l'écart tiré en plus. */
+  spacing: { from: 9, to: 5 } satisfies Ramp,
+  spacingSpread: 2,
+  /** Épaisseur d'une porte (tuiles). */
+  thickness: { from: 1, to: 2 } satisfies Ramp,
+  /** Marge au-dessus et au-dessous du chemin du témoin, dans l'ouverture d'une porte (px). */
+  margin: { from: 26, to: 9 } satisfies Ramp,
+  /**
+   * Chance que le témoin change d'allure entre deux portes : planer en freinant, ou fermer le
+   * parapluie un instant pour descendre plus vite (sinon, planer à pleine vitesse).
+   */
+  change: { from: 0, to: 0.75 } satisfies Ramp,
+  /** Fermer le parapluie (le témoin) : durée en pas de 1/120 s. */
+  dropSteps: { from: 8, to: 22 } satisfies Ramp,
+  /** Lignes sous l'arrivée (le fond pique). */
+  below: 3,
+};

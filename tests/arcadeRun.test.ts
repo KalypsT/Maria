@@ -91,7 +91,8 @@ describe('le menu de la console', () => {
     });
     expect(byId.get(ArcadeGameId.Climb)).toMatchObject({ unlocked: true, ready: true });
     expect(byId.get(ArcadeGameId.Chimney)).toMatchObject({ unlocked: false, ready: true });
-    expect(byId.get(ArcadeGameId.Wind)).toMatchObject({ unlocked: false, ready: false });
+    expect(byId.get(ArcadeGameId.Wind)).toMatchObject({ unlocked: false, ready: true });
+    expect(byId.get(ArcadeGameId.Corridor)).toMatchObject({ unlocked: false, ready: false });
     expect(byId.get(ArcadeGameId.Wind)).toMatchObject({ unlocked: false });
     expect(cards.filter(playable).map((card) => card.game.id)).toEqual([
       ArcadeGameId.Jumps,
