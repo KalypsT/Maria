@@ -194,9 +194,9 @@ import { monsterChaseParams, monsterEndlessParams } from '../core/arcade/monster
 import { ArcadeEvent, ArcadePhase, ArcadeRun } from '../core/arcade/run';
 import { arcadeRecord } from '../core/save/arcade';
 import { touchesHazard } from '../core/physics/gridCollision';
-import { RECORDS, isRecordSlot, recordSlot } from '../config/records';
+import { isRecordSlot } from '../config/records';
 import { isMemory } from '../config/memories';
-import { drawnCanvas, treasureDrawing } from '../ui/treasureDrawing';
+import { drawnCanvas, recordDrawing, treasureDrawing } from '../ui/treasureDrawing';
 import { drawSticker } from './art/stickerArt';
 import { canPlayRecords, recordShelf, type RecordChoice } from '../core/audio/records';
 import { buildMapModel } from '../core/world/mapModel';
@@ -1926,12 +1926,7 @@ export class GameScene extends Phaser.Scene {
     if (isMemory(id)) {
       content = treasureDrawing('treasure-fly-drawing', id, TREASURE_FLY.sizePx);
     } else if (isRecordSlot(id)) {
-      const record = RECORDS.find((r) => recordSlot(r.id) === id);
-      if (record) {
-        content = document.createElement('span');
-        content.className = 'treasure-sleeve';
-        content.style.setProperty('--sleeve', `#${record.sleeve.toString(16).padStart(6, '0')}`);
-      }
+      content = recordDrawing(id);
     }
     if (!content) {
       this.refreshBagSpark();

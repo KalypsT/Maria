@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**Retour d'essai, suite** (D-168, D-169, sur `claude/game-test-issues-e7pomv`) : **faits** : l'image du sac, le jingle des trouvailles, la lanterne, les pas sur le bois (fichiers de l'utilisateur) ; la cheminée de l'école étrange en difficulté moyenne ; le passage vers la gare n'a plus l'air d'un monde étrange ; l'ombre de l'oculus s'arrête une fois passée ; **les souvenirs de Céleste refaits** (D-169 : neuf souvenirs sur tout le voyage, l'envol vers le sac pour tous les trésors, des bulles sans cœur, la gommette étoile des capacités). **En attente** : les images (prompts fournis, choix validés) : les souvenirs qui manquent (la boîte à musique, la carte postale, le dessin de toute la famille, le dessin de l'école à refaire), les affaires de Maria, les jouets du monde étrange, les pochettes des disques (facultatif), **les trois courts souvenirs** (Céleste à 2 ans en référence, une image par souvenir) ; essai sur téléphone.
+**Retour d'essai, suite** (D-168 à D-170, sur `claude/game-test-issues-e7pomv`, PR #99, `main` fusionnée dedans) : **faits** : l'image du sac, le jingle des trouvailles, la lanterne, les pas sur le bois ; la cheminée de l'école étrange en difficulté moyenne ; le passage vers la gare n'a plus l'air d'un monde étrange ; l'ombre de l'oculus s'arrête une fois passée ; **les souvenirs de Céleste refaits** (D-169 : neuf souvenirs sur tout le voyage, l'envol vers le sac, la gommette étoile des capacités ; les affaires de Maria sans bulle, D-165) ; **toutes les images des trésors, des pochettes et des courts souvenirs** (D-170). **En attente** : essai sur téléphone ; retouches éventuelles des images (le second Roger, le téléphone de la cuisine rose).
 
 **La console, le mode Sans fin** (D-167, demande de l'utilisateur, sur `ccr-e9f3d38a-x4umy1`, reparti de `main` après la fusion du mode Niveaux) : un seul parcours continu fait de morceaux collés (une jointure entre chacun), une bande de trois morceaux chargée ; un nouveau parcours à chaque partie, la difficulté plafonnée au niveau 20, un repère fantôme du record et un bip tous les 100 m, débloqué après un niveau atteint en mode Niveaux (proposé : 5). Plan validé en 6 PR. **PR 1 faite : le moteur** (les morceaux des sauts et leurs jointures, la bande, purs et testés) et **PR 2 faite : le Sans fin dans la console** (les sauts : ouvert au niveau 5, la bande dans la scène, le dessin bloc par bloc, les morceaux en arrière-plan et hors ligne, le repère du record, le bip des 100 m). **Essai sur téléphone attendu** (une saccade au changement de morceau ?). **PR 3 faite : le couloir et les tyroliennes** en Sans fin (la jointure des tyroliennes à hauteur libre : le morceau suivant en part). **PR 4 faite : les deux mondes et le monstre** (le monstre tenu en laisse, écart au plan signalé). **Essai sur téléphone attendu** (le monstre, les deux mondes). **PR 5 faite : la bande en deux dimensions et les jeux verticaux** (la grimpette en escalier, la cheminée empilée, le grand vent en descente ; les huit jeux ont leur Sans fin). Suite : la PR 6, les réglages après les essais sur téléphone.
 
@@ -57,6 +57,12 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les images des trésors, des pochettes et des courts souvenirs (D-170)
+
+- 19 images de l'utilisateur : tous les trésors ont la leur (sac, envol, décor), les pochettes des disques, les trois courts souvenirs en illustrations (bords effacés en ovale) ; WebP et JPEG, ajoutés au cache hors ligne ; la vignette de la fiche à la bonne taille.
+- Vérifié dans Chromium : le sac, les fiches, les courts souvenirs en plein écran, le décor.
+- [ ] À vérifier sur téléphone : les courts souvenirs (l'effacement des bords, la lisibilité), les objets dans le décor (assez lisibles en petit ?).
 
 ### Les souvenirs de Céleste refaits (D-169)
 

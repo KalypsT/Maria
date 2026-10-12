@@ -1,5 +1,7 @@
 import type { FlashbackId } from '../config/memories';
 import { drawFlashback } from '../scenes/art/flashbackArt';
+import { FLASHBACKS } from '../config/memories';
+import { flashbackImage } from './flashbackImages';
 
 /** Part du souvenir consacrée à son apparition, puis à sa disparition (lentes). */
 const FADE_SHARE = 0.22;
@@ -21,6 +23,10 @@ export class FlashbackView {
     this.canvas = document.createElement('canvas');
     this.root.append(this.canvas);
     parent.append(this.root);
+    // Les illustrations (D-170) se chargent dès le début de la partie.
+    for (const id of FLASHBACKS) {
+      flashbackImage(id);
+    }
   }
 
   /** Souvenir affiché (`id` null : aucun) et son avancement (0 → 1). */
@@ -55,7 +61,13 @@ export class FlashbackView {
     }
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.clearRect(0, 0, width, height);
-    drawFlashback(ctx, id, width / 2, height / 2, width, height);
+    const image = flashbackImage(id, () => {
+      // Chargée pendant qu'elle se joue : redessinée avec son illustration.
+      if (this.drawn === id) {
+        this.draw(id);
+      }
+    });
+    drawFlashback(ctx, id, width / 2, height / 2, width, height, image);
     this.drawn = id;
   }
 

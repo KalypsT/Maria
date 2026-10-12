@@ -1,5 +1,6 @@
 import type { PropKind } from '../core/story/story';
-import type { MemoryId } from './memories';
+import type { FlashbackId, MemoryId } from './memories';
+import { recordSlot, type RecordId } from './records';
 import type { CelesteOutfit } from './growth';
 
 /**
@@ -700,11 +701,35 @@ export type WallStyle = (typeof WALL_STYLES)[number];
  * souvenir absent de cette liste est dessiné par le code.
  */
 export const MEMORY_IMAGES: Readonly<Partial<Record<MemoryId, string>>> = {
-  height: 'memory-height.png',
-  photo: 'memory-photo.png',
-  'watering-can': 'memory-watering-can.png',
-  ticket: 'memory-ticket.png',
-  letter: 'memory-letter.png',
+  // Mes souvenirs (D-169, D-170).
+  height: 'memory-height.webp',
+  photo: 'memory-photo.webp',
+  'music-box': 'memory-music-box.webp',
+  'watering-can': 'memory-watering-can.webp',
+  'school-drawing': 'memory-school-drawing.webp',
+  ticket: 'memory-ticket.webp',
+  letter: 'memory-letter.webp',
+  postcard: 'memory-postcard.webp',
+  'family-drawing': 'memory-family-drawing.webp',
+  // Les affaires de Maria (D-170), d'après `maria.png`.
+  slipper: 'memory-slipper.webp',
+  bottle: 'memory-bottle.webp',
+  headband: 'memory-headband.webp',
+  bonnet: 'memory-bonnet.webp',
+  // Le monde étrange (D-170) ; Roger et l'Educaville ont déjà leur image.
+  'pink-kitchen': 'memory-pink-kitchen.webp',
+  'music-book': 'memory-music-book.webp',
+  'white-cloth': 'memory-white-cloth.webp',
+  'eden-tower': 'memory-eden-tower.webp',
+};
+
+/**
+ * Les trésors dont l'image sert déjà au décor (`ART_IMAGES`) : la même dans le sac (D-170), sans
+ * la charger deux fois.
+ */
+export const TREASURE_SHARED_IMAGES: Readonly<Partial<Record<MemoryId, string>>> = {
+  roger: 'roger.png',
+  'shape-box': 'toy-town.png',
 };
 
 /** Le nom d'élément de l'image d'un souvenir, dans `ART_IMAGES`. */
@@ -713,12 +738,37 @@ export function memoryImageKey(id: MemoryId): string {
 }
 
 /**
+ * Les pochettes des disques (D-170), fournies par l'utilisateur, détourées : le disque à moitié
+ * sorti de sa pochette, sans texte (le titre est écrit dans le sac). Dans le sac, dans l'envol vers
+ * le sac et dans le décor ; leur nom d'élément est l'identifiant du disque dans la sauvegarde.
+ */
+export const RECORD_IMAGES: Readonly<Record<RecordId, string>> = {
+  early: 'record-early.webp',
+  adventures: 'record-adventures.webp',
+  lullaby: 'record-lullaby.webp',
+};
+
+/**
+ * Les courts souvenirs en illustrations (D-170), fournies par l'utilisateur : sans cadre, le jeu
+ * garde son traitement de vieille photo (coins arrondis, voile chaud, bords qui s'effacent).
+ * Chargées à la demande par la page (pas par la scène). Sans image, le dessin par le code.
+ */
+export const FLASHBACK_IMAGES: Readonly<Record<FlashbackId, string>> = {
+  roger: 'flashback-roger.jpg',
+  'music-book': 'flashback-music-book.jpg',
+  'white-cloth': 'flashback-white-cloth.jpg',
+};
+
+/**
  * Images fournies (voir le document « Créer des images pour le jeu ») : nom d'élément → fichier
  * sous `public/art/`. Un élément absent de cette liste est dessiné par le code.
  */
 export const ART_IMAGES: Readonly<Record<string, string>> = {
   ...Object.fromEntries(
     Object.entries(MEMORY_IMAGES).map(([id, file]) => [memoryImageKey(id as MemoryId), file]),
+  ),
+  ...Object.fromEntries(
+    Object.entries(RECORD_IMAGES).map(([id, file]) => [recordSlot(id as RecordId), file]),
   ),
   /** Maria (D-31) : image fournie par l'utilisateur, détourée. */
   maria: 'maria.png',

@@ -445,8 +445,9 @@ export const PROP_SIZE = {
   cradle: { w: 30, h: 16 },
   'cradle-maria': { w: 30, h: 16 },
   'cradle-undone': { w: 30, h: 16 },
-  slipper: { w: 7, h: 4 },
-  bottle: { w: 9, h: 5 },
+  // Les affaires de Maria : à la forme de leur image (D-170).
+  slipper: { w: 8, h: 6 },
+  bottle: { w: 7, h: 9 },
   headband: { w: 10, h: 5 },
   blanket: { w: 10, h: 5 },
   // Parents (D-37) : à hauteur d'enfant, bien plus grands que Céleste (environ 26 px) ; taille

@@ -481,6 +481,39 @@ const MEMORY_SPAN: Readonly<Record<MemoryProp, readonly [number, number]>> = {
 type MemoryProp =
   'watering-can' | 'ticket' | 'letter' | 'postcard' | 'school-drawing' | 'family-drawing';
 
+/** La lueur turquoise du monde étrange autour d'un trésor ; celle, chaude et grise, du torchon. */
+const STRANGE_GLOW = 'rgba(94, 230, 210, 0.35)';
+const SOFT_GLOW = 'rgba(255, 244, 222, 0.45)';
+
+/**
+ * Un trésor dans le décor (D-170) : son image fournie (`key`), posée au bas de sa place, sur sa
+ * lueur s'il en a une ; sinon son dessin par le code (`fallback`).
+ */
+function drawTreasureProp(
+  ctx: CanvasRenderingContext2D,
+  key: string,
+  w: number,
+  h: number,
+  images: ReadonlyMap<string, CanvasImageSource>,
+  glow: string | null,
+  fallback: () => void,
+): void {
+  const image = images.get(key);
+  if (!image) {
+    fallback();
+    return;
+  }
+  if (glow) {
+    const r = Math.max(w, h) * 0.62;
+    const halo = ctx.createRadialGradient(w / 2, h / 2, r * 0.15, w / 2, h / 2, r);
+    halo.addColorStop(0, glow);
+    halo.addColorStop(1, glow.replace(/[\d.]+\)$/, '0)'));
+    ctx.fillStyle = halo;
+    ctx.fillRect(w / 2 - r, h / 2 - r, 2 * r, 2 * r);
+  }
+  drawContained(ctx, image, w, h);
+}
+
 /** Un souvenir de Céleste dans le décor (D-169) : son image fournie, ou son dessin par le code. */
 function drawMemoryProp(
   ctx: CanvasRenderingContext2D,
@@ -791,22 +824,30 @@ export function drawProp(
       drawCradle(ctx, w, h, 'undone');
       break;
     case 'slipper':
-      drawSlipper(ctx, w, h);
+      drawTreasureProp(ctx, memoryImageKey('slipper'), w, h, images, null, () => {
+        drawSlipper(ctx, w, h);
+      });
       break;
     case 'bottle':
-      drawBottle(ctx, w, h);
+      drawTreasureProp(ctx, memoryImageKey('bottle'), w, h, images, null, () => {
+        drawBottle(ctx, w, h);
+      });
       break;
     case 'headband':
-      drawHeadband(ctx, w, h);
+      drawTreasureProp(ctx, memoryImageKey('headband'), w, h, images, null, () => {
+        drawHeadband(ctx, w, h);
+      });
       break;
     case 'blanket':
       drawBlanket(ctx, w, h);
       break;
     case 'bonnet':
-      ctx.save();
-      ctx.translate(w / 2, h / 2 + 1);
-      bonnet(ctx, Math.min(w, h * 1.1));
-      ctx.restore();
+      drawTreasureProp(ctx, memoryImageKey('bonnet'), w, h, images, null, () => {
+        ctx.save();
+        ctx.translate(w / 2, h / 2 + 1);
+        bonnet(ctx, Math.min(w, h * 1.1));
+        ctx.restore();
+      });
       break;
     case 'gate':
       drawGate(ctx, w, h, false);
@@ -850,18 +891,22 @@ export function drawProp(
     case 'pink-kitchen':
       // La cuisine rose (D-88), au bout du train de la vaisselle : on la regarde, on ne la prend
       // pas. La lueur turquoise du monde étrange autour d'elle.
-      ctx.save();
-      ctx.translate(w / 2, h / 2);
-      pinkKitchen(ctx, Math.min(w, h), true);
-      ctx.restore();
+      drawTreasureProp(ctx, memoryImageKey('pink-kitchen'), w, h, images, STRANGE_GLOW, () => {
+        ctx.save();
+        ctx.translate(w / 2, h / 2);
+        pinkKitchen(ctx, Math.min(w, h), true);
+        ctx.restore();
+      });
       break;
     case 'music-book':
       // Le livre musical (D-104), sur le toit du carrousel étrange : on le regarde, on ne le prend
       // pas. La lueur turquoise du monde étrange autour de lui.
-      ctx.save();
-      ctx.translate(w / 2, h / 2);
-      musicBook(ctx, Math.min(w, h), true);
-      ctx.restore();
+      drawTreasureProp(ctx, memoryImageKey('music-book'), w, h, images, STRANGE_GLOW, () => {
+        ctx.save();
+        ctx.translate(w / 2, h / 2);
+        musicBook(ctx, Math.min(w, h), true);
+        ctx.restore();
+      });
       break;
     case 'toy-kitchen':
       // Le souvenir jouable (D-89) : la dînette, telle qu'elle était, sans la lueur.
@@ -881,10 +926,12 @@ export function drawProp(
       break;
     case 'white-cloth':
       // Le torchon blanc (D-116), dans le petit lit de la sieste : on le regarde, on ne le prend pas.
-      ctx.save();
-      ctx.translate(w / 2, h / 2);
-      whiteCloth(ctx, Math.min(w, h), true);
-      ctx.restore();
+      drawTreasureProp(ctx, memoryImageKey('white-cloth'), w, h, images, SOFT_GLOW, () => {
+        ctx.save();
+        ctx.translate(w / 2, h / 2);
+        whiteCloth(ctx, Math.min(w, h), true);
+        ctx.restore();
+      });
       break;
     case 'cube-pile':
       drawCubePile(ctx, h);
@@ -944,14 +991,20 @@ export function drawProp(
       drawRecordPlayer(ctx, 0, 0, w, h);
       break;
     case 'record-adventures':
-      drawRecordSleeve(ctx, w, h, '#e38aa0');
+      drawTreasureProp(ctx, kind, w, h, images, null, () => {
+        drawRecordSleeve(ctx, w, h, '#e38aa0');
+      });
       break;
     // Les deux autres disques (D-156), dans la couleur de leur pochette (`RECORDS`).
     case 'record-early':
-      drawRecordSleeve(ctx, w, h, '#7fb3a6');
+      drawTreasureProp(ctx, kind, w, h, images, null, () => {
+        drawRecordSleeve(ctx, w, h, '#7fb3a6');
+      });
       break;
     case 'record-lullaby':
-      drawRecordSleeve(ctx, w, h, '#b7a3d6');
+      drawTreasureProp(ctx, kind, w, h, images, null, () => {
+        drawRecordSleeve(ctx, w, h, '#b7a3d6');
+      });
       break;
     default:
       break;

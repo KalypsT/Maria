@@ -785,3 +785,10 @@ Landscape format 16:9, high resolution.
 Je fais ensuite l'intégration : l'image remplit la vignette, le traitement de vieille photo reste
 dessiné par le code ; une image allégée (pas de transparence : un format compressé, ajouté au cache
 hors ligne).
+
+### Reçues (D-170)
+
+Toutes les images ci-dessus sont reçues et intégrées (`public/art/memory-*.webp`, `record-*.webp`,
+`flashback-*.jpg`). Retouches possibles, si l'utilisateur le souhaite : retirer le second Roger,
+flou, au fond de `flashback-roger` ; retirer le téléphone de `memory-pink-kitchen` ; les cheveux de
+Céleste plus foncés dans `flashback-music-book` et `flashback-white-cloth`.
