@@ -40,9 +40,12 @@ export class EndlessChunks {
     }
   }
 
-  /** Demande un morceau à l'avance (sans effet s'il est déjà prêt ou demandé). */
-  prepare(game: ArcadeGameId, index: number, runSeed: number): void {
-    const request: EndlessRequest = { game, index, runSeed };
+  /**
+   * Demande un morceau à l'avance (sans effet s'il est déjà prêt ou demandé) ; `entryTop` : la
+   * hauteur de sa jointure (null : celle du départ).
+   */
+  prepare(game: ArcadeGameId, index: number, runSeed: number, entryTop: number | null): void {
+    const request: EndlessRequest = { game, index, runSeed, entryTop };
     const key = keyOf(request);
     if (!this.worker || this.ready.has(key) || this.asked.has(key)) {
       return;
@@ -53,15 +56,20 @@ export class EndlessChunks {
 
   /** Le morceau s'il est prêt (sans attendre), retiré de la réserve ; sinon null. */
   take(game: ArcadeGameId, index: number, runSeed: number): EndlessChunk | null {
-    const key = keyOf({ game, index, runSeed });
+    const key = keyOf({ game, index, runSeed, entryTop: null });
     const chunk = this.ready.get(key) ?? null;
     this.ready.delete(key);
     return chunk;
   }
 
   /** Le morceau tout de suite : prêt, ou généré sur place. Null pour un jeu sans morceaux. */
-  now(game: ArcadeGameId, index: number, runSeed: number): EndlessChunk | null {
-    return this.take(game, index, runSeed) ?? endlessChunk(game, index, runSeed);
+  now(
+    game: ArcadeGameId,
+    index: number,
+    runSeed: number,
+    entryTop: number | null,
+  ): EndlessChunk | null {
+    return this.take(game, index, runSeed) ?? endlessChunk(game, index, runSeed, entryTop);
   }
 
   /** Une nouvelle partie (sa graine) : les morceaux de l'ancienne sont oubliés. */

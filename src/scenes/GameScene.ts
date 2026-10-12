@@ -3378,7 +3378,8 @@ export class GameScene extends Phaser.Scene {
     source.start(runSeed);
     const first: EndlessChunk[] = [];
     for (let i = 0; i < 3; i++) {
-      const chunk = source.now(game.id, firstChunk + i, runSeed);
+      // Chaque morceau part de la hauteur où a fini le précédent (les tyroliennes).
+      const chunk = source.now(game.id, firstChunk + i, runSeed, first.at(-1)?.exitTop ?? null);
       if (!chunk) {
         this.showConsoleMenu();
         return;
@@ -3405,7 +3406,7 @@ export class GameScene extends Phaser.Scene {
     const box = this.player.box;
     this.arcadeStartX = box.x + box.width / 2;
     this.arcadeStartY = box.y + box.height;
-    source.prepare(game.id, band.nextIndex, runSeed);
+    source.prepare(game.id, band.nextIndex, runSeed, band.exitTop);
     this.endless.marker = this.recordMarker(
       arcadeRecord(this.session.data.arcade, game.id, run.mode),
     );
@@ -3475,7 +3476,7 @@ export class GameScene extends Phaser.Scene {
     // Pas encore prêt (une course très rapide, ou sans arrière-plan) : généré tout de suite.
     let next = endless.next;
     if (!next) {
-      next = source.now(game, band.nextIndex, runSeed);
+      next = source.now(game, band.nextIndex, runSeed, band.exitTop);
       if (!next) {
         return;
       }
@@ -3497,10 +3498,11 @@ export class GameScene extends Phaser.Scene {
     this.arcadeStartX -= dx;
     painter.shift(dx, dropped);
     painter.setWalls(level);
+    this.showCables();
     if (endless.marker) {
       endless.marker.x -= dx;
     }
-    source.prepare(game, band.nextIndex, runSeed);
+    source.prepare(game, band.nextIndex, runSeed, band.exitTop);
     if (__DEBUG_TOOLS__) {
       this.frameStats.roomMs += performance.now() - start;
     }

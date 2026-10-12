@@ -6,6 +6,8 @@ export interface EndlessRequest {
   readonly game: ArcadeGameId;
   readonly index: number;
   readonly runSeed: number;
+  /** La hauteur de sa jointure (null : celle du départ). */
+  readonly entryTop: number | null;
 }
 
 /** Sa réponse : le morceau, ou null (et l'erreur) si la génération a échoué. */

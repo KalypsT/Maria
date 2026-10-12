@@ -297,6 +297,7 @@ export function generateStepsChunk(
     width: end - 1,
     difficulty: stepsDifficulty(tuning, level),
     posts: pieces.slice(0, -1).map((p) => ({ ...p, col: p.col - 1 })),
+    exitTop: tuning.start.top,
   };
 }
 

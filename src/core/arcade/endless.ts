@@ -1,5 +1,7 @@
 import { ARCADE_ENDLESS } from '../../config/arcade';
-import type { PostPiece } from './course';
+import { TILE_SIZE as T } from '../../config/display';
+import type { CablePiece, PostPiece } from './course';
+import type { RunAction } from './runner';
 
 /**
  * Le mode Sans fin (D-167), pur : la course est faite de morceaux collés bout à bout. Le dernier
@@ -18,8 +20,17 @@ export interface EndlessChunk {
   /** Largeur (tuiles) : de sa jointure à celle du morceau suivant. */
   readonly width: number;
   readonly difficulty: number;
-  /** Ses poteaux (colonnes du morceau : la jointure de départ en colonne 0). */
+  /**
+   * Ses poteaux (colonnes du morceau : la jointure de départ en colonne 0). Le couloir n'a pas de
+   * poteaux : sa jointure est le sol de départ, décrit comme un poteau.
+   */
   readonly posts: readonly PostPiece[];
+  /** Ligne du haut de la jointure suivante : le morceau d'après part de cette hauteur. */
+  readonly exitTop: number;
+  /** Ses câbles (les tyroliennes), en colonnes du morceau, avec la sortie du témoin. */
+  readonly cables?: readonly CablePiece[];
+  /** Les gestes du témoin qui court (le couloir), en px du morceau (les tests les rejouent). */
+  readonly plan?: readonly RunAction[];
 }
 
 /** Le niveau dont le morceau `index` a la difficulté : le niveau `index + 1`, jusqu'au plafond. */
@@ -64,7 +75,46 @@ export function stitch(
     const offset = 1 + chunks.slice(0, -1).reduce((sum, c) => sum + c.width, 0);
     mark(lastSeam.top - 1, offset + lastSeam.col + Math.floor(lastSeam.width / 2), 'G');
   }
-  return [...header, ...grid.map((line) => line.join(''))].join('\n');
+  return [...header, ...stitchedCableLines(chunks), ...grid.map((line) => line.join(''))].join(
+    '\n',
+  );
+}
+
+/** Les câbles de morceaux collés (format des salles, `; @cable:`), en colonnes de la salle. */
+function stitchedCableLines(chunks: readonly EndlessChunk[]): string[] {
+  return stitchedCables(chunks).map(
+    (c) => `; @cable: ${String(c.c1)} ${String(c.r1)} ${String(c.c2)} ${String(c.r2)}`,
+  );
+}
+
+/** Les câbles de morceaux collés, en colonnes de la salle (le mur de gauche en colonne 0). */
+export function stitchedCables(chunks: readonly EndlessChunk[]): CablePiece[] {
+  const cables: CablePiece[] = [];
+  let offset = 1;
+  for (const chunk of chunks) {
+    for (const cable of chunk.cables ?? []) {
+      cables.push({ ...cable, c1: cable.c1 + offset, c2: cable.c2 + offset });
+    }
+    offset += chunk.width;
+  }
+  return cables;
+}
+
+/** Les gestes du témoin de morceaux collés, en px de la salle. */
+export function stitchedPlan(chunks: readonly EndlessChunk[]): RunAction[] {
+  const plan: RunAction[] = [];
+  let offset = T;
+  for (const chunk of chunks) {
+    for (const action of chunk.plan ?? []) {
+      plan.push({
+        ...action,
+        atX: action.atX + offset,
+        ...(action.jumpX !== undefined ? { jumpX: action.jumpX + offset } : {}),
+      });
+    }
+    offset += chunk.width * T;
+  }
+  return plan;
 }
 
 /** Les poteaux de morceaux collés, en colonnes de la salle (le mur de gauche en colonne 0). */
@@ -104,6 +154,11 @@ export class EndlessBand {
   /** Rang du morceau à préparer ensuite (celui que demandera `shift`). */
   get nextIndex(): number {
     return (this.chunks[this.chunks.length - 1]?.index ?? -1) + 1;
+  }
+
+  /** La hauteur de la jointure qui ouvrira le morceau suivant. */
+  get exitTop(): number {
+    return this.chunks[this.chunks.length - 1]?.exitTop ?? 0;
   }
 
   /** La colonne de la salle où commence le dernier morceau (le mur de gauche en colonne 0). */

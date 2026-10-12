@@ -7,6 +7,7 @@ import { PlayerPhysics } from '../player/PlayerPhysics';
 import type { Hitbox } from './course';
 import { replayRun, scanAction, type RunAction, type RunBest } from './runner';
 import { mulberry32, ramp, seedOf } from './random';
+import type { EndlessChunk } from './endless';
 import { ARCADE_ROOM_META } from './roomMeta';
 
 /**
@@ -133,28 +134,27 @@ function bestFor(
   return best;
 }
 
+/** Les obstacles posés par le témoin, ses gestes, et où finit le dernier (colonne). */
+interface Placement {
+  readonly obstacles: CorridorObstacle[];
+  readonly plan: CorridorAction[];
+  readonly end: number;
+}
+
 /**
- * Le niveau n du couloir (D-166), toujours le même : une graine fixe, des obstacles de plus en plus
- * serrés (barres, tunnels, trous), et chacun gardé seulement si le témoin (la vraie physique, la
- * phase du jeu) le passe depuis l'obstacle précédent, sur une plage de départs assez longue ; il
- * part au milieu. Les trous les plus larges demandent le saut long depuis la glissade (un saut en
- * courant n'y suffit pas). Une dernière vérification rejoue tout le plan ; les tests mesurent
- * ensuite chaque niveau avec l'analyse de faisabilité (D-16).
+ * Les obstacles du niveau `n` (sa difficulté, leur nombre), avec la graine `seed` : chacun gardé
+ * seulement si le témoin le passe depuis l'obstacle précédent, sur une plage de départs assez
+ * longue ; il part au milieu.
  */
-export function generateCorridorLevel(
+function placeObstacles(
   n: number,
+  seed: string,
   params: Readonly<MovementParams>,
   hitbox: Hitbox,
-  abilities: readonly string[],
-): CorridorLevel {
-  const random = mulberry32(seedOf(`corridor:${String(n)}`));
+  header: readonly string[],
+): Placement {
+  const random = mulberry32(seedOf(seed));
   const d = corridorDifficulty(n);
-  const header = [
-    `; Console (D-166) : le couloir, niveau ${String(n)}. Généré (graine fixe) : ne pas modifier à la main.`,
-    `; @name: Le couloir · niveau ${String(n)}`,
-    `; @abilities: ${abilities.join(' ')}`,
-    ...ARCADE_ROOM_META,
-  ];
   const id = `arcade-corridor-${String(n)}`;
   const parse = (list: readonly CorridorObstacle[], end: number) =>
     parseAsciiLevel(id, levelText(list, end + LOOKAHEAD_COLS, null, header));
@@ -226,6 +226,37 @@ export function generateCorridorLevel(
     end = placed.obstacle.col + placed.obstacle.width;
   }
 
+  return { obstacles, plan, end };
+}
+
+/**
+ * Le niveau n du couloir (D-166), toujours le même : une graine fixe, des obstacles de plus en plus
+ * serrés (barres, tunnels, trous), et chacun gardé seulement si le témoin (la vraie physique, la
+ * phase du jeu) le passe depuis l'obstacle précédent, sur une plage de départs assez longue ; il
+ * part au milieu. Les trous les plus larges demandent le saut long depuis la glissade (un saut en
+ * courant n'y suffit pas). Une dernière vérification rejoue tout le plan ; les tests mesurent
+ * ensuite chaque niveau avec l'analyse de faisabilité (D-16).
+ */
+export function generateCorridorLevel(
+  n: number,
+  params: Readonly<MovementParams>,
+  hitbox: Hitbox,
+  abilities: readonly string[],
+): CorridorLevel {
+  const header = [
+    `; Console (D-166) : le couloir, niveau ${String(n)}. Généré (graine fixe) : ne pas modifier à la main.`,
+    `; @name: Le couloir · niveau ${String(n)}`,
+    `; @abilities: ${abilities.join(' ')}`,
+    ...ARCADE_ROOM_META,
+  ];
+  const id = `arcade-corridor-${String(n)}`;
+  const { obstacles, plan, end } = placeObstacles(
+    n,
+    `corridor:${String(n)}`,
+    params,
+    hitbox,
+    header,
+  );
   const goalCol = end + C.goalCols;
   const width = goalCol + 4;
   const text = levelText(obstacles, width, goalCol, header);
@@ -238,7 +269,49 @@ export function generateCorridorLevel(
     plan,
     obstacles,
     lengthTiles: goalCol - SPAWN_COL,
-    difficulty: d,
+    difficulty: corridorDifficulty(n),
+  };
+}
+
+/**
+ * Un morceau du couloir pour le mode Sans fin (D-167) : sa jointure est le sol de départ (sans
+ * obstacle), et il s'arrête une tuile après son dernier obstacle, où commence le sol du suivant.
+ * Les obstacles sont posés comme ceux du niveau `level`, avec une graine propre à la partie et au
+ * morceau.
+ */
+export function generateCorridorChunk(
+  index: number,
+  level: number,
+  runSeed: number,
+  params: Readonly<MovementParams>,
+  hitbox: Hitbox,
+): EndlessChunk {
+  const header = ARCADE_ROOM_META;
+  const { obstacles, plan, end } = placeObstacles(
+    level,
+    `endless:corridor:${String(runSeed)}:${String(index)}`,
+    params,
+    hitbox,
+    header,
+  );
+  // La jointure suivante commence une tuile après le dernier obstacle.
+  const next = end + 1;
+  const lines = levelText(obstacles, next + 1, null, [])
+    .split('\n')
+    .map((line) => line.slice(1, next).replace('P', '.'));
+  return {
+    index,
+    level,
+    lines,
+    width: next - 1,
+    difficulty: corridorDifficulty(level),
+    posts: [{ kind: 'post', col: 0, width: C.startCols, top: C.floorRow, goal: false }],
+    exitTop: C.floorRow,
+    plan: plan.map((action) => ({
+      ...action,
+      atX: action.atX - T,
+      ...(action.jumpX !== undefined ? { jumpX: action.jumpX - T } : {}),
+    })),
   };
 }
 

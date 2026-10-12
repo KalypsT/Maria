@@ -160,13 +160,13 @@ describe('le mode Sans fin : les morceaux d’une partie', () => {
   it('sans worker, chaque morceau se génère quand on le demande ; un jeu sans morceaux : null', () => {
     const source = new EndlessChunks();
     source.start(SEED);
-    source.prepare(ArcadeGameId.Jumps, 0, SEED);
+    source.prepare(ArcadeGameId.Jumps, 0, SEED, null);
     expect(source.take(ArcadeGameId.Jumps, 0, SEED)).toBeNull();
-    const chunk = source.now(ArcadeGameId.Jumps, 0, SEED);
+    const chunk = source.now(ArcadeGameId.Jumps, 0, SEED, null);
     expect(chunk?.lines).toEqual(endlessChunk(ArcadeGameId.Jumps, 0, SEED)?.lines);
-    expect(source.now(ArcadeGameId.Corridor, 0, SEED)).toBeNull();
+    expect(source.now(ArcadeGameId.Worlds, 0, SEED, null)).toBeNull();
     expect(endlessChunk(ArcadeGameId.Jumps, -1, SEED)).toBeNull();
-    expect(ENDLESS_READY).toEqual([ArcadeGameId.Jumps]);
+    expect(ENDLESS_READY).toEqual([ArcadeGameId.Jumps, ArcadeGameId.Cables, ArcadeGameId.Corridor]);
     source.destroy();
   });
 });

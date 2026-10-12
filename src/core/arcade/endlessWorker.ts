@@ -6,12 +6,12 @@ import type { EndlessRequest, EndlessReply } from './endlessMessages';
  * sans faire attendre le jeu. Pur : le générateur des niveaux, rien de Phaser.
  */
 self.onmessage = (event: MessageEvent<EndlessRequest>) => {
-  const { game, index, runSeed } = event.data;
+  const { game, index, runSeed, entryTop } = event.data;
   let reply: EndlessReply;
   try {
-    reply = { game, index, runSeed, chunk: endlessChunk(game, index, runSeed) };
+    reply = { ...event.data, chunk: endlessChunk(game, index, runSeed, entryTop) };
   } catch (error) {
-    reply = { game, index, runSeed, chunk: null, error: String(error) };
+    reply = { game, index, runSeed, entryTop, chunk: null, error: String(error) };
   }
   self.postMessage(reply);
 };

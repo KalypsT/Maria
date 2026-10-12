@@ -1,5 +1,6 @@
 import {
   ARCADE,
+  ARCADE_CABLES,
   ARCADE_CLIMB,
   ARCADE_GAMES,
   ARCADE_JUMPS,
@@ -8,9 +9,9 @@ import {
 } from '../../config/arcade';
 import { GROWTH_PHASES, phaseMovement, type GrowthPhase } from '../../config/growth';
 import { DEFAULT_MOVEMENT, type MovementParams } from '../../config/movement';
-import { generateCablesLevel } from './cables';
+import { generateCablesChunk, generateCablesLevel } from './cables';
 import { generateChimneyLevel } from './chimney';
-import { generateCorridorLevel } from './corridor';
+import { generateCorridorChunk, generateCorridorLevel } from './corridor';
 import { generateMonsterLevel } from './monster';
 import { endlessLevel, type EndlessChunk } from './endless';
 import { generateStepsChunk, generateStepsLevel } from './steps';
@@ -128,17 +129,24 @@ function generate(
 }
 
 /** Jeux qui ont leurs morceaux pour le mode Sans fin (D-167) ; les autres : « bientôt ». */
-export const ENDLESS_READY: readonly ArcadeGameId[] = [ArcadeGameId.Jumps];
+export const ENDLESS_READY: readonly ArcadeGameId[] = [
+  ArcadeGameId.Jumps,
+  ArcadeGameId.Cables,
+  ArcadeGameId.Corridor,
+];
 
 /**
  * Le morceau `index` (0, 1, 2…) d'une partie Sans fin de graine `runSeed` (D-167) : généré, comme
- * les niveaux, d'après les valeurs de mouvement par défaut de la phase du jeu. Null pour un jeu
- * sans morceaux (encore) ou un rang invalide.
+ * les niveaux, d'après les valeurs de mouvement par défaut de la phase du jeu. `entryTop` : la
+ * hauteur de sa jointure (celle où a fini le morceau d'avant ; null : le premier, ou un jeu dont
+ * les jointures ont toujours la même hauteur). Null pour un jeu sans morceaux (encore) ou un rang
+ * invalide.
  */
 export function endlessChunk(
   id: ArcadeGameId,
   index: number,
   runSeed: number,
+  entryTop: number | null = null,
 ): EndlessChunk | null {
   const game = arcadeGame(id);
   if (!game || !ENDLESS_READY.includes(id) || !Number.isInteger(index) || index < 0) {
@@ -146,17 +154,32 @@ export function endlessChunk(
   }
   const phase = arcadePhase(game);
   const params = phaseMovement(DEFAULT_MOVEMENT, phase);
-  return generateStepsChunk(
-    game.id,
-    game.name,
-    index,
-    endlessLevel(index),
-    runSeed,
-    ARCADE_JUMPS,
-    params,
-    phase.hitbox,
-    game.abilities,
-  );
+  const level = endlessLevel(index);
+  switch (id) {
+    case ArcadeGameId.Cables:
+      return generateCablesChunk(
+        index,
+        level,
+        runSeed,
+        entryTop ?? ARCADE_CABLES.start.top,
+        params,
+        phase.hitbox,
+      );
+    case ArcadeGameId.Corridor:
+      return generateCorridorChunk(index, level, runSeed, params, phase.hitbox);
+    default:
+      return generateStepsChunk(
+        game.id,
+        game.name,
+        index,
+        level,
+        runSeed,
+        ARCADE_JUMPS,
+        params,
+        phase.hitbox,
+        game.abilities,
+      );
+  }
 }
 
 /** Mètres du compteur pour une distance parcourue (tuiles). */
