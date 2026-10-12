@@ -9,6 +9,7 @@ import {
 import { GROWTH_PHASES, phaseMovement, type GrowthPhase } from '../../config/growth';
 import { DEFAULT_MOVEMENT } from '../../config/movement';
 import { generateCablesLevel } from './cables';
+import { generateChimneyLevel } from './chimney';
 import { generateStepsLevel } from './steps';
 
 /** Le jeu d'un identifiant (undefined : inconnu). */
@@ -55,6 +56,7 @@ export interface ArcadeLevel {
 export const ARCADE_READY: readonly ArcadeGameId[] = [
   ArcadeGameId.Jumps,
   ArcadeGameId.Climb,
+  ArcadeGameId.Chimney,
   ArcadeGameId.Cables,
 ];
 
@@ -81,6 +83,17 @@ export function arcadeLevel(id: ArcadeGameId, n: number): ArcadeLevel | null {
       phase.hitbox,
       game.abilities,
     );
+    return {
+      id: `arcade-${id}-${String(n)}`,
+      text: level.text,
+      game: id,
+      number: n,
+      lengthTiles: level.lengthTiles,
+      difficulty: level.difficulty,
+    };
+  }
+  if (id === ArcadeGameId.Chimney) {
+    const level = generateChimneyLevel(n, params, phase.hitbox, game.abilities);
     return {
       id: `arcade-${id}-${String(n)}`,
       text: level.text,

@@ -461,6 +461,10 @@ export class GameScene extends Phaser.Scene {
   private consolePlayed = false;
   /** Centre de Céleste au départ du niveau de la console (px) : d'où se compte la distance. */
   private arcadeStartX = 0;
+  /** Ses pieds au départ (px) : d'où se compte la hauteur (la cheminée). */
+  private arcadeStartY = 0;
+  /** Le compteur du jeu en cours compte la hauteur (la cheminée), sinon l'avancée. */
+  private arcadeUp = false;
   /** Dernier sens du joystick ou des flèches devant l'écran de la console. */
   private consoleMoveDir = 0;
   /** Dans la chambre, un jeu de la console pas encore vu (D-166) : l'étincelle sur la télé. */
@@ -3280,6 +3284,7 @@ export class GameScene extends Phaser.Scene {
   /** Une partie de la console, depuis le niveau 1. */
   private startArcade(game: ArcadeGameId, mode: ArcadeMode): void {
     this.arcadeRun = new ArcadeRun(game, mode, PHYSICS_STEP_HZ);
+    this.arcadeUp = arcadeGame(game)?.axis === 'up';
     this.consolePlayed = true;
     this.consoleScreen.showPlay();
     this.loadArcadeLevel();
@@ -3299,6 +3304,7 @@ export class GameScene extends Phaser.Scene {
     this.respawn();
     const box = this.player.box;
     this.arcadeStartX = box.x + box.width / 2;
+    this.arcadeStartY = box.y + box.height;
     run.startLevel(level.lengthTiles);
     this.consoleScreen.setBanner(`Niveau ${String(run.level)}`);
     this.chime('start');
@@ -3326,7 +3332,11 @@ export class GameScene extends Phaser.Scene {
     }
     if (live) {
       const box = player.box;
-      run.advance((box.x + box.width / 2 - this.arcadeStartX) / TILE_SIZE);
+      run.advance(
+        this.arcadeUp
+          ? (this.arcadeStartY - box.y - box.height) / TILE_SIZE
+          : (box.x + box.width / 2 - this.arcadeStartX) / TILE_SIZE,
+      );
       const goal = this.level.goal;
       if (touchesHazard(this.level, box)) {
         run.fall();

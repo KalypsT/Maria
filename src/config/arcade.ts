@@ -36,6 +36,8 @@ export interface ArcadeGame {
   readonly phase: number;
   /** Capacités prêtées pendant le jeu (celles qu'il entraîne, pas plus). */
   readonly abilities: readonly Ability[];
+  /** Le compteur compte la hauteur (la cheminée) ; sinon l'avancée vers la droite. */
+  readonly axis?: 'up';
 }
 
 /**
@@ -58,6 +60,7 @@ export const ARCADE_GAMES: readonly ArcadeGame[] = [
     ability: Ability.WallJump,
     phase: 2,
     abilities: [Ability.WallJump],
+    axis: 'up',
   },
   {
     id: ArcadeGameId.Wind,
@@ -303,4 +306,40 @@ export const ARCADE_CLIMB: StepsTuning = {
   width: { from: 4, to: 2 },
   widthSpread: 1,
   headroom: 10,
+};
+
+/**
+ * La cheminée (D-166) : monter entre deux murs en sauts muraux, de section en section ; des briques
+ * de jeu sur les murs et au fond. Le compteur compte la hauteur. PROVISOIRES, à régler sur téléphone.
+ */
+export const ARCADE_CHIMNEY = {
+  /** Largeur de la salle (tuiles). */
+  cols: 22,
+  /** Hauteur d'une section (tuiles) : la largeur de la cheminée change d'une section à l'autre. */
+  sectionRows: 6,
+  /** Sections par niveau : `first`, une de plus tous les `every` niveaux, au plus `max`. */
+  sections: { first: 3, every: 2, max: 10 },
+  /** Difficulté du niveau n : 1 − rate^(n−1). */
+  difficultyRate: 0.85,
+  /**
+   * Largeur intérieure visée (tuiles), la largeur tirée en plus, et ses bornes : au-delà de 5
+   * tuiles, un saut mural monte moins qu'on ne retombe en traversant.
+   */
+  width: { from: 3, to: 5 } satisfies Ramp,
+  widthSpread: 1,
+  minWidth: 3,
+  maxWidth: 5,
+  /** Décalage d'une section à l'autre, au plus (tuiles) : de petits rebords, des surplombs. */
+  shift: { from: 0, to: 1 } satisfies Ramp,
+  /** Briques de jeu sur les murs, par section. */
+  patches: { from: 0, to: 3 } satisfies Ramp,
+  /** Marge entre le chemin du témoin et une brique de jeu du mur (px). */
+  patchMarginPx: { from: 24, to: 6 } satisfies Ramp,
+  /** Lignes au-dessus du haut de la cheminée (le poteau du fanion). */
+  headroom: 6,
+  /**
+   * Niveaux vérifiés un par un par l'analyse (elle est lente sur une haute cheminée) ; le témoin
+   * prouve déjà chaque niveau avec la vraie physique.
+   */
+  verifiedLevels: 12,
 };
