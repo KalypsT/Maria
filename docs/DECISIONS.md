@@ -2765,6 +2765,7 @@ Retour d'essai de l'utilisateur (de la station balnéaire à la fin), plan valid
 - **Demande de l'utilisateur** (changement de mouvement validé) : accélérer au fil de la glissade, selon la pente, un peu plus réaliste et un peu plus difficile.
 - **Avant** : l'accélération ne jouait que sur un câble en pente (au-delà de `cableFlatSlope`), `600 × pente`, jusqu'à 240 px/s ; la plupart des fils sont presque plats : on ne la sentait pas.
 - **Maintenant, comme une poulie** : `cableAccel × pente` sur tous les câbles, **signée** : en descente elle accélère, en montée (un câble presque plat, parcouru dans son sens d'arrivée) elle ralentit, jamais sous `cableMinSpeed` (110 px/s). `cableAccel` passe à **900** (à peu près la gravité du saut) et `cableMaxSpeed` à **300 px/s**. Le sens reste celui de D-65 (toujours vers le bas en pente, le sens d'arrivée à plat). PROVISOIRES, réglables dans l'overlay.
+- **Les niveaux des tyroliennes de la console changent** (le générateur suit les valeurs de mouvement) : l'empreinte des dix premiers est mise à jour, chaque niveau reste faisable (vérifié par l'analyse).
 - **Vérifié par les tests** : tous les passages avec un fil (la gare, le train, la mer, la jetée, la nounou, le ciel de la chambre, la console) sont rejoués par l'analyse avec la vraie physique. `cable.test.ts` : la montée qui ralentit jusqu'au minimum, la descente qui accélère, bien plus vite qu'à l'accroche sans dépasser le maximum.
 
 ### Étape 4 : la maison de la nounou
