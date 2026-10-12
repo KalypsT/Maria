@@ -1,4 +1,5 @@
 import { TILE_SIZE as T } from '../../config/display';
+import { TOWER_CUBES } from '../../config/story';
 import type { ShapeTools } from './gardenArt';
 import type { ArtContext, Rect } from './roomArt';
 
@@ -23,6 +24,8 @@ const MOON = '#f3ecd2';
 const BLANKET = '#c48a9a';
 const SEA_NIGHT = '#28507a';
 const TORCH = 'rgba(255, 236, 170, 0.8)';
+/** Un passage vers un îlot fini s'éteint à cette fraction de sa lueur (D-171). PROVISOIRE. */
+const ISLET_DONE_DIM = 0.35;
 /** Les cubes de jouets : rouge, bleu, jaune, vert, passés. */
 const CUBES = ['#d9788f', '#6f8fc4', '#e6c27a', '#7fa37a'] as const;
 
@@ -32,9 +35,50 @@ function hash(x: number, y: number): number {
   return n - Math.floor(n);
 }
 
+/** La couleur de l'îlot `k` (celle de son cube, `TOWER_CUBES`, D-171), avec une opacité. */
+function isletColor(k: number, alpha: number): string {
+  const n = parseInt((TOWER_CUBES[k]?.color ?? '#78f0dc').slice(1), 16);
+  return `rgba(${String((n >> 16) & 255)}, ${String((n >> 8) & 255)}, ${String(n & 255)}, ${String(alpha)})`;
+}
+
+/** Le dessin d'un passage vers un îlot (D-171) : sa couleur, éteinte une fois l'îlot fini. */
+interface IsletLook {
+  readonly k: number;
+  readonly done: boolean;
+  readonly strong: string;
+  readonly soft: string;
+}
+
+function isletLook(a: ArtContext, k: number): IsletLook {
+  const flag = TOWER_CUBES[k]?.flag;
+  const done = flag !== undefined && a.flags?.has(flag) === true;
+  const dim = done ? ISLET_DONE_DIM : 1;
+  return { k, done, strong: isletColor(k, 0.8 * dim), soft: isletColor(k, 0.3 * dim) };
+}
+
+/** L'îlot fini (D-171) : son cube se montre sur son passage, dans un petit halo. */
+function doneCube(a: ArtContext, cx: number, cy: number, look: IsletLook): void {
+  if (!look.done) {
+    return;
+  }
+  const { ctx } = a;
+  const s = 9;
+  const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, 2 * s);
+  halo.addColorStop(0, 'rgba(255, 240, 200, 0.45)');
+  halo.addColorStop(1, 'rgba(255, 240, 200, 0)');
+  ctx.fillStyle = halo;
+  ctx.fillRect(cx - 2 * s, cy - 2 * s, 4 * s, 4 * s);
+  ctx.fillStyle = isletColor(look.k, 1);
+  ctx.beginPath();
+  ctx.roundRect(cx - s / 2, cy - s / 2, s, s, 1.5);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+  ctx.fillRect(cx - s * 0.38, cy - s * 0.44, s * 0.76, s * 0.14);
+}
+
 export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string, Drawer> {
   /** Le motif d'un passage : un arc sombre bordé de turquoise, où passe une lueur. */
-  const arch = (a: ArtContext, r: Rect) => {
+  const arch = (a: ArtContext, r: Rect, look?: IsletLook) => {
     const { ctx, palette: p } = a;
     ctx.fillStyle = p.structure;
     ctx.beginPath();
@@ -44,7 +88,7 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
     ctx.lineTo(r.x + r.w, r.y + r.h);
     ctx.closePath();
     ctx.fill();
-    ctx.strokeStyle = GLOW_SOFT;
+    ctx.strokeStyle = look?.soft ?? GLOW_SOFT;
     ctx.lineWidth = 2;
     ctx.stroke();
   };
@@ -168,7 +212,8 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
         ctx.fillStyle = 'rgba(40, 30, 60, 0.45)';
         rounded(ctx, { x: x - s / 2, y: r.y + T - s / 2, w: s, h: s }, 2);
         ctx.fill();
-        ctx.strokeStyle = 'rgba(190, 190, 220, 0.7)';
+        // Chaque creux a la couleur de son îlot (D-171).
+        ctx.strokeStyle = isletColor(i, 0.85);
         ctx.lineWidth = 1;
         ctx.setLineDash([2, 1.5]);
         ctx.stroke();
@@ -213,9 +258,11 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
     },
     passagebed(a, r) {
       // Vers la chambre et le jardin renversé : un arc, la tête d'un lit, des feuilles de haie.
-      arch(a, r);
+      // Aux couleurs de son cube (D-171), éteint une fois l'îlot fini.
+      const g = isletLook(a, 0);
+      arch(a, r, g);
       const { ctx } = a;
-      ctx.strokeStyle = GLOW;
+      ctx.strokeStyle = g.strong;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(r.x + r.w * 0.25, r.y + r.h * 0.8);
@@ -223,7 +270,7 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
       ctx.quadraticCurveTo(r.x + r.w / 2, r.y + r.h * 0.42, r.x + r.w * 0.75, r.y + r.h * 0.55);
       ctx.lineTo(r.x + r.w * 0.75, r.y + r.h * 0.8);
       ctx.stroke();
-      ctx.fillStyle = GLOW_SOFT;
+      ctx.fillStyle = g.soft;
       for (let i = 0; i < 6; i++) {
         ctx.beginPath();
         ctx.ellipse(
@@ -237,6 +284,7 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
         );
         ctx.fill();
       }
+      doneCube(a, r.x + r.w / 2, r.y + r.w / 2, g);
     },
     napexit(a, r) {
       // La sortie de la chambre de la sieste (D-164, revue des portes) : l'arche de la maison de la
@@ -246,10 +294,11 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
     bedgate(a, r) {
       // Le raccourci de l'îlot 1 (D-112) : une petite arche basse, à hauteur de tout-petit, la tête
       // d'un lit dessinée dessus, des feuilles de haie au pied. Elle ne mène nulle part tant que Roger
-      // n'est pas retrouvé (la porte n'existe pas encore).
-      arch(a, r);
+      // n'est pas retrouvé (la porte n'existe pas encore). Aux couleurs de son cube (D-171).
+      const g = isletLook(a, 0);
+      arch(a, r, g);
       const { ctx } = a;
-      ctx.strokeStyle = GLOW_SOFT;
+      ctx.strokeStyle = g.soft;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(r.x + r.w * 0.28, r.y + r.h * 0.75);
@@ -257,7 +306,7 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
       ctx.quadraticCurveTo(r.x + r.w / 2, r.y + r.h * 0.38, r.x + r.w * 0.72, r.y + r.h * 0.5);
       ctx.lineTo(r.x + r.w * 0.72, r.y + r.h * 0.75);
       ctx.stroke();
-      ctx.fillStyle = GLOW_SOFT;
+      ctx.fillStyle = g.soft;
       for (let i = 0; i < 4; i++) {
         ctx.beginPath();
         ctx.ellipse(
@@ -274,11 +323,12 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
     },
     schoolgate(a, r) {
       // Le raccourci de l'îlot 2 (D-113) : la même petite arche, l'horloge ronde de l'école dessus.
-      arch(a, r);
+      const g = isletLook(a, 1);
+      arch(a, r, g);
       const { ctx } = a;
       const cx = r.x + r.w / 2;
       const cy = r.y + r.h * 0.5;
-      ctx.strokeStyle = GLOW_SOFT;
+      ctx.strokeStyle = g.soft;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.arc(cx, cy, r.w * 0.2, 0, Math.PI * 2);
@@ -290,11 +340,12 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
     },
     stationgate(a, r) {
       // Le raccourci de l'îlot 3 (D-114) : la même petite arche, l'horloge de quai pendue et un rail.
-      arch(a, r);
+      const g = isletLook(a, 2);
+      arch(a, r, g);
       const { ctx } = a;
       const cx = r.x + r.w / 2;
       const cy = r.y + r.h * 0.45;
-      ctx.strokeStyle = GLOW_SOFT;
+      ctx.strokeStyle = g.soft;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(cx, r.y + r.w * 0.25);
@@ -306,19 +357,51 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
       ctx.stroke();
     },
     seagate(a, r) {
-      // Le raccourci de l'îlot 4 (D-115) : la même petite arche, une vague et le toit d'un carrousel.
-      arch(a, r);
+      // Le raccourci de l'îlot 4 (D-115) : la même petite arche, un petit carrousel (D-171 : son mât,
+      // son toit festonné, son fanion ; l'ancien toit seul se lisait comme une flèche) et une vague.
+      const g = isletLook(a, 3);
+      arch(a, r, g);
       const { ctx } = a;
       const cx = r.x + r.w / 2;
-      ctx.strokeStyle = GLOW_SOFT;
-      ctx.lineWidth = 1.5;
+      const top = r.y + r.h * 0.28;
+      const eave = r.y + r.h * 0.46;
+      const half = r.w * 0.3;
+      ctx.strokeStyle = g.soft;
+      ctx.fillStyle = g.soft;
+      ctx.lineWidth = 1.2;
+      // Le fanion, au bout du mât.
       ctx.beginPath();
-      ctx.moveTo(cx - r.w * 0.3, r.y + r.h * 0.45);
-      ctx.lineTo(cx, r.y + r.h * 0.3);
-      ctx.lineTo(cx + r.w * 0.3, r.y + r.h * 0.45);
-      ctx.moveTo(r.x + 3, r.y + r.h - 4);
-      ctx.quadraticCurveTo(cx - r.w * 0.15, r.y + r.h - 8, cx, r.y + r.h - 4);
-      ctx.quadraticCurveTo(cx + r.w * 0.15, r.y + r.h, r.x + r.w - 3, r.y + r.h - 4);
+      ctx.moveTo(cx, top);
+      ctx.lineTo(cx, top - 6);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx, top - 6);
+      ctx.lineTo(cx + 5, top - 4.5);
+      ctx.lineTo(cx, top - 3);
+      ctx.fill();
+      // Le toit en chapiteau, festonné.
+      ctx.beginPath();
+      ctx.moveTo(cx, top);
+      ctx.lineTo(cx - half, eave);
+      for (let k = 0; k < 4; k++) {
+        const x0 = cx - half + (k * 2 * half) / 4;
+        ctx.quadraticCurveTo(x0 + half / 4, eave + 3, x0 + half / 2, eave);
+      }
+      ctx.closePath();
+      ctx.fill();
+      // Le mât et deux chevaux de bois, de simples barres.
+      ctx.beginPath();
+      ctx.moveTo(cx, eave);
+      ctx.lineTo(cx, r.y + r.h - 6);
+      for (const x of [cx - half * 0.6, cx + half * 0.6]) {
+        ctx.moveTo(x, eave + 2);
+        ctx.lineTo(x, r.y + r.h * 0.7);
+        ctx.moveTo(x - 3, r.y + r.h * 0.66);
+        ctx.lineTo(x + 3, r.y + r.h * 0.66);
+      }
+      ctx.moveTo(r.x + 3, r.y + r.h - 3);
+      ctx.quadraticCurveTo(cx - r.w * 0.15, r.y + r.h - 6, cx, r.y + r.h - 3);
+      ctx.quadraticCurveTo(cx + r.w * 0.15, r.y + r.h, r.x + r.w - 3, r.y + r.h - 3);
       ctx.stroke();
     },
     napcot(a, r) {
@@ -366,11 +449,12 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
     },
     passageschool(a, r) {
       // Vers l'école et la rue : l'horloge ronde de l'école, un crayon géant.
-      arch(a, r);
+      const g = isletLook(a, 1);
+      arch(a, r, g);
       const { ctx } = a;
       const cx = r.x + r.w / 2;
       const cy = r.y + r.w / 2 + 2;
-      ctx.strokeStyle = GLOW;
+      ctx.strokeStyle = g.strong;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.arc(cx, cy, r.w * 0.22, 0, Math.PI * 2);
@@ -381,13 +465,15 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
       ctx.moveTo(r.x + r.w * 0.2, r.y + r.h - 3);
       ctx.lineTo(r.x + r.w * 0.8, r.y + r.h * 0.62);
       ctx.stroke();
+      doneCube(a, cx, r.y + r.h * 0.72, g);
     },
     passagestation(a, r) {
       // Vers la gare et le train : l'horloge de quai pendue, et un rail qui file.
-      arch(a, r);
+      const g = isletLook(a, 2);
+      arch(a, r, g);
       const { ctx } = a;
       const cx = r.x + r.w / 2;
-      ctx.strokeStyle = GLOW;
+      ctx.strokeStyle = g.strong;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(cx, r.y + r.w * 0.15);
@@ -399,24 +485,67 @@ export function nannyDrawers({ tileShape, rounded }: ShapeTools): Record<string,
       ctx.moveTo(r.x + 3, r.y + r.h - 8);
       ctx.lineTo(r.x + r.w - 3, r.y + r.h - 8);
       ctx.stroke();
+      doneCube(a, cx, r.y + r.h * 0.6, g);
     },
     passagesea(a, r) {
-      // Vers la plage et le carrousel : une trappe dans le plancher, une vague, un peu de sable.
+      // Vers la plage et le carrousel (redessinée en D-171 : elle ressemblait à une marche) : une
+      // vraie trappe dans le plancher, son abattant levé (ses planches, son anneau), une lueur bleue
+      // qui monte du trou, une vague dedans, un peu de sable autour.
       const { ctx, palette: p } = a;
-      ctx.fillStyle = p.structure;
-      ctx.fillRect(r.x, r.y + r.h - 6, r.w, 6);
-      ctx.strokeStyle = GLOW;
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(r.x + 0.75, r.y + r.h - 6, r.w - 1.5, 5);
+      const g = isletLook(a, 3);
+      const floor = r.y + r.h;
+      const hole = { x: r.x + r.w * 0.34, w: r.w * 0.5 };
+      // La lueur qui monte du trou, plus large en haut.
+      const light = ctx.createLinearGradient(0, floor, 0, r.y);
+      light.addColorStop(0, g.soft);
+      light.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = light;
       ctx.beginPath();
-      ctx.moveTo(r.x + 4, r.y + r.h - 12);
-      ctx.quadraticCurveTo(r.x + r.w * 0.3, r.y + r.h - 20, r.x + r.w / 2, r.y + r.h - 12);
-      ctx.quadraticCurveTo(r.x + r.w * 0.7, r.y + r.h - 4, r.x + r.w - 4, r.y + r.h - 12);
+      ctx.moveTo(hole.x, floor - 3);
+      ctx.lineTo(hole.x + hole.w, floor - 3);
+      ctx.lineTo(hole.x + hole.w + 8, r.y);
+      ctx.lineTo(hole.x - 8, r.y);
+      ctx.closePath();
+      ctx.fill();
+      // Le trou, vu un peu de dessus, et sa vague.
+      ctx.fillStyle = p.structure;
+      ctx.fillRect(hole.x, floor - 5, hole.w, 5);
+      ctx.strokeStyle = g.strong;
+      ctx.lineWidth = 1.2;
+      ctx.strokeRect(hole.x + 0.6, floor - 5, hole.w - 1.2, 4.4);
+      ctx.beginPath();
+      ctx.moveTo(hole.x + 4, floor - 2.5);
+      ctx.quadraticCurveTo(hole.x + hole.w * 0.3, floor - 5, hole.x + hole.w / 2, floor - 2.5);
+      ctx.quadraticCurveTo(hole.x + hole.w * 0.7, floor, hole.x + hole.w - 4, floor - 2.5);
       ctx.stroke();
+      // L'abattant, levé sur sa charnière (à gauche du trou), penché en arrière.
+      const len = hole.w * 0.9;
+      ctx.save();
+      ctx.translate(hole.x, floor - 5);
+      ctx.rotate(-Math.PI * 0.62);
+      const thick = 9;
+      ctx.fillStyle = p.wood;
+      ctx.fillRect(0, -thick, len, thick);
+      ctx.strokeStyle = p.woodDark;
+      ctx.lineWidth = 0.8;
+      for (let k = 1; k < 4; k++) {
+        ctx.beginPath();
+        ctx.moveTo((k * len) / 4, -thick);
+        ctx.lineTo((k * len) / 4, 0);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = g.strong;
+      ctx.lineWidth = 1.2;
+      ctx.strokeRect(0.6, -thick + 0.6, len - 1.2, thick - 1.2);
+      ctx.beginPath();
+      ctx.arc(len - 8, -thick / 2, 2.5, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
       ctx.fillStyle = 'rgba(230, 205, 150, 0.45)';
       for (let k = 0; k < r.w / 6; k++) {
-        ctx.fillRect(r.x + hash(k, 6) * r.w, r.y + r.h - 7 - hash(k, 7) * 3, 1.5, 1);
+        ctx.fillRect(r.x + hash(k, 6) * r.w, floor - 2 - hash(k, 7) * 2, 1.5, 1);
       }
+      doneCube(a, hole.x + hole.w / 2, r.y + r.h * 0.45, g);
     },
   };
 }

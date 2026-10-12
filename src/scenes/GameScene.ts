@@ -2793,7 +2793,14 @@ export class GameScene extends Phaser.Scene {
     this.finishView.setPalette(palette, this.artFinish);
     // Salle habillée (D-28) : dessinée par l'habillage, pas tuile par tuile.
     const images = this.artImages();
-    const dressed = this.roomArt.build(level, palette, this.artFinish, this.artScale, images);
+    const dressed = this.roomArt.build(
+      level,
+      palette,
+      this.artFinish,
+      this.artScale,
+      images,
+      this.story.flags,
+    );
     // Les deux couches (D-107) : dessinées à part, avec l'habillage si la salle en a.
     this.shiftView.load(
       atTide(base, false),

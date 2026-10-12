@@ -55,6 +55,11 @@ export interface ArtContext {
    * Absent : toute la salle.
    */
   readonly clip?: Rect;
+  /**
+   * Étapes de l'histoire vécues (D-171), pour un décor qui change avec elles (un îlot de mémoire
+   * fini). Absent : comme au début.
+   */
+  readonly flags?: ReadonlySet<string>;
 }
 
 /** Débord possible d'un élément de décor hors de ses tuiles (ombres, feuillage, halos). */

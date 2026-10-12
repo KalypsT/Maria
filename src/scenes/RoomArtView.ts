@@ -35,6 +35,7 @@ export class RoomArtView {
   private palette: Readonly<ArtPalette> | null = null;
   private finish: Readonly<ArtFinish> | null = null;
   private images: ReadonlyMap<string, CanvasImageSource> = new Map();
+  private flags: ReadonlySet<string> = new Set();
   private scale = 1;
   /** Vrai juste après `build` : la première mise à jour dessine tout ce qui est visible. */
   private fresh = false;
@@ -65,6 +66,7 @@ export class RoomArtView {
     finish: Readonly<ArtFinish>,
     scale: number,
     images: ReadonlyMap<string, CanvasImageSource>,
+    flags: ReadonlySet<string>,
   ): boolean {
     this.clear();
     if (level.decor.length === 0) {
@@ -75,6 +77,7 @@ export class RoomArtView {
     this.finish = finish;
     this.scale = scale;
     this.images = images;
+    this.flags = flags;
     this.fresh = true;
     const chunkPx = LEVEL_CHUNK_TILES * T;
     for (const layer of ['bg', 'light'] as const) {
@@ -155,6 +158,7 @@ export class RoomArtView {
       level,
       palette,
       images: this.images,
+      flags: this.flags,
       clip: { x: x0, y: y0, w, h },
     };
     if (chunk.layer === 'bg') {

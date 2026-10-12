@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { TILE_SIZE as T } from '../config/display';
 import {
   PASSERBY_DEPTH,
+  PASSERBY_ECHO,
   PASSERBY_REACTIONS,
   PASSERBY_TUNING,
   PASSERSBY,
@@ -106,8 +107,10 @@ export class PasserbyView {
       }
     }
     this.illustrated = new Set(PASSERBY_KINDS.filter((k) => passerbyIllustrated(k, images)));
+    // Un écho (D-171) : la salle n'a que lui, dans un monde étrange.
+    const echo = spots.some((spot) => spot.memory === true);
     for (const kind of kinds) {
-      this.texture(kind, images, time === 'evening');
+      this.texture(kind, images, time === 'evening', echo);
     }
     this.bubble.setScale(1 / scale);
     this.passersby = spots.map((spot) => this.place(spot));
@@ -134,6 +137,14 @@ export class PasserbyView {
         continue;
       }
       const fleeing = state.fleeMs >= 0;
+      // Un écho vacille doucement (D-171).
+      const alpha =
+        passerby.spot.memory === true
+          ? passerby.alpha *
+            (1 -
+              PASSERBY_ECHO.flicker *
+                (0.5 + 0.5 * Math.sin((nowMs / PASSERBY_ECHO.flickerMs) * Math.PI * 2)))
+          : passerby.alpha;
       const distance = passerbyDistance(x, y, box, reaction.column);
       if (stepPasserby(state, distance, dtMs, reaction, tuning) && reaction.bubble) {
         // Un passant parle à Céleste (D-165) : une bulle de parole, vers l'intérieur de la salle.
@@ -151,8 +162,10 @@ export class PasserbyView {
         }
         this.renderFlee(passerby);
       } else if (passerby.alt) {
-        passerby.alt.setAlpha(state.blend * passerby.alpha).setVisible(state.blend > 0);
-        passerby.base.setAlpha((1 - state.blend) * passerby.alpha).setVisible(state.blend < 1);
+        passerby.alt.setAlpha(state.blend * alpha).setVisible(state.blend > 0);
+        passerby.base.setAlpha((1 - state.blend) * alpha).setVisible(state.blend < 1);
+      } else if (alpha !== passerby.alpha) {
+        passerby.base.setAlpha(alpha);
       }
     }
     this.renderBubble(nowMs);
@@ -245,6 +258,7 @@ export class PasserbyView {
     kind: PasserbyKind,
     images: ReadonlyMap<string, CanvasImageSource>,
     evening: boolean,
+    echo: boolean,
   ): void {
     const { w, h, below, above } = passerbySize(kind);
     const key = `passerby-${kind}`;
@@ -258,6 +272,13 @@ export class PasserbyView {
     ctx.scale(this.artScale, this.artScale);
     ctx.translate(0, above);
     drawPasserby(ctx, kind, images, evening);
+    if (echo) {
+      // L'écho d'un passant (D-171) : teinté de la lueur du monde étrange, sans couleur vraie.
+      ctx.globalCompositeOperation = 'source-atop';
+      ctx.fillStyle = PASSERBY_ECHO.tint;
+      ctx.fillRect(0, -above, w, above + h + below);
+      ctx.globalCompositeOperation = 'source-over';
+    }
     const textures = this.scene.textures;
     if (textures.exists(key)) {
       textures.remove(key);
