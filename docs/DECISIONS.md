@@ -2741,3 +2741,14 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
 - **Test** : `artImages.test.ts` (chaque image déclarée existe ; chaque trésor, disque et court souvenir a la sienne).
 - **Vérifié dans Chromium** : la page des trésors complète, la fiche d'un disque, « Revoir le souvenir », deux courts souvenirs en plein écran, le chausson et un disque dans le décor.
 - **Sauvegarde** : aucun changement.
+
+## D-171 — Retour d'essai, du train à la fin
+
+Retour d'essai de l'utilisateur (de la station balnéaire à la fin), plan validé en 6 étapes : l'écran noir de la fin ; la jetée ; la vitesse sur les fils ; la maison de la nounou ; le souvenir d'Eden ; les retrouvailles.
+
+### Étape 1 : l'écran noir de la fin
+
+- **Le bug** : au réveil (Agir sur le lit, Maria à côté de Céleste), l'écran restait noir, la musique et les boutons continuaient. Céleste tient Maria (`hold-sit`) au moment où le jour revient : la salle est redessinée, l'image de Maria assise aussi, sous le même nom ; l'image de Maria dans les bras gardait l'ancienne texture, détruite, et le rendu plantait (`Cannot read properties of null (reading 'resolution')`). Un changement d'échelle de l'écran (une rotation) pendant que Céleste la tient aurait fait de même.
+- **Corrigé** : l'image tenue compare la texture elle-même, plus son nom (`GameScene.renderHeldMaria`). Les autres images qui changent de texture sont recréées à chaque redessin (vérifié).
+- Les vérifications précédentes partaient de l'histoire de debug « le matin », déjà réveillée : le passage de la nuit au matin n'y était jamais joué.
+- **Vérifié dans Chromium** : depuis « Maria dans son berceau », Maria retrouvée, le cercle, le réveil, le tapis et l'histoire, l'étagère et le câlin.

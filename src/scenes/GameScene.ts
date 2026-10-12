@@ -4057,7 +4057,9 @@ export class GameScene extends Phaser.Scene {
     if (!visible) {
       return;
     }
-    if (this.heldMaria.texture.key !== HELD_MARIA_TEXTURE) {
+    // Comparer la texture, pas son nom : les objets de l'histoire sont redessinés sous le même nom
+    // (au matin, à un changement d'échelle) ; l'ancienne texture, détruite, ferait planter le rendu.
+    if (this.heldMaria.texture !== this.textures.get(HELD_MARIA_TEXTURE)) {
       this.heldMaria.setTexture(HELD_MARIA_TEXTURE);
     }
     const facing = this.player.facing;
