@@ -240,3 +240,67 @@ export const CONSOLE_TILE_COLORS = {
   /** Le fanion. */
   goal: 0xff3d86,
 } as const;
+
+/**
+ * Les sauts et la grimpette (D-166) : de poteau en poteau, au-dessus des briques de jeu. Distances
+ * en tuiles. PROVISOIRES, à régler sur téléphone.
+ */
+export interface StepsTuning {
+  /** Hauteur du niveau (tuiles) pendant la génération ; la grimpette la recadre ensuite. */
+  readonly rows: number;
+  /** Lignes permises pour le haut des poteaux (la grimpette : seulement le bas). */
+  readonly postRows: { readonly min: number; readonly max: number };
+  /** Poteau de départ : largeur et ligne du haut. */
+  readonly start: { readonly width: number; readonly top: number };
+  readonly goalWidth: number;
+  /** Difficulté du niveau n : 1 − rate^(n−1). */
+  readonly difficultyRate: number;
+  /** Poteaux par niveau (sans le départ ni le fanion) : `first`, un de plus tous les `every`. */
+  readonly posts: { readonly first: number; readonly every: number; readonly max: number };
+  /** Écart visé entre deux poteaux, et l'écart tiré en plus. */
+  readonly gap: Ramp;
+  readonly gapSpread: number;
+  /** Différence de hauteur visée (tuiles), tirée jusqu'à cette valeur. */
+  readonly rise: Ramp;
+  /** Seulement vers le haut (la grimpette), sinon vers le haut ou le bas. */
+  readonly upOnly: boolean;
+  /** Largeur d'un poteau, et la largeur tirée en plus. */
+  readonly width: Ramp;
+  readonly widthSpread: number;
+  /** Lignes laissées au-dessus du poteau le plus haut (la grimpette). */
+  readonly headroom: number;
+}
+
+/** Les sauts : de pierre en pierre, de plus en plus étroites, espacées et décalées. */
+export const ARCADE_JUMPS: StepsTuning = {
+  rows: 22,
+  postRows: { min: 9, max: 19 },
+  start: { width: 6, top: 15 },
+  goalWidth: 6,
+  difficultyRate: 0.85,
+  posts: { first: 5, every: 2, max: 14 },
+  gap: { from: 2, to: 5 },
+  gapSpread: 1,
+  rise: { from: 1, to: 3 },
+  upOnly: false,
+  width: { from: 4, to: 1.5 },
+  widthSpread: 1,
+  headroom: 0,
+};
+
+/** La grimpette : des rebords de plus en plus hauts, où Céleste s'accroche et se hisse. */
+export const ARCADE_CLIMB: StepsTuning = {
+  rows: 120,
+  postRows: { min: 8, max: 116 },
+  start: { width: 6, top: 112 },
+  goalWidth: 6,
+  difficultyRate: 0.85,
+  posts: { first: 5, every: 2, max: 12 },
+  gap: { from: 1, to: 3 },
+  gapSpread: 1,
+  rise: { from: 1.5, to: 4.5 },
+  upOnly: true,
+  width: { from: 4, to: 2 },
+  widthSpread: 1,
+  headroom: 10,
+};

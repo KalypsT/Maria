@@ -89,8 +89,13 @@ describe('le menu de la console', () => {
       ready: true,
       record: 33,
     });
-    expect(byId.get(ArcadeGameId.Climb)).toMatchObject({ unlocked: true, ready: false });
+    expect(byId.get(ArcadeGameId.Climb)).toMatchObject({ unlocked: true, ready: true });
+    expect(byId.get(ArcadeGameId.Chimney)).toMatchObject({ unlocked: false, ready: false });
     expect(byId.get(ArcadeGameId.Wind)).toMatchObject({ unlocked: false });
-    expect(cards.filter(playable).map((card) => card.game.id)).toEqual([ArcadeGameId.Cables]);
+    expect(cards.filter(playable).map((card) => card.game.id)).toEqual([
+      ArcadeGameId.Jumps,
+      ArcadeGameId.Climb,
+      ArcadeGameId.Cables,
+    ]);
   });
 });

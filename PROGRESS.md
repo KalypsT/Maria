@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La console de Céleste** (D-166, demande de l'utilisateur, sur `ccr-e9f3d38a-x4umy1`) : un mode à part, un jeu par capacité (des niveaux qui s'enchaînent, de plus en plus durs, record en mètres). Maquette (https://claude.ai/artifact/2Pb1PC7arwM1ESAByVLc9T), choix de l'utilisateur et plan validés en 9 PR pour le mode Niveaux (le système ; l'écran de la console ; le cadeau et la chambre ; puis un jeu par PR) ; le mode Sans fin plus tard. **PR 1 faite : le système et les tyroliennes** (les jeux, le générateur et son témoin, les records dans la sauvegarde sans migration, DEBUG → « Console ») et **PR 2 faite : l'écran de la console** (le menu, le mode, la partie, « Oups ! » et le record, le style pastel, les bips ; DEBUG → « Console » → « Allumer la console ») et **PR 3 faite : le cadeau et la chambre** (papa au premier passage au potager, la télé sur le bureau, Agir, « nouveau ! » et l'étincelle). Suite : la PR 4, les sauts et la grimpette (le premier jeu jouable dès le cadeau) ; essayer la console sur téléphone.
+**La console de Céleste** (D-166, demande de l'utilisateur, sur `ccr-e9f3d38a-x4umy1`) : un mode à part, un jeu par capacité (des niveaux qui s'enchaînent, de plus en plus durs, record en mètres). Maquette (https://claude.ai/artifact/2Pb1PC7arwM1ESAByVLc9T), choix de l'utilisateur et plan validés en 9 PR pour le mode Niveaux (le système ; l'écran de la console ; le cadeau et la chambre ; puis un jeu par PR) ; le mode Sans fin plus tard. **PR 1 faite : le système et les tyroliennes** (les jeux, le générateur et son témoin, les records dans la sauvegarde sans migration, DEBUG → « Console ») et **PR 2 faite : l'écran de la console** (le menu, le mode, la partie, « Oups ! » et le record, le style pastel, les bips ; DEBUG → « Console » → « Allumer la console ») et **PR 3 faite : le cadeau et la chambre** (papa au premier passage au potager, la télé sur le bureau, Agir, « nouveau ! » et l'étincelle) et **PR 4 faite : les sauts et la grimpette** (jouables dès le cadeau). Suite : la PR 5, la cheminée (saut mural) ; essayer la console sur téléphone.
 
 **Les bulles** (D-165, demande de l'utilisateur, sur `ccr-3b45ec98-n8x7xk`) : la revue de toutes les bulles. Choix de l'utilisateur faits (un nuage pour Céleste, une bulle de parole pour les autres ; Maria aux seuls moments-pivots et la boucle de la maison cassée ; la photo de Maria gardée ; six nouveaux pictogrammes et le lit à « z » ; **le style « papier découpé »** ; pas de bulle pour les affaires de Maria). Faits : l'inventaire (`docs/BULLES.md`), la maquette (https://claude.ai/artifact/AgbA6JRNEMACrZzPv7Rfim) **la PR 1 : le rendu** (le nuage et la bulle de parole en papier découpé, le recadrage des pictogrammes, le côté de la bulle, la lune qui ne troue plus, les nouveaux pictogrammes ; aucun changement de contenu) et **la PR 2 : la maison, le jardin, le quartier** (la boucle « où est Maria ? » cassée, les cœurs de fin d'indice retirés, le manque, pas de bulle pour les affaires de Maria, les portes fermées). L'inventaire est validé. **PR 3 faite : la gare, le train, la mer** (plus de Maria au début des niveaux, le sourire, « chut », l'émerveillement, le manque, les portes) et **PR 4 faite : la nounou, le monde de Maria, les passants, les portes**. **Le plan des bulles est complet.** Suite : essai sur téléphone.
 
@@ -53,6 +53,13 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### La console, PR 4 : les sauts et la grimpette (D-166)
+
+- Deux jeux de plus, générés comme les tyroliennes et prouvés par le témoin : les sauts (de pierre en pierre, dès le cadeau) et la grimpette (un escalier de rebords, des puits de briques de jeu sous les poteaux).
+- Mesuré par l'analyse : 20 niveaux de chaque jeu faisables ; le passage le plus dur de ~460 à ~200 ms (sauts), de ~620 à ~260 ms (grimpette).
+- Vérifié dans Chromium (844 × 390) : « Les sauts » nouveau et jouable, la grimpette au niveau 10.
+- [ ] À vérifier sur téléphone : les sauts (la difficulté monte-t-elle ? les pierres étroites, assez lisibles ?) ; la grimpette (l'accroche aux rebords est-elle sûre ? les puits se comprennent-ils ?).
 
 ### La console, PR 3 : le cadeau et la chambre (D-166)
 

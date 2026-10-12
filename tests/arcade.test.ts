@@ -43,8 +43,8 @@ describe('les jeux de la console', () => {
   });
 
   it('les niveaux : seulement pour les jeux prêts, à partir de 1', () => {
-    expect(ARCADE_READY).toEqual([ArcadeGameId.Cables]);
-    expect(arcadeLevel(ArcadeGameId.Jumps, 1)).toBeNull();
+    expect(ARCADE_READY).toEqual([ArcadeGameId.Jumps, ArcadeGameId.Climb, ArcadeGameId.Cables]);
+    expect(arcadeLevel(ArcadeGameId.Chimney, 1)).toBeNull();
     expect(arcadeLevel(ArcadeGameId.Cables, 0)).toBeNull();
     expect(arcadeLevel(ArcadeGameId.Cables, 1.5)).toBeNull();
     expect(arcadeLevel(ArcadeGameId.Cables, 3)?.id).toBe('arcade-cables-3');

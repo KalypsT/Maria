@@ -1,7 +1,15 @@
-import { ARCADE, ARCADE_GAMES, ArcadeGameId, type ArcadeGame } from '../../config/arcade';
+import {
+  ARCADE,
+  ARCADE_CLIMB,
+  ARCADE_GAMES,
+  ARCADE_JUMPS,
+  ArcadeGameId,
+  type ArcadeGame,
+} from '../../config/arcade';
 import { GROWTH_PHASES, phaseMovement, type GrowthPhase } from '../../config/growth';
 import { DEFAULT_MOVEMENT } from '../../config/movement';
 import { generateCablesLevel } from './cables';
+import { generateStepsLevel } from './steps';
 
 /** Le jeu d'un identifiant (undefined : inconnu). */
 export function arcadeGame(id: string): ArcadeGame | undefined {
@@ -44,7 +52,11 @@ export interface ArcadeLevel {
 }
 
 /** Jeux qui ont déjà leur générateur de niveaux. */
-export const ARCADE_READY: readonly ArcadeGameId[] = [ArcadeGameId.Cables];
+export const ARCADE_READY: readonly ArcadeGameId[] = [
+  ArcadeGameId.Jumps,
+  ArcadeGameId.Climb,
+  ArcadeGameId.Cables,
+];
 
 /**
  * Le niveau n (1, 2, 3…) d'un jeu, toujours le même (D-166) : généré d'après les valeurs de
@@ -58,6 +70,26 @@ export function arcadeLevel(id: ArcadeGameId, n: number): ArcadeLevel | null {
   }
   const phase = arcadePhase(game);
   const params = phaseMovement(DEFAULT_MOVEMENT, phase);
+  if (id === ArcadeGameId.Jumps || id === ArcadeGameId.Climb) {
+    const tuning = id === ArcadeGameId.Jumps ? ARCADE_JUMPS : ARCADE_CLIMB;
+    const level = generateStepsLevel(
+      id,
+      game.name,
+      n,
+      tuning,
+      params,
+      phase.hitbox,
+      game.abilities,
+    );
+    return {
+      id: `arcade-${id}-${String(n)}`,
+      text: level.text,
+      game: id,
+      number: n,
+      lengthTiles: level.lengthTiles,
+      difficulty: level.difficulty,
+    };
+  }
   if (id === ArcadeGameId.Cables) {
     const level = generateCablesLevel(n, params, phase.hitbox, game.abilities);
     return {

@@ -137,8 +137,8 @@ describe('les jeux nouveaux', () => {
       consoleCards(new Set([Ability.Hook]), new Set(), arcade)
         .filter((card) => card.isNew)
         .map((card) => card.game.id);
-    // Les sauts sont débloqués mais pas encore prêts : jamais « nouveaux ».
-    expect(news()).toEqual([ArcadeGameId.Cables]);
+    // Les sauts (dès le cadeau) et les tyroliennes (le crochet) ; pas la grimpette (sans grimper).
+    expect(news()).toEqual([ArcadeGameId.Jumps, ArcadeGameId.Cables]);
     const session = new SaveSession(
       new SaveManager(new MemorySaveStorage()),
       createNewSave('bedroom', 0),
@@ -147,6 +147,6 @@ describe('les jeux nouveaux', () => {
     await session.markArcadeSeen([ArcadeGameId.Cables]);
     expect(session.data.arcade.seen).toEqual([ArcadeGameId.Cables]);
     arcade.seen.push(ArcadeGameId.Cables);
-    expect(news()).toEqual([]);
+    expect(news()).toEqual([ArcadeGameId.Jumps]);
   });
 });
