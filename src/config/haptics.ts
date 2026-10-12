@@ -17,7 +17,7 @@ export const HAPTICS = {
   /** Une veilleuse s'allume. */
   checkpoint: [10],
   /** Céleste prend Maria dans ses bras (D-171) : deux battements de cœur. */
-  hug: [35, 140, 45],
+  hug: [35, 110, 45],
 } as const satisfies Record<string, readonly number[]>;
 
 export type HapticMoment = keyof typeof HAPTICS;
