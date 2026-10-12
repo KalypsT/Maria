@@ -158,7 +158,8 @@ export const StoryFlag = {
   GardenDad: 'garden.dad',
   /**
    * Papa a offert la console à Céleste au potager (D-166) ; elle est installée dans la chambre. Posé
-   * aussi, sans la scène, dans une partie déjà passée par le portillon (papa n'est plus au potager).
+   * aussi, sans la scène, dans une partie déjà passée par le portillon (papa n'est plus au potager),
+   * avant le dernier niveau ; après la fin, la console est là de toute façon.
    */
   ConsoleGift: 'garden.console-gift',
   /** Papa a montré la haie, une fois le saut mural trouvé (D-55). */

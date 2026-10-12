@@ -185,10 +185,12 @@ export const ARCADE_CABLES = {
  */
 export const CONSOLE_TV = {
   room: 'bedroom',
-  col: 33,
+  // Le bout gauche du bureau : loin de l'étagère où Maria s'assoit après la fin (sans étincelle
+  // sur elle, D-144).
+  col: 30,
   row: 14,
-  area: { col: 29, row: 13, w: 7, h: 7 },
-  mark: { col: 33, row: 12 },
+  area: { col: 28, row: 13, w: 7, h: 7 },
+  mark: { col: 30, row: 12 },
 } as const;
 
 /** Le nom de la console, sur son écran d'accueil (PLACEHOLDER, D-166). */

@@ -3444,8 +3444,8 @@ export class GameScene extends Phaser.Scene {
     const there =
       this.zone !== null &&
       this.level.id === CONSOLE_TV.room &&
-      flags.has(StoryFlag.ConsoleGift) &&
-      (!flags.has(StoryFlag.GrownFourth) || flags.has(StoryFlag.FinaleGone));
+      ((flags.has(StoryFlag.ConsoleGift) && !flags.has(StoryFlag.GrownFourth)) ||
+        flags.has(StoryFlag.FinaleGone));
     const data = this.session.data;
     this.consoleNews =
       there &&

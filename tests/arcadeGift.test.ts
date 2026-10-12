@@ -57,6 +57,8 @@ describe('le cadeau de papa', () => {
     expect(has(late.when, [F.GateOpen])).toBe(true);
     expect(has(late.when, [F.GateOpen, F.ConsoleGift])).toBe(false);
     expect(has(late.when, [F.Grown])).toBe(false);
+    // Rien de nouveau dans la chambre pendant le dernier niveau ni après la fin (D-144, D-145).
+    expect(has(late.when, [F.GateOpen, F.GrownFourth])).toBe(false);
   });
 });
 
@@ -82,12 +84,14 @@ describe('la console dans la chambre', () => {
     expect(tile(CONSOLE_TV.col, CONSOLE_TV.row)).toBe(0);
   });
 
-  it('seulement une fois offerte ; pas pendant le dernier niveau ; de nouveau après la fin', () => {
+  it('seulement une fois offerte ; pas pendant le dernier niveau ; après la fin, toujours', () => {
     for (const check of [shown, usable]) {
       expect(check([F.Grown])).toBe(false);
       expect(check([F.Grown, F.ConsoleGift])).toBe(true);
       expect(check([F.ConsoleGift, F.GrownFourth])).toBe(false);
       expect(check([F.ConsoleGift, F.GrownFourth, F.FinaleGone])).toBe(true);
+      // Une partie finie avant la console : elle est là après la fin.
+      expect(check([F.GrownFourth, F.FinaleGone])).toBe(true);
     }
   });
 

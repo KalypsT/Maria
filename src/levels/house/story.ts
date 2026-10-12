@@ -9,11 +9,12 @@ import { CONSOLE_TV } from '../../config/arcade';
 
 /**
  * Quand la console est dans la chambre (D-166) : une fois offerte, sauf pendant le dernier niveau
- * (la chambre du premier soir, rejouée : rien de nouveau) ; de nouveau après la fin.
+ * (la chambre du premier soir, rejouée : rien de nouveau) ; après la fin, toujours (même dans une
+ * partie finie avant que la console existe : rien ne se déclenche plus dans la chambre).
  */
 const CONSOLE_WHEN = [
   { all: [F.ConsoleGift], none: [F.GrownFourth] },
-  { all: [F.ConsoleGift, F.FinaleGone] },
+  { all: [F.FinaleGone] },
 ] as const;
 
 /** Haut de la bibliothèque du salon, là où Maria était assise. */
@@ -919,7 +920,7 @@ export const HOUSE_STORY: StoryData = {
       room: 'bedroom',
       on: 'touch',
       area: { col: 1, row: 1, w: 44, h: 19 },
-      when: { all: [F.GateOpen], none: [F.ConsoleGift] },
+      when: { all: [F.GateOpen], none: [F.ConsoleGift, F.GrownFourth] },
       lock: false,
       steps: [{ do: 'flag', id: F.ConsoleGift }],
     },
