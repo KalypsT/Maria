@@ -21,7 +21,7 @@ import {
 import { parseAsciiLevel } from '../level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../player/PlayerPhysics';
 import { mulberry32, ramp, seedOf } from './random';
-import type { EndlessChunk } from './endless';
+import { chunkLines, type EndlessChunk } from './endless';
 import { ARCADE_ROOM_META } from './roomMeta';
 
 export type { CableExit } from './course';
@@ -503,10 +503,8 @@ export function generateCablesChunk(
   );
   const next = pieces[pieces.length - 1];
   const end = next?.kind === 'post' ? next.col : 1;
-  const lines = levelText(pieces.slice(0, -1), end + 1, C.rows, [])
-    .split('\n')
-    .filter((line) => !line.startsWith(';'))
-    .map((line) => line.slice(1, end).replace('P', '.'));
+  const lines = chunkLines(levelText(pieces.slice(0, -1), end + 1, C.rows, []), 1, end);
+  const exitTop = next?.kind === 'post' ? next.top : entryTop;
   return {
     index,
     level,
@@ -517,7 +515,9 @@ export function generateCablesChunk(
       .filter((p): p is PostPiece => p.kind === 'post')
       .slice(0, -1)
       .map((p) => ({ ...p, col: p.col - 1 })),
-    exit: { top: next?.kind === 'post' ? next.top : entryTop, layer: 'present' },
+    exit: { top: exitTop, layer: 'present' },
+    anchorIn: { col: 0, row: entryTop - 1 },
+    anchorOut: { col: end - 1, row: exitTop - 1 },
     cables: cables.map((c) => ({ ...c, c1: c.c1 - 1, c2: c.c2 - 1 })),
   };
 }

@@ -536,4 +536,9 @@ export const ARCADE_ENDLESS = {
   unlockLevel: 5,
   /** Un bip tous les… (m). */
   milestoneMeters: 100,
+  /**
+   * La cheminée (vers le haut) : il n'y a plus de fond qui pique ; retomber plus de ces lignes sous
+   * la meilleure hauteur atteinte, c'est l'erreur (deux sections).
+   */
+  fallRows: 12,
 };

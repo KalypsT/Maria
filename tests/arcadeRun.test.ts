@@ -163,11 +163,10 @@ describe('le menu de la console', () => {
     expect(endlessPlayable(jumps())).toBe(false);
     reachArcadeLevel(arcade, ArcadeGameId.Jumps, ARCADE_ENDLESS.unlockLevel);
     expect(endlessPlayable(jumps())).toBe(true);
-    // Débloqué, mais sans morceaux encore : « bientôt ».
-    reachArcadeLevel(arcade, ArcadeGameId.Climb, 30);
+    // Chaque jeu a son propre niveau atteint.
     const climb = consoleCards(new Set([Ability.Climb]), new Set(), arcade).find(
       (c) => c.game.id === ArcadeGameId.Climb,
     );
-    expect(climb).toMatchObject({ endlessReady: false, endlessOpen: true });
+    expect(climb).toMatchObject({ endlessReady: true, endlessOpen: false });
   });
 });

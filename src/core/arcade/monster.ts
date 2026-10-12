@@ -9,7 +9,7 @@ import { touchesHazard } from '../physics/gridCollision';
 import { PlayerPhysics } from '../player/PlayerPhysics';
 import type { Hitbox } from './course';
 import { mulberry32, ramp, seedOf } from './random';
-import type { EndlessChunk } from './endless';
+import { chunkLines, type EndlessChunk } from './endless';
 import { ARCADE_ROOM_META } from './roomMeta';
 import {
   drive,
@@ -374,9 +374,7 @@ export function generateMonsterChunk(
     ARCADE_ROOM_META,
   );
   const next = end + 1;
-  const lines = levelText(obstacles, next + 1, null, [])
-    .split('\n')
-    .map((line) => line.slice(1, next).replace('P', '.'));
+  const lines = chunkLines(levelText(obstacles, next + 1, null, []), 1, next);
   // L'allure du témoin dans ce morceau (les sauts, les blocs : il ne court pas toujours à fond).
   const pace = paceOf(
     parseAsciiLevel(
@@ -396,6 +394,8 @@ export function generateMonsterChunk(
     difficulty: monsterDifficulty(level),
     posts: [{ kind: 'post', col: 0, width: C.startCols, top: C.floorRow, goal: false }],
     exit: { top: C.floorRow, layer: 'present' },
+    anchorIn: { col: 0, row: C.floorRow - 1 },
+    anchorOut: { col: next - 1, row: C.floorRow - 1 },
     plan: plan.map((action) => ({ ...action, atX: action.atX - T })),
     speed: Math.floor(pace * ramp(C.endless.speed, monsterDifficulty(level)) * 100) / 100,
   };

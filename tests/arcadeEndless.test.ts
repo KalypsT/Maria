@@ -78,7 +78,8 @@ describe('le mode Sans fin : les morceaux des sauts', () => {
   it.each(chunks.map((c) => [c.index, c] as const))(
     'morceau %i : une jointure au départ, à la hauteur de celle du suivant',
     (_, c) => {
-      expect(c.lines).toHaveLength(ARCADE_JUMPS.rows);
+      // Sans le plafond ni le fond du cadre : la bande les ajoute.
+      expect(c.lines).toHaveLength(ARCADE_JUMPS.rows - 2);
       for (const line of c.lines) {
         expect(line).toHaveLength(c.width);
         expect(line).not.toMatch(/[PG]/);
@@ -91,8 +92,10 @@ describe('le mode Sans fin : les morceaux des sauts', () => {
         goal: false,
       });
       // Le haut de la jointure, et rien au-dessus.
-      expect(c.lines[ARCADE_JUMPS.start.top]?.slice(0, ARCADE_JUMPS.start.width)).toBe('bbbbbb');
       expect(c.lines[ARCADE_JUMPS.start.top - 1]?.slice(0, ARCADE_JUMPS.start.width)).toBe(
+        'bbbbbb',
+      );
+      expect(c.lines[ARCADE_JUMPS.start.top - 2]?.slice(0, ARCADE_JUMPS.start.width)).toBe(
         '......',
       );
       expect(c.width).toBeGreaterThanOrEqual(HALF_VIEW_TILES);
@@ -136,7 +139,7 @@ describe('le mode Sans fin : les morceaux des sauts', () => {
     expect(band.shouldShift(start - 1)).toBe(false);
     expect(band.shouldShift(start)).toBe(true);
     expect(() => band.shift(chunk(4))).toThrow(/3/);
-    expect(band.shift(chunk(3))).toBe(chunk(0).width);
+    expect(band.shift(chunk(3))).toEqual({ dx: -chunk(0).width, dy: 0 });
     expect(band.originCols).toBe(chunk(0).width);
     expect(band.loaded.map((c) => c.index)).toEqual([1, 2, 3]);
     // Céleste, reculée de la largeur retirée, est au début du morceau du milieu.
@@ -157,22 +160,17 @@ describe('le mode Sans fin : les morceaux des sauts', () => {
 
 /** Les morceaux de la partie (D-167, PR 2) : sans worker (ici), générés sur place. */
 describe('le mode Sans fin : les morceaux d’une partie', () => {
-  it('sans worker, chaque morceau se génère quand on le demande ; un jeu sans morceaux : null', () => {
+  it('sans worker, chaque morceau se génère quand on le demande ; un rang invalide : null', () => {
     const source = new EndlessChunks();
     source.start(SEED);
     source.prepare(ArcadeGameId.Jumps, 0, SEED, null);
     expect(source.take(ArcadeGameId.Jumps, 0, SEED)).toBeNull();
     const chunk = source.now(ArcadeGameId.Jumps, 0, SEED, null);
     expect(chunk?.lines).toEqual(endlessChunk(ArcadeGameId.Jumps, 0, SEED)?.lines);
-    expect(source.now(ArcadeGameId.Chimney, 0, SEED, null)).toBeNull();
+    expect(source.now(ArcadeGameId.Chimney, -1, SEED, null)).toBeNull();
     expect(endlessChunk(ArcadeGameId.Jumps, -1, SEED)).toBeNull();
-    expect(ENDLESS_READY).toEqual([
-      ArcadeGameId.Jumps,
-      ArcadeGameId.Cables,
-      ArcadeGameId.Corridor,
-      ArcadeGameId.Worlds,
-      ArcadeGameId.Monster,
-    ]);
+    // Les huit jeux, depuis la PR 5 (D-167).
+    expect(ENDLESS_READY).toEqual(Object.values(ArcadeGameId));
     source.destroy();
   });
 });

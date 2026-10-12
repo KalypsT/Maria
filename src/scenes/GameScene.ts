@@ -172,6 +172,7 @@ import { RecordPicker } from '../ui/RecordPicker';
 import { ConsoleScreen } from '../ui/ConsoleScreen';
 import {
   ARCADE,
+  ARCADE_ENDLESS,
   ARCADE_CHIMES,
   ARCADE_CHIME_GAIN,
   ARCADE_TIMING,
@@ -181,7 +182,7 @@ import {
   type ArcadeChime,
   type ArcadeGameId,
 } from '../config/arcade';
-import { EndlessBand, newRunSeed, type EndlessChunk } from '../core/arcade/endless';
+import { EndlessBand, frameRects, newRunSeed, type EndlessChunk } from '../core/arcade/endless';
 import { ARCADE_ROOM_META } from '../core/arcade/roomMeta';
 import { EndlessChunks } from '../platform/endlessChunks';
 import { EndlessPainter } from './EndlessPainter';
@@ -488,6 +489,11 @@ export class GameScene extends Phaser.Scene {
   /** Les morceaux du mode Sans fin, préparés en arrière-plan (créé à la première partie). */
   private endlessChunks: EndlessChunks | null = null;
   private endlessPainter!: EndlessPainter;
+  /**
+   * La cheminée en Sans fin (D-167) : les pieds de Céleste au plus haut (px). Plus de
+   * `ARCADE_ENDLESS.fallRows` lignes en dessous, c'est la chute (il n'y a plus de fond qui pique).
+   */
+  private endlessBestFeet = 0;
   /** L'annonce d'un repère (« 100 m ») s'efface à ce moment (ms, horloge de la scène). */
   private bannerUntilMs = -1;
   /** Dernier sens du joystick ou des flèches devant l'écran de la console. */
@@ -3391,7 +3397,7 @@ export class GameScene extends Phaser.Scene {
       `; @abilities: ${game.abilities.join(' ')}`,
       ...ARCADE_ROOM_META,
     ];
-    const band = new EndlessBand(first);
+    const band = new EndlessBand(first, game.axis === 'up' ? 'up' : 'x');
     this.endless = { band, runSeed, header, next: null, marker: null, debug: firstChunk > 0 };
     this.setRoom(parseAsciiLevel(`arcade-${game.id}-endless`, band.text(header)), null, null);
     // Le monstre (D-167) : la poursuite des niveaux, tenue en laisse.
@@ -3403,18 +3409,17 @@ export class GameScene extends Phaser.Scene {
         PHYSICS_STEP_HZ,
       );
     }
-    let x = TILE_SIZE;
-    for (const chunk of first) {
-      this.endlessPainter.add(chunk, header, x);
-      x += chunk.width * TILE_SIZE;
+    for (const { chunk, col, row } of band.layout.placed) {
+      this.endlessPainter.add(chunk, header, col * TILE_SIZE, (1 + row) * TILE_SIZE);
     }
     this.endlessPainter.finish();
-    this.endlessPainter.setWalls(this.level);
+    this.endlessPainter.setFrame(frameRects(band.layout));
     this.useGrowth(arcadePhase(game));
     this.respawn();
     const box = this.player.box;
     this.arcadeStartX = box.x + box.width / 2;
     this.arcadeStartY = box.y + box.height;
+    this.endlessBestFeet = this.arcadeStartY;
     source.prepare(game.id, band.nextIndex, runSeed, band.exit);
     this.endless.marker = this.recordMarker(
       arcadeRecord(this.session.data.arcade, game.id, run.mode),
@@ -3432,9 +3437,21 @@ export class GameScene extends Phaser.Scene {
     if (record <= 0) {
       return null;
     }
-    const x = this.arcadeStartX + (record / ARCADE.metersPerTile) * TILE_SIZE;
-    const g = this.add.graphics({ x, y: 0 }).setDepth(1);
+    const tiles = (record / ARCADE.metersPerTile) * TILE_SIZE;
     const color = CONSOLE_TILE_COLORS.goal;
+    if (this.arcadeUp) {
+      // Vers le haut (la cheminée) : une ligne en travers, à la hauteur du record.
+      const g = this.add.graphics({ x: 0, y: this.arcadeStartY - tiles }).setDepth(1);
+      const right = (this.level.width - 1) * TILE_SIZE;
+      g.fillStyle(color, 0.35);
+      for (let x = TILE_SIZE; x < right; x += 8) {
+        g.fillRect(x, -1, 4, 2);
+      }
+      g.fillStyle(color, 0.55);
+      g.fillTriangle(2 * TILE_SIZE, -1, 2 * TILE_SIZE + 10, -1, 2 * TILE_SIZE + 5, -14);
+      return g;
+    }
+    const g = this.add.graphics({ x: this.arcadeStartX + tiles, y: 0 }).setDepth(1);
     const bottom = (this.level.height - 1) * TILE_SIZE;
     g.fillStyle(color, 0.35);
     for (let y = TILE_SIZE; y < bottom; y += 8) {
@@ -3470,15 +3487,21 @@ export class GameScene extends Phaser.Scene {
     const { band, header, runSeed } = endless;
     const painter = this.endlessPainter;
     painter.step();
-    const endX = (band.lastStartCol + (band.loaded.at(-1)?.width ?? 0)) * TILE_SIZE;
+    /** Dessine `chunk` là où il ira, au bout de la bande. */
+    const queue = (chunk: EndlessChunk) => {
+      const at = band.placeOf(chunk);
+      painter.add(chunk, header, at.col * TILE_SIZE, (1 + at.row) * TILE_SIZE);
+    };
     if (!endless.next) {
       endless.next = source.take(game, band.nextIndex, runSeed);
       if (endless.next) {
-        painter.add(endless.next, header, endX);
+        queue(endless.next);
       }
     }
     const player = this.player;
-    if (!band.shouldShift(Math.floor(player.box.x / TILE_SIZE))) {
+    const box = player.box;
+    const feetRow = Math.floor((box.y + box.height - 1) / TILE_SIZE);
+    if (!band.shouldShift(Math.floor(box.x / TILE_SIZE), feetRow)) {
       return;
     }
     const start = __DEBUG_TOOLS__ ? performance.now() : 0;
@@ -3489,11 +3512,13 @@ export class GameScene extends Phaser.Scene {
       if (!next) {
         return;
       }
-      painter.add(next, header, endX);
+      queue(next);
     }
     painter.finish();
     const dropped = band.loaded[0]?.index ?? -1;
-    const dx = band.shift(next) * TILE_SIZE;
+    const move = band.shift(next);
+    const dx = move.dx * TILE_SIZE;
+    const dy = move.dy * TILE_SIZE;
     endless.next = null;
     // La salle relue, dans la couche où est Céleste (les deux mondes, D-107).
     const base = parseAsciiLevel(this.level.id, band.text(header));
@@ -3502,25 +3527,29 @@ export class GameScene extends Phaser.Scene {
     this.level = level;
     this.run.setLayer(level);
     this.combat.setLayer(level);
-    const box = player.box;
-    box.x -= dx;
-    player.prevX -= dx;
+    box.x += dx;
+    box.y += dy;
+    player.prevX += dx;
+    player.prevY += dy;
     player.shiftTo(level, 0);
     if (base.layers) {
       this.shiftView.load(base, null);
       this.shiftView.show(layer, null);
     }
     if (base.chase) {
-      this.combat.chase?.reframe(base.chase, dx);
+      this.combat.chase?.reframe(base.chase, -dx);
     }
-    this.camera.translate(-dx, 0);
+    this.camera.translate(dx, dy);
     this.camera.setBounds(level.width * TILE_SIZE, level.height * TILE_SIZE);
-    this.arcadeStartX -= dx;
-    painter.shift(dx, dropped);
-    painter.setWalls(level);
+    this.arcadeStartX += dx;
+    this.arcadeStartY += dy;
+    this.endlessBestFeet += dy;
+    painter.shift(dx, dy, dropped);
+    painter.setFrame(frameRects(band.layout));
     this.showCables();
     if (endless.marker) {
-      endless.marker.x -= dx;
+      endless.marker.x += dx;
+      endless.marker.y += dy;
     }
     source.prepare(game, band.nextIndex, runSeed, band.exit);
     if (__DEBUG_TOOLS__) {
@@ -3595,7 +3624,13 @@ export class GameScene extends Phaser.Scene {
       if (chase && (chase.events & ChaseEvent.Wake) !== 0) {
         this.chime('wake');
       }
-      if (caught || touchesHazard(this.level, box)) {
+      // La cheminée en Sans fin : retomber trop bas, c'est l'erreur (D-167).
+      const feet = box.y + box.height;
+      this.endlessBestFeet = Math.min(this.endlessBestFeet, feet);
+      const dropped =
+        this.endless?.band.axis === 'up' &&
+        feet > this.endlessBestFeet + ARCADE_ENDLESS.fallRows * TILE_SIZE;
+      if (caught || dropped || touchesHazard(this.level, box)) {
         run.fall();
         this.chime('fall');
         this.haptics.pulse('hurt');

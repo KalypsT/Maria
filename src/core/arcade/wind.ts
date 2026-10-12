@@ -7,6 +7,7 @@ import { touchesHazard } from '../physics/gridCollision';
 import { PlayerPhysics, type PlayerInput } from '../player/PlayerPhysics';
 import type { Hitbox } from './course';
 import { mulberry32, ramp, seedOf } from './random';
+import { chunkLines, type EndlessChunk } from './endless';
 import { ARCADE_ROOM_META } from './roomMeta';
 
 /**
@@ -157,10 +158,15 @@ interface Goal {
   readonly top: number;
 }
 
-function levelText(gates: readonly Gate[], goal: Goal, header: readonly string[]): string {
+function levelText(
+  gates: readonly Gate[],
+  goal: Goal,
+  header: readonly string[],
+  goalWidth: number = C.goalWidth,
+): string {
   const floor = goal.top + C.below;
   const rows = floor + 2;
-  const cols = goal.col + C.goalWidth + 1;
+  const cols = goal.col + goalWidth + 1;
   const grid: string[][] = [];
   for (let r = 0; r < rows; r++) {
     const line = new Array<string>(cols).fill(r === 0 || r === rows - 1 ? '#' : '.');
@@ -180,7 +186,7 @@ function levelText(gates: readonly Gate[], goal: Goal, header: readonly string[]
     }
   };
   post(1, C.start.width, C.start.top);
-  post(goal.col, C.goalWidth, goal.top);
+  post(goal.col, goalWidth, goal.top);
   for (const gate of gates) {
     for (let r = 1; r < floor; r++) {
       if (r >= gate.open0 && r <= gate.open1) {
@@ -198,33 +204,34 @@ function levelText(gates: readonly Gate[], goal: Goal, header: readonly string[]
   }
   const goalLine = grid[goal.top - 1];
   if (goalLine) {
-    goalLine[goal.col + Math.floor(C.goalWidth / 2)] = 'G';
+    goalLine[goal.col + Math.floor(goalWidth / 2)] = 'G';
   }
   return [...header, ...grid.map((line) => line.join(''))].join('\n');
 }
 
+/** Ce que pose le témoin : les portes, le poteau d'arrivée, son plan, le texte de la salle. */
+interface Placement {
+  readonly gates: Gate[];
+  readonly goal: Goal;
+  readonly plan: WindLeg[];
+  readonly text: string;
+  readonly count: number;
+}
+
 /**
- * Le niveau n du grand vent (D-166), toujours le même : une graine fixe, un plan pour le témoin (une
- * allure par passage entre deux portes, de plus en plus variée), son vol avec la vraie physique dans
- * le ciel vide ; puis les portes de briques de jeu, ouvertes autour de son chemin (une marge qui se
- * resserre), et le poteau du fanion là où il se pose. Une dernière vérification rejoue le vol avec
- * les portes (sinon, les ouvertures s'élargissent). L'analyse de faisabilité ne sait pas changer
- * d'allure en plein vol : les tests rejouent le plan du témoin.
+ * Les portes du niveau `n` (sa difficulté, leur nombre), avec la graine `seed`, et le poteau
+ * d'arrivée, de largeur `goalWidth`, là où se pose le témoin.
  */
-export function generateWindLevel(
+function placeWind(
   n: number,
+  seed: string,
   params: Readonly<MovementParams>,
   hitbox: Hitbox,
-  abilities: readonly string[],
-): WindLevel {
-  const random = mulberry32(seedOf(`wind:${String(n)}`));
+  header: readonly string[],
+  goalWidth: number,
+): Placement {
+  const random = mulberry32(seedOf(seed));
   const d = windDifficulty(n);
-  const header = [
-    `; Console (D-166) : le grand vent, niveau ${String(n)}. Généré (graine fixe) : ne pas modifier à la main.`,
-    `; @name: Le grand vent · niveau ${String(n)}`,
-    `; @abilities: ${abilities.join(' ')}`,
-    ...ARCADE_ROOM_META,
-  ];
   const id = `arcade-wind-${String(n)}`;
   const count = windGates(n);
 
@@ -279,18 +286,84 @@ export function generateWindLevel(
         open1: Math.ceil((bottom + margin) / T) - 1,
       };
     });
-    const text = levelText(gates, goal, header);
+    const text = levelText(gates, goal, header, goalWidth);
     const replay = fly(parseAsciiLevel(id, text), plan, params, hitbox);
     if (replay.landed && replay.feet === goal.top * T) {
-      return {
-        text,
-        plan,
-        lengthTiles: goalCol + Math.floor(C.goalWidth / 2) - 2,
-        gates: count,
-        difficulty: d,
-      };
+      return { gates, goal, plan, text, count };
     }
     margin += WIDEN_PX;
   }
   throw new Error(`Le grand vent, niveau ${String(n)} : le témoin ne passe pas les portes`);
+}
+
+/**
+ * Le niveau n du grand vent (D-166), toujours le même : une graine fixe, un plan pour le témoin (une
+ * allure par passage entre deux portes, de plus en plus variée), son vol avec la vraie physique dans
+ * le ciel vide ; puis les portes de briques de jeu, ouvertes autour de son chemin (une marge qui se
+ * resserre), et le poteau du fanion là où il se pose. Une dernière vérification rejoue le vol avec
+ * les portes (sinon, les ouvertures s'élargissent). L'analyse de faisabilité ne sait pas changer
+ * d'allure en plein vol : les tests rejouent le plan du témoin.
+ */
+export function generateWindLevel(
+  n: number,
+  params: Readonly<MovementParams>,
+  hitbox: Hitbox,
+  abilities: readonly string[],
+): WindLevel {
+  const header = [
+    `; Console (D-166) : le grand vent, niveau ${String(n)}. Généré (graine fixe) : ne pas modifier à la main.`,
+    `; @name: Le grand vent · niveau ${String(n)}`,
+    `; @abilities: ${abilities.join(' ')}`,
+    ...ARCADE_ROOM_META,
+  ];
+  const { goal, plan, text, count } = placeWind(
+    n,
+    `wind:${String(n)}`,
+    params,
+    hitbox,
+    header,
+    C.goalWidth,
+  );
+  return {
+    text,
+    plan,
+    lengthTiles: goal.col + Math.floor(C.goalWidth / 2) - 2,
+    gates: count,
+    difficulty: windDifficulty(n),
+  };
+}
+
+/**
+ * Un morceau du grand vent pour le mode Sans fin (D-167) : de son poteau de départ (la jointure) au
+ * poteau où se pose le témoin, non compris : de la largeur du départ, il ouvre le morceau d'après,
+ * plus bas et plus loin (en escalier). Les portes sont posées comme celles du niveau `level`.
+ */
+export function generateWindChunk(
+  index: number,
+  level: number,
+  runSeed: number,
+  params: Readonly<MovementParams>,
+  hitbox: Hitbox,
+): EndlessChunk {
+  const { goal, plan, text } = placeWind(
+    level,
+    `endless:wind:${String(runSeed)}:${String(index)}`,
+    params,
+    hitbox,
+    ARCADE_ROOM_META,
+    C.start.width,
+  );
+  const lines = chunkLines(text, 1, goal.col);
+  return {
+    index,
+    level,
+    lines,
+    width: goal.col - 1,
+    difficulty: windDifficulty(level),
+    posts: [{ kind: 'post', col: 0, width: C.start.width, top: C.start.top, goal: false }],
+    exit: { top: goal.top, layer: 'present' },
+    anchorIn: { col: 0, row: C.start.top - 1 },
+    anchorOut: { col: goal.col - 1, row: goal.top - 1 },
+    windPlan: plan.map((leg) => ({ ...leg, untilX: leg.untilX - T })),
+  };
 }

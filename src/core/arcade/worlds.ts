@@ -8,7 +8,7 @@ import { touchesHazard } from '../physics/gridCollision';
 import { PlayerPhysics, type PlayerInput } from '../player/PlayerPhysics';
 import { postUnder, type Hitbox, type PostPiece } from './course';
 import { mulberry32, ramp, seedOf } from './random';
-import type { EndlessChunk, EndlessEntry } from './endless';
+import { chunkLines, type EndlessChunk, type EndlessEntry } from './endless';
 import { ARCADE_ROOM_META } from './roomMeta';
 
 /** Un poteau des deux mondes : d'une seule couche (D-107), ou des deux. */
@@ -535,10 +535,9 @@ export function generateWorldsChunk(
   );
   const next = posts[posts.length - 1];
   const end = next ? next.col : 1;
-  const lines = levelText(posts.slice(0, -1), gates, end + 1, [])
-    .split('\n')
-    .filter((line) => !line.startsWith(';'))
-    .map((line) => line.slice(1, end).replace('P', '.'));
+  const lines = chunkLines(levelText(posts.slice(0, -1), gates, end + 1, []), 1, end);
+  const entryTop = posts[0]?.top ?? C.start.top;
+  const exitTop = next?.top ?? C.start.top;
   const zones = [
     ...posts.slice(0, -1).flatMap((p) =>
       p.layer === 'both'
@@ -562,7 +561,9 @@ export function generateWorldsChunk(
     width: end - 1,
     difficulty: worldsDifficulty(level),
     posts: posts.slice(0, -1).map((p) => ({ ...p, col: p.col - 1 })),
-    exit: { top: next?.top ?? C.start.top, layer },
+    exit: { top: exitTop, layer },
+    anchorIn: { col: 0, row: entryTop - 1 },
+    anchorOut: { col: end - 1, row: exitTop - 1 },
     zones,
     shifts: shifts.map((x) => x - T),
   };

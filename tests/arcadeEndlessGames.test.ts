@@ -50,7 +50,7 @@ function run(game: ArcadeGameId, count: number, seed = SEED): EndlessChunk[] {
 /** Les morceaux de chaque partie ont des lignes de la même largeur, sans départ ni fanion. */
 function wellFormed(chunks: readonly EndlessChunk[], rows: number): void {
   for (const chunk of chunks) {
-    expect(chunk.lines).toHaveLength(rows);
+    expect(chunk.lines).toHaveLength(rows - 2);
     for (const line of chunk.lines) {
       expect(line).toHaveLength(chunk.width);
       expect(line).not.toMatch(/[PG]/);
@@ -98,9 +98,9 @@ describe('le mode Sans fin : le couloir', () => {
     for (const chunk of chunks) {
       expect(chunk.exit).toEqual({ top: ARCADE_CORRIDOR.floorRow, layer: 'present' });
       // Pas d'obstacle sur la jointure : le sol, et rien dessus.
-      const floor = chunk.lines[ARCADE_CORRIDOR.floorRow] ?? '';
+      const floor = chunk.lines[ARCADE_CORRIDOR.floorRow - 1] ?? '';
       expect(floor.slice(0, ARCADE_CORRIDOR.startCols)).toBe('b'.repeat(ARCADE_CORRIDOR.startCols));
-      expect(chunk.lines[ARCADE_CORRIDOR.floorRow - 2]?.slice(0, ARCADE_CORRIDOR.startCols)).toBe(
+      expect(chunk.lines[ARCADE_CORRIDOR.floorRow - 3]?.slice(0, ARCADE_CORRIDOR.startCols)).toBe(
         '.'.repeat(ARCADE_CORRIDOR.startCols),
       );
     }

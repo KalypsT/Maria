@@ -16,7 +16,7 @@ import {
   type Witness,
 } from './course';
 import { mulberry32, ramp, seedOf } from './random';
-import type { EndlessChunk } from './endless';
+import { chunkLines, type EndlessChunk } from './endless';
 import { ARCADE_ROOM_META } from './roomMeta';
 
 /** Un niveau des sauts ou de la grimpette : son texte et ce qu'il contient. */
@@ -162,7 +162,9 @@ function placePosts(b: StepsBuild): PostPiece[] {
     for (let gap = 1; gap <= MAX_GAP; gap++) {
       for (let top = tuning.postRows.min; top <= tuning.postRows.max; top++) {
         const rise = prev.top - top;
-        if ((tuning.upOnly && rise < 0) || (last && b.seam && top !== tuning.start.top)) {
+        // La jointure des sauts est à la hauteur du départ ; celle de la grimpette, plus haut.
+        const seamTop = last && b.seam && !tuning.upOnly && top !== tuning.start.top;
+        if ((tuning.upOnly && rise < 0) || seamTop) {
           continue;
         }
         candidates.push({
@@ -255,9 +257,12 @@ export function generateStepsLevel(
 }
 
 /**
- * Un morceau des sauts pour le mode Sans fin (D-167) : de la jointure de départ (comprise) à la
- * suivante (non comprise), qui ouvre le morceau d'après. Les poteaux sont posés comme ceux du niveau
- * `level` (sa difficulté, son nombre de poteaux), avec une graine propre à la partie et au morceau.
+ * Un morceau des sauts ou de la grimpette pour le mode Sans fin (D-167) : de la jointure de départ
+ * (comprise) à la suivante (non comprise), qui ouvre le morceau d'après. Les poteaux sont posés
+ * comme ceux du niveau `level` (sa difficulté, son nombre de poteaux), avec une graine propre à la
+ * partie et au morceau. Les sauts : la jointure suivante à la hauteur du départ (le morceau d'après
+ * est à côté). La grimpette : plus haut (le morceau d'après est en escalier), et le morceau est
+ * recadré au-dessus de son poteau le plus haut, comme les niveaux.
  */
 export function generateStepsChunk(
   key: string,
@@ -270,9 +275,6 @@ export function generateStepsChunk(
   hitbox: Hitbox,
   abilities: readonly string[],
 ): EndlessChunk {
-  if (tuning.upOnly) {
-    throw new Error(`${name} : pas encore de morceaux vers le haut`);
-  }
   const pieces = placePosts({
     key,
     name,
@@ -285,19 +287,25 @@ export function generateStepsChunk(
     header: [],
     seam: true,
   });
-  const next = pieces[pieces.length - 1];
+  const wells = tuning.upOnly ? WELL_DEPTH : 0;
+  const highest = Math.min(...pieces.map((p) => p.top));
+  const cut = tuning.upOnly ? Math.max(0, highest - tuning.headroom) : 0;
+  const shown = pieces.map((p) => ({ ...p, top: p.top - cut }));
+  const next = shown[shown.length - 1];
   const end = next ? next.col : 1;
-  const lines = levelText(pieces.slice(0, -1), end + 1, tuning.rows, [])
-    .split('\n')
-    .map((line) => line.slice(1, end).replace('P', '.'));
+  const exitTop = next ? next.top : tuning.start.top - cut;
+  // La jointure suivante est dessinée (le puits qui la précède en dépend), puis retranchée.
+  const lines = chunkLines(levelText(shown, end + 1, tuning.rows - cut, [], wells), 1, end);
   return {
     index,
     level,
     lines,
     width: end - 1,
     difficulty: stepsDifficulty(tuning, level),
-    posts: pieces.slice(0, -1).map((p) => ({ ...p, col: p.col - 1 })),
-    exit: { top: tuning.start.top, layer: 'present' },
+    posts: shown.slice(0, -1).map((p) => ({ ...p, col: p.col - 1 })),
+    exit: { top: exitTop, layer: 'present' },
+    anchorIn: { col: 0, row: tuning.start.top - cut - 1 },
+    anchorOut: { col: end - 1, row: exitTop - 1 },
   };
 }
 
@@ -310,6 +318,7 @@ export function crossSteps(
   posts: readonly PostPiece[],
   params: Readonly<MovementParams>,
   hitbox: Hitbox,
+  canClimb = false,
 ): boolean {
   const spawn = spawnPosition(level, hitbox.width, hitbox.height);
   const w: Witness = {
@@ -317,6 +326,7 @@ export function crossSteps(
     pressNext: false,
     lastCable: -1,
   };
+  w.phys.canClimb = canClimb;
   const target = posts[posts.length - 1];
   for (let i = 0; i < MAX_STEPS * posts.length; i++) {
     decide(w, posts);

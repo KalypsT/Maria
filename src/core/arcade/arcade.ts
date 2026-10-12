@@ -10,12 +10,12 @@ import {
 import { GROWTH_PHASES, phaseMovement, type GrowthPhase } from '../../config/growth';
 import { DEFAULT_MOVEMENT, type MovementParams } from '../../config/movement';
 import { generateCablesChunk, generateCablesLevel } from './cables';
-import { generateChimneyLevel } from './chimney';
+import { generateChimneyChunk, generateChimneyLevel } from './chimney';
 import { generateCorridorChunk, generateCorridorLevel } from './corridor';
 import { generateMonsterChunk, generateMonsterLevel } from './monster';
 import { endlessLevel, type EndlessChunk, type EndlessEntry } from './endless';
 import { generateStepsChunk, generateStepsLevel } from './steps';
-import { generateWindLevel } from './wind';
+import { generateWindChunk, generateWindLevel } from './wind';
 import { generateWorldsChunk, generateWorldsLevel } from './worlds';
 
 /** Le jeu d'un identifiant (undefined : inconnu). */
@@ -128,14 +128,8 @@ function generate(
   }
 }
 
-/** Jeux qui ont leurs morceaux pour le mode Sans fin (D-167) ; les autres : « bientôt ». */
-export const ENDLESS_READY: readonly ArcadeGameId[] = [
-  ArcadeGameId.Jumps,
-  ArcadeGameId.Cables,
-  ArcadeGameId.Corridor,
-  ArcadeGameId.Worlds,
-  ArcadeGameId.Monster,
-];
+/** Jeux qui ont leurs morceaux pour le mode Sans fin (D-167) : tous, depuis sa PR 5. */
+export const ENDLESS_READY: readonly ArcadeGameId[] = Object.values(ArcadeGameId);
 
 /**
  * Le morceau `index` (0, 1, 2…) d'une partie Sans fin de graine `runSeed` (D-167) : généré, comme
@@ -157,6 +151,22 @@ export function endlessChunk(
   const params = phaseMovement(DEFAULT_MOVEMENT, phase);
   const level = endlessLevel(index);
   switch (id) {
+    case ArcadeGameId.Climb:
+      return generateStepsChunk(
+        game.id,
+        game.name,
+        index,
+        level,
+        runSeed,
+        ARCADE_CLIMB,
+        params,
+        phase.hitbox,
+        game.abilities,
+      );
+    case ArcadeGameId.Chimney:
+      return generateChimneyChunk(index, level, runSeed, entry, params, phase.hitbox);
+    case ArcadeGameId.Wind:
+      return generateWindChunk(index, level, runSeed, params, phase.hitbox);
     case ArcadeGameId.Cables:
       return generateCablesChunk(
         index,

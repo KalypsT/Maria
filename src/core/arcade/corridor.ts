@@ -7,7 +7,7 @@ import { PlayerPhysics } from '../player/PlayerPhysics';
 import type { Hitbox } from './course';
 import { replayRun, scanAction, type RunAction, type RunBest } from './runner';
 import { mulberry32, ramp, seedOf } from './random';
-import type { EndlessChunk } from './endless';
+import { chunkLines, type EndlessChunk } from './endless';
 import { ARCADE_ROOM_META } from './roomMeta';
 
 /**
@@ -296,9 +296,7 @@ export function generateCorridorChunk(
   );
   // La jointure suivante commence une tuile après le dernier obstacle.
   const next = end + 1;
-  const lines = levelText(obstacles, next + 1, null, [])
-    .split('\n')
-    .map((line) => line.slice(1, next).replace('P', '.'));
+  const lines = chunkLines(levelText(obstacles, next + 1, null, []), 1, next);
   return {
     index,
     level,
@@ -307,6 +305,8 @@ export function generateCorridorChunk(
     difficulty: corridorDifficulty(level),
     posts: [{ kind: 'post', col: 0, width: C.startCols, top: C.floorRow, goal: false }],
     exit: { top: C.floorRow, layer: 'present' },
+    anchorIn: { col: 0, row: C.floorRow - 1 },
+    anchorOut: { col: next - 1, row: C.floorRow - 1 },
     plan: plan.map((action) => ({
       ...action,
       atX: action.atX - T,

@@ -1,6 +1,7 @@
 import type Phaser from 'phaser';
 import { LEVEL_CHUNK_TILES, TILE_SIZE as T } from '../config/display';
-import { stitch, type EndlessChunk } from '../core/arcade/endless';
+import { CONSOLE_TILE_COLORS } from '../config/arcade';
+import { stitch, type EndlessChunk, type FrameRect } from '../core/arcade/endless';
 import { commonLayer } from '../core/level/layers';
 import type { LevelData } from '../core/level/LevelData';
 import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
@@ -24,7 +25,7 @@ interface Block {
   readonly row0: number;
   readonly rows: number;
   x: number;
-  readonly y: number;
+  y: number;
 }
 
 /**
@@ -32,12 +33,13 @@ interface Block {
  * tuile ne regarde que la tuile du dessus), en blocs de `LEVEL_CHUNK_TILES` comme les salles, et
  * **un bloc par pas** : un morceau préparé à l'avance est dessiné avant que Céleste n'y arrive,
  * sans saccade. Quand la bande retire un morceau, ses images disparaissent et les autres reculent ;
- * rien n'est redessiné. Les deux murs de la bande sont à part.
+ * rien n'est redessiné. Le cadre de la bande (sa bordure, et ce qu'aucun morceau ne couvre) est un
+ * seul dessin à part, refait au recul (quelques rectangles).
  */
 export class EndlessPainter {
   private readonly images = new Map<number, Phaser.GameObjects.Image[]>();
   private readonly queue: Block[] = [];
-  private readonly walls: Phaser.GameObjects.Image[] = [];
+  private frame: Phaser.GameObjects.Graphics | null = null;
   private graphics: Phaser.GameObjects.Graphics | null = null;
   private serial = 0;
 
@@ -51,14 +53,18 @@ export class EndlessPainter {
     return this.queue.length > 0;
   }
 
-  /** Un morceau à dessiner, sa jointure à `x` px (`header` : le style de la console). */
-  add(chunk: EndlessChunk, header: readonly string[], x: number): void {
+  /**
+   * Un morceau à dessiner, la case de sa première colonne et de sa première ligne à (`x`, `y`) px
+   * (`header` : le style de la console).
+   */
+  add(chunk: EndlessChunk, header: readonly string[], x: number, y: number): void {
     // Les zones d'une seule couche (les deux mondes) sont dessinées à part (`ShiftLayerView`).
     const level = commonLayer(
       parseAsciiLevel(`endless-paint-${String(chunk.index)}`, stitch([chunk], header)),
     );
-    for (let row0 = 0; row0 < level.height; row0 += LEVEL_CHUNK_TILES) {
-      // Les colonnes du morceau sont de 1 à sa largeur (la colonne 0 est un mur).
+    // Les lignes et les colonnes du morceau sont de 1 à sa taille (autour : le cadre).
+    const rows = chunk.lines.length;
+    for (let row0 = 1; row0 <= rows; row0 += LEVEL_CHUNK_TILES) {
       for (let col0 = 1; col0 <= chunk.width; col0 += LEVEL_CHUNK_TILES) {
         this.queue.push({
           chunk: chunk.index,
@@ -66,9 +72,9 @@ export class EndlessPainter {
           col0,
           cols: Math.min(LEVEL_CHUNK_TILES, chunk.width + 1 - col0),
           row0,
-          rows: Math.min(LEVEL_CHUNK_TILES, level.height - row0),
+          rows: Math.min(LEVEL_CHUNK_TILES, rows + 1 - row0),
           x: x + (col0 - 1) * T,
-          y: row0 * T,
+          y: y + (row0 - 1) * T,
         });
       }
     }
@@ -90,40 +96,35 @@ export class EndlessPainter {
     this.step(this.queue.length);
   }
 
-  /** Les murs de la bande : la première et la dernière colonne de `level`. */
-  setWalls(level: LevelData): void {
-    if (this.walls.length === 0) {
-      const g = this.canvas();
-      g.clear();
-      for (let row = 0; row < level.height; row++) {
-        this.drawTile(g, level, 0, row, 0, row * T);
-      }
-      const key = 'endless-wall';
-      if (this.scene.textures.exists(key)) {
-        this.scene.textures.remove(key);
-      }
-      g.generateTexture(key, T, level.height * T);
-      for (let i = 0; i < 2; i++) {
-        this.walls.push(this.scene.add.image(0, 0, key).setOrigin(0, 0));
+  /** Le cadre de la bande : ses rectangles pleins (`frameRects`). */
+  setFrame(rects: readonly FrameRect[]): void {
+    const g = (this.frame ??= this.scene.add.graphics());
+    g.clear();
+    for (const r of rects) {
+      g.fillStyle(CONSOLE_TILE_COLORS.frame);
+      g.fillRect(r.col * T, r.row * T, r.width * T, r.height * T);
+      if (r.edge) {
+        g.fillStyle(CONSOLE_TILE_COLORS.frameEdge);
+        g.fillRect(r.col * T, r.row * T, r.width * T, 2);
       }
     }
-    this.walls[0]?.setX(0);
-    this.walls[1]?.setX((level.width - 1) * T);
   }
 
-  /** Tout recule de `dx` px : le morceau `dropped` disparaît (la bande l'a retiré). */
-  shift(dx: number, dropped: number): void {
+  /** Tout se déplace de (`dx`, `dy`) px : le morceau `dropped` disparaît (la bande l'a retiré). */
+  shift(dx: number, dy: number, dropped: number): void {
     for (const image of this.images.get(dropped) ?? []) {
       this.remove(image);
     }
     this.images.delete(dropped);
     for (const list of this.images.values()) {
       for (const image of list) {
-        image.x -= dx;
+        image.x += dx;
+        image.y += dy;
       }
     }
     for (const block of this.queue) {
-      block.x -= dx;
+      block.x += dx;
+      block.y += dy;
     }
   }
 
@@ -136,10 +137,7 @@ export class EndlessPainter {
     }
     this.images.clear();
     this.queue.length = 0;
-    for (const wall of this.walls) {
-      wall.destroy();
-    }
-    this.walls.length = 0;
+    this.frame?.clear();
   }
 
   private paint(block: Block): void {
