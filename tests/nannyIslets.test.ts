@@ -321,7 +321,10 @@ describe('les îlots de mémoire de la maison de la nounou (D-112, D-113)', () =
           );
         for (const [room, exit] of islet.shortcuts) {
           expect(hidden(room, exit, [F.NannyHouse])).toBe(true);
-          expect(hidden(room, exit, [F.NannyHouse, islet.done])).toBe(false);
+          // Les portes vers l'îlot voisin attendent aussi cet îlot (D-171) : tous les îlots faits.
+          expect(
+            hidden(room, exit, [F.NannyHouse, islet.done, ...TOWER_CUBES.map((c) => c.flag)]),
+          ).toBe(false);
         }
       });
 
