@@ -12,6 +12,7 @@ import { HOUSE_STORY } from '../src/levels/house/story';
 import {
   lanternNodes,
   reachableNodes,
+  seaAnalysis,
   standOn,
   stuckNodes,
   tideGraph,
@@ -148,6 +149,37 @@ describe('la jetée et la fête foraine, le soir (D-101)', () => {
         expect(reached.has(carousel), `carrousel ${String(high)}`).toBe(true);
       }
       expect(stuckNodes(graph, reached, lanternNodes(zone, BAY))).toEqual([]);
+    },
+  );
+
+  it(
+    'le fil du retour (D-171) : hors de portée à l’aller, depuis l’est de la jetée ; attrapé du toit de la guérite',
+    { timeout: ANALYSIS_TIMEOUT_MS },
+    () => {
+      for (const high of [false, true]) {
+        const jetty = atTide(level('sea-jetty'), high);
+        const back = jetty.cables.findIndex((c) => c.x1 === 62 * T + T / 2);
+        expect(back).toBeGreaterThanOrEqual(0);
+        const without = { ...jetty, cables: jetty.cables.filter((_, i) => i !== back) };
+        const withIt = seaAnalysis(jetty);
+        const withoutIt = seaAnalysis(without);
+        const east = withIt.map.surfaces.filter((s) => s.colStart >= 70).map((s) => s.id);
+        const targets = (a: typeof withIt, from: number) =>
+          [...new Set(a.moves.filter((m) => m.from === from).map((m) => m.to))].sort();
+        for (const from of east) {
+          expect(targets(withIt, from), `surface ${String(from)}`).toEqual(
+            targets(withoutIt, from),
+          );
+        }
+        // Du toit de la guérite, le fil mène au toit de la pêche aux canards.
+        const booth = withIt.map.surfaces.find((s) => s.row === 7 && s.colStart === 59);
+        const roof = withIt.map.surfaces.find((s) => s.row === 8 && s.colStart === 118);
+        expect(booth && roof).toBeTruthy();
+        expect(
+          withIt.moves.some((m) => m.from === booth?.id && m.to === roof?.id),
+          `guérite → toit ${String(high)}`,
+        ).toBe(true);
+      }
     },
   );
 });

@@ -1276,6 +1276,7 @@ export class GameScene extends Phaser.Scene {
       this.time.now,
       this.combat.sweepWarnProgress,
       this.combat.sweepPhase === TrainPhase.Passing,
+      this.combat.sweepRiseProgress,
     );
     if (this.combat.waveRow >= 0) {
       this.water.updateWaves(

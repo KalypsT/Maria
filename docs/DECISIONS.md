@@ -2752,3 +2752,10 @@ Retour d'essai de l'utilisateur (de la station balnéaire à la fin), plan valid
 - **Corrigé** : l'image tenue compare la texture elle-même, plus son nom (`GameScene.renderHeldMaria`). Les autres images qui changent de texture sont recréées à chaque redessin (vérifié).
 - Les vérifications précédentes partaient de l'histoire de debug « le matin », déjà réveillée : le passage de la nuit au matin n'y était jamais joué.
 - **Vérifié dans Chromium** : depuis « Maria dans son berceau », Maria retrouvée, le cercle, le réveil, le tapis et l'histoire, l'étagère et le câlin.
+
+### Étape 2 : la jetée
+
+- **Le bassin aux canards retiré** (capture de l'utilisateur) : dessiné dans le trou du platelage, sous le toit de la pêche aux canards, il ressemblait à une plateforme. Le toit, ses poteaux et ses lampions restent.
+- **Les chaises volantes remontent doucement** : après leur passage, elles remontaient d'un coup ; elles remontent maintenant pendant `sweepRiseMs` (1 s, comme la descente). Le dessin seulement : elles ne touchent Céleste que pendant le passage, comme avant (`cycleRiseProgress`, rien ne remonte à l'arrivée dans la salle).
+- **Le fil du retour hors de portée à l'aller** : depuis le toit de la pêche aux canards, on l'attrapait d'un petit saut, et il menait d'un coup au carrousel. Le monter un peu ne suffisait pas (en planant depuis le toit, on finit toujours par le croiser par le dessus). Il est maintenant **tout en haut** (de la colonne 62, ligne 2, à la colonne 122, ligne 0), toujours au-dessus du crochet depuis le toit ; **la guérite de la grande roue est surélevée de 2 cases** pour l'attraper au retour, et **ses caisses deviennent des marches** (deux caisses de plus, deux caisses rehaussées, de chaque côté).
+- **Tests** (`seaFair.test.ts`) : aux deux marées, le fil du retour n'ajoute aucun passage depuis l'est de la jetée (l'analyse avec et sans lui) ; du toit de la guérite, il mène au toit de la pêche aux canards. La baie reste jamais coincée, le carrousel atteint (le test existant).
