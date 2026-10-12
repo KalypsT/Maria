@@ -529,6 +529,14 @@ const LOCKED: StoryData['lockedRooms'] = [
   { room: 'nanny-house', exit: 9, when: { none: [F.NannySeaDone] }, hidden: true },
   { room: 'nanny-carousel', exit: 3, when: { none: [F.NannySeaDone] }, hidden: true },
   { room: 'nanny-train', exit: 4, when: { none: [F.NannySeaDone] }, hidden: true },
+  // Les portes vers l'îlot voisin (D-171) : elles menaient au bout de l'îlot voisin, son cube à côté,
+  // et coupaient cet îlot. Elles n'existent qu'une fois les deux îlots finis : un raccourci de plus.
+  { room: 'nanny-street', exit: 3, when: { none: [F.NannyBedDone] }, hidden: true },
+  { room: 'nanny-bed', exit: 3, when: { none: [F.NannyBedDone] }, hidden: true },
+  { room: 'nanny-train', exit: 3, when: { none: [F.NannySchoolDone] }, hidden: true },
+  { room: 'nanny-street', exit: 4, when: { none: [F.NannySchoolDone] }, hidden: true },
+  { room: 'nanny-carousel', exit: 3, when: { none: [F.NannyStationDone] }, hidden: true },
+  { room: 'nanny-train', exit: 4, when: { none: [F.NannyStationDone] }, hidden: true },
   // La porte de la salle de jeux (D-117) : fermée tant que l'effacement n'est pas dissous ; celle de
   // la maison où elle mène n'existe pas encore.
   { room: 'nanny-playroom', exit: 2, when: { none: [F.NannyErasureGone] }, icon: 'locked' },

@@ -1431,4 +1431,5 @@ export const HOUSE_STORY: StoryData = {
   moving: [...TRAIN_STORY.moving, ...NANNY_STORY.moving],
   // La nuit dans le train, lumières éteintes (D-85) ; la dernière nuit dans la chambre (D-139).
   dim: [...TRAIN_STORY.dim, ...FINALE_STORY.dim],
+  music: FINALE_STORY.music,
 };

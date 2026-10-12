@@ -156,11 +156,13 @@ export interface CombatParams {
    * Les chaises volantes de la fête (D-101), `; @sweep:` : elles tournent haut, descendent pendant
    * `sweepWarnMs`, puis balaient leur zone pendant `sweepPassMs` (toutes les `sweepPeriodMs`) :
    * Céleste qui y est (debout) est renversée en arrière, la peur monte, une fois par passage.
-   * Couchée (glissade), elle passe dessous.
+   * Couchée (glissade), elle passe dessous. Puis elles remontent pendant `sweepRiseMs` (le dessin
+   * seulement, D-171).
    */
   sweepPeriodMs: number;
   sweepWarnMs: number;
   sweepPassMs: number;
+  sweepRiseMs: number;
   /** Poussée des chaises : vers l'arrière (px/s) et vers le haut (px/s). */
   sweepPushX: number;
   sweepPushY: number;
@@ -242,6 +244,7 @@ export const DEFAULT_COMBAT: Readonly<CombatParams> = {
   sweepPeriodMs: 4200,
   sweepWarnMs: 1000,
   sweepPassMs: 1500,
+  sweepRiseMs: 1000,
   sweepPushX: 170,
   sweepPushY: 120,
   luggagePeriodMs: 6500,
@@ -319,6 +322,7 @@ export const COMBAT_PARAM_RANGES: Readonly<
   sweepPeriodMs: { min: 1500, max: 20000, step: 100 },
   sweepWarnMs: { min: 200, max: 4000, step: 100 },
   sweepPassMs: { min: 200, max: 6000, step: 100 },
+  sweepRiseMs: { min: 0, max: 4000, step: 100 },
   sweepPushX: { min: 0, max: 600, step: 10 },
   sweepPushY: { min: 0, max: 600, step: 10 },
   luggagePeriodMs: { min: 2000, max: 20000, step: 250 },
@@ -422,6 +426,25 @@ export function cycleWarnProgress(ms: number, period: number, warn: number, pass
   const t = ((ms % span) + span) % span;
   const start = span - warn - pass;
   return t < start || t >= start + warn ? -1 : (t - start) / warn;
+}
+
+/**
+ * Retour d'un danger à cycle après son passage (1 → 0 pendant les `rise` premières ms du calme), ou
+ * -1 en dehors (et avant le premier passage : rien ne remonte à l'arrivée dans la salle).
+ */
+export function cycleRiseProgress(
+  ms: number,
+  period: number,
+  warn: number,
+  pass: number,
+  rise: number,
+): number {
+  const span = Math.max(period, warn + pass + 1);
+  if (ms < span || rise <= 0) {
+    return -1;
+  }
+  const t = ms % span;
+  return t < Math.min(rise, span - warn - pass) ? 1 - t / rise : -1;
 }
 
 /** Taille d'une valise qui tombe (px). */

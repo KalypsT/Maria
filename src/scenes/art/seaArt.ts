@@ -1372,38 +1372,15 @@ export function seaDrawers({ rounded, tileShape }: ShapeTools): Record<string, D
       }
     },
     duckstall(a, r) {
-      // La pêche aux canards : un long toit bas (plein), le bassin et ses canards dessous, dans le trou
-      // du platelage, et des lampions.
+      // La pêche aux canards : un long toit bas (plein) et des lampions. Plus de bassin dans le trou
+      // du platelage : il ressemblait à une plateforme (D-171).
       const roof = { x: r.x, y: r.y + 3 * T, w: r.w, h: 5 * T };
       const { ctx } = a;
-      // Deux poteaux jusqu'au platelage, de part et d'autre du trou, et le bassin aux canards
-      // dans le trou (D-137) : le toit ne flotte pas.
+      // Deux poteaux jusqu'au platelage, de part et d'autre du trou (D-137) : le toit ne flotte pas.
       const deck = groundRow(a, r.x + T, roof.y / T + 5) * T;
       ctx.fillStyle = WOOD_DARK;
       for (const x of [roof.x + 6, roof.x + roof.w - 10]) {
         ctx.fillRect(x, roof.y + roof.h, 4, deck - roof.y - roof.h);
-      }
-      let c0 = -1;
-      let c1 = -1;
-      for (let col = r.x / T; col < (r.x + r.w) / T; col++) {
-        if (tileAt(a.level, col, deck / T) !== Tile.Solid) {
-          c0 = c0 < 0 ? col : c0;
-          c1 = col;
-        }
-      }
-      if (c0 >= 0) {
-        const pool = { x: c0 * T + 2, y: deck - 10, w: (c1 - c0 + 1) * T - 4, h: 10 };
-        ctx.fillStyle = '#6fb6c9';
-        ctx.fillRect(pool.x, pool.y, pool.w, pool.h);
-        ctx.fillStyle = WHITE;
-        ctx.fillRect(pool.x, pool.y - 3, pool.w, 3);
-        ctx.fillStyle = '#f2c14e';
-        for (let x = pool.x + 8; x < pool.x + pool.w - 6; x += 18) {
-          ctx.beginPath();
-          ctx.ellipse(x, pool.y + 1, 4, 3, 0, 0, Math.PI * 2);
-          ctx.arc(x + 4, pool.y - 3, 2.5, 0, Math.PI * 2);
-          ctx.fill();
-        }
       }
       tileShape(a, roof, MINT, '#c6eee2');
       ctx.fillStyle = STRIPE_RED;

@@ -122,6 +122,17 @@ export const PASSERBY_REACTIONS: Readonly<Partial<Record<PasserbyKind, PasserbyR
 };
 
 /**
+ * Un écho dans un monde étrange (`memory`, D-171) : teinté de la lueur turquoise du monde étrange,
+ * il vacille doucement (l'opacité oscille de `flicker` autour de la sienne, en `flickerMs`).
+ * PROVISOIRE.
+ */
+export const PASSERBY_ECHO = {
+  tint: 'rgba(120, 240, 220, 0.55)',
+  flicker: 0.25,
+  flickerMs: 1700,
+} as const;
+
+/**
  * Réglages (D-155), PROVISOIRES, à régler sur téléphone. Distances depuis le centre de Céleste
  * jusqu'au passant (px logiques).
  */

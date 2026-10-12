@@ -2741,3 +2741,63 @@ Demande de l'utilisateur : de la vie dans certains niveaux (la rue d'abord, des 
 - **Test** : `artImages.test.ts` (chaque image déclarée existe ; chaque trésor, disque et court souvenir a la sienne).
 - **Vérifié dans Chromium** : la page des trésors complète, la fiche d'un disque, « Revoir le souvenir », deux courts souvenirs en plein écran, le chausson et un disque dans le décor.
 - **Sauvegarde** : aucun changement.
+
+## D-171 — Retour d'essai, du train à la fin
+
+Retour d'essai de l'utilisateur (de la station balnéaire à la fin), plan validé en 6 étapes : l'écran noir de la fin ; la jetée ; la vitesse sur les fils ; la maison de la nounou ; le souvenir d'Eden ; les retrouvailles.
+
+### Étape 1 : l'écran noir de la fin
+
+- **Le bug** : au réveil (Agir sur le lit, Maria à côté de Céleste), l'écran restait noir, la musique et les boutons continuaient. Céleste tient Maria (`hold-sit`) au moment où le jour revient : la salle est redessinée, l'image de Maria assise aussi, sous le même nom ; l'image de Maria dans les bras gardait l'ancienne texture, détruite, et le rendu plantait (`Cannot read properties of null (reading 'resolution')`). Un changement d'échelle de l'écran (une rotation) pendant que Céleste la tient aurait fait de même.
+- **Corrigé** : l'image tenue compare la texture elle-même, plus son nom (`GameScene.renderHeldMaria`). Les autres images qui changent de texture sont recréées à chaque redessin (vérifié).
+- Les vérifications précédentes partaient de l'histoire de debug « le matin », déjà réveillée : le passage de la nuit au matin n'y était jamais joué.
+- **Vérifié dans Chromium** : depuis « Maria dans son berceau », Maria retrouvée, le cercle, le réveil, le tapis et l'histoire, l'étagère et le câlin.
+
+### Étape 2 : la jetée
+
+- **Le bassin aux canards retiré** (capture de l'utilisateur) : dessiné dans le trou du platelage, sous le toit de la pêche aux canards, il ressemblait à une plateforme. Le toit, ses poteaux et ses lampions restent.
+- **Les chaises volantes remontent doucement** : après leur passage, elles remontaient d'un coup ; elles remontent maintenant pendant `sweepRiseMs` (1 s, comme la descente). Le dessin seulement : elles ne touchent Céleste que pendant le passage, comme avant (`cycleRiseProgress`, rien ne remonte à l'arrivée dans la salle).
+- **Le fil du retour hors de portée à l'aller** : depuis le toit de la pêche aux canards, on l'attrapait d'un petit saut, et il menait d'un coup au carrousel. Le monter un peu ne suffisait pas (en planant depuis le toit, on finit toujours par le croiser par le dessus). Il est maintenant **tout en haut** (de la colonne 62, ligne 2, à la colonne 122, ligne 0), toujours au-dessus du crochet depuis le toit ; **la guérite de la grande roue est surélevée de 2 cases** pour l'attraper au retour, et **ses caisses deviennent des marches** (deux caisses de plus, deux caisses rehaussées, de chaque côté).
+- **Tests** (`seaFair.test.ts`) : aux deux marées, le fil du retour n'ajoute aucun passage depuis l'est de la jetée (l'analyse avec et sans lui) ; du toit de la guérite, il mène au toit de la pêche aux canards. La baie reste jamais coincée, le carrousel atteint (le test existant).
+
+### Étape 3 : la vitesse sur les fils
+
+- **Demande de l'utilisateur** (changement de mouvement validé) : accélérer au fil de la glissade, selon la pente, un peu plus réaliste et un peu plus difficile.
+- **Avant** : l'accélération ne jouait que sur un câble en pente (au-delà de `cableFlatSlope`), `600 × pente`, jusqu'à 240 px/s ; la plupart des fils sont presque plats : on ne la sentait pas.
+- **Maintenant, comme une poulie** : `cableAccel × pente` sur tous les câbles, **signée** : en descente elle accélère, en montée (un câble presque plat, parcouru dans son sens d'arrivée) elle ralentit, jamais sous `cableMinSpeed` (110 px/s). `cableAccel` passe à **900** (à peu près la gravité du saut) et `cableMaxSpeed` à **300 px/s**. Le sens reste celui de D-65 (toujours vers le bas en pente, le sens d'arrivée à plat). PROVISOIRES, réglables dans l'overlay.
+- **Les niveaux des tyroliennes de la console changent** (le générateur suit les valeurs de mouvement) : l'empreinte des dix premiers est mise à jour, chaque niveau reste faisable (vérifié par l'analyse).
+- **Vérifié par les tests** : tous les passages avec un fil (la gare, le train, la mer, la jetée, la nounou, le ciel de la chambre, la console) sont rejoués par l'analyse avec la vraie physique. `cable.test.ts` : la montée qui ralentit jusqu'au minimum, la descente qui accélère, bien plus vite qu'à l'accroche sans dépasser le maximum.
+
+### Étape 4 : la maison de la nounou
+
+- **Les portes vers l'îlot voisin** (le bloc 3 atteint d'un coup, le train d'autrefois jamais vu) : la porte près du cube d'un îlot menait au bout de l'îlot voisin, à côté de son cube, et coupait cet îlot (carrousel → train → rue → chambre). Elles n'existent plus qu'une fois **les deux îlots finis** : un raccourci de plus, jamais un îlot sauté. Les raccourcis vers la maison ne changent pas.
+- **La trappe du plancher redessinée** (entre l'arche à l'horloge et l'arche au « ^ », elle ressemblait à une marche) : un trou dans le plancher, une vague dedans, une lueur bleue qui monte, et **son abattant levé** (planches, anneau). **L'arche du carrousel** : un petit carrousel (son mât, son toit festonné, son fanion, deux chevaux de bois) ; l'ancien toit seul se lisait comme une flèche vers le haut.
+- **Chaque îlot a sa couleur** (choix a de l'utilisateur), celle de son cube (`TOWER_CUBES`) : son passage, son arche de raccourci et son creux sur la porte de la sieste (rose, jaune, turquoise, bleu).
+- **Un îlot fini** (choix b) : son passage s'éteint (`ISLET_DONE_DIM`, 35 % de sa lueur) et son cube s'y montre, dans un petit halo. Le décor connaît maintenant les étapes vécues (`ArtContext.flags`), redessiné à chaque arrivée dans la salle.
+- **La voisine de la rue d'autrefois**, gardée (choix de l'utilisateur), en plus étrange : l'écho d'un passant (`memory`) est teinté de la lueur turquoise du monde étrange et vacille doucement (`PASSERBY_ECHO`, PROVISOIRE). Elle salue toujours.
+- **Test** (`nannyIslets.test.ts`) : chaque porte vers l'îlot voisin, cachée sans les deux îlots finis, ouverte avec eux. Les îlots restent jamais coincés, chaque cube atteint (le test existant).
+- **Vérifié dans Chromium** : la trappe, l'arche du carrousel, le passage de l'école éteint avec son cube jaune, la voisine en écho.
+
+### Étape 5 : le souvenir d'Eden
+
+- **Le tas de cubes diminue** (les cubes « se dédoublaient » : le tas gardait ses quatre cubes) : un cube de moins à chaque cube pris, Céleste le rose, Eden le jaune dans le noir, Céleste le turquoise, Eden le bleu ; puis plus de tas (`cube-pile-3`, `-2`, `-1`, à l'écran au moment du geste).
+- **Le cache-cache mieux compris** (choix de l'utilisateur, toutes les pistes) :
+  - avant chaque compte, **Eden propose le jeu** : sa bulle de parole, un visage les mains sur les yeux (nouveau pictogramme `hide-seek`) ;
+  - quand Céleste rouvre les yeux, **elle se demande où il est** : un nuage, le visage d'Eden et un « ? » (`eden-where`), et **il pouffe** derrière sa cachette (nouveau bruitage `eden-giggle`, à fournir, `docs/BRUITAGES.md`) ;
+  - **la nounou tourne la tête** vers la cachette les deux fois (seulement la seconde avant) ;
+  - l'étincelle d'aide arrive après **2 s** (4 s avant).
+- **Le moteur des souvenirs jouables** : une action peut avoir une bulle quand elle devient la suivante (`prompt` : le pictogramme, qui parle, un son ; événement `MemoryEvent.Prompt`). La cuisine est inchangée.
+- **Tests** (`nannyEden.test.ts`) : le tas (un seul à la fois, un cube de moins à chaque cube pris), les bulles (qui parle est bien là au moment de sa bulle, chaque recherche a la sienne), la nounou à chaque cachette.
+- **Vérifié dans Chromium** : tout le souvenir joué, le tas qui diminue, la bulle d'Eden, les « Eden ? », le cœur.
+
+### Étape 6 : les retrouvailles
+
+- **Le retour de l'utilisateur** : la fin de la chambre grande (une porte) puis la vraie chambre, Maria dans son berceau, était trop brusque, trop rapide : on ne comprenait pas qu'on avait retrouvé Maria. C'est la fin du jeu : il faut étendre ce moment, compréhensible et très émouvant. **Choix de l'utilisateur** : Maria retrouvée **dans le berceau géant de la chambre grande** (option A), **Agir maintenu pour la serrer** ; pas de court souvenir du premier soir.
+- **L'approche** : la chambre grande ne finit plus sur sa porte (le déclencheur `finale-home` est retiré). La descente mène au coffre à jouets, sous le mobile : **le berceau géant** (devenu un objet de l'histoire, `big-cradle`, au lieu d'un décor), son côté trop haut, la couverture bombée.
+- **La découverte** (`finale-big-cradle`, Agir) : le jingle de Maria, le noir ; Céleste à côté du berceau, **la vue glisse et se rapproche** (nouvelle option `zoom` de l'étape `look`, `STORY_ZOOM`) : la tête de Maria sur l'oreiller (`big-cradle-maria`). Céleste reste immobile, **troublée** (« ? »), puis la reconnaît (Maria) ; une étincelle sur le berceau. Puis **le silence** (nouvelles règles de musique de l'histoire, `StoryData.music`).
+- **Le câlin** (`finale-big-hug`) : **Agir maintenu** (`hold`, 1,6 s) : à la place de l'étincelle, **un cœur qui se remplit** de bas en haut ; lâché, il se vide doucement ; une simple pression ne suffit pas. Le noir ; **Céleste tient Maria** (pilier 5 : elle n'arrive dans les bras que dans le noir), la vue rapprochée ; **une vibration en deux battements** (nouvelle étape `haptic`, `HAPTICS.hug`) ; **le cœur du prologue** ; **le thème de fin commence** (`ending`, la variation de la boîte à musique, jusqu'au matin) ; **l'étrange s'en va** en scintillements tout autour ; un second cœur.
+- **La chambre revient à sa taille** : le cercle se referme sur elles, et se rouvre sur **la vraie chambre, la nuit** : Céleste assise sur son lit, **Maria dans les bras**, le berceau vide ; un long temps, un cœur ; dans le noir, Maria à côté d'elle (`finale.together`). Puis le matin, comme avant (D-144).
+- **Écart signalé** : D-138 voulait Maria « dans son berceau, dans la vraie chambre » ; elle est maintenant retrouvée dans le monde de Maria, dans le berceau géant (« un lieu impossible », spec §5.4), choix de l'utilisateur.
+- **Une partie d'avant D-171** déjà passée par la porte (Maria dans le berceau de la vraie chambre) garde l'ancien déroulé (`finale-found`).
+- **Nouvelle étape de l'histoire** en fin de liste : `finale.cradle-seen`. **Fil discret** : le berceau géant, puis le câlin (à la place de la porte). **Debug** : l'histoire « le berceau géant, Maria découverte ».
+- **Tests** (`finaleHome.test.ts`) : la descente facile jusqu'au berceau, jamais coincée ; la découverte (le jingle, Maria dans le noir, la vue rapprochée, « ? » puis Maria) ; **une seule Maria à chaque moment**, jamais avant d'avoir regardé ; le câlin (dans le noir, le cœur, la vibration, le cercle, la vraie chambre, Maria à côté d'elle dans le noir) ; **Agir maintenu** (le cœur qui se remplit, se vide, une pression ne suffit pas) ; la musique (le silence, le thème de fin jusqu'au matin). L'ancienne partie garde son déroulé.

@@ -120,7 +120,10 @@ export interface MovementParams {
   cableMinSpeed: number;
   /** Vitesse maximale le long d'un câble (px/s). */
   cableMaxSpeed: number;
-  /** Accélération le long d'un câble en pente, multipliée par sa pente (px/s²). */
+  /**
+   * Accélération le long d'un câble, multipliée par sa pente (px/s², D-171) : en descente elle
+   * accélère, en montée (un câble presque plat) elle ralentit, sans passer sous `cableMinSpeed`.
+   */
   cableAccel: number;
   /** Pente (sinus) en dessous de laquelle un câble est plat : on y garde son sens d'arrivée. */
   cableFlatSlope: number;
@@ -199,8 +202,8 @@ export const DEFAULT_MOVEMENT: Readonly<MovementParams> = {
   glideAutoDelayMs: 40,
   cableHookAbovePx: 6,
   cableMinSpeed: 110,
-  cableMaxSpeed: 240,
-  cableAccel: 600,
+  cableMaxSpeed: 300,
+  cableAccel: 900,
   cableFlatSlope: 0.1,
   cableJumpWindowMs: 120,
   cableJumpHeightTiles: 2,

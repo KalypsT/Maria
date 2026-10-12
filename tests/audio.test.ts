@@ -195,6 +195,8 @@ describe('silences de Maria dans l’histoire (D-57)', () => {
     expect(hushed.map((t) => t.id).sort()).toEqual(
       [
         'evening-sleep',
+        // Les retrouvailles (D-171) : Maria dans le berceau géant.
+        'finale-big-cradle',
         // Le dernier plan (D-144) : la vue reste sur Maria.
         'finale-leave',
         'hedge-enter',

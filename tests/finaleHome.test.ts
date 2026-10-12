@@ -6,7 +6,7 @@ import { EntityType, Tile, tileAt } from '../src/core/level/LevelData';
 import { checkCondition, type StoryStep } from '../src/core/story/story';
 import { StoryDirector } from '../src/core/story/StoryDirector';
 import { isMappedRoom, isStrangeRoom, returnLantern } from '../src/core/world/zone';
-import { BIG_START, FINALE_CRADLE, HOME_START } from '../src/levels/finale/story';
+import { BIG_CRADLE, BIG_START, FINALE_CRADLE } from '../src/levels/finale/story';
 import { HOUSE_STORY } from '../src/levels/house/story';
 import { MILESTONES } from '../src/levels/milestones';
 import { NIGHT, SKY } from './finaleFlags';
@@ -24,13 +24,17 @@ const bedroom = level('bedroom');
 /** La veilleuse de l'étagère haute (l'arrivée) et celle du tapis. */
 const SHELF_LAMP = { col: 82, row: 15 };
 const RUG_LAMP = { col: 41, row: 39 };
-/** Devant la porte de la chambre grande. */
-const DOOR = { col: 85, row: 39 };
 
 const BIG_FLAGS = [...SKY, F.FinaleBig];
-const HOME = [...BIG_FLAGS, F.FinaleHome];
-const FOUND = [...HOME, F.FinaleFound];
-const TOGETHER = [...FOUND, F.FinaleTogether];
+/** Les retrouvailles (D-171) : le berceau géant découvert, Maria dans les bras, la vraie chambre. */
+const SEEN = [...BIG_FLAGS, F.FinaleCradleSeen];
+const FOUND = [...SEEN, F.FinaleFound];
+const HOME = [...FOUND, F.FinaleHome];
+const TOGETHER = [...HOME, F.FinaleTogether];
+/** Une partie d'avant D-171 : par la porte de la chambre grande, Maria dans son berceau. */
+const OLD_HOME = [...BIG_FLAGS, F.FinaleHome];
+/** Debout sur le coffre à jouets, à côté du berceau géant. */
+const CRADLE_SIDE = { col: 50, row: 35 };
 
 function need<V>(value: V | null | undefined, what: string): V {
   if (value === null || value === undefined) {
@@ -52,11 +56,11 @@ function director(flags: readonly string[]): StoryDirector {
   return story;
 }
 
-/** Les objets de mise en scène de la chambre, montrés à ce moment. */
-function shown(flags: readonly string[]): string[] {
+/** Les objets de mise en scène d'une salle (la chambre par défaut), montrés à ce moment. */
+function shown(flags: readonly string[], room = 'bedroom'): string[] {
   const set = new Set(flags);
   return HOUSE_STORY.props
-    .filter((p) => p.room === 'bedroom' && checkCondition(set, p.when))
+    .filter((p) => p.room === room && checkCondition(set, p.when))
     .map((p) => p.kind);
 }
 
@@ -158,53 +162,71 @@ describe('la chambre grande (D-143)', () => {
     expect({ col: lamp.col, row: lamp.row }).toEqual(SHELF_LAMP);
   });
 
-  it('on redescend facilement jusqu’à la porte ; jamais coincée', () => {
+  it('on redescend facilement jusqu’au berceau géant ; jamais coincée', () => {
     const start = standOn(big, BIG_START);
-    const door = standOn(big, DOOR);
-    expect(door).toBeGreaterThanOrEqual(0);
-    expect(reach(start, DIFFICULTY_MIN_WINDOW_MS.easy).has(door)).toBe(true);
+    const cradle = standOn(big, CRADLE_SIDE);
+    expect(cradle).toBeGreaterThanOrEqual(0);
+    expect(reach(start, DIFFICULTY_MIN_WINDOW_MS.easy).has(cradle)).toBe(true);
     for (const s of reach(start, 0)) {
-      expect(reach(s, DIFFICULTY_MIN_WINDOW_MS.easy).has(door), `surface ${String(s)}`).toBe(true);
+      expect(reach(s, DIFFICULTY_MIN_WINDOW_MS.easy).has(cradle), `surface ${String(s)}`).toBe(
+        true,
+      );
     }
     // Le berceau, sous le mobile, sur le coffre à jouets : là où il est dans la vraie chambre.
-    const cradle = need(
-      big.decor.find((d) => d.kind === 'bigcradle'),
-      'berceau',
-    );
-    expect(tileAt(big, cradle.col, cradle.row + cradle.height)).toBe(Tile.Solid);
-    expect(Math.floor((cradle.col + cradle.width / 2) / 2)).toBe(FINALE_CRADLE.col);
+    expect(tileAt(big, BIG_CRADLE.col, BIG_CRADLE.row + 1)).toBe(Tile.Solid);
+    expect(Math.floor((BIG_CRADLE.col + 0.5) / 2)).toBe(FINALE_CRADLE.col);
+    expect(big.decor.some((d) => d.kind === 'bigcradle')).toBe(false);
   });
 });
 
-describe('la vraie chambre, la nuit : Maria retrouvée (D-143)', () => {
-  it('par la porte de la chambre grande, la vraie chambre : Céleste entre par sa porte', () => {
-    const home = trigger('finale-home');
-    expect(home.room).toBe(BIG);
-    expect(flagsOf(home.steps)).toEqual([F.FinaleHome]);
-    expect(home.steps).toContainEqual(
-      expect.objectContaining({ do: 'room', room: 'bedroom', ...HOME_START, returnPoint: true }),
-    );
-    const area = need(home.area, 'zone');
-    expect(DOOR.col).toBeGreaterThanOrEqual(area.col);
-    expect(DOOR.col).toBeLessThan(area.col + area.w);
-    expect(checkCondition(new Set(HOME), trigger('finale-home-again').when)).toBe(true);
+describe('les retrouvailles (D-171)', () => {
+  it('le berceau géant : Céleste regarde dedans, la vue se rapproche ; Maria y dort', () => {
+    const look = trigger('finale-big-cradle');
+    expect(look.room).toBe(BIG);
+    expect(look.on).toBe('interact');
+    expect(look.hold).toBeUndefined();
+    expect(flagsOf(look.steps)).toEqual([F.FinaleCradleSeen]);
+    const area = need(look.area, 'zone');
+    expect(CRADLE_SIDE.col).toBeGreaterThanOrEqual(area.col);
+    expect(CRADLE_SIDE.col).toBeLessThan(area.col + area.w);
+    expect(actions(BIG, BIG_FLAGS)).toEqual(['finale-big-cradle']);
+    const at = (pred: (s: StoryStep) => boolean) => look.steps.findIndex(pred);
+    // Le jingle de Maria, puis le noir ; Maria se montre dans le noir, la vue se rapproche.
+    expect(at((s) => s.do === 'hush')).toBe(0);
+    expect(at((s) => s.do === 'flag')).toBeGreaterThan(at((s) => s.do === 'fadeOut'));
+    expect(look.steps).toContainEqual(expect.objectContaining({ do: 'look' }));
+    const zoom = look.steps.find((s) => s.do === 'look');
+    expect(zoom?.do === 'look' ? (zoom.zoom ?? 1) : 1).toBeGreaterThan(1);
+    // Troublée, puis elle la reconnaît.
+    const question = at((s) => s.do === 'thought' && s.icon === 'question');
+    const maria = at((s) => s.do === 'thought' && s.icon === 'maria');
+    expect(question).toBeGreaterThan(at((s) => s.do === 'fadeIn'));
+    expect(maria).toBeGreaterThan(question);
+    // Pas de porte vers la vraie chambre : on ne peut pas passer à côté de Maria.
+    expect(HOUSE_STORY.triggers.some((t) => t.id === 'finale-home')).toBe(false);
     expect(MILESTONES.map((m) => ('trigger' in m ? m.trigger : ''))).toEqual(
-      expect.arrayContaining(['finale-big', 'finale-home', 'finale-found']),
+      expect.arrayContaining(['finale-big', 'finale-big-cradle', 'finale-big-hug']),
     );
   });
 
-  it('Maria dort dans son berceau ; une seule Maria, toujours, et jamais avant le retour', () => {
-    const marias = (flags: readonly string[]) => shown(flags).filter((k) => k.includes('maria'));
+  it('une seule Maria, toujours ; jamais avant d’avoir regardé dans le berceau', () => {
+    const marias = (flags: readonly string[]) =>
+      [...shown(flags), ...shown(flags, BIG)].filter((k) => k.includes('maria'));
     expect(marias(NIGHT)).toEqual([]);
     expect(marias(BIG_FLAGS)).toEqual([]);
-    expect(marias(HOME)).toEqual(['cradle-maria']);
-    // Dans les bras de Céleste (le temps du câlin) : le berceau vide, aucune autre Maria.
+    expect(marias(SEEN)).toEqual(['big-cradle-maria']);
+    // Dans les bras de Céleste : les deux berceaux vides.
     expect(marias(FOUND)).toEqual([]);
+    expect(marias(HOME)).toEqual([]);
     expect(marias(TOGETHER)).toEqual(['maria-sit']);
-    for (const flags of [NIGHT, HOME, FOUND, TOGETHER]) {
+    for (const flags of [BIG_FLAGS, SEEN, FOUND, HOME, TOGETHER]) {
+      expect(shown(flags, BIG).filter((k) => k.startsWith('big-cradle'))).toHaveLength(1);
       expect(shown(flags).filter((k) => k.startsWith('cradle'))).toHaveLength(1);
     }
-    // Plus de vacillement : Maria est là.
+    // Une partie d'avant D-171 : Maria dort dans le berceau de la vraie chambre.
+    expect(marias(OLD_HOME)).toEqual(['cradle-maria']);
+    expect(actions('bedroom', OLD_HOME)).toEqual(['finale-found']);
+    // Plus de vacillement dans la vraie chambre : Maria est là.
     const near = (flags: readonly string[]) =>
       director(flags).omen(
         'bedroom',
@@ -213,24 +235,70 @@ describe('la vraie chambre, la nuit : Maria retrouvée (D-143)', () => {
       );
     expect(near(NIGHT)).toBeGreaterThan(0.8);
     expect(near(HOME)).toBe(0);
+    expect(near(OLD_HOME)).toBe(0);
   });
 
-  it('Agir sur le berceau : dans le noir, dans ses bras ; le cœur ; le cercle se referme', () => {
-    expect(actions('bedroom', HOME)).toEqual(['finale-found']);
-    const found = trigger('finale-found');
-    expect(flagsOf(found.steps)).toEqual([F.FinaleFound, F.FinaleTogether]);
-    const at = (pred: (s: StoryStep) => boolean) => found.steps.findIndex(pred);
+  it('le câlin : Agir maintenu ; dans le noir, dans ses bras ; le cœur ; le cercle ; sa vraie chambre', () => {
+    const hug = trigger('finale-big-hug');
+    expect(hug.room).toBe(BIG);
+    expect(hug.hold).toBeGreaterThanOrEqual(1000);
+    expect(hug.mark).toBeDefined();
+    expect(actions(BIG, SEEN)).toEqual(['finale-big-hug']);
+    expect(actions(BIG, FOUND)).toEqual([]);
+    expect(flagsOf(hug.steps)).toEqual([F.FinaleFound, F.FinaleHome, F.FinaleTogether]);
+    const at = (pred: (s: StoryStep) => boolean) => hug.steps.findIndex(pred);
     const hold = at((s) => s.do === 'pose' && s.pose === 'hold');
     const heart = at((s) => s.do === 'thought' && s.icon === 'heart');
     const circle = at((s) => s.do === 'fadeOut' && s.shape === 'iris');
+    const home = at((s) => s.do === 'room');
     expect(hold).toBeGreaterThan(at((s) => s.do === 'fadeOut'));
     expect(heart).toBeGreaterThan(hold);
+    expect(at((s) => s.do === 'haptic')).toBeGreaterThan(hold);
     expect(circle).toBeGreaterThan(heart);
-    // Après le cercle : sur son lit, assise, Maria à côté d'elle.
-    expect(found.steps.slice(circle)).toContainEqual({ do: 'pose', pose: 'sit' });
-    // La chambre reste fermée : la nuit, puis Céleste pense à dormir ; le lit mène au matin (D-144).
-    expect(director(HOME).lockIcon('bedroom', 1)).toBe('cradle');
+    expect(home).toBeGreaterThan(circle);
+    expect(hug.steps[home]).toMatchObject({ room: 'bedroom', returnPoint: true });
+    // Sur son lit, Maria dans les bras ; puis, dans le noir, à côté d'elle.
+    expect(hug.steps.slice(home)).toContainEqual({ do: 'pose', pose: 'hold-sit' });
+    expect(hug.steps.at(-1)?.do).toBe('wait');
+    expect(hug.steps.filter((s) => s.do === 'pose').at(-1)).toEqual({ do: 'pose', pose: 'sit' });
+    // La chambre reste fermée : Céleste pense à dormir ; le lit mène au matin (D-144).
     expect(director(TOGETHER).lockIcon('bedroom', 1)).toBe('bed');
     expect(actions('bedroom', TOGETHER)).toEqual(['finale-morning']);
+  });
+
+  it('Agir maintenu : le cœur se remplit, se vide lâché ; une simple pression ne suffit pas', () => {
+    const hug = trigger('finale-big-hug');
+    const story = director(SEEN);
+    const box = {
+      x: (CRADLE_SIDE.col + 0.5) * TILE_SIZE - 6,
+      y: (CRADLE_SIDE.row + 1) * TILE_SIZE - 28,
+      width: 12,
+      height: 28,
+    };
+    story.step(BIG, box, true, false);
+    expect(story.busy).toBe(false);
+    const steps = Math.ceil(((hug.hold ?? 0) / 1000) * 120);
+    for (let i = 0; i < steps / 2; i++) {
+      story.step(BIG, box, false, true);
+    }
+    const half = story.holdProgress;
+    expect(half).toBeGreaterThan(0.4);
+    expect(half).toBeLessThan(0.6);
+    story.step(BIG, box, false, false);
+    expect(story.holdProgress).toBeLessThan(half);
+    expect(story.holdProgress).toBeGreaterThan(0);
+    for (let i = 0; i < steps + 2 && !story.busy; i++) {
+      story.step(BIG, box, false, true);
+    }
+    expect(story.busy).toBe(true);
+    expect(story.holdProgress).toBe(0);
+  });
+
+  it('la musique : le silence devant le berceau, le thème de fin du câlin jusqu’au matin', () => {
+    expect(director(BIG_FLAGS).music()).toBeUndefined();
+    expect(director(SEEN).music()).toBeNull();
+    expect(director(FOUND).music()).toBe('ending');
+    expect(director(TOGETHER).music()).toBe('ending');
+    expect(director([...TOGETHER, F.FinaleMorning]).music()).toBeUndefined();
   });
 });

@@ -4,6 +4,7 @@ import {
   TUNNEL_CLEAR_PX,
   TrainPhase,
   cyclePhase,
+  cycleRiseProgress,
   cycleWarnProgress,
   luggageState,
   TRAIN_GUST_AHEAD_PX,
@@ -366,6 +367,18 @@ export class CombatWorld {
   get sweepWarnProgress(): number {
     const p = this.params;
     return cycleWarnProgress(this.hazardMs, p.sweepPeriodMs, p.sweepWarnMs, p.sweepPassMs);
+  }
+
+  /** Remontée des chaises après leur passage (1 → 0), -1 sinon (pour le dessin, D-171). */
+  get sweepRiseProgress(): number {
+    const p = this.params;
+    return cycleRiseProgress(
+      this.hazardMs,
+      p.sweepPeriodMs,
+      p.sweepWarnMs,
+      p.sweepPassMs,
+      p.sweepRiseMs,
+    );
   }
 
   /**

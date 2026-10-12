@@ -155,6 +155,63 @@ describe('Eden et son souvenir jouable (D-118)', () => {
     expect(memory.done).toBe(true);
   });
 
+  it('le tas de cubes (D-171) : un cube de moins à chaque cube pris, jamais deux tas', () => {
+    const piles = (fs: Set<string>) =>
+      DATA.props.filter((p) => p.kind.startsWith('cube-pile') && checkCondition(fs, p.when));
+    const order: [string[], string | null][] = [
+      [[], 'cube-pile'],
+      [[E.cube1], 'cube-pile-3'],
+      [[E.cube1, E.tower1, E.tower2], 'cube-pile-2'],
+      [[E.cube1, E.tower1, E.tower2, E.cube2], 'cube-pile-1'],
+      [[E.cube1, E.tower1, E.tower2, E.cube2, E.tower3, E.fallen], null],
+    ];
+    for (const [flags, kind] of order) {
+      expect(piles(new Set(flags)).map((p) => p.kind)).toEqual(kind ? [kind] : []);
+    }
+    // Il change sous les yeux, quand Céleste prend un cube.
+    expect(DATA.props.filter((p) => p.kind.startsWith('cube-pile')).every((p) => p.instant)).toBe(
+      true,
+    );
+  });
+
+  it('les bulles du cache-cache (D-171) : Eden le propose, Céleste se demande où il est', () => {
+    const ids = new Set(DATA.props.map((p) => p.id));
+    const counts = DATA.actions.filter((a) => a.gesture === 'count');
+    for (const c of counts) {
+      expect(c.prompt?.icon).toBe('hide-seek');
+      expect(ids.has(c.prompt?.by ?? '')).toBe(true);
+    }
+    DATA.actions.forEach((a, k) => {
+      if (a.gesture === 'count') {
+        const seek = DATA.actions[k + 1]?.prompt;
+        expect(seek?.icon).toBe('eden-where');
+        expect(seek?.by).toBeUndefined();
+        expect(seek?.sfx).toBe('eden-giggle');
+      }
+    });
+    // Joué : la bulle d'Eden quand le compte devient l'action suivante, et Eden est bien là.
+    const memory = new PlayableMemory(DATA, HZ);
+    for (let i = 0; i < ms(PLAYABLE_MEMORY_TIMING.introMs) + 1; i++) {
+      memory.step(away, false);
+    }
+    const prompted: number[] = [];
+    for (const action of DATA.actions) {
+      const box = inside(action.area);
+      memory.step(box, true);
+      for (let i = 0; i < 4000 && memory.locked; i++) {
+        if (memory.step(box, false) & MemoryEvent.Prompt) {
+          prompted.push(memory.next);
+          const by = memory.current?.prompt?.by;
+          if (by) {
+            const speaker = DATA.props.find((p) => p.id === by);
+            expect(speaker && checkCondition(memory.flags, speaker.when)).toBe(true);
+          }
+        }
+      }
+    }
+    expect(prompted).toEqual(DATA.actions.flatMap((a, k) => (a.prompt ? [k] : [])));
+  });
+
   it('le cache-cache (D-122) : Céleste compte, Eden se cache ; on cherche seule avant l’étincelle', () => {
     const counts = DATA.actions.filter((a) => a.gesture === 'count');
     expect(counts).toHaveLength(2);
@@ -165,15 +222,18 @@ describe('Eden et son souvenir jouable (D-118)', () => {
     // Chaque compte est suivi d'une recherche dont l'étincelle attend.
     DATA.actions.forEach((a, k) => {
       if (a.gesture === 'count') {
-        expect(DATA.actions[k + 1]?.markDelayMs ?? 0).toBeGreaterThan(2000);
+        expect(DATA.actions[k + 1]?.markDelayMs ?? 0).toBeGreaterThanOrEqual(2000);
       }
     });
-    // La nounou tourne la tête vers la seconde cachette, le temps de la trouver.
+    // La nounou tourne la tête vers chaque cachette, le temps de la trouver (la première aussi
+    // depuis D-171).
     const nanny = (fs: Set<string>) =>
       DATA.props.filter((p) => p.kind.startsWith('nanny') && checkCondition(fs, p.when));
-    expect(nanny(new Set([E.hideA])).map((p) => p.kind)).toEqual(['nanny-shadow']);
-    expect(nanny(new Set([E.hideA, E.hideB])).map((p) => p.kind)).toEqual(['nanny-look']);
-    expect(nanny(new Set([E.hideA, E.hideB, E.found])).map((p) => p.kind)).toEqual([
+    expect(nanny(new Set([E.fallen])).map((p) => p.kind)).toEqual(['nanny-shadow']);
+    expect(nanny(new Set([E.hideA])).map((p) => p.kind)).toEqual(['nanny-look']);
+    expect(nanny(new Set([E.hideA, E.foundA])).map((p) => p.kind)).toEqual(['nanny-shadow']);
+    expect(nanny(new Set([E.hideA, E.foundA, E.hideB])).map((p) => p.kind)).toEqual(['nanny-look']);
+    expect(nanny(new Set([E.hideA, E.foundA, E.hideB, E.found])).map((p) => p.kind)).toEqual([
       'nanny-shadow',
     ]);
 

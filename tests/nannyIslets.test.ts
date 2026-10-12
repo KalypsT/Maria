@@ -174,6 +174,55 @@ describe('les îlots de mémoire de la maison de la nounou (D-112, D-113)', () =
     expect(storyProblems(HOUSE_STORY, zone)).toEqual([]);
   });
 
+  it('les portes vers l’îlot voisin (D-171) : seulement une fois les deux îlots finis', () => {
+    const hidden = (flags: string[], room: string, exit: number) =>
+      HOUSE_STORY.lockedRooms.some(
+        (lock) =>
+          lock.room === room &&
+          lock.exit === exit &&
+          lock.hidden === true &&
+          checkCondition(new Set(flags), lock.when),
+      );
+    const pairs = [
+      {
+        islet: F.NannySchoolDone,
+        neighbor: F.NannyBedDone,
+        doors: [
+          ['nanny-street', 3],
+          ['nanny-bed', 3],
+        ],
+      },
+      {
+        islet: F.NannyStationDone,
+        neighbor: F.NannySchoolDone,
+        doors: [
+          ['nanny-train', 3],
+          ['nanny-street', 4],
+        ],
+      },
+      {
+        islet: F.NannySeaDone,
+        neighbor: F.NannyStationDone,
+        doors: [
+          ['nanny-carousel', 3],
+          ['nanny-train', 4],
+        ],
+      },
+    ] as const;
+    for (const { islet, neighbor, doors } of pairs) {
+      for (const [room, exit] of doors) {
+        expect(hidden([], room, exit), `${room}:${String(exit)}`).toBe(true);
+        expect(hidden([islet], room, exit), `${room}:${String(exit)}, l’îlot seul`).toBe(true);
+        expect(hidden([neighbor], room, exit), `${room}:${String(exit)}, le voisin seul`).toBe(
+          true,
+        );
+        expect(hidden([islet, neighbor], room, exit), `${room}:${String(exit)}, les deux`).toBe(
+          false,
+        );
+      }
+    }
+  });
+
   it(
     'jamais coincée : de tout endroit atteint, une lanterne (avec la bascule) ; chaque objet est atteint',
     { timeout: ANALYSIS_TIMEOUT_MS },
@@ -272,7 +321,10 @@ describe('les îlots de mémoire de la maison de la nounou (D-112, D-113)', () =
           );
         for (const [room, exit] of islet.shortcuts) {
           expect(hidden(room, exit, [F.NannyHouse])).toBe(true);
-          expect(hidden(room, exit, [F.NannyHouse, islet.done])).toBe(false);
+          // Les portes vers l'îlot voisin attendent aussi cet îlot (D-171) : tous les îlots faits.
+          expect(
+            hidden(room, exit, [F.NannyHouse, islet.done, ...TOWER_CUBES.map((c) => c.flag)]),
+          ).toBe(false);
         }
       });
 

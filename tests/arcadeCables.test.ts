@@ -15,7 +15,7 @@ import { ANALYSIS_TIMEOUT_MS } from './timeouts';
  * réglages ou les valeurs de mouvement par défaut changent, les niveaux changent aussi : vérifier
  * les nouveaux (DEBUG → « Console »), puis mettre à jour l'empreinte.
  */
-const FINGERPRINT = 'dd06818a';
+const FINGERPRINT = '5b6dc83f';
 
 const NUMBERS = Array.from({ length: ARCADE.verifiedLevels }, (_, i) => i + 1);
 

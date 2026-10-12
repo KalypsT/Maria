@@ -42,9 +42,12 @@ export class RideView {
     );
   }
 
-  /** Une fois par image : `warn` (0 → 1, -1 hors de l'annonce), `passing` : elles balaient. */
-  update(nowMs: number, warn: number, passing: boolean): void {
-    const low = passing ? 1 : Math.max(0, warn);
+  /**
+   * Une fois par image : `warn` (0 → 1, -1 hors de l'annonce), `passing` : elles balaient ; `rise`
+   * (1 → 0, -1 sinon) : elles remontent, aussi doucement qu'elles sont descendues (D-171).
+   */
+  update(nowMs: number, warn: number, passing: boolean, rise: number): void {
+    const low = passing ? 1 : warn >= 0 ? warn : Math.max(0, rise);
     const t = (nowMs / 1000) * RIDE_LOOK.turnsPerS * Math.PI * 2;
     for (let z = 0; z < this.zones.length; z++) {
       const zone = this.zones[z];

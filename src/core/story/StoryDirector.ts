@@ -1,4 +1,6 @@
 import { TILE_SIZE } from '../../config/display';
+import type { MusicTrack } from '../../config/audio';
+import type { HapticMoment } from '../../config/haptics';
 import type { FlashbackId } from '../../config/memories';
 import type { PlayableMemoryId } from '../../config/playableMemories';
 import { PHYSICS_STEP_HZ, msToSteps } from '../../config/movement';
@@ -44,8 +46,13 @@ export interface StoryHost {
   records?(): void;
   /** La console (D-166) : Céleste s'assoit, l'écran de la console s'ouvre. */
   console?(): void;
-  /** Regard (D-122) : la vue va vers cette tuile ; null : elle revient sur Céleste. */
-  look?(col: number | null, row: number | null): void;
+  /**
+   * Regard (D-122) : la vue va vers cette tuile ; null : elle revient sur Céleste. `zoom` (D-171) :
+   * elle se rapproche aussi (1 : sans rapprochement).
+   */
+  look?(col: number | null, row: number | null, zoom: number): void;
+  /** Une vibration (D-171). */
+  haptic?(moment: HapticMoment): void;
   /** Céleste est sortie de la salle (D-144) : invisible jusqu'au prochain changement de salle. */
   gone?(): void;
   /** Un très léger signe du monde étrange pendant `ms` (D-144). */
@@ -53,6 +60,9 @@ export interface StoryHost {
   /** La fin du jeu (D-145) : « Continuer » reprendra dans `room` ; l'écran de fin, puis l'accueil. */
   end?(room: string): void;
 }
+
+/** Agir lâché (D-171) : le cœur se vide deux fois moins vite qu'il ne se remplit. */
+const HOLD_DRAIN = 0.5;
 
 /**
  * Metteur en scène (§33, D-31) : étapes vécues, déclencheurs et scripts, voile des fondus. Un pas
@@ -69,6 +79,8 @@ export class StoryDirector {
   flashbackProgress = 0;
   /** Déclencheur Agir disponible là où se tient Céleste (-1 : aucun). */
   interactable = -1;
+  /** Agir maintenu sur un déclencheur `hold` (D-171) : de 0 à 1, il part à 1. */
+  holdProgress = 0;
   /** Un souvenir jouable est en cours (D-89) : le script attend `endPlay`. */
   playing = false;
   private running: StoryTrigger | null = null;
@@ -84,6 +96,19 @@ export class StoryDirector {
     private readonly host: StoryHost,
     private readonly stepHz: number = PHYSICS_STEP_HZ,
   ) {}
+
+  /**
+   * La musique voulue par l'histoire (D-171) : la piste de la première règle vraie, `null` pour le
+   * silence ; `undefined` : celle de la salle.
+   */
+  music(): MusicTrack | null | undefined {
+    for (const rule of this.data.music ?? []) {
+      if (this.check(rule.when)) {
+        return rule.track;
+      }
+    }
+    return undefined;
+  }
 
   /** Remplace les étapes vécues (chargement de la sauvegarde, outil de debug) ; script arrêté. */
   setFlags(flags: Iterable<string>): void {
@@ -212,7 +237,7 @@ export class StoryDirector {
    * Un pas : avance le script en cours ; sinon, cherche le déclencheur Agir à portée (lancé si
    * `interact`), puis un déclencheur de contact.
    */
-  step(room: string, box: Box, interact: boolean): void {
+  step(room: string, box: Box, interact: boolean, held = false): void {
     const left = this.lastRoom !== null && this.lastRoom !== room ? this.lastRoom : null;
     this.lastRoom = room;
     const triggers = this.data.triggers;
@@ -230,6 +255,7 @@ export class StoryDirector {
       this.advance();
       return;
     }
+    const before = this.interactable;
     this.interactable = -1;
     for (let i = 0; i < triggers.length; i++) {
       const t = triggers[i];
@@ -239,9 +265,24 @@ export class StoryDirector {
       }
     }
     const available = triggers[this.interactable];
-    if (interact && available) {
-      this.start(available);
-      return;
+    if (available?.hold !== undefined) {
+      // Agir maintenu (D-171) : le cœur se remplit tant qu'il est tenu, se vide doucement sinon.
+      const total = Math.max(1, msToSteps(available.hold, this.stepHz));
+      const progress = this.interactable === before ? this.holdProgress : 0;
+      this.holdProgress = held
+        ? Math.min(1, progress + 1 / total)
+        : Math.max(0, progress - HOLD_DRAIN / total);
+      if (this.holdProgress >= 1) {
+        this.holdProgress = 0;
+        this.start(available);
+        return;
+      }
+    } else {
+      this.holdProgress = 0;
+      if (interact && available) {
+        this.start(available);
+        return;
+      }
     }
     for (const t of triggers) {
       if (t.on === 'touch' && t.room === room && this.ready(t, box)) {
@@ -360,7 +401,10 @@ export class StoryDirector {
         this.host.console?.();
         break;
       case 'look':
-        this.host.look?.(step.col ?? null, step.row ?? null);
+        this.host.look?.(step.col ?? null, step.row ?? null, step.zoom ?? 1);
+        break;
+      case 'haptic':
+        this.host.haptic?.(step.moment);
         break;
       case 'gone':
         this.host.gone?.();

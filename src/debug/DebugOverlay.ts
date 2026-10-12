@@ -1697,7 +1697,11 @@ export function installDebugOverlay(scene: GameScene): void {
       ['Histoire : le ciel de la chambre (D-142)', sky],
       ['Histoire : la chambre grande (D-143)', [...sky, F.FinaleBig]],
       [
-        'Histoire : Maria dans son berceau, la vraie chambre (D-143)',
+        'Histoire : le berceau géant, Maria découverte (D-171)',
+        [...sky, F.FinaleBig, F.FinaleCradleSeen],
+      ],
+      [
+        'Histoire : Maria dans son berceau, la vraie chambre (avant D-171)',
         [...sky, F.FinaleBig, F.FinaleHome],
       ],
       ['Histoire : Maria retrouvée (D-143)', together],
