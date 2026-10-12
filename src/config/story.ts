@@ -283,6 +283,11 @@ export const StoryFlag = {
   FinaleShelved: 'finale.shelved',
   /** Céleste est sortie par la porte : le dernier plan, sur Maria (D-144). */
   FinaleGone: 'finale.gone',
+  /** Les souvenirs qu'on emporte (D-169) : pris, ils quittent le décor. */
+  WateringCanTaken: 'memory.watering-can',
+  TicketTaken: 'memory.ticket',
+  LetterTaken: 'memory.letter',
+  PostcardTaken: 'memory.postcard',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -440,8 +445,9 @@ export const PROP_SIZE = {
   cradle: { w: 30, h: 16 },
   'cradle-maria': { w: 30, h: 16 },
   'cradle-undone': { w: 30, h: 16 },
-  slipper: { w: 7, h: 4 },
-  bottle: { w: 9, h: 5 },
+  // Les affaires de Maria : à la forme de leur image (D-170).
+  slipper: { w: 8, h: 6 },
+  bottle: { w: 7, h: 9 },
   headband: { w: 10, h: 5 },
   blanket: { w: 10, h: 5 },
   // Parents (D-37) : à hauteur d'enfant, bien plus grands que Céleste (environ 26 px) ; taille
@@ -552,6 +558,13 @@ export const PROP_SIZE = {
   'record-lullaby': { w: 10, h: 10 },
   plant: { w: 10, h: 16 },
   'baby-photo': { w: 11, h: 10 },
+  // Les souvenirs de Céleste (D-169). Le dessin de toute la famille couvre celui de la chambre.
+  'watering-can': { w: 13, h: 10 },
+  ticket: { w: 11, h: 6 },
+  letter: { w: 8, h: 11 },
+  postcard: { w: 11, h: 8 },
+  'school-drawing': { w: 22, h: 15 },
+  'family-drawing': { w: 52, h: 46 },
   'height-chart': { w: 7, h: 40 },
   'height-chart-grown': { w: 7, h: 40 },
   'height-chart-older': { w: 7, h: 40 },

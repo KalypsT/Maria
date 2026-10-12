@@ -33,7 +33,7 @@ fichier en plus. **Pas d'ambiances pour l'instant** (décision de l'utilisateur)
 
 | Emplacement         | Quand                                                       | Variantes |
 | ------------------- | ----------------------------------------------------------- | --------- |
-| `step-wood`         | un pas sur du bois (parquet, meuble, planche)               | 3–4       |
+| `step-wood` ✅ ×4   | un pas sur du bois (parquet, meuble, planche)               | 3–4       |
 | `step-fabric`       | un pas sur du tissu (lit, canapé, couchette, valise)        | 3–4       |
 | `step-grass` ✅ ×4  | un pas dans l'herbe, la terre                               | 3–4       |
 | `step-stone` ✅ ×4  | un pas sur la pierre, les pavés, le carrelage               | 3–4       |
@@ -84,7 +84,7 @@ même gamme douce (tirées au hasard, elles font une petite mélodie).
 
 | Emplacement           | Quand                                                                                        | Variantes |
 | --------------------- | -------------------------------------------------------------------------------------------- | --------- |
-| `checkpoint`          | une veilleuse s'allume                                                                       | 1         |
+| `checkpoint` ✅       | une veilleuse s'allume                                                                       | 1         |
 | `door`                | une porte de façade s'ouvre                                                                  | 1–2       |
 | `thought`             | une bulle de pensée apparaît (très doux)                                                     | 1         |
 | `hint`                | le fil discret se montre (un tintement)                                                      | 1         |

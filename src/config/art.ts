@@ -1,4 +1,6 @@
 import type { PropKind } from '../core/story/story';
+import type { FlashbackId, MemoryId } from './memories';
+import { recordSlot, type RecordId } from './records';
 import type { CelesteOutfit } from './growth';
 
 /**
@@ -694,16 +696,88 @@ export const WALL_STYLES = ['dots', 'stripes', 'planks', 'tiles', 'clocks', 'tag
 export type WallStyle = (typeof WALL_STYLES)[number];
 
 /**
+ * Les images des souvenirs de Céleste (D-169), fournies par l'utilisateur, détourées : dans le sac
+ * (la case, la fiche), dans leur envol vers le sac, et dans le décor pour ceux qu'on emporte. Un
+ * souvenir absent de cette liste est dessiné par le code.
+ */
+export const MEMORY_IMAGES: Readonly<Partial<Record<MemoryId, string>>> = {
+  // Mes souvenirs (D-169, D-170).
+  height: 'memory-height.webp',
+  photo: 'memory-photo.webp',
+  'music-box': 'memory-music-box.webp',
+  'watering-can': 'memory-watering-can.webp',
+  'school-drawing': 'memory-school-drawing.webp',
+  ticket: 'memory-ticket.webp',
+  letter: 'memory-letter.webp',
+  postcard: 'memory-postcard.webp',
+  'family-drawing': 'memory-family-drawing.webp',
+  // Les affaires de Maria (D-170), d'après `maria.png`.
+  slipper: 'memory-slipper.webp',
+  bottle: 'memory-bottle.webp',
+  headband: 'memory-headband.webp',
+  bonnet: 'memory-bonnet.webp',
+  // Le monde étrange (D-170) ; Roger et l'Educaville ont déjà leur image.
+  'pink-kitchen': 'memory-pink-kitchen.webp',
+  'music-book': 'memory-music-book.webp',
+  'white-cloth': 'memory-white-cloth.webp',
+  'eden-tower': 'memory-eden-tower.webp',
+};
+
+/**
+ * Les trésors dont l'image sert déjà au décor (`ART_IMAGES`) : la même dans le sac (D-170), sans
+ * la charger deux fois.
+ */
+export const TREASURE_SHARED_IMAGES: Readonly<Partial<Record<MemoryId, string>>> = {
+  roger: 'roger.png',
+  'shape-box': 'toy-town.png',
+};
+
+/** Le nom d'élément de l'image d'un souvenir, dans `ART_IMAGES`. */
+export function memoryImageKey(id: MemoryId): string {
+  return `memory-${id}`;
+}
+
+/**
+ * Les pochettes des disques (D-170), fournies par l'utilisateur, détourées : le disque à moitié
+ * sorti de sa pochette, sans texte (le titre est écrit dans le sac). Dans le sac, dans l'envol vers
+ * le sac et dans le décor ; leur nom d'élément est l'identifiant du disque dans la sauvegarde.
+ */
+export const RECORD_IMAGES: Readonly<Record<RecordId, string>> = {
+  early: 'record-early.webp',
+  adventures: 'record-adventures.webp',
+  lullaby: 'record-lullaby.webp',
+};
+
+/**
+ * Les courts souvenirs en illustrations (D-170), fournies par l'utilisateur : sans cadre, le jeu
+ * garde son traitement de vieille photo (coins arrondis, voile chaud, bords qui s'effacent).
+ * Chargées à la demande par la page (pas par la scène). Sans image, le dessin par le code.
+ */
+export const FLASHBACK_IMAGES: Readonly<Record<FlashbackId, string>> = {
+  roger: 'flashback-roger.jpg',
+  'music-book': 'flashback-music-book.jpg',
+  'white-cloth': 'flashback-white-cloth.jpg',
+};
+
+/**
  * Images fournies (voir le document « Créer des images pour le jeu ») : nom d'élément → fichier
  * sous `public/art/`. Un élément absent de cette liste est dessiné par le code.
  */
 export const ART_IMAGES: Readonly<Record<string, string>> = {
+  ...Object.fromEntries(
+    Object.entries(MEMORY_IMAGES).map(([id, file]) => [memoryImageKey(id as MemoryId), file]),
+  ),
+  ...Object.fromEntries(
+    Object.entries(RECORD_IMAGES).map(([id, file]) => [recordSlot(id as RecordId), file]),
+  ),
   /** Maria (D-31) : image fournie par l'utilisateur, détourée. */
   maria: 'maria.png',
   /** Roger, la peluche singe de Céleste (D-68, D-69) : image fournie par l'utilisateur, détourée. */
   roger: 'roger.png',
   /** La coquille d'escargot (D-148) : image fournie par l'utilisateur, détourée. */
   shell: 'shell.png',
+  /** Le sac à dos de Céleste (D-168), le bouton du menu : image fournie par l'utilisateur, détourée. */
+  backpack: 'backpack.png',
   /**
    * L'Educaville (D-155) : images fournies par l'utilisateur, détourées sur le même cadre (le
    * combiné raccroché, puis décroché : le jouet ne bouge pas de l'une à l'autre).
@@ -733,6 +807,51 @@ export const SHELL_ART = {
   /** Au ramassage : la coquille file vers le cahier (ms), puis « n/N » du lieu reste affiché (ms). */
   flyMs: 620,
   countMs: 2200,
+} as const;
+
+/**
+ * La gommette étoile des capacités (D-169, choix de l'utilisateur), à la place de la petite lueur :
+ * posée au-dessus de son appui, elle flotte en se balançant, scintille de temps en temps, et une
+ * flaque de lumière au sol la signale de loin. PROVISOIRE : à juger sur téléphone.
+ */
+export const ABILITY_STICKER = {
+  /** Diamètre de la gommette (px logiques ; Céleste en fait 24 à 28). */
+  sizePx: 17,
+  /** Halo doré autour d'elle (px) et son opacité au centre. */
+  haloPx: 6,
+  haloAlpha: 0.5,
+  /** Flottement : amplitude (px) et période (ms) ; balancement : angle (rad) et période (ms). */
+  bobPx: 2,
+  bobMs: 1600,
+  swayRad: 0.16,
+  swayMs: 2600,
+  /** Scintillement : période et durée (ms). */
+  glintPeriodMs: 2400,
+  glintMs: 520,
+  /** La flaque de lumière au sol : largeur, hauteur (px) et opacité, qui respire un peu. */
+  poolW: 26,
+  poolH: 6,
+  poolAlpha: 0.42,
+  /** Diamètre de la gommette qui s'envole vers le sac (px CSS). */
+  flyPx: 40,
+} as const;
+
+/**
+ * L'envol vers le sac (D-169) : un trésor trouvé, une gommette de capacité, monte un instant
+ * au-dessus de là où il était, puis file vers le bouton du sac, qui sursaute à son arrivée.
+ * PROVISOIRE : à juger sur téléphone.
+ */
+export const TREASURE_FLY = {
+  /** Taille du dessin qui s'envole (px CSS). */
+  sizePx: 54,
+  /** Il monte d'autant (px CSS), apparaît et reste un instant (ms)… */
+  liftPx: 30,
+  showMs: 650,
+  /** … puis file vers le sac (ms), où il arrive à cette échelle. */
+  flyMs: 720,
+  arriveScale: 0.35,
+  /** Le sursaut du sac à son arrivée (ms). */
+  bumpMs: 320,
 } as const;
 
 /**

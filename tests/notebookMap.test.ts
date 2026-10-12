@@ -58,16 +58,16 @@ describe('la carte du sac (D-160)', () => {
 
   it('un trésor vu mais pas pris est en pointillés dans sa salle visitée', () => {
     const spots = treasureSpots(HOUSE_STORY);
-    const bookcase = spots.find((spot) => spot.id === 'bookcase');
-    if (!bookcase) {
-      throw new Error('bibliothèque absente');
+    const photo = spots.find((spot) => spot.id === 'photo');
+    if (!photo) {
+      throw new Error('photo absente');
     }
-    const at = (seen: string[], taken: string[], visited = [bookcase.room]) =>
+    const at = (seen: string[], taken: string[], visited = [photo.room]) =>
       buildMapModel(zone, progress({ visited, treasures: { spots, seen, taken } })).rooms.find(
-        (room) => room.id === bookcase.room,
+        (room) => room.id === photo.room,
       )?.seenTreasures.length ?? 0;
     expect(at([], [])).toBe(0);
-    expect(at(['bookcase'], [])).toBe(1);
-    expect(at(['bookcase'], ['bookcase'])).toBe(0);
+    expect(at(['photo'], [])).toBe(1);
+    expect(at(['photo'], ['photo'])).toBe(0);
   });
 });

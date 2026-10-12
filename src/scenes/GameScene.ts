@@ -138,8 +138,10 @@ import {
   TRAIN_RIDE,
   CHASE_VIEW,
   SHELL_ART,
+  TREASURE_FLY,
+  ABILITY_STICKER,
 } from '../config/art';
-import { STORY_TIMING, StoryFlag, TOWER_CUBES, TOY_PHONE } from '../config/story';
+import { PROP_SIZE, STORY_TIMING, StoryFlag, TOWER_CUBES, TOY_PHONE } from '../config/story';
 import { PropStage } from '../core/story/PropStage';
 import { StoryDirector } from '../core/story/StoryDirector';
 import { checkCondition, holdsMaria, type TimeOfDay } from '../core/story/story';
@@ -162,7 +164,7 @@ import { ShiftLayerView } from './ShiftLayerView';
 import { LullabyView } from './LullabyView';
 import { RideView } from './RideView';
 import { Backpack } from '../ui/Backpack';
-import { BAG_ICON, SPARK_ICON } from '../ui/bagIcons';
+import { BAG_IMAGE, SPARK_ICON } from '../ui/bagIcons';
 import { notebookPlaces, openingPage, type BackpackTrigger } from '../core/world/backpack';
 import { recordSpots, treasureSpots, type TreasureSpot } from '../core/world/treasures';
 import { hasNewTreasure, roomPlace, treasureBook } from '../core/world/treasureBook';
@@ -193,6 +195,9 @@ import { ArcadeEvent, ArcadePhase, ArcadeRun } from '../core/arcade/run';
 import { arcadeRecord } from '../core/save/arcade';
 import { touchesHazard } from '../core/physics/gridCollision';
 import { isRecordSlot } from '../config/records';
+import { isMemory } from '../config/memories';
+import { drawnCanvas, recordDrawing, treasureDrawing } from '../ui/treasureDrawing';
+import { drawSticker } from './art/stickerArt';
 import { canPlayRecords, recordShelf, type RecordChoice } from '../core/audio/records';
 import { buildMapModel } from '../core/world/mapModel';
 import { DEFAULT_PUPPET, type PuppetParams } from '../config/puppet';
@@ -705,12 +710,18 @@ export class GameScene extends Phaser.Scene {
         this.fx.shake(ms, strength);
       },
       memory: (id) => {
-        if (!this.session.data.progression.memories.includes(id)) {
+        const found = !this.session.data.progression.memories.includes(id);
+        if (found) {
           // Un disque trouvé (D-121) sonne comme une trouvaille.
           this.audio.playJingle(isRecordSlot(id) ? 'found' : 'memory');
         }
         void this.session.addMemory(id);
-        this.refreshBagSpark();
+        if (found) {
+          // Il file vers le sac (D-169) ; l'étincelle du sac s'allume à son arrivée.
+          this.flyTreasure(id);
+        } else {
+          this.refreshBagSpark();
+        }
       },
       hush: (ms) => {
         this.audio.hush(ms);
@@ -841,7 +852,7 @@ export class GameScene extends Phaser.Scene {
     const forceTouch = __DEBUG_TOOLS__ && new URLSearchParams(location.search).has('touch');
     if (forceTouch || TouchSource.isTouchDevice()) {
       this.touch = new TouchSource(document.body, controlSettings);
-      this.touch.setIcon('Map', BAG_ICON, 'Le sac');
+      this.touch.setIcon('Map', BAG_IMAGE, 'Le sac');
       this.refreshBagSpark();
       this.controls.sources.push(this.touch);
       detachTouch = this.touch.attach(window);
@@ -1907,6 +1918,39 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
+   * Un trésor trouvé (D-169) : son dessin monte au-dessus de là où il était (l'objet de l'histoire,
+   * sinon sa place, sinon Céleste), puis file vers le sac ; l'étincelle du sac s'allume à son arrivée.
+   */
+  private flyTreasure(id: string): void {
+    let content: HTMLElement | null = null;
+    if (isMemory(id)) {
+      content = treasureDrawing('treasure-fly-drawing', id, TREASURE_FLY.sizePx);
+    } else if (isRecordSlot(id)) {
+      content = recordDrawing(id);
+    }
+    if (!content) {
+      this.refreshBagSpark();
+      return;
+    }
+    const room = this.level.id;
+    const prop = HOUSE_STORY.props.find((p) => p.id === id && p.room === room);
+    const spot = [...TREASURE_SPOTS, ...RECORD_SPOTS].find((s) => s.id === id && s.room === room);
+    const box = this.player.box;
+    const world = prop
+      ? {
+          x: (prop.col + 0.5) * TILE_SIZE,
+          y: (prop.row + 1) * TILE_SIZE - PROP_SIZE[prop.kind].h / 2,
+        }
+      : spot
+        ? { x: (spot.col + 0.5) * TILE_SIZE, y: (spot.row + 0.5) * TILE_SIZE }
+        : { x: box.x + box.width / 2, y: box.y };
+    const from = this.screenPoint(world.x, world.y);
+    this.hud.flyToBag(content, { x: from.x, y: from.y }, () => {
+      this.refreshBagSpark();
+    });
+  }
+
+  /**
    * Un trésor passé à l'écran, quand il est là (son déclencheur est possible), est vu (D-160) :
    * Céleste le dessinera en pointillés sur la carte tant qu'elle ne l'a pas pris.
    */
@@ -1964,6 +2008,38 @@ export class GameScene extends Phaser.Scene {
     this.player.reset(
       (col + 0.5) * TILE_SIZE - this.growth.hitbox.width / 2,
       (shell.row + 1) * TILE_SIZE - this.growth.hitbox.height,
+      level,
+    );
+    this.feel.reset(this.player);
+    this.resetCamera();
+  }
+
+  /**
+   * Outil de debug (D-169) : Céleste à la place d'un trésor (sous l'étincelle de son déclencheur,
+   * sur le premier appui), pour le trouver ou le regarder.
+   */
+  teleportToTreasure(id: string): void {
+    const spot = [...TREASURE_SPOTS, ...RECORD_SPOTS].find((s) => s.id === id);
+    if (!spot) {
+      return;
+    }
+    this.teleportToRoom(spot.room);
+    const level = this.level;
+    if (level.id !== spot.room) {
+      return;
+    }
+    const free = (col: number, row: number) => tileAt(level, col, row) === Tile.Empty;
+    const ground = (col: number, row: number) => {
+      const tile = tileAt(level, col, row);
+      return tile === Tile.Solid || tile === Tile.OneWay;
+    };
+    let row = spot.row;
+    while (row < level.height - 1 && !(free(spot.col, row) && ground(spot.col, row + 1))) {
+      row++;
+    }
+    this.player.reset(
+      (spot.col + 0.5) * TILE_SIZE - this.growth.hitbox.width / 2,
+      (row + 1) * TILE_SIZE - this.growth.hitbox.height,
       level,
     );
     this.feel.reset(this.player);
@@ -2527,19 +2603,35 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     if (isAbility(item.id)) {
-      this.learnAbility(item.id);
+      this.learnAbility(item.id, {
+        x: (item.col + 0.5) * TILE_SIZE,
+        y: (item.row + 1) * TILE_SIZE - ABILITY_STICKER.sizePx,
+      });
     }
   }
 
   /**
    * Capacité obtenue (objet ramassé, D-26, ou apprise dans l'histoire, D-85) : sauvegardée,
-   * appliquée, indice de prototype et bulle d'aide.
+   * appliquée, indice de prototype et bulle d'aide. Sa gommette (D-169) file vers le sac, depuis
+   * l'objet ramassé (`from`, px du monde) ou, apprise dans une scène, au-dessus de Céleste.
    */
-  private learnAbility(id: Ability): void {
+  private learnAbility(id: Ability, from: { x: number; y: number } | null = null): void {
     this.audio.playJingle('found');
     this.audio.sfx.play('voice-laugh');
     void this.session.unlockAbility(id);
     this.applyAbilities();
+    const box = this.player.box;
+    const start = this.screenPoint(
+      from?.x ?? box.x + box.width / 2,
+      from?.y ?? box.y - ABILITY_STICKER.sizePx,
+    );
+    const size = ABILITY_STICKER.flyPx;
+    this.hud.flyToBag(
+      drawnCanvas('sticker-fly', size, size, (ctx) => {
+        drawSticker(ctx, size / 2, size / 2, size / 2);
+      }),
+      { x: start.x, y: start.y },
+    );
     this.hud.showHint(ABILITY_HINTS[id], ABILITY_HINT_MS);
     // Bulle d'aide (D-62, demande de l'utilisateur) : comment s'en servir, en pictogramme.
     const help = ABILITY_HELP_ICONS[id];

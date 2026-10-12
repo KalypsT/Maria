@@ -144,10 +144,10 @@ describe('saveData', () => {
 
   it('les trésors vus (D-160) : gardés, vides dans une sauvegarde plus ancienne', () => {
     const data = sample();
-    data.progression.seenTreasures = ['bookcase'];
+    data.progression.seenTreasures = ['ticket'];
     expect(deserializeSave(serializeSave(data))).toMatchObject({
       ok: true,
-      data: { progression: { seenTreasures: ['bookcase'] } },
+      data: { progression: { seenTreasures: ['ticket'] } },
     });
     const older: Partial<SaveData['progression']> = { ...data.progression };
     delete older.seenTreasures;

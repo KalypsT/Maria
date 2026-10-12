@@ -1,26 +1,26 @@
 import Phaser from 'phaser';
-import { SHELL_ART, SHIFT_LAYER_VIEW } from '../config/art';
+import { ABILITY_STICKER, SHELL_ART, SHIFT_LAYER_VIEW } from '../config/art';
 import { PLACEHOLDER_COLORS, TILE_SIZE as T } from '../config/display';
 import type { LevelCable } from '../core/level/LevelData';
 import { PickupKind, type Pickups } from '../core/world/Pickups';
 import type { RunState } from '../core/world/RunState';
 import { drawShellFallback, drawShellGlint, shellSeed } from './art/shellArt';
+import { drawSticker } from './art/stickerArt';
 
 const CHECKPOINT_OFF = 'checkpoint-off-placeholder';
 const CHECKPOINT_ON = 'checkpoint-on-placeholder';
 const TRAVEL_OFF = 'travel-lamp-off';
 const TRAVEL_ON = 'travel-lamp-on';
-const PICKUP = 'ability-pickup-placeholder';
+const PICKUP = 'ability-sticker';
+const PICKUP_POOL = 'ability-sticker-pool';
 const SHELL = 'shell-pickup';
 const SHELL_GLINT = 'shell-glint';
 /** Image fournie de la coquille (D-148), chargée par la scène (`ART_IMAGES`). */
 const SHELL_IMAGE = 'art:shell';
 const WIDTH = 10;
 const HEIGHT = 14;
-const PICKUP_SIZE = 10;
-/** Flottement de l'objet de capacité : amplitude (px) et période (ms). */
-const PICKUP_BOB_PX = 2;
-const PICKUP_BOB_MS = 1600;
+/** La gommette et son halo (px logiques). */
+const PICKUP_SIZE = ABILITY_STICKER.sizePx + 2 * ABILITY_STICKER.haloPx;
 
 /** Couleurs de la veilleuse : maison réelle, et monde étrange (turquoise, D-34). */
 const REAL_LAMP = {
@@ -71,14 +71,16 @@ function shellFlipped(id: string): boolean {
 /**
  * Affichage des checkpoints (placeholder neutre, design ouvert §45) : un petit repère qui s'allume
  * quand il est activé, plus vif s'il est le point de retour courant. Objets de capacité (D-26) :
- * une petite lueur qui flotte ; coquilles (D-148) : posées sur leur appui, un halo rose, un
- * scintillement de temps en temps.
+ * la gommette étoile (D-169), qui flotte en se balançant au-dessus d'une flaque de lumière ;
+ * coquilles (D-148) : posées sur leur appui, un halo rose, un scintillement de temps en temps.
  */
 export class WorldView {
   private sprites: Phaser.GameObjects.Image[] = [];
   private pickupSprites: Phaser.GameObjects.Image[] = [];
-  /** Scintillement de chaque coquille (null : un objet de capacité). */
+  /** Scintillement de chaque coquille et de chaque gommette. */
   private glintSprites: (Phaser.GameObjects.Image | null)[] = [];
+  /** La flaque de lumière sous chaque gommette (null : une coquille). */
+  private poolSprites: (Phaser.GameObjects.Image | null)[] = [];
   /** Décalage du scintillement de chaque coquille (ms), d'après son nom. */
   private glintOffsets: number[] = [];
   /** Coquille : taille dessinée (px logiques), d'après l'image. */
@@ -144,7 +146,7 @@ export class WorldView {
         .setScale(1 / this.artScale)
         .setDepth(5),
     );
-    for (const sprite of [...this.pickupSprites, ...this.glintSprites]) {
+    for (const sprite of [...this.pickupSprites, ...this.glintSprites, ...this.poolSprites]) {
       sprite?.destroy();
     }
     const items = this.pickups.items;
@@ -154,7 +156,7 @@ export class WorldView {
     this.pickupSprites = items.map((item) => {
       if (item.kind !== PickupKind.Shell) {
         return this.scene.add
-          .image((item.col + 0.5) * T, (item.row + 0.5) * T, PICKUP)
+          .image((item.col + 0.5) * T, this.stickerY(item.row), PICKUP)
           .setScale(1 / this.artScale)
           .setDepth(6)
           .setVisible(!item.taken);
@@ -169,24 +171,42 @@ export class WorldView {
         .setVisible(!item.taken);
     });
     this.glintSprites = items.map((item) =>
-      item.kind === PickupKind.Shell
-        ? this.scene.add
-            .image(
-              (item.col + 0.5) * T + (shellFlipped(item.id) ? 0.15 : -0.15) * w,
-              (item.row + 1) * T - h * 0.8,
-              SHELL_GLINT,
-            )
-            .setScale(1 / this.artScale)
-            .setDepth(6)
-            .setVisible(false)
-        : null,
+      this.scene.add
+        .image(
+          item.kind === PickupKind.Shell
+            ? (item.col + 0.5) * T + (shellFlipped(item.id) ? 0.15 : -0.15) * w
+            : (item.col + 0.5) * T + ABILITY_STICKER.sizePx * 0.3,
+          item.kind === PickupKind.Shell
+            ? (item.row + 1) * T - h * 0.8
+            : this.stickerY(item.row) - ABILITY_STICKER.sizePx * 0.3,
+          SHELL_GLINT,
+        )
+        .setScale(1 / this.artScale)
+        .setDepth(6)
+        .setVisible(false),
     );
+    // La flaque de lumière sur l'appui de la gommette, derrière elle.
+    this.poolSprites = items.map((item) =>
+      item.kind === PickupKind.Shell
+        ? null
+        : this.scene.add
+            .image((item.col + 0.5) * T, (item.row + 1) * T, PICKUP_POOL)
+            .setScale(1 / this.artScale)
+            .setDepth(5.9)
+            .setVisible(!item.taken),
+    );
+  }
+
+  /** Hauteur du centre de la gommette : au-dessus de son appui, le halo juste au ras. */
+  private stickerY(row: number): number {
+    return (row + 1) * T - ABILITY_STICKER.sizePx / 2 - ABILITY_STICKER.bobPx - 3;
   }
 
   render(): void {
     const items = this.pickups.items;
     const now = this.scene.time.now;
-    const bob = Math.sin((now / PICKUP_BOB_MS) * Math.PI * 2) * PICKUP_BOB_PX;
+    const s = ABILITY_STICKER;
+    const wave = Math.sin((now / s.bobMs) * Math.PI * 2);
     for (let i = 0; i < items.length; i++) {
       const sprite = this.pickupSprites[i];
       const item = items[i];
@@ -194,19 +214,28 @@ export class WorldView {
         continue;
       }
       sprite.setVisible(!item.taken);
-      if (item.kind !== PickupKind.Shell) {
-        sprite.setY((item.row + 0.5) * T + bob);
-        continue;
+      const sticker = item.kind !== PickupKind.Shell;
+      if (sticker) {
+        // La gommette (D-169) : elle flotte en se balançant ; sa flaque de lumière respire.
+        sprite
+          .setY(this.stickerY(item.row) + wave * s.bobPx)
+          .setRotation(Math.sin((now / s.swayMs) * Math.PI * 2) * s.swayRad);
+        this.poolSprites[i]?.setVisible(!item.taken).setAlpha(0.75 + 0.25 * wave);
       }
       // Le scintillement : une étoile qui s'ouvre et se referme, de temps en temps.
       const glint = this.glintSprites[i];
-      const t = (now + (this.glintOffsets[i] ?? 0)) % SHELL_ART.glintPeriodMs;
-      const on = !item.taken && t < SHELL_ART.glintMs;
-      const k = on ? Math.sin((t / SHELL_ART.glintMs) * Math.PI) : 0;
+      const period = sticker ? s.glintPeriodMs : SHELL_ART.glintPeriodMs;
+      const length = sticker ? s.glintMs : SHELL_ART.glintMs;
+      const t = (now + (this.glintOffsets[i] ?? 0)) % period;
+      const on = !item.taken && t < length;
+      const k = on ? Math.sin((t / length) * Math.PI) : 0;
       glint
         ?.setVisible(on)
         .setAlpha(k)
         .setScale((0.4 + 0.6 * k) / this.artScale);
+      if (sticker && glint) {
+        glint.setY(this.stickerY(item.row) + wave * s.bobPx - s.sizePx * 0.3);
+      }
     }
     const checkpoints = this.run.checkpoints;
     for (let i = 0; i < checkpoints.length; i++) {
@@ -273,22 +302,29 @@ export class WorldView {
       textures.addCanvas(key, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
     };
     const css = (color: number) => `#${color.toString(16).padStart(6, '0')}`;
+    // La gommette (D-169), sur son halo doré ; la flaque de lumière de son appui.
     make(PICKUP, PICKUP_SIZE, PICKUP_SIZE, (ctx) => {
       const c = PICKUP_SIZE / 2;
-      const color = css(PLACEHOLDER_COLORS.checkpointLit);
       const halo = ctx.createRadialGradient(c, c, 0, c, c, c);
-      halo.addColorStop(0, `${color}99`);
-      halo.addColorStop(1, `${color}00`);
+      halo.addColorStop(0, `rgba(255, 226, 150, ${String(ABILITY_STICKER.haloAlpha)})`);
+      halo.addColorStop(1, 'rgba(255, 226, 150, 0)');
       ctx.fillStyle = halo;
       ctx.fillRect(0, 0, PICKUP_SIZE, PICKUP_SIZE);
-      ctx.fillStyle = color;
+      drawSticker(ctx, c, c, ABILITY_STICKER.sizePx / 2);
+    });
+    make(PICKUP_POOL, ABILITY_STICKER.poolW, ABILITY_STICKER.poolH, (ctx) => {
+      const { poolW: pw, poolH: ph, poolAlpha } = ABILITY_STICKER;
+      ctx.save();
+      ctx.translate(pw / 2, ph / 2);
+      ctx.scale(pw / ph, 1);
+      const pool = ctx.createRadialGradient(0, 0, 0, 0, 0, ph / 2);
+      pool.addColorStop(0, `rgba(255, 230, 160, ${String(poolAlpha)})`);
+      pool.addColorStop(1, 'rgba(255, 230, 160, 0)');
+      ctx.fillStyle = pool;
       ctx.beginPath();
-      for (let i = 0; i < 8; i++) {
-        const angle = (i * Math.PI) / 4;
-        const r = i % 2 === 0 ? c - 0.5 : 1.4;
-        ctx.lineTo(c + Math.cos(angle) * r, c + Math.sin(angle) * r);
-      }
+      ctx.arc(0, 0, ph / 2, 0, Math.PI * 2);
       ctx.fill();
+      ctx.restore();
     });
     // La coquille (D-148) : l'image fournie, ou son dessin par le code, sur un halo rose.
     const image = textures.exists(SHELL_IMAGE)

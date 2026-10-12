@@ -622,3 +622,173 @@ Si l'image plaît mais se lit mal en petit, demander dans la même conversation 
 same style, but simpler: thicker outline, fewer details, bigger pocket and button.`
 
 Je fais ensuite le détourage et l'intégration ; en attendant, le jeu dessine le sac par le code.
+
+## Les souvenirs de Céleste (images des trésors, retour d'essai après D-168)
+
+Les six images de capacités proposées en D-168 (Céleste qui fait chaque geste) sont abandonnées :
+l'utilisateur garde les pictogrammes du cahier.
+
+Neuf souvenirs, un ou plusieurs par lieu du voyage (liste validée par l'utilisateur). Chaque image
+sert **en petit** (la case de la boîte à trésors, environ 40 px ; l'objet qui s'envole vers le sac)
+et **en grand** (la fiche du trésor, environ 150 px, 300 px sur un écran net). Il faut donc une
+forme franche et peu de détails, mais un objet assez joli pour être regardé en grand. **Pas de
+texte, ni lettre, ni chiffre** (pilier 6, et le jeu est en français) : un mot écrit se lirait mal en
+petit et figerait l'histoire.
+
+Méthode : **une seule conversation pour les neuf objets**, pour garder le même style. Au premier
+message, joindre `celeste.png` (le style, et Céleste) et `toy-town.png` (un objet déjà fait dans ce
+style). Ensuite, un objet par message, en recommençant par le début commun. Si un objet dérive,
+rejoindre `celeste.png` au message.
+
+### Début commun
+
+```
+Using the attached images as the strict reference for the style (same children's picture-book
+illustration style, soft texture, thin warm outlines, same colors and level of finish), draw ONE
+single object, described below. It is a keepsake of a 6-year-old girl, shown in a game's treasure
+box: it must stay readable when very small (about 40 pixels) and still look lovely when large.
+Bold simple shapes, a clear outline, few details, no thin lines that would disappear. No brand, no
+logo, no readable text, no letters, no numbers. The whole object, nothing cropped, centered,
+filling most of the image. Plain pure white background, no shadow on the ground, no other element.
+Square format, high resolution.
+```
+
+### Les neuf objets (fin du message)
+
+| Fichier                     | Lieu                     | Fin du message                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| --------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `memory-height.png`         | la maison, la chambre    | `The object: a child's height chart that hangs on a bedroom wall, a tall narrow strip of cream-painted wood with a slightly darker light-wood edge on the left and small graduation ticks without any numbers. Four short horizontal marks at different heights, drawn by a parent: the three lowest in grey pencil, the highest one in pink with a tiny pink heart beside it. Straight front view, upright, filling the height of the image.`                                                                                                                                               |
+| `memory-photo.png`          | la maison, le salon      | `The object: a family photo in a simple warm wooden frame, slightly tilted. Inside the frame, in the same picture-book style, a sunny garden: a man with wavy chestnut hair, a short beard and a navy t-shirt; a woman with long curly dark-brown hair and a pink t-shirt; in front of them, a smaller little girl of about 4 with round pink glasses, freckles and two low chestnut pigtails tied with pink ribbon bows, laughing; a fluffy dark-grey long-haired cat with amber eyes sitting at her feet. The parents' hands rest on the girl's shoulders. Simple faces, readable shapes.` |
+| `memory-music-box.png`      | la maison, la chambre    | `The object: an old wooden music box, plum-pink with a thin golden band, its lid open: inside the lid a small round mirror, and on the box a tiny ballerina in a pale pink tutu, one arm raised. Three small musical notes float above it. Three-quarter front view.`                                                                                                                                                                                                                                                                                                                        |
+| `memory-watering-can.png`   | le jardin, le potager    | `The object: a child's small metal watering can, pastel pink, with a round body, a long thin spout ending in a rose with little holes, a curved handle on top, and a small hand-painted white daisy on its side. A little worn, a few tiny water drops on the spout. Side view, spout to the right.`                                                                                                                                                                                                                                                                                         |
+| `memory-school-drawing.png` | le quartier, la classe   | `The object: a child's crayon drawing on a sheet of cream paper, pinned at the top by a red pushpin, a corner slightly curled. The drawing, naive and colorful like a 6-year-old's: a house with a pink roof, a big yellow sun with rays, three stick-figure people holding hands (a tall one, a long-haired one, and a small one with round pink glasses) and a grey cat. Straight front view.`                                                                                                                                                                                             |
+| `memory-ticket.png`         | la gare                  | `The object: a small old-fashioned rectangular train ticket made of thick cream card, slightly bent, with a pale blue stripe across it, a tiny printed train silhouette, a round punched hole near one end, and a few short grey lines where text would be (not readable). Three-quarter view, slightly tilted.`                                                                                                                                                                                                                                                                             |
+| `memory-letter.png`         | le train, dans la valise | `The object: a letter from a mother to her little girl, a sheet of pale blue paper folded in three and half opened. On the visible part, no words, only a simple hand-drawn heart in pink ink and, below it, a tiny drawing of a woman with long curly hair holding the hand of a little girl with round glasses. A small dried flower is tucked in the fold. Three-quarter view.`                                                                                                                                                                                                           |
+| `memory-postcard.png`       | la mer, le dortoir       | `The object: a postcard drawn by a 6-year-old for her parents, seen from the front: a white card with a slightly rounded corner, covered with a naive crayon drawing of the seaside: blue waves, a small sailing boat, a big sun, two seagulls drawn as small Vs, a striped beach towel on the sand. A small corner of a stamp with a wavy postmark shows behind it (no text). Slightly tilted.`                                                                                                                                                                                             |
+| `memory-family-drawing.png` | la maison, après la fin  | `The object: a big child's crayon drawing on a sheet of white paper, held on the wall by two strips of tape, the most careful drawing of the little girl: the whole family standing side by side on green grass under a big yellow sun: a tall father with chestnut hair and a beard, a mother with long curly dark hair, the girl with round pink glasses and two pigtails, holding in her arms a baby doll with brown skin, a pink headband and a pink top; the grey cat at their feet; small pink hearts and flowers around them. Naive, joyful, colorful. Straight front view.`          |
+
+### Reçues (première partie)
+
+Détourées dans `public/art/` (360 px de haut) : `memory-height.png`, `memory-photo.png`,
+`memory-watering-can.png`, `memory-ticket.png`, `memory-letter.png`. Restent : la boîte à
+musique, la carte postale, le dessin de la famille au complet, et **le dessin de l'école, à
+refaire** : la première version était une photo (une feuille sur une table), avec le titre « MY
+FAMILY », et la petite fille ressemblait à un garçon. Message de reprise, dans la même conversation
+(rejoindre `celeste.png`) :
+
+```
+Redo this object. This time it must NOT be a photograph: draw the sheet of paper as an
+illustration, in the same children's picture-book style as the previous objects of this
+conversation, on a plain pure white background (no table, no wall, no wood, no shadow).
+ABSOLUTELY NO TEXT: no title, no words, no letters, no signature.
+
+The object: a child's crayon drawing on a sheet of cream paper, pinned at the top by a red
+pushpin, one corner slightly curled. The drawing, naive and colorful like a 6-year-old's: a house
+with a pink roof, a big yellow sun with rays, green grass, and the family holding hands: a tall
+father with chestnut hair and a short beard, a mother with long curly dark-brown hair, and a
+little GIRL with two pigtails tied with pink bows, round pink glasses and a pink dress; a grey cat
+beside them. Straight front view, landscape format.
+```
+
+### Après
+
+- Détourage et mise à l'échelle (`scripts/art-cutout.py --height 360 --largest`, `--holes 200`
+  pour un trou ou une anse), puis une ligne dans `MEMORY_IMAGES` (`src/config/art.ts`) : l'image
+  remplace le dessin par le code dans le sac (la case, la fiche), dans l'envol vers le sac (D-169),
+  et dans le décor pour l'arrosoir, le billet, la lettre et la carte postale.
+- La toise, la photo et la boîte à musique restent dessinées dans le décor par le code (la toise y
+  gagne un trait à chaque croissance) ; les deux dessins au mur prennent leur image quand elle
+  arrive.
+
+## Les autres trésors encore dessinés par le code (suite de D-169)
+
+Même conversation que les souvenirs (même début commun, ci-dessus), un objet par message. Pour les
+affaires de Maria, **joindre aussi `maria.png`** : ses affaires reprennent son rose et son tissu
+fleuri.
+
+### Les affaires de Maria (joindre `maria.png`)
+
+| Fichier               | Fin du message                                                                                                                                                                                                                                |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `memory-slipper.png`  | `The object: one tiny doll's slipper belonging to the baby doll in the attached photo: soft pink felt, a pale cream sole, a small white pompom on the toe, a lining of the same small floral fabric as her clothes. Three-quarter side view.` |
+| `memory-bottle.png`   | `The object: a tiny doll's baby bottle for the baby doll in the attached photo: a small clear bottle with a little milk inside, a pink screw ring with a tiny flower, a soft beige teat, lying slightly tilted. Three-quarter view.`          |
+| `memory-headband.png` | `The object: the headband of the baby doll in the attached photo, alone: the same soft pink stretchy headband with the same fabric bow (small pink and green flowers on cream), laid flat in a loose oval. Seen slightly from above.`         |
+| `memory-bonnet.png`   | `The object: a tiny knitted baby bonnet for the baby doll in the attached photo: soft pink wool, a ribbed edge, a little white pompom on top, two short ties. Front view.`                                                                    |
+
+### Le monde étrange (les jouets de la petite enfance)
+
+| Fichier                   | Fin du message                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `memory-pink-kitchen.png` | `The object: a toddler's toy play kitchen from the 1990s, pink plastic with rounded corners: on top two round hot plates, a tiny saucepan and a teapot; at the back a small splashback with round knobs; below, an oven door with a round window and a small cupboard door. A little worn, much loved. Straight front view.`                       |
+| `memory-music-book.png`   | `The object: a thick children's board book with rounded corners and a padded cover, sky blue with a big yellow musical note on the cover (no title, no letters); along the side edge, a row of five big round colorful push buttons (red, yellow, green, blue, pink) that play music. Three-quarter view.`                                         |
+| `memory-white-cloth.png`  | `The object: a toddler's comfort cloth, a soft square of white cotton muslin folded in two and a little crumpled, a thin pale blue border along its edges, one corner hanging down. Give it a clear warm outline all around and soft grey-blue shadows in the folds, so that it stands out on the white background. Seen slightly from above.`     |
+| `memory-eden-tower.png`   | `The object: a little tower of four chunky wooden toy cubes with rounded edges, stacked a bit crooked, soft faded colors: at the bottom a pink cube with a white circle on its face, then a yellow cube with a white triangle, then a turquoise cube with a white diamond, on top a blue cube with a white star. No letters. Straight front view.` |
+
+Le torchon blanc : si le détourage le mange (blanc sur blanc), redemander le même objet `on a plain
+light grey background`.
+
+### Les pochettes des disques (facultatif)
+
+Aujourd'hui, une pochette est un carré de couleur. Une image par disque, sans texte (le titre est
+écrit dans le sac) :
+
+| Fichier                 | Disque                   | Fin du message                                                                                                                                                                                                                         |
+| ----------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `record-early.png`      | Céleste petite étoile    | `The object: a small 45 rpm vinyl record sliding half out of its square cardboard sleeve; the sleeve is soft sea-green, decorated with a naive drawing of a small smiling yellow star above a crescent moon. No text.`                 |
+| `record-adventures.png` | Les Aventures de Céleste | `The object: a small 45 rpm vinyl record sliding half out of its square cardboard sleeve; the sleeve is soft pink, decorated with a naive drawing of a little girl with round glasses running under a small yellow umbrella. No text.` |
+| `record-lullaby.png`    | Avant même ta naissance  | `The object: a small 45 rpm vinyl record sliding half out of its square cardboard sleeve; the sleeve is soft lilac, decorated with a naive drawing of a crescent moon and little stars above an empty wooden cradle. No text.`         |
+
+## Les courts souvenirs (D-68) en images
+
+Les trois courts souvenirs (Roger, le livre musical, le torchon blanc) occupent presque tout l'écran
+pendant 7 s, et reviennent dans le sac (« Revoir le souvenir ») : ce sont les dessins par le code
+les plus exposés du jeu. Une illustration par souvenir, **sans cadre** : le jeu garde son
+traitement de vieille photo (coins arrondis, voile chaud, bords qui s'effacent, lent zoom).
+**Maria n'y est jamais** (pilier 5), **aucun texte** (pilier 6).
+
+Une conversation à part. Joindre `celeste.png` au premier message, valider d'abord Céleste toute
+petite (sa référence), puis chaque scène avec elle en référence.
+
+### `celeste-toddler.png` (joindre `celeste.png`)
+
+```
+Using the attached image as the strict reference for the style and for the character, draw the
+SAME girl when she was a toddler of about 2 years old: same face shape and features, same brown
+eyes, freckles, chubby cheeks, the same chestnut hair but short and soft with two tiny tufts tied
+with small pink ribbons, the same round pink glasses (smaller, child-size), a soft pale yellow
+toddler romper with short sleeves. Pose: sitting on the floor, legs out in front of her, calm
+smile. Full body, three-quarter view facing right, nothing cropped. Plain pure white background, no
+shadow, no text. Square format, high resolution.
+```
+
+### Les scènes (joindre `celeste-toddler.png`)
+
+Début de chaque message :
+
+```
+Using the attached image as the strict reference for the character (the same toddler, same face,
+same short hair with two tiny tufts and pink ribbons, same round pink glasses, same pale yellow
+romper) and for the style (children's picture-book illustration, soft texture, thin warm
+outlines), draw a full illustration of a tender childhood memory, as if remembered years later:
+warm, slightly faded golden colors, soft light, a dreamy feeling, a gently blurred background. No
+text, no letters, no frame, no border, no other person or doll than described. Keep the girl and
+the main object in the central area; keep the edges calm and simple (they will fade softly).
+Landscape format 16:9, high resolution.
+```
+
+| Fichier                     | Fin du message                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `flashback-roger.png`       | Joindre aussi `roger.png`. `The scene: evening in a cosy child's bedroom. The toddler sits on a soft rug and hugs tightly against her cheek the plush monkey of the second attached image (same monkey: ginger fur, cream face, long dangling arms and legs), her eyes closed, a peaceful smile. Behind her, the wooden bars of a baby crib and a small lamp glowing warm.`                                                                     |
+| `flashback-music-book.png`  | Joindre aussi `memory-music-book.png` s'il est fait. `The scene: a sunny afternoon in a living room. The toddler sits alone on a patterned rug with a thick children's board book open in front of her (big round colorful buttons along its edge); she presses a button with one finger, eyes wide open with delight, mouth in a little "oh"; small drawn musical notes float up from the book. A pale window with light curtains behind her.` |
+| `flashback-white-cloth.png` | Joindre aussi `memory-white-cloth.png` s'il est fait. `The scene: nap time, an afternoon at the nanny's house. The toddler lies on her side in a small wooden crib with bars, eyes closed, asleep, holding a soft white cotton cloth with a thin pale blue border against her cheek. The curtain is drawn; soft warm afternoon light filters through it. Nobody else in the room. Calm and safe.`                                               |
+
+Je fais ensuite l'intégration : l'image remplit la vignette, le traitement de vieille photo reste
+dessiné par le code ; une image allégée (pas de transparence : un format compressé, ajouté au cache
+hors ligne).
+
+### Reçues (D-170)
+
+Toutes les images ci-dessus sont reçues et intégrées (`public/art/memory-*.webp`, `record-*.webp`,
+`flashback-*.jpg`). Retouches possibles, si l'utilisateur le souhaite : retirer le second Roger,
+flou, au fond de `flashback-roger` ; retirer le téléphone de `memory-pink-kitchen` ; les cheveux de
+Céleste plus foncés dans `flashback-music-book` et `flashback-white-cloth`.

@@ -51,7 +51,7 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           // Musique (D-57) : précachée aussi, jouable hors ligne dès l'installation.
-          globPatterns: ['**/*.{js,css,html,png,svg,ogg,opus,m4a,mp3}'],
+          globPatterns: ['**/*.{js,css,html,png,webp,jpg,svg,ogg,opus,m4a,mp3}'],
           // Le build de debug est publié sous /Maria/debug/ : jamais précaché ni servi par ce SW.
           globIgnores: ['debug/**'],
           navigateFallbackDenylist: [/^\/Maria\/debug(\/|$)/],

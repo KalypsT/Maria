@@ -93,6 +93,8 @@ const LEAVE_AREA: TileArea = { col: 41, row: 9, w: 4, h: 11 };
  * chambre (son départ) ; Céleste ne revient pas chercher Maria.
  */
 export const AFTER_END_ROOM = 'hall';
+/** Le dessin de toute la famille (D-169), au mur de la chambre, sur son ancien dessin. */
+const FAMILY_DRAWING = { col: 37, row: 5 };
 /** Le lit : Agir pour se coucher (le premier soir, D-37). */
 const BED_AREA: TileArea = { col: 7, row: 13, w: 11, h: 3 };
 const BED_SEAT = { col: 12, row: 15 };
@@ -476,6 +478,24 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'end', room: AFTER_END_ROOM },
     ],
   },
+  {
+    // Après la fin (D-169) : au mur de la chambre, à la place de son dessin, le dessin de toute la
+    // famille, Maria dans les bras de Céleste. Une raison de revenir chez elle ; on le regarde
+    // autant qu'on veut.
+    id: 'look-family-drawing',
+    room: 'bedroom',
+    on: 'interact',
+    area: { col: 35, row: 8, w: 5, h: 12 },
+    mark: { col: FAMILY_DRAWING.col, row: FAMILY_DRAWING.row + 2 },
+    when: { all: [F.FinaleGone] },
+    lock: true,
+    repeat: true,
+    steps: [
+      { do: 'memory', id: 'family-drawing' },
+      { do: 'thought', icon: 'family', ms: S.thoughtMs },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
 ];
 
 const PROPS: StoryData['props'] = [
@@ -563,6 +583,13 @@ const PROPS: StoryData['props'] = [
     kind: 'maria-sit',
     ...MARIA_SHELF,
     when: { all: [F.FinaleShelved] },
+  },
+  {
+    id: 'family-drawing',
+    room: 'bedroom',
+    kind: 'family-drawing',
+    ...FAMILY_DRAWING,
+    when: { all: [F.FinaleGone] },
   },
 ];
 

@@ -1,9 +1,10 @@
 import type { MemoryId } from '../../config/memories';
 
 /**
- * Dessins des souvenirs (D-38), PLACEHOLDERS : chaque souvenir tient dans un carré de côté `size`
- * centré en (cx, cy). Ils servent en petit dans les bulles de pensée et en grand dans le cahier
- * de Céleste. Aplats doux, comme le reste du style D-28.
+ * Dessins des souvenirs (D-38, D-169), PLACEHOLDERS : chaque souvenir tient dans un carré de côté
+ * `size` centré en (cx, cy). Ils servent en petit dans les bulles de pensée et en grand dans le sac
+ * de Céleste, tant que l'image fournie manque (`MEMORY_IMAGES`). Aplats doux, comme le reste du
+ * style D-28.
  */
 
 const INK = '#5b4a44';
@@ -84,7 +85,7 @@ function photo(ctx: CanvasRenderingContext2D, s: number): void {
   ctx.fill();
 }
 
-/** Le dessin de Céleste : une maison, un soleil, trois bonhommes et le chat. */
+/** Le dessin de Céleste à l'école : une maison, un soleil, trois bonhommes et le chat. */
 function drawing(ctx: CanvasRenderingContext2D, s: number): void {
   ctx.save();
   ctx.rotate(-0.05);
@@ -122,6 +123,191 @@ function drawing(ctx: CanvasRenderingContext2D, s: number): void {
   ctx.fillStyle = PINK;
   ctx.beginPath();
   ctx.arc(0, -s * 0.33, s * 0.025, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+/**
+ * Le dessin de toute la famille (D-169), après la fin : le même dessin d'enfant, plus soigné, papa,
+ * maman, Céleste qui tient Maria dans ses bras, le chat, des cœurs. PLACEHOLDER.
+ */
+function familyDrawing(ctx: CanvasRenderingContext2D, s: number): void {
+  ctx.save();
+  ctx.rotate(0.04);
+  roundRect(ctx, -s * 0.46, -s * 0.36, s * 0.92, s * 0.72, s * 0.02, '#fffdf6');
+  ctx.fillStyle = '#9bc49a';
+  ctx.fillRect(-s * 0.46, s * 0.24, s * 0.92, s * 0.12);
+  ctx.lineWidth = Math.max(0.8, s * 0.022);
+  ctx.lineCap = 'round';
+  // Le soleil.
+  ctx.fillStyle = '#f2c14e';
+  ctx.beginPath();
+  ctx.arc(s * 0.32, -s * 0.22, s * 0.07, 0, Math.PI * 2);
+  ctx.fill();
+  // Papa (grand, cheveux châtains), maman (cheveux longs), Céleste et Maria, le chat.
+  const figure = (x: number, top: number, color: string, hair: string, long: boolean): void => {
+    ctx.fillStyle = hair;
+    ctx.beginPath();
+    ctx.arc(x, top, s * 0.05, 0, Math.PI * 2);
+    ctx.fill();
+    if (long) {
+      ctx.fillRect(x - s * 0.06, top, s * 0.12, s * 0.09);
+    }
+    ctx.fillStyle = '#e7b995';
+    ctx.beginPath();
+    ctx.arc(x, top + s * 0.02, s * 0.04, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x, top + s * 0.06);
+    ctx.lineTo(x - s * 0.07, s * 0.24);
+    ctx.lineTo(x + s * 0.07, s * 0.24);
+    ctx.fill();
+  };
+  figure(-s * 0.3, -s * 0.12, '#46618f', '#8a5a36', false);
+  figure(-s * 0.12, -s * 0.08, '#f1b9c7', '#4a2e1f', true);
+  figure(s * 0.06, s * 0.02, '#f1a9bd', '#5a3a2a', false);
+  ctx.strokeStyle = '#ff6fa3';
+  ctx.beginPath();
+  ctx.arc(s * 0.045, s * 0.04, s * 0.018, 0, Math.PI * 2);
+  ctx.moveTo(s * 0.093, s * 0.04);
+  ctx.arc(s * 0.075, s * 0.04, s * 0.018, 0, Math.PI * 2);
+  ctx.stroke();
+  // Maria dans ses bras : une petite tête brune, son bandeau rose.
+  ctx.fillStyle = '#b77a52';
+  ctx.beginPath();
+  ctx.arc(s * 0.15, s * 0.12, s * 0.035, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#f6b6c8';
+  ctx.fillRect(s * 0.115, s * 0.09, s * 0.07, s * 0.015);
+  ctx.fillStyle = '#8c919c';
+  ctx.beginPath();
+  ctx.ellipse(s * 0.3, s * 0.2, s * 0.06, s * 0.035, 0, 0, Math.PI * 2);
+  ctx.arc(s * 0.35, s * 0.16, s * 0.03, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = PINK;
+  for (const [x, y] of [
+    [-s * 0.38, -s * 0.26],
+    [-s * 0.02, -s * 0.26],
+    [s * 0.18, -s * 0.12],
+  ] as const) {
+    heart(ctx, x, y, s * 0.035);
+  }
+  ctx.restore();
+}
+
+/** Un petit cœur plein, centré en (x, y). */
+function heart(ctx: CanvasRenderingContext2D, x: number, y: number, r: number): void {
+  ctx.beginPath();
+  ctx.moveTo(x, y + r);
+  ctx.bezierCurveTo(x - r * 1.6, y, x - r * 0.9, y - r * 1.3, x, y - r * 0.4);
+  ctx.bezierCurveTo(x + r * 0.9, y - r * 1.3, x + r * 1.6, y, x, y + r);
+  ctx.fill();
+}
+
+/** Le petit arrosoir rose de Céleste (D-169), une pâquerette peinte. PLACEHOLDER. */
+function wateringCan(ctx: CanvasRenderingContext2D, s: number): void {
+  const body = '#f2a7bd';
+  ctx.strokeStyle = body;
+  ctx.lineWidth = s * 0.05;
+  ctx.lineCap = 'round';
+  // L'anse du dos, le bec.
+  ctx.beginPath();
+  ctx.arc(-s * 0.26, s * 0.02, s * 0.12, Math.PI * 0.5, Math.PI * 1.5);
+  ctx.moveTo(s * 0.14, s * 0.18);
+  ctx.lineTo(s * 0.38, -s * 0.12);
+  ctx.stroke();
+  roundRect(ctx, -s * 0.26, -s * 0.12, s * 0.42, s * 0.4, s * 0.05, body);
+  ctx.fillStyle = '#e07f9d';
+  ctx.fillRect(-s * 0.26, -s * 0.12, s * 0.42, s * 0.05);
+  // La pomme percée, au bout du bec.
+  ctx.save();
+  ctx.translate(s * 0.4, -s * 0.15);
+  ctx.rotate(-0.9);
+  roundRect(ctx, -s * 0.07, -s * 0.03, s * 0.14, s * 0.07, s * 0.02, '#e07f9d');
+  ctx.restore();
+  // La pâquerette.
+  ctx.fillStyle = '#fffdf6';
+  for (let i = 0; i < 6; i++) {
+    const a = (i * Math.PI) / 3;
+    ctx.beginPath();
+    ctx.arc(
+      -s * 0.05 + Math.cos(a) * s * 0.045,
+      s * 0.09 + Math.sin(a) * s * 0.045,
+      s * 0.03,
+      0,
+      Math.PI * 2,
+    );
+    ctx.fill();
+  }
+  ctx.fillStyle = '#e6c27a';
+  ctx.beginPath();
+  ctx.arc(-s * 0.05, s * 0.09, s * 0.025, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/** Le billet de train (D-169) : un carton crème, deux bandes bleues, un trou poinçonné. PLACEHOLDER. */
+function ticket(ctx: CanvasRenderingContext2D, s: number): void {
+  ctx.save();
+  ctx.rotate(-0.25);
+  roundRect(ctx, -s * 0.4, -s * 0.2, s * 0.8, s * 0.4, s * 0.04, '#f6ecd2');
+  ctx.fillStyle = '#9db8de';
+  ctx.fillRect(-s * 0.4, -s * 0.13, s * 0.8, s * 0.05);
+  ctx.fillRect(-s * 0.4, s * 0.08, s * 0.8, s * 0.05);
+  ctx.fillStyle = 'rgba(91,74,68,0.45)';
+  for (const y of [-s * 0.04, s * 0.01]) {
+    ctx.fillRect(-s * 0.1, y, s * 0.3, s * 0.018);
+  }
+  ctx.fillStyle = '#fffdf6';
+  ctx.beginPath();
+  ctx.arc(-s * 0.28, 0, s * 0.05, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+/** La lettre de maman (D-169) : une feuille bleu pâle pliée, un cœur rose, sans un mot. PLACEHOLDER. */
+function letter(ctx: CanvasRenderingContext2D, s: number): void {
+  roundRect(ctx, -s * 0.2, -s * 0.34, s * 0.44, s * 0.68, s * 0.02, '#cfe0ef');
+  roundRect(ctx, -s * 0.26, -s * 0.3, s * 0.4, s * 0.66, s * 0.02, '#e3eef8');
+  ctx.fillStyle = ROSE;
+  heart(ctx, -s * 0.06, -s * 0.1, s * 0.09);
+  ctx.fillStyle = '#e6c27a';
+  ctx.beginPath();
+  ctx.arc(s * 0.12, -s * 0.36, s * 0.05, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/**
+ * La carte postale (D-169), dessinée par Céleste pour ses parents : la mer, un bateau, le soleil.
+ * PLACEHOLDER.
+ */
+function postcard(ctx: CanvasRenderingContext2D, s: number): void {
+  ctx.save();
+  ctx.rotate(0.08);
+  roundRect(ctx, -s * 0.42, -s * 0.28, s * 0.84, s * 0.56, s * 0.03, '#fffdf6');
+  ctx.fillStyle = '#9db8de';
+  ctx.fillRect(-s * 0.38, s * 0.04, s * 0.76, s * 0.2);
+  ctx.strokeStyle = '#4f6f8f';
+  ctx.lineWidth = Math.max(0.7, s * 0.02);
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.36, s * 0.04);
+  for (let x = -s * 0.36; x < s * 0.36; x += s * 0.12) {
+    ctx.quadraticCurveTo(x + s * 0.03, -s * 0.01, x + s * 0.06, s * 0.04);
+    ctx.quadraticCurveTo(x + s * 0.09, s * 0.09, x + s * 0.12, s * 0.04);
+  }
+  ctx.stroke();
+  ctx.fillStyle = '#f2c14e';
+  ctx.beginPath();
+  ctx.arc(s * 0.24, -s * 0.14, s * 0.07, 0, Math.PI * 2);
+  ctx.fill();
+  // Le petit voilier.
+  ctx.fillStyle = '#c96f4f';
+  ctx.fillRect(-s * 0.2, s * 0.0, s * 0.16, s * 0.04);
+  ctx.fillStyle = '#f1a9bd';
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.12, -s * 0.18);
+  ctx.lineTo(-s * 0.12, -s * 0.01);
+  ctx.lineTo(-s * 0.02, -s * 0.01);
   ctx.fill();
   ctx.restore();
 }
@@ -1054,26 +1240,35 @@ export function drawMemory(
   ctx.save();
   ctx.translate(cx, cy);
   switch (id) {
+    case 'height':
+      heightChart(ctx, size * 0.34, size * 0.95, 1);
+      break;
     case 'photo':
       photo(ctx, size);
-      break;
-    case 'drawing':
-      drawing(ctx, size);
       break;
     case 'music-box':
       musicBox(ctx, size);
       break;
-    case 'plant':
-      plant(ctx, size);
+    case 'watering-can':
+      wateringCan(ctx, size);
+      break;
+    case 'school-drawing':
+      drawing(ctx, size);
+      break;
+    case 'ticket':
+      ticket(ctx, size);
+      break;
+    case 'letter':
+      letter(ctx, size);
+      break;
+    case 'postcard':
+      postcard(ctx, size);
+      break;
+    case 'family-drawing':
+      familyDrawing(ctx, size);
       break;
     case 'headband':
       headband(ctx, size);
-      break;
-    case 'bookcase':
-      babyPhoto(ctx, size);
-      break;
-    case 'height':
-      heightChart(ctx, size * 0.34, size * 0.95, 1);
       break;
     case 'bonnet':
       bonnet(ctx, size);
@@ -1103,6 +1298,27 @@ export function drawMemory(
     case 'eden-tower':
       cubeTower(ctx, size * 0.9);
       break;
+  }
+  ctx.restore();
+}
+
+/**
+ * Dessins d'anciens souvenirs (D-169 : plus des trésors), gardés pour les bulles et le décor : la
+ * plante de la cuisine, la photo de Céleste bébé avec Maria, centrés en (cx, cy), de taille `size`.
+ */
+export function drawSketch(
+  ctx: CanvasRenderingContext2D,
+  kind: 'plant' | 'baby-photo',
+  cx: number,
+  cy: number,
+  size: number,
+): void {
+  ctx.save();
+  ctx.translate(cx, cy);
+  if (kind === 'plant') {
+    plant(ctx, size);
+  } else {
+    babyPhoto(ctx, size);
   }
   ctx.restore();
 }

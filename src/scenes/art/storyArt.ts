@@ -1,3 +1,4 @@
+import { memoryImageKey } from '../../config/art';
 import { PROP_SIZE, TOWER_CUBES } from '../../config/story';
 import type { PropKind, ThoughtIcon } from '../../core/story/story';
 import { fitScale, type BubbleKind, type BubbleSide, type SafeBox } from '../../core/story/bubble';
@@ -5,6 +6,7 @@ import {
   bonnet,
   dadHead,
   drawMemory,
+  drawSketch,
   drawNotes,
   heightChart,
   momHead,
@@ -318,20 +320,22 @@ function drawFarCrane(ctx: CanvasRenderingContext2D, w: number, h: number): void
 }
 
 /**
- * Le lendemain matin (D-64) : la porte de la palissade du chantier est ouverte ; dedans, l'ombre
- * et un reflet turquoise. Le battant (à gauche) est rabattu contre la palissade.
+ * Le lendemain matin (D-64) : la porte de la palissade du chantier est ouverte ; dedans, le passage
+ * vers la gare, dans la lumière du matin. Le battant (à gauche) est rabattu contre la palissade.
  */
 function drawSiteGap(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   const door = 16;
+  // Derrière la palissade, le passage vers la gare, dans la lumière du matin (D-168 : pas la lueur
+  // turquoise d'un monde étrange, la gare est le monde réel).
   const inside = ctx.createLinearGradient(door, 0, w, 0);
-  inside.addColorStop(0, '#20262f');
-  inside.addColorStop(1, '#2c3440');
+  inside.addColorStop(0, '#5d5a55');
+  inside.addColorStop(1, '#8a8478');
   ctx.fillStyle = inside;
   ctx.fillRect(door, 0, w - door, h);
-  const glimmer = ctx.createRadialGradient(door + 36, h * 0.55, 0, door + 36, h * 0.55, 30);
-  glimmer.addColorStop(0, 'rgba(120, 236, 220, 0.55)');
-  glimmer.addColorStop(1, 'rgba(120, 236, 220, 0)');
-  ctx.fillStyle = glimmer;
+  const daylight = ctx.createRadialGradient(door + 36, h * 0.55, 0, door + 36, h * 0.55, 34);
+  daylight.addColorStop(0, 'rgba(255, 236, 190, 0.6)');
+  daylight.addColorStop(1, 'rgba(255, 236, 190, 0)');
+  ctx.fillStyle = daylight;
   ctx.fillRect(door, 0, w - door, h);
   // Le battant ouvert, vu par la tranche.
   ctx.fillStyle = '#9a7352';
@@ -463,6 +467,68 @@ function drawContained(
   const ih = image instanceof HTMLImageElement ? image.naturalHeight : h;
   const k = Math.min(w / iw, h / ih);
   ctx.drawImage(image, (w - iw * k) / 2, h - ih * k, iw * k, ih * k);
+}
+
+/** La part du carré de dessin d'un souvenir (`drawMemory`) qu'occupe l'objet, en largeur et en hauteur. */
+const MEMORY_SPAN: Readonly<Record<MemoryProp, readonly [number, number]>> = {
+  'watering-can': [0.9, 0.6],
+  ticket: [0.85, 0.6],
+  letter: [0.55, 0.78],
+  postcard: [0.88, 0.62],
+  'school-drawing': [0.9, 0.72],
+  'family-drawing': [0.94, 0.76],
+};
+type MemoryProp =
+  'watering-can' | 'ticket' | 'letter' | 'postcard' | 'school-drawing' | 'family-drawing';
+
+/** La lueur turquoise du monde étrange autour d'un trésor ; celle, chaude et grise, du torchon. */
+const STRANGE_GLOW = 'rgba(94, 230, 210, 0.35)';
+const SOFT_GLOW = 'rgba(255, 244, 222, 0.45)';
+
+/**
+ * Un trésor dans le décor (D-170) : son image fournie (`key`), posée au bas de sa place, sur sa
+ * lueur s'il en a une ; sinon son dessin par le code (`fallback`).
+ */
+function drawTreasureProp(
+  ctx: CanvasRenderingContext2D,
+  key: string,
+  w: number,
+  h: number,
+  images: ReadonlyMap<string, CanvasImageSource>,
+  glow: string | null,
+  fallback: () => void,
+): void {
+  const image = images.get(key);
+  if (!image) {
+    fallback();
+    return;
+  }
+  if (glow) {
+    const r = Math.max(w, h) * 0.62;
+    const halo = ctx.createRadialGradient(w / 2, h / 2, r * 0.15, w / 2, h / 2, r);
+    halo.addColorStop(0, glow);
+    halo.addColorStop(1, glow.replace(/[\d.]+\)$/, '0)'));
+    ctx.fillStyle = halo;
+    ctx.fillRect(w / 2 - r, h / 2 - r, 2 * r, 2 * r);
+  }
+  drawContained(ctx, image, w, h);
+}
+
+/** Un souvenir de Céleste dans le décor (D-169) : son image fournie, ou son dessin par le code. */
+function drawMemoryProp(
+  ctx: CanvasRenderingContext2D,
+  kind: MemoryProp,
+  w: number,
+  h: number,
+  images: ReadonlyMap<string, CanvasImageSource>,
+): void {
+  const image = images.get(memoryImageKey(kind));
+  if (image) {
+    drawContained(ctx, image, w, h);
+    return;
+  }
+  const [sw, sh] = MEMORY_SPAN[kind];
+  drawMemory(ctx, kind, w / 2, h / 2, Math.min(w / sw, h / sh));
 }
 
 /**
@@ -758,22 +824,30 @@ export function drawProp(
       drawCradle(ctx, w, h, 'undone');
       break;
     case 'slipper':
-      drawSlipper(ctx, w, h);
+      drawTreasureProp(ctx, memoryImageKey('slipper'), w, h, images, null, () => {
+        drawSlipper(ctx, w, h);
+      });
       break;
     case 'bottle':
-      drawBottle(ctx, w, h);
+      drawTreasureProp(ctx, memoryImageKey('bottle'), w, h, images, null, () => {
+        drawBottle(ctx, w, h);
+      });
       break;
     case 'headband':
-      drawHeadband(ctx, w, h);
+      drawTreasureProp(ctx, memoryImageKey('headband'), w, h, images, null, () => {
+        drawHeadband(ctx, w, h);
+      });
       break;
     case 'blanket':
       drawBlanket(ctx, w, h);
       break;
     case 'bonnet':
-      ctx.save();
-      ctx.translate(w / 2, h / 2 + 1);
-      bonnet(ctx, Math.min(w, h * 1.1));
-      ctx.restore();
+      drawTreasureProp(ctx, memoryImageKey('bonnet'), w, h, images, null, () => {
+        ctx.save();
+        ctx.translate(w / 2, h / 2 + 1);
+        bonnet(ctx, Math.min(w, h * 1.1));
+        ctx.restore();
+      });
       break;
     case 'gate':
       drawGate(ctx, w, h, false);
@@ -781,9 +855,17 @@ export function drawProp(
     case 'gate-open':
       drawGate(ctx, w, h, true);
       break;
+    case 'watering-can':
+    case 'ticket':
+    case 'letter':
+    case 'postcard':
+    case 'school-drawing':
+    case 'family-drawing':
+      drawMemoryProp(ctx, kind, w, h, images);
+      break;
     case 'baby-photo':
       // Photo encadrée posée debout, en haut de la bibliothèque.
-      drawMemory(ctx, 'bookcase', w / 2, h / 2, Math.min(w / 0.8, h / 0.88));
+      drawSketch(ctx, 'baby-photo', w / 2, h / 2, Math.min(w / 0.8, h / 0.88));
       break;
     case 'toy-town-lifted':
       // Au monde étrange (D-155) : le téléphone décroché, une lueur turquoise sort du combiné.
@@ -809,18 +891,22 @@ export function drawProp(
     case 'pink-kitchen':
       // La cuisine rose (D-88), au bout du train de la vaisselle : on la regarde, on ne la prend
       // pas. La lueur turquoise du monde étrange autour d'elle.
-      ctx.save();
-      ctx.translate(w / 2, h / 2);
-      pinkKitchen(ctx, Math.min(w, h), true);
-      ctx.restore();
+      drawTreasureProp(ctx, memoryImageKey('pink-kitchen'), w, h, images, STRANGE_GLOW, () => {
+        ctx.save();
+        ctx.translate(w / 2, h / 2);
+        pinkKitchen(ctx, Math.min(w, h), true);
+        ctx.restore();
+      });
       break;
     case 'music-book':
       // Le livre musical (D-104), sur le toit du carrousel étrange : on le regarde, on ne le prend
       // pas. La lueur turquoise du monde étrange autour de lui.
-      ctx.save();
-      ctx.translate(w / 2, h / 2);
-      musicBook(ctx, Math.min(w, h), true);
-      ctx.restore();
+      drawTreasureProp(ctx, memoryImageKey('music-book'), w, h, images, STRANGE_GLOW, () => {
+        ctx.save();
+        ctx.translate(w / 2, h / 2);
+        musicBook(ctx, Math.min(w, h), true);
+        ctx.restore();
+      });
       break;
     case 'toy-kitchen':
       // Le souvenir jouable (D-89) : la dînette, telle qu'elle était, sans la lueur.
@@ -840,10 +926,12 @@ export function drawProp(
       break;
     case 'white-cloth':
       // Le torchon blanc (D-116), dans le petit lit de la sieste : on le regarde, on ne le prend pas.
-      ctx.save();
-      ctx.translate(w / 2, h / 2);
-      whiteCloth(ctx, Math.min(w, h), true);
-      ctx.restore();
+      drawTreasureProp(ctx, memoryImageKey('white-cloth'), w, h, images, SOFT_GLOW, () => {
+        ctx.save();
+        ctx.translate(w / 2, h / 2);
+        whiteCloth(ctx, Math.min(w, h), true);
+        ctx.restore();
+      });
       break;
     case 'cube-pile':
       drawCubePile(ctx, h);
@@ -903,14 +991,20 @@ export function drawProp(
       drawRecordPlayer(ctx, 0, 0, w, h);
       break;
     case 'record-adventures':
-      drawRecordSleeve(ctx, w, h, '#e38aa0');
+      drawTreasureProp(ctx, kind, w, h, images, null, () => {
+        drawRecordSleeve(ctx, w, h, '#e38aa0');
+      });
       break;
     // Les deux autres disques (D-156), dans la couleur de leur pochette (`RECORDS`).
     case 'record-early':
-      drawRecordSleeve(ctx, w, h, '#7fb3a6');
+      drawTreasureProp(ctx, kind, w, h, images, null, () => {
+        drawRecordSleeve(ctx, w, h, '#7fb3a6');
+      });
       break;
     case 'record-lullaby':
-      drawRecordSleeve(ctx, w, h, '#b7a3d6');
+      drawTreasureProp(ctx, kind, w, h, images, null, () => {
+        drawRecordSleeve(ctx, w, h, '#b7a3d6');
+      });
       break;
     default:
       break;
@@ -1263,19 +1357,54 @@ function drawIcon(
       drawMemory(ctx, 'photo', cx, cy, 18);
       break;
     case 'drawing':
-      drawMemory(ctx, 'drawing', cx, cy, 18);
+      drawMemory(ctx, 'school-drawing', cx, cy, 18);
       break;
     case 'music':
       drawNotes(ctx, cx, cy, 11);
       break;
     case 'flower':
-      drawMemory(ctx, 'plant', cx, cy + 1, 17);
+      drawSketch(ctx, 'plant', cx, cy + 1, 17);
       break;
     case 'baby':
-      drawMemory(ctx, 'bookcase', cx, cy, 17);
+      drawSketch(ctx, 'baby-photo', cx, cy, 17);
       break;
     case 'height':
       drawMemory(ctx, 'height', cx, cy, 18);
+      break;
+    case 'sea': {
+      // La mer (D-169) : un soleil au-dessus de deux vagues.
+      ctx.fillStyle = '#f2c14e';
+      ctx.beginPath();
+      ctx.arc(cx + 3, cy - 3.5, 3.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#4f7fb8';
+      ctx.lineWidth = 1.4;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (const y of [cy + 1.5, cy + 5]) {
+        ctx.moveTo(cx - 8, y);
+        for (let x = cx - 8; x < cx + 8; x += 4) {
+          ctx.quadraticCurveTo(x + 1, y - 2, x + 2, y);
+          ctx.quadraticCurveTo(x + 3, y + 2, x + 4, y);
+        }
+      }
+      ctx.stroke();
+      break;
+    }
+    case 'home':
+      // La maison (D-169) : le toit rose, la fenêtre allumée.
+      ctx.fillStyle = '#f3ead7';
+      ctx.fillRect(cx - 6, cy - 1, 12, 8);
+      ctx.fillStyle = '#d9788f';
+      ctx.beginPath();
+      ctx.moveTo(cx - 8, cy - 0.5);
+      ctx.lineTo(cx, cy - 7.5);
+      ctx.lineTo(cx + 8, cy - 0.5);
+      ctx.fill();
+      ctx.fillStyle = '#f2c14e';
+      ctx.fillRect(cx - 4, cy + 1, 3.5, 3);
+      ctx.fillStyle = WOOD_DARK;
+      ctx.fillRect(cx + 1.5, cy + 2, 3, 5);
       break;
     case 'handle': {
       // Une porte, la poignée tout en haut, et une petite main qui n'y arrive pas (D-46).

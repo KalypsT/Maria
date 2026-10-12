@@ -1,19 +1,15 @@
+import { ART_IMAGES } from '../config/art';
 import type { PlaceIcon } from '../config/places';
 
 /**
- * Les dessins du sac à dos (D-159), en SVG, PLACEHOLDER : le sac (le bouton en haut à gauche, en
- * attendant l'image de l'utilisateur), et les trois objets de sa poche : le cahier, la boîte à
- * trésors, la trousse. Peu de détails : ils se lisent petits, sur la nuit.
+ * Les dessins du sac à dos (D-159), en SVG, PLACEHOLDER : les trois objets de sa poche (le cahier,
+ * la boîte à trésors, la trousse), les lieux, l'étincelle. Peu de détails : ils se lisent petits.
  */
 
 const INK = '#3b3330';
 
-export const BAG_ICON = `<svg viewBox="0 0 40 40" aria-hidden="true">
-<path d="M13 12c0-5 3-8 7-8s7 3 7 8" fill="none" stroke="#f3ead7" stroke-width="2.4" stroke-linecap="round"/>
-<rect x="7" y="11" width="26" height="25" rx="7" fill="#d9788f" stroke="${INK}" stroke-width="1.8"/>
-<path d="M7 20h26" stroke="${INK}" stroke-width="1.5"/>
-<rect x="14" y="24" width="12" height="8" rx="2.5" fill="#f1ccd3" stroke="${INK}" stroke-width="1.5"/>
-<circle cx="20" cy="20" r="1.8" fill="#f2c879"/></svg>`;
+/** Le sac à dos de Céleste (D-168) : l'image de l'utilisateur, sur le bouton du menu. */
+export const BAG_IMAGE = `<img src="art/${ART_IMAGES['backpack'] ?? 'backpack.png'}" alt="" draggable="false">`;
 
 export const NOTEBOOK_ICON = `<svg viewBox="0 0 60 48" aria-hidden="true">
 <rect x="12" y="4" width="36" height="40" rx="3" fill="#4f6f8f" stroke="${INK}" stroke-width="2"/>

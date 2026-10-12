@@ -357,6 +357,37 @@ body {
   visibility: visible;
 }
 
+/*
+ * L'envol vers le sac (D-169) : un trésor trouvé, une gommette de capacité, file vers le bouton du
+ * sac ; le sac sursaute à son arrivée.
+ */
+.treasure-fly {
+  position: fixed;
+  z-index: 16;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 0 5px rgb(255 240 200 / 90%));
+  pointer-events: none;
+}
+
+.treasure-fly > * {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.touch-map.bump {
+  animation: bag-bump 320ms ease-out;
+}
+
+/* `scale`, pas `transform` : le bouton est placé par un `transform` en ligne. */
+@keyframes bag-bump {
+  40% {
+    scale: 1.18;
+  }
+}
+
 /* Voile de l'évanouissement : au-dessus du jeu, sous les menus et les commandes. */
 #faint-veil {
   position: fixed;
@@ -1203,6 +1234,11 @@ body {
   height: 42px;
 }
 
+/* L'image fournie d'un souvenir (D-169), entière dans sa case. */
+.treasure-image {
+  object-fit: contain;
+}
+
 /* L'indice : sur deux lignes au plus (« Mon quartier »). */
 .treasure-hint {
   display: -webkit-box;
@@ -1303,6 +1339,19 @@ body {
   font: 700 0.7rem / 1.2 var(--ui-font);
   text-align: left;
   cursor: pointer;
+}
+
+/* La pochette d'un disque en image (D-170) : le disque à moitié sorti. */
+.treasure-sleeve-image {
+  flex: none;
+  width: 52px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.treasure-sleeve-image.big {
+  width: 150px;
+  height: 120px;
 }
 
 /* Une pochette de disque (D-121) : sa couleur, le rond du disque. */
@@ -1469,6 +1518,13 @@ body {
 }
 
 /* Le sac, seul bouton en haut à gauche (D-159). */
+.touch-map img {
+  width: 82%;
+  height: 82%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
 .touch-map svg {
   width: 72%;
   height: 72%;

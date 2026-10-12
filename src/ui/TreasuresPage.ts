@@ -1,7 +1,7 @@
 import { ART_IMAGES } from '../config/art';
 import { MEMORY_NAMES, flashbackOf, isMemory } from '../config/memories';
 import { playableOf, type PlayableMemoryId } from '../config/playableMemories';
-import { RECORDS, recordSlot } from '../config/records';
+import { RECORDS, recordSlot, type RecordSlot } from '../config/records';
 import type {
   TreasureBook,
   TreasureCell,
@@ -9,7 +9,8 @@ import type {
   TreasureWhere,
 } from '../core/world/treasureBook';
 import { drawFlashback } from '../scenes/art/flashbackArt';
-import { drawMemory } from '../scenes/art/memoryArt';
+import { flashbackImage } from './flashbackImages';
+import { drawnCanvas, recordDrawing, treasureDrawing } from './treasureDrawing';
 
 /** Les noms des lieux et des salles, pour les indices et les fiches. */
 export interface TreasureNames {
@@ -42,26 +43,6 @@ function element<K extends keyof HTMLElementTagNameMap>(
   }
   parent.appendChild(el);
   return el;
-}
-
-/** Un canvas net à la densité de l'écran, de `w` × `h` px CSS ; `draw` y dessine en px CSS. */
-function drawnCanvas(
-  className: string,
-  w: number,
-  h: number,
-  draw: (ctx: CanvasRenderingContext2D) => void,
-): HTMLCanvasElement {
-  const canvas = document.createElement('canvas');
-  canvas.className = className;
-  const ratio = window.devicePixelRatio || 1;
-  canvas.width = Math.round(w * ratio);
-  canvas.height = Math.round(h * ratio);
-  const ctx = canvas.getContext('2d');
-  if (ctx) {
-    ctx.scale(ratio, ratio);
-    draw(ctx);
-  }
-  return canvas;
 }
 
 /**
@@ -136,11 +117,7 @@ export class TreasuresPage {
         const record = RECORDS.find((r) => recordSlot(r.id) === cell.id);
         const button = element('button', sleeves, 'treasure-record');
         button.type = 'button';
-        const sleeve = element('span', button, 'treasure-sleeve');
-        sleeve.style.setProperty(
-          '--sleeve',
-          `#${(record?.sleeve ?? 0).toString(16).padStart(6, '0')}`,
-        );
+        button.append(recordDrawing(cell.id as RecordSlot));
         element('span', button, 'treasure-record-title', record?.title ?? '');
         if (cell.isNew) {
           element('span', button, 'treasure-new');
@@ -172,11 +149,7 @@ export class TreasuresPage {
     const box = element('span', button, 'treasure-box');
     if (cell.found && isMemory(cell.id)) {
       const id = cell.id;
-      box.append(
-        drawnCanvas('treasure-drawing', 42, 42, (ctx) => {
-          drawMemory(ctx, id, 21, 21, 38);
-        }),
-      );
+      box.append(treasureDrawing('treasure-drawing', id, 42));
       if (flashbackOf(id) || playableOf(id)) {
         element('span', button, 'treasure-play', '▶');
       }
@@ -218,14 +191,9 @@ export class TreasuresPage {
     const memory = cell.found && isMemory(id) ? id : null;
     const record = family === 'records' ? RECORDS.find((r) => recordSlot(r.id) === id) : undefined;
     if (memory) {
-      big.append(
-        drawnCanvas('treasure-big-drawing', 150, 150, (ctx) => {
-          drawMemory(ctx, memory, 75, 75, 136);
-        }),
-      );
+      big.append(treasureDrawing('treasure-big-drawing', memory, 150));
     } else if (record) {
-      const sleeve = element('span', big, 'treasure-sleeve big');
-      sleeve.style.setProperty('--sleeve', `#${record.sleeve.toString(16).padStart(6, '0')}`);
+      big.append(recordDrawing(recordSlot(record.id), true));
     } else {
       big.textContent = '?';
     }
@@ -253,11 +221,15 @@ export class TreasuresPage {
         if (flashback) {
           // Le court souvenir (D-68), en grand à la place du dessin.
           big.classList.add('flashback');
-          big.replaceChildren(
-            drawnCanvas('treasure-big-drawing', 260, 150, (ctx) => {
-              drawFlashback(ctx, flashback, 130, 75, 250, 145);
-            }),
-          );
+          const show = () => {
+            const image = flashbackImage(flashback, show);
+            big.replaceChildren(
+              drawnCanvas('treasure-big-drawing', 260, 150, (ctx) => {
+                drawFlashback(ctx, flashback, 130, 75, 250, 145, image);
+              }),
+            );
+          };
+          show();
         }
       });
     }

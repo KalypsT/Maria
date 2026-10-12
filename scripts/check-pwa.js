@@ -25,6 +25,10 @@ if (existsSync('dist/sw.js')) {
     missing.length === 0,
     `musique absente du précache (trop lourde ?) : ${missing.join(', ')}`,
   );
+  // Les images fournies (D-170) : toutes précachées (le jeu se joue hors ligne).
+  const art = readdirSync('dist/art').filter((name) => /\.(png|webp|jpg)$/.test(name));
+  const missingArt = art.filter((name) => !urls.includes(`art/${name}`));
+  check(missingArt.length === 0, `images absentes du précache : ${missingArt.join(', ')}`);
   check(/Maria\\\/debug/.test(sw), 'le service worker n’exclut pas /Maria/debug/ des navigations');
 }
 if (existsSync('dist/manifest.webmanifest')) {

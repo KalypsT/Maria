@@ -2,8 +2,9 @@ import type { FlashbackId } from '../../config/memories';
 import { musicBook, roger, whiteCloth } from './memoryArt';
 
 /**
- * Courts souvenirs (D-68), dessinés par le code, PLACEHOLDER : une vignette aux couleurs chaudes
- * et passées, bords adoucis, sans texte. Maria n'y est jamais (pilier 5).
+ * Courts souvenirs (D-68) : une vignette aux couleurs chaudes et passées, bords adoucis, sans texte.
+ * Maria n'y est jamais (pilier 5). L'illustration fournie (D-170, `image`) quand elle est chargée,
+ * dans le même traitement de vieille photo ; sinon le dessin par le code (PLACEHOLDER).
  */
 export function drawFlashback(
   ctx: CanvasRenderingContext2D,
@@ -12,9 +13,40 @@ export function drawFlashback(
   cy: number,
   w: number,
   h: number,
+  image: HTMLImageElement | null = null,
 ): void {
   ctx.save();
   ctx.translate(cx, cy);
+  const radius = Math.min(w, h) * 0.12;
+  if (image && image.naturalWidth > 0) {
+    // L'illustration remplit la vignette (centrée, rognée au besoin) ; ses bords s'effacent en
+    // ovale, ses coins disparaissent.
+    const k = Math.max(w / image.naturalWidth, h / image.naturalHeight);
+    const iw = image.naturalWidth * k;
+    const ih = image.naturalHeight * k;
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(-w / 2, -h / 2, w, h, radius);
+    ctx.clip();
+    ctx.drawImage(image, -iw / 2, -ih / 2, iw, ih);
+    ctx.restore();
+    ctx.save();
+    ctx.scale(w / 2, h / 2);
+    const fade = ctx.createRadialGradient(0, 0, 0, 0, 0, FLASHBACK_FADE.outer);
+    fade.addColorStop(0, 'rgba(0, 0, 0, 1)');
+    fade.addColorStop(FLASHBACK_FADE.inner / FLASHBACK_FADE.outer, 'rgba(0, 0, 0, 1)');
+    fade.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.globalCompositeOperation = 'destination-in';
+    ctx.fillStyle = fade;
+    ctx.fillRect(-1, -1, 2, 2);
+    ctx.restore();
+    // Le voile chaud, sur l'image seulement.
+    ctx.globalCompositeOperation = 'source-atop';
+    ctx.fillStyle = 'rgba(255, 214, 160, 0.12)';
+    ctx.fillRect(-w / 2, -h / 2, w, h);
+    ctx.restore();
+    return;
+  }
   // Le cadre : un souvenir un peu flou, couleur de vieille photo.
   const frame = ctx.createRadialGradient(0, 0, Math.min(w, h) * 0.2, 0, 0, Math.max(w, h) * 0.62);
   frame.addColorStop(0, '#f6e3c4');
@@ -22,16 +54,22 @@ export function drawFlashback(
   frame.addColorStop(1, 'rgba(214, 178, 138, 0)');
   ctx.fillStyle = frame;
   ctx.beginPath();
-  ctx.roundRect(-w / 2, -h / 2, w, h, Math.min(w, h) * 0.12);
+  ctx.roundRect(-w / 2, -h / 2, w, h, radius);
   ctx.fill();
   FLASHBACK_DRAWERS[id](ctx, w, h);
   // Grain et voile chaud par-dessus.
   ctx.fillStyle = 'rgba(255, 214, 160, 0.12)';
   ctx.beginPath();
-  ctx.roundRect(-w / 2, -h / 2, w, h, Math.min(w, h) * 0.12);
+  ctx.roundRect(-w / 2, -h / 2, w, h, radius);
   ctx.fill();
   ctx.restore();
 }
+
+/**
+ * L'effacement des bords de l'illustration (D-170), en ovale : opaque jusqu'à `inner`, transparent
+ * à `outer` (1 : le milieu d'un bord de la vignette ; les coins sont à 1,41). PROVISOIRE.
+ */
+const FLASHBACK_FADE = { inner: 0.8, outer: 1.15 } as const;
 
 /** Dessin de chaque court souvenir, dans son cadre (centré en 0, 0). */
 const FLASHBACK_DRAWERS: Readonly<

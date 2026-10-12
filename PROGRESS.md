@@ -2,6 +2,8 @@
 
 ## Phase en cours
 
+**Retour d'essai, suite** (D-168 à D-170, sur `claude/game-test-issues-e7pomv`, PR #99, `main` fusionnée dedans) : **faits** : l'image du sac, le jingle des trouvailles, la lanterne, les pas sur le bois ; la cheminée de l'école étrange en difficulté moyenne ; le passage vers la gare n'a plus l'air d'un monde étrange ; l'ombre de l'oculus s'arrête une fois passée ; **les souvenirs de Céleste refaits** (D-169 : neuf souvenirs sur tout le voyage, l'envol vers le sac, la gommette étoile des capacités ; les affaires de Maria sans bulle, D-165) ; **toutes les images des trésors, des pochettes et des courts souvenirs** (D-170). **En attente** : essai sur téléphone ; retouches éventuelles des images (le second Roger, le téléphone de la cuisine rose).
+
 **La console, le mode Sans fin** (D-167, demande de l'utilisateur, sur `ccr-e9f3d38a-x4umy1`, reparti de `main` après la fusion du mode Niveaux) : un seul parcours continu fait de morceaux collés (une jointure entre chacun), une bande de trois morceaux chargée ; un nouveau parcours à chaque partie, la difficulté plafonnée au niveau 20, un repère fantôme du record et un bip tous les 100 m, débloqué après un niveau atteint en mode Niveaux (proposé : 5). Plan validé en 6 PR. **PR 1 faite : le moteur** (les morceaux des sauts et leurs jointures, la bande, purs et testés) et **PR 2 faite : le Sans fin dans la console** (les sauts : ouvert au niveau 5, la bande dans la scène, le dessin bloc par bloc, les morceaux en arrière-plan et hors ligne, le repère du record, le bip des 100 m). **Essai sur téléphone attendu** (une saccade au changement de morceau ?). **PR 3 faite : le couloir et les tyroliennes** en Sans fin (la jointure des tyroliennes à hauteur libre : le morceau suivant en part). **PR 4 faite : les deux mondes et le monstre** (le monstre tenu en laisse, écart au plan signalé). **Essai sur téléphone attendu** (le monstre, les deux mondes). **PR 5 faite : la bande en deux dimensions et les jeux verticaux** (la grimpette en escalier, la cheminée empilée, le grand vent en descente ; les huit jeux ont leur Sans fin). Suite : la PR 6, les réglages après les essais sur téléphone.
 
 **La console de Céleste** (D-166, demande de l'utilisateur, sur `ccr-e9f3d38a-x4umy1`) : un mode à part, un jeu par capacité (des niveaux qui s'enchaînent, de plus en plus durs, record en mètres). Maquette (https://claude.ai/artifact/2Pb1PC7arwM1ESAByVLc9T), choix de l'utilisateur et plan validés en 9 PR pour le mode Niveaux (le système ; l'écran de la console ; le cadeau et la chambre ; puis un jeu par PR) ; le mode Sans fin plus tard. **PR 1 faite : le système et les tyroliennes** (les jeux, le générateur et son témoin, les records dans la sauvegarde sans migration, DEBUG → « Console ») et **PR 2 faite : l'écran de la console** (le menu, le mode, la partie, « Oups ! » et le record, le style pastel, les bips ; DEBUG → « Console » → « Allumer la console ») et **PR 3 faite : le cadeau et la chambre** (papa au premier passage au potager, la télé sur le bureau, Agir, « nouveau ! » et l'étincelle) et **PR 4 faite : les sauts et la grimpette** (jouables dès le cadeau) et **PR 5 faite : la cheminée** (le saut mural, la hauteur au compteur) et **PR 6 faite : le grand vent** (le parapluie, des portes de briques de jeu) et **PR 7 faite : le couloir** (la glissade : des barres, des tunnels, des trous, le saut long) et **PR 8 faite : les deux mondes** (la bascule en plein saut, des portes et des murs d'une seule couche) et **PR 9 faite : le monstre** (après la vague de la mer : courir et sauter, poursuivie par une masse pastel). **Le mode Niveaux est complet** (huit jeux). Suite : essayer la console sur téléphone ; le mode Sans fin, avec son propre plan.
@@ -55,6 +57,24 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les images des trésors, des pochettes et des courts souvenirs (D-170)
+
+- 19 images de l'utilisateur : tous les trésors ont la leur (sac, envol, décor), les pochettes des disques, les trois courts souvenirs en illustrations (bords effacés en ovale) ; WebP et JPEG, ajoutés au cache hors ligne ; la vignette de la fiche à la bonne taille.
+- Vérifié dans Chromium : le sac, les fiches, les courts souvenirs en plein écran, le décor.
+- [ ] À vérifier sur téléphone : les courts souvenirs (l'effacement des bords, la lisibilité), les objets dans le décor (assez lisibles en petit ?).
+
+### Les souvenirs de Céleste refaits (D-169)
+
+- Neuf souvenirs (la toise, la photo, la boîte à musique, l'arrosoir, le dessin de l'école, le billet, la lettre de maman, la carte postale, le dessin de toute la famille) ; la plante et la photo de Céleste bébé retirées ; on emporte ce qui se porte ; des bulles sans cœur (la mer, la maison ; les affaires de Maria sans bulle, D-165) ; l'envol vers le sac pour tous les trésors ; cinq images de l'utilisateur ; la gommette étoile des capacités ; DEBUG → « Trésors ».
+- Vérifié dans Chromium : chaque souvenir à sa place, l'envol, la page des trésors, la gommette et son envol.
+- [ ] À vérifier sur téléphone : l'envol (durée, lisibilité), la gommette (assez visible ? sa flaque de lumière), les souvenirs se trouvent-ils sans aide ?
+
+### Retour d'essai, suite (D-168)
+
+- Le sac en image ; `found`, `checkpoint`, `step-wood` ×4 ; la cheminée de l'école étrange (133 ms, moyen) ; la palissade vers la gare sans présage ni lueur turquoise ; le présage de l'oculus jusqu'au premier passage.
+- Vérifié dans Chromium : la palissade ouverte ; le sac à 34 px.
+- [ ] À vérifier sur téléphone : le sac se reconnaît-il ? Le son de la lanterne, des pas sur le bois, de la trouvaille (volume) ; la cheminée de l'école (vraiment intermédiaire ?).
 
 ### Le mode Sans fin, PR 5 : la bande en deux dimensions, les jeux verticaux (D-167)
 

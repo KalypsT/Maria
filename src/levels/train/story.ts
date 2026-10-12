@@ -20,6 +20,8 @@ import type {
 const TRAIN_DOOR = { col: 55, row: 26 };
 /** La couchette de Céleste : celle du milieu, à gauche du compartiment de la classe. */
 const BUNK = { col: 11, row: 11, w: 5, h: 3 };
+/** La lettre de maman (D-169), sur la couchette du haut, au-dessus de la sienne. */
+const LETTER = { col: 12, row: 9 };
 /** La grille en accordéon entre les deux compartiments : on glisse dessous (D-84). */
 const GATE_SIDE = { col: 32, row: 16, w: 6, h: 3 };
 
@@ -335,6 +337,23 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.lookMs },
     ],
   },
+  {
+    // La lettre de maman (D-169), sur la couchette du haut, au-dessus de celle de Céleste : une
+    // feuille pliée, un cœur, sans un mot. Agir la prend ; elle quitte le décor pour le sac.
+    id: 'take-letter',
+    room: 'train-couchettes',
+    on: 'interact',
+    area: { col: LETTER.col - 1, row: LETTER.row - 2, w: 5, h: 3 },
+    mark: { col: LETTER.col, row: LETTER.row - 2 },
+    when: { all: [F.TrainDeparted], none: [F.LetterTaken] },
+    lock: true,
+    steps: [
+      { do: 'flag', id: F.LetterTaken },
+      { do: 'memory', id: 'letter' },
+      { do: 'thought', icon: 'mom', ms: S.thoughtMs },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
 ];
 
 /**
@@ -575,6 +594,14 @@ const PROPS: StoryProp[] = [
     kind: 'pink-kitchen',
     ...PINK_KITCHEN,
     when: {},
+  },
+  {
+    id: 'letter',
+    room: 'train-couchettes',
+    kind: 'letter',
+    ...LETTER,
+    instant: true,
+    when: { all: [F.TrainDeparted], none: [F.LetterTaken] },
   },
 ];
 
