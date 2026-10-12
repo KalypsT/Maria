@@ -517,7 +517,7 @@ export function generateCablesChunk(
       .filter((p): p is PostPiece => p.kind === 'post')
       .slice(0, -1)
       .map((p) => ({ ...p, col: p.col - 1 })),
-    exitTop: next?.kind === 'post' ? next.top : entryTop,
+    exit: { top: next?.kind === 'post' ? next.top : entryTop, layer: 'present' },
     cables: cables.map((c) => ({ ...c, c1: c.c1 - 1, c2: c.c2 - 1 })),
   };
 }

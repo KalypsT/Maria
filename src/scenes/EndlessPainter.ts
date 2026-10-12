@@ -1,6 +1,7 @@
 import type Phaser from 'phaser';
 import { LEVEL_CHUNK_TILES, TILE_SIZE as T } from '../config/display';
 import { stitch, type EndlessChunk } from '../core/arcade/endless';
+import { commonLayer } from '../core/level/layers';
 import type { LevelData } from '../core/level/LevelData';
 import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
 
@@ -52,7 +53,10 @@ export class EndlessPainter {
 
   /** Un morceau à dessiner, sa jointure à `x` px (`header` : le style de la console). */
   add(chunk: EndlessChunk, header: readonly string[], x: number): void {
-    const level = parseAsciiLevel(`endless-paint-${String(chunk.index)}`, stitch([chunk], header));
+    // Les zones d'une seule couche (les deux mondes) sont dessinées à part (`ShiftLayerView`).
+    const level = commonLayer(
+      parseAsciiLevel(`endless-paint-${String(chunk.index)}`, stitch([chunk], header)),
+    );
     for (let row0 = 0; row0 < level.height; row0 += LEVEL_CHUNK_TILES) {
       // Les colonnes du morceau sont de 1 à sa largeur (la colonne 0 est un mur).
       for (let col0 = 1; col0 <= chunk.width; col0 += LEVEL_CHUNK_TILES) {

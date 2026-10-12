@@ -8,6 +8,7 @@ import { touchesHazard } from '../physics/gridCollision';
 import { PlayerPhysics, type PlayerInput } from '../player/PlayerPhysics';
 import { postUnder, type Hitbox, type PostPiece } from './course';
 import { mulberry32, ramp, seedOf } from './random';
+import type { EndlessChunk, EndlessEntry } from './endless';
 import { ARCADE_ROOM_META } from './roomMeta';
 
 /** Un poteau des deux mondes : d'une seule couche (D-107), ou des deux. */
@@ -254,31 +255,35 @@ interface Placed {
   readonly witness: Witness;
 }
 
+/** Les pièces posées par le témoin, ses bascules, et sa couche en arrivant sur le dernier poteau. */
+interface Placement {
+  readonly posts: WorldsPost[];
+  readonly gates: WorldsGate[];
+  readonly shifts: number[];
+  readonly layer: Layer;
+}
+
 /**
- * Le niveau n des deux mondes (D-166), toujours le même : une graine fixe ; chaque poteau gardé
- * seulement si le témoin (la vraie physique, la phase du jeu) s'y pose depuis le précédent, en
- * basculant quand il le faut. Il essaie chaque bascule à chaque px et garde la plus longue plage
- * qui passe (au moins `minWindowPx`), en son milieu. Les tests rejouent ses bascules et mesurent
- * chaque niveau avec l'analyse de faisabilité (D-16, la bascule, D-108).
+ * Les poteaux du niveau `n` (sa difficulté, leur nombre), avec la graine `seed` : le départ (commun
+ * aux deux couches) en haut de la ligne `startTop`, le témoin dans la couche `startLayer` ; `seam` :
+ * le dernier poteau est une jointure du mode Sans fin (D-167), sans fanion.
  */
-export function generateWorldsLevel(
+function placeWorlds(
   n: number,
+  seed: string,
+  startTop: number,
+  startLayer: Layer,
+  seam: boolean,
   params: Readonly<MovementParams>,
   hitbox: Hitbox,
-  abilities: readonly string[],
-): WorldsLevel {
-  const random = mulberry32(seedOf(`worlds:${String(n)}`));
+  header: readonly string[],
+): Placement {
+  const random = mulberry32(seedOf(seed));
   const d = worldsDifficulty(n);
-  const header = [
-    `; Console (D-166) : les deux mondes, niveau ${String(n)}. Généré (graine fixe) : ne pas modifier à la main.`,
-    `; @name: Les deux mondes · niveau ${String(n)}`,
-    `; @abilities: ${abilities.join(' ')}`,
-    ...ARCADE_ROOM_META,
-  ];
   const id = `arcade-worlds-${String(n)}`;
   const hazardRow = C.rows - 2;
   const posts: WorldsPost[] = [
-    { kind: 'post', col: 1, width: C.start.width, top: C.start.top, goal: false, layer: 'both' },
+    { kind: 'post', col: 1, width: C.start.width, top: startTop, goal: false, layer: 'both' },
   ];
   const gates: WorldsGate[] = [];
   const shifts: number[] = [];
@@ -289,13 +294,15 @@ export function generateWorldsLevel(
   };
   const first = parse(posts, gates);
   const spawn = spawnPosition(first.present, hitbox.width, hitbox.height);
-  const phys = new PlayerPhysics(first.present, params, spawn.x, spawn.y, hitbox);
-  let saved: Witness = { phys, layer: 'present', next: 0 };
+  const phys = new PlayerPhysics(first[startLayer], params, spawn.x, spawn.y, hitbox);
+  let saved: Witness = { phys, layer: startLayer, next: 0 };
   const minWindow = ramp(C.minWindowPx, d);
 
   const count = worldsCount(n);
   for (let i = 0; i <= count; i++) {
     const goal = i === count;
+    /** Le dernier poteau : le fanion, ou une jointure du mode Sans fin (D-167), sans fanion. */
+    const lastWidth = seam ? C.start.width : C.goalWidth;
     const last = posts[posts.length - 1];
     if (!last) {
       break;
@@ -328,9 +335,9 @@ export function generateWorldsLevel(
       const post: WorldsPost = {
         kind: 'post',
         col: exit + gap,
-        width: goal ? C.goalWidth : postWidth,
+        width: goal ? lastWidth : postWidth,
         top,
-        goal,
+        goal: goal && !seam,
         layer: 'both',
       };
       const list = [...posts, post];
@@ -451,6 +458,39 @@ export function generateWorldsLevel(
     saved = placed.witness;
   }
 
+  return { posts, gates, shifts, layer: saved.layer };
+}
+
+/**
+ * Le niveau n des deux mondes (D-166), toujours le même : une graine fixe ; chaque poteau gardé
+ * seulement si le témoin (la vraie physique, la phase du jeu) s'y pose depuis le précédent, en
+ * basculant quand il le faut. Il essaie chaque bascule à chaque px et garde la plus longue plage
+ * qui passe (au moins `minWindowPx`), en son milieu. Les tests rejouent ses bascules et mesurent
+ * chaque niveau avec l'analyse de faisabilité (D-16, la bascule, D-108).
+ */
+export function generateWorldsLevel(
+  n: number,
+  params: Readonly<MovementParams>,
+  hitbox: Hitbox,
+  abilities: readonly string[],
+): WorldsLevel {
+  const header = [
+    `; Console (D-166) : les deux mondes, niveau ${String(n)}. Généré (graine fixe) : ne pas modifier à la main.`,
+    `; @name: Les deux mondes · niveau ${String(n)}`,
+    `; @abilities: ${abilities.join(' ')}`,
+    ...ARCADE_ROOM_META,
+  ];
+  const id = `arcade-worlds-${String(n)}`;
+  const { posts, gates, shifts } = placeWorlds(
+    n,
+    `worlds:${String(n)}`,
+    C.start.top,
+    'present',
+    false,
+    params,
+    hitbox,
+    header,
+  );
   const goalPost = posts[posts.length - 1];
   const width = goalPost ? goalPost.col + goalPost.width + 1 : LOOKAHEAD_COLS;
   const text = levelText(posts, gates, width, header);
@@ -459,7 +499,73 @@ export function generateWorldsLevel(
   }
   const spawnCol = (posts[0]?.col ?? 0) + 1;
   const goalCol = goalPost ? goalPost.col + Math.floor(goalPost.width / 2) : spawnCol;
-  return { text, posts, gates, shifts, lengthTiles: goalCol - spawnCol, difficulty: d };
+  return {
+    text,
+    posts,
+    gates,
+    shifts,
+    lengthTiles: goalCol - spawnCol,
+    difficulty: worldsDifficulty(n),
+  };
+}
+
+/**
+ * Un morceau des deux mondes pour le mode Sans fin (D-167) : de sa jointure (un poteau commun aux
+ * deux couches, en haut de la ligne de `entry`, le témoin dans sa couche) à la suivante, non
+ * comprise, dont la hauteur est libre ; le morceau d'après part de là, dans la couche où le témoin
+ * y arrive. Ses zones d'une seule couche sont en colonnes du morceau.
+ */
+export function generateWorldsChunk(
+  index: number,
+  level: number,
+  runSeed: number,
+  entry: EndlessEntry | null,
+  params: Readonly<MovementParams>,
+  hitbox: Hitbox,
+): EndlessChunk {
+  const { posts, gates, shifts, layer } = placeWorlds(
+    level,
+    `endless:worlds:${String(runSeed)}:${String(index)}`,
+    entry?.top ?? C.start.top,
+    entry?.layer ?? 'present',
+    true,
+    params,
+    hitbox,
+    ARCADE_ROOM_META,
+  );
+  const next = posts[posts.length - 1];
+  const end = next ? next.col : 1;
+  const lines = levelText(posts.slice(0, -1), gates, end + 1, [])
+    .split('\n')
+    .filter((line) => !line.startsWith(';'))
+    .map((line) => line.slice(1, end).replace('P', '.'));
+  const zones = [
+    ...posts.slice(0, -1).flatMap((p) =>
+      p.layer === 'both'
+        ? []
+        : [
+            {
+              layer: p.layer,
+              col: p.col - 1,
+              row: p.top,
+              width: p.width,
+              height: C.rows - 2 - p.top,
+            },
+          ],
+    ),
+    ...gates.map((g) => ({ layer: g.layer, col: g.col - 1, row: 1, width: 1, height: g.bottom })),
+  ];
+  return {
+    index,
+    level,
+    lines,
+    width: end - 1,
+    difficulty: worldsDifficulty(level),
+    posts: posts.slice(0, -1).map((p) => ({ ...p, col: p.col - 1 })),
+    exit: { top: next?.top ?? C.start.top, layer },
+    zones,
+    shifts: shifts.map((x) => x - T),
+  };
 }
 
 /**

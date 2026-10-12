@@ -12,11 +12,11 @@ import { DEFAULT_MOVEMENT, type MovementParams } from '../../config/movement';
 import { generateCablesChunk, generateCablesLevel } from './cables';
 import { generateChimneyLevel } from './chimney';
 import { generateCorridorChunk, generateCorridorLevel } from './corridor';
-import { generateMonsterLevel } from './monster';
-import { endlessLevel, type EndlessChunk } from './endless';
+import { generateMonsterChunk, generateMonsterLevel } from './monster';
+import { endlessLevel, type EndlessChunk, type EndlessEntry } from './endless';
 import { generateStepsChunk, generateStepsLevel } from './steps';
 import { generateWindLevel } from './wind';
-import { generateWorldsLevel } from './worlds';
+import { generateWorldsChunk, generateWorldsLevel } from './worlds';
 
 /** Le jeu d'un identifiant (undefined : inconnu). */
 export function arcadeGame(id: string): ArcadeGame | undefined {
@@ -133,20 +133,21 @@ export const ENDLESS_READY: readonly ArcadeGameId[] = [
   ArcadeGameId.Jumps,
   ArcadeGameId.Cables,
   ArcadeGameId.Corridor,
+  ArcadeGameId.Worlds,
+  ArcadeGameId.Monster,
 ];
 
 /**
  * Le morceau `index` (0, 1, 2…) d'une partie Sans fin de graine `runSeed` (D-167) : généré, comme
- * les niveaux, d'après les valeurs de mouvement par défaut de la phase du jeu. `entryTop` : la
- * hauteur de sa jointure (celle où a fini le morceau d'avant ; null : le premier, ou un jeu dont
- * les jointures ont toujours la même hauteur). Null pour un jeu sans morceaux (encore) ou un rang
- * invalide.
+ * les niveaux, d'après les valeurs de mouvement par défaut de la phase du jeu. `entry` : où il
+ * commence (là où a fini le morceau d'avant : la hauteur de la jointure, la couche ; null : le
+ * premier). Null pour un jeu sans morceaux (encore) ou un rang invalide.
  */
 export function endlessChunk(
   id: ArcadeGameId,
   index: number,
   runSeed: number,
-  entryTop: number | null = null,
+  entry: EndlessEntry | null = null,
 ): EndlessChunk | null {
   const game = arcadeGame(id);
   if (!game || !ENDLESS_READY.includes(id) || !Number.isInteger(index) || index < 0) {
@@ -161,12 +162,16 @@ export function endlessChunk(
         index,
         level,
         runSeed,
-        entryTop ?? ARCADE_CABLES.start.top,
+        entry?.top ?? ARCADE_CABLES.start.top,
         params,
         phase.hitbox,
       );
     case ArcadeGameId.Corridor:
       return generateCorridorChunk(index, level, runSeed, params, phase.hitbox);
+    case ArcadeGameId.Worlds:
+      return generateWorldsChunk(index, level, runSeed, entry, params, phase.hitbox);
+    case ArcadeGameId.Monster:
+      return generateMonsterChunk(index, level, runSeed, params, phase.hitbox);
     default:
       return generateStepsChunk(
         game.id,

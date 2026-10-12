@@ -1,5 +1,6 @@
 import { ARCADE_ENDLESS } from '../../config/arcade';
 import { TILE_SIZE as T } from '../../config/display';
+import type { Layer } from '../level/LevelData';
 import type { CablePiece, PostPiece } from './course';
 import type { RunAction } from './runner';
 
@@ -9,6 +10,15 @@ import type { RunAction } from './runner';
  * de trois morceaux est chargée à la fois ; quand Céleste entre dans le dernier, le plus ancien est
  * retiré, et tout recule de sa largeur.
  */
+
+/**
+ * Où commence un morceau : la hauteur de sa jointure (ligne du haut) et la couche où y arrive le
+ * témoin (les deux mondes ; le présent ailleurs). Le morceau d'avant la donne en finissant.
+ */
+export interface EndlessEntry {
+  readonly top: number;
+  readonly layer: Layer;
+}
 
 /** Un morceau : ses lignes (sans les murs), de sa jointure de départ (comprise) à la suivante. */
 export interface EndlessChunk {
@@ -25,12 +35,27 @@ export interface EndlessChunk {
    * poteaux : sa jointure est le sol de départ, décrit comme un poteau.
    */
   readonly posts: readonly PostPiece[];
-  /** Ligne du haut de la jointure suivante : le morceau d'après part de cette hauteur. */
-  readonly exitTop: number;
+  /** La jointure suivante (sa hauteur) et la couche du témoin : le morceau d'après en part. */
+  readonly exit: EndlessEntry;
   /** Ses câbles (les tyroliennes), en colonnes du morceau, avec la sortie du témoin. */
   readonly cables?: readonly CablePiece[];
   /** Les gestes du témoin qui court (le couloir), en px du morceau (les tests les rejouent). */
   readonly plan?: readonly RunAction[];
+  /** Ses zones d'une seule couche (les deux mondes, `; @shift:`), en colonnes du morceau. */
+  readonly zones?: readonly EndlessZone[];
+  /** Les bascules du témoin (les deux mondes), en px du morceau (les tests les rejouent). */
+  readonly shifts?: readonly number[];
+  /** La vitesse du monstre dans ce morceau (tuiles/s). */
+  readonly speed?: number;
+}
+
+/** Une zone d'une seule couche (D-108), en tuiles. */
+export interface EndlessZone {
+  readonly layer: Layer;
+  readonly col: number;
+  readonly row: number;
+  readonly width: number;
+  readonly height: number;
 }
 
 /** Le niveau dont le morceau `index` a la difficulté : le niveau `index + 1`, jusqu'au plafond. */
@@ -75,9 +100,57 @@ export function stitch(
     const offset = 1 + chunks.slice(0, -1).reduce((sum, c) => sum + c.width, 0);
     mark(lastSeam.top - 1, offset + lastSeam.col + Math.floor(lastSeam.width / 2), 'G');
   }
-  return [...header, ...stitchedCableLines(chunks), ...grid.map((line) => line.join(''))].join(
-    '\n',
-  );
+  return [
+    ...header,
+    ...stitchedCableLines(chunks),
+    ...stitchedZoneLines(chunks),
+    ...stitchedChaseLines(chunks),
+    ...grid.map((line) => line.join('')),
+  ].join('\n');
+}
+
+/**
+ * Le monstre de morceaux collés (`; @chase:`) : vers la droite, une vitesse par morceau ; il ne
+ * finit jamais (la ligne d'arrivée est contre le mur du fond, la bande recule avant).
+ */
+function stitchedChaseLines(chunks: readonly EndlessChunk[]): string[] {
+  if (!chunks.some((c) => c.speed !== undefined)) {
+    return [];
+  }
+  const end = chunks.reduce((sum, c) => sum + c.width, 0);
+  const lines = [`; @chase: right ${String(end)}`, '; @chase-look: monster'];
+  let offset = 1;
+  for (const chunk of chunks) {
+    offset += chunk.width;
+    lines.push(`; @chase-phase: ${String(Math.min(offset, end))} ${(chunk.speed ?? 0).toFixed(2)}`);
+  }
+  return lines;
+}
+
+/** Les zones d'une seule couche de morceaux collés (`; @shift:`), en colonnes de la salle. */
+function stitchedZoneLines(chunks: readonly EndlessChunk[]): string[] {
+  const lines: string[] = [];
+  let offset = 1;
+  for (const chunk of chunks) {
+    for (const z of chunk.zones ?? []) {
+      lines.push(
+        `; @shift: ${z.layer} ${String(z.col + offset)} ${String(z.row)} ${String(z.width)} ${String(z.height)}`,
+      );
+    }
+    offset += chunk.width;
+  }
+  return lines;
+}
+
+/** Les bascules du témoin de morceaux collés, en px de la salle. */
+export function stitchedShifts(chunks: readonly EndlessChunk[]): number[] {
+  const shifts: number[] = [];
+  let offset = T;
+  for (const chunk of chunks) {
+    shifts.push(...(chunk.shifts ?? []).map((x) => x + offset));
+    offset += chunk.width * T;
+  }
+  return shifts;
 }
 
 /** Les câbles de morceaux collés (format des salles, `; @cable:`), en colonnes de la salle. */
@@ -156,9 +229,9 @@ export class EndlessBand {
     return (this.chunks[this.chunks.length - 1]?.index ?? -1) + 1;
   }
 
-  /** La hauteur de la jointure qui ouvrira le morceau suivant. */
-  get exitTop(): number {
-    return this.chunks[this.chunks.length - 1]?.exitTop ?? 0;
+  /** Où commencera le morceau suivant (la jointure qui l'ouvre, la couche du témoin). */
+  get exit(): EndlessEntry | null {
+    return this.chunks[this.chunks.length - 1]?.exit ?? null;
   }
 
   /** La colonne de la salle où commence le dernier morceau (le mur de gauche en colonne 0). */

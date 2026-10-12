@@ -9,6 +9,7 @@ import { touchesHazard } from '../physics/gridCollision';
 import { PlayerPhysics } from '../player/PlayerPhysics';
 import type { Hitbox } from './course';
 import { mulberry32, ramp, seedOf } from './random';
+import type { EndlessChunk } from './endless';
 import { ARCADE_ROOM_META } from './roomMeta';
 import {
   drive,
@@ -72,6 +73,21 @@ export function monsterChaseParams(base: Readonly<CombatParams>): CombatParams {
     ...base,
     chaseSideStartDelayMs: C.startDelayMs,
     chaseSideRestartGapTiles: C.startGapTiles,
+  };
+}
+
+/**
+ * La poursuite du mode Sans fin (D-167) : comme dans les niveaux, plus **la laisse** : au-delà de
+ * `ARCADE_MONSTER.endless.leashTiles` derrière Céleste, le monstre rattrape jusqu'à cette distance.
+ * Il court un peu moins vite qu'elle : une hésitation se rattrape, de moins en moins vite.
+ */
+export function monsterEndlessParams(base: Readonly<CombatParams>): CombatParams {
+  const e = C.endless;
+  return {
+    ...monsterChaseParams(base),
+    chaseCatchUpGapTiles: e.leashTiles,
+    chaseCatchUpRate: e.catchUpRate,
+    chaseCatchUpMaxSpeed: e.catchUpMaxSpeed,
   };
 }
 
@@ -139,13 +155,13 @@ export function chaseLead(
   plan: readonly RunAction[],
   params: Readonly<MovementParams>,
   hitbox: Hitbox,
-  combat: Readonly<CombatParams> = DEFAULT_COMBAT,
+  chaseParams: Readonly<CombatParams> = monsterChaseParams(DEFAULT_COMBAT),
 ): number {
   const data = level.chase;
   if (!data) {
     return Number.NEGATIVE_INFINITY;
   }
-  const chase = new Chase(data, monsterChaseParams(combat), PHYSICS_STEP_HZ);
+  const chase = new Chase(data, chaseParams, PHYSICS_STEP_HZ);
   const driver = startDriver(level, params, hitbox, false);
   const box = driver.phys.box;
   let lead = Number.POSITIVE_INFINITY;
@@ -183,27 +199,26 @@ function bestFor(
   }));
 }
 
+/** Les obstacles posés par le témoin, ses sauts, et où finit le dernier (colonne). */
+interface Placement {
+  readonly obstacles: MonsterObstacle[];
+  readonly plan: RunAction[];
+  readonly end: number;
+}
+
 /**
- * Le niveau n du monstre (D-166), toujours le même : une graine fixe ; des trous et des blocs de
- * plus en plus serrés, chacun gardé seulement si le témoin (la vraie physique, la phase du jeu, sans
- * capacité) le passe en courant, sur une plage de départs assez longue (il saute au milieu). Puis
- * le monstre : il accélère d'un tronçon à l'autre, et sa vitesse est cherchée pour que le témoin
- * garde au plus juste `lead` tuiles d'avance (de moins en moins). Une dernière course le vérifie.
+ * Les obstacles du niveau `n` (sa difficulté, leur nombre), avec la graine `seed` : chacun gardé
+ * seulement si le témoin le passe en sautant, sur une plage de départs assez longue.
  */
-export function generateMonsterLevel(
+function placeObstacles(
   n: number,
+  seed: string,
   params: Readonly<MovementParams>,
   hitbox: Hitbox,
-  abilities: readonly string[],
-): MonsterLevel {
-  const random = mulberry32(seedOf(`monster:${String(n)}`));
+  header: readonly string[],
+): Placement {
+  const random = mulberry32(seedOf(seed));
   const d = monsterDifficulty(n);
-  const header = [
-    `; Console (D-166) : le monstre, niveau ${String(n)}. Généré (graine fixe) : ne pas modifier à la main.`,
-    `; @name: Le monstre · niveau ${String(n)}`,
-    `; @abilities: ${abilities.join(' ')}`,
-    ...ARCADE_ROOM_META,
-  ];
   const id = `arcade-monster-${String(n)}`;
   const parse = (list: readonly MonsterObstacle[], end: number) =>
     parseAsciiLevel(id, levelText(list, end + LOOKAHEAD_COLS, null, header));
@@ -261,6 +276,38 @@ export function generateMonsterLevel(
     end = placed.obstacle.col + placed.obstacle.width;
   }
 
+  return { obstacles, plan, end };
+}
+
+/**
+ * Le niveau n du monstre (D-166), toujours le même : une graine fixe ; des trous et des blocs de
+ * plus en plus serrés, chacun gardé seulement si le témoin (la vraie physique, la phase du jeu, sans
+ * capacité) le passe en courant, sur une plage de départs assez longue (il saute au milieu). Puis
+ * le monstre : il accélère d'un tronçon à l'autre, et sa vitesse est cherchée pour que le témoin
+ * garde au plus juste `lead` tuiles d'avance (de moins en moins). Une dernière course le vérifie.
+ */
+export function generateMonsterLevel(
+  n: number,
+  params: Readonly<MovementParams>,
+  hitbox: Hitbox,
+  abilities: readonly string[],
+): MonsterLevel {
+  const d = monsterDifficulty(n);
+  const header = [
+    `; Console (D-166) : le monstre, niveau ${String(n)}. Généré (graine fixe) : ne pas modifier à la main.`,
+    `; @name: Le monstre · niveau ${String(n)}`,
+    `; @abilities: ${abilities.join(' ')}`,
+    ...ARCADE_ROOM_META,
+  ];
+  const id = `arcade-monster-${String(n)}`;
+  const { obstacles, plan, end } = placeObstacles(
+    n,
+    `monster:${String(n)}`,
+    params,
+    hitbox,
+    header,
+  );
+
   const goalCol = end + C.goalCols;
   const width = goalCol + 4;
   const ground = levelText(obstacles, width, goalCol, header);
@@ -303,4 +350,76 @@ export function generateMonsterLevel(
     lengthTiles: goalCol - SPAWN_COL,
     difficulty: d,
   };
+}
+
+/**
+ * Un morceau du monstre pour le mode Sans fin (D-167) : sa jointure est le sol de départ (sans
+ * obstacle), et il s'arrête une tuile après son dernier obstacle. Les obstacles sont posés comme
+ * ceux du niveau `level` ; le monstre y court à une part de l'allure du témoin dans le morceau (les
+ * sauts et les blocs la ralentissent), une part qui monte avec la difficulté
+ * (`ARCADE_MONSTER.endless.speed`), tenu en laisse (`monsterEndlessParams`).
+ */
+export function generateMonsterChunk(
+  index: number,
+  level: number,
+  runSeed: number,
+  params: Readonly<MovementParams>,
+  hitbox: Hitbox,
+): EndlessChunk {
+  const { obstacles, plan, end } = placeObstacles(
+    level,
+    `endless:monster:${String(runSeed)}:${String(index)}`,
+    params,
+    hitbox,
+    ARCADE_ROOM_META,
+  );
+  const next = end + 1;
+  const lines = levelText(obstacles, next + 1, null, [])
+    .split('\n')
+    .map((line) => line.slice(1, next).replace('P', '.'));
+  // L'allure du témoin dans ce morceau (les sauts, les blocs : il ne court pas toujours à fond).
+  const pace = paceOf(
+    parseAsciiLevel(
+      'endless-monster',
+      levelText(obstacles, next + LOOKAHEAD_COLS, null, ARCADE_ROOM_META),
+    ),
+    plan,
+    params,
+    hitbox,
+    next * T,
+  );
+  return {
+    index,
+    level,
+    lines,
+    width: next - 1,
+    difficulty: monsterDifficulty(level),
+    posts: [{ kind: 'post', col: 0, width: C.startCols, top: C.floorRow, goal: false }],
+    exit: { top: C.floorRow, layer: 'present' },
+    plan: plan.map((action) => ({ ...action, atX: action.atX - T })),
+    speed: Math.floor(pace * ramp(C.endless.speed, monsterDifficulty(level)) * 100) / 100,
+  };
+}
+
+/**
+ * L'allure du témoin (tuiles/s), de son départ jusqu'à `endX` (px) : la distance, sur le temps mis
+ * en suivant son plan (la vraie physique).
+ */
+function paceOf(
+  level: LevelData,
+  plan: readonly RunAction[],
+  params: Readonly<MovementParams>,
+  hitbox: Hitbox,
+  endX: number,
+): number {
+  const driver = startDriver(level, params, hitbox, false);
+  const box = driver.phys.box;
+  const startX = box.x;
+  for (let i = 1; i < RUN_MAX_STEPS * (plan.length + 2); i++) {
+    drive(driver, plan);
+    if (box.x >= endX) {
+      return (box.x - startX) / T / (i / PHYSICS_STEP_HZ);
+    }
+  }
+  return params.maxRunSpeed / T;
 }

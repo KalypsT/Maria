@@ -512,6 +512,17 @@ export const ARCADE_MONSTER = {
    * de marge (à pleine course, une tuile se perd en un dixième de seconde).
    */
   lead: { from: 8, to: 3 } satisfies Ramp,
+  /**
+   * Le mode Sans fin (D-167) : la vitesse du monstre, une part de l'allure du témoin dans le morceau
+   * (les sauts et les blocs le ralentissent), qui monte avec la difficulté ; **sa laisse** : au-delà de `leashTiles` derrière Céleste, il rattrape (de
+   * `catchUpRate` tuiles/s par tuile de retard en plus, jusqu'à `catchUpMaxSpeed` tuiles/s).
+   */
+  endless: {
+    speed: { from: 0.7, to: 0.95 } satisfies Ramp,
+    leashTiles: 8,
+    catchUpRate: 1.5,
+    catchUpMaxSpeed: 16,
+  },
 };
 
 /** Le mode Sans fin (D-167). PROVISOIRES, à régler sur téléphone. */

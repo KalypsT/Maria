@@ -306,7 +306,7 @@ export function generateCorridorChunk(
     width: next - 1,
     difficulty: corridorDifficulty(level),
     posts: [{ kind: 'post', col: 0, width: C.startCols, top: C.floorRow, goal: false }],
-    exitTop: C.floorRow,
+    exit: { top: C.floorRow, layer: 'present' },
     plan: plan.map((action) => ({
       ...action,
       atX: action.atX - T,

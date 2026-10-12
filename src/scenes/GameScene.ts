@@ -187,7 +187,7 @@ import { EndlessChunks } from '../platform/endlessChunks';
 import { EndlessPainter } from './EndlessPainter';
 import { arcadeGame, arcadeLevel, arcadePhase } from '../core/arcade/arcade';
 import { consoleCards } from '../core/arcade/consoleMenu';
-import { monsterChaseParams } from '../core/arcade/monster';
+import { monsterChaseParams, monsterEndlessParams } from '../core/arcade/monster';
 import { ArcadeEvent, ArcadePhase, ArcadeRun } from '../core/arcade/run';
 import { arcadeRecord } from '../core/save/arcade';
 import { touchesHazard } from '../core/physics/gridCollision';
@@ -3379,7 +3379,7 @@ export class GameScene extends Phaser.Scene {
     const first: EndlessChunk[] = [];
     for (let i = 0; i < 3; i++) {
       // Chaque morceau part de la hauteur où a fini le précédent (les tyroliennes).
-      const chunk = source.now(game.id, firstChunk + i, runSeed, first.at(-1)?.exitTop ?? null);
+      const chunk = source.now(game.id, firstChunk + i, runSeed, first.at(-1)?.exit ?? null);
       if (!chunk) {
         this.showConsoleMenu();
         return;
@@ -3394,6 +3394,15 @@ export class GameScene extends Phaser.Scene {
     const band = new EndlessBand(first);
     this.endless = { band, runSeed, header, next: null, marker: null, debug: firstChunk > 0 };
     this.setRoom(parseAsciiLevel(`arcade-${game.id}-endless`, band.text(header)), null, null);
+    // Le monstre (D-167) : la poursuite des niveaux, tenue en laisse.
+    const chase = this.level.chase;
+    if (chase) {
+      this.combat.chase = new Chase(
+        chase,
+        monsterEndlessParams(this.combatParams),
+        PHYSICS_STEP_HZ,
+      );
+    }
     let x = TILE_SIZE;
     for (const chunk of first) {
       this.endlessPainter.add(chunk, header, x);
@@ -3406,7 +3415,7 @@ export class GameScene extends Phaser.Scene {
     const box = this.player.box;
     this.arcadeStartX = box.x + box.width / 2;
     this.arcadeStartY = box.y + box.height;
-    source.prepare(game.id, band.nextIndex, runSeed, band.exitTop);
+    source.prepare(game.id, band.nextIndex, runSeed, band.exit);
     this.endless.marker = this.recordMarker(
       arcadeRecord(this.session.data.arcade, game.id, run.mode),
     );
@@ -3476,7 +3485,7 @@ export class GameScene extends Phaser.Scene {
     // Pas encore prêt (une course très rapide, ou sans arrière-plan) : généré tout de suite.
     let next = endless.next;
     if (!next) {
-      next = source.now(game, band.nextIndex, runSeed, band.exitTop);
+      next = source.now(game, band.nextIndex, runSeed, band.exit);
       if (!next) {
         return;
       }
@@ -3486,13 +3495,24 @@ export class GameScene extends Phaser.Scene {
     const dropped = band.loaded[0]?.index ?? -1;
     const dx = band.shift(next) * TILE_SIZE;
     endless.next = null;
-    const level = parseAsciiLevel(this.level.id, band.text(header));
+    // La salle relue, dans la couche où est Céleste (les deux mondes, D-107).
+    const base = parseAsciiLevel(this.level.id, band.text(header));
+    const layer = layerOf(this.level);
+    const level = atLayer(base, layer);
     this.level = level;
+    this.run.setLayer(level);
     this.combat.setLayer(level);
     const box = player.box;
     box.x -= dx;
     player.prevX -= dx;
     player.shiftTo(level, 0);
+    if (base.layers) {
+      this.shiftView.load(base, null);
+      this.shiftView.show(layer, null);
+    }
+    if (base.chase) {
+      this.combat.chase?.reframe(base.chase, dx);
+    }
     this.camera.translate(-dx, 0);
     this.camera.setBounds(level.width * TILE_SIZE, level.height * TILE_SIZE);
     this.arcadeStartX -= dx;
@@ -3502,7 +3522,7 @@ export class GameScene extends Phaser.Scene {
     if (endless.marker) {
       endless.marker.x -= dx;
     }
-    source.prepare(game, band.nextIndex, runSeed, band.exitTop);
+    source.prepare(game, band.nextIndex, runSeed, band.exit);
     if (__DEBUG_TOOLS__) {
       this.frameStats.roomMs += performance.now() - start;
     }
