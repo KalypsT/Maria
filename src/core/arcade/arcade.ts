@@ -7,10 +7,11 @@ import {
   type ArcadeGame,
 } from '../../config/arcade';
 import { GROWTH_PHASES, phaseMovement, type GrowthPhase } from '../../config/growth';
-import { DEFAULT_MOVEMENT } from '../../config/movement';
+import { DEFAULT_MOVEMENT, type MovementParams } from '../../config/movement';
 import { generateCablesLevel } from './cables';
 import { generateChimneyLevel } from './chimney';
 import { generateCorridorLevel } from './corridor';
+import { generateMonsterLevel } from './monster';
 import { generateStepsLevel } from './steps';
 import { generateWindLevel } from './wind';
 import { generateWorldsLevel } from './worlds';
@@ -55,7 +56,7 @@ export interface ArcadeLevel {
   readonly difficulty: number;
 }
 
-/** Jeux qui ont déjà leur générateur de niveaux. */
+/** Jeux qui ont leur générateur de niveaux (tous, depuis la PR 9). */
 export const ARCADE_READY: readonly ArcadeGameId[] = [
   ArcadeGameId.Jumps,
   ArcadeGameId.Climb,
@@ -64,12 +65,13 @@ export const ARCADE_READY: readonly ArcadeGameId[] = [
   ArcadeGameId.Cables,
   ArcadeGameId.Corridor,
   ArcadeGameId.Worlds,
+  ArcadeGameId.Monster,
 ];
 
 /**
  * Le niveau n (1, 2, 3…) d'un jeu, toujours le même (D-166) : généré d'après les valeurs de
  * mouvement par défaut de la phase du jeu, jamais d'après les réglages en direct du debug. Null
- * pour un jeu sans générateur (encore) ou un numéro invalide.
+ * pour un jeu inconnu ou un numéro invalide.
  */
 export function arcadeLevel(id: ArcadeGameId, n: number): ArcadeLevel | null {
   const game = arcadeGame(id);
@@ -78,82 +80,50 @@ export function arcadeLevel(id: ArcadeGameId, n: number): ArcadeLevel | null {
   }
   const phase = arcadePhase(game);
   const params = phaseMovement(DEFAULT_MOVEMENT, phase);
-  if (id === ArcadeGameId.Jumps || id === ArcadeGameId.Climb) {
-    const tuning = id === ArcadeGameId.Jumps ? ARCADE_JUMPS : ARCADE_CLIMB;
-    const level = generateStepsLevel(
-      id,
-      game.name,
-      n,
-      tuning,
-      params,
-      phase.hitbox,
-      game.abilities,
-    );
-    return {
-      id: `arcade-${id}-${String(n)}`,
-      text: level.text,
-      game: id,
-      number: n,
-      lengthTiles: level.lengthTiles,
-      difficulty: level.difficulty,
-    };
+  const level = generate(game, n, params, phase.hitbox);
+  return {
+    id: `arcade-${id}-${String(n)}`,
+    text: level.text,
+    game: id,
+    number: n,
+    lengthTiles: level.lengthTiles,
+    difficulty: level.difficulty,
+  };
+}
+
+/** Ce que tous les générateurs donnent. */
+interface Generated {
+  readonly text: string;
+  readonly lengthTiles: number;
+  readonly difficulty: number;
+}
+
+/** Le générateur de chaque jeu. */
+function generate(
+  game: ArcadeGame,
+  n: number,
+  params: Readonly<MovementParams>,
+  hitbox: Readonly<{ width: number; height: number }>,
+): Generated {
+  switch (game.id) {
+    case ArcadeGameId.Jumps:
+    case ArcadeGameId.Climb: {
+      const tuning = game.id === ArcadeGameId.Jumps ? ARCADE_JUMPS : ARCADE_CLIMB;
+      return generateStepsLevel(game.id, game.name, n, tuning, params, hitbox, game.abilities);
+    }
+    case ArcadeGameId.Chimney:
+      return generateChimneyLevel(n, params, hitbox, game.abilities);
+    case ArcadeGameId.Wind:
+      return generateWindLevel(n, params, hitbox, game.abilities);
+    case ArcadeGameId.Cables:
+      return generateCablesLevel(n, params, hitbox, game.abilities);
+    case ArcadeGameId.Corridor:
+      return generateCorridorLevel(n, params, hitbox, game.abilities);
+    case ArcadeGameId.Worlds:
+      return generateWorldsLevel(n, params, hitbox, game.abilities);
+    case ArcadeGameId.Monster:
+      return generateMonsterLevel(n, params, hitbox, game.abilities);
   }
-  if (id === ArcadeGameId.Chimney) {
-    const level = generateChimneyLevel(n, params, phase.hitbox, game.abilities);
-    return {
-      id: `arcade-${id}-${String(n)}`,
-      text: level.text,
-      game: id,
-      number: n,
-      lengthTiles: level.lengthTiles,
-      difficulty: level.difficulty,
-    };
-  }
-  if (id === ArcadeGameId.Wind) {
-    const level = generateWindLevel(n, params, phase.hitbox, game.abilities);
-    return {
-      id: `arcade-${id}-${String(n)}`,
-      text: level.text,
-      game: id,
-      number: n,
-      lengthTiles: level.lengthTiles,
-      difficulty: level.difficulty,
-    };
-  }
-  if (id === ArcadeGameId.Worlds) {
-    const level = generateWorldsLevel(n, params, phase.hitbox, game.abilities);
-    return {
-      id: `arcade-${id}-${String(n)}`,
-      text: level.text,
-      game: id,
-      number: n,
-      lengthTiles: level.lengthTiles,
-      difficulty: level.difficulty,
-    };
-  }
-  if (id === ArcadeGameId.Corridor) {
-    const level = generateCorridorLevel(n, params, phase.hitbox, game.abilities);
-    return {
-      id: `arcade-${id}-${String(n)}`,
-      text: level.text,
-      game: id,
-      number: n,
-      lengthTiles: level.lengthTiles,
-      difficulty: level.difficulty,
-    };
-  }
-  if (id === ArcadeGameId.Cables) {
-    const level = generateCablesLevel(n, params, phase.hitbox, game.abilities);
-    return {
-      id: `arcade-${id}-${String(n)}`,
-      text: level.text,
-      game: id,
-      number: n,
-      lengthTiles: level.lengthTiles,
-      difficulty: level.difficulty,
-    };
-  }
-  return null;
 }
 
 /** Mètres du compteur pour une distance parcourue (tuiles). */

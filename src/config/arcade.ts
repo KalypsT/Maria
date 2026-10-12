@@ -221,6 +221,8 @@ export const ARCADE_CHIMES = {
   cleared: { from: 784, to: 1568, ms: 260, wave: 'triangle' },
   /** Une chute. */
   fall: { from: 620, to: 140, ms: 420, wave: 'triangle' },
+  /** Le monstre se réveille. */
+  wake: { from: 196, to: 147, ms: 260, wave: 'square' },
   /** Un nouveau record. */
   record: { from: 1046, to: 2093, ms: 380, wave: 'square' },
 } satisfies Record<string, SynthTone>;
@@ -462,4 +464,48 @@ export const ARCADE_WORLDS = {
    * Le témoin bascule au milieu de la plage.
    */
   minWindowPx: { from: 24, to: 8 } satisfies Ramp,
+};
+
+/**
+ * Le monstre (D-166) : le seul jeu où quelque chose pousse Céleste. Une course vers la droite sur un
+ * sol, des trous et des blocs (on court et on saute, sans capacité) ; derrière, une masse pastel sans
+ * visage (la poursuite des boss, D-67, D-87) : la toucher, c'est l'erreur. Sa vitesse se règle sur le
+ * témoin : il garde au plus juste `lead` tuiles d'avance. Distances en tuiles. PROVISOIRES, à régler
+ * sur téléphone.
+ */
+export const ARCADE_MONSTER = {
+  rows: 22,
+  /** Ligne du haut du sol. */
+  floorRow: 17,
+  /** Sol avant le premier obstacle, et après le dernier jusqu'au fanion (tuiles). */
+  startCols: 10,
+  goalCols: 8,
+  difficultyRate: 0.85,
+  /** Obstacles par niveau : `first`, un de plus tous les `every` niveaux, au plus `max`. */
+  obstacles: { first: 6, every: 2, max: 16 },
+  /** Sol entre deux obstacles (tuiles) visé, et le sol tiré en plus. */
+  gap: { from: 6, to: 2 } satisfies Ramp,
+  gapSpread: 3,
+  /** Chance d'un trou (sinon, un bloc). */
+  pitChance: { from: 0.45, to: 0.5 } satisfies Ramp,
+  /** Largeur d'un trou (tuiles) visée, et la largeur tirée en plus. */
+  pitWidth: { from: 2, to: 4.5 } satisfies Ramp,
+  pitSpread: 1,
+  /** Hauteur d'un bloc (tuiles) visée, tirée jusqu'à une tuile de plus ; sa largeur, tirée en plus. */
+  blockHeight: { from: 1, to: 2.4 } satisfies Ramp,
+  blockWidth: { from: 2, to: 3 } satisfies Ramp,
+  blockSpread: 3,
+  /** Plage de départs du saut (px) où le témoin passe, au moins. */
+  minWindowPx: { from: 20, to: 8 } satisfies Ramp,
+  /** Le monstre part après ce délai (ms), à cette distance derrière Céleste (tuiles). */
+  startDelayMs: 600,
+  startGapTiles: 5,
+  /** Tronçons de vitesse : le monstre accélère d'un tronçon à l'autre (vitesse relative). */
+  sections: 3,
+  speedProfile: { from: 0.8, to: 1.15 } satisfies Ramp,
+  /**
+   * L'avance la plus petite du témoin sur le monstre, une fois réveillé (tuiles) : de moins en moins
+   * de marge (à pleine course, une tuile se perd en un dixième de seconde).
+   */
+  lead: { from: 8, to: 3 } satisfies Ramp,
 };

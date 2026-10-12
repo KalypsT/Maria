@@ -94,7 +94,7 @@ describe('le menu de la console', () => {
     expect(byId.get(ArcadeGameId.Wind)).toMatchObject({ unlocked: false, ready: true });
     expect(byId.get(ArcadeGameId.Corridor)).toMatchObject({ unlocked: false, ready: true });
     expect(byId.get(ArcadeGameId.Worlds)).toMatchObject({ unlocked: false, ready: true });
-    expect(byId.get(ArcadeGameId.Monster)).toMatchObject({ unlocked: false, ready: false });
+    expect(byId.get(ArcadeGameId.Monster)).toMatchObject({ unlocked: false, ready: true });
     expect(byId.get(ArcadeGameId.Wind)).toMatchObject({ unlocked: false });
     expect(cards.filter(playable).map((card) => card.game.id)).toEqual([
       ArcadeGameId.Jumps,

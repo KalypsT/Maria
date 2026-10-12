@@ -42,17 +42,9 @@ describe('les jeux de la console', () => {
     expect(ids([], [StoryFlag.SeaStrangeDone])).toEqual([ArcadeGameId.Jumps, ArcadeGameId.Monster]);
   });
 
-  it('les niveaux : seulement pour les jeux prêts, à partir de 1', () => {
-    expect(ARCADE_READY).toEqual([
-      ArcadeGameId.Jumps,
-      ArcadeGameId.Climb,
-      ArcadeGameId.Chimney,
-      ArcadeGameId.Wind,
-      ArcadeGameId.Cables,
-      ArcadeGameId.Corridor,
-      ArcadeGameId.Worlds,
-    ]);
-    expect(arcadeLevel(ArcadeGameId.Monster, 1)).toBeNull();
+  it('les niveaux : pour chaque jeu, à partir de 1', () => {
+    // Les huit jeux ont leur générateur, dans l'ordre du menu.
+    expect(ARCADE_READY).toEqual(Object.values(ArcadeGameId));
     expect(arcadeLevel(ArcadeGameId.Cables, 0)).toBeNull();
     expect(arcadeLevel(ArcadeGameId.Cables, 1.5)).toBeNull();
     expect(arcadeLevel(ArcadeGameId.Cables, 3)?.id).toBe('arcade-cables-3');

@@ -3,9 +3,9 @@ import { TILE_SIZE as T } from '../../config/display';
 import type { MovementParams } from '../../config/movement';
 import { spawnPosition, type LevelData } from '../level/LevelData';
 import { parseAsciiLevel } from '../level/parseAsciiLevel';
-import { touchesHazard } from '../physics/gridCollision';
-import { PlayerPhysics, type PlayerInput } from '../player/PlayerPhysics';
+import { PlayerPhysics } from '../player/PlayerPhysics';
 import type { Hitbox } from './course';
+import { replayRun, scanAction, type RunAction, type RunBest } from './runner';
 import { mulberry32, ramp, seedOf } from './random';
 import { ARCADE_ROOM_META } from './roomMeta';
 
@@ -19,15 +19,8 @@ export interface CorridorObstacle {
   readonly width: number;
 }
 
-/**
- * Un geste du témoin, quand le bord droit de sa boîte atteint `atX` (px) : glisser, sauter, ou
- * glisser puis sauter (le saut long) quand le bord droit atteint `jumpX`.
- */
-export interface CorridorAction {
-  readonly kind: 'slide' | 'jump' | 'slide-jump';
-  readonly atX: number;
-  readonly jumpX?: number;
-}
+/** Un geste du témoin (`runner.ts`). */
+export type CorridorAction = RunAction;
 
 /** Un niveau du couloir : son texte, le plan du témoin (les tests le rejouent), ses obstacles. */
 export interface CorridorLevel {
@@ -41,11 +34,6 @@ export interface CorridorLevel {
 
 /** Colonnes de sol laissées après le dernier obstacle, pendant la génération. */
 const LOOKAHEAD_COLS = 24;
-/** Pas de simulation au plus pour passer un obstacle (et pour tout le niveau, à la fin). */
-const MAX_STEPS = 900;
-/** Départs du geste essayés avant l'obstacle (px), et après son bord (le temps de grâce). */
-const SCAN_BEFORE_PX = 110;
-const SCAN_AFTER_PX = 6;
 /** Saut long : la glissade part ces distances (px) avant le saut. */
 const SLIDE_LEADS_PX = [16, 32, 48];
 /** Écart tiré en plus essayé, au plus (tuiles), si l'obstacle ne passe pas à l'écart visé. */
@@ -110,135 +98,6 @@ function levelText(
   return [...header, ...grid.map((line) => line.join(''))].join('\n');
 }
 
-/** Le témoin qui suit un plan : le geste suivant, et le saut long en attente. */
-interface Driver {
-  readonly phys: PlayerPhysics;
-  next: number;
-  jumpX: number;
-}
-
-const input: PlayerInput = {
-  moveX: 1,
-  moveY: 0,
-  jumpPressed: false,
-  jumpHeld: true,
-  abilityPressed: false,
-};
-
-/** Un pas : il court vers la droite, Saut tenu ; le geste du plan quand il arrive à sa place. */
-function drive(driver: Driver, plan: readonly CorridorAction[]): void {
-  const box = driver.phys.box;
-  const right = box.x + box.width;
-  input.jumpPressed = false;
-  input.abilityPressed = false;
-  const action = plan[driver.next];
-  if (action && right >= action.atX) {
-    driver.next++;
-    if (action.kind === 'jump') {
-      input.jumpPressed = true;
-    } else {
-      input.abilityPressed = true;
-      driver.jumpX = action.jumpX ?? Number.POSITIVE_INFINITY;
-    }
-  } else if (right >= driver.jumpX) {
-    input.jumpPressed = true;
-    driver.jumpX = Number.POSITIVE_INFINITY;
-  }
-  driver.phys.step(input);
-}
-
-function copyPhys(
-  from: PlayerPhysics,
-  level: LevelData,
-  params: Readonly<MovementParams>,
-): PlayerPhysics {
-  const phys = new PlayerPhysics(level, params, from.box.x, from.box.y, from.box);
-  phys.copyFrom(from);
-  phys.shiftTo(level, 0);
-  return phys;
-}
-
-/**
- * Depuis `from`, le témoin passe-t-il l'obstacle avec ce geste : posé au sol au-delà de `clearX`
- * (px), le geste fait, sans toucher de danger ? Retourne son état d'alors.
- */
-function pass(
-  from: PlayerPhysics,
-  level: LevelData,
-  params: Readonly<MovementParams>,
-  action: CorridorAction,
-  clearX: number,
-): PlayerPhysics | null {
-  const driver: Driver = {
-    phys: copyPhys(from, level, params),
-    next: 0,
-    jumpX: Number.POSITIVE_INFINITY,
-  };
-  const plan = [action];
-  for (let i = 0; i < MAX_STEPS; i++) {
-    drive(driver, plan);
-    const phys = driver.phys;
-    if (touchesHazard(level, phys.box)) {
-      return null;
-    }
-    if (
-      driver.next === 1 &&
-      driver.jumpX === Number.POSITIVE_INFINITY &&
-      phys.grounded &&
-      phys.box.x >= clearX
-    ) {
-      return phys;
-    }
-  }
-  return null;
-}
-
-/** Le meilleur geste pour un obstacle : la plus longue plage de départs qui passent, et son milieu. */
-interface Best {
-  readonly action: CorridorAction;
-  readonly window: number;
-  readonly phys: PlayerPhysics;
-}
-
-/**
- * Essaie le geste à chaque px avant l'obstacle (jamais avant la place du témoin : le geste se décide
- * après l'obstacle précédent) ; `make` donne le geste d'un départ. Garde la plus longue plage.
- */
-function scan(
-  from: PlayerPhysics,
-  level: LevelData,
-  params: Readonly<MovementParams>,
-  edgeX: number,
-  clearX: number,
-  make: (x: number) => CorridorAction,
-): Best | null {
-  const first = Math.max(edgeX - SCAN_BEFORE_PX, Math.ceil(from.box.x + from.box.width) + 1);
-  let best: Best | null = null;
-  let runStart = -1;
-  const close = (end: number) => {
-    const window = end - runStart;
-    if (runStart >= 0 && window > (best?.window ?? 0)) {
-      const action = make(runStart + Math.floor(window / 2));
-      const phys = pass(from, level, params, action, clearX);
-      if (phys) {
-        best = { action, window, phys };
-      }
-    }
-    runStart = -1;
-  };
-  for (let x = first; x <= edgeX + SCAN_AFTER_PX; x++) {
-    if (pass(from, level, params, make(x), clearX)) {
-      if (runStart < 0) {
-        runStart = x;
-      }
-    } else {
-      close(x);
-    }
-  }
-  close(edgeX + SCAN_AFTER_PX + 1);
-  return best;
-}
-
 /** Le meilleur geste pour passer cet obstacle (null : rien ne passe). */
 function bestFor(
   from: PlayerPhysics,
@@ -246,13 +105,13 @@ function bestFor(
   params: Readonly<MovementParams>,
   o: CorridorObstacle,
   long: boolean,
-): Best | null {
+): RunBest | null {
   const edgeX = o.col * T;
   const clearX = (o.col + o.width) * T;
   if (o.kind !== 'pit') {
-    return scan(from, level, params, edgeX, clearX, (atX) => ({ kind: 'slide', atX }));
+    return scanAction(from, level, params, edgeX, clearX, (atX) => ({ kind: 'slide', atX }));
   }
-  const jump = scan(from, level, params, edgeX, clearX, (atX) => ({ kind: 'jump', atX }));
+  const jump = scanAction(from, level, params, edgeX, clearX, (atX) => ({ kind: 'jump', atX }));
   if (!long) {
     return jump;
   }
@@ -260,9 +119,9 @@ function bestFor(
     // Un saut long demandé : un saut en courant ne doit pas suffire.
     return null;
   }
-  let best: Best | null = null;
+  let best: RunBest | null = null;
   for (const lead of SLIDE_LEADS_PX) {
-    const found = scan(from, level, params, edgeX, clearX, (jumpX) => ({
+    const found = scanAction(from, level, params, edgeX, clearX, (jumpX) => ({
       kind: 'slide-jump',
       atX: jumpX - lead,
       jumpX,
@@ -333,7 +192,7 @@ export function generateCorridorLevel(
         (a, b) => Math.abs(a - wanted) - Math.abs(b - wanted),
       );
     }
-    type Placed = { obstacle: CorridorObstacle; best: Best };
+    type Placed = { obstacle: CorridorObstacle; best: RunBest };
     const tryPlace = (list: readonly (readonly [CorridorObstacle, boolean])[]): Placed | null => {
       for (const [obstacle, isLong] of list) {
         const level = parse([...obstacles, obstacle], obstacle.col + obstacle.width);
@@ -394,20 +253,5 @@ export function runPlan(
   params: Readonly<MovementParams>,
   hitbox: Hitbox,
 ): number {
-  const spawn = spawnPosition(level, hitbox.width, hitbox.height);
-  const phys = new PlayerPhysics(level, params, spawn.x, spawn.y, hitbox);
-  phys.canSlide = true;
-  const driver: Driver = { phys, next: 0, jumpX: Number.POSITIVE_INFINITY };
-  let lastX = Number.NaN;
-  for (let i = 0; i < MAX_STEPS * (plan.length + 2); i++) {
-    drive(driver, plan);
-    if (touchesHazard(level, phys.box)) {
-      return -1;
-    }
-    if (driver.next === plan.length && phys.grounded && !phys.low && phys.box.x === lastX) {
-      return phys.box.x;
-    }
-    lastX = phys.box.x;
-  }
-  return -1;
+  return replayRun(level, plan, params, hitbox, true);
 }

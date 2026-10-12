@@ -22,7 +22,7 @@ import {
   type MovementParams,
 } from '../config/movement';
 import { CameraController } from '../core/camera/CameraController';
-import { ChaseEvent } from '../core/boss/Chase';
+import { Chase, ChaseEvent } from '../core/boss/Chase';
 import { CombatEvent, CombatWorld, wavesOf } from '../core/combat/CombatWorld';
 import { FixedStepClock } from '../core/FixedStepClock';
 import { InputController } from '../core/input/InputController';
@@ -181,6 +181,7 @@ import {
 } from '../config/arcade';
 import { arcadeGame, arcadeLevel, arcadePhase } from '../core/arcade/arcade';
 import { consoleCards } from '../core/arcade/consoleMenu';
+import { monsterChaseParams } from '../core/arcade/monster';
 import { ArcadeEvent, ArcadePhase, ArcadeRun } from '../core/arcade/run';
 import { arcadeRecord } from '../core/save/arcade';
 import { touchesHazard } from '../core/physics/gridCollision';
@@ -3300,6 +3301,11 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     this.setRoom(parseAsciiLevel(level.id, level.text), null, null);
+    // Le monstre (D-166) : la poursuite des boss, qui part plus tôt et plus près.
+    const chase = this.level.chase;
+    if (chase) {
+      this.combat.chase = new Chase(chase, monsterChaseParams(this.combatParams), PHYSICS_STEP_HZ);
+    }
     this.useGrowth(arcadePhase(game));
     this.respawn();
     const box = this.player.box;
@@ -3311,8 +3317,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Un pas d'une partie : Céleste joue ; les briques de jeu, c'est l'erreur (pas de peur ici) ; le
-   * poteau du fanion, le niveau suivant.
+   * Un pas d'une partie : Céleste joue ; les briques de jeu ou le monstre, c'est l'erreur (pas de
+   * peur ici) ; le poteau du fanion, le niveau suivant.
    */
   private stepArcade(run: ArcadeRun): void {
     const controls = this.controls;
@@ -3339,7 +3345,14 @@ export class GameScene extends Phaser.Scene {
           : (box.x + box.width / 2 - this.arcadeStartX) / TILE_SIZE,
       );
       const goal = this.level.goal;
-      if (touchesHazard(this.level, box)) {
+      // Le monstre (D-166) : il avance seulement pendant que Céleste joue ; le toucher, c'est
+      // l'erreur, comme les briques de jeu.
+      const chase = this.combat.chase;
+      const caught = chase?.step(box, false) === true;
+      if (chase && (chase.events & ChaseEvent.Wake) !== 0) {
+        this.chime('wake');
+      }
+      if (caught || touchesHazard(this.level, box)) {
         run.fall();
         this.chime('fall');
         this.haptics.pulse('hurt');
