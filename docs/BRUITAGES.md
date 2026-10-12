@@ -92,6 +92,7 @@ même gamme douce (tirées au hasard, elles font une petite mélodie).
 | `map-close`           | la page du cahier se referme                                                                 | 1         |
 | `toy-phone-ring` ✅   | le téléphone de l'Educaville sonne tout seul, au bout de l'école étrange (**boucle**, D-155) | 1         |
 | `toy-phone-pickup` ✅ | Céleste décroche : le clic du combiné, puis le silence (D-155)                               | 1         |
+| `eden-giggle`         | dans le souvenir d'Eden, il pouffe derrière sa cachette quand Céleste ouvre les yeux (D-171) | 1–2       |
 
 ### La voix de Céleste
 

@@ -2776,3 +2776,15 @@ Retour d'essai de l'utilisateur (de la station balnéaire à la fin), plan valid
 - **La voisine de la rue d'autrefois**, gardée (choix de l'utilisateur), en plus étrange : l'écho d'un passant (`memory`) est teinté de la lueur turquoise du monde étrange et vacille doucement (`PASSERBY_ECHO`, PROVISOIRE). Elle salue toujours.
 - **Test** (`nannyIslets.test.ts`) : chaque porte vers l'îlot voisin, cachée sans les deux îlots finis, ouverte avec eux. Les îlots restent jamais coincés, chaque cube atteint (le test existant).
 - **Vérifié dans Chromium** : la trappe, l'arche du carrousel, le passage de l'école éteint avec son cube jaune, la voisine en écho.
+
+### Étape 5 : le souvenir d'Eden
+
+- **Le tas de cubes diminue** (les cubes « se dédoublaient » : le tas gardait ses quatre cubes) : un cube de moins à chaque cube pris, Céleste le rose, Eden le jaune dans le noir, Céleste le turquoise, Eden le bleu ; puis plus de tas (`cube-pile-3`, `-2`, `-1`, à l'écran au moment du geste).
+- **Le cache-cache mieux compris** (choix de l'utilisateur, toutes les pistes) :
+  - avant chaque compte, **Eden propose le jeu** : sa bulle de parole, un visage les mains sur les yeux (nouveau pictogramme `hide-seek`) ;
+  - quand Céleste rouvre les yeux, **elle se demande où il est** : un nuage, le visage d'Eden et un « ? » (`eden-where`), et **il pouffe** derrière sa cachette (nouveau bruitage `eden-giggle`, à fournir, `docs/BRUITAGES.md`) ;
+  - **la nounou tourne la tête** vers la cachette les deux fois (seulement la seconde avant) ;
+  - l'étincelle d'aide arrive après **2 s** (4 s avant).
+- **Le moteur des souvenirs jouables** : une action peut avoir une bulle quand elle devient la suivante (`prompt` : le pictogramme, qui parle, un son ; événement `MemoryEvent.Prompt`). La cuisine est inchangée.
+- **Tests** (`nannyEden.test.ts`) : le tas (un seul à la fois, un cube de moins à chaque cube pris), les bulles (qui parle est bien là au moment de sa bulle, chaque recherche a la sienne), la nounou à chaque cachette.
+- **Vérifié dans Chromium** : tout le souvenir joué, le tas qui diminue, la bulle d'Eden, les « Eden ? », le cœur.

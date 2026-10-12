@@ -112,6 +112,10 @@ export const THOUGHT_ICONS = [
   'sea',
   /** La maison, sa fenêtre allumée (D-169) : Céleste y pense, loin de chez elle. */
   'home',
+  /** Un visage, les mains sur les yeux (D-171) : « on joue à cache-cache », dans le souvenir d'Eden. */
+  'hide-seek',
+  /** Eden (blond, la coupe au bol) et un « ? » (D-171) : où s'est-il caché ? */
+  'eden-where',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
@@ -434,6 +438,10 @@ export const PROP_KINDS = [
    * des îlots), la tour tombée (les quatre cubes par terre).
    */
   'cube-pile',
+  /** Le tas, un cube de moins à chaque cube pris (D-171). */
+  'cube-pile-3',
+  'cube-pile-2',
+  'cube-pile-1',
   'cube-tower-1',
   'cube-tower-2',
   'cube-tower-3',

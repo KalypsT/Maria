@@ -3938,6 +3938,13 @@ export class GameScene extends Phaser.Scene {
     if ((events & MemoryEvent.Heart) !== 0) {
       this.storyView.think('heart', PLAYABLE_MEMORY_TIMING.heartMs);
     }
+    const prompt = memory.current?.prompt;
+    if ((events & MemoryEvent.Prompt) !== 0 && prompt) {
+      this.storyView.think(prompt.icon, PLAYABLE_MEMORY_TIMING.promptMs, prompt.by);
+      if (prompt.sfx) {
+        this.audio.sfx.play(prompt.sfx);
+      }
+    }
     if ((events & MemoryEvent.Done) !== 0) {
       this.endMemory();
       return;

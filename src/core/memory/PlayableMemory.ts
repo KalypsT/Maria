@@ -19,6 +19,8 @@ export const MemoryEvent = {
   Alone: 4,
   /** Le souvenir est fini (dans le noir) : on revient au jeu. */
   Done: 8,
+  /** L'action suivante a une bulle (`current.prompt`, D-171). */
+  Prompt: 16,
 } as const;
 
 /** Moments du souvenir. */
@@ -87,6 +89,7 @@ export class PlayableMemory {
       aloneMs: msToSteps(timing.aloneMs, stepHz),
       blinkMs: msToSteps(timing.blinkMs, stepHz),
       beatMs: msToSteps(timing.beatMs, stepHz),
+      promptMs: msToSteps(timing.promptMs, stepHz),
     };
   }
 
@@ -223,6 +226,9 @@ export class PlayableMemory {
   /** Une action finie : la suivante, ou le cœur après la dernière. */
   private afterAction(): void {
     if (this.next < this.data.actions.length) {
+      if (this.data.actions[this.next]?.prompt) {
+        this.events |= MemoryEvent.Prompt;
+      }
       this.enter(Phase.Play);
     } else {
       this.events |= MemoryEvent.Heart;

@@ -80,6 +80,11 @@ export const SFX_SLOTS = [
    */
   'toy-phone-ring',
   'toy-phone-pickup',
+  /**
+   * Le petit rire d'Eden caché (D-171), dans son souvenir : quand Céleste ouvre les yeux, il
+   * pouffe derrière sa cachette.
+   */
+  'eden-giggle',
   /** Une bulle de pensée apparaît. */
   'thought',
   /** Le fil discret se montre (D-129) : un tintement très doux. */
@@ -258,6 +263,7 @@ export const TEST_TONES: Readonly<Record<SfxSlot, SynthTone>> = {
   door: { from: 350, to: 250, ms: 120, wave: 'triangle' },
   'toy-phone-ring': { from: 880, to: 880, ms: 0, wave: 'square' },
   'toy-phone-pickup': { from: 600, to: 300, ms: 40, wave: 'square' },
+  'eden-giggle': { from: 900, to: 1300, ms: 160, wave: 'triangle' },
   thought: { from: 1200, to: 1500, ms: 50, wave: 'sine' },
   hint: { from: 1500, to: 1900, ms: 180, wave: 'sine' },
   'voice-hop': { from: 600, to: 900, ms: 80, wave: 'triangle' },

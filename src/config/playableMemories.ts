@@ -1,7 +1,8 @@
 import type { GrowthPhase } from './growth';
 import type { MemoryId } from './memories';
 import { PLAYER_HITBOX } from './movement';
-import type { StoryProp, TileArea } from '../core/story/story';
+import type { StoryProp, ThoughtIcon, TileArea } from '../core/story/story';
+import type { SfxSlot } from './sfx';
 
 /**
  * Souvenirs jouables (D-89) : un court moment d'enfance qu'on joue, sans texte, dans une petite
@@ -38,6 +39,15 @@ export interface MemoryAction {
   readonly beats?: number;
   /** L'étincelle n'apparaît qu'après ce délai (ms) : on cherche d'abord seule (D-122). */
   readonly markDelayMs?: number;
+  /**
+   * Quand l'action devient la suivante (D-171) : une bulle, de Céleste (elle pense) ou d'un objet
+   * de la salle (`by`, son identifiant : il parle), et un son.
+   */
+  readonly prompt?: {
+    readonly icon: ThoughtIcon;
+    readonly by?: string;
+    readonly sfx?: SfxSlot;
+  };
   /** Scintillement (vapeur, thé versé) au moment du geste. */
   readonly sparkle?: TileArea;
   /**
@@ -97,6 +107,8 @@ export const PLAYABLE_MEMORY_TIMING = {
   blinkMs: 1400,
   /** Un battement du noir quand Céleste compte (D-122), ajouté au clignement. */
   beatMs: 650,
+  /** La bulle qui annonce une action (D-171). */
+  promptMs: 2200,
 };
 
 /** Étapes du souvenir de la cuisine (jamais sauvegardées). */
@@ -209,8 +221,8 @@ const FOUND_B = { col: 8, row: 19 };
 const NANNY = { col: 40, row: 19 };
 /** Le compte du cache-cache : trois battements de noir (D-122). */
 const COUNT_BEATS = 3;
-/** On cherche d'abord seule ; l'étincelle n'aide qu'après (ms). PROVISOIRE. */
-const SEEK_HINT_MS = 4000;
+/** On cherche d'abord seule ; l'étincelle n'aide qu'après (ms, 4 s avant D-171). PROVISOIRE. */
+const SEEK_HINT_MS = 2000;
 /** Céleste se tient devant une cachette (par terre, à côté). */
 const beside = (p: { col: number; row: number }, side: -1 | 1) => ({
   area: { col: side < 0 ? p.col - 4 : p.col, row: p.row, w: 4, h: 3 },
@@ -240,6 +252,26 @@ const EDEN_POSES: readonly {
   { kind: 'eden-peek', at: HIDE_B, from: E.hideB, until: E.found, flip: true },
   { kind: 'eden-laugh', at: FOUND_B, from: E.found, until: E.gone, flip: true },
 ];
+
+/**
+ * Le tas selon le moment (D-171) : un cube de moins à chaque cube pris (Céleste prend le premier,
+ * Eden le deuxième dans le noir, Céleste le troisième, Eden le dernier). Avant, le tas gardait ses
+ * quatre cubes : ils semblaient se dédoubler.
+ */
+const PILE_STATES: readonly {
+  readonly kind: 'cube-pile' | 'cube-pile-3' | 'cube-pile-2' | 'cube-pile-1';
+  readonly from: string | null;
+  readonly until: string;
+}[] = [
+  { kind: 'cube-pile', from: null, until: E.cube1 },
+  { kind: 'cube-pile-3', from: E.cube1, until: E.tower2 },
+  { kind: 'cube-pile-2', from: E.tower2, until: E.cube2 },
+  { kind: 'cube-pile-1', from: E.cube2, until: E.fallen },
+];
+
+/** Eden près de la tour tombée, puis trouvé près du pouf : il propose le cache-cache (D-171). */
+const EDEN_COUNTING = 'eden-2-eden-laugh';
+const EDEN_FOUND_A = 'eden-4-eden-laugh';
 
 /** La tour selon le moment : rien, puis un à trois cubes, puis tombée. */
 const TOWER_STATES: readonly {
@@ -277,7 +309,8 @@ const EDEN: PlayableMemoryData = {
     { ...at(TOWER), gesture: 'serve', carry: false, shows: E.tower1, sets: E.tower2, blink: true },
     { ...at(PILE), gesture: 'serve', carry: true, sets: E.cube2 },
     { ...at(TOWER), gesture: 'serve', carry: false, shows: E.tower3, sets: E.fallen, blink: true },
-    // Le cache-cache : Céleste se cache les yeux et compte ; dans le noir, il se cache.
+    // Le cache-cache : Eden le propose (sa bulle, D-171) ; Céleste se cache les yeux et compte ;
+    // dans le noir, il se cache. Elle rouvre les yeux : où est-il ? Il pouffe derrière sa cachette.
     {
       ...at(EDEN_AT),
       gesture: 'count',
@@ -285,6 +318,7 @@ const EDEN: PlayableMemoryData = {
       sets: E.hideA,
       blink: true,
       beats: COUNT_BEATS,
+      prompt: { icon: 'hide-seek', by: EDEN_COUNTING },
     },
     {
       ...beside(HIDE_A, -1),
@@ -293,6 +327,7 @@ const EDEN: PlayableMemoryData = {
       sets: E.foundA,
       blink: true,
       markDelayMs: SEEK_HINT_MS,
+      prompt: { icon: 'eden-where', sfx: 'eden-giggle' },
     },
     {
       ...at(FOUND_A),
@@ -301,6 +336,7 @@ const EDEN: PlayableMemoryData = {
       sets: E.hideB,
       blink: true,
       beats: COUNT_BEATS,
+      prompt: { icon: 'hide-seek', by: EDEN_FOUND_A },
     },
     {
       ...beside(HIDE_B, 1),
@@ -309,10 +345,18 @@ const EDEN: PlayableMemoryData = {
       sets: E.found,
       blink: true,
       markDelayMs: SEEK_HINT_MS,
+      prompt: { icon: 'eden-where', sfx: 'eden-giggle' },
     },
   ],
   props: [
-    { id: 'eden-pile', room: 'memory-eden', kind: 'cube-pile', ...PILE, when: {} },
+    ...PILE_STATES.map((p): StoryProp => ({
+      id: `eden-${p.kind}`,
+      room: 'memory-eden',
+      kind: p.kind,
+      ...PILE,
+      when: { all: p.from ? [p.from] : [], none: [p.until] },
+      instant: true,
+    })),
     ...TOWER_STATES.map((t): StoryProp => ({
       id: `eden-${t.kind}`,
       room: 'memory-eden',
@@ -331,14 +375,30 @@ const EDEN: PlayableMemoryData = {
       instant: true,
     })),
     // La nounou, dans son fauteuil : une silhouette bienveillante qui regarde, sans visage net ;
-    // pendant la seconde cachette, elle tourne la tête vers le coffre à jouets.
+    // pendant chaque cachette (la première aussi depuis D-171), elle tourne la tête vers elle.
     {
       id: 'eden-nanny',
       room: 'memory-eden',
       kind: 'nanny-shadow',
       ...NANNY,
       flip: true,
-      when: { none: [E.hideB] },
+      when: { none: [E.hideA] },
+    },
+    {
+      id: 'eden-nanny-look-a',
+      room: 'memory-eden',
+      kind: 'nanny-look',
+      ...NANNY,
+      flip: true,
+      when: { all: [E.hideA], none: [E.foundA] },
+    },
+    {
+      id: 'eden-nanny-between',
+      room: 'memory-eden',
+      kind: 'nanny-shadow',
+      ...NANNY,
+      flip: true,
+      when: { all: [E.foundA], none: [E.hideB] },
     },
     {
       id: 'eden-nanny-look',

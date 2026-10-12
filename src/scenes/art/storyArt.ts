@@ -619,12 +619,23 @@ function drawFallenTower(ctx: CanvasRenderingContext2D, w: number, h: number): v
 }
 
 /** Le tas de cubes (D-118), par terre. */
-function drawCubePile(ctx: CanvasRenderingContext2D, h: number): void {
+/**
+ * Le tas de cubes du souvenir d'Eden : les `n` derniers des quatre (D-171). Le premier pris est
+ * celui du dessus (le rose), puis ceux du bas, de gauche à droite.
+ */
+function drawCubePile(ctx: CanvasRenderingContext2D, h: number, n: number): void {
   const s = 7;
-  drawCube(ctx, 2, h - s, s, 1);
-  drawCube(ctx, 9, h - s, s, 2);
-  drawCube(ctx, 16, h - s, s, 3);
-  drawCube(ctx, 5.5, h - 2 * s, s, 0);
+  const first = 4 - n;
+  for (const [k, x, y] of [
+    [1, 2, h - s],
+    [2, 9, h - s],
+    [3, 16, h - s],
+    [0, 5.5, h - 2 * s],
+  ] as const) {
+    if (k >= first) {
+      drawCube(ctx, x, y, s, k);
+    }
+  }
 }
 
 /**
@@ -934,7 +945,16 @@ export function drawProp(
       });
       break;
     case 'cube-pile':
-      drawCubePile(ctx, h);
+      drawCubePile(ctx, h, 4);
+      break;
+    case 'cube-pile-3':
+      drawCubePile(ctx, h, 3);
+      break;
+    case 'cube-pile-2':
+      drawCubePile(ctx, h, 2);
+      break;
+    case 'cube-pile-1':
+      drawCubePile(ctx, h, 1);
       break;
     case 'cube-tower-1':
     case 'cube-tower-2':
@@ -1405,6 +1425,65 @@ function drawIcon(
       ctx.fillRect(cx - 4, cy + 1, 3.5, 3);
       ctx.fillStyle = WOOD_DARK;
       ctx.fillRect(cx + 1.5, cy + 2, 3, 5);
+      break;
+    case 'hide-seek':
+      // Cache-cache (D-171) : un visage, les deux mains sur les yeux.
+      faceIcon(ctx, cx, cy + 1);
+      // Deux mains ouvertes, les doigts vers le haut, penchées vers le milieu : elles débordent du
+      // visage (sinon on dirait des lunettes).
+      for (const s of [-1, 1]) {
+        ctx.save();
+        ctx.translate(cx + s * 3.2, cy - 0.8);
+        ctx.rotate(s * 0.35);
+        ctx.fillStyle = HAND;
+        ctx.strokeStyle = INK;
+        ctx.lineWidth = 0.6;
+        ctx.beginPath();
+        ctx.roundRect(-2.4, -1.2, 4.8, 4.6, 1.6);
+        ctx.fill();
+        ctx.stroke();
+        for (let f = 0; f < 3; f++) {
+          ctx.beginPath();
+          ctx.roundRect(-2.2 + f * 1.55, -5.4, 1.3, 4.6, 0.65);
+          ctx.fill();
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 0.9;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.arc(cx, cy + 3.8, 1.6, Math.PI * 0.15, Math.PI * 0.85);
+      ctx.stroke();
+      break;
+    case 'eden-where':
+      // Où est Eden ? (D-171) : son visage, blond à la coupe au bol (D-122), et un « ? ».
+      faceIcon(ctx, cx - 2, cy + 1);
+      ctx.fillStyle = '#e8c96a';
+      ctx.beginPath();
+      ctx.arc(cx - 2, cy + 0.6, 6.8, Math.PI, Math.PI * 2);
+      ctx.lineTo(cx + 4.8, cy + 0.2);
+      ctx.lineTo(cx - 8.8, cy + 0.2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = INK;
+      for (const s of [-1, 1]) {
+        ctx.beginPath();
+        ctx.arc(cx - 2 + s * 2.4, cy + 2.2, 0.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.strokeStyle = PINK;
+      ctx.lineWidth = 1.5;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.arc(cx + 7, cy - 5, 2.2, Math.PI * 1.1, Math.PI * 2.4);
+      ctx.lineTo(cx + 7, cy - 1.8);
+      ctx.stroke();
+      ctx.fillStyle = PINK;
+      ctx.beginPath();
+      ctx.arc(cx + 7, cy + 0.6, 0.85, 0, Math.PI * 2);
+      ctx.fill();
       break;
     case 'handle': {
       // Une porte, la poignée tout en haut, et une petite main qui n'y arrive pas (D-46).
