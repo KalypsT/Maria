@@ -21,9 +21,10 @@ export const BACKPACK_PAGES: Readonly<Record<BackpackTab, readonly BackpackPage[
 
 /**
  * Ce qui ouvre le sac : son bouton (l'action Carte, au toucher, au clavier ou à la manette), la
- * touche Pause (Échap), ou l'appli passée en arrière-plan.
+ * touche Pause (Échap), l'appli passée en arrière-plan, ou Agir à une lanterne (le voyage rapide,
+ * D-163 : la carte).
  */
-export type BackpackTrigger = 'bag' | 'pause' | 'hidden';
+export type BackpackTrigger = 'bag' | 'pause' | 'hidden' | 'travel';
 
 /**
  * La page ouverte (choix de l'utilisateur, D-159) : toujours la carte ; la touche Pause ouvre les

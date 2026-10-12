@@ -168,7 +168,8 @@ const WAKE_AND_RETURN: readonly StoryStep[] = [
   { do: 'wait', ms: S.monthsBlackMs },
   { do: 'fadeIn', ms: S.monthsFadeInMs },
   { do: 'wait', ms: 1400 },
-  { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs + 800 },
+  // Le temps a passé, le manque reste (D-165).
+  { do: 'thought', icon: 'miss', ms: S.thoughtMs + 800 },
   { do: 'wait', ms: S.lookMs },
 ];
 
@@ -190,10 +191,8 @@ export const NANNY_ENTER: readonly StoryStep[] = [
   { do: 'flag', id: F.NannyArrived },
   { do: 'wait', ms: S.nightBlackMs },
   { do: 'fadeIn', ms: S.nightFadeInMs, shape: 'iris' },
+  // Plus de bulle « Maria » au début d'un niveau (D-165, revient sur D-70).
   { do: 'wait', ms: S.lookMs },
-  // Le début d'un niveau (D-70) : Céleste pense à Maria.
-  { do: 'thought', icon: 'maria', ms: S.thoughtMs },
-  { do: 'wait', ms: S.thoughtMs },
 ];
 
 const TRIGGERS: StoryTrigger[] = [
@@ -213,7 +212,7 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.lookMs },
       { do: 'thought', icon: 'question', ms: S.thoughtMs },
       { do: 'wait', ms: S.thoughtMs },
-      { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'nanny-reflection' },
+      { do: 'thought', icon: 'smile', ms: S.thoughtMs, by: 'nanny-reflection' },
       { do: 'wait', ms: S.thoughtMs },
       { do: 'fadeOut', ms: S.blinkOutMs },
       { do: 'flag', id: F.NannyMirror },
@@ -228,7 +227,7 @@ const TRIGGERS: StoryTrigger[] = [
   },
   ...ISLET_CUBES.map((c): StoryTrigger => ({
     // Au bout de chaque îlot (D-112 à D-115, D-122) : un cube de la tour d'Eden. Céleste le
-    // reconnaît (un cœur) et le prend : il rejoint son creux sur la porte de la sieste, et la
+    // reconnaît (l'émerveillement, D-165) et le prend : il rejoint son creux sur la porte de la sieste, et la
     // bulle montre les cubes déjà trouvés (ceux qui restent, en creux). Les passages près de lui
     // s'ouvrent, vers la maison et vers l'îlot voisin.
     id: `nanny-${c.kind}`,
@@ -245,7 +244,7 @@ const TRIGGERS: StoryTrigger[] = [
         ms: S.cradleSparkleMs + 600,
       },
       { do: 'wait', ms: S.cradleSparkleMs },
-      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+      { do: 'thought', icon: 'wonder', ms: S.thoughtMs },
       { do: 'wait', ms: S.thoughtMs },
       { do: 'flag', id: c.flag },
       { do: 'thought', icon: 'cubes', ms: S.thoughtMs + 1200 },
@@ -305,7 +304,7 @@ const TRIGGERS: StoryTrigger[] = [
     lock: true,
     steps: [
       { do: 'sparkle', area: { col: o.at.col - 1, row: o.at.row - 2, w: 3, h: 3 }, ms: S.lookMs },
-      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+      { do: 'thought', icon: 'wonder', ms: S.thoughtMs },
       { do: 'flag', id: o.flag },
       // Le cube rejoint la tour d'Eden, sur le gros cube (D-122).
       {
@@ -347,7 +346,7 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'fadeIn', ms: S.nightFadeInMs, shape: 'iris' },
       { do: 'wait', ms: S.lookMs },
       // La fin du niveau (D-119) : le cercle se referme sur la salle de jeux, Eden n'est plus là.
-      { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+      // Sans bulle « Maria » ici (D-165) : elle revient au réveil, dix secondes plus tard.
       { do: 'wait', ms: S.thoughtMs },
       { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
       ...WAKE_AND_RETURN,
@@ -532,14 +531,15 @@ const LOCKED: StoryData['lockedRooms'] = [
   { room: 'nanny-train', exit: 4, when: { none: [F.NannySeaDone] }, hidden: true },
   // La porte de la salle de jeux (D-117) : fermée tant que l'effacement n'est pas dissous ; celle de
   // la maison où elle mène n'existe pas encore.
-  { room: 'nanny-playroom', exit: 2, when: { none: [F.NannyErasureGone] }, icon: 'question' },
+  { room: 'nanny-playroom', exit: 2, when: { none: [F.NannyErasureGone] }, icon: 'locked' },
   { room: 'nanny-house', exit: 11, when: { none: [F.NannyErasureGone] }, hidden: true },
   // La petite porte de la sieste (D-116) : fermée tant qu'une veilleuse est éteinte (un îlot reste).
   ...ISLETS_DONE.map((flag) => ({
     room: 'nanny-house',
     exit: 10,
     when: { none: [flag] },
-    icon: 'question' as const,
+    // Les cubes qui manquent encore (D-165), plutôt qu'un « ? ».
+    icon: 'cubes' as const,
   })),
 ];
 

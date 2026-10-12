@@ -4,6 +4,16 @@
 
 **Retour d'essai, suite** (D-168, D-169, sur `claude/game-test-issues-e7pomv`) : **faits** : l'image du sac, le jingle des trouvailles, la lanterne, les pas sur le bois (fichiers de l'utilisateur) ; la cheminée de l'école étrange en difficulté moyenne ; le passage vers la gare n'a plus l'air d'un monde étrange ; l'ombre de l'oculus s'arrête une fois passée ; **les souvenirs de Céleste refaits** (D-169 : neuf souvenirs sur tout le voyage, l'envol vers le sac pour tous les trésors, des bulles sans cœur, la gommette étoile des capacités). **En attente** : les images (prompts fournis, choix validés) : les souvenirs qui manquent (la boîte à musique, la carte postale, le dessin de toute la famille, le dessin de l'école à refaire), les affaires de Maria, les jouets du monde étrange, les pochettes des disques (facultatif), **les trois courts souvenirs** (Céleste à 2 ans en référence, une image par souvenir) ; essai sur téléphone.
 
+**La console, le mode Sans fin** (D-167, demande de l'utilisateur, sur `ccr-e9f3d38a-x4umy1`, reparti de `main` après la fusion du mode Niveaux) : un seul parcours continu fait de morceaux collés (une jointure entre chacun), une bande de trois morceaux chargée ; un nouveau parcours à chaque partie, la difficulté plafonnée au niveau 20, un repère fantôme du record et un bip tous les 100 m, débloqué après un niveau atteint en mode Niveaux (proposé : 5). Plan validé en 6 PR. **PR 1 faite : le moteur** (les morceaux des sauts et leurs jointures, la bande, purs et testés) et **PR 2 faite : le Sans fin dans la console** (les sauts : ouvert au niveau 5, la bande dans la scène, le dessin bloc par bloc, les morceaux en arrière-plan et hors ligne, le repère du record, le bip des 100 m). **Essai sur téléphone attendu** (une saccade au changement de morceau ?). **PR 3 faite : le couloir et les tyroliennes** en Sans fin (la jointure des tyroliennes à hauteur libre : le morceau suivant en part). **PR 4 faite : les deux mondes et le monstre** (le monstre tenu en laisse, écart au plan signalé). **Essai sur téléphone attendu** (le monstre, les deux mondes). **PR 5 faite : la bande en deux dimensions et les jeux verticaux** (la grimpette en escalier, la cheminée empilée, le grand vent en descente ; les huit jeux ont leur Sans fin). Suite : la PR 6, les réglages après les essais sur téléphone.
+
+**La console de Céleste** (D-166, demande de l'utilisateur, sur `ccr-e9f3d38a-x4umy1`) : un mode à part, un jeu par capacité (des niveaux qui s'enchaînent, de plus en plus durs, record en mètres). Maquette (https://claude.ai/artifact/2Pb1PC7arwM1ESAByVLc9T), choix de l'utilisateur et plan validés en 9 PR pour le mode Niveaux (le système ; l'écran de la console ; le cadeau et la chambre ; puis un jeu par PR) ; le mode Sans fin plus tard. **PR 1 faite : le système et les tyroliennes** (les jeux, le générateur et son témoin, les records dans la sauvegarde sans migration, DEBUG → « Console ») et **PR 2 faite : l'écran de la console** (le menu, le mode, la partie, « Oups ! » et le record, le style pastel, les bips ; DEBUG → « Console » → « Allumer la console ») et **PR 3 faite : le cadeau et la chambre** (papa au premier passage au potager, la télé sur le bureau, Agir, « nouveau ! » et l'étincelle) et **PR 4 faite : les sauts et la grimpette** (jouables dès le cadeau) et **PR 5 faite : la cheminée** (le saut mural, la hauteur au compteur) et **PR 6 faite : le grand vent** (le parapluie, des portes de briques de jeu) et **PR 7 faite : le couloir** (la glissade : des barres, des tunnels, des trous, le saut long) et **PR 8 faite : les deux mondes** (la bascule en plein saut, des portes et des murs d'une seule couche) et **PR 9 faite : le monstre** (après la vague de la mer : courir et sauter, poursuivie par une masse pastel). **Le mode Niveaux est complet** (huit jeux). Suite : essayer la console sur téléphone ; le mode Sans fin, avec son propre plan.
+
+**Les bulles** (D-165, demande de l'utilisateur, sur `ccr-3b45ec98-n8x7xk`) : la revue de toutes les bulles. Choix de l'utilisateur faits (un nuage pour Céleste, une bulle de parole pour les autres ; Maria aux seuls moments-pivots et la boucle de la maison cassée ; la photo de Maria gardée ; six nouveaux pictogrammes et le lit à « z » ; **le style « papier découpé »** ; pas de bulle pour les affaires de Maria). Faits : l'inventaire (`docs/BULLES.md`), la maquette (https://claude.ai/artifact/AgbA6JRNEMACrZzPv7Rfim) **la PR 1 : le rendu** (le nuage et la bulle de parole en papier découpé, le recadrage des pictogrammes, le côté de la bulle, la lune qui ne troue plus, les nouveaux pictogrammes ; aucun changement de contenu) et **la PR 2 : la maison, le jardin, le quartier** (la boucle « où est Maria ? » cassée, les cœurs de fin d'indice retirés, le manque, pas de bulle pour les affaires de Maria, les portes fermées). L'inventaire est validé. **PR 3 faite : la gare, le train, la mer** (plus de Maria au début des niveaux, le sourire, « chut », l'émerveillement, le manque, les portes) et **PR 4 faite : la nounou, le monde de Maria, les passants, les portes**. **Le plan des bulles est complet.** Suite : essai sur téléphone.
+
+**Retour d'essai jusqu'à la mer** (D-164, sur `ccr-6f15c4bd-qxtl81`) : plan validé en 3 PR. **PR 1 faite : le phare (sa porte), le dortoir (une porte claire, sa lueur toute la nuit), l'escalier de la plage (sans chaîne, un portique et sa flèche, les marches)** et **PR 2 faite : l'annonce des tunnels (la bouche qui arrive de l'avant, les creux qui s'éclairent)** et **PR 3 faite : le boss du train plus tendu (10, 8,5 puis 8 tuiles/s selon le tronçon)**. **Le retour d'essai est traité.** Puis **PR 4 faite : la revue visuelle des 41 portes** (trois portes sans dessin, maintenant dessinées : l'entrée du centre vue de l'intérieur, le retour de la jetée, la sortie de la chambre de la sieste ; DEBUG → « Portes »). Suite : essai sur téléphone ; le boss de la mer (pas encore essayé).
+
+**Le voyage rapide** (D-163, demande de l'utilisateur, sur `ccr-6f15c4bd-qxtl81`) : les veilleuses qui se répondent, une veilleuse principale par niveau (six, le train compris), turquoise, depuis n'importe quelle lanterne allumée du monde réel, débloquée après le monde étrange du niveau. Plan validé en 2 PR. **PR 1 faite : le système** (les règles, le voyage, DEBUG → « Voyage ») et **PR 2 faite : dans le jeu** (la veilleuse turquoise, l'étincelle d'Agir à une lanterne, la carte du sac en mode voyage, Céleste qui s'assoit, le noir, l'arrivée assise). **Le voyage rapide est complet.** Suite : essai sur téléphone (les durées, la portée de 2 tuiles, la veilleuse turquoise et le fil discret).
+
 **Le trou du grillage de l'aire de jeux** (D-158, sur `claude/game-test-issues-e7pomv`) : le ballon de la cour coincé dedans, un pigeon qui s'envole par le trou depuis le toit de la tour. Le chantier attendra (bulles des personnages). **Le sac à dos** (D-159, D-160) : maquette interactive (https://claude.ai/artifact/DE58ednNNhcjxdPUsuLd6T), choix de l'utilisateur et plan validés en 3 PR (le sac ; la carte ; les trésors). **PR 1 faite : le sac** (un seul bouton, la poche et ses trois objets, le cahier, les trésors d'avant, les réglages de l'ancienne pause) et **PR 2 faite : la carte** (D-161 : la rangée des lieux à gauche, feuilleter, un « ? », le point rose, les trésors aperçus) et **PR 3 faite : les trésors** (D-162 : une page par type et en couleurs, les indices, la fiche et le nom, « nouveau », l'étincelle). **Le plan du sac est complet.** Suite : essai sur téléphone ; l'image du sac (prompt fourni) ; le contenu (les objets des souvenirs, leurs lieux), à redéfinir par l'utilisateur ; une récompense par famille complète (à trouver).
 
 **Retour d'essai, nouvelle partie depuis le début** (D-157, sur `claude/game-test-issues-e7pomv`) : **faits** : maman assise n'a plus la tête coupée (canapé, banc de l'aire de jeux ; toutes les poses assises) ; le monsieur de l'abribus et la dame au chien plus petits (75 %) ; se rattraper au mur quitté après un saut mural raté (une fois retombée sous le point du saut) ; la seconde cheminée de la ronce et celle de l'école étrange resserrées de 5 à 4 tuiles (la ronce passe de difficile à moyen) ; le son de Maria baissé. **En attente** : le nouveau son des trouvailles (fichier de l'utilisateur, `found`) ; le quartier (trouver l'entrée de l'école, aller au fond du chantier) : propositions à valider ; le cahier (pages et contenu) : à revoir avec l'utilisateur.
@@ -50,7 +60,7 @@
 
 ### Les souvenirs de Céleste refaits (D-169)
 
-- Neuf souvenirs (la toise, la photo, la boîte à musique, l'arrosoir, le dessin de l'école, le billet, la lettre de maman, la carte postale, le dessin de toute la famille) ; la plante et la photo de Céleste bébé retirées ; on emporte ce qui se porte ; des bulles sans cœur (la mer, la maison, le visage de Maria) ; l'envol vers le sac pour tous les trésors ; cinq images de l'utilisateur ; la gommette étoile des capacités ; DEBUG → « Trésors ».
+- Neuf souvenirs (la toise, la photo, la boîte à musique, l'arrosoir, le dessin de l'école, le billet, la lettre de maman, la carte postale, le dessin de toute la famille) ; la plante et la photo de Céleste bébé retirées ; on emporte ce qui se porte ; des bulles sans cœur (la mer, la maison ; les affaires de Maria sans bulle, D-165) ; l'envol vers le sac pour tous les trésors ; cinq images de l'utilisateur ; la gommette étoile des capacités ; DEBUG → « Trésors ».
 - Vérifié dans Chromium : chaque souvenir à sa place, l'envol, la page des trésors, la gommette et son envol.
 - [ ] À vérifier sur téléphone : l'envol (durée, lisibilité), la gommette (assez visible ? sa flaque de lumière), les souvenirs se trouvent-ils sans aide ?
 
@@ -59,6 +69,151 @@
 - Le sac en image ; `found`, `checkpoint`, `step-wood` ×4 ; la cheminée de l'école étrange (133 ms, moyen) ; la palissade vers la gare sans présage ni lueur turquoise ; le présage de l'oculus jusqu'au premier passage.
 - Vérifié dans Chromium : la palissade ouverte ; le sac à 34 px.
 - [ ] À vérifier sur téléphone : le sac se reconnaît-il ? Le son de la lanterne, des pas sur le bois, de la trouvaille (volume) ; la cheminée de l'école (vraiment intermédiaire ?).
+
+### Le mode Sans fin, PR 5 : la bande en deux dimensions, les jeux verticaux (D-167)
+
+- Chaque morceau a une entrée et une sortie : le suivant se place à côté, au-dessus ou en escalier ; la bande ajoute le cadre et remplit le reste ; au recul, tout se déplace en largeur et en hauteur. La grimpette (en escalier vers le haut), la cheminée (empilée, un rebord par morceau ; retomber de deux sections, c'est l'erreur), le grand vent (en escalier vers le bas).
+- Vérifié : la grimpette, 14 morceaux traversés, chaque jointure faisable par l'analyse ; la cheminée et le grand vent, chaque jointure passée par le témoin ; dans Chromium, quatre changements de morceau par jeu (3 à 6 ms).
+- [ ] À vérifier sur téléphone : les jeux verticaux en Sans fin (la cheminée : la chute de deux sections, juste ? les rebords ; le grand vent : le cadre plein au-dessus, lisible ?).
+
+### Le mode Sans fin, PR 4 : les deux mondes et le monstre (D-167)
+
+- Les deux mondes (une jointure commune aux deux couches, à hauteur libre ; le morceau suivant part de la couche où arrive le témoin ; les zones recalées, la vue des couches rechargée, Céleste reste dans sa couche) et le monstre (à une part de l'allure du témoin, de 70 à 95 %, tenu en laisse à 8 tuiles ; `Chase.reframe` au recul) en Sans fin.
+- Vérifié : 25 morceaux de chaque jeu traversés par le témoin (le monstre jamais à moins de 6 tuiles) ; chaque jointure faisable (les deux mondes de 300 à 167 ms) ; dans Chromium, quatre changements de morceau par jeu.
+- [ ] À vérifier sur téléphone : le monstre en Sans fin (la laisse de 8 tuiles : assez menaçant ? trop ?), les deux mondes (la fluidité au changement de morceau : la vue des couches est rechargée).
+
+### Le mode Sans fin, PR 3 : le couloir et les tyroliennes (D-167)
+
+- Le couloir (une jointure de sol plat) et les tyroliennes (une jointure à la hauteur où finit le morceau, le suivant en part ; les câbles recalés) en Sans fin ; la pose des pièces partagée avec les niveaux (inchangés).
+- Vérifié : le témoin traverse 25 morceaux de chaque jeu ; chaque jointure faisable (couloir 217 puis 108 ms, tyroliennes 550 à 317 ms) ; dans Chromium, quatre changements de morceau par jeu, les câbles à leur place.
+- [ ] À vérifier sur téléphone : le couloir et les tyroliennes en Sans fin (les jointures basses des tyroliennes, gênantes ?).
+
+### Le mode Sans fin, PR 2 : le Sans fin dans la console (D-167)
+
+- Les sauts en Sans fin : ouvert quand le niveau 5 est atteint en mode Niveaux (le niveau le plus haut atteint, gardé dans la sauvegarde sans migration) ; un nouveau parcours à chaque partie ; la bande de trois morceaux dans la scène (le recul invisible, le dessin bloc par bloc, rien de redessiné) ; les morceaux générés en arrière-plan (un worker, précaché, hors ligne), sur place sinon ; le repère fantôme du record ; un bip et la distance tous les 100 m ; DEBUG → « Console » → « Sans fin » (depuis un morceau), le morceau dans les infos.
+- Vérifié dans Chromium (844 × 390) : le mode fermé puis ouvert, une partie, quatre changements de morceau (le suivant toujours prêt, le recul en 1 à 2,5 ms), « Oups ! » et le record, « Rejouer » et le repère.
+- [ ] À vérifier sur téléphone : le Sans fin des sauts (une saccade au changement de morceau ? le repère du record lisible ? le bip des 100 m ? le niveau 5 pour l'ouvrir, juste ?).
+
+### Le mode Sans fin, PR 1 : le moteur (D-167)
+
+- Les morceaux des sauts (la pose des poteaux des niveaux, partagée ; une jointure à chaque bout), la difficulté du niveau n au morceau n jusqu'au plafond (20), une nouvelle graine à chaque partie ; le collage et la bande de trois morceaux (le recul, la distance).
+- Vérifié : le témoin traverse 30 morceaux d'affilée ; chaque jointure des 19 premiers faisable par l'analyse (de 458 à 200 ms) ; les niveaux des sauts et de la grimpette inchangés (mêmes empreintes).
+
+### La console, PR 9 : le monstre (D-166)
+
+- Débloqué après la vague de la mer, sans capacité : courir et sauter des trous et des blocs, poursuivie par une masse pastel sans visage (la poursuite des boss, avec une allure `monster`) ; la toucher, c'est l'erreur. Sa vitesse est réglée pour que le témoin à pleine course ne garde que de 8 à 3 tuiles d'avance ; il accélère d'un tronçon à l'autre.
+- Le témoin de course est partagé avec le couloir (`runner.ts`).
+- Mesuré : l'analyse (20 niveaux faisables, de 450 à 225 ms), la course du témoin poursuivi (il échappe au monstre, avec l'avance visée).
+- Vérifié dans Chromium (844 × 390) : le menu (débloqué, nouveau), une partie où le monstre attrape Céleste immobile.
+- [ ] À vérifier sur téléphone : le monstre (le départ, assez de temps pour réagir ? l'avance du premier niveau, assez douce ? de 3 tuiles aux niveaux durs, jouable ? le monstre lisible, pas effrayant ?).
+
+### La console, PR 8 : les deux mondes (D-166)
+
+- De poteau en poteau, des poteaux d'une seule couche : basculer en plein saut ; des portes de briques de jeu d'une seule couche resserrent le moment ; de larges poteaux communs à deux murs : basculer en courant, puis revenir. La bascule marche dans la boucle de la console.
+- Mesuré par l'analyse (20 niveaux) : tous faisables, impossibles sans la bascule ; le passage le plus dur : 367 ms au niveau 1, puis jusqu'à 167 ms.
+- Vérifié dans Chromium (844 × 390) : le niveau 6 dans les deux couches, le menu, une partie.
+- [ ] À vérifier sur téléphone : les deux mondes (les portes lisibles dans les deux couches ? basculer entre deux portes au doigt ? la fluidité avec une quarantaine de zones ?).
+
+### La console, PR 7 : le couloir (D-166)
+
+- Courir et glisser sous des barres de briques de jeu (une tuile de passage), sous des tunnels, sauter des trous ; les plus larges demandent le saut long depuis la glissade. Des obstacles de plus en plus serrés, chacun prouvé par le témoin.
+- Mesuré par l'analyse (20 niveaux) : tous faisables, impossibles sans la glissade ; le passage le plus dur : 225 ms au niveau 1, puis 108 ms.
+- Vérifié dans Chromium (844 × 390) : le niveau 12, le menu, une glissade sous la barre.
+- [ ] À vérifier sur téléphone : le couloir (glisser au bon moment sous une barre de 2 tuiles, faisable au doigt ? l'enchaînement glissade puis saut long ? les barres lisibles ?).
+
+### La console, PR 6 : le grand vent (D-166)
+
+- Une longue descente en planant à travers des portes de briques de jeu, ouvertes autour du vol du témoin (qui change d'allure : planer vite, freiner, fermer le parapluie un instant).
+- Vérifié par le vol du témoin rejoué dans les 20 premiers niveaux (l'analyse de faisabilité ne sait pas changer d'allure en plein vol).
+- Vérifié dans Chromium (844 × 390) : le niveau 8.
+- [ ] À vérifier sur téléphone : le grand vent (les ouvertures, assez larges pour un doigt ? fermer le parapluie et le rouvrir à temps : faisable ? les portes de briques de jeu, lisibles ?).
+
+### La console, PR 5 : la cheminée (D-166)
+
+- Monter entre deux murs en sauts muraux, section par section (largeur de 3 à 5 tuiles, petits décalages), des briques de jeu sur les murs loin du chemin du témoin, un fond qui pique ; le compteur compte la hauteur.
+- Mesuré par l'analyse : les 12 premiers niveaux faisables ; le passage le plus dur entre ~170 et ~270 ms.
+- Vérifié dans Chromium (844 × 390) : la cheminée au niveau 6, le compteur en hauteur.
+- [ ] À vérifier sur téléphone : la cheminée (le rythme des sauts muraux, les briques sur les murs : assez visibles ? trop punitives ?).
+
+### La console, PR 4 : les sauts et la grimpette (D-166)
+
+- Deux jeux de plus, générés comme les tyroliennes et prouvés par le témoin : les sauts (de pierre en pierre, dès le cadeau) et la grimpette (un escalier de rebords, des puits de briques de jeu sous les poteaux).
+- Mesuré par l'analyse : 20 niveaux de chaque jeu faisables ; le passage le plus dur de ~460 à ~200 ms (sauts), de ~620 à ~260 ms (grimpette).
+- Vérifié dans Chromium (844 × 390) : « Les sauts » nouveau et jouable, la grimpette au niveau 10.
+- [ ] À vérifier sur téléphone : les sauts (la difficulté monte-t-elle ? les pierres étroites, assez lisibles ?) ; la grimpette (l'accroche aux rebords est-elle sûre ? les puits se comprennent-ils ?).
+
+### La console, PR 3 : le cadeau et la chambre (D-166)
+
+- Au premier passage au potager, papa appelle Céleste et lui offre la console de salon (« ! », la manette, l'émerveillement, la télé) ; la télé sur le bureau de la chambre ; Agir : Céleste s'assoit, la console s'allume ; « nouveau ! » et l'étincelle sur la télé pour un jeu pas encore vu ; pas de télé pendant le dernier niveau.
+- Vérifié dans Chromium (844 × 390) : la scène du potager, la télé, Agir.
+- [ ] À vérifier sur téléphone : la scène du cadeau se comprend-elle (la manette, puis la télé) ? Trop longue (environ 9 s) ? La télé se voit-elle sur le bureau ? Agir devant elle (devant le bureau, ou dessus) ?
+
+### La console, PR 2 : l'écran de la console (D-166)
+
+- Le mode console dans le jeu (mis de côté, puis retour exact) ; le menu des jeux, le choix du mode (Sans fin « bientôt »), la partie (l'annonce, le compteur, le fanion, la chute), « Oups ! » et le record ; le bouton du sac sert de Menu (quitter compte comme une chute) ; le style pastel ; les bips (synthétisés, PLACEHOLDER).
+- Vérifié dans Chromium (844 × 390) : du menu à « Oups ! », puis « Éteindre ».
+- [ ] À vérifier sur téléphone : DEBUG → « Console » → « Allumer la console » (le crochet débloqué dans DEBUG pour voir les tyroliennes). Le menu se lit-il ? Les cases se touchent-elles bien ? Le compteur gêne-t-il ? Les bips : agréables, trop forts ? Le pastel et les câbles fins : assez lisibles ?
+
+### La console, PR 1 : le système et les tyroliennes (D-166)
+
+- Les huit jeux (`src/config/arcade.ts`), leur déblocage et leur phase ; `arcadeLevel(jeu, n)`, toujours le même niveau (graine fixe, valeurs de mouvement par défaut) ; le générateur des tyroliennes, chaque pièce prouvée par un témoin (la vraie physique) ; les records dans la sauvegarde (`arcade`, sans migration) ; DEBUG → « Console ».
+- Mesuré par l'analyse : les 20 premiers niveaux faisables ; passage le plus dur de ~600 ms (niveau 1) à ~200–340 ms (à partir du niveau 7). L'analyse ne voit pas tout ce qui durcit le jeu (enchaînements, sauts depuis le câble).
+- Vérifié dans Chromium (844 × 390) : un niveau joué et mesuré depuis le debug.
+- [ ] À vérifier sur téléphone : les tyroliennes (DEBUG → « Console » → « Jouer », niveaux 1, 5, 10, 20) : la difficulté monte-t-elle assez ? Les câbles se voient-ils ? Le niveau descend-il trop vers les briques ? (Céleste y garde sa phase du moment : la phase 2 jusqu'à la gare.)
+
+### Les bulles, PR 4 : la nounou, le monde de Maria, les passants, les portes (D-165)
+
+- Plus de Maria à l'arrivée chez la nounou ni juste après Eden (elle revient au réveil) ; le reflet sourit ; les cubes émerveillent ; le manque aux derniers mois plus tard et devant le berceau refait ; l'émerveillement dans le berceau immense ; les passants sourient ou font coucou ; le cadenas à la salle de jeux, les cubes qui manquent à la porte de la sieste.
+- [ ] À vérifier sur téléphone : la bulle des cubes à la porte de la sieste (fermée) se comprend-elle ? Le coucou des passants se lit-il à leur taille ?
+
+### Les bulles, PR 3 : la gare, le train, la mer (D-165)
+
+- Plus de bulle « Maria » au début des niveaux (Maria reste à la fin des mondes étranges) ; le sourire (la camarade, la maîtresse), « chut » (le contrôleur), l'émerveillement (la cuisine rose, la mer à la fenêtre, le livre musical), le manque (les mois plus tard, la maman au bébé) ; le cadenas aux portes du train et de la mer.
+- [ ] À vérifier sur téléphone : sans bulle « Maria » au début du train et de la mer, le fil reste-t-il présent ? « Chut » du contrôleur se lit-il ? L'arrivée sur les voies de la gare, sans arrêt, passe-t-elle inaperçue (voulu) ?
+
+### Les bulles, PR 2 : la maison, le jardin, le quartier (D-165)
+
+- Maria disparue seulement au berceau vide et à la première question (papa) ; ensuite un « ? » ; les échanges avec les parents finissent sur leur indice (neuf cœurs retirés) ; le manque au câlin de maman et aux mois plus tard ; pas de bulle pour les affaires de Maria ; le cadenas aux portes du quartier.
+- [ ] À vérifier sur téléphone : comprend-on encore que Céleste demande où est Maria (le « ? » seul, après la première fois) ? Le manque (le petit nuage gris) se lit-il ? Sans cœur, les parents paraissent-ils froids ?
+
+### Les bulles, PR 1 : le rendu (D-165)
+
+- Céleste pense dans un nuage, les autres parlent dans une bulle ronde ; le style « papier découpé » (une ombre portée, un papier grainé, sans trait) ; chaque pictogramme mesuré et posé dans une zone sûre (plus de débordement) ; la bulle part vers la gauche au bord droit d'une salle ; le lit à « z », la lune sans trou ; six nouveaux pictogrammes (pas encore utilisés). Textures dessinées à la demande.
+- [ ] À vérifier sur téléphone : la taille des bulles (un peu plus larges qu'avant) ; le papier découpé sur les fonds clairs (le jour, la plage, l'école) : la bulle se détache-t-elle assez ? Un petit à-coup à la première apparition d'une bulle ?
+
+### Retour d'essai, PR 4 : la revue des portes (D-164)
+
+- Les 41 portes de façade photographiées ; trois sans dessin, maintenant dessinées (l'entrée du centre, le retour de la jetée, la sortie de la chambre de la sieste) ; un test général ; DEBUG → « Portes ».
+- [ ] À vérifier sur téléphone : la trappe du toit du train se voit-elle ? Les trois nouvelles portes.
+
+### Retour d'essai, PR 3 : le boss du train plus tendu (D-164)
+
+- Une vitesse par tronçon : 10, 8,5, 8 tuiles/s (avant : 7). Tolérances mesurées +22 / +72 / +18 % (la tour : +24 / +62 / +24 %).
+- [ ] À vérifier sur téléphone : plus tendu que la tour, sans être un vrai défi ? Le premier tronçon (il gagne sur Céleste) : effrayant ou frustrant ?
+
+### Retour d'essai, PR 2 : l'annonce des tunnels du toit (D-164)
+
+- La bouche du tunnel arrive de l'avant pendant l'annonce, sa voûte au ras du toit ; les creux et le soufflet s'éclairent.
+- Vérifié dans Chromium (844 × 390) : un cycle complet.
+- [ ] À vérifier sur téléphone : comprend-on qu'il faut se coucher ou aller dans un creux ? La bouche arrive-t-elle assez tôt ? La lumière des creux se voit-elle ?
+
+### Retour d'essai, PR 1 : le phare, le dortoir, l'escalier de la plage (D-164)
+
+- La porte du pied du phare dessinée ; la porte du dortoir claire et sa lueur toute la nuit ; l'escalier de la plage : la chaîne retirée, un portique bleu (parasol, vagues, flèche), les marches, en haut comme en bas.
+- Vérifié dans Chromium (844 × 390).
+- [ ] À vérifier sur téléphone : la porte du dortoir se voit-elle tout de suite la nuit ? L'escalier se comprend-il (Agir pour descendre) ? Le portique est-il trop voyant ?
+
+### Le voyage rapide, PR 2 : dans le jeu (D-163)
+
+- La veilleuse principale turquoise ; l'étincelle d'Agir à une lanterne allumée (deux veilleuses débloquées au moins) ; la carte du sac en mode voyage (les veilleuses palpitent, un toucher choisit, un second confirme) ; Céleste s'assoit, le noir, elle arrive assise à côté de la veilleuse, son point de retour. DEBUG → « Voyage » → « Révéler la carte ».
+- Vérifié dans Chromium (844 × 390) : de la chambre à la rue, par la carte.
+- [ ] À vérifier sur téléphone : la veilleuse turquoise se remarque-t-elle sans se confondre avec le fil discret ? L'étincelle à chaque lanterne gêne-t-elle ? Les veilleuses de la carte se touchent-elles bien au doigt (deux touchers) ? La transition (environ 2 s) : trop longue, trop courte ? Céleste assise à l'arrivée se comprend-elle ?
+
+### Le voyage rapide, PR 1 : le système (D-163)
+
+- Les six veilleuses principales (`TRAVEL_LANTERNS`), leur déblocage, la règle « là où l'on pourrait aller à pied maintenant », les moments sans voyage (`TRAVEL_BLOCKED`), le départ depuis une lanterne allumée ; `GameScene.travelTo` ; DEBUG → « Voyage ».
+- Vérifié dans Chromium (844 × 390) : refusé loin d'une lanterne ; la mer, puis la gare.
+- [ ] À vérifier sur téléphone : l'arrivée reste-t-elle le point de retour après un rechargement ?
 
 ### Le sac à dos, PR 3 : les trésors (D-162)
 

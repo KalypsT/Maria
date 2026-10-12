@@ -1,8 +1,10 @@
+import type { ArcadeGameId, ArcadeMode } from '../../config/arcade';
 import type { AudioSettings } from '../../config/audio';
 import type { ControlSettings } from '../../config/controls';
 import type { DisplaySettings } from '../../config/display';
 import type { SaveData } from './saveData';
 import type { SaveManager } from './SaveManager';
+import { reachArcadeLevel, submitArcadeScore } from './arcade';
 import { addFaint, addHint, addPlayTime, createStats } from './stats';
 
 /**
@@ -175,6 +177,37 @@ export class SaveSession {
   /** Outil de debug (D-153) : les stats remises à zéro. */
   resetStats(): Promise<void> {
     this.current.stats = createStats();
+    return this.persist();
+  }
+
+  /**
+   * Fin d'une partie de la console (D-166) : garde le meilleur score du jeu dans ce mode. Retourne
+   * true pour un nouveau record (écrit seulement dans ce cas).
+   */
+  async recordArcadeScore(game: ArcadeGameId, mode: ArcadeMode, meters: number): Promise<boolean> {
+    if (!submitArcadeScore(this.current.arcade, game, mode, meters)) {
+      return false;
+    }
+    await this.persist();
+    return true;
+  }
+
+  /**
+   * Un niveau de la console commence en mode Niveaux (D-167) : garde le plus haut atteint (il ouvre
+   * le mode Sans fin). Écrit seulement s'il monte.
+   */
+  recordArcadeLevel(game: ArcadeGameId, level: number): Promise<void> {
+    return reachArcadeLevel(this.current.arcade, game, level) ? this.persist() : Promise.resolve();
+  }
+
+  /** Jeux de la console vus dans son menu (D-166) : ils ne sont plus « nouveaux ». */
+  markArcadeSeen(games: readonly ArcadeGameId[]): Promise<void> {
+    const seen = this.current.arcade.seen;
+    const added = games.filter((game) => !seen.includes(game));
+    if (added.length === 0) {
+      return Promise.resolve();
+    }
+    seen.push(...added);
     return this.persist();
   }
 

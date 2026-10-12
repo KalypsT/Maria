@@ -5,7 +5,6 @@ import {
   PROP_SIZE,
   STORY_TIMING,
   THOUGHT_SCALE,
-  TOWER_CUBES,
   towerCubesMask,
 } from '../config/story';
 import type { PropStage } from '../core/story/PropStage';
@@ -15,20 +14,20 @@ import {
   LOOP_OBJECT_KINDS,
   PROP_KINDS,
   isPasserbyKind,
-  THOUGHT_ICONS,
   type PropKind,
   type ThoughtIcon,
 } from '../core/story/story';
 import { drawLoopObject } from './art/memoryArt';
 import { characterHeadroom, characterOverhang, drawCharacter } from './art/familyArt';
 import {
+  BUBBLE_SIZE,
   SPARKLE_SIZE,
-  THOUGHT_SIZE,
+  drawBubble,
   drawProp,
   drawSparkle,
-  drawThought,
   drawToyTown,
 } from './art/storyArt';
+import { bubbleKey, bubbleSide, type BubbleKind, type BubbleSide } from '../core/story/bubble';
 
 /** Objets et personnages animés en boucle (deux images). */
 function isLooping(kind: PropKind): boolean {
@@ -42,9 +41,16 @@ const SPARKLE_KEY = 'story-sparkle';
 /** Pulsation de l'étincelle (ms). */
 const SPARKLE_MS = 1300;
 
-/** Texture de la bulle des cubes (D-122) pour une combinaison de cubes trouvés. */
-function cubesKey(mask: number): string {
-  return `thought-cubes-${String(mask)}`;
+/** Largeur d'une bulle dans le monde (px), pour choisir son côté. */
+const BUBBLE_WORLD_W = BUBBLE_SIZE.w * THOUGHT_SCALE;
+/** Décalage de la traîne (ou de la pointe) par rapport à la tête (px du monde). */
+const BUBBLE_NUDGE = { thought: 2, speech: 4 } as const;
+
+/** Ce que montre une bulle affichée, pour la redessiner à une nouvelle échelle. */
+interface BubbleSpec {
+  readonly icon: ThoughtIcon;
+  readonly cubes: number;
+  readonly side: BubbleSide;
 }
 
 /**
@@ -64,11 +70,22 @@ export class StoryView {
    */
   doorMark: { col: number; row: number } | null = null;
   private artScale = 0;
-  private thoughtKey = '';
+  private images: ReadonlyMap<string, CanvasImageSource> = new Map();
+  /**
+   * Textures des bulles déjà dessinées (D-165) : chacune la première fois qu'elle sert, puis gardée
+   * jusqu'au prochain changement d'échelle (une par forme, pictogramme et côté : trop pour toutes
+   * les dessiner d'avance).
+   */
+  private readonly bubbleKeys = new Set<string>();
+  private readonly roomBounds = new Phaser.Geom.Rectangle();
+  /** Pied de Céleste (x), à la dernière image : le côté de sa bulle. */
+  private celesteX = 0;
+  private thoughtSpec: BubbleSpec | null = null;
   private thoughtStart = -1;
   private thoughtEnd = -1;
-  /** Bulle d'un personnage (parent) : au-dessus de sa tête. */
+  /** Bulle de parole d'un personnage : au-dessus de sa tête. */
   private readonly speech: Phaser.GameObjects.Image;
+  private speechSpec: BubbleSpec | null = null;
   private speechProp = -1;
   private speechStart = -1;
   private speechEnd = -1;
@@ -122,26 +139,17 @@ export class StoryView {
         drawProp(ctx, kind, images);
       });
     }
-    const k = THOUGHT_SCALE;
-    for (const icon of THOUGHT_ICONS) {
-      this.texture(`thought-${icon}`, THOUGHT_SIZE.w * k, THOUGHT_SIZE.h * k, (ctx) => {
-        ctx.scale(k, k);
-        drawThought(ctx, icon, images);
-      });
+    // Les bulles se redessinent à la demande, à la nouvelle échelle.
+    this.images = images;
+    for (const key of this.bubbleKeys) {
+      this.scene.textures.remove(key);
     }
-    // La bulle des cubes de la tour d'Eden (D-122) : une image par combinaison de cubes trouvés.
-    for (let mask = 0; mask < 1 << TOWER_CUBES.length; mask++) {
-      this.texture(cubesKey(mask), THOUGHT_SIZE.w * k, THOUGHT_SIZE.h * k, (ctx) => {
-        ctx.scale(k, k);
-        drawThought(ctx, 'cubes', images, mask);
-      });
-    }
+    this.bubbleKeys.clear();
     this.texture(SPARKLE_KEY, SPARKLE_SIZE, SPARKLE_SIZE, drawSparkle);
     this.thought.setScale(1 / scale);
     this.speech.setScale(1 / scale);
-    if (this.thoughtKey) {
-      this.thought.setTexture(this.thoughtKey);
-    }
+    this.showBubble(this.thought, this.thoughtSpec);
+    this.showBubble(this.speech, this.speechSpec);
     this.sparkle.setTexture(SPARKLE_KEY).setScale(1 / scale);
     this.rebuild();
   }
@@ -187,25 +195,62 @@ export class StoryView {
     }
   }
 
-  /** Bulle de Céleste, ou du personnage `by` s'il est dans la salle et visible. */
+  /**
+   * Bulle de Céleste (elle pense : un nuage), ou du personnage `by` s'il est dans la salle et
+   * visible (il parle : une bulle de parole, D-165).
+   */
   think(icon: ThoughtIcon, ms: number, by?: string): void {
     // Les cubes (D-122) : ceux déjà trouvés, d'après les étapes vécues.
-    const key =
-      icon === 'cubes' ? cubesKey(towerCubesMask(this.director.flags)) : `thought-${icon}`;
+    const cubes = icon === 'cubes' ? towerCubesMask(this.director.flags) : 0;
     if (by !== undefined) {
       const index = this.stage.props.findIndex((p) => p.id === by);
-      if (index >= 0 && this.stage.shown[index]) {
+      const box = this.stage.boxes[index];
+      if (index >= 0 && box && this.stage.shown[index]) {
         this.speechProp = index;
-        this.speech.setTexture(key);
+        this.speechSpec = { icon, cubes, side: this.side(box.x + box.width * 0.5) };
+        this.showBubble(this.speech, this.speechSpec);
         this.speechStart = this.scene.time.now;
         this.speechEnd = this.speechStart + ms;
       }
       return;
     }
-    this.thoughtKey = key;
-    this.thought.setTexture(this.thoughtKey);
+    this.thoughtSpec = { icon, cubes, side: this.side(this.celesteX) };
+    this.showBubble(this.thought, this.thoughtSpec);
     this.thoughtStart = this.scene.time.now;
     this.thoughtEnd = this.thoughtStart + ms;
+  }
+
+  /**
+   * La texture d'une bulle (D-165), dessinée la première fois qu'elle sert. Aussi pour les bulles
+   * des passants (`PasserbyView`).
+   */
+  bubbleTexture(kind: BubbleKind, icon: ThoughtIcon, side: BubbleSide, cubes = 0): string {
+    const key = bubbleKey(kind, icon, side, cubes);
+    if (!this.bubbleKeys.has(key)) {
+      const k = THOUGHT_SCALE;
+      this.texture(key, BUBBLE_SIZE.w * k, BUBBLE_SIZE.h * k, (ctx) => {
+        ctx.scale(k, k);
+        drawBubble(ctx, kind, icon, this.images, side, cubes);
+      });
+      this.bubbleKeys.add(key);
+    }
+    return key;
+  }
+
+  /** Le côté d'une bulle attachée en `x` (px du monde) : vers l'intérieur de la salle. */
+  side(x: number): BubbleSide {
+    const bounds = this.scene.cameras.main.getBounds(this.roomBounds);
+    return bubbleSide(x, BUBBLE_WORLD_W, bounds.right);
+  }
+
+  private showBubble(image: Phaser.GameObjects.Image, spec: BubbleSpec | null): void {
+    if (!spec || this.artScale <= 0) {
+      return;
+    }
+    const kind = image === this.thought ? 'thought' : 'speech';
+    image
+      .setTexture(this.bubbleTexture(kind, spec.icon, spec.side, spec.cubes))
+      .setOrigin(spec.side > 0 ? 0 : 1, 1);
   }
 
   /** Une bulle est affichée. */
@@ -215,19 +260,22 @@ export class StoryView {
 
   clearThought(): void {
     this.thoughtEnd = -1;
+    this.thoughtSpec = null;
   }
 
   /** Une image : bulle au-dessus de la tête de Céleste (pieds en x, y), étincelle. */
   render(x: number, y: number, headHeight: number): void {
     const now = this.scene.time.now;
     const thought = this.thought;
+    this.celesteX = x;
     if (now < this.thoughtEnd) {
       const fade = STORY_TIMING.thoughtFadeMs;
       const alpha = Math.min(1, (now - this.thoughtStart) / fade, (this.thoughtEnd - now) / fade);
+      const nudge = BUBBLE_NUDGE.thought * (this.thoughtSpec?.side ?? 1);
       thought
         .setVisible(true)
         .setAlpha(Math.max(0, alpha))
-        .setPosition(x - 2, y - headHeight + 2 - (1 - Math.min(1, alpha)) * 2);
+        .setPosition(x - nudge, y - headHeight + 2 - (1 - Math.min(1, alpha)) * 2);
     } else if (thought.visible) {
       thought.setVisible(false);
     }
@@ -241,8 +289,11 @@ export class StoryView {
       this.speech
         .setVisible(true)
         .setAlpha(Math.max(0, alpha))
-        // La traîne de la bulle (en bas à gauche) part du milieu du personnage : sa tête.
-        .setPosition(speechBox.x + speechBox.width * 0.5 - 4, speechBox.y + 4 - speechLift);
+        // La pointe de la bulle part du milieu du personnage : sa tête.
+        .setPosition(
+          speechBox.x + speechBox.width * 0.5 - BUBBLE_NUDGE.speech * (this.speechSpec?.side ?? 1),
+          speechBox.y + 4 - speechLift,
+        );
     } else if (this.speech.visible) {
       this.speech.setVisible(false);
     }

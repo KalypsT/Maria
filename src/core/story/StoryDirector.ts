@@ -42,6 +42,8 @@ export interface StoryHost {
   play(id: PlayableMemoryId): void;
   /** Le tourne-disque (D-121) : le choix des disques, ou une bulle s'il n'y en a aucun. */
   records?(): void;
+  /** La console (D-166) : Céleste s'assoit, l'écran de la console s'ouvre. */
+  console?(): void;
   /** Regard (D-122) : la vue va vers cette tuile ; null : elle revient sur Céleste. */
   look?(col: number | null, row: number | null): void;
   /** Céleste est sortie de la salle (D-144) : invisible jusqu'au prochain changement de salle. */
@@ -249,6 +251,11 @@ export class StoryDirector {
     }
   }
 
+  /** Lance un script hors des déclencheurs de l'histoire (le voyage rapide, D-163). */
+  run(trigger: StoryTrigger): void {
+    this.start(trigger);
+  }
+
   private ready(trigger: StoryTrigger, box: Box): boolean {
     const area = trigger.area;
     return area !== undefined && areaOverlaps(area, box, TILE_SIZE) && this.check(trigger.when);
@@ -348,6 +355,9 @@ export class StoryDirector {
         break;
       case 'records':
         this.host.records?.();
+        break;
+      case 'console':
+        this.host.console?.();
         break;
       case 'look':
         this.host.look?.(step.col ?? null, step.row ?? null);

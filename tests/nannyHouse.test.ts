@@ -51,8 +51,8 @@ describe('la maison de la nounou : l’entrée, le miroir, la maison (D-110)', (
       });
       expect(order.indexOf('room')).toBeGreaterThan(order.indexOf('fadeOut'));
       expect(steps).toContainEqual({ do: 'flag', id: F.NannyArrived });
-      // Le début d'un niveau (D-70) : Céleste pense à Maria ; ni Maria ni parents à l'écran.
-      expect(steps.some((s) => s.do === 'thought' && s.icon === 'maria')).toBe(true);
+      // Plus de bulle « Maria » au début d'un niveau (D-165, revient sur D-70).
+      expect(steps.some((s) => s.do === 'thought' && s.icon === 'maria')).toBe(false);
     }
     expect(standOn(level('nanny-entry'), NANNY_ARRIVAL)).toBeGreaterThanOrEqual(0);
     expect(storyProblems(HOUSE_STORY, zone)).toEqual([]);

@@ -580,6 +580,11 @@ export const DECOR_KINDS: Readonly<
   cave: { furniture: false },
   beachcabin: { furniture: true },
   beachstairsfoot: { furniture: false },
+  // Retour d'essai : la porte du dortoir, celle du pied du phare (vue de l'intérieur).
+  dormdoor: { furniture: false },
+  // La revue des portes (D-164) : la sortie de la chambre de la sieste, chez la nounou.
+  napexit: { furniture: false },
+  lighthousedoor: { furniture: false },
   lifeguardchair: { furniture: true },
   groynepost: { furniture: true },
   buoy: { furniture: true },
@@ -1116,6 +1121,29 @@ export const MEMORY_PALETTE: Readonly<ArtPalette> = {
   glow: 0.5,
   vignette: 0.45,
   vignetteColor: '120,70,40',
+};
+
+/**
+ * La console de Céleste (D-166) : le style pastel choisi sur la maquette, à part du reste du jeu ;
+ * un fond rose, des poteaux mauves, un liseré net. PLACEHOLDER.
+ */
+export const CONSOLE_PALETTE: Readonly<ArtPalette> = {
+  ...DAY_PALETTE,
+  wallTop: '#fde6ef',
+  wallBottom: '#f6d3e2',
+  wallpaper: 'rgba(255,255,255,0.18)',
+  wainscot: '#f1c9db',
+  floor: '#9b7fd1',
+  floorEdge: '#b9a1e6',
+  structure: '#6e52a8',
+  wood: '#9b7fd1',
+  woodLight: '#b9a1e6',
+  woodDark: '#6e52a8',
+  rim: 'rgba(255,255,255,0.85)',
+  darkness: 0,
+  glow: 0,
+  vignette: 0.12,
+  vignetteColor: '160,90,130',
 };
 
 /**

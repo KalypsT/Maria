@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Ability } from '../src/config/abilities';
+import { ARCADE_GAMES } from '../src/config/arcade';
 import { MARIA_THINGS, MEMORIES, STRANGE_THINGS } from '../src/config/memories';
 import { RECORD_SLOTS } from '../src/config/records';
 import { StoryFlag } from '../src/config/story';
@@ -10,7 +11,7 @@ import frozenText from './fixtures/saveIds.txt?raw';
 
 /**
  * Les identifiants écrits dans la sauvegarde (D-152, pilier 10) : salles, lanternes, coquilles,
- * capacités, souvenirs (et disques), étapes de l'histoire. La liste figée `saveIds.txt` est celle
+ * capacités, souvenirs (et disques), étapes de l'histoire, jeux de la console (leurs records, D-166). La liste figée `saveIds.txt` est celle
  * des parties qui existent : un identifiant n'en sort jamais sans être déclaré dans `RETIRED`.
  */
 
@@ -50,6 +51,7 @@ function currentSaveIds(): string[] {
     ),
   );
   ids.push(...Object.values(StoryFlag).map((id) => `flag ${id}`));
+  ids.push(...ARCADE_GAMES.map((game) => `arcade ${game.id}`));
   return [...new Set(ids)].sort();
 }
 

@@ -205,14 +205,20 @@ export const DEFAULT_SFX_VOLUME = 0.8;
  */
 export const SFX_BUDGET_BYTES = 4 * 1024 * 1024;
 
+/** Un son synthétisé : fréquence de départ et d'arrivée (Hz), durée (ms), forme d'onde. */
+export interface SynthTone {
+  readonly from: number;
+  readonly to: number;
+  readonly ms: number;
+  readonly wave: OscillatorType;
+}
+
 /**
  * Sons de test (build de debug seulement) : un emplacement sans fichier joue un petit son synthétisé,
  * pour vérifier au téléphone que chaque bruitage tombe au bon moment. Fréquence de départ et
  * d'arrivée (Hz), durée (ms ; 0 pour une boucle : un son tenu tant qu'elle dure), forme d'onde.
  */
-export const TEST_TONES: Readonly<
-  Record<SfxSlot, { from: number; to: number; ms: number; wave: OscillatorType }>
-> = {
+export const TEST_TONES: Readonly<Record<SfxSlot, SynthTone>> = {
   'step-wood': { from: 260, to: 200, ms: 35, wave: 'triangle' },
   'step-fabric': { from: 160, to: 140, ms: 35, wave: 'sine' },
   'step-grass': { from: 320, to: 280, ms: 35, wave: 'triangle' },

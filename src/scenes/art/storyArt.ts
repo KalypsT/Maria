@@ -1,6 +1,7 @@
 import { memoryImageKey } from '../../config/art';
 import { PROP_SIZE, TOWER_CUBES } from '../../config/story';
 import type { PropKind, ThoughtIcon } from '../../core/story/story';
+import { fitScale, type BubbleKind, type BubbleSide, type SafeBox } from '../../core/story/bubble';
 import {
   bonnet,
   dadHead,
@@ -354,6 +355,29 @@ function drawSiteGap(ctx: CanvasRenderingContext2D, w: number, h: number): void 
  * voiture entière, le bout des voisines ; au milieu, la porte grande ouverte, l'intérieur dans
  * l'ombre et une lueur turquoise qui déborde sur le quai. Le bas est au niveau du quai.
  */
+/**
+ * La lueur sous la porte du dortoir (D-105, retour d'essai) : un trait de lumière pâle au ras du
+ * sol, sous la porte (48 px), et son halo qui remonte un peu sur le bas de la porte.
+ */
+function drawDoorGlow(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  const door = 46;
+  const x = (w - door) / 2;
+  const halo = ctx.createLinearGradient(0, h, 0, 0);
+  halo.addColorStop(0, 'rgba(190, 245, 236, 0.55)');
+  halo.addColorStop(1, 'rgba(190, 245, 236, 0)');
+  ctx.fillStyle = halo;
+  ctx.beginPath();
+  ctx.moveTo(0, h);
+  ctx.lineTo(x, h - 2);
+  ctx.lineTo(x, 0);
+  ctx.lineTo(x + door, 0);
+  ctx.lineTo(x + door, h - 2);
+  ctx.lineTo(w, h);
+  ctx.fill();
+  ctx.fillStyle = '#e6fffa';
+  ctx.fillRect(x, h - 2, door, 2);
+}
+
 function drawQuayTrain(ctx: CanvasRenderingContext2D, w: number, h: number, day = false): void {
   const top = 6;
   const car = (x: number, cw: number, radius: number | number[]) => {
@@ -901,6 +925,12 @@ export function drawProp(
     case 'quay-train-day':
       drawQuayTrain(ctx, w, h, true);
       break;
+    case 'door-glow':
+      drawDoorGlow(ctx, w, h);
+      break;
+    case 'console-tv':
+      drawConsoleTv(ctx, w, h);
+      break;
     case 'height-chart':
     case 'height-chart-grown':
     case 'height-chart-older':
@@ -928,55 +958,200 @@ export function drawProp(
   }
 }
 
-/** Taille d'une bulle de pensée (px logiques), petites bulles de la traîne comprises. */
-export const THOUGHT_SIZE = { w: 34, h: 31 } as const;
-/** Agrandissement du nuage et du pictogramme dans la bulle (retour de l'utilisateur). */
-const CLOUD_SCALE = 1.2;
-const ICON_SCALE = 1.3;
+/** Taille d'une bulle (px logiques), traîne ou pointe comprise (D-165). */
+export const BUBBLE_SIZE = { w: 46, h: 40 } as const;
+
+/** Le papier des bulles (style « papier découpé », D-165) et son ombre portée. */
+const BUBBLE_PAPER = '#fbf3e3';
+const BUBBLE_SHADOW = 'rgba(52,34,28,0.32)';
+const BUBBLE_SHADOW_OFFSET = { x: 1.1, y: 1.6 } as const;
+
+/** Centre du nuage et ses lobes : un anneau régulier, aux rayons un peu variés. */
+const CLOUD = { x: 25, y: 16 } as const;
+const CLOUD_LOBES: readonly (readonly [number, number, number])[] = Array.from(
+  { length: 10 },
+  (_, i) => {
+    const a = (i / 10) * Math.PI * 2 - Math.PI / 2;
+    return [
+      CLOUD.x + Math.cos(a) * 14.2,
+      CLOUD.y + Math.sin(a) * 9,
+      5.4 + 0.7 * Math.sin(i * 2.3 + 0.4),
+    ] as const;
+  },
+);
+
+/** Zone sûre du pictogramme, selon la forme (le pictogramme n'en sort jamais). */
+const SAFE: Readonly<Record<BubbleKind, SafeBox>> = {
+  thought: { x: CLOUD.x, y: CLOUD.y + 0.3, w: 26, h: 18 },
+  speech: { x: 25, y: 16.5, w: 30, h: 19 },
+};
+/** Agrandissement maximal d'un petit pictogramme. */
+const MAX_FIT = 1.5;
+
+/** Le nuage de Céleste et sa traîne de petites bulles, vers sa tête (en bas à gauche). */
+function cloudPath(ctx: CanvasRenderingContext2D): void {
+  ctx.beginPath();
+  ctx.ellipse(CLOUD.x, CLOUD.y, 15, 10, 0, 0, Math.PI * 2);
+  for (const [x, y, r] of CLOUD_LOBES) {
+    ctx.moveTo(x + r, y);
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+  }
+  ctx.moveTo(13.3, 33);
+  ctx.arc(10.6, 33, 2.7, 0, Math.PI * 2);
+  ctx.moveTo(6.6, 37.4);
+  ctx.arc(5, 37.4, 1.6, 0, Math.PI * 2);
+}
+
+/** La bulle de parole d'un personnage et sa pointe, vers sa bouche (en bas à gauche). */
+function speechPath(ctx: CanvasRenderingContext2D): void {
+  ctx.beginPath();
+  ctx.roundRect(5, 3, 40, 27, 12.5);
+  // Même sens de tracé que le corps : sinon leur recouvrement se vide (règle non nulle).
+  ctx.moveTo(20, 28);
+  ctx.quadraticCurveTo(14.5, 35, 5, 38.5);
+  ctx.quadraticCurveTo(10, 34, 11, 27);
+  ctx.closePath();
+}
+
+/** Le grain du papier : des points clairs et sombres, toujours les mêmes. */
+function paperGrain(ctx: CanvasRenderingContext2D): void {
+  let seed = 7;
+  const random = (): number => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 260; i++) {
+    ctx.fillStyle = random() < 0.5 ? 'rgba(120,96,80,0.07)' : 'rgba(255,255,255,0.35)';
+    ctx.fillRect(random() * BUBBLE_SIZE.w, random() * BUBBLE_SIZE.h, 0.6, 0.6);
+  }
+}
+
+/** Rectangle occupé par un pictogramme, mesuré une fois (px logiques, autour de son centre). */
+interface IconBounds {
+  readonly cx: number;
+  readonly cy: number;
+  readonly w: number;
+  readonly h: number;
+}
+/** Taille (px logiques) et finesse de la mesure. */
+const MEASURE_SIZE = 64;
+const MEASURE_RES = 4;
+const iconBounds = new Map<string, IconBounds>();
 
 /**
- * Bulle de pensée : nuage clair, deux petites bulles vers la tête (en bas à gauche), pictogramme.
+ * Le rectangle qu'occupe vraiment un pictogramme : dessiné une fois à part, ses pixels mesurés. Le
+ * même pour toutes les bulles des cubes (les creux ont la taille des cubes).
  */
-export function drawThought(
+function measureIcon(
+  icon: ThoughtIcon,
+  images: ReadonlyMap<string, CanvasImageSource>,
+): IconBounds {
+  const cacheKey = images.has('maria') ? icon : `${icon}-drawn`;
+  const cached = iconBounds.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+  const px = MEASURE_SIZE * MEASURE_RES;
+  const canvas = document.createElement('canvas');
+  canvas.width = px;
+  canvas.height = px;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  let bounds: IconBounds = { cx: MEASURE_SIZE / 2, cy: MEASURE_SIZE / 2, w: 0, h: 0 };
+  if (ctx) {
+    ctx.scale(MEASURE_RES, MEASURE_RES);
+    drawIconAt(
+      ctx,
+      icon,
+      images,
+      MEASURE_SIZE / 2,
+      MEASURE_SIZE / 2,
+      (1 << TOWER_CUBES.length) - 1,
+    );
+    const data = ctx.getImageData(0, 0, px, px).data;
+    let x0 = px;
+    let y0 = px;
+    let x1 = -1;
+    let y1 = -1;
+    for (let y = 0; y < px; y++) {
+      for (let x = 0; x < px; x++) {
+        if ((data[(y * px + x) * 4 + 3] ?? 0) > 8) {
+          x0 = Math.min(x0, x);
+          x1 = Math.max(x1, x);
+          y0 = Math.min(y0, y);
+          y1 = Math.max(y1, y);
+        }
+      }
+    }
+    if (x1 >= 0) {
+      bounds = {
+        cx: (x0 + x1 + 1) / 2 / MEASURE_RES,
+        cy: (y0 + y1 + 1) / 2 / MEASURE_RES,
+        w: (x1 - x0 + 1) / MEASURE_RES,
+        h: (y1 - y0 + 1) / MEASURE_RES,
+      };
+    }
+  }
+  iconBounds.set(cacheKey, bounds);
+  return bounds;
+}
+
+/** Un pictogramme dessiné autour de (cx, cy) ; `cubes` : les cubes trouvés (bulle des cubes). */
+function drawIconAt(
   ctx: CanvasRenderingContext2D,
   icon: ThoughtIcon,
   images: ReadonlyMap<string, CanvasImageSource>,
-  /** Bulle `cubes` : les cubes déjà trouvés (`towerCubesMask`). */
-  cubes = 0,
+  cx: number,
+  cy: number,
+  cubes: number,
 ): void {
-  const cx = 19;
-  const cy = 12.5;
-  const c = CLOUD_SCALE;
-  ctx.fillStyle = 'rgba(253,248,238,0.95)';
-  ctx.strokeStyle = 'rgba(91,74,68,0.55)';
-  ctx.lineWidth = 0.8;
-  ctx.beginPath();
-  for (const [x, y, r] of [
-    [-6, 1, 5],
-    [0, -3, 6.5],
-    [6.5, 1, 5],
-    [0, 4, 5.5],
-  ] as const) {
-    ctx.moveTo(cx + x * c + r * c, cy + y * c);
-    ctx.arc(cx + x * c, cy + y * c, r * c, 0, Math.PI * 2);
-  }
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(cx - 11, cy + 12.5, 2.2, 0, Math.PI * 2);
-  ctx.moveTo(cx - 13.5, cy + 16.8);
-  ctx.arc(cx - 14.7, cy + 16.8, 1.3, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.stroke();
-  // Pictogramme agrandi autour du centre du nuage.
   ctx.save();
-  ctx.translate(cx, cy);
-  ctx.scale(ICON_SCALE, ICON_SCALE);
-  ctx.translate(-cx, -cy);
   if (icon === 'cubes') {
     drawCubeSlots(ctx, cx, cy, cubes);
   } else {
     drawIcon(ctx, icon, images, cx, cy);
   }
+  ctx.restore();
+}
+
+/**
+ * Une bulle (D-165), style « papier découpé » : sans trait, une ombre portée nette, un papier grainé.
+ * `thought` : le nuage de Céleste ; `speech` : la bulle de parole d'un autre personnage. `side` -1 :
+ * la bulle part vers la gauche (la forme en miroir, jamais le pictogramme). Le pictogramme, mesuré,
+ * est posé dans la zone sûre : il ne déborde jamais.
+ */
+export function drawBubble(
+  ctx: CanvasRenderingContext2D,
+  kind: BubbleKind,
+  icon: ThoughtIcon,
+  images: ReadonlyMap<string, CanvasImageSource>,
+  side: BubbleSide = 1,
+  /** Bulle `cubes` : les cubes déjà trouvés (`towerCubesMask`). */
+  cubes = 0,
+): void {
+  const path = kind === 'thought' ? cloudPath : speechPath;
+  ctx.save();
+  if (side < 0) {
+    ctx.translate(BUBBLE_SIZE.w, 0);
+    ctx.scale(-1, 1);
+  }
+  ctx.save();
+  ctx.translate(BUBBLE_SHADOW_OFFSET.x, BUBBLE_SHADOW_OFFSET.y);
+  path(ctx);
+  ctx.fillStyle = BUBBLE_SHADOW;
+  ctx.fill();
+  ctx.restore();
+  path(ctx);
+  ctx.fillStyle = BUBBLE_PAPER;
+  ctx.fill();
+  ctx.clip();
+  paperGrain(ctx);
+  ctx.restore();
+
+  const bounds = measureIcon(icon, images);
+  const safe = SAFE[kind];
+  const k = fitScale(bounds.w, bounds.h, safe, MAX_FIT);
+  ctx.save();
+  ctx.translate(safe.x, safe.y);
+  ctx.scale(k, k);
+  ctx.translate(-bounds.cx, -bounds.cy);
+  drawIconAt(ctx, icon, images, MEASURE_SIZE / 2, MEASURE_SIZE / 2, cubes);
   ctx.restore();
 }
 
@@ -1037,7 +1212,23 @@ function drawIcon(
       ctx.fillRect(cx - 8, cy + 4, 14, 1.2);
       ctx.fillStyle = '#f3ead7';
       ctx.fillRect(cx - 6, cy - 0.5, 3.5, 1.8);
-      moon(ctx, cx + 6, cy - 4);
+      // Des « z » à la place de la lune (D-165).
+      ctx.strokeStyle = '#6d86c2';
+      ctx.lineWidth = 0.9;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      for (const [x, y, z] of [
+        [cx + 1.5, cy - 3.2, 3.2],
+        [cx + 5.2, cy - 6.6, 2.4],
+        [cx + 8, cy - 9, 1.8],
+      ] as const) {
+        ctx.beginPath();
+        ctx.moveTo(x, y - z);
+        ctx.lineTo(x + z, y - z);
+        ctx.lineTo(x, y);
+        ctx.lineTo(x + z, y);
+        ctx.stroke();
+      }
       break;
     case 'book': {
       // Livre ouvert : l'histoire du soir.
@@ -1586,19 +1777,294 @@ function drawIcon(
       ctx.arc(cx, cy + 5, 1, 0, Math.PI * 2);
       ctx.fill();
       break;
+    case 'smile':
+      faceIcon(ctx, cx, cy);
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 0.9;
+      ctx.lineCap = 'round';
+      for (const s of [-1, 1]) {
+        ctx.beginPath();
+        ctx.arc(cx + s * 2.4, cy - 0.6, 1.2, Math.PI * 1.1, Math.PI * 1.9);
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.arc(cx, cy + 1.1, 2.6, Math.PI * 0.18, Math.PI * 0.82);
+      ctx.stroke();
+      break;
+    case 'hush':
+      faceIcon(ctx, cx, cy);
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 0.9;
+      ctx.lineCap = 'round';
+      for (const s of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(cx + s * 2.4 - 1, cy - 0.9);
+        ctx.lineTo(cx + s * 2.4 + 1, cy - 0.9);
+        ctx.stroke();
+      }
+      // Le doigt sur la bouche, et le poing.
+      ctx.fillStyle = HAND;
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.roundRect(cx - 0.95, cy + 0.4, 1.9, 7.4, 0.95);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.roundRect(cx - 2.2, cy + 5.2, 4.4, 3.6, 1.4);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    case 'wave': {
+      // Une main ouverte, un peu penchée, et deux traits de mouvement.
+      ctx.save();
+      ctx.translate(cx, cy + 1);
+      ctx.rotate(-0.22);
+      ctx.fillStyle = HAND;
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 0.6;
+      const tops = [1.2, 0, 0.3, 1.5] as const;
+      tops.forEach((top, i) => {
+        ctx.beginPath();
+        ctx.roundRect(-3.9 + i * 2.05, -7 + top, 1.85, 7, 0.92);
+        ctx.fill();
+        ctx.stroke();
+      });
+      ctx.save();
+      ctx.translate(-4, 1.8);
+      ctx.rotate(-0.75);
+      ctx.beginPath();
+      ctx.roundRect(-1, -4.6, 2, 5, 1);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+      ctx.beginPath();
+      ctx.roundRect(-4.1, -2, 8.2, 7, 2.6);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(91,74,68,0.75)';
+      ctx.lineWidth = 0.8;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.arc(cx - 2, cy - 2.5, 7.5, Math.PI * 1.08, Math.PI * 1.32);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx + 2, cy - 2.5, 7.5, -Math.PI * 0.32, -Math.PI * 0.08);
+      ctx.stroke();
+      break;
+    }
+    case 'wonder':
+      ctx.fillStyle = GOLD;
+      sparkleStar(ctx, cx - 1, cy + 0.5, 6.8);
+      ctx.fillStyle = '#fff3c4';
+      sparkleStar(ctx, cx - 1, cy + 0.5, 2.4);
+      ctx.fillStyle = GOLD;
+      sparkleStar(ctx, cx + 6, cy - 4.5, 2.6);
+      ctx.fillStyle = PINK;
+      sparkleStar(ctx, cx + 5.5, cy + 5, 1.8);
+      break;
+    case 'miss':
+      // Un petit nuage gris et trois gouttes.
+      ctx.fillStyle = '#a9b6c8';
+      ctx.beginPath();
+      ctx.arc(cx - 3.4, cy - 1.2, 3.3, 0, Math.PI * 2);
+      ctx.arc(cx + 0.4, cy - 3.2, 4.2, 0, Math.PI * 2);
+      ctx.arc(cx + 4.1, cy - 0.9, 3.1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(cx - 3.4, cy - 1.2, 7.5, 3.2);
+      ctx.fillStyle = '#5d86c9';
+      for (const [dx, dy] of [
+        [-3, 5],
+        [0.6, 6.6],
+        [4, 4.8],
+      ] as const) {
+        const x = cx + dx;
+        const y = cy + dy;
+        ctx.beginPath();
+        ctx.moveTo(x, y - 2.2);
+        ctx.quadraticCurveTo(x + 1.2, y - 0.2, x, y + 0.9);
+        ctx.quadraticCurveTo(x - 1.2, y - 0.2, x, y - 2.2);
+        ctx.fill();
+      }
+      break;
+    case 'call':
+      // « ! » : papa appelle Céleste (D-166).
+      ctx.fillStyle = PINK;
+      ctx.beginPath();
+      ctx.roundRect(cx - 1.4, cy - 7.5, 2.8, 10, 1.4);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx, cy + 5.6, 1.6, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    case 'gamepad':
+      drawGamepad(ctx, cx, cy, 1);
+      break;
+    case 'tv':
+      // La télé et sa console : installée dans la chambre (D-166).
+      drawTv(ctx, cx - 8, cy - 7, 13, 10);
+      ctx.fillStyle = TV_BODY;
+      ctx.fillRect(cx - 3, cy + 3, 3, 2);
+      ctx.fillRect(cx - 5, cy + 5, 7, 1.5);
+      ctx.fillStyle = CONSOLE_PINK;
+      ctx.strokeStyle = CONSOLE_DARK;
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.roundRect(cx + 3, cy + 2.5, 6, 4, 1);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    case 'locked':
+      // Une porte cintrée et son cadenas.
+      ctx.fillStyle = WOOD_DARK;
+      ctx.beginPath();
+      ctx.roundRect(cx - 6, cy - 7.5, 10, 15, [4.5, 4.5, 0, 0]);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+      ctx.lineWidth = 0.7;
+      ctx.strokeRect(cx - 4.4, cy - 3.6, 6.8, 3.6);
+      ctx.strokeRect(cx - 4.4, cy + 1.2, 6.8, 4.4);
+      ctx.strokeStyle = '#8b8f96';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.arc(cx + 4.4, cy + 0.6, 2.3, Math.PI, 0);
+      ctx.stroke();
+      ctx.fillStyle = '#e6c27a';
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.roundRect(cx + 1.1, cy + 0.6, 6.6, 5.4, 1.1);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = INK;
+      ctx.beginPath();
+      ctx.arc(cx + 4.4, cy + 2.8, 0.75, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(cx + 4.05, cy + 2.8, 0.7, 1.7);
+      break;
   }
 }
 
+const HAND = '#f1c9a5';
+const GOLD = '#f2c14e';
+/** La console de Céleste (D-166) : le rose de la console, l'écran pastel. PLACEHOLDER. */
+const CONSOLE_PINK = '#f2a7c3';
+const CONSOLE_DARK = '#7a2f4d';
+const CONSOLE_SCREEN = '#fde6ef';
+const CONSOLE_MAUVE = '#9b7fd1';
+const TV_BODY = '#4a3a44';
+
+/** Une manette rose : la croix et deux boutons (pictogramme du cadeau, et sur la console). */
+function drawGamepad(ctx: CanvasRenderingContext2D, cx: number, cy: number, s: number): void {
+  ctx.fillStyle = CONSOLE_PINK;
+  ctx.strokeStyle = CONSOLE_DARK;
+  ctx.lineWidth = 0.9 * s;
+  ctx.beginPath();
+  ctx.roundRect(cx - 7 * s, cy - 3.5 * s, 14 * s, 7 * s, 3.5 * s);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = CONSOLE_DARK;
+  ctx.fillRect(cx - 5.2 * s, cy - 0.5 * s, 3.6 * s, 1 * s);
+  ctx.fillRect(cx - 3.9 * s, cy - 1.8 * s, 1 * s, 3.6 * s);
+  ctx.beginPath();
+  ctx.arc(cx + 3 * s, cy + 0.9 * s, 0.9 * s, 0, Math.PI * 2);
+  ctx.arc(cx + 5 * s, cy - 0.9 * s, 0.9 * s, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/** Une petite télé à l'écran pastel (un poteau, un câble) ; `s` : l'échelle. */
+function drawTv(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number): void {
+  ctx.fillStyle = TV_BODY;
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, 2.5);
+  ctx.fill();
+  const sx = x + 2.5;
+  const sy = y + 2.5;
+  const sw = w - 5;
+  const sh = h - 5;
+  ctx.fillStyle = CONSOLE_SCREEN;
+  ctx.fillRect(sx, sy, sw, sh);
+  // Un écran des tyroliennes : un câble, un poteau mauve.
+  ctx.strokeStyle = TV_BODY;
+  ctx.lineWidth = 0.7;
+  ctx.beginPath();
+  ctx.moveTo(sx + sw * 0.1, sy + sh * 0.25);
+  ctx.lineTo(sx + sw * 0.62, sy + sh * 0.5);
+  ctx.stroke();
+  ctx.fillStyle = CONSOLE_MAUVE;
+  ctx.fillRect(sx + sw * 0.7, sy + sh * 0.6, sw * 0.18, sh * 0.4);
+}
+
+/** La console de salon sur le bureau de la chambre (D-166) : la télé, la console, la manette. */
+function drawConsoleTv(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  drawTv(ctx, 3, 2, 26, 20);
+  // Le pied de la télé.
+  ctx.fillStyle = TV_BODY;
+  ctx.fillRect(13, 22, 6, 4);
+  ctx.fillRect(9, h - 3, 14, 3);
+  // La console à côté, et la manette posée dessus, reliée par son fil.
+  ctx.fillStyle = CONSOLE_PINK;
+  ctx.strokeStyle = CONSOLE_DARK;
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.roundRect(w - 14, h - 7, 13, 7, 1.5);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = CONSOLE_DARK;
+  ctx.fillRect(w - 11, h - 4.5, 7, 1);
+  ctx.strokeStyle = TV_BODY;
+  ctx.lineWidth = 0.7;
+  ctx.beginPath();
+  ctx.moveTo(w - 7, h - 7);
+  ctx.quadraticCurveTo(w - 3, h - 12, w - 7.5, h - 12.5);
+  ctx.stroke();
+  drawGamepad(ctx, w - 8, h - 14.5, 0.55);
+}
+
+/** Un visage rond aux joues roses (sourire, « chut »). */
+function faceIcon(ctx: CanvasRenderingContext2D, cx: number, cy: number): void {
+  ctx.fillStyle = '#fbe6cf';
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = 0.9;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 6.6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(224,89,139,0.45)';
+  for (const s of [-1, 1]) {
+    ctx.beginPath();
+    ctx.arc(cx + s * 3.7, cy + 1.7, 1.3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+/** Une étoile à quatre branches, aux côtés creusés. */
+function sparkleStar(ctx: CanvasRenderingContext2D, x: number, y: number, r: number): void {
+  const k = r * 0.24;
+  ctx.beginPath();
+  ctx.moveTo(x, y - r);
+  ctx.quadraticCurveTo(x + k, y - k, x + r, y);
+  ctx.quadraticCurveTo(x + k, y + k, x, y + r);
+  ctx.quadraticCurveTo(x - k, y + k, x - r, y);
+  ctx.quadraticCurveTo(x - k, y - k, x, y - r);
+  ctx.fill();
+}
+
+/**
+ * Un croissant de lune : le disque, moins la morsure, découpée par un masque (et non effacée : elle
+ * trouait ce qui était dessous, la bulle comprise, D-165).
+ */
 function moon(ctx: CanvasRenderingContext2D, x: number, y: number): void {
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x - 4, y - 4, 8, 8);
+  ctx.arc(x + 1.6, y - 1, 2.6, 0, Math.PI * 2);
+  ctx.clip('evenodd');
   ctx.fillStyle = '#e6c27a';
   ctx.beginPath();
   ctx.arc(x, y, 3, 0, Math.PI * 2);
   ctx.fill();
-  ctx.globalCompositeOperation = 'destination-out';
-  ctx.beginPath();
-  ctx.arc(x + 1.6, y - 1, 2.6, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.globalCompositeOperation = 'source-over';
+  ctx.restore();
 }
 
 /** Petite étincelle au-dessus de ce qu'on peut faire (Agir). */

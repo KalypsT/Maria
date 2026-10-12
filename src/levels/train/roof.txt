@@ -1,6 +1,7 @@
 ; Le train (D-86), PR 3 : le toit, la nuit, dehors, en route (on n'y monte qu'en suivant la lueur).
 ; Le toit du fourgon, le soufflet entre les deux voitures, le toit du wagon-restaurant et la
-; cheminée de sa cuisine. Les tunnels arrivent par l'avant (annoncés : l'image s'assombrit) : debout
+; cheminée de sa cuisine. Les tunnels arrivent par l'avant (annoncés : leur bouche approche, les
+; creux s'éclairent, D-164) : debout
 ; sur le toit, on est repoussée ; couchée (glissade) ou dans un creux, entre deux voitures, rien.
 ; Au bout, la trappe du wagon-restaurant (porte 2).
 ; @name: Le toit du train

@@ -6,6 +6,7 @@ import { parseDisplaySettings, sanitizeDisplaySettings } from '../settings/displ
 import { sanitizeAudioSettings } from '../settings/audioSettings';
 import { LEGACY_STORY_FLAGS } from '../../config/story';
 import type { LevelEntity } from '../level/LevelData';
+import { createArcade, sanitizeArcade, type ArcadeSave } from './arcade';
 import { createStats, sanitizeStats, type GameStats } from './stats';
 
 /**
@@ -55,6 +56,11 @@ export interface SaveData {
   story: { flags: string[] };
   /** Stats de la partie (D-153) : absentes des sauvegardes plus anciennes, à zéro (aucune migration). */
   stats: GameStats;
+  /**
+   * La console (D-166) : records et jeux déjà vus. Absente des sauvegardes plus anciennes : vide
+   * (aucune migration).
+   */
+  arcade: ArcadeSave;
 }
 
 /** Enregistrement stocké : le contenu sérialisé et sa somme de contrôle. */
@@ -127,6 +133,7 @@ export function createNewSave(
     },
     story: { flags: [] },
     stats: createStats(),
+    arcade: createArcade(),
   };
 }
 
@@ -240,6 +247,7 @@ export function validateSaveData(raw: unknown): SaveData | null {
     },
     story: { flags },
     stats: sanitizeStats(raw['stats']),
+    arcade: sanitizeArcade(raw['arcade']),
   };
 }
 

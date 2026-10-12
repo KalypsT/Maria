@@ -82,7 +82,7 @@ const TRAIN = /^(\d+)\s+(left|right)$/;
 /**
  * Poursuite (D-67, D-87) : `; @chase: 4` (vers le haut, ligne d'arrivée) ou `; @chase: right 140`
  * (sens, ligne ou colonne d'arrivée), `; @chase-phase: 40 1.5` (jusqu'à la ligne ou la colonne,
- * tuiles/s), `; @chase-trip: col ligne l h`, `; @chase-look: wave` (la vague, D-103).
+ * tuiles/s), `; @chase-trip: col ligne l h`, `; @chase-look: wave` (la vague, D-103) ou `monster` (la console, D-166).
  */
 const CHASE_END = /^(?:(up|right|left)\s+)?(\d+)$/;
 const CHASE_PHASE = /^(\d+)\s+(\d+(?:\.\d+)?)$/;
@@ -372,7 +372,7 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
         }
         chasePhases.push({ until: Number(c[1]), speed: Number(c[2]) });
       } else if (match[1] === 'chase-look') {
-        if (value !== 'wave' && value !== 'erasure') {
+        if (value !== 'wave' && value !== 'erasure' && value !== 'monster') {
           throw bad();
         }
         chaseLook = value;
@@ -577,8 +577,8 @@ export function parseAsciiLevel(id: string, text: string): LevelData {
       );
     }
   }
-  if (chaseLook === 'wave' && (chaseEnd < 0 || chaseDir === 'up')) {
-    throw new Error(`Niveau ${id} : @chase-look: wave va avec une poursuite horizontale`);
+  if ((chaseLook === 'wave' || chaseLook === 'monster') && (chaseEnd < 0 || chaseDir === 'up')) {
+    throw new Error(`Niveau ${id} : @chase-look: ${chaseLook} va avec une poursuite horizontale`);
   }
   if (chaseLook === 'erasure' && (chaseEnd < 0 || chaseDir !== 'up')) {
     throw new Error(`Niveau ${id} : @chase-look: erasure va avec une poursuite vers le haut`);

@@ -114,8 +114,8 @@ const TRIGGERS: StoryTrigger[] = [
   {
     // L'arrivée de la classe (D-98) : Agir près de la maîtresse. Céleste demande (« ? ») ; la
     // maîtresse sourit (le soleil). Dans le noir, la classe part au centre : le dortoir, les sacs
-    // posés au pied des couchettes, la camarade et les enfants. Céleste pense à Maria (le début d'un
-    // niveau, D-70).
+    // posés au pied des couchettes, la camarade (un sourire) et les enfants. Plus de bulle « Maria »
+    // au début d'un niveau (D-165).
     id: 'sea-arrival',
     room: 'sea-station',
     on: 'interact',
@@ -134,9 +134,7 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.nightBlackMs },
       { do: 'fadeIn', ms: S.nightFadeInMs },
       { do: 'wait', ms: S.lookMs },
-      { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'classmate-dorm' },
-      { do: 'wait', ms: S.thoughtMs },
-      { do: 'thought', icon: 'maria', ms: S.thoughtMs },
+      { do: 'thought', icon: 'smile', ms: S.thoughtMs, by: 'classmate-dorm' },
       { do: 'wait', ms: S.thoughtMs },
     ],
   },
@@ -184,7 +182,7 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.lookMs },
       { do: 'thought', icon: 'tide', ms: S.thoughtMs },
       { do: 'wait', ms: S.thoughtMs },
-      { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'teacher-promenade' },
+      { do: 'thought', icon: 'smile', ms: S.thoughtMs, by: 'teacher-promenade' },
     ],
   },
   {
@@ -227,7 +225,7 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.nightBlackMs },
       { do: 'fadeIn', ms: S.nightFadeInMs },
       { do: 'wait', ms: S.lookMs },
-      { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'classmate-jetty' },
+      { do: 'thought', icon: 'smile', ms: S.thoughtMs, by: 'classmate-jetty' },
       { do: 'wait', ms: S.thoughtMs },
       { do: 'thought', icon: 'carousel', ms: S.thoughtMs },
     ],
@@ -297,7 +295,8 @@ const TRIGGERS: StoryTrigger[] = [
         ms: S.cradleSparkleMs + 600,
       },
       { do: 'wait', ms: S.cradleSparkleMs },
-      { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+      // Le livre de quand elle était toute petite : l'émerveillement (D-165).
+      { do: 'thought', icon: 'wonder', ms: S.thoughtMs },
       { do: 'wait', ms: S.thoughtMs },
       // Le court souvenir (D-105) : Céleste toute petite, seule, appuie sur un bouton du livre ;
       // des notes dessinées s'en échappent.
@@ -432,6 +431,15 @@ const TRIGGERS: StoryTrigger[] = [
 ];
 
 const PROPS: StoryProp[] = [
+  // La lueur sous la porte du dortoir, toute la nuit (D-105, retour d'essai) : la porte à ouvrir.
+  {
+    id: 'dorm-door-glow',
+    room: 'sea-centre',
+    kind: 'door-glow',
+    col: DORM_DOOR.col,
+    row: DORM_DOOR.row,
+    when: NIGHT,
+  },
   // Le disque « Avant même ta naissance » (D-156), sur l'armoire du dortoir.
   {
     id: 'record-lullaby',
@@ -554,8 +562,8 @@ const PROPS: StoryProp[] = [
  */
 const LOCKED: StoryData['lockedRooms'] = [
   // L'arche de la jetée (D-101) : la fête s'installe le jour, on n'y entre que le soir.
-  { room: 'sea-port', exit: 3, when: { none: [F.SeaEvening] }, icon: 'question' },
-  { room: 'sea-promenade', exit: 4, when: { none: [F.SeaFirstTide] }, icon: 'question' },
+  { room: 'sea-port', exit: 3, when: { none: [F.SeaEvening] }, icon: 'locked' },
+  { room: 'sea-promenade', exit: 4, when: { none: [F.SeaFirstTide] }, icon: 'locked' },
   {
     room: 'sea-station',
     exit: 2,

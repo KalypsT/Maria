@@ -88,6 +88,26 @@ export const THOUGHT_ICONS = [
   'cubes',
   /** Maria assise sur l'étagère du surmeuble (D-144) : là où la ranger. */
   'maria-shelf',
+  // Les sentiments et les portes (D-165) : le cœur garde son sens, la tendresse.
+  /** Un visage qui sourit : la gentillesse (la maîtresse, la camarade, des passants). */
+  'smile',
+  /** Une main qui fait coucou : un salut (des passants). */
+  'wave',
+  /** Un visage, un doigt sur la bouche : « chut » (le contrôleur, la nuit). */
+  'hush',
+  /** Une grande étincelle dorée et deux petites : l'émerveillement, une découverte. */
+  'wonder',
+  /** Un petit nuage gris et sa pluie : le manque, la tristesse douce. */
+  'miss',
+  /** Une porte et son cadenas : une porte fermée. */
+  'locked',
+  // La console de Céleste (D-166).
+  /** « ! » : quelqu'un appelle Céleste (papa au potager, le cadeau). */
+  'call',
+  /** Une manette : la console de salon (le cadeau de papa). */
+  'gamepad',
+  /** Une petite télé et sa console : elle est installée dans la chambre. */
+  'tv',
   /** La mer, son soleil et une vague (D-169) : là où part le train de la classe. */
   'sea',
   /** La maison, sa fenêtre allumée (D-169) : Céleste y pense, loin de chez elle. */
@@ -188,6 +208,11 @@ export type StoryStep =
    * (le plateau vide) s'il n'y en a aucun.
    */
   | { readonly do: 'records' }
+  /**
+   * La console de Céleste (D-166, non bloquant) : Céleste s'assoit devant la télé, l'écran de la
+   * console s'ouvre sur son menu.
+   */
+  | { readonly do: 'console' }
   /**
    * Céleste est sortie de la salle (D-144, seulement dans le noir) : on ne la voit plus ; une
    * étape `room` la ramène, avant la fin du script (vérifié par `storyProblems`).
@@ -308,6 +333,10 @@ export const PROP_KINDS = [
   'quay-train',
   /** Le train à quai, de jour (D-90) : la porte ouverte, sans lueur ; il relie les deux gares. */
   'quay-train-day',
+  /** La lueur sous la porte du dortoir, la nuit (D-105, retour d'essai) : un trait de lumière. */
+  'door-glow',
+  /** La console de salon de Céleste (D-166) : une petite télé, la console, la manette. */
+  'console-tv',
   // Objets à regarder (D-38), avec un petit mouvement en boucle.
   'music-box',
   'plant',
@@ -459,6 +488,7 @@ export const WALL_PROP_KINDS: ReadonlySet<PropKind> = new Set<PropKind>([
   'site-gap',
   'quay-train',
   'quay-train-day',
+  'door-glow',
 ]);
 
 /**

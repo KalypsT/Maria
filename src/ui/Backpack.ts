@@ -143,10 +143,17 @@ export class Backpack {
 
   /**
    * Ouvre le sac sur une page. `content` : les cartes des lieux visités (aucune dans un parcours
-   * d'essai), la rangée des lieux, les souvenirs, les capacités, les chiffres.
+   * d'essai), la rangée des lieux, les souvenirs, les capacités, les chiffres. `onTravel` : ouvert
+   * depuis une lanterne (le voyage rapide, D-163), une veilleuse touchée deux fois sur la carte.
    */
-  open(page: BackpackPage, content: NotebookContent): void {
+  open(
+    page: BackpackPage,
+    content: NotebookContent,
+    onTravel: ((lantern: string) => void) | null = null,
+  ): void {
     this.content = content;
+    this.notebook.setTravel(onTravel);
+    this.root.classList.toggle('travel', onTravel !== null);
     this.hasMap = content.startPlace !== null;
     this.treasuresNew = content.treasures?.hasNew ?? false;
     // Sans partie (un parcours d'essai), pas de trésors.
@@ -165,6 +172,7 @@ export class Backpack {
   close(): void {
     this.root.hidden = true;
     this.notebook.stop();
+    this.notebook.setTravel(null);
   }
 
   destroy(): void {

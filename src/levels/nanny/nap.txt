@@ -29,6 +29,7 @@
 ; @leg: 29,27 55,29 hard shift umbrella
 ; @leg: 55,29 71,26 hard shift
 ; @leg: 71,26 66,4 medium shift wall-jump
+; @decor: napexit 2 26 3 5
 ; @decor: mobile 40 1 6 10
 ; @decor: napcot 58 1 17 5
 ; @decor: giantstake 74 6 1 17

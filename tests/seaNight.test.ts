@@ -51,7 +51,8 @@ describe('la nuit, le couloir en boucle, la fin (D-105)', () => {
       .map((p) => p.kind)
       .filter((kind) => !kind.startsWith('record-'))
       .sort();
-    expect(shown).toEqual(['classmate-asleep', 'kid-asleep', 'kid-asleep']);
+    // La lueur sous la porte (retour d'essai), toute la nuit.
+    expect(shown).toEqual(['classmate-asleep', 'door-glow', 'kid-asleep', 'kid-asleep']);
     const day = new Set<string>([F.SeaArrived]);
     expect(
       HOUSE_STORY.props.some(

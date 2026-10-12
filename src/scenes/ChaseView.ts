@@ -11,6 +11,7 @@ const CART = 'chase-cart-placeholder';
 const TOWER = 'chase-tower-placeholder';
 const WAVE_FACE = 'chase-wave-face-placeholder';
 const WAVE_CREST = 'chase-wave-crest-placeholder';
+const MONSTER_FACE = 'chase-monster-face-placeholder';
 /** La vague (D-103) : largeur du front d'écume et de la crête (px logiques). */
 const FACE_W = 3 * T;
 const CREST_W = 5 * T;
@@ -49,6 +50,14 @@ const METAL = '#2a2540';
 const ERASE_MASS = '#a9a6b8';
 const ERASE_RIM = 'rgba(242,240,248,0.9)';
 const METAL_LIGHT = '#4a4268';
+/** Le monstre de la console (D-166) : une masse pastel, des bosses rondes, le liseré rose du danger. */
+const MONSTER_MASS = '#b9a3e3';
+const MONSTER_LIGHT = '#d4c3f2';
+const MONSTER_SPOT = '#a58bd8';
+const MONSTER_RIM = '#ff6f9f';
+/** Le monstre ondule un peu au front (px, ms). */
+const WOBBLE_PX = 2;
+const WOBBLE_MS = 900;
 
 /** Pseudo-hasard stable. */
 function hash(x: number, y: number): number {
@@ -89,6 +98,9 @@ function commonFloorY(level: LevelData): number {
  * vaisselle qui monte jusqu'en haut de la salle (assiettes, tasses, théières, une cloche de
  * service), sans visage ; derrière lui, l'ombre. La tour oscille un peu et tremble au croc-en-jambe
  * et au contact. Trois images : l'ombre (étirée), le chariot, la tour.
+ *
+ * Le monstre de la console (D-166, `; @chase-look: monster`) : une masse pastel sans visage, son
+ * front en bosses rondes. Deux images : la masse (étirée), le front.
  */
 export class ChaseView {
   private top: Phaser.GameObjects.Image | null = null;
@@ -158,6 +170,21 @@ export class ChaseView {
     }
     // Vers la droite, la masse est à gauche du front ; vers la gauche, à droite (image retournée).
     const right = room.chase.dir === 'right';
+    if (room.chase.look === 'monster') {
+      this.createMonsterTextures();
+      this.body = this.scene.add
+        .image(0, 0, BODY)
+        .setOrigin(right ? 1 : 0, 0)
+        .setDepth(9);
+      this.body.setDisplaySize(this.width, this.height);
+      this.face = this.scene.add
+        .image(0, 0, MONSTER_FACE)
+        .setOrigin(right ? 1 : 0, 0)
+        .setScale(inverse)
+        .setFlipX(!right)
+        .setDepth(9);
+      return;
+    }
     if (room.chase.look === 'wave') {
       this.createWaveTextures();
       this.body = this.scene.add
@@ -222,6 +249,21 @@ export class ChaseView {
       this.face.setPosition(x, heave);
       this.crest.setPosition(x + reach + Math.sin(now * 0.05) * JOLT_PX * jolt, heave - 2);
       this.crest.setAlpha(chase.backwash ? 0.65 : 1);
+      this.body.setPosition(x - chase.sign * (FACE_W - 2), 0);
+      return;
+    }
+    if (this.face && this.body) {
+      // Le monstre de la console (D-166) : le front ondule, tremble au contact ; la masse suit.
+      if (chase.jolts !== this.seenJolts) {
+        this.seenJolts = chase.jolts;
+        this.joltAt = now;
+      }
+      const jolt = Math.max(0, 1 - (now - this.joltAt) / JOLT_MS);
+      const wobble =
+        Math.sin((now / WOBBLE_MS) * Math.PI * 2) * WOBBLE_PX +
+        Math.sin(now * 0.06) * JOLT_PX * jolt;
+      const x = chase.front;
+      this.face.setPosition(x + chase.sign * wobble, -HEAVE_PX);
       this.body.setPosition(x - chase.sign * (FACE_W - 2), 0);
       return;
     }
@@ -430,6 +472,53 @@ export class ChaseView {
    * hauteur de la salle ; un front d'eau sombre strié d'écume, bordé de turquoise ; en haut, la
    * crête qui s'enroule ; dans l'écume, des chevaux de bois et des ballons.
    */
+  /**
+   * Le monstre de la console (D-166), PLACEHOLDER : une masse pastel sans visage, son front fait de
+   * bosses rondes (un nuage), quelques taches plus sombres, le liseré rose des briques de jeu le long
+   * du front : là où il ne faut pas être. Doux, jamais effrayant (pilier 8).
+   */
+  private createMonsterTextures(): void {
+    const h = this.height + 2 * HEAVE_PX;
+    this.make(BODY, 4, 4, (ctx) => {
+      ctx.fillStyle = MONSTER_MASS;
+      ctx.fillRect(0, 0, 4, 4);
+    });
+    this.make(MONSTER_FACE, FACE_W, h, (ctx) => {
+      const edge = (y: number) => FACE_W - 3 - Math.abs(Math.sin(y * 0.11)) * 7;
+      const grad = ctx.createLinearGradient(0, 0, FACE_W, 0);
+      grad.addColorStop(0, MONSTER_MASS);
+      grad.addColorStop(1, MONSTER_LIGHT);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      for (let y = 0; y <= h; y += 2) {
+        ctx.lineTo(edge(y), y);
+      }
+      ctx.lineTo(0, h);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = MONSTER_SPOT;
+      for (let k = 0; k < 18; k++) {
+        ctx.globalAlpha = 0.35 + hash(k, 5) * 0.3;
+        ctx.beginPath();
+        ctx.arc(4 + hash(k, 6) * (FACE_W - 18), hash(k, 7) * h, 2 + hash(k, 8) * 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = MONSTER_RIM;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let y = 0; y <= h; y += 2) {
+        if (y === 0) {
+          ctx.moveTo(edge(y), y);
+        } else {
+          ctx.lineTo(edge(y), y);
+        }
+      }
+      ctx.stroke();
+    });
+  }
+
   private createWaveTextures(): void {
     const h = this.height + 2 * HEAVE_PX;
     this.make(BODY, 4, 4, (ctx) => {

@@ -5,6 +5,17 @@ import { TRAIN_STORY } from '../train/story';
 import { SEA_STORY } from '../sea/story';
 import { NANNY_STORY } from '../nanny/story';
 import { FINALE_STORY } from '../finale/story';
+import { CONSOLE_TV } from '../../config/arcade';
+
+/**
+ * Quand la console est dans la chambre (D-166) : une fois offerte, sauf pendant le dernier niveau
+ * (la chambre du premier soir, rejouée : rien de nouveau) ; après la fin, toujours (même dans une
+ * partie finie avant que la console existe : rien ne se déclenche plus dans la chambre).
+ */
+const CONSOLE_WHEN = [
+  { all: [F.ConsoleGift], none: [F.GrownFourth] },
+  { all: [F.FinaleGone] },
+] as const;
 
 /** Haut de la bibliothèque du salon, là où Maria était assise. */
 const LIVING_TOP: TileArea = { col: 46, row: 5, w: 10, h: 3 };
@@ -117,8 +128,7 @@ export const HOUSE_STORY: StoryData = {
       lock: true,
       steps: [
         { do: 'pose', pose: 'sit' },
-        { do: 'thought', icon: 'heart', ms: S.holdMs },
-        { do: 'wait', ms: S.holdMs },
+        { do: 'wait', ms: S.lookMs },
         { do: 'fadeOut', ms: S.fadeMs },
         { do: 'flag', id: F.EveningGoodnight },
         { do: 'place', col: 12, row: 15, facing: 1 },
@@ -145,8 +155,8 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: 2000 },
       ],
     },
-    // Les affaires de Maria (D-58) : Agir les ramasse ; elles quittent le jeu pour le sac. Céleste
-    // pense à Maria (D-169, plus un cœur).
+    // Les affaires de Maria (D-58) : Agir les ramasse ; elles quittent le jeu et filent vers le sac
+    // (D-169). Sans bulle (D-165) : l'étincelle, le son et le sac suffisent.
     {
       id: 'take-slipper',
       room: 'hall',
@@ -159,8 +169,6 @@ export const HOUSE_STORY: StoryData = {
         { do: 'flag', id: F.TraceHall },
         { do: 'flag', id: F.SlipperTaken },
         { do: 'memory', id: 'slipper' },
-        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
-        { do: 'wait', ms: S.lookMs },
       ],
     },
     {
@@ -175,8 +183,6 @@ export const HOUSE_STORY: StoryData = {
         { do: 'flag', id: F.TraceStairs },
         { do: 'flag', id: F.BottleTaken },
         { do: 'memory', id: 'bottle' },
-        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
-        { do: 'wait', ms: S.lookMs },
       ],
     },
     {
@@ -191,8 +197,6 @@ export const HOUSE_STORY: StoryData = {
       steps: [
         { do: 'flag', id: F.HeadbandTaken },
         { do: 'memory', id: 'headband' },
-        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
-        { do: 'wait', ms: S.lookMs },
       ],
     },
     {
@@ -207,8 +211,6 @@ export const HOUSE_STORY: StoryData = {
       steps: [
         { do: 'flag', id: F.BonnetTaken },
         { do: 'memory', id: 'bonnet' },
-        { do: 'thought', icon: 'maria', ms: S.thoughtMs },
-        { do: 'wait', ms: S.lookMs },
       ],
     },
     {
@@ -241,12 +243,10 @@ export const HOUSE_STORY: StoryData = {
       lock: true,
       steps: [
         { do: 'flag', id: F.MorningMom },
-        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
+        { do: 'thought', icon: 'question', ms: S.thoughtMs },
         { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'question', ms: S.thoughtMs, by: 'mom-sofa' },
         { do: 'wait', ms: S.thoughtMs },
-        { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'mom-sofa' },
-        { do: 'wait', ms: S.lookMs },
       ],
     },
     {
@@ -301,7 +301,8 @@ export const HOUSE_STORY: StoryData = {
         // Le monde étrange se révèle autour de Céleste.
         { do: 'fadeIn', ms: S.blinkInMs, shape: 'iris' },
         { do: 'wait', ms: 500 },
-        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs + 800 },
+        // Maria vient d'être vue ; ce qui frappe, c'est le monde changé (D-165).
+        { do: 'thought', icon: 'question', ms: S.thoughtMs + 800 },
         { do: 'wait', ms: S.lookMs },
       ],
     },
@@ -374,7 +375,8 @@ export const HOUSE_STORY: StoryData = {
       when: { all: [F.DadVisit], none: [F.MomHug] },
       lock: true,
       steps: [
-        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
+        // Le chagrin, sans remontrer Maria (D-165) ; maman console.
+        { do: 'thought', icon: 'miss', ms: S.thoughtMs },
         { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'heart', ms: S.holdMs, by: 'mom-sofa' },
         { do: 'wait', ms: S.holdMs },
@@ -410,7 +412,8 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: S.monthsBlackMs },
         { do: 'fadeIn', ms: S.monthsFadeInMs },
         { do: 'wait', ms: 1400 },
-        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs + 800 },
+        // Le temps a passé, le manque reste (D-165).
+        { do: 'thought', icon: 'miss', ms: S.thoughtMs + 800 },
         { do: 'wait', ms: S.lookMs },
         // Il fait beau : envie de jouer dehors, et d'y chercher Maria (D-46).
         { do: 'thought', icon: 'sun', ms: S.thoughtMs },
@@ -449,7 +452,8 @@ export const HOUSE_STORY: StoryData = {
       ],
     },
     {
-      // Maman étend le linge : elle ne sait pas non plus où est Maria, elle console.
+      // Maman étend le linge : elle ne sait pas non plus où est Maria, elle encourage. Céleste
+      // demande d'un « ? » : Maria disparue n'est montrée qu'à la première question, à papa (D-165).
       id: 'garden-mom',
       room: 'garden-terrace',
       on: 'interact',
@@ -459,13 +463,32 @@ export const HOUSE_STORY: StoryData = {
       lock: true,
       steps: [
         { do: 'flag', id: F.GardenMom },
-        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
+        { do: 'thought', icon: 'question', ms: S.thoughtMs },
         { do: 'wait', ms: S.thoughtMs },
         // Au jardin, maman ne sait pas non plus, mais encourage : « cherche bien » (D-50).
         { do: 'thought', icon: 'search', ms: S.thoughtMs, by: 'mom-garden' },
         { do: 'wait', ms: S.thoughtMs },
-        { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'mom-garden' },
+      ],
+    },
+    {
+      // La console (D-166) : au premier passage au potager, papa appelle Céleste et lui offre une
+      // console de salon (la manette), qu'il installe dans sa chambre (la télé). Sans texte.
+      id: 'garden-console',
+      room: 'garden-vegetables',
+      on: 'touch',
+      area: { col: 1, row: 14, w: 63, h: 8 },
+      when: { all: [F.Grown], none: [F.ConsoleGift, F.GateOpen] },
+      lock: true,
+      steps: [
+        { do: 'flag', id: F.ConsoleGift },
+        { do: 'thought', icon: 'call', ms: S.lookMs, by: 'dad-garden' },
         { do: 'wait', ms: S.lookMs },
+        { do: 'thought', icon: 'gamepad', ms: S.thoughtMs, by: 'dad-garden' },
+        { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'wonder', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
+        { do: 'thought', icon: 'tv', ms: S.thoughtMs, by: 'dad-garden' },
+        { do: 'wait', ms: S.thoughtMs },
       ],
     },
     {
@@ -484,8 +507,6 @@ export const HOUSE_STORY: StoryData = {
         // Papa montre, sans rien savoir, la cabane dans l'arbre : un indice (D-50).
         { do: 'thought', icon: 'treehouse', ms: S.thoughtMs, by: 'dad-garden' },
         { do: 'wait', ms: S.thoughtMs },
-        { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'dad-garden' },
-        { do: 'wait', ms: S.lookMs },
       ],
     },
     {
@@ -504,8 +525,6 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'gate', ms: S.thoughtMs, by: 'dad-garden' },
         { do: 'wait', ms: S.thoughtMs },
-        { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'dad-garden' },
-        { do: 'wait', ms: S.lookMs },
       ],
     },
     {
@@ -538,8 +557,6 @@ export const HOUSE_STORY: StoryData = {
         { do: 'flag', id: F.GardenDadHedge },
         { do: 'thought', icon: 'hedge', ms: S.thoughtMs, by: 'dad-garden' },
         { do: 'wait', ms: S.thoughtMs },
-        { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'dad-garden' },
-        { do: 'wait', ms: S.lookMs },
       ],
     },
     {
@@ -675,8 +692,6 @@ export const HOUSE_STORY: StoryData = {
         { do: 'flag', id: F.StreetMomCrane },
         { do: 'thought', icon: 'crane', ms: S.thoughtMs, by: 'mom-bench' },
         { do: 'wait', ms: S.thoughtMs },
-        { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'mom-bench' },
-        { do: 'wait', ms: S.lookMs },
       ],
     },
     {
@@ -815,7 +830,7 @@ export const HOUSE_STORY: StoryData = {
     },
     {
       // À l'aire de jeux (D-61), maman sur un banc : elle ne sait pas non plus où est Maria ; elle
-      // montre papa, parti faire les courses à la supérette (D-63), puis un cœur.
+      // montre papa, parti faire les courses à la supérette (D-63). L'échange finit sur l'indice (D-165).
       id: 'street-mom',
       room: 'playground',
       on: 'interact',
@@ -825,17 +840,16 @@ export const HOUSE_STORY: StoryData = {
       lock: true,
       steps: [
         { do: 'flag', id: F.StreetMom },
-        { do: 'thought', icon: 'maria-missing', ms: S.thoughtMs },
+        { do: 'thought', icon: 'question', ms: S.thoughtMs },
         { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'dad', ms: S.thoughtMs, by: 'mom-bench' },
         { do: 'wait', ms: S.thoughtMs },
-        { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'mom-bench' },
-        { do: 'wait', ms: S.lookMs },
       ],
     },
     {
       // À la supérette (D-63), papa fait les courses. Il ne sait pas non plus où est Maria ; sans
-      // rien savoir, il montre la grue du chantier (le parapluie y est coincé), puis un cœur.
+      // rien savoir, il montre la grue du chantier (le parapluie y est coincé). L'échange finit sur
+      // l'indice (D-165).
       id: 'street-dad',
       room: 'shop',
       on: 'interact',
@@ -849,8 +863,6 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'crane', ms: S.thoughtMs, by: 'dad-shop' },
         { do: 'wait', ms: S.thoughtMs },
-        { do: 'thought', icon: 'heart', ms: S.thoughtMs, by: 'dad-shop' },
-        { do: 'wait', ms: S.lookMs },
       ],
     },
     // Objets à regarder (D-38) : la première fois, ils deviennent des souvenirs du sac ; on peut
@@ -887,6 +899,30 @@ export const HOUSE_STORY: StoryData = {
         { do: 'wait', ms: S.lookMs },
       ],
     },
+    {
+      // Une partie déjà passée par le portillon (D-166) : papa n'est plus au potager ; la console
+      // est déjà installée dans la chambre.
+      id: 'console-late',
+      room: 'bedroom',
+      on: 'touch',
+      area: { col: 1, row: 1, w: 44, h: 19 },
+      when: { all: [F.GateOpen], none: [F.ConsoleGift, F.GrownFourth] },
+      lock: false,
+      steps: [{ do: 'flag', id: F.ConsoleGift }],
+    },
+    ...CONSOLE_WHEN.map((when, i) => ({
+      // La console de salon (D-166) : Agir devant la télé, Céleste s'assoit et l'allume. Pas
+      // pendant le dernier niveau (la chambre du premier soir, rejouée) ; de nouveau après la fin.
+      id: i === 0 ? 'bedroom-console' : 'bedroom-console-after',
+      room: CONSOLE_TV.room,
+      on: 'interact' as const,
+      area: CONSOLE_TV.area,
+      mark: CONSOLE_TV.mark,
+      when,
+      lock: true,
+      repeat: true,
+      steps: [{ do: 'console' } as const],
+    })),
     {
       // Le tourne-disque du grenier (D-121), sur la malle : on choisit un disque trouvé, ou, sans
       // disque, une bulle (le plateau vide). Agir depuis la malle ou depuis le plancher à côté.
@@ -1238,6 +1274,15 @@ export const HOUSE_STORY: StoryData = {
       row: 27,
       when: { all: [F.GateOpen] },
     },
+    ...CONSOLE_WHEN.map((when, i) => ({
+      // La console de salon sur le bureau (D-166), une fois offerte par papa.
+      id: i === 0 ? 'console-tv' : 'console-tv-after',
+      room: CONSOLE_TV.room,
+      kind: 'console-tv' as const,
+      col: CONSOLE_TV.col,
+      row: CONSOLE_TV.row,
+      when,
+    })),
     {
       id: 'dad-garden',
       room: 'garden-vegetables',
@@ -1338,10 +1383,10 @@ export const HOUSE_STORY: StoryData = {
     // Le portillon (D-60) : fermé tant que la chevillette n'est pas tirée.
     { room: 'garden-alley', exit: 3, when: { none: [F.GateOpen] }, icon: 'gate' },
     // La palissade du chantier (D-64, D-66) : ouverte le lendemain de l'école étrange (la gare).
-    { room: 'street', exit: 6, when: { none: [F.StreetMorning] }, icon: 'question' },
+    { room: 'street', exit: 6, when: { none: [F.StreetMorning] }, icon: 'locked' },
     // La porte de l'école (D-64) : elle ne s'ouvre que de l'intérieur.
-    { room: 'street', exit: 5, when: { none: [F.SchoolOpen] }, icon: 'question' },
-    { room: 'school', exit: 1, when: { none: [F.SchoolOpen] }, icon: 'question' },
+    { room: 'street', exit: 5, when: { none: [F.SchoolOpen] }, icon: 'locked' },
+    { room: 'school', exit: 1, when: { none: [F.SchoolOpen] }, icon: 'locked' },
     // La nuit après l'école étrange (D-64) : c'est l'heure de dormir.
     { room: 'bedroom', when: { all: [F.SchoolDone], none: [F.StreetMorning] }, icon: 'bed' },
     // La gare (D-69).

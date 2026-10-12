@@ -492,7 +492,7 @@ describe('histoire de la maison (D-31)', () => {
       'think cradle',
       'think heart',
       'think bed',
-      'think heart',
+      // Au lit, plus de cœur avant maman (D-165) : trois de suite.
       'think heart mom-bed',
       'think heart',
       'think maria-missing',
@@ -574,7 +574,9 @@ describe('histoire de la maison (D-31)', () => {
     expect(veilAtRoom).toBe(1);
     expect(stage.shown[maria]).toBe(false);
     expect(log).toContain('room living-strange 50,8,-1');
-    expect(log).toContain('think maria-missing');
+    // Maria vient d'être vue : ce qui frappe, c'est le monde changé (D-165).
+    expect(log).toContain('think question');
+    expect(log).not.toContain('think maria-missing');
   });
 
   it('après un échec, le haut de la bibliothèque ramène au monde étrange, jusqu’à la fin', () => {
@@ -817,7 +819,8 @@ describe('quelques mois plus tard (D-43)', () => {
     expect(d.flags.has(F.Grown)).toBe(true);
     expect(veilAtGrowth, 'grandit dans le noir complet').toBe(1);
     expect(d.veil).toBe(0);
-    expect(log).toContain('think maria-missing');
+    // Le temps a passé, le manque reste (D-165).
+    expect(log).toContain('think miss');
     expect(d.timeOfDay(), 'quelques mois plus tard, le matin').toBe('morning');
     // Une seule fois.
     log.length = 0;

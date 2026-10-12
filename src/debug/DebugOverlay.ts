@@ -1,3 +1,15 @@
+import { Ability } from '../config/abilities';
+import {
+  ARCADE_READY,
+  ENDLESS_READY,
+  arcadeGame,
+  arcadeLevel,
+  arcadePhase,
+  metersOf,
+} from '../core/arcade/arcade';
+import { analyzeLevel } from '../core/analysis/analyzeLevel';
+import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
+import { phaseMovement } from '../config/growth';
 import { TREASURES } from '../core/world/treasures';
 import { RECORDS, recordSlot } from '../config/records';
 import { StoryFlag } from '../config/story';
@@ -11,7 +23,7 @@ import { ART_FINISH_RANGES, DEFAULT_ART_FINISH, type ArtFinish } from '../config
 import { EntityType } from '../core/level/LevelData';
 import { deserializeSave } from '../core/save/saveData';
 import { formatPlayTime, statsByPlace, totalFaints } from '../core/save/stats';
-import { mapPage } from '../core/world/zone';
+import { isMappedRoom, mapPage } from '../core/world/zone';
 import { HitchMonitor, type FrameWork } from '../core/perf/hitchMonitor';
 import { STRANGE_MOCKUPS, STRANGE_MOCKUP_NAMES } from '../config/strangeThemes';
 import { DEFAULT_MOVEMENT, MOVEMENT_PARAM_RANGES, type MovementParams } from '../config/movement';
@@ -1940,6 +1952,194 @@ export function installDebugOverlay(scene: GameScene): void {
     }
   }
 
+  // Le voyage rapide (D-163) : d'ici, peut-on partir ? Chaque veilleuse principale et son état ;
+  // voyager (avec les règles) ou forcer.
+  const travelSection = element('details', panel);
+  element('summary', travelSection, undefined, 'Voyage');
+  const travelList = element('div', travelSection);
+  const departure: Readonly<Record<string, string>> = {
+    zone: 'hors partie',
+    strange: 'monde étrange',
+    busy: 'Céleste occupée',
+    story: "pas en ce moment (l'histoire)",
+    lantern: 'pas de lanterne allumée à portée',
+  };
+  const travelStates: Readonly<Record<string, string>> = {
+    locked: 'pas encore',
+    here: 'ici',
+    far: 'pas à pied',
+    open: 'ouverte',
+  };
+  const refreshTravel = () => {
+    const { options, problem } = scene.travelState();
+    travelList.replaceChildren();
+    element(
+      'div',
+      travelList,
+      'dbg-stats',
+      `Départ : ${problem ? (departure[problem] ?? problem) : 'possible'}`,
+    );
+    for (const { point, state } of options) {
+      const row = element('div', travelList, 'dbg-actions');
+      element('span', row, undefined, `${point.level} · ${travelStates[state] ?? state}`);
+      for (const [label, force] of [
+        ['Voyager', false],
+        ['Forcer', true],
+      ] as const) {
+        element('button', row, undefined, label).addEventListener('click', (event) => {
+          scene.travelTo(point.lantern, force);
+          (event.currentTarget as HTMLElement).blur();
+          refreshTravel();
+        });
+      }
+    }
+  };
+  travelSection.addEventListener('toggle', () => {
+    if (travelSection.open) {
+      refreshTravel();
+    }
+  });
+  element('button', travelSection, undefined, 'Actualiser').addEventListener(
+    'click',
+    refreshTravel,
+  );
+  // Les histoires du debug ne dessinent pas la carte : toutes les salles du monde réel visitées.
+  element('button', travelSection, undefined, 'Révéler la carte').addEventListener(
+    'click',
+    (event) => {
+      for (const zone of ZONES) {
+        for (const [id, level] of zone.rooms) {
+          if (isMappedRoom(level)) {
+            void scene.session.revealRoom(id);
+          }
+        }
+      }
+      (event.currentTarget as HTMLElement).blur();
+    },
+  );
+
+  // La console (D-166) : l'allumer ; les niveaux générés, joués comme un parcours d'essai
+  // (sauvegarde inchangée) ; mesurés par l'analyse de faisabilité ; les records de la partie.
+  const arcadeSection = element('details', panel);
+  element('summary', arcadeSection, undefined, 'Console');
+  const arcadeRow = element('div', arcadeSection, 'dbg-actions');
+  const arcadeSelect = element('select', arcadeRow);
+  for (const id of ARCADE_READY) {
+    const option = element('option', arcadeSelect, undefined, arcadeGame(id)?.name ?? id);
+    option.value = id;
+  }
+  element('span', arcadeRow, undefined, 'niveau');
+  const arcadeNumber = element('input', arcadeRow);
+  arcadeNumber.type = 'number';
+  arcadeNumber.min = '1';
+  arcadeNumber.value = '1';
+  arcadeNumber.style.width = '4em';
+  const arcadeInfo = element('div', arcadeSection, 'dbg-stats');
+  const currentArcade = () => {
+    const id = ARCADE_READY.find((game) => game === arcadeSelect.value);
+    return id ? arcadeLevel(id, Math.max(1, Math.floor(Number(arcadeNumber.value)) || 1)) : null;
+  };
+  const describeArcade = (extra = '') => {
+    const level = currentArcade();
+    const game = level ? arcadeGame(level.game) : undefined;
+    const records = Object.entries(scene.session.data.arcade.records)
+      .map(([id, r]) => `${id} ${String(r.levels)} m / ${String(r.endless)} m`)
+      .join(' · ');
+    arcadeInfo.textContent = level
+      ? `${level.id} · difficulté ${level.difficulty.toFixed(2)} · ${String(metersOf(level.lengthTiles))} m · phase ${String(game?.phase ?? '?')} (Céleste reste dans sa phase ici)${extra}` +
+        ` · records : ${records || 'aucun'}`
+      : 'Aucun niveau';
+  };
+  const arcadeActions = element('div', arcadeSection, 'dbg-actions');
+  // Allumer la console comme le fera la télé de la chambre (D-166, PR 3).
+  element('button', arcadeActions, undefined, 'Allumer la console').addEventListener(
+    'click',
+    (event) => {
+      (event.currentTarget as HTMLElement).blur();
+      panel.hidden = true;
+      scene.openConsole();
+    },
+  );
+  element('button', arcadeActions, undefined, 'Jouer').addEventListener('click', (event) => {
+    const level = currentArcade();
+    if (level) {
+      scene.loadLevel({ id: level.id, text: level.text });
+    }
+    describeArcade();
+    (event.currentTarget as HTMLElement).blur();
+  });
+  element('button', arcadeActions, undefined, 'Mesurer').addEventListener('click', (event) => {
+    const level = currentArcade();
+    const game = level ? arcadeGame(level.game) : undefined;
+    if (level && game) {
+      const phase = arcadePhase(game);
+      const analysis = analyzeLevel(
+        parseAsciiLevel(level.id, level.text),
+        phaseMovement(DEFAULT_MOVEMENT, phase),
+        {
+          climb: game.abilities.includes(Ability.Climb),
+          wallJump: game.abilities.includes(Ability.WallJump),
+          glide: game.abilities.includes(Ability.Umbrella),
+          hook: game.abilities.includes(Ability.Hook),
+          slide: game.abilities.includes(Ability.Slide),
+          shift: game.abilities.includes(Ability.Shift),
+          hitbox: phase.hitbox,
+        },
+      );
+      const critical = analysis.critical;
+      describeArcade(
+        analysis.path === null
+          ? ' · INFAISABLE'
+          : ` · passage le plus dur : ${critical ? `${critical.windowMs.toFixed(0)} ms` : 'aucun saut'}`,
+      );
+    }
+    (event.currentTarget as HTMLElement).blur();
+  });
+  // Le mode Sans fin (D-167) : depuis le morceau n − 1 (le numéro du niveau), même fermé ; son
+  // score ne compte pas, sauf depuis le premier.
+  element('button', arcadeActions, undefined, 'Sans fin').addEventListener('click', (event) => {
+    const id = ENDLESS_READY.find((game) => game === arcadeSelect.value);
+    (event.currentTarget as HTMLElement).blur();
+    if (!id) {
+      describeArcade(' · pas encore de mode Sans fin pour ce jeu');
+      return;
+    }
+    panel.hidden = true;
+    scene.debugEndless(id, Math.max(1, Math.floor(Number(arcadeNumber.value)) || 1) - 1);
+  });
+  arcadeSelect.addEventListener('change', () => {
+    describeArcade();
+  });
+  arcadeNumber.addEventListener('change', () => {
+    describeArcade();
+  });
+  arcadeSection.addEventListener('toggle', () => {
+    if (arcadeSection.open) {
+      describeArcade();
+    }
+  });
+
+  // Les portes de façade (D-164) : par salle ; y aller (la revue visuelle des portes).
+  const doorSection = element('details', panel);
+  element('summary', doorSection, undefined, 'Portes');
+  for (const zone of ZONES) {
+    for (const [id, level] of zone.rooms) {
+      if (level.doors.length === 0) {
+        continue;
+      }
+      element('div', doorSection, 'dbg-stats', level.meta.name ?? id);
+      for (const door of level.doors) {
+        const target = zone.destination(id, door.id);
+        const row = element('div', doorSection, 'dbg-actions');
+        element('span', row, undefined, `${id}:${String(door.id)} → ${target?.room ?? '?'}`);
+        element('button', row, undefined, 'Aller').addEventListener('click', (event) => {
+          scene.teleportToDoor(id, door.id);
+          (event.currentTarget as HTMLElement).blur();
+        });
+      }
+    }
+  }
+
   // Les coquilles (D-148) : par lieu, trouvées ou non ; y aller, cocher, tout ou rien.
   const shellSection = element('details', panel);
   const shellSummary = element('summary', shellSection, undefined, 'Coquilles');
@@ -2374,6 +2574,10 @@ export function installDebugOverlay(scene: GameScene): void {
       stats.textContent +=
         `\nfil palier ${String(hint.stage)}  sans progrès ${(hint.idleMs / 1000).toFixed(0)} s` +
         (scene.hintGoalName ? `  → ${scene.hintGoalName}` : '');
+      const chunk = scene.endlessChunk;
+      if (chunk !== null) {
+        stats.textContent += `\nsans fin : morceau ${String(chunk)}`;
+      }
       const touch = scene.touch;
       if (touch) {
         const stick = touch.controller.joystick;

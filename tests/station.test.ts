@@ -111,8 +111,10 @@ describe('la gare (D-66)', () => {
     expect(checkCondition(new Set([F.SchoolDone]), lock.when)).toBe(true);
     expect(checkCondition(new Set([F.SchoolDone, F.StreetMorning]), lock.when)).toBe(false);
     expect(HOUSE_STORY.triggers.some((t) => t.id.startsWith('street-site'))).toBe(false);
+    // L'arrivée sur les voies note l'étape, sans bulle ni arrêt (D-165).
     const arrived = HOUSE_STORY.triggers.find((t) => t.id === 'station-arrived');
-    expect(arrived?.steps.some((s) => s.do === 'thought' && s.icon === 'maria')).toBe(true);
+    expect(arrived?.steps).toEqual([{ do: 'flag', id: F.StationArrived }]);
+    expect(arrived?.lock).toBe(false);
   });
 
   describe('les trains : un danger simple (souffle)', () => {

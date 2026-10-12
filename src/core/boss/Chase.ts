@@ -54,14 +54,14 @@ export class Chase {
   private needsRestart = true;
   /** Attente du départ en cours (et non d'un contact ou d'un croc-en-jambe). */
   private waking = false;
-  private readonly tripsUsed: Uint8Array;
+  private tripsUsed: Uint8Array;
   private readonly dt: number;
   /** Ligne d'arrivée et limites des phases sur l'axe de la course (px). */
-  private readonly endAxis: number;
-  private readonly phaseAxis: Float64Array;
+  private endAxis: number;
+  private phaseAxis: Float64Array;
 
   constructor(
-    readonly data: LevelChase,
+    public data: LevelChase,
     private params: Readonly<CombatParams>,
     private readonly stepHz: number,
   ) {
@@ -81,6 +81,21 @@ export class Chase {
    */
   private lineAxis(index: number): number {
     return this.sign * (this.data.dir === 'right' ? index : index + 1) * T;
+  }
+
+  /**
+   * La salle recule sous la poursuite (le mode Sans fin de la console, D-167) : tout recule de `dx`
+   * px dans le monde, le front aussi ; la ligne d'arrivée et les phases sont celles de `data` (la
+   * nouvelle salle). Le reste (l'attente, la secousse, le rythme) continue.
+   */
+  reframe(data: LevelChase, dx: number): void {
+    this.data = data;
+    this.axis -= this.sign * dx;
+    this.endAxis = this.lineAxis(data.end);
+    this.phaseAxis = Float64Array.from(data.phases, (p) => this.lineAxis(p.until));
+    if (this.tripsUsed.length !== data.trips.length) {
+      this.tripsUsed = new Uint8Array(data.trips.length);
+    }
   }
 
   setParams(params: Readonly<CombatParams>): void {
