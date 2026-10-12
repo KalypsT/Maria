@@ -887,6 +887,9 @@ export function drawProp(
     case 'door-glow':
       drawDoorGlow(ctx, w, h);
       break;
+    case 'console-tv':
+      drawConsoleTv(ctx, w, h);
+      break;
     case 'height-chart':
     case 'height-chart-grown':
     case 'height-chart-older':
@@ -1808,6 +1811,33 @@ function drawIcon(
         ctx.fill();
       }
       break;
+    case 'call':
+      // « ! » : papa appelle Céleste (D-166).
+      ctx.fillStyle = PINK;
+      ctx.beginPath();
+      ctx.roundRect(cx - 1.4, cy - 7.5, 2.8, 10, 1.4);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx, cy + 5.6, 1.6, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    case 'gamepad':
+      drawGamepad(ctx, cx, cy, 1);
+      break;
+    case 'tv':
+      // La télé et sa console : installée dans la chambre (D-166).
+      drawTv(ctx, cx - 8, cy - 7, 13, 10);
+      ctx.fillStyle = TV_BODY;
+      ctx.fillRect(cx - 3, cy + 3, 3, 2);
+      ctx.fillRect(cx - 5, cy + 5, 7, 1.5);
+      ctx.fillStyle = CONSOLE_PINK;
+      ctx.strokeStyle = CONSOLE_DARK;
+      ctx.lineWidth = 0.6;
+      ctx.beginPath();
+      ctx.roundRect(cx + 3, cy + 2.5, 6, 4, 1);
+      ctx.fill();
+      ctx.stroke();
+      break;
     case 'locked':
       // Une porte cintrée et son cadenas.
       ctx.fillStyle = WOOD_DARK;
@@ -1841,6 +1871,79 @@ function drawIcon(
 
 const HAND = '#f1c9a5';
 const GOLD = '#f2c14e';
+/** La console de Céleste (D-166) : le rose de la console, l'écran pastel. PLACEHOLDER. */
+const CONSOLE_PINK = '#f2a7c3';
+const CONSOLE_DARK = '#7a2f4d';
+const CONSOLE_SCREEN = '#fde6ef';
+const CONSOLE_MAUVE = '#9b7fd1';
+const TV_BODY = '#4a3a44';
+
+/** Une manette rose : la croix et deux boutons (pictogramme du cadeau, et sur la console). */
+function drawGamepad(ctx: CanvasRenderingContext2D, cx: number, cy: number, s: number): void {
+  ctx.fillStyle = CONSOLE_PINK;
+  ctx.strokeStyle = CONSOLE_DARK;
+  ctx.lineWidth = 0.9 * s;
+  ctx.beginPath();
+  ctx.roundRect(cx - 7 * s, cy - 3.5 * s, 14 * s, 7 * s, 3.5 * s);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = CONSOLE_DARK;
+  ctx.fillRect(cx - 5.2 * s, cy - 0.5 * s, 3.6 * s, 1 * s);
+  ctx.fillRect(cx - 3.9 * s, cy - 1.8 * s, 1 * s, 3.6 * s);
+  ctx.beginPath();
+  ctx.arc(cx + 3 * s, cy + 0.9 * s, 0.9 * s, 0, Math.PI * 2);
+  ctx.arc(cx + 5 * s, cy - 0.9 * s, 0.9 * s, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/** Une petite télé à l'écran pastel (un poteau, un câble) ; `s` : l'échelle. */
+function drawTv(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number): void {
+  ctx.fillStyle = TV_BODY;
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, 2.5);
+  ctx.fill();
+  const sx = x + 2.5;
+  const sy = y + 2.5;
+  const sw = w - 5;
+  const sh = h - 5;
+  ctx.fillStyle = CONSOLE_SCREEN;
+  ctx.fillRect(sx, sy, sw, sh);
+  // Un écran des tyroliennes : un câble, un poteau mauve.
+  ctx.strokeStyle = TV_BODY;
+  ctx.lineWidth = 0.7;
+  ctx.beginPath();
+  ctx.moveTo(sx + sw * 0.1, sy + sh * 0.25);
+  ctx.lineTo(sx + sw * 0.62, sy + sh * 0.5);
+  ctx.stroke();
+  ctx.fillStyle = CONSOLE_MAUVE;
+  ctx.fillRect(sx + sw * 0.7, sy + sh * 0.6, sw * 0.18, sh * 0.4);
+}
+
+/** La console de salon sur le bureau de la chambre (D-166) : la télé, la console, la manette. */
+function drawConsoleTv(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  drawTv(ctx, 3, 2, 26, 20);
+  // Le pied de la télé.
+  ctx.fillStyle = TV_BODY;
+  ctx.fillRect(13, 22, 6, 4);
+  ctx.fillRect(9, h - 3, 14, 3);
+  // La console à côté, et la manette posée dessus, reliée par son fil.
+  ctx.fillStyle = CONSOLE_PINK;
+  ctx.strokeStyle = CONSOLE_DARK;
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.roundRect(w - 14, h - 7, 13, 7, 1.5);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = CONSOLE_DARK;
+  ctx.fillRect(w - 11, h - 4.5, 7, 1);
+  ctx.strokeStyle = TV_BODY;
+  ctx.lineWidth = 0.7;
+  ctx.beginPath();
+  ctx.moveTo(w - 7, h - 7);
+  ctx.quadraticCurveTo(w - 3, h - 12, w - 7.5, h - 12.5);
+  ctx.stroke();
+  drawGamepad(ctx, w - 8, h - 14.5, 0.55);
+}
 
 /** Un visage rond aux joues roses (sourire, « chut »). */
 function faceIcon(ctx: CanvasRenderingContext2D, cx: number, cy: number): void {

@@ -156,6 +156,11 @@ export const StoryFlag = {
   /** Au jardin, Céleste a parlé de Maria à maman (terrasse) et à papa (potager). */
   GardenMom: 'garden.mom',
   GardenDad: 'garden.dad',
+  /**
+   * Papa a offert la console à Céleste au potager (D-166) ; elle est installée dans la chambre. Posé
+   * aussi, sans la scène, dans une partie déjà passée par le portillon (papa n'est plus au potager).
+   */
+  ConsoleGift: 'garden.console-gift',
   /** Papa a montré la haie, une fois le saut mural trouvé (D-55). */
   GardenDadHedge: 'garden.dad-hedge',
   /** Céleste a regardé dans le trou de la haie, au fond du jardin. */
@@ -466,6 +471,8 @@ export const PROP_SIZE = {
   'quay-train-day': { w: 200, h: 66 },
   // La lueur sous la porte du dortoir (retour d'essai) : la largeur de la porte, et son halo.
   'door-glow': { w: 64, h: 16 },
+  // La console de salon (D-166), sur le bureau de la chambre : la télé, la console, la manette.
+  'console-tv': { w: 44, h: 30 },
   // Roger, la peluche singe (D-68), tout en haut de la tour des objets perdus.
   roger: { w: 16, h: 18 },
   // La cuisine rose (D-88), la dînette d'enfance, à peu près à hauteur de Céleste.

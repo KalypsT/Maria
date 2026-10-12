@@ -1675,6 +1675,10 @@ body {
   color: var(--console-soft);
   font-size: 0.8rem;
 }
+.console-note.new {
+  color: var(--console-accent);
+  font-weight: 700;
+}
 .console-modes,
 .console-actions {
   display: flex;

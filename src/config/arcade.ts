@@ -176,6 +176,18 @@ export const ARCADE_CABLES = {
   postWidth: { from: 4, to: 2 } satisfies Ramp,
 };
 
+/**
+ * La console de salon dans la chambre (D-166) : la télé posée sur le bureau (centre du bas de la
+ * tuile), la zone où Agir l'allume (devant le bureau, ou dessus), l'étincelle au-dessus.
+ */
+export const CONSOLE_TV = {
+  room: 'bedroom',
+  col: 33,
+  row: 14,
+  area: { col: 29, row: 13, w: 7, h: 7 },
+  mark: { col: 33, row: 12 },
+} as const;
+
 /** Le nom de la console, sur son écran d'accueil (PLACEHOLDER, D-166). */
 export const ARCADE_TITLE = 'Les jeux de Céleste';
 

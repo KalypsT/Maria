@@ -174,6 +174,7 @@ import {
   ARCADE_CHIMES,
   ARCADE_CHIME_GAIN,
   CONSOLE_TILE_COLORS,
+  CONSOLE_TV,
   type ArcadeChime,
   type ArcadeGameId,
   type ArcadeMode,
@@ -462,6 +463,8 @@ export class GameScene extends Phaser.Scene {
   private arcadeStartX = 0;
   /** Dernier sens du joystick ou des flèches devant l'écran de la console. */
   private consoleMoveDir = 0;
+  /** Dans la chambre, un jeu de la console pas encore vu (D-166) : l'étincelle sur la télé. */
+  private consoleNews = false;
   /** Souvenir jouable en cours (D-89), null sinon ; et ce qu'il faut retrouver à sa fin. */
   private memoryPlay: PlayableMemory | null = null;
   private memoryReturn: {
@@ -687,6 +690,11 @@ export class GameScene extends Phaser.Scene {
       },
       records: () => {
         this.openRecords();
+      },
+      console: () => {
+        // Devant la télé de la chambre (D-166) : Céleste s'assoit, la console s'allume.
+        this.poser.sitting = true;
+        this.openConsole();
       },
       look: (col, row) => {
         if (col === null || row === null) {
@@ -2407,6 +2415,7 @@ export class GameScene extends Phaser.Scene {
     this.storyView.rebuild();
     this.storyView.clearThought();
     this.loadPassersby();
+    this.refreshConsoleNews();
     this.poser.sitting = false;
     this.fx.reset();
     this.fx.load(level, isStrangeRoom(level), this.palette(), this.story.timeOfDay() === 'morning');
@@ -3121,7 +3130,8 @@ export class GameScene extends Phaser.Scene {
       // Une lanterne d'où partir (D-163) : l'étincelle au-dessus d'elle.
       const lamp = this.nearTravel >= 0 ? this.run.checkpoints[this.nearTravel] : undefined;
       if (!lamp || story.busy) {
-        this.storyView.doorMark = null;
+        // Un nouveau jeu sur la console (D-166) : l'étincelle sur la télé de la chambre.
+        this.storyView.doorMark = this.consoleNews && !story.busy ? CONSOLE_TV.mark : null;
       } else if (mark?.col !== lamp.col || mark.row !== lamp.row - 2) {
         this.storyView.doorMark = { col: lamp.col, row: lamp.row - 2 };
       }
@@ -3233,7 +3243,14 @@ export class GameScene extends Phaser.Scene {
         abilities.add(ability);
       }
     }
-    this.consoleScreen.showMenu(consoleCards(abilities, this.story.flags, data.arcade));
+    const cards = consoleCards(abilities, this.story.flags, data.arcade);
+    this.consoleScreen.showMenu(cards);
+    // Vus : « nouveau » cette fois-ci, plus ensuite ; l'étincelle de la télé s'éteint.
+    void this.session
+      .markArcadeSeen(cards.filter((card) => card.isNew).map((c) => c.game.id))
+      .then(() => {
+        this.refreshConsoleNews();
+      });
     this.clock.reset();
     this.touch?.releaseAll();
     this.consoleMoveDir = 0;
@@ -3406,6 +3423,25 @@ export class GameScene extends Phaser.Scene {
     this.controls.consumePressed('Jump');
     this.controls.consumePressed('Interact');
     this.controls.consumePressed('Attack');
+  }
+
+  /**
+   * La télé de la chambre scintille (D-166) : la console est là (offerte, pas pendant le dernier
+   * niveau) et un de ses jeux, jouable, n'a pas encore été vu dans son menu.
+   */
+  private refreshConsoleNews(): void {
+    const flags = this.story.flags;
+    const there =
+      this.zone !== null &&
+      this.level.id === CONSOLE_TV.room &&
+      flags.has(StoryFlag.ConsoleGift) &&
+      (!flags.has(StoryFlag.GrownFourth) || flags.has(StoryFlag.FinaleGone));
+    const data = this.session.data;
+    this.consoleNews =
+      there &&
+      consoleCards(new Set(data.progression.abilities), flags, data.arcade).some(
+        (card) => card.isNew,
+      );
   }
 
   /** Un bip de la console (D-166, PLACEHOLDER). */

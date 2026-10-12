@@ -107,6 +107,7 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
           step.do === 'wait' ||
           step.do === 'memory' ||
           step.do === 'records' ||
+          step.do === 'console' ||
           (reversible &&
             (step.do === 'toggle' ||
               step.do === 'fadeOut' ||

@@ -37,6 +37,7 @@ flag finale.shelved
 flag finale.sky
 flag finale.together
 flag garden.arrived
+flag garden.console-gift
 flag garden.dad
 flag garden.dad-gate
 flag garden.dad-hedge

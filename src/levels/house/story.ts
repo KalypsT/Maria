@@ -5,6 +5,16 @@ import { TRAIN_STORY } from '../train/story';
 import { SEA_STORY } from '../sea/story';
 import { NANNY_STORY } from '../nanny/story';
 import { FINALE_STORY } from '../finale/story';
+import { CONSOLE_TV } from '../../config/arcade';
+
+/**
+ * Quand la console est dans la chambre (D-166) : une fois offerte, sauf pendant le dernier niveau
+ * (la chambre du premier soir, rejouée : rien de nouveau) ; de nouveau après la fin.
+ */
+const CONSOLE_WHEN = [
+  { all: [F.ConsoleGift], none: [F.GrownFourth] },
+  { all: [F.ConsoleGift, F.FinaleGone] },
+] as const;
 
 /** Haut de la bibliothèque du salon, là où Maria était assise. */
 const LIVING_TOP: TileArea = { col: 46, row: 5, w: 10, h: 3 };
@@ -460,6 +470,27 @@ export const HOUSE_STORY: StoryData = {
       ],
     },
     {
+      // La console (D-166) : au premier passage au potager, papa appelle Céleste et lui offre une
+      // console de salon (la manette), qu'il installe dans sa chambre (la télé). Sans texte.
+      id: 'garden-console',
+      room: 'garden-vegetables',
+      on: 'touch',
+      area: { col: 1, row: 14, w: 63, h: 8 },
+      when: { all: [F.Grown], none: [F.ConsoleGift, F.GateOpen] },
+      lock: true,
+      steps: [
+        { do: 'flag', id: F.ConsoleGift },
+        { do: 'thought', icon: 'call', ms: S.lookMs, by: 'dad-garden' },
+        { do: 'wait', ms: S.lookMs },
+        { do: 'thought', icon: 'gamepad', ms: S.thoughtMs, by: 'dad-garden' },
+        { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'wonder', ms: S.thoughtMs },
+        { do: 'wait', ms: S.lookMs },
+        { do: 'thought', icon: 'tv', ms: S.thoughtMs, by: 'dad-garden' },
+        { do: 'wait', ms: S.thoughtMs },
+      ],
+    },
+    {
       // Papa arrose le potager, au pied des bacs.
       id: 'garden-dad',
       room: 'garden-vegetables',
@@ -882,6 +913,30 @@ export const HOUSE_STORY: StoryData = {
       ],
     },
     {
+      // Une partie déjà passée par le portillon (D-166) : papa n'est plus au potager ; la console
+      // est déjà installée dans la chambre.
+      id: 'console-late',
+      room: 'bedroom',
+      on: 'touch',
+      area: { col: 1, row: 1, w: 44, h: 19 },
+      when: { all: [F.GateOpen], none: [F.ConsoleGift] },
+      lock: false,
+      steps: [{ do: 'flag', id: F.ConsoleGift }],
+    },
+    ...CONSOLE_WHEN.map((when, i) => ({
+      // La console de salon (D-166) : Agir devant la télé, Céleste s'assoit et l'allume. Pas
+      // pendant le dernier niveau (la chambre du premier soir, rejouée) ; de nouveau après la fin.
+      id: i === 0 ? 'bedroom-console' : 'bedroom-console-after',
+      room: CONSOLE_TV.room,
+      on: 'interact' as const,
+      area: CONSOLE_TV.area,
+      mark: CONSOLE_TV.mark,
+      when,
+      lock: true,
+      repeat: true,
+      steps: [{ do: 'console' } as const],
+    })),
+    {
       // Le tourne-disque du grenier (D-121), sur la malle : on choisit un disque trouvé, ou, sans
       // disque, une bulle (le plateau vide). Agir depuis la malle ou depuis le plancher à côté.
       id: 'record-player',
@@ -1217,6 +1272,15 @@ export const HOUSE_STORY: StoryData = {
       row: 27,
       when: { all: [F.GateOpen] },
     },
+    ...CONSOLE_WHEN.map((when, i) => ({
+      // La console de salon sur le bureau (D-166), une fois offerte par papa.
+      id: i === 0 ? 'console-tv' : 'console-tv-after',
+      room: CONSOLE_TV.room,
+      kind: 'console-tv' as const,
+      col: CONSOLE_TV.col,
+      row: CONSOLE_TV.row,
+      when,
+    })),
     {
       id: 'dad-garden',
       room: 'garden-vegetables',

@@ -11,6 +11,8 @@ export interface ConsoleCard {
   readonly ready: boolean;
   /** Record du mode Niveaux (m ; 0 : jamais joué). */
   readonly record: number;
+  /** Jouable et pas encore vu dans le menu : « nouveau » (et l'étincelle de la télé). */
+  readonly isNew: boolean;
 }
 
 /** Les huit cases du menu, dans l'ordre, d'après la partie. */
@@ -20,12 +22,15 @@ export function consoleCards(
   arcade: Readonly<ArcadeSave>,
 ): ConsoleCard[] {
   const unlocked = new Set(unlockedArcadeGames(abilities, flags).map((game) => game.id));
-  return ARCADE_GAMES.map((game) => ({
-    game,
-    unlocked: unlocked.has(game.id),
-    ready: ARCADE_READY.includes(game.id),
-    record: arcadeRecord(arcade, game.id, ArcadeMode.Levels),
-  }));
+  return ARCADE_GAMES.map((game) => {
+    const card = {
+      game,
+      unlocked: unlocked.has(game.id),
+      ready: ARCADE_READY.includes(game.id),
+      record: arcadeRecord(arcade, game.id, ArcadeMode.Levels),
+    };
+    return { ...card, isNew: card.unlocked && card.ready && !arcade.seen.includes(game.id) };
+  });
 }
 
 /** Une case qu'on peut lancer : débloquée et prête. */

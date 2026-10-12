@@ -192,6 +192,17 @@ export class SaveSession {
     return true;
   }
 
+  /** Jeux de la console vus dans son menu (D-166) : ils ne sont plus « nouveaux ». */
+  markArcadeSeen(games: readonly ArcadeGameId[]): Promise<void> {
+    const seen = this.current.arcade.seen;
+    const added = games.filter((game) => !seen.includes(game));
+    if (added.length === 0) {
+      return Promise.resolve();
+    }
+    seen.push(...added);
+    return this.persist();
+  }
+
   /** Remplace toute la partie (import d'un code de sauvegarde). */
   replace(data: SaveData): Promise<void> {
     this.current = data;

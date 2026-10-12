@@ -140,9 +140,14 @@ export class ConsoleScreen {
         note.className = 'console-note';
         note.textContent = !card.ready
           ? 'bientôt'
-          : card.record > 0
-            ? `★ ${String(card.record)} m`
-            : '—';
+          : card.isNew
+            ? 'nouveau !'
+            : card.record > 0
+              ? `★ ${String(card.record)} m`
+              : '—';
+        if (card.isNew) {
+          note.classList.add('new');
+        }
         cell.append(name, note);
         if (!card.ready) {
           cell.classList.add('soon');
