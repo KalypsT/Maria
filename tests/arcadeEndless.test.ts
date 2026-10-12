@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { ARCADE, ARCADE_ENDLESS, ARCADE_JUMPS, ArcadeGameId } from '../src/config/arcade';
 import { phaseMovement } from '../src/config/growth';
 import { DEFAULT_MOVEMENT } from '../src/config/movement';
-import { arcadeGame, arcadePhase } from '../src/core/arcade/arcade';
+import { ENDLESS_READY, arcadeGame, arcadePhase, endlessChunk } from '../src/core/arcade/arcade';
+import { EndlessChunks } from '../src/platform/endlessChunks';
 import {
   EndlessBand,
   endlessLevel,
@@ -151,5 +152,21 @@ describe('le mode Sans fin : les morceaux des sauts', () => {
     expect(tileAt(level, 0, 5)).toBe(Tile.Solid);
     expect(tileAt(level, level.width - 1, 5)).toBe(Tile.Solid);
     expect(level.goal).toBeNull();
+  });
+});
+
+/** Les morceaux de la partie (D-167, PR 2) : sans worker (ici), générés sur place. */
+describe('le mode Sans fin : les morceaux d’une partie', () => {
+  it('sans worker, chaque morceau se génère quand on le demande ; un jeu sans morceaux : null', () => {
+    const source = new EndlessChunks();
+    source.start(SEED);
+    source.prepare(ArcadeGameId.Jumps, 0, SEED);
+    expect(source.take(ArcadeGameId.Jumps, 0, SEED)).toBeNull();
+    const chunk = source.now(ArcadeGameId.Jumps, 0, SEED);
+    expect(chunk?.lines).toEqual(endlessChunk(ArcadeGameId.Jumps, 0, SEED)?.lines);
+    expect(source.now(ArcadeGameId.Corridor, 0, SEED)).toBeNull();
+    expect(endlessChunk(ArcadeGameId.Jumps, -1, SEED)).toBeNull();
+    expect(ENDLESS_READY).toEqual([ArcadeGameId.Jumps]);
+    source.destroy();
   });
 });

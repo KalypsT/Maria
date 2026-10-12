@@ -204,6 +204,8 @@ export const ARCADE_TIMING = {
   clearedMs: 1200,
   /** Après une chute, avant l'écran « Oups ! ». */
   fallMs: 700,
+  /** Le mode Sans fin (D-167) : « 100 m » affiché, à chaque repère. */
+  milestoneMs: 1000,
 };
 
 /**
@@ -221,6 +223,8 @@ export const ARCADE_CHIMES = {
   cleared: { from: 784, to: 1568, ms: 260, wave: 'triangle' },
   /** Une chute. */
   fall: { from: 620, to: 140, ms: 420, wave: 'triangle' },
+  /** Le mode Sans fin passe un repère (tous les 100 m, D-167). */
+  milestone: { from: 988, to: 1319, ms: 140, wave: 'triangle' },
   /** Le monstre se réveille. */
   wake: { from: 196, to: 147, ms: 260, wave: 'square' },
   /** Un nouveau record. */

@@ -1,5 +1,5 @@
-import { ARCADE_TITLE, ArcadeMode, type ArcadeGameId } from '../config/arcade';
-import { playable, type ConsoleCard } from '../core/arcade/consoleMenu';
+import { ARCADE_ENDLESS, ARCADE_TITLE, ArcadeMode, type ArcadeGameId } from '../config/arcade';
+import { endlessPlayable, playable, type ConsoleCard } from '../core/arcade/consoleMenu';
 import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 
 /** Pictogrammes des jeux (PLACEHOLDER, comme la maquette) : des traits simples, 24 × 24. */
@@ -55,8 +55,8 @@ type View = 'closed' | 'menu' | 'mode' | 'result' | 'play';
 
 /**
  * L'écran de la console (D-166), en DOM par-dessus le jeu, dans le style pastel choisi sur la
- * maquette : le menu des jeux (débloqués avec leurs capacités, leur record), le choix du mode (le
- * mode Sans fin viendra plus tard), l'écran de fin (« Oups ! », le score, le record), et pendant la
+ * maquette : le menu des jeux (débloqués avec leurs capacités, leur record), le choix du mode
+ * (Niveaux ; Sans fin, ouvert par un niveau atteint, D-167), l'écran de fin (« Oups ! », le score, le record), et pendant la
  * partie, seulement le compteur et l'annonce du niveau. Au doigt, ou au clavier et à la manette :
  * gauche et droite, Saut ou Agir pour choisir, Pause ou Carte pour revenir.
  */
@@ -191,23 +191,35 @@ export class ConsoleScreen {
       this.handlers.beep('select');
       this.handlers.play(card.game.id, ArcadeMode.Levels);
     });
+    // Le mode Sans fin (D-167) : ses morceaux prêts, et le niveau voulu atteint en mode Niveaux.
+    const open = endlessPlayable(card);
     const endless = button('', 'console-mode');
-    endless.disabled = true;
+    endless.disabled = !open;
     endless.append(
       Object.assign(document.createElement('strong'), { textContent: 'Sans fin' }),
       Object.assign(document.createElement('span'), { textContent: 'Le plus loin possible' }),
       Object.assign(document.createElement('span'), {
         className: 'console-note',
-        textContent: 'bientôt',
+        textContent: !card.endlessReady
+          ? 'bientôt'
+          : !card.endlessOpen
+            ? `Atteindre le niveau ${String(ARCADE_ENDLESS.unlockLevel)}`
+            : card.endlessRecord > 0
+              ? `Record ★ ${String(card.endlessRecord)} m`
+              : 'Record —',
       }),
     );
+    endless.addEventListener('click', () => {
+      this.handlers.beep('select');
+      this.handlers.play(card.game.id, ArcadeMode.Endless);
+    });
     row.append(levels, endless);
     const back = button('Retour', 'console-button');
     back.addEventListener('click', () => {
       this.back();
     });
     this.panel.replaceChildren(title, row, back);
-    this.open('mode', [levels, back], 0);
+    this.open('mode', open ? [levels, endless, back] : [levels, back], 0);
   }
 
   /** L'écran de fin : le score, le record (ou « Nouveau record ! »). */
@@ -245,14 +257,17 @@ export class ConsoleScreen {
     this.hud.hidden = false;
   }
 
-  /** Le compteur : le niveau, les mètres, le record ; le DOM n'est écrit que s'il change. */
-  setHud(level: number, meters: number, record: number): void {
-    const key = `${String(level)}|${String(meters)}|${String(record)}`;
+  /**
+   * Le compteur : le niveau (« Niveau 3 », « Sans fin »), les mètres, le record ; le DOM n'est écrit
+   * que s'il change.
+   */
+  setHud(label: string, meters: number, record: number): void {
+    const key = `${label}|${String(meters)}|${String(record)}`;
     if (key === this.shownHud) {
       return;
     }
     this.shownHud = key;
-    this.hudLevel.textContent = `Niveau ${String(level)}`;
+    this.hudLevel.textContent = label;
     this.hudMeters.textContent = `${String(meters)} m`;
     this.hudRecord.textContent = record > 0 ? `★ ${String(record)} m` : '★ —';
   }

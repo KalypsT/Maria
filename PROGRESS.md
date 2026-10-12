@@ -2,7 +2,7 @@
 
 ## Phase en cours
 
-**La console, le mode Sans fin** (D-167, demande de l'utilisateur, sur `ccr-e9f3d38a-x4umy1`, reparti de `main` après la fusion du mode Niveaux) : un seul parcours continu fait de morceaux collés (une jointure entre chacun), une bande de trois morceaux chargée ; un nouveau parcours à chaque partie, la difficulté plafonnée au niveau 20, un repère fantôme du record et un bip tous les 100 m, débloqué après un niveau atteint en mode Niveaux (proposé : 5). Plan validé en 6 PR. **PR 1 faite : le moteur** (les morceaux des sauts et leurs jointures, la bande, purs et testés ; rien de jouable encore). Suite : la PR 2, le Sans fin dans la console (**essai sur téléphone** ensuite).
+**La console, le mode Sans fin** (D-167, demande de l'utilisateur, sur `ccr-e9f3d38a-x4umy1`, reparti de `main` après la fusion du mode Niveaux) : un seul parcours continu fait de morceaux collés (une jointure entre chacun), une bande de trois morceaux chargée ; un nouveau parcours à chaque partie, la difficulté plafonnée au niveau 20, un repère fantôme du record et un bip tous les 100 m, débloqué après un niveau atteint en mode Niveaux (proposé : 5). Plan validé en 6 PR. **PR 1 faite : le moteur** (les morceaux des sauts et leurs jointures, la bande, purs et testés) et **PR 2 faite : le Sans fin dans la console** (les sauts : ouvert au niveau 5, la bande dans la scène, le dessin bloc par bloc, les morceaux en arrière-plan et hors ligne, le repère du record, le bip des 100 m). **Essai sur téléphone attendu** (une saccade au changement de morceau ?). Suite : la PR 3, le couloir et les tyroliennes.
 
 **La console de Céleste** (D-166, demande de l'utilisateur, sur `ccr-e9f3d38a-x4umy1`) : un mode à part, un jeu par capacité (des niveaux qui s'enchaînent, de plus en plus durs, record en mètres). Maquette (https://claude.ai/artifact/2Pb1PC7arwM1ESAByVLc9T), choix de l'utilisateur et plan validés en 9 PR pour le mode Niveaux (le système ; l'écran de la console ; le cadeau et la chambre ; puis un jeu par PR) ; le mode Sans fin plus tard. **PR 1 faite : le système et les tyroliennes** (les jeux, le générateur et son témoin, les records dans la sauvegarde sans migration, DEBUG → « Console ») et **PR 2 faite : l'écran de la console** (le menu, le mode, la partie, « Oups ! » et le record, le style pastel, les bips ; DEBUG → « Console » → « Allumer la console ») et **PR 3 faite : le cadeau et la chambre** (papa au premier passage au potager, la télé sur le bureau, Agir, « nouveau ! » et l'étincelle) et **PR 4 faite : les sauts et la grimpette** (jouables dès le cadeau) et **PR 5 faite : la cheminée** (le saut mural, la hauteur au compteur) et **PR 6 faite : le grand vent** (le parapluie, des portes de briques de jeu) et **PR 7 faite : le couloir** (la glissade : des barres, des tunnels, des trous, le saut long) et **PR 8 faite : les deux mondes** (la bascule en plein saut, des portes et des murs d'une seule couche) et **PR 9 faite : le monstre** (après la vague de la mer : courir et sauter, poursuivie par une masse pastel). **Le mode Niveaux est complet** (huit jeux). Suite : essayer la console sur téléphone ; le mode Sans fin, avec son propre plan.
 
@@ -55,6 +55,12 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le mode Sans fin, PR 2 : le Sans fin dans la console (D-167)
+
+- Les sauts en Sans fin : ouvert quand le niveau 5 est atteint en mode Niveaux (le niveau le plus haut atteint, gardé dans la sauvegarde sans migration) ; un nouveau parcours à chaque partie ; la bande de trois morceaux dans la scène (le recul invisible, le dessin bloc par bloc, rien de redessiné) ; les morceaux générés en arrière-plan (un worker, précaché, hors ligne), sur place sinon ; le repère fantôme du record ; un bip et la distance tous les 100 m ; DEBUG → « Console » → « Sans fin » (depuis un morceau), le morceau dans les infos.
+- Vérifié dans Chromium (844 × 390) : le mode fermé puis ouvert, une partie, quatre changements de morceau (le suivant toujours prêt, le recul en 1 à 2,5 ms), « Oups ! » et le record, « Rejouer » et le repère.
+- [ ] À vérifier sur téléphone : le Sans fin des sauts (une saccade au changement de morceau ? le repère du record lisible ? le bip des 100 m ? le niveau 5 pour l'ouvrir, juste ?).
 
 ### Le mode Sans fin, PR 1 : le moteur (D-167)
 

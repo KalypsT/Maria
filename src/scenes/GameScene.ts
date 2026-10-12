@@ -171,14 +171,20 @@ import type { NotebookContent, NotebookMap } from '../ui/NotebookPages';
 import { RecordPicker } from '../ui/RecordPicker';
 import { ConsoleScreen } from '../ui/ConsoleScreen';
 import {
+  ARCADE,
   ARCADE_CHIMES,
   ARCADE_CHIME_GAIN,
+  ARCADE_TIMING,
+  ArcadeMode,
   CONSOLE_TILE_COLORS,
   CONSOLE_TV,
   type ArcadeChime,
   type ArcadeGameId,
-  type ArcadeMode,
 } from '../config/arcade';
+import { EndlessBand, newRunSeed, type EndlessChunk } from '../core/arcade/endless';
+import { ARCADE_ROOM_META } from '../core/arcade/roomMeta';
+import { EndlessChunks } from '../platform/endlessChunks';
+import { EndlessPainter } from './EndlessPainter';
 import { arcadeGame, arcadeLevel, arcadePhase } from '../core/arcade/arcade';
 import { consoleCards } from '../core/arcade/consoleMenu';
 import { monsterChaseParams } from '../core/arcade/monster';
@@ -466,6 +472,24 @@ export class GameScene extends Phaser.Scene {
   private arcadeStartY = 0;
   /** Le compteur du jeu en cours compte la hauteur (la cheminée), sinon l'avancée. */
   private arcadeUp = false;
+  /**
+   * La partie Sans fin en cours (D-167) : la bande, la graine, l'en-tête de ses salles, le morceau
+   * suivant (prêt et en cours de dessin), le repère du record ; `debug` : lancée depuis un autre
+   * morceau que le premier par le debug (son score ne compte pas).
+   */
+  private endless: {
+    readonly band: EndlessBand;
+    readonly runSeed: number;
+    readonly header: readonly string[];
+    next: EndlessChunk | null;
+    marker: Phaser.GameObjects.Graphics | null;
+    readonly debug: boolean;
+  } | null = null;
+  /** Les morceaux du mode Sans fin, préparés en arrière-plan (créé à la première partie). */
+  private endlessChunks: EndlessChunks | null = null;
+  private endlessPainter!: EndlessPainter;
+  /** L'annonce d'un repère (« 100 m ») s'efface à ce moment (ms, horloge de la scène). */
+  private bannerUntilMs = -1;
   /** Dernier sens du joystick ou des flèches devant l'écran de la console. */
   private consoleMoveDir = 0;
   /** Dans la chambre, un jeu de la console pas encore vu (D-166) : l'étincelle sur la télé. */
@@ -777,6 +801,9 @@ export class GameScene extends Phaser.Scene {
     this.rideView.setArt(this.artScale);
     this.rideView.rebuild();
     this.chaseView = new ChaseView(this, this.combat);
+    this.endlessPainter = new EndlessPainter(this, (g, level, col, row, x, y) =>
+      this.drawTile(g, level, col, row, x, y),
+    );
     this.chaseView.setArt(this.artScale);
     this.props.load(this.story.data.props, this.level.id, this.story.flags);
     this.storyView = new StoryView(this, this.props, this.story);
@@ -2693,6 +2720,10 @@ export class GameScene extends Phaser.Scene {
     this.backdrop.clear();
     this.foreground.clear();
     this.worldLife.clear();
+    if (this.endless) {
+      // Le mode Sans fin (D-167) : la bande est dessinée morceau par morceau (`EndlessPainter`).
+      return;
+    }
     const chunkPx = LEVEL_CHUNK_TILES * TILE_SIZE;
     const g = this.make.graphics({}, false);
     for (let chunkRow = 0; chunkRow * LEVEL_CHUNK_TILES < level.height; chunkRow++) {
@@ -3233,6 +3264,7 @@ export class GameScene extends Phaser.Scene {
   /** Le menu des jeux, d'après la partie (capacités, étapes, records). */
   private showConsoleMenu(): void {
     this.arcadeRun = null;
+    this.stopEndless();
     const data = this.session.data;
     // Les capacités de la partie, et celles que l'overlay de debug débloque.
     const abilities = new Set<string>(data.progression.abilities);
@@ -3282,13 +3314,196 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  /** Une partie de la console, depuis le niveau 1. */
-  private startArcade(game: ArcadeGameId, mode: ArcadeMode): void {
+  /**
+   * Une partie de la console, depuis le niveau 1 ; en mode Sans fin, depuis le premier morceau (le
+   * debug peut partir d'un autre, `firstChunk`).
+   */
+  private startArcade(game: ArcadeGameId, mode: ArcadeMode, firstChunk = 0): void {
     this.arcadeRun = new ArcadeRun(game, mode, PHYSICS_STEP_HZ);
     this.arcadeUp = arcadeGame(game)?.axis === 'up';
     this.consolePlayed = true;
     this.consoleScreen.showPlay();
-    this.loadArcadeLevel();
+    if (mode === ArcadeMode.Endless) {
+      this.loadEndless(firstChunk);
+    } else {
+      this.loadArcadeLevel();
+    }
+  }
+
+  /**
+   * Le mode Sans fin (D-167), depuis le debug : la partie commence au morceau `firstChunk` (0 : le
+   * premier), même si le mode n'est pas encore ouvert ; son score ne compte pas, sauf au premier.
+   */
+  debugEndless(game: ArcadeGameId, firstChunk: number): void {
+    if (!this.consoleScreen.on) {
+      this.openConsole();
+    }
+    if (this.consoleScreen.on) {
+      this.startArcade(game, ArcadeMode.Endless, Math.max(0, Math.floor(firstChunk)));
+    }
+  }
+
+  /** Le morceau où est Céleste en mode Sans fin (le debug) ; null hors du mode. */
+  get endlessChunk(): number | null {
+    const endless = this.endless;
+    if (!endless) {
+      return null;
+    }
+    const col = Math.floor(this.player.box.x / TILE_SIZE);
+    let start = 1;
+    for (const chunk of endless.band.loaded) {
+      if (col < start + chunk.width) {
+        return chunk.index;
+      }
+      start += chunk.width;
+    }
+    return null;
+  }
+
+  /**
+   * La partie Sans fin commence (D-167) : une nouvelle graine, les trois premiers morceaux (le
+   * premier un peu d'attente derrière l'annonce), dessinés tout de suite ; le suivant demandé au
+   * générateur en arrière-plan ; le repère du record.
+   */
+  private loadEndless(firstChunk: number): void {
+    const run = this.arcadeRun;
+    const game = run ? arcadeGame(run.game) : undefined;
+    if (!run || !game) {
+      this.showConsoleMenu();
+      return;
+    }
+    this.stopEndless();
+    const source = (this.endlessChunks ??= new EndlessChunks());
+    const runSeed = newRunSeed();
+    source.start(runSeed);
+    const first: EndlessChunk[] = [];
+    for (let i = 0; i < 3; i++) {
+      const chunk = source.now(game.id, firstChunk + i, runSeed);
+      if (!chunk) {
+        this.showConsoleMenu();
+        return;
+      }
+      first.push(chunk);
+    }
+    const header = [
+      `; @name: ${game.name} · sans fin`,
+      `; @abilities: ${game.abilities.join(' ')}`,
+      ...ARCADE_ROOM_META,
+    ];
+    const band = new EndlessBand(first);
+    this.endless = { band, runSeed, header, next: null, marker: null, debug: firstChunk > 0 };
+    this.setRoom(parseAsciiLevel(`arcade-${game.id}-endless`, band.text(header)), null, null);
+    let x = TILE_SIZE;
+    for (const chunk of first) {
+      this.endlessPainter.add(chunk, header, x);
+      x += chunk.width * TILE_SIZE;
+    }
+    this.endlessPainter.finish();
+    this.endlessPainter.setWalls(this.level);
+    this.useGrowth(arcadePhase(game));
+    this.respawn();
+    const box = this.player.box;
+    this.arcadeStartX = box.x + box.width / 2;
+    this.arcadeStartY = box.y + box.height;
+    source.prepare(game.id, band.nextIndex, runSeed);
+    this.endless.marker = this.recordMarker(
+      arcadeRecord(this.session.data.arcade, game.id, run.mode),
+    );
+    run.startLevel(0);
+    this.consoleScreen.setBanner('Sans fin');
+    this.chime('start');
+  }
+
+  /**
+   * Le repère fantôme du record (D-167) : une ligne pâle et un petit fanion, là où le record s'est
+   * arrêté. Null sans record.
+   */
+  private recordMarker(record: number): Phaser.GameObjects.Graphics | null {
+    if (record <= 0) {
+      return null;
+    }
+    const x = this.arcadeStartX + (record / ARCADE.metersPerTile) * TILE_SIZE;
+    const g = this.add.graphics({ x, y: 0 }).setDepth(1);
+    const color = CONSOLE_TILE_COLORS.goal;
+    const bottom = (this.level.height - 1) * TILE_SIZE;
+    g.fillStyle(color, 0.35);
+    for (let y = TILE_SIZE; y < bottom; y += 8) {
+      g.fillRect(-1, y, 2, 4);
+    }
+    g.fillStyle(color, 0.55);
+    g.fillTriangle(1, 2 * TILE_SIZE, 1, 2 * TILE_SIZE + 10, 14, 2 * TILE_SIZE + 5);
+    return g;
+  }
+
+  /** La partie Sans fin s'arrête : sa bande et son repère disparaissent. */
+  private stopEndless(): void {
+    if (!this.endless) {
+      return;
+    }
+    this.endless.marker?.destroy();
+    this.endless = null;
+    this.endlessPainter.clear();
+  }
+
+  /**
+   * Un pas du mode Sans fin (D-167) : un bloc du morceau suivant se dessine ; dès qu'il est prêt en
+   * arrière-plan, il est récupéré. Quand Céleste entre dans le dernier morceau de la bande, le plus
+   * ancien part et tout recule de sa largeur : la salle, Céleste, la caméra, le compteur, le
+   * repère. Rien ne bouge à l'écran.
+   */
+  private stepEndless(game: ArcadeGameId): void {
+    const endless = this.endless;
+    const source = this.endlessChunks;
+    if (!endless || !source) {
+      return;
+    }
+    const { band, header, runSeed } = endless;
+    const painter = this.endlessPainter;
+    painter.step();
+    const endX = (band.lastStartCol + (band.loaded.at(-1)?.width ?? 0)) * TILE_SIZE;
+    if (!endless.next) {
+      endless.next = source.take(game, band.nextIndex, runSeed);
+      if (endless.next) {
+        painter.add(endless.next, header, endX);
+      }
+    }
+    const player = this.player;
+    if (!band.shouldShift(Math.floor(player.box.x / TILE_SIZE))) {
+      return;
+    }
+    const start = __DEBUG_TOOLS__ ? performance.now() : 0;
+    // Pas encore prêt (une course très rapide, ou sans arrière-plan) : généré tout de suite.
+    let next = endless.next;
+    if (!next) {
+      next = source.now(game, band.nextIndex, runSeed);
+      if (!next) {
+        return;
+      }
+      painter.add(next, header, endX);
+    }
+    painter.finish();
+    const dropped = band.loaded[0]?.index ?? -1;
+    const dx = band.shift(next) * TILE_SIZE;
+    endless.next = null;
+    const level = parseAsciiLevel(this.level.id, band.text(header));
+    this.level = level;
+    this.combat.setLayer(level);
+    const box = player.box;
+    box.x -= dx;
+    player.prevX -= dx;
+    player.shiftTo(level, 0);
+    this.camera.translate(-dx, 0);
+    this.camera.setBounds(level.width * TILE_SIZE, level.height * TILE_SIZE);
+    this.arcadeStartX -= dx;
+    painter.shift(dx, dropped);
+    painter.setWalls(level);
+    if (endless.marker) {
+      endless.marker.x -= dx;
+    }
+    source.prepare(game, band.nextIndex, runSeed);
+    if (__DEBUG_TOOLS__) {
+      this.frameStats.roomMs += performance.now() - start;
+    }
   }
 
   /** Le niveau en cours de la partie : sa salle, Céleste à la taille du jeu, au départ. */
@@ -3300,6 +3515,9 @@ export class GameScene extends Phaser.Scene {
       this.showConsoleMenu();
       return;
     }
+    this.stopEndless();
+    // Le niveau le plus haut atteint ouvre le mode Sans fin (D-167).
+    void this.session.recordArcadeLevel(run.game, run.level);
     this.setRoom(parseAsciiLevel(level.id, level.text), null, null);
     // Le monstre (D-166) : la poursuite des boss, qui part plus tôt et plus près.
     const chase = this.level.chase;
@@ -3336,6 +3554,9 @@ export class GameScene extends Phaser.Scene {
     this.stepShift(controls.consumePressed('Shift') && live);
     if (run.phase !== ArcadePhase.Fallen) {
       player.step(input);
+    }
+    if (this.endless) {
+      this.stepEndless(run.game);
     }
     if (live) {
       const box = player.box;
@@ -3374,6 +3595,15 @@ export class GameScene extends Phaser.Scene {
     if ((events & ArcadeEvent.Started) !== 0) {
       this.consoleScreen.setBanner(null);
     }
+    if ((events & ArcadeEvent.Milestone) !== 0) {
+      // Un repère du mode Sans fin (D-167) : un bip, et la distance un instant.
+      this.chime('milestone');
+      this.consoleScreen.setBanner(`${String(run.meters)} m`);
+      this.bannerUntilMs = this.time.now + ARCADE_TIMING.milestoneMs;
+    } else if (this.bannerUntilMs >= 0 && this.time.now >= this.bannerUntilMs) {
+      this.bannerUntilMs = -1;
+      this.consoleScreen.setBanner(null);
+    }
     if ((events & ArcadeEvent.NextLevel) !== 0) {
       this.loadArcadeLevel();
       return;
@@ -3383,7 +3613,7 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     this.consoleScreen.setHud(
-      run.level,
+      run.mode === ArcadeMode.Endless ? 'Sans fin' : `Niveau ${String(run.level)}`,
       run.meters,
       arcadeRecord(this.session.data.arcade, run.game, run.mode),
     );
@@ -3405,8 +3635,13 @@ export class GameScene extends Phaser.Scene {
       run.quit();
     }
     const before = arcadeRecord(this.session.data.arcade, run.game, run.mode);
-    const isNew = run.final > before;
-    void this.session.recordArcadeScore(run.game, run.mode, run.final);
+    // Une partie Sans fin lancée par le debug loin du départ ne compte pas.
+    const counts = !this.endless?.debug;
+    const isNew = counts && run.final > before;
+    if (counts) {
+      void this.session.recordArcadeScore(run.game, run.mode, run.final);
+    }
+    this.bannerUntilMs = -1;
     this.audio.sfx.stopLoops();
     this.consoleScreen.showResult(run.final, Math.max(before, run.final), isNew);
     if (isNew) {
@@ -3422,6 +3657,7 @@ export class GameScene extends Phaser.Scene {
     const back = this.consoleReturn;
     this.consoleScreen.close();
     this.arcadeRun = null;
+    this.stopEndless();
     this.consoleReturn = null;
     if (!back) {
       return;

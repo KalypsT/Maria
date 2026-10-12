@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { ARCADE, ArcadeGameId, ArcadeMode } from '../src/config/arcade';
 import {
+  arcadeReached,
   arcadeRecord,
   createArcade,
+  reachArcadeLevel,
   sanitizeArcade,
   submitArcadeScore,
 } from '../src/core/save/arcade';
@@ -44,6 +46,7 @@ describe('la console dans la sauvegarde', () => {
           monster: 'abîmé',
         },
         seen: ['cables', 'cables', 'inconnu', 3, 'wind'],
+        reached: { jumps: 7.6, cables: 0, wind: 'abîmé', inconnu: 4, climb: 1e9 },
       }),
     ).toEqual({
       records: {
@@ -51,6 +54,13 @@ describe('la console dans la sauvegarde', () => {
         jumps: { levels: 0, endless: ARCADE.maxRecordMeters },
       },
       seen: ['cables', 'wind'],
+      reached: { jumps: 7, climb: 100_000 },
+    });
+    // Une console d'avant le mode Sans fin (D-167), sans `reached`.
+    expect(sanitizeArcade({ records: {}, seen: ['jumps'] })).toEqual({
+      records: {},
+      seen: ['jumps'],
+      reached: {},
     });
   });
 
@@ -58,6 +68,7 @@ describe('la console dans la sauvegarde', () => {
     const data = createNewSave('bedroom', 0);
     submitArcadeScore(data.arcade, ArcadeGameId.Cables, ArcadeMode.Levels, 37);
     data.arcade.seen.push(ArcadeGameId.Cables);
+    reachArcadeLevel(data.arcade, ArcadeGameId.Cables, 6);
     const reloaded = deserializeSave(serializeSave(data));
     expect(reloaded.ok && reloaded.data.arcade).toEqual(data.arcade);
     const code = decodeSaveCode(encodeSaveCode(data));
@@ -67,6 +78,25 @@ describe('la console dans la sauvegarde', () => {
     expect(validateSaveData(older)?.arcade).toEqual(createArcade());
     // Des records abîmés ne font pas perdre la partie.
     expect(validateSaveData({ ...data, arcade: 'abîmé' })?.arcade).toEqual(createArcade());
+  });
+
+  it('le niveau le plus haut atteint en mode Niveaux (D-167), seulement s’il monte', async () => {
+    const arcade = createArcade();
+    expect(arcadeReached(arcade, ArcadeGameId.Jumps)).toBe(0);
+    expect(reachArcadeLevel(arcade, ArcadeGameId.Jumps, 1)).toBe(true);
+    expect(reachArcadeLevel(arcade, ArcadeGameId.Jumps, 4)).toBe(true);
+    expect(reachArcadeLevel(arcade, ArcadeGameId.Jumps, 2)).toBe(false);
+    expect(arcadeReached(arcade, ArcadeGameId.Jumps)).toBe(4);
+
+    let clock = 0;
+    const manager = new SaveManager(new MemorySaveStorage());
+    const session = new SaveSession(manager, createNewSave('bedroom', 0), () => ++clock);
+    await session.recordArcadeLevel(ArcadeGameId.Climb, 3);
+    expect(clock).toBe(1);
+    await session.recordArcadeLevel(ArcadeGameId.Climb, 3);
+    await session.recordArcadeLevel(ArcadeGameId.Climb, 1);
+    expect(clock).toBe(1);
+    expect((await manager.load()).data?.arcade.reached).toEqual({ climb: 3 });
   });
 
   it('la partie : écrite seulement pour un nouveau record', async () => {
