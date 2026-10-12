@@ -929,9 +929,9 @@ export class PlayerPhysics {
       this.releaseCable(false);
       return false;
     }
-    if (Math.abs(uy) > p.cableFlatSlope) {
-      this.cableSpeed += p.cableAccel * Math.abs(uy) * dt;
-    }
+    // Comme une poulie (D-171) : elle accélère dans la descente, d'autant plus que le câble penche,
+    // et ralentit si elle monte (un câble presque plat, dans son sens d'arrivée).
+    this.cableSpeed += p.cableAccel * this.cableDir * uy * dt;
     this.cableSpeed = Math.min(p.cableMaxSpeed, Math.max(p.cableMinSpeed, this.cableSpeed));
     this.updateCableVelocity(ux, uy);
     const hookX = this.hookX(box.x) + this.vx * dt;

@@ -105,7 +105,10 @@ describe('le crochet du parapluie et les câbles (D-65)', () => {
       fastest = Math.max(fastest, player.cableSpeed);
       step(player, 0, false, true);
     }
-    expect(fastest).toBe(P.cableMaxSpeed);
+    // Une pente douce (une case sur huit) : bien plus vite qu'à l'accroche (D-171), sans dépasser
+    // la vitesse maximale.
+    expect(fastest).toBeGreaterThan(250);
+    expect(fastest).toBeLessThanOrEqual(P.cableMaxSpeed);
     // Au bout : lâchée avec l'élan, le parapluie toujours ouvert (Saut tenu).
     expect(player.cable).toBe(-1);
     expect(player.vx).toBeGreaterThan(P.maxRunSpeed);
@@ -146,6 +149,30 @@ describe('le crochet du parapluie et les câbles (D-65)', () => {
     }
     expect(player.cableSpeed).toBe(speed);
     expect(player.cableDir).toBe(1);
+  });
+
+  it('câble presque plat (D-171) : en montée elle ralentit, jusqu’à la vitesse minimale ; en descente elle accélère', () => {
+    // Monte doucement vers la droite (une case sur 48) : elle y arrive en allant à droite.
+    const up = makePlayer(field(['8 15 56 14']));
+    jumpToCable(up);
+    expect(up.state).toBe(PlayerState.Cable);
+    expect(up.cableDir).toBe(1);
+    let previous = up.cableSpeed;
+    for (let s = 0; s < 60 && up.cable >= 0; s++) {
+      step(up, 0, false, true);
+      expect(up.cableSpeed).toBeLessThanOrEqual(previous);
+      expect(up.cableSpeed).toBeGreaterThanOrEqual(P.cableMinSpeed);
+      previous = up.cableSpeed;
+    }
+    // Descend doucement vers la droite : elle accélère.
+    const down = makePlayer(field(['8 14 56 15']));
+    jumpToCable(down);
+    expect(down.cableDir).toBe(1);
+    const start = down.cableSpeed;
+    for (let s = 0; s < 60; s++) {
+      step(down, 0, false, true);
+    }
+    expect(down.cableSpeed).toBeGreaterThan(start);
   });
 
   it('lâcher Saut lâche le câble, avec l’élan, parapluie fermé', () => {
