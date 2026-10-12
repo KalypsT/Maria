@@ -137,7 +137,8 @@ describe('l’aire de jeux (D-61)', () => {
       d.step('playground', bench, false);
     }
     expect(d.flags.has(F.StreetMom)).toBe(true);
-    expect(said).toContain('mom-bench:heart');
+    // Céleste demande d'un « ? », maman montre papa ; plus de cœur à la fin de l'indice (D-165).
+    expect(said).toEqual(['celeste:question', 'mom-bench:dad']);
     d.step('playground', bench, false);
     expect(d.interactable).toBe(-1);
   });

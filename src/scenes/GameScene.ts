@@ -22,7 +22,7 @@ import {
   type MovementParams,
 } from '../config/movement';
 import { CameraController } from '../core/camera/CameraController';
-import { ChaseEvent } from '../core/boss/Chase';
+import { Chase, ChaseEvent } from '../core/boss/Chase';
 import { CombatEvent, CombatWorld, wavesOf } from '../core/combat/CombatWorld';
 import { FixedStepClock } from '../core/FixedStepClock';
 import { InputController } from '../core/input/InputController';
@@ -123,6 +123,7 @@ import {
   type ArtFinish,
   GARDEN_PALETTE,
   MEMORY_PALETTE,
+  CONSOLE_PALETTE,
   NIGHTLIGHT_PALETTE,
   NIGHTLIGHT_SOFT_PALETTE,
   ERASURE_COLORS,
@@ -168,6 +169,22 @@ import { hasNewTreasure, roomPlace, treasureBook } from '../core/world/treasureB
 import { MAP_PLACES, placeTitle } from '../config/places';
 import type { NotebookContent, NotebookMap } from '../ui/NotebookPages';
 import { RecordPicker } from '../ui/RecordPicker';
+import { ConsoleScreen } from '../ui/ConsoleScreen';
+import {
+  ARCADE_CHIMES,
+  ARCADE_CHIME_GAIN,
+  CONSOLE_TILE_COLORS,
+  CONSOLE_TV,
+  type ArcadeChime,
+  type ArcadeGameId,
+  type ArcadeMode,
+} from '../config/arcade';
+import { arcadeGame, arcadeLevel, arcadePhase } from '../core/arcade/arcade';
+import { consoleCards } from '../core/arcade/consoleMenu';
+import { monsterChaseParams } from '../core/arcade/monster';
+import { ArcadeEvent, ArcadePhase, ArcadeRun } from '../core/arcade/run';
+import { arcadeRecord } from '../core/save/arcade';
+import { touchesHazard } from '../core/physics/gridCollision';
 import { isRecordSlot } from '../config/records';
 import { canPlayRecords, recordShelf, type RecordChoice } from '../core/audio/records';
 import { buildMapModel } from '../core/world/mapModel';
@@ -247,6 +264,16 @@ const SOLID_COLORS: Readonly<Partial<Record<number, SolidColors>>> = {
   [Material.Wood]: { fill: PLACEHOLDER_COLORS.wood, edge: PLACEHOLDER_COLORS.woodEdge },
   [Material.Fabric]: { fill: PLACEHOLDER_COLORS.fabric, edge: PLACEHOLDER_COLORS.fabricEdge },
   [Material.Leaf]: { fill: PLACEHOLDER_COLORS.leaf, edge: PLACEHOLDER_COLORS.leafEdge },
+};
+
+/** La console (D-166) : le cadre de l'écran et les poteaux. */
+const CONSOLE_FRAME: SolidColors = {
+  fill: CONSOLE_TILE_COLORS.frame,
+  edge: CONSOLE_TILE_COLORS.frameEdge,
+};
+const CONSOLE_POST: SolidColors = {
+  fill: CONSOLE_TILE_COLORS.post,
+  edge: CONSOLE_TILE_COLORS.postEdge,
 };
 
 /** Les trésors (D-160), salle par salle : où ils sont, pour les voir et les montrer sur la carte. */
@@ -398,6 +425,51 @@ export class GameScene extends Phaser.Scene {
   );
   /** Dernier sens du joystick ou des flèches devant le tourne-disque (un pas par poussée). */
   private recordMoveDir = 0;
+  /**
+   * La console (D-166) : son écran (le jeu attend pendant les menus), la partie en cours, et ce
+   * qu'il faut retrouver en l'éteignant (comme un souvenir jouable, hors de la partie : seuls les
+   * records sont sauvegardés).
+   */
+  private readonly consoleScreen = new ConsoleScreen({
+    play: (game, mode) => {
+      this.startArcade(game, mode);
+    },
+    replay: () => {
+      const run = this.arcadeRun;
+      if (run) {
+        this.startArcade(run.game, run.mode);
+      }
+    },
+    menu: () => {
+      this.showConsoleMenu();
+    },
+    off: () => {
+      this.closeConsole();
+    },
+    beep: (kind) => {
+      this.chime(kind);
+    },
+  });
+  private arcadeRun: ArcadeRun | null = null;
+  private consoleReturn: {
+    level: LevelData;
+    zone: Zone | null;
+    x: number;
+    y: number;
+    facing: number;
+  } | null = null;
+  /** Une partie a été jouée depuis l'allumage (la salle et la taille de Céleste ont changé). */
+  private consolePlayed = false;
+  /** Centre de Céleste au départ du niveau de la console (px) : d'où se compte la distance. */
+  private arcadeStartX = 0;
+  /** Ses pieds au départ (px) : d'où se compte la hauteur (la cheminée). */
+  private arcadeStartY = 0;
+  /** Le compteur du jeu en cours compte la hauteur (la cheminée), sinon l'avancée. */
+  private arcadeUp = false;
+  /** Dernier sens du joystick ou des flèches devant l'écran de la console. */
+  private consoleMoveDir = 0;
+  /** Dans la chambre, un jeu de la console pas encore vu (D-166) : l'étincelle sur la télé. */
+  private consoleNews = false;
   /** Souvenir jouable en cours (D-89), null sinon ; et ce qu'il faut retrouver à sa fin. */
   private memoryPlay: PlayableMemory | null = null;
   private memoryReturn: {
@@ -624,6 +696,11 @@ export class GameScene extends Phaser.Scene {
       records: () => {
         this.openRecords();
       },
+      console: () => {
+        // Devant la télé de la chambre (D-166) : Céleste s'assoit, la console s'allume.
+        this.poser.sitting = true;
+        this.openConsole();
+      },
       look: (col, row) => {
         if (col === null || row === null) {
           this.camera.release();
@@ -827,6 +904,7 @@ export class GameScene extends Phaser.Scene {
       document.removeEventListener('visibilitychange', onVisibility);
       this.backpack.destroy();
       this.recordPicker.destroy();
+      this.consoleScreen.destroy();
       this.hud.destroy();
       this.flashbackView.destroy();
       this.scale.off(Phaser.Scale.Events.RESIZE, this.onResize);
@@ -857,6 +935,16 @@ export class GameScene extends Phaser.Scene {
     }
     if (this.recordPicker.isOpen()) {
       this.stepRecordPicker(mapPressed || pausePressed);
+      return;
+    }
+    if (this.consoleScreen.isOpen()) {
+      // L'écran de la console (D-166) : le jeu attend le choix.
+      this.stepConsoleMenu(mapPressed || pausePressed);
+      return;
+    }
+    if ((mapPressed || pausePressed) && this.arcadeRun) {
+      // Le bouton du sac sert de Menu : quitter compte comme une chute (D-166).
+      this.endArcade(true);
       return;
     }
     if ((mapPressed || pausePressed) && !this.memoryPlay) {
@@ -911,6 +999,16 @@ export class GameScene extends Phaser.Scene {
         this.freezeInterpolation();
         if ((run.events & RunEvent.SplashReturn) !== 0) {
           this.returnToFooting();
+        }
+        continue;
+      }
+      const arcade = this.arcadeRun;
+      if (arcade) {
+        // Une partie de la console (D-166) : sa propre petite boucle, hors de la partie.
+        this.stepArcade(arcade);
+        if (this.consoleScreen.isOpen()) {
+          this.freezeInterpolation();
+          break;
         }
         continue;
       }
@@ -2322,6 +2420,7 @@ export class GameScene extends Phaser.Scene {
     this.storyView.rebuild();
     this.storyView.clearThought();
     this.loadPassersby();
+    this.refreshConsoleNews();
     this.poser.sitting = false;
     this.fx.reset();
     this.fx.load(level, isStrangeRoom(level), this.palette(), this.story.timeOfDay() === 'morning');
@@ -2351,7 +2450,8 @@ export class GameScene extends Phaser.Scene {
    * (`; @abilities:`, hors partie), appliquées à Céleste.
    */
   applyAbilities(): void {
-    const owned = this.session.data.progression.abilities;
+    // Dans la console (D-166), seulement les capacités que le jeu prête.
+    const owned = this.arcadeRun ? [] : this.session.data.progression.abilities;
     const lent = this.zone ? [] : (this.level.meta.abilities ?? '').split(/\s+/);
     const has = (ability: Ability) => owned.includes(ability) || lent.includes(ability);
     this.player.canClimb = this.debugClimb || has(Ability.Climb);
@@ -2643,9 +2743,15 @@ export class GameScene extends Phaser.Scene {
   ): boolean {
     const tile = tileAt(level, col, row);
     const material = level.materials[row * level.width + col];
+    // La console (D-166) : ses propres couleurs pastel.
+    const arcade = level.meta.world === 'console';
     if (tile === Tile.Solid) {
       // Placeholders de matériaux (D-25) : murs, meubles en bois, tissu (lit, canapé, linge).
-      const colors = SOLID_COLORS[material ?? Material.Default] ?? DEFAULT_SOLID;
+      const colors = arcade
+        ? material === Material.Wood
+          ? CONSOLE_POST
+          : CONSOLE_FRAME
+        : (SOLID_COLORS[material ?? Material.Default] ?? DEFAULT_SOLID);
       g.fillStyle(colors.fill);
       g.fillRect(x, y, TILE_SIZE, TILE_SIZE);
       const above = row * level.width - level.width + col;
@@ -2667,7 +2773,7 @@ export class GameScene extends Phaser.Scene {
     }
     if (tile === Tile.Hazard || tile === Tile.Thorns) {
       // Placeholder de danger (design ouvert, §45) : rangée de pointes émoussées, sans violence.
-      g.fillStyle(PLACEHOLDER_COLORS.hazard);
+      g.fillStyle(arcade ? CONSOLE_TILE_COLORS.hazard : PLACEHOLDER_COLORS.hazard);
       for (let i = 0; i < 4; i++) {
         g.fillTriangle(
           x + i * 4,
@@ -2705,7 +2811,7 @@ export class GameScene extends Phaser.Scene {
     const goal = level.goal;
     if (goal?.col === col && goal.row === row) {
       // Placeholder d'arrivée : un fanion.
-      g.fillStyle(PLACEHOLDER_COLORS.goal);
+      g.fillStyle(arcade ? CONSOLE_TILE_COLORS.goal : PLACEHOLDER_COLORS.goal);
       g.fillRect(x + 3, y, 2, TILE_SIZE);
       g.fillTriangle(x + 5, y, x + 15, y + 4, x + 5, y + 8);
       return true;
@@ -2945,6 +3051,10 @@ export class GameScene extends Phaser.Scene {
       // Un souvenir jouable (D-89) : couleurs chaudes et passées.
       return MEMORY_PALETTE;
     }
+    if (this.level.meta.world === 'console') {
+      // La console de Céleste (D-166) : le style pastel, à part du jeu.
+      return CONSOLE_PALETTE;
+    }
     if (isGardenRoom(this.level)) {
       return GARDEN_PALETTE;
     }
@@ -3025,7 +3135,8 @@ export class GameScene extends Phaser.Scene {
       // Une lanterne d'où partir (D-163) : l'étincelle au-dessus d'elle.
       const lamp = this.nearTravel >= 0 ? this.run.checkpoints[this.nearTravel] : undefined;
       if (!lamp || story.busy) {
-        this.storyView.doorMark = null;
+        // Un nouveau jeu sur la console (D-166) : l'étincelle sur la télé de la chambre.
+        this.storyView.doorMark = this.consoleNews && !story.busy ? CONSOLE_TV.mark : null;
       } else if (mark?.col !== lamp.col || mark.row !== lamp.row - 2) {
         this.storyView.doorMark = { col: lamp.col, row: lamp.row - 2 };
       }
@@ -3092,6 +3203,274 @@ export class GameScene extends Phaser.Scene {
     this.setRoom(room.level, room.zone, saved.levelId === id ? saved.checkpointId : null);
     this.transition.cancel();
     this.placeCeleste(col, row, facing);
+  }
+
+  /**
+   * Allume la console (D-166) : le jeu est mis de côté (salle, place de Céleste) et l'écran de la
+   * console s'ouvre sur son menu. Ses parties se jouent hors de la partie : seuls les records sont
+   * sauvegardés. En l'éteignant, Céleste revient exactement où elle était.
+   */
+  openConsole(): void {
+    if (this.consoleScreen.on || this.memoryPlay || this.paused) {
+      return;
+    }
+    const box = this.player.box;
+    this.consoleReturn = {
+      level: this.level,
+      zone: this.zone,
+      x: box.x,
+      y: box.y,
+      facing: this.player.facing,
+    };
+    this.consolePlayed = false;
+    this.transition.cancel();
+    this.storyView.clearThought();
+    this.audio.sfx.stopLoops();
+    this.chime('select');
+    this.showConsoleMenu();
+  }
+
+  /** Le menu des jeux, d'après la partie (capacités, étapes, records). */
+  private showConsoleMenu(): void {
+    this.arcadeRun = null;
+    const data = this.session.data;
+    // Les capacités de la partie, et celles que l'overlay de debug débloque.
+    const abilities = new Set<string>(data.progression.abilities);
+    for (const [on, ability] of [
+      [this.debugClimb, Ability.Climb],
+      [this.debugWallJump, Ability.WallJump],
+      [this.debugUmbrella, Ability.Umbrella],
+      [this.debugHook, Ability.Hook],
+      [this.debugSlide, Ability.Slide],
+      [this.debugShift, Ability.Shift],
+    ] as const) {
+      if (on) {
+        abilities.add(ability);
+      }
+    }
+    const cards = consoleCards(abilities, this.story.flags, data.arcade);
+    this.consoleScreen.showMenu(cards);
+    // Vus : « nouveau » cette fois-ci, plus ensuite ; l'étincelle de la télé s'éteint.
+    void this.session
+      .markArcadeSeen(cards.filter((card) => card.isNew).map((c) => c.game.id))
+      .then(() => {
+        this.refreshConsoleNews();
+      });
+    this.clock.reset();
+    this.touch?.releaseAll();
+    this.consoleMoveDir = 0;
+  }
+
+  /** Devant l'écran de la console : gauche et droite, Saut ou Agir ; Pause ou Carte reviennent. */
+  private stepConsoleMenu(backPressed: boolean): void {
+    const controls = this.controls;
+    if (backPressed) {
+      this.chime('move');
+      this.consoleScreen.back();
+      return;
+    }
+    const dir = controls.moveX > 0.5 ? 1 : controls.moveX < -0.5 ? -1 : 0;
+    if (dir !== 0 && dir !== this.consoleMoveDir) {
+      this.consoleScreen.move(dir);
+    }
+    this.consoleMoveDir = dir;
+    const confirm = controls.consumePressed('Interact');
+    const attack = controls.consumePressed('Attack');
+    const jump = controls.consumePressed('Jump');
+    if (confirm || attack || jump) {
+      this.consoleScreen.confirm();
+    }
+  }
+
+  /** Une partie de la console, depuis le niveau 1. */
+  private startArcade(game: ArcadeGameId, mode: ArcadeMode): void {
+    this.arcadeRun = new ArcadeRun(game, mode, PHYSICS_STEP_HZ);
+    this.arcadeUp = arcadeGame(game)?.axis === 'up';
+    this.consolePlayed = true;
+    this.consoleScreen.showPlay();
+    this.loadArcadeLevel();
+  }
+
+  /** Le niveau en cours de la partie : sa salle, Céleste à la taille du jeu, au départ. */
+  private loadArcadeLevel(): void {
+    const run = this.arcadeRun;
+    const game = run ? arcadeGame(run.game) : undefined;
+    const level = run ? arcadeLevel(run.game, run.level) : null;
+    if (!run || !game || !level) {
+      this.showConsoleMenu();
+      return;
+    }
+    this.setRoom(parseAsciiLevel(level.id, level.text), null, null);
+    // Le monstre (D-166) : la poursuite des boss, qui part plus tôt et plus près.
+    const chase = this.level.chase;
+    if (chase) {
+      this.combat.chase = new Chase(chase, monsterChaseParams(this.combatParams), PHYSICS_STEP_HZ);
+    }
+    this.useGrowth(arcadePhase(game));
+    this.respawn();
+    const box = this.player.box;
+    this.arcadeStartX = box.x + box.width / 2;
+    this.arcadeStartY = box.y + box.height;
+    run.startLevel(level.lengthTiles);
+    this.consoleScreen.setBanner(`Niveau ${String(run.level)}`);
+    this.chime('start');
+  }
+
+  /**
+   * Un pas d'une partie : Céleste joue ; les briques de jeu ou le monstre, c'est l'erreur (pas de
+   * peur ici) ; le poteau du fanion, le niveau suivant.
+   */
+  private stepArcade(run: ArcadeRun): void {
+    const controls = this.controls;
+    const player = this.player;
+    const input = this.playerInput;
+    const live = run.playing;
+    controls.consumePressed('Interact');
+    controls.consumePressed('Attack');
+    input.moveX = live ? controls.moveX : 0;
+    input.moveY = live ? controls.moveY : 0;
+    input.jumpPressed = controls.consumePressed('Jump') && live;
+    input.jumpHeld = controls.isHeld('Jump') && live;
+    input.abilityPressed = controls.consumePressed('Ability') && live;
+    // Les deux mondes (D-166) : la bascule, comme dans la partie ; les dangers suivent la couche.
+    this.stepShift(controls.consumePressed('Shift') && live);
+    if (run.phase !== ArcadePhase.Fallen) {
+      player.step(input);
+    }
+    if (live) {
+      const box = player.box;
+      run.advance(
+        this.arcadeUp
+          ? (this.arcadeStartY - box.y - box.height) / TILE_SIZE
+          : (box.x + box.width / 2 - this.arcadeStartX) / TILE_SIZE,
+      );
+      const goal = this.level.goal;
+      // Le monstre (D-166) : il avance seulement pendant que Céleste joue ; le toucher, c'est
+      // l'erreur, comme les briques de jeu.
+      const chase = this.combat.chase;
+      const caught = chase?.step(box, false) === true;
+      if (chase && (chase.events & ChaseEvent.Wake) !== 0) {
+        this.chime('wake');
+      }
+      if (caught || touchesHazard(this.level, box)) {
+        run.fall();
+        this.chime('fall');
+        this.haptics.pulse('hurt');
+        this.audio.sfx.stopLoops();
+      } else if (
+        goal &&
+        player.grounded &&
+        box.y + box.height === (goal.row + 1) * TILE_SIZE &&
+        // Le poteau du fanion : trois tuiles de chaque côté du fanion.
+        box.x + box.width > (goal.col - 3) * TILE_SIZE &&
+        box.x < (goal.col + 3) * TILE_SIZE
+      ) {
+        run.reachGoal();
+        this.chime('cleared');
+        this.consoleScreen.setBanner(`Niveau ${String(run.level)} réussi !`);
+      }
+    }
+    const events = run.step();
+    if ((events & ArcadeEvent.Started) !== 0) {
+      this.consoleScreen.setBanner(null);
+    }
+    if ((events & ArcadeEvent.NextLevel) !== 0) {
+      this.loadArcadeLevel();
+      return;
+    }
+    if ((events & ArcadeEvent.Over) !== 0) {
+      this.endArcade(false);
+      return;
+    }
+    this.consoleScreen.setHud(
+      run.level,
+      run.meters,
+      arcadeRecord(this.session.data.arcade, run.game, run.mode),
+    );
+    this.camera.lookInput = 0;
+    this.camera.step(player);
+    this.feel.step(player);
+    this.stepPose();
+    this.stepStage();
+    this.stepMoveSounds();
+  }
+
+  /** Fin de la partie (une chute, ou quitter : le score atteint compte) : « Oups ! », le record. */
+  private endArcade(quit: boolean): void {
+    const run = this.arcadeRun;
+    if (!run) {
+      return;
+    }
+    if (quit) {
+      run.quit();
+    }
+    const before = arcadeRecord(this.session.data.arcade, run.game, run.mode);
+    const isNew = run.final > before;
+    void this.session.recordArcadeScore(run.game, run.mode, run.final);
+    this.audio.sfx.stopLoops();
+    this.consoleScreen.showResult(run.final, Math.max(before, run.final), isNew);
+    if (isNew) {
+      this.chime('record');
+    }
+    this.clock.reset();
+    this.touch?.releaseAll();
+    this.consoleMoveDir = 0;
+  }
+
+  /** Éteindre la console : retour exact là où était Céleste, à sa taille. */
+  private closeConsole(): void {
+    const back = this.consoleReturn;
+    this.consoleScreen.close();
+    this.arcadeRun = null;
+    this.consoleReturn = null;
+    if (!back) {
+      return;
+    }
+    if (this.consolePlayed) {
+      const saved = this.session.data.checkpoint;
+      this.setRoom(
+        back.level,
+        back.zone,
+        saved.levelId === back.level.id ? saved.checkpointId : null,
+      );
+      this.useGrowth(growthPhase(this.story.flags));
+      this.player.reset(back.x, back.y, this.level);
+      this.player.facing = back.facing < 0 ? -1 : 1;
+      this.feel.reset(this.player);
+      this.poser.reset();
+      this.resetCamera();
+      this.reappearAtMs = this.time.now;
+    }
+    this.consolePlayed = false;
+    this.clock.reset();
+    this.touch?.releaseAll();
+    this.controls.consumePressed('Jump');
+    this.controls.consumePressed('Interact');
+    this.controls.consumePressed('Attack');
+  }
+
+  /**
+   * La télé de la chambre scintille (D-166) : la console est là (offerte, pas pendant le dernier
+   * niveau) et un de ses jeux, jouable, n'a pas encore été vu dans son menu.
+   */
+  private refreshConsoleNews(): void {
+    const flags = this.story.flags;
+    const there =
+      this.zone !== null &&
+      this.level.id === CONSOLE_TV.room &&
+      ((flags.has(StoryFlag.ConsoleGift) && !flags.has(StoryFlag.GrownFourth)) ||
+        flags.has(StoryFlag.FinaleGone));
+    const data = this.session.data;
+    this.consoleNews =
+      there &&
+      consoleCards(new Set(data.progression.abilities), flags, data.arcade).some(
+        (card) => card.isNew,
+      );
+  }
+
+  /** Un bip de la console (D-166, PLACEHOLDER). */
+  private chime(kind: ArcadeChime): void {
+    this.audio.sfx.chime(ARCADE_CHIMES[kind], ARCADE_CHIME_GAIN);
   }
 
   /**

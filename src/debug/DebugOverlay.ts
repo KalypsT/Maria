@@ -1,3 +1,14 @@
+import { Ability } from '../config/abilities';
+import {
+  ARCADE_READY,
+  arcadeGame,
+  arcadeLevel,
+  arcadePhase,
+  metersOf,
+} from '../core/arcade/arcade';
+import { analyzeLevel } from '../core/analysis/analyzeLevel';
+import { parseAsciiLevel } from '../core/level/parseAsciiLevel';
+import { phaseMovement } from '../config/growth';
 import { TREASURES } from '../core/world/treasures';
 import { RECORDS, recordSlot } from '../config/records';
 import { StoryFlag } from '../config/story';
@@ -2005,6 +2016,95 @@ export function installDebugOverlay(scene: GameScene): void {
       (event.currentTarget as HTMLElement).blur();
     },
   );
+
+  // La console (D-166) : l'allumer ; les niveaux générés, joués comme un parcours d'essai
+  // (sauvegarde inchangée) ; mesurés par l'analyse de faisabilité ; les records de la partie.
+  const arcadeSection = element('details', panel);
+  element('summary', arcadeSection, undefined, 'Console');
+  const arcadeRow = element('div', arcadeSection, 'dbg-actions');
+  const arcadeSelect = element('select', arcadeRow);
+  for (const id of ARCADE_READY) {
+    const option = element('option', arcadeSelect, undefined, arcadeGame(id)?.name ?? id);
+    option.value = id;
+  }
+  element('span', arcadeRow, undefined, 'niveau');
+  const arcadeNumber = element('input', arcadeRow);
+  arcadeNumber.type = 'number';
+  arcadeNumber.min = '1';
+  arcadeNumber.value = '1';
+  arcadeNumber.style.width = '4em';
+  const arcadeInfo = element('div', arcadeSection, 'dbg-stats');
+  const currentArcade = () => {
+    const id = ARCADE_READY.find((game) => game === arcadeSelect.value);
+    return id ? arcadeLevel(id, Math.max(1, Math.floor(Number(arcadeNumber.value)) || 1)) : null;
+  };
+  const describeArcade = (extra = '') => {
+    const level = currentArcade();
+    const game = level ? arcadeGame(level.game) : undefined;
+    const records = Object.entries(scene.session.data.arcade.records)
+      .map(([id, r]) => `${id} ${String(r.levels)} m / ${String(r.endless)} m`)
+      .join(' · ');
+    arcadeInfo.textContent = level
+      ? `${level.id} · difficulté ${level.difficulty.toFixed(2)} · ${String(metersOf(level.lengthTiles))} m · phase ${String(game?.phase ?? '?')} (Céleste reste dans sa phase ici)${extra}` +
+        ` · records : ${records || 'aucun'}`
+      : 'Aucun niveau';
+  };
+  const arcadeActions = element('div', arcadeSection, 'dbg-actions');
+  // Allumer la console comme le fera la télé de la chambre (D-166, PR 3).
+  element('button', arcadeActions, undefined, 'Allumer la console').addEventListener(
+    'click',
+    (event) => {
+      (event.currentTarget as HTMLElement).blur();
+      panel.hidden = true;
+      scene.openConsole();
+    },
+  );
+  element('button', arcadeActions, undefined, 'Jouer').addEventListener('click', (event) => {
+    const level = currentArcade();
+    if (level) {
+      scene.loadLevel({ id: level.id, text: level.text });
+    }
+    describeArcade();
+    (event.currentTarget as HTMLElement).blur();
+  });
+  element('button', arcadeActions, undefined, 'Mesurer').addEventListener('click', (event) => {
+    const level = currentArcade();
+    const game = level ? arcadeGame(level.game) : undefined;
+    if (level && game) {
+      const phase = arcadePhase(game);
+      const analysis = analyzeLevel(
+        parseAsciiLevel(level.id, level.text),
+        phaseMovement(DEFAULT_MOVEMENT, phase),
+        {
+          climb: game.abilities.includes(Ability.Climb),
+          wallJump: game.abilities.includes(Ability.WallJump),
+          glide: game.abilities.includes(Ability.Umbrella),
+          hook: game.abilities.includes(Ability.Hook),
+          slide: game.abilities.includes(Ability.Slide),
+          shift: game.abilities.includes(Ability.Shift),
+          hitbox: phase.hitbox,
+        },
+      );
+      const critical = analysis.critical;
+      describeArcade(
+        analysis.path === null
+          ? ' · INFAISABLE'
+          : ` · passage le plus dur : ${critical ? `${critical.windowMs.toFixed(0)} ms` : 'aucun saut'}`,
+      );
+    }
+    (event.currentTarget as HTMLElement).blur();
+  });
+  arcadeSelect.addEventListener('change', () => {
+    describeArcade();
+  });
+  arcadeNumber.addEventListener('change', () => {
+    describeArcade();
+  });
+  arcadeSection.addEventListener('toggle', () => {
+    if (arcadeSection.open) {
+      describeArcade();
+    }
+  });
 
   // Les portes de façade (D-164) : par salle ; y aller (la revue visuelle des portes).
   const doorSection = element('details', panel);

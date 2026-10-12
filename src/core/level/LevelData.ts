@@ -184,9 +184,10 @@ export type ChaseDir = 'up' | 'right' | 'left';
 /**
  * Allure du poursuivant : celle de son sens (le tas des objets perdus, le chariot de vaisselle), ou
  * la vague (D-103, horizontale seulement), qui déferle puis se retire (`surgeMs`, `backwashMs`), ou
- * l'effacement (D-111, vers le haut seulement), une décoloration grise et pâle.
+ * l'effacement (D-111, vers le haut seulement), une décoloration grise et pâle, ou le monstre de
+ * la console (D-166, horizontal seulement), une masse pastel sans visage.
  */
-export type ChaseLook = 'default' | 'wave' | 'erasure';
+export type ChaseLook = 'default' | 'wave' | 'erasure' | 'monster';
 
 /**
  * Poursuite (D-67, D-87) : quelque chose de grand avance derrière Céleste, dans le sens `dir`. Par

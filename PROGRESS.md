@@ -2,6 +2,8 @@
 
 ## Phase en cours
 
+**La console de Céleste** (D-166, demande de l'utilisateur, sur `ccr-e9f3d38a-x4umy1`) : un mode à part, un jeu par capacité (des niveaux qui s'enchaînent, de plus en plus durs, record en mètres). Maquette (https://claude.ai/artifact/2Pb1PC7arwM1ESAByVLc9T), choix de l'utilisateur et plan validés en 9 PR pour le mode Niveaux (le système ; l'écran de la console ; le cadeau et la chambre ; puis un jeu par PR) ; le mode Sans fin plus tard. **PR 1 faite : le système et les tyroliennes** (les jeux, le générateur et son témoin, les records dans la sauvegarde sans migration, DEBUG → « Console ») et **PR 2 faite : l'écran de la console** (le menu, le mode, la partie, « Oups ! » et le record, le style pastel, les bips ; DEBUG → « Console » → « Allumer la console ») et **PR 3 faite : le cadeau et la chambre** (papa au premier passage au potager, la télé sur le bureau, Agir, « nouveau ! » et l'étincelle) et **PR 4 faite : les sauts et la grimpette** (jouables dès le cadeau) et **PR 5 faite : la cheminée** (le saut mural, la hauteur au compteur) et **PR 6 faite : le grand vent** (le parapluie, des portes de briques de jeu) et **PR 7 faite : le couloir** (la glissade : des barres, des tunnels, des trous, le saut long) et **PR 8 faite : les deux mondes** (la bascule en plein saut, des portes et des murs d'une seule couche) et **PR 9 faite : le monstre** (après la vague de la mer : courir et sauter, poursuivie par une masse pastel). **Le mode Niveaux est complet** (huit jeux). Suite : essayer la console sur téléphone ; le mode Sans fin, avec son propre plan.
+
 **Les bulles** (D-165, demande de l'utilisateur, sur `ccr-3b45ec98-n8x7xk`) : la revue de toutes les bulles. Choix de l'utilisateur faits (un nuage pour Céleste, une bulle de parole pour les autres ; Maria aux seuls moments-pivots et la boucle de la maison cassée ; la photo de Maria gardée ; six nouveaux pictogrammes et le lit à « z » ; **le style « papier découpé »** ; pas de bulle pour les affaires de Maria). Faits : l'inventaire (`docs/BULLES.md`), la maquette (https://claude.ai/artifact/AgbA6JRNEMACrZzPv7Rfim) **la PR 1 : le rendu** (le nuage et la bulle de parole en papier découpé, le recadrage des pictogrammes, le côté de la bulle, la lune qui ne troue plus, les nouveaux pictogrammes ; aucun changement de contenu) et **la PR 2 : la maison, le jardin, le quartier** (la boucle « où est Maria ? » cassée, les cœurs de fin d'indice retirés, le manque, pas de bulle pour les affaires de Maria, les portes fermées). L'inventaire est validé. **PR 3 faite : la gare, le train, la mer** (plus de Maria au début des niveaux, le sourire, « chut », l'émerveillement, le manque, les portes) et **PR 4 faite : la nounou, le monde de Maria, les passants, les portes**. **Le plan des bulles est complet.** Suite : essai sur téléphone.
 
 **Retour d'essai jusqu'à la mer** (D-164, sur `ccr-6f15c4bd-qxtl81`) : plan validé en 3 PR. **PR 1 faite : le phare (sa porte), le dortoir (une porte claire, sa lueur toute la nuit), l'escalier de la plage (sans chaîne, un portique et sa flèche, les marches)** et **PR 2 faite : l'annonce des tunnels (la bouche qui arrive de l'avant, les creux qui s'éclairent)** et **PR 3 faite : le boss du train plus tendu (10, 8,5 puis 8 tuiles/s selon le tronçon)**. **Le retour d'essai est traité.** Puis **PR 4 faite : la revue visuelle des 41 portes** (trois portes sans dessin, maintenant dessinées : l'entrée du centre vue de l'intérieur, le retour de la jetée, la sortie de la chambre de la sieste ; DEBUG → « Portes »). Suite : essai sur téléphone ; le boss de la mer (pas encore essayé).
@@ -51,6 +53,68 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### La console, PR 9 : le monstre (D-166)
+
+- Débloqué après la vague de la mer, sans capacité : courir et sauter des trous et des blocs, poursuivie par une masse pastel sans visage (la poursuite des boss, avec une allure `monster`) ; la toucher, c'est l'erreur. Sa vitesse est réglée pour que le témoin à pleine course ne garde que de 8 à 3 tuiles d'avance ; il accélère d'un tronçon à l'autre.
+- Le témoin de course est partagé avec le couloir (`runner.ts`).
+- Mesuré : l'analyse (20 niveaux faisables, de 450 à 225 ms), la course du témoin poursuivi (il échappe au monstre, avec l'avance visée).
+- Vérifié dans Chromium (844 × 390) : le menu (débloqué, nouveau), une partie où le monstre attrape Céleste immobile.
+- [ ] À vérifier sur téléphone : le monstre (le départ, assez de temps pour réagir ? l'avance du premier niveau, assez douce ? de 3 tuiles aux niveaux durs, jouable ? le monstre lisible, pas effrayant ?).
+
+### La console, PR 8 : les deux mondes (D-166)
+
+- De poteau en poteau, des poteaux d'une seule couche : basculer en plein saut ; des portes de briques de jeu d'une seule couche resserrent le moment ; de larges poteaux communs à deux murs : basculer en courant, puis revenir. La bascule marche dans la boucle de la console.
+- Mesuré par l'analyse (20 niveaux) : tous faisables, impossibles sans la bascule ; le passage le plus dur : 367 ms au niveau 1, puis jusqu'à 167 ms.
+- Vérifié dans Chromium (844 × 390) : le niveau 6 dans les deux couches, le menu, une partie.
+- [ ] À vérifier sur téléphone : les deux mondes (les portes lisibles dans les deux couches ? basculer entre deux portes au doigt ? la fluidité avec une quarantaine de zones ?).
+
+### La console, PR 7 : le couloir (D-166)
+
+- Courir et glisser sous des barres de briques de jeu (une tuile de passage), sous des tunnels, sauter des trous ; les plus larges demandent le saut long depuis la glissade. Des obstacles de plus en plus serrés, chacun prouvé par le témoin.
+- Mesuré par l'analyse (20 niveaux) : tous faisables, impossibles sans la glissade ; le passage le plus dur : 225 ms au niveau 1, puis 108 ms.
+- Vérifié dans Chromium (844 × 390) : le niveau 12, le menu, une glissade sous la barre.
+- [ ] À vérifier sur téléphone : le couloir (glisser au bon moment sous une barre de 2 tuiles, faisable au doigt ? l'enchaînement glissade puis saut long ? les barres lisibles ?).
+
+### La console, PR 6 : le grand vent (D-166)
+
+- Une longue descente en planant à travers des portes de briques de jeu, ouvertes autour du vol du témoin (qui change d'allure : planer vite, freiner, fermer le parapluie un instant).
+- Vérifié par le vol du témoin rejoué dans les 20 premiers niveaux (l'analyse de faisabilité ne sait pas changer d'allure en plein vol).
+- Vérifié dans Chromium (844 × 390) : le niveau 8.
+- [ ] À vérifier sur téléphone : le grand vent (les ouvertures, assez larges pour un doigt ? fermer le parapluie et le rouvrir à temps : faisable ? les portes de briques de jeu, lisibles ?).
+
+### La console, PR 5 : la cheminée (D-166)
+
+- Monter entre deux murs en sauts muraux, section par section (largeur de 3 à 5 tuiles, petits décalages), des briques de jeu sur les murs loin du chemin du témoin, un fond qui pique ; le compteur compte la hauteur.
+- Mesuré par l'analyse : les 12 premiers niveaux faisables ; le passage le plus dur entre ~170 et ~270 ms.
+- Vérifié dans Chromium (844 × 390) : la cheminée au niveau 6, le compteur en hauteur.
+- [ ] À vérifier sur téléphone : la cheminée (le rythme des sauts muraux, les briques sur les murs : assez visibles ? trop punitives ?).
+
+### La console, PR 4 : les sauts et la grimpette (D-166)
+
+- Deux jeux de plus, générés comme les tyroliennes et prouvés par le témoin : les sauts (de pierre en pierre, dès le cadeau) et la grimpette (un escalier de rebords, des puits de briques de jeu sous les poteaux).
+- Mesuré par l'analyse : 20 niveaux de chaque jeu faisables ; le passage le plus dur de ~460 à ~200 ms (sauts), de ~620 à ~260 ms (grimpette).
+- Vérifié dans Chromium (844 × 390) : « Les sauts » nouveau et jouable, la grimpette au niveau 10.
+- [ ] À vérifier sur téléphone : les sauts (la difficulté monte-t-elle ? les pierres étroites, assez lisibles ?) ; la grimpette (l'accroche aux rebords est-elle sûre ? les puits se comprennent-ils ?).
+
+### La console, PR 3 : le cadeau et la chambre (D-166)
+
+- Au premier passage au potager, papa appelle Céleste et lui offre la console de salon (« ! », la manette, l'émerveillement, la télé) ; la télé sur le bureau de la chambre ; Agir : Céleste s'assoit, la console s'allume ; « nouveau ! » et l'étincelle sur la télé pour un jeu pas encore vu ; pas de télé pendant le dernier niveau.
+- Vérifié dans Chromium (844 × 390) : la scène du potager, la télé, Agir.
+- [ ] À vérifier sur téléphone : la scène du cadeau se comprend-elle (la manette, puis la télé) ? Trop longue (environ 9 s) ? La télé se voit-elle sur le bureau ? Agir devant elle (devant le bureau, ou dessus) ?
+
+### La console, PR 2 : l'écran de la console (D-166)
+
+- Le mode console dans le jeu (mis de côté, puis retour exact) ; le menu des jeux, le choix du mode (Sans fin « bientôt »), la partie (l'annonce, le compteur, le fanion, la chute), « Oups ! » et le record ; le bouton du sac sert de Menu (quitter compte comme une chute) ; le style pastel ; les bips (synthétisés, PLACEHOLDER).
+- Vérifié dans Chromium (844 × 390) : du menu à « Oups ! », puis « Éteindre ».
+- [ ] À vérifier sur téléphone : DEBUG → « Console » → « Allumer la console » (le crochet débloqué dans DEBUG pour voir les tyroliennes). Le menu se lit-il ? Les cases se touchent-elles bien ? Le compteur gêne-t-il ? Les bips : agréables, trop forts ? Le pastel et les câbles fins : assez lisibles ?
+
+### La console, PR 1 : le système et les tyroliennes (D-166)
+
+- Les huit jeux (`src/config/arcade.ts`), leur déblocage et leur phase ; `arcadeLevel(jeu, n)`, toujours le même niveau (graine fixe, valeurs de mouvement par défaut) ; le générateur des tyroliennes, chaque pièce prouvée par un témoin (la vraie physique) ; les records dans la sauvegarde (`arcade`, sans migration) ; DEBUG → « Console ».
+- Mesuré par l'analyse : les 20 premiers niveaux faisables ; passage le plus dur de ~600 ms (niveau 1) à ~200–340 ms (à partir du niveau 7). L'analyse ne voit pas tout ce qui durcit le jeu (enchaînements, sauts depuis le câble).
+- Vérifié dans Chromium (844 × 390) : un niveau joué et mesuré depuis le debug.
+- [ ] À vérifier sur téléphone : les tyroliennes (DEBUG → « Console » → « Jouer », niveaux 1, 5, 10, 20) : la difficulté monte-t-elle assez ? Les câbles se voient-ils ? Le niveau descend-il trop vers les briques ? (Céleste y garde sa phase du moment : la phase 2 jusqu'à la gare.)
 
 ### Les bulles, PR 4 : la nounou, le monde de Maria, les passants, les portes (D-165)
 
