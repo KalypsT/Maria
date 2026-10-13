@@ -54,6 +54,11 @@ const MUSIC_BOOK = { col: 181, row: 13 };
 const BUNK_SEAT = { col: 45, row: 9 };
 /** La carte postale (D-169), au bout de sa couchette, côté oreiller. */
 const POSTCARD = { col: 47, row: 9 };
+/**
+ * La lettre de maman (D-169), si Céleste ne l'a pas prise dans le train (D-171 : on n'y revient
+ * jamais) : au dortoir, sur la couchette du haut, au-dessus de la sienne, comme dans le train.
+ */
+const LETTER_DORM = { col: 44, row: 6 };
 /** Le monde étrange, en cours (avant le livre musical). */
 const IN_STRANGE = { all: [F.SeaStrange], none: [F.SeaStrangeDone] };
 /** La nuit au dortoir (D-105), après le livre musical, jusqu'à la fin du niveau. */
@@ -428,6 +433,22 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.lookMs },
     ],
   },
+  {
+    // La lettre de maman, oubliée dans le train (D-171) : on la retrouve au dortoir.
+    id: 'take-letter-dorm',
+    room: 'sea-centre',
+    on: 'interact',
+    area: { col: LETTER_DORM.col - 1, row: LETTER_DORM.row - 1, w: 4, h: 2 },
+    mark: { col: LETTER_DORM.col, row: LETTER_DORM.row - 2 },
+    when: { all: [F.SeaArrived], none: [F.LetterTaken] },
+    lock: true,
+    steps: [
+      { do: 'flag', id: F.LetterTaken },
+      { do: 'memory', id: 'letter' },
+      { do: 'thought', icon: 'mom', ms: S.thoughtMs },
+      { do: 'wait', ms: S.lookMs },
+    ],
+  },
 ];
 
 const PROPS: StoryProp[] = [
@@ -553,6 +574,14 @@ const PROPS: StoryProp[] = [
     ...POSTCARD,
     instant: true,
     when: { all: [F.SeaArrived], none: [F.PostcardTaken] },
+  },
+  {
+    id: 'letter-dorm',
+    room: 'sea-centre',
+    kind: 'letter',
+    ...LETTER_DORM,
+    instant: true,
+    when: { all: [F.SeaArrived], none: [F.LetterTaken] },
   },
 ];
 
