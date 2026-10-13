@@ -52,14 +52,23 @@ describe('la nuit, le couloir en boucle, la fin (D-105)', () => {
       .filter((kind) => !kind.startsWith('record-'))
       .sort();
     // La lueur sous la porte (retour d'essai), toute la nuit ; la carte postale de Céleste (D-169)
-    // sur sa couchette, tant qu'elle ne l'a pas prise.
+    // sur sa couchette, et la lettre de maman oubliée dans le train (D-171), tant qu'elle ne les a
+    // pas prises.
     expect(shown).toEqual([
       'classmate-asleep',
       'door-glow',
       'kid-asleep',
       'kid-asleep',
+      'letter',
       'postcard',
     ]);
+    // Prise dans le train, elle n'est plus au dortoir.
+    const taken = new Set<string>([...night, F.LetterTaken]);
+    expect(
+      HOUSE_STORY.props.some(
+        (p) => p.room === 'sea-centre' && p.kind === 'letter' && checkCondition(taken, p.when),
+      ),
+    ).toBe(false);
     const day = new Set<string>([F.SeaArrived]);
     expect(
       HOUSE_STORY.props.some(

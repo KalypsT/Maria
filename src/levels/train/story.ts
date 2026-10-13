@@ -345,7 +345,8 @@ const TRIGGERS: StoryTrigger[] = [
     on: 'interact',
     area: { col: LETTER.col - 1, row: LETTER.row - 2, w: 5, h: 3 },
     mark: { col: LETTER.col, row: LETTER.row - 2 },
-    when: { all: [F.TrainDeparted], none: [F.LetterTaken] },
+    // Jusqu'à l'arrivée : ensuite, on la retrouve au dortoir de la mer (D-171).
+    when: { all: [F.TrainDeparted], none: [F.LetterTaken, F.TrainArrived] },
     lock: true,
     steps: [
       { do: 'flag', id: F.LetterTaken },
@@ -601,7 +602,7 @@ const PROPS: StoryProp[] = [
     kind: 'letter',
     ...LETTER,
     instant: true,
-    when: { all: [F.TrainDeparted], none: [F.LetterTaken] },
+    when: { all: [F.TrainDeparted], none: [F.LetterTaken, F.TrainArrived] },
   },
 ];
 

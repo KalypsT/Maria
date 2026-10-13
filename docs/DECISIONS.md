@@ -2801,3 +2801,10 @@ Retour d'essai de l'utilisateur (de la station balnéaire à la fin), plan valid
 - **Une partie d'avant D-171** déjà passée par la porte (Maria dans le berceau de la vraie chambre) garde l'ancien déroulé (`finale-found`).
 - **Nouvelle étape de l'histoire** en fin de liste : `finale.cradle-seen`. **Fil discret** : le berceau géant, puis le câlin (à la place de la porte). **Debug** : l'histoire « le berceau géant, Maria découverte ».
 - **Tests** (`finaleHome.test.ts`) : la descente facile jusqu'au berceau, jamais coincée ; la découverte (le jingle, Maria dans le noir, la vue rapprochée, « ? » puis Maria) ; **une seule Maria à chaque moment**, jamais avant d'avoir regardé ; le câlin (dans le noir, le cœur, la vibration, le cercle, la vraie chambre, Maria à côté d'elle dans le noir) ; **Agir maintenu** (le cœur qui se remplit, se vide, une pression ne suffit pas) ; la musique (le silence, le thème de fin jusqu'au matin). L'ancienne partie garde son déroulé.
+
+### La lettre de maman, oubliée dans le train
+
+- **Signalé pendant ce retour d'essai, corrigé à la demande de l'utilisateur** : la lettre de maman (D-169), sur la couchette du haut du wagon-lit, restait dans le train à quai si Céleste ne l'avait pas prise avant l'arrivée ; on ne revient jamais dans le train : elle était perdue.
+- **Maintenant** : dans le train, jusqu'à l'arrivée seulement ; ensuite, **au dortoir de la mer, sur la couchette du haut, au-dessus de celle de Céleste**, comme dans le train (au-dessus de la carte postale). Même geste : Agir, elle file vers le sac, une bulle maman. Prise dans le train, elle n'est pas au dortoir.
+- **Tests** : `trainArrival.test.ts` (personne dans les voitures à quai, plus la lettre non plus), `seaNight.test.ts` (la lettre au dortoir tant qu'elle n'est pas prise).
+- **Vérifié dans Chromium** : la lettre sur la couchette du haut du dortoir.
