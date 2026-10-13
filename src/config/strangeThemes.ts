@@ -8,7 +8,15 @@ import { STRANGE_PALETTE, type ArtPalette } from './art';
  * Céleste ne changent pas d'un niveau à l'autre (lisibilité des appuis). PLACEHOLDERS, à régler sur
  * téléphone (DEBUG → « Nuance du monde étrange »).
  */
-export const STRANGE_TINTS = ['house', 'garden', 'street', 'station', 'train', 'sea'] as const;
+export const STRANGE_TINTS = [
+  'house',
+  'garden',
+  'street',
+  'station',
+  'train',
+  'sea',
+  'nanny',
+] as const;
 export type StrangeTint = (typeof STRANGE_TINTS)[number];
 
 export const STRANGE_TINT_NAMES: Readonly<Record<StrangeTint, string>> = {
@@ -18,6 +26,7 @@ export const STRANGE_TINT_NAMES: Readonly<Record<StrangeTint, string>> = {
   station: 'la gare (violet bleuté)',
   train: 'le train (violet prune, cuivré)',
   sea: 'la mer (violet bleu canard)',
+  nanny: 'la nounou (violet passé, autrefois)',
 };
 
 /** Remplissage des silhouettes (meubles, feuillage) et de leurs ombres. */
@@ -104,6 +113,21 @@ const STRANGE_TINT_PALETTES: Readonly<Record<StrangeTint, Partial<ArtPalette>>> 
     floorEdge: '#20384a',
     night: '#2a5a70',
     nightLow: '#143246',
+  },
+  // La maison de la nounou et ses îlots (niveau 7) : autrefois, un violet passé, un peu poussiéreux,
+  // un papier peint plus chaud. Reste sombre : le souvenir de la bascule est clair et chaud
+  // (`MEMORY_PALETTE`), les deux couches ne se confondent pas.
+  nanny: {
+    ...silhouettes('#2b2236', '#1e1828'),
+    wallTop: '#342a40',
+    wallBottom: '#241d2e',
+    wainscot: '#2e2538',
+    wallpaper: 'rgba(255,215,190,0.11)',
+    structure: '#211a2c',
+    floor: '#211a2c',
+    floorEdge: '#33293f',
+    night: '#55457a',
+    nightLow: '#271e44',
   },
 };
 

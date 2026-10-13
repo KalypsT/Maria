@@ -8,6 +8,7 @@
 ; @lantern: nanny-carousel-top 24 7
 ; @lantern: nanny-carousel-entry 5 24
 ; @world: strange
+; @tint: nanny
 ; @mapped: yes
 ; @music: strange
 ; @difficulty: medium

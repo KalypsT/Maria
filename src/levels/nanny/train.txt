@@ -11,6 +11,8 @@
 ; @lantern: nanny-train-roof 67 8
 ; @lantern: nanny-train-rack 4 11
 ; @world: strange
+; @tint: nanny
+; @wall: tiles
 ; @mapped: yes
 ; @music: strange
 ; @difficulty: medium

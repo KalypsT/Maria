@@ -2835,3 +2835,12 @@ Retour d'essai de l'utilisateur (de la station balnéaire à la fin), plan valid
 - **Les couloirs de la mer** prennent la nuance du lieu qu'ils évoquent : le couloir de la chambre, celle de la maison (et ses pois) ; celui de la gare, celle de la gare (et ses carreaux) ; les autres, celle de la mer. Le couloir change de couleur d'un tour à l'autre, comme son décor (D-105).
 - **Rien ne touche à la collision, au mouvement ni à la sauvegarde.**
 - **Vérifié dans Chromium** : la ronce, le jardin renversé (comparé avec la nuance de la maison), l'école étrange, la cuisine étrange, le train de la vaisselle, la fête engloutie, la vague, le couloir.
+
+## D-174 — Les mondes étranges, PR 3 : le niveau 7 (la nounou)
+
+- **Fin du plan de D-172.** Les 13 salles de la maison de la nounou et de ses îlots prennent la nuance **`nanny`** : autrefois, **un violet passé, un peu poussiéreux**, un papier peint plus chaud (PLACEHOLDER). Elle reste sombre : le souvenir de la bascule (`MEMORY_PALETTE`, clair et chaud) ne se confond pas avec le présent.
+- **Les motifs des îlots** tirés du lieu évoqué : l'école d'autrefois, les rayures ; **la gare d'autrefois, les horloges arrêtées** (le motif de la maquette B) ; le train d'autrefois, les carreaux ; les autres, le papier peint à pois de la maison.
+- **La bascule** : le présent garde le liseré épais, sa lueur et le halo ; le souvenir garde sa palette et son voile chaud ; les contours fantômes de l'autre couche gardent leurs couleurs (`SHIFT_LAYER_VIEW`, inchangé : sa couleur de remplissage ne sert qu'aux salles de tuiles, il n'y en a pas au niveau 7).
+- **Le niveau 8 n'est pas touché** (ses palettes de veilleuse, D-141, D-143) : l'étrange s'y efface.
+- **Rien ne touche à la collision, au mouvement ni à la sauvegarde.**
+- **Tests** : `strangeThemes.test.ts` (toutes les salles étranges ont une nuance sauf au niveau 8 ; les 13 salles de la nounou ; les horloges). **Vérifié dans Chromium** : la maison de la nounou (présent, souvenir, et comparée avec la nuance de la maison), la gare d'autrefois (présent, souvenir), l'école, le train, la cage d'escalier.

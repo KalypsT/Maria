@@ -9,6 +9,7 @@
 ; @lantern: nanny-garden-hedge 68 6
 ; @lantern: nanny-garden-planter 30 28
 ; @world: strange
+; @tint: nanny
 ; @mapped: yes
 ; @music: strange
 ; @difficulty: medium

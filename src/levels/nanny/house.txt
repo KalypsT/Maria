@@ -20,6 +20,7 @@
 ; @lantern: nanny-house-hall 6 36
 ; @lantern: nanny-house-rug 68 36
 ; @world: strange
+; @tint: nanny
 ; @mapped: yes
 ; @music: strange
 ; @difficulty: medium

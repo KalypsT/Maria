@@ -10,6 +10,7 @@
 ; @lantern: nanny-stairs-banister 29 40
 ; @lantern: nanny-stairs-bottom 6 55
 ; @world: strange
+; @tint: nanny
 ; @music: strange
 ; @difficulty: easy
 ; @ambient: #141428

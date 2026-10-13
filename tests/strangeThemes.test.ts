@@ -85,14 +85,21 @@ describe('les nuances du monde étrange (D-172)', () => {
     }
   });
 
-  it('chaque salle étrange des niveaux 1 à 6 nomme sa nuance (le 7 et le 8 à part)', () => {
-    const levels1to6 = strangeRooms.filter(
-      (r) => !r.id.startsWith('nanny-') && r.meta.palette === undefined,
-    );
-    expect(levels1to6.length).toBeGreaterThan(10);
-    for (const room of levels1to6) {
+  it('chaque salle étrange nomme sa nuance, sauf au niveau 8 (la veilleuse)', () => {
+    const tinted = strangeRooms.filter((r) => r.meta.palette === undefined);
+    expect(tinted.length).toBeGreaterThan(25);
+    for (const room of tinted) {
       expect(room.meta.tint, room.meta.name).toBeDefined();
     }
+  });
+
+  it('le niveau 7 : la nuance de la nounou, les horloges arrêtées dans la gare d’autrefois', () => {
+    const nanny = strangeRooms.filter((r) => r.id.startsWith('nanny-'));
+    expect(nanny.length).toBe(13);
+    for (const room of nanny) {
+      expect(room.meta.tint, room.meta.name).toBe('nanny');
+    }
+    expect(nanny.find((r) => r.id === 'nanny-station')?.meta.wall).toBe('clocks');
   });
 
   it('les couloirs de la mer reprennent le lieu qu’ils évoquent', () => {

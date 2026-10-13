@@ -8,6 +8,8 @@
 ; @lantern: nanny-station-end 86 19
 ; @lantern: nanny-station-entry 4 26
 ; @world: strange
+; @tint: nanny
+; @wall: clocks
 ; @mapped: yes
 ; @music: strange
 ; @difficulty: medium

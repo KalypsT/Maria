@@ -10,6 +10,7 @@
 ; @lantern: nanny-nap-middle 55 29
 ; @lantern: nanny-nap-entry 7 30
 ; @world: strange
+; @tint: nanny
 ; @mapped: yes
 ; @music: strange
 ; @difficulty: hard
