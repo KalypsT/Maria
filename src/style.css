@@ -1,3 +1,11 @@
+/* Gaegu Bold (OFL, voir src/assets/fonts/Gaegu-OFL.txt), réduite aux majuscules : le titre (D-175). */
+@font-face {
+  font-family: 'Maria Title';
+  font-weight: 700;
+  font-display: block;
+  src: url('./assets/fonts/gaegu-bold-caps.woff2') format('woff2');
+}
+
 :root {
   /*
    * Thème (PLACEHOLDER, direction artistique ouverte §45, choix « C ») : menus et écran de départ
@@ -15,6 +23,10 @@
   --crayon-rose: #d9788f;
   --crayon-rose-soft: #f1ccd3;
   --crayon-blue: #4f6f8f;
+  /* Les crayons du titre (D-175), une couleur par lettre. */
+  --crayon-yellow: #e2b44a;
+  --crayon-green: #6f9a5b;
+  --crayon-lilac: #9a6fb0;
   --warning-ink: #a14a3a;
   --night: #1f222b;
   --veil: #14161b;
@@ -44,6 +56,8 @@
   /* Même effet, plus discret pour les grands panneaux. */
   --sketch-radius-panel: 26px 10px 30px 12px / 12px 28px 10px 30px;
   --ui-font: ui-rounded, 'SF Pro Rounded', 'Nunito', system-ui, sans-serif;
+  /* Le titre, écrit comme par une enfant (D-175, PLACEHOLDER §45). */
+  --title-font: 'Maria Title', var(--ui-font);
 
   /* Marges de l'encoche / barre d'accueil, pour les futurs éléments d'interface. */
   --safe-top: env(safe-area-inset-top, 0px);
@@ -727,16 +741,37 @@ body {
 
 .title-panel h1 {
   margin: 0 0 12px;
-  font-weight: 700;
-  letter-spacing: 0.3em;
-  color: var(--ink);
-  /* Soulignement au crayon de couleur. */
-  background: linear-gradient(
-    transparent 78%,
-    var(--crayon-rose-soft) 78%,
-    var(--crayon-rose-soft) 94%,
-    transparent 94%
-  );
+  font: 700 clamp(64px, 13vh, 104px) / 1 var(--title-font);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  /* Le trait qui tremble (filtre SVG ajouté par TitleScreen). */
+  filter: url('#title-wobble');
+}
+
+.title-name span {
+  display: inline-block;
+  color: var(--crayon-rose);
+  transform: rotate(-6deg) translateY(-2px);
+}
+
+.title-name span:nth-child(2) {
+  color: var(--crayon-blue);
+  transform: rotate(4deg) translateY(3px);
+}
+
+.title-name span:nth-child(3) {
+  color: var(--crayon-yellow);
+  transform: rotate(-3deg) translateY(-2px);
+}
+
+.title-name span:nth-child(4) {
+  color: var(--crayon-green);
+  transform: rotate(5deg) translateY(3px);
+}
+
+.title-name span:nth-child(5) {
+  color: var(--crayon-lilac);
+  transform: rotate(-4deg) translateY(-2px);
 }
 
 .title-panel button,
