@@ -2,6 +2,7 @@
 ; ouverture est apparue en haut du mur gauche. Céleste y arrive sur la bibliothèque, dans le noir.
 ; @name: Salon étrange
 ; @world: strange
+; @tint: house
 ; @difficulty: easy
 ; @ambient: #1d2230
 ; @note: redescendre par la bibliothèque, traverser, remonter les meubles flottants jusqu'à l'ouverture (sortie 1).

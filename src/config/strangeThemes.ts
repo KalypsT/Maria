@@ -8,12 +8,16 @@ import { STRANGE_PALETTE, type ArtPalette } from './art';
  * Céleste ne changent pas d'un niveau à l'autre (lisibilité des appuis). PLACEHOLDERS, à régler sur
  * téléphone (DEBUG → « Nuance du monde étrange »).
  */
-export const STRANGE_TINTS = ['house', 'station'] as const;
+export const STRANGE_TINTS = ['house', 'garden', 'street', 'station', 'train', 'sea'] as const;
 export type StrangeTint = (typeof STRANGE_TINTS)[number];
 
 export const STRANGE_TINT_NAMES: Readonly<Record<StrangeTint, string>> = {
   house: 'la maison (le violet de base)',
+  garden: 'le jardin (violet mousse)',
+  street: 'le quartier (violet craie)',
   station: 'la gare (violet bleuté)',
+  train: 'le train (violet prune, cuivré)',
+  sea: 'la mer (violet bleu canard)',
 };
 
 /** Remplissage des silhouettes (meubles, feuillage) et de leurs ombres. */
@@ -36,6 +40,29 @@ function silhouettes(fill: string, dark: string): Partial<ArtPalette> {
 const STRANGE_TINT_PALETTES: Readonly<Record<StrangeTint, Partial<ArtPalette>>> = {
   // La maison : le violet de base, le papier peint à pois.
   house: {},
+  // Le jardin, derrière la haie : dehors, la nuit glisse vers une mousse sombre.
+  garden: {
+    ...silhouettes('#1f2c28', '#141e1b'),
+    wallTop: '#27332f',
+    wallBottom: '#1a2420',
+    structure: '#1a2522',
+    floor: '#1a2522',
+    floorEdge: '#28362f',
+    night: '#466a58',
+    nightLow: '#22382f',
+  },
+  // Le quartier (l'école étrange) : un violet grisé, comme de la craie, les rayures de l'école.
+  street: {
+    ...silhouettes('#26223a', '#1a1729'),
+    wallTop: '#2e2a3e',
+    wallBottom: '#1f1c2c',
+    wainscot: '#28243a',
+    wallpaper: 'rgba(235,230,255,0.12)',
+    wallMotif: 'stripes',
+    structure: '#1f1c30',
+    floor: '#1f1c30',
+    floorEdge: '#2e2a42',
+  },
   // La gare : la nuit bleue du hall réel glissée dans le violet, ses carreaux.
   station: {
     ...silhouettes('#1f2142', '#151830'),
@@ -49,6 +76,34 @@ const STRANGE_TINT_PALETTES: Readonly<Record<StrangeTint, Partial<ArtPalette>>> 
     floorEdge: '#262a4b',
     night: '#3d4580',
     nightLow: '#1c2148',
+  },
+  // Le train : la cuisine et le wagon-restaurant, un violet prune, des reflets cuivrés, les carreaux.
+  train: {
+    ...silhouettes('#2a1b38', '#1d1228'),
+    wallTop: '#33213e',
+    wallBottom: '#22162c',
+    wainscot: '#2c1c36',
+    wallpaper: 'rgba(255,190,160,0.12)',
+    wallMotif: 'tiles',
+    structure: '#221630',
+    floor: '#221630',
+    floorEdge: '#35223f',
+    lamp: '255,175,150',
+  },
+  // La mer : un violet tiré vers le bleu canard, sombre (loin du turquoise des liserés), les rayures
+  // du centre de vacances.
+  sea: {
+    ...silhouettes('#18303c', '#0f222c'),
+    wallTop: '#1c3040',
+    wallBottom: '#122230',
+    wainscot: '#182a3a',
+    wallpaper: 'rgba(200,235,255,0.11)',
+    wallMotif: 'stripes',
+    structure: '#142834',
+    floor: '#142834',
+    floorEdge: '#20384a',
+    night: '#2a5a70',
+    nightLow: '#143246',
   },
 };
 

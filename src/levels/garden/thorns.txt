@@ -6,6 +6,7 @@
 ; @lantern: garden-thorns-bush 6 19
 ; @lantern: garden-thorns-bottom 3 37
 ; @world: strange
+; @tint: garden
 ; @outdoor: yes
 ; @difficulty: medium
 ; @ambient: #1a1f2c

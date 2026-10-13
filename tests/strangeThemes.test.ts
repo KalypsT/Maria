@@ -85,6 +85,23 @@ describe('les nuances du monde étrange (D-172)', () => {
     }
   });
 
+  it('chaque salle étrange des niveaux 1 à 6 nomme sa nuance (le 7 et le 8 à part)', () => {
+    const levels1to6 = strangeRooms.filter(
+      (r) => !r.id.startsWith('nanny-') && r.meta.palette === undefined,
+    );
+    expect(levels1to6.length).toBeGreaterThan(10);
+    for (const room of levels1to6) {
+      expect(room.meta.tint, room.meta.name).toBeDefined();
+    }
+  });
+
+  it('les couloirs de la mer reprennent le lieu qu’ils évoquent', () => {
+    const tint = (name: string) => strangeRooms.find((r) => r.meta.name === name)?.meta.tint;
+    expect(tint('Le couloir')).toBe('sea');
+    expect(tint('Le couloir (la chambre)')).toBe('house');
+    expect(tint('Le couloir (la gare)')).toBe('station');
+  });
+
   it('la gare étrange : le violet bleuté, les carreaux, les étiquettes dans la tour', () => {
     const room = (name: string) => strangeRooms.find((r) => r.meta.name === name);
     expect(room('Objets perdus')?.meta.tint).toBe('station');

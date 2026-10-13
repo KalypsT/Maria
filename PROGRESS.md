@@ -34,7 +34,7 @@
 
 **La cohérence des niveaux** (D-132 à D-137, demande de l'utilisateur) : la maison, le jardin, le quartier et la gare faits et fusionnés ; **le train** (D-136) et **la station balnéaire** (D-137 : l'aile du centre, les pieds de la grue, la pêche aux canards, les rochers percés, le mât d'amarrage) faits, sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (la maison de la nounou), même méthode.
 
-**Les mondes étranges** (D-172, suite du chantier D de D-124, sur `ccr-bcf301f9-9s6mzb`) : **la maquette A choisie** (« le crépuscule, mieux lu »), une nuance par niveau, les motifs de B et C seulement, le niveau 8 inchangé, le halo partout. Plan validé en 3 PR. **PR 1 faite : la base et la gare étrange** (A partout sauf au niveau 8, les nuances par `; @tint:`, la gare en violet bleuté, les étiquettes dans la tour, DEBUG → « Nuance du monde étrange »). Suite : PR 2, les niveaux 1 à 6 ; PR 3, le niveau 7.
+**Les mondes étranges** (D-172, suite du chantier D de D-124, sur `ccr-bcf301f9-9s6mzb`) : **la maquette A choisie** (« le crépuscule, mieux lu »), une nuance par niveau, les motifs de B et C seulement, le niveau 8 inchangé, le halo partout. Plan validé en 3 PR. **PR 1 faite : la base et la gare étrange** (A partout sauf au niveau 8, les nuances par `; @tint:`, la gare en violet bleuté, les étiquettes dans la tour, DEBUG → « Nuance du monde étrange ») et **PR 2 faite : les niveaux 1 à 6** (D-173 : jardin mousse, quartier craie, train prune et cuivre, mer bleu canard ; les couloirs de la mer selon le lieu évoqué). Suite : PR 3, le niveau 7.
 
 **Sensations, son, aide** (D-124) : chantiers **A** (fluidité et sensations), **B** (bruitages et vibrations) et **C** (le fil discret) faits et fusionnés (D-124 à D-129) ; le chantier D (mondes étranges) continue en D-172. En attente : essais sur téléphone (compteur de saccades, sensations, sons de test, vibrations, fil discret) ; les sons à fournir (`docs/BRUITAGES.md`) ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades.
 
@@ -523,6 +523,13 @@
 - Reste une liberté : la trappe à linge traverse la maison (du couloir à la buanderie).
 - Tests : `house.test.ts` (l'escalier se descend et se remonte sans grimper, les portes au ras du sol, les nouveaux endroits d'escalade), `mapModel`, `records`, `story` mis à jour. Vérifié dans Chromium : captures des sept salles et de la carte.
 - [ ] À vérifier sur téléphone : descendre et remonter l'escalier (les sauts de marche en marche, trop nombreux ?) ; monter au grenier par la cage et en redescendre dans la chambre ; revenir de la buanderie à la cuisine par le tabouret ; sauter les deux briques du salon.
+
+### Les mondes étranges, PR 2 : les niveaux 1 à 6 (D-173)
+
+- Une nuance par niveau : maison (le violet de base), jardin derrière la haie (mousse sombre), école étrange (violet craie, rayures), gare (violet bleuté), train (prune, cuivre, carreaux), mer (bleu canard, rayures).
+- Les couloirs de la mer : la chambre en violet de maison (pois), la gare en violet bleuté (carreaux), les autres en bleu canard.
+- Tests : `strangeThemes.test.ts` (chaque salle des niveaux 1 à 6 a sa nuance, les couloirs). Captures dans Chromium de chaque monde étrange.
+- [ ] À vérifier sur téléphone : chaque monde se reconnaît-il ? Les nuances trop discrètes ou trop fortes (comparer avec DEBUG → « Nuance du monde étrange ») ? Les rayures de l'école ne gênent-elles pas la lecture des tables ?
 
 ### Les mondes étranges, PR 1 : la base et la gare étrange (D-172)
 

@@ -14,6 +14,7 @@
 ; @lantern: school-strange-ruler 35 33
 ; @lantern: school-strange-entry 3 43
 ; @world: strange
+; @tint: street
 ; @music: strange
 ; @hazard: pencils
 ; @difficulty: hard

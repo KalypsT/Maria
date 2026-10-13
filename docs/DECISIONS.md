@@ -2822,3 +2822,16 @@ Retour d'essai de l'utilisateur (de la station balnéaire à la fin), plan valid
 - **Test de contraste** : dans chaque nuance, le liseré doit garder un rapport de contraste supérieur à 7 sur le mur, le sol, la structure et les silhouettes (garde-fou pour la mer, dont la nuance ne doit pas s'approcher du turquoise).
 - **Rien ne touche à la collision, au mouvement ni à la sauvegarde.** Le décor est précalculé : aucun coût par image.
 - **Tests** : `strangeThemes.test.ts`. **Vérifié dans Chromium** : les objets perdus (nuance de la gare et de la maison comparées), la tour (étiquettes), le salon étrange, la gare d'autrefois (niveau 7, en base A), un couloir de la mer.
+
+## D-173 — Les mondes étranges, PR 2 : les nuances des niveaux 1 à 6
+
+- **Suite du plan de D-172.** Chaque salle étrange des niveaux 1 à 6 nomme sa nuance (`; @tint:`) ; un test le vérifie. Les nuances (PLACEHOLDERS, à régler sur téléphone) :
+  - **la maison** (`house`) : le violet de base ; le salon étrange (pois) et le passage d'ombres (planches) gardent leur motif ;
+  - **le jardin** (`garden`), derrière la haie (la ronce, le jardin renversé) : dehors, la nuit glisse vers **une mousse sombre** (ciel et silhouettes vert-de-gris). Une première version, trop proche du gris, a été poussée vers le vert après les captures ;
+  - **le quartier** (`street`), l'école étrange : **un violet grisé, comme de la craie**, les rayures de l'école ;
+  - **la gare** (`station`) : inchangée depuis la PR 1 ;
+  - **le train** (`train`), la cuisine étrange et le train de la vaisselle : **un violet prune**, un papier peint et des lampes **cuivrés**, les carreaux du wagon-restaurant ;
+  - **la mer** (`sea`), la fête engloutie, la vague et les couloirs : **un bleu canard sombre**, loin du turquoise des liserés (le test de contraste le garde), les rayures du centre de vacances.
+- **Les couloirs de la mer** prennent la nuance du lieu qu'ils évoquent : le couloir de la chambre, celle de la maison (et ses pois) ; celui de la gare, celle de la gare (et ses carreaux) ; les autres, celle de la mer. Le couloir change de couleur d'un tour à l'autre, comme son décor (D-105).
+- **Rien ne touche à la collision, au mouvement ni à la sauvegarde.**
+- **Vérifié dans Chromium** : la ronce, le jardin renversé (comparé avec la nuance de la maison), l'école étrange, la cuisine étrange, le train de la vaisselle, la fête engloutie, la vague, le couloir.
