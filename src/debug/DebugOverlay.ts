@@ -25,7 +25,7 @@ import { deserializeSave } from '../core/save/saveData';
 import { formatPlayTime, statsByPlace, totalFaints } from '../core/save/stats';
 import { isMappedRoom, mapPage } from '../core/world/zone';
 import { HitchMonitor, type FrameWork } from '../core/perf/hitchMonitor';
-import { STRANGE_MOCKUPS, STRANGE_MOCKUP_NAMES } from '../config/strangeThemes';
+import { STRANGE_TINTS, STRANGE_TINT_NAMES } from '../config/strangeThemes';
 import { DEFAULT_MOVEMENT, MOVEMENT_PARAM_RANGES, type MovementParams } from '../config/movement';
 import { LEVELS, ZONES, levelName } from '../levels';
 import { shellTally, zoneShells } from '../core/world/shells';
@@ -287,17 +287,18 @@ export function installDebugOverlay(scene: GameScene): void {
     scene.applyFinish();
     refreshFinish();
   });
-  // Maquettes du monde étrange (D-130) : la palette, le motif, les liserés et le halo à comparer.
-  const mockupSelect = element('select', panel);
-  element('option', mockupSelect, undefined, 'Maquette du monde étrange : actuelle').value = '';
-  for (const mockup of STRANGE_MOCKUPS) {
-    element('option', mockupSelect, undefined, STRANGE_MOCKUP_NAMES[mockup]).value = mockup;
+  // Nuances du monde étrange (D-172) : imposer celle d'un autre niveau pour comparer.
+  const tintSelect = element('select', panel);
+  element('option', tintSelect, undefined, 'Nuance du monde étrange : celle de la salle').value =
+    '';
+  for (const tint of STRANGE_TINTS) {
+    element('option', tintSelect, undefined, `Nuance : ${STRANGE_TINT_NAMES[tint]}`).value = tint;
   }
-  mockupSelect.value = scene.strangeMockup ?? '';
-  mockupSelect.addEventListener('change', () => {
-    const value = mockupSelect.value;
-    scene.setStrangeMockup(STRANGE_MOCKUPS.find((m) => m === value) ?? null);
-    mockupSelect.blur();
+  tintSelect.value = scene.strangeTintOverride ?? '';
+  tintSelect.addEventListener('change', () => {
+    const value = tintSelect.value;
+    scene.setStrangeTintOverride(STRANGE_TINTS.find((t) => t === value) ?? null);
+    tintSelect.blur();
   });
   // Sensations proposées (D-125) : écrasement, inclinaison, poussière et saut adouci d'un coup,
   // pour comparer sur téléphone ; les valeurs par défaut du jeu ne changent pas.

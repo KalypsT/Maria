@@ -1786,8 +1786,9 @@ function drawWall(
   wall.addColorStop(1, p.wallBottom);
   ctx.fillStyle = wall;
   ctx.fillRect(0, 0, width, height);
-  // Un monde étrange peut imposer son motif (D-130) : celui de son lieu, pas celui de la maison.
-  const style = p.wallMotif ?? wallStyle(level);
+  // Le motif de la salle ; sinon, dans un monde étrange, celui de son lieu (D-172), pas celui de la
+  // maison.
+  const style = level.meta.wall || !p.wallMotif ? wallStyle(level) : p.wallMotif;
   const wainscot = style === 'dots' || style === 'stripes';
   drawWallpaper(ctx, p, style, width, wainscot ? wainscotY : floorY);
   if (wainscot) {

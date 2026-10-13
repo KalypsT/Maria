@@ -1076,11 +1076,14 @@ export interface ArtPalette {
   vignette: number;
   /** Couleur du vignettage (« r,g,b »). */
   vignetteColor: string;
-  /** Épaisseur du liseré des surfaces praticables (px, D-130). */
+  /** Épaisseur du liseré des surfaces praticables (px, D-130, D-172). */
   rimWidth: number;
   /** Lueur douce au-dessus du liseré (opacité, 0 : aucune, D-130). */
   rimGlow: number;
-  /** Motif du mur imposé par la palette (un monde étrange, D-130) ; null : celui de la salle. */
+  /**
+   * Motif du mur par défaut de la palette (la nuance d'un monde étrange, D-172), quand la salle n'en
+   * impose pas (`; @wall:`) ; null : celui de la salle (à pois par défaut).
+   */
   wallMotif: WallStyle | null;
   /** Halo doux autour de Céleste (opacité, 0 : aucun, D-130) et sa couleur (« r,g,b »). */
   halo: number;
@@ -1196,41 +1199,48 @@ export const CONSOLE_PALETTE: Readonly<ArtPalette> = {
 };
 
 /**
- * Monde étrange (D-28, D-36 : palette « crépuscule » choisie par l'utilisateur) : fonds violets et
- * bleu nuit, halos roses, bords des surfaces praticables en turquoise (lisibilité, pilier 1).
+ * Monde étrange (D-28, D-36 : palette « crépuscule » choisie par l'utilisateur ; D-172 : la maquette
+ * A de D-130, « le crépuscule, mieux lu ») : fonds violets et bleu nuit, halos roses, des masses
+ * violettes plutôt que noires, bords des surfaces praticables en turquoise, épais et surmontés d'une
+ * lueur (lisibilité, pilier 1), un halo doux autour de Céleste. Chaque niveau la nuance
+ * (`src/config/strangeThemes.ts`).
  */
 export const STRANGE_PALETTE: Readonly<ArtPalette> = {
   ...REAL_PALETTE,
   wallTop: '#2c2344',
   wallBottom: '#1d1832',
-  wallpaper: 'rgba(255,175,225,0.15)',
+  wallpaper: 'rgba(255,175,225,0.11)',
   wainscot: '#251d38',
-  floor: '#0f0c18',
-  floorEdge: '#1c1530',
-  structure: '#0a0812',
-  wood: '#16112a',
-  woodLight: '#16112a',
-  woodDark: '#0f0b1e',
-  fabric: '#16112a',
-  fabricLight: '#16112a',
-  linen: '#16112a',
-  toy: '#16112a',
-  toyLight: '#16112a',
+  floor: '#1c1632',
+  floorEdge: '#2b2347',
+  structure: '#1c1632',
+  wood: '#231c3f',
+  woodLight: '#231c3f',
+  woodDark: '#181231',
+  fabric: '#231c3f',
+  fabricLight: '#231c3f',
+  linen: '#231c3f',
+  toy: '#231c3f',
+  toyLight: '#231c3f',
   curtain: '#1d1532',
   night: '#4b3b7c',
   nightLow: '#221a46',
   moon: '#ffd8ee',
-  rim: 'rgba(140,240,225,0.9)',
+  rim: 'rgba(140,240,225,0.95)',
   lamp: '255,160,210',
   darkness: 0.42,
   silhouettes: true,
-  leaf: '#16112a',
-  leafLight: '#16112a',
-  leafDark: '#0f0b1e',
+  leaf: '#231c3f',
+  leafLight: '#231c3f',
+  leafDark: '#181231',
   // Déjà en silhouettes sur un fond sombre : pas de voile, un vignettage plus présent.
   veil: 0,
   vignette: 0.5,
   vignetteColor: '6,4,16',
+  rimWidth: 2,
+  rimGlow: 0.35,
+  halo: 0.22,
+  haloColor: '140,240,225',
 };
 
 /**

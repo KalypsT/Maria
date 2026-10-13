@@ -2808,3 +2808,17 @@ Retour d'essai de l'utilisateur (de la station balnéaire à la fin), plan valid
 - **Maintenant** : dans le train, jusqu'à l'arrivée seulement ; ensuite, **au dortoir de la mer, sur la couchette du haut, au-dessus de celle de Céleste**, comme dans le train (au-dessus de la carte postale). Même geste : Agir, elle file vers le sac, une bulle maman. Prise dans le train, elle n'est pas au dortoir.
 - **Tests** : `trainArrival.test.ts` (personne dans les voitures à quai, plus la lettre non plus), `seaNight.test.ts` (la lettre au dortoir tant qu'elle n'est pas prise).
 - **Vérifié dans Chromium** : la lettre sur la couchette du haut du dortoir.
+
+## D-172 — Les mondes étranges : la maquette A choisie, plan en 3 PR ; PR 1 : la base et la gare étrange
+
+- **Choix de l'utilisateur** (parmi les maquettes de D-130) : **A, « le crépuscule, mieux lu »**. Réponses aux questions : **une nuance par niveau** (le violet de base glisse vers la couleur du lieu réel) ; de B et C, **seulement les motifs** (les étiquettes de bagage, les horloges arrêtées), là où ils ont du sens ; le **niveau 7** reçoit A (en dernier, avec la bascule vérifiée), **le niveau 8 garde ses palettes de veilleuse** (l'étrange s'y efface) ; **le halo de Céleste partout**.
+- **Plan validé en 3 PR** : 1. la base et la gare étrange ; 2. les niveaux 1 à 6 (maison, jardin et derrière la haie, quartier, gare, train, mer et ses couloirs) ; 3. le niveau 7 (une nuance « autrefois », les horloges arrêtées dans la gare d'autrefois, les deux couches de la bascule lisibles).
+- **PR 1** :
+  - `STRANGE_PALETTE` devient la maquette A : masses violettes plutôt que noires, liseré turquoise de 2 px surmonté d'une lueur, halo doux turquoise autour de Céleste. Les couleurs de fond de D-36 sont gardées.
+  - **Les nuances** (`src/config/strangeThemes.ts`) : chaque salle étrange choisit la sienne par `; @tint:` (aucune : celle de la maison, le violet de base) ; une nuance remplace des couleurs et propose un motif de mur par défaut. **Le motif d'une salle (`; @wall:`) l'emporte** sur celui de la nuance (avant, en D-130, la palette l'emportait). Le liseré, sa lueur et le halo ne changent jamais d'une nuance à l'autre.
+  - **La gare** (`station`) : violet bleuté, les carreaux du hall ; la tour des objets perdus avec **les étiquettes de bagage** (`; @wall: tags`). Les objets perdus gardent les carreaux (le hall à l'envers).
+  - Les maquettes B et C retirées ; leurs motifs (`clocks`, `tags`) gardés.
+  - DEBUG → « Nuance du monde étrange » : celle de la salle, ou une nuance imposée pour comparer.
+- **Test de contraste** : dans chaque nuance, le liseré doit garder un rapport de contraste supérieur à 7 sur le mur, le sol, la structure et les silhouettes (garde-fou pour la mer, dont la nuance ne doit pas s'approcher du turquoise).
+- **Rien ne touche à la collision, au mouvement ni à la sauvegarde.** Le décor est précalculé : aucun coût par image.
+- **Tests** : `strangeThemes.test.ts`. **Vérifié dans Chromium** : les objets perdus (nuance de la gare et de la maison comparées), la tour (étiquettes), le salon étrange, la gare d'autrefois (niveau 7, en base A), un couloir de la mer.

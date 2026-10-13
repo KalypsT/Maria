@@ -34,7 +34,9 @@
 
 **La cohérence des niveaux** (D-132 à D-137, demande de l'utilisateur) : la maison, le jardin, le quartier et la gare faits et fusionnés ; **le train** (D-136) et **la station balnéaire** (D-137 : l'aile du centre, les pieds de la grue, la pêche aux canards, les rochers percés, le mât d'amarrage) faits, sur `ccr-ac748a1e-rfr7an`. Suite : essai sur téléphone, puis le niveau suivant (la maison de la nounou), même méthode.
 
-**Sensations, son, aide et mondes étranges** (D-124) : chantiers **A** (fluidité et sensations), **B** (bruitages et vibrations) et **C** (le fil discret) faits et fusionnés (D-124 à D-129). **Chantier D, PR 1 faite : trois maquettes de la gare étrange** (D-130), sur `ccr-9d90352a-xuwhs1`. Suite : **le choix de l'utilisateur** (A, B, C ou un mélange), puis la gare étrange refaite (D2) et les autres mondes étranges un par un. En attente : essais sur téléphone (compteur de saccades, sensations, sons de test, vibrations, fil discret) ; les sons à fournir (`docs/BRUITAGES.md`) ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades.
+**Les mondes étranges** (D-172, suite du chantier D de D-124, sur `ccr-bcf301f9-9s6mzb`) : **la maquette A choisie** (« le crépuscule, mieux lu »), une nuance par niveau, les motifs de B et C seulement, le niveau 8 inchangé, le halo partout. Plan validé en 3 PR. **PR 1 faite : la base et la gare étrange** (A partout sauf au niveau 8, les nuances par `; @tint:`, la gare en violet bleuté, les étiquettes dans la tour, DEBUG → « Nuance du monde étrange »). Suite : PR 2, les niveaux 1 à 6 ; PR 3, le niveau 7.
+
+**Sensations, son, aide** (D-124) : chantiers **A** (fluidité et sensations), **B** (bruitages et vibrations) et **C** (le fil discret) faits et fusionnés (D-124 à D-129) ; le chantier D (mondes étranges) continue en D-172. En attente : essais sur téléphone (compteur de saccades, sensations, sons de test, vibrations, fil discret) ; les sons à fournir (`docs/BRUITAGES.md`) ; A3 (dessin du décor hors du fil principal) seulement si le compteur montre des saccades.
 
 **Les personnages illustrés** (D-123, D-146 à D-151, D-154) : **tous les personnages sont illustrés** (papa, maman, Céleste dans ses quatre tenues, adultes, enfants, le chien, le chat, la nounou, Eden), sur `ccr-142ffd96-q5pgli`. Suite : essai sur téléphone.
 
@@ -522,6 +524,14 @@
 - Tests : `house.test.ts` (l'escalier se descend et se remonte sans grimper, les portes au ras du sol, les nouveaux endroits d'escalade), `mapModel`, `records`, `story` mis à jour. Vérifié dans Chromium : captures des sept salles et de la carte.
 - [ ] À vérifier sur téléphone : descendre et remonter l'escalier (les sauts de marche en marche, trop nombreux ?) ; monter au grenier par la cage et en redescendre dans la chambre ; revenir de la buanderie à la cuisine par le tabouret ; sauter les deux briques du salon.
 
+### Les mondes étranges, PR 1 : la base et la gare étrange (D-172)
+
+- La maquette A devient le monde étrange de tous les niveaux sauf le dernier : masses violettes, liseré turquoise de 2 px et sa lueur, halo doux autour de Céleste.
+- Les nuances : `; @tint:` par salle (`src/config/strangeThemes.ts`), le motif de la salle (`; @wall:`) avant celui de la nuance. La gare : violet bleuté, carreaux ; la tour : étiquettes de bagage.
+- DEBUG → **« Nuance du monde étrange »** (celle de la salle, ou une autre à comparer). Les maquettes B et C retirées (leurs motifs gardés).
+- Tests : `strangeThemes.test.ts` (dont le contraste du liseré dans chaque nuance). Captures dans Chromium : objets perdus, tour, salon étrange, gare d'autrefois, couloir de la mer.
+- [ ] À vérifier sur téléphone : les appuis se lisent-ils mieux ? La nuance bleutée de la gare se voit-elle (comparer avec DEBUG → « Nuance : la maison ») ? Le halo autour de Céleste ?
+
 ### Bruitages : les premiers fichiers (D-131)
 
 - 16 sons fournis, préparés et intégrés (27 fichiers avec les variantes, 200 Ko) : saut, réception, touchée, chute dans l'eau, hissage, parapluie (ouvert, refermé), crochet, glisse le long du câble (boucle), bascule, trains (annonce, passage), pas sur la pierre, l'herbe, le sable (4 variantes chacun) et les feuilles (3).
@@ -529,12 +539,12 @@
 - Reste à fournir : voir `docs/BRUITAGES.md` (les sons sans ✅).
 - [ ] À vérifier sur téléphone : les pas (volume, sable trop soufflé ?), le saut et la réception ensemble, la boucle du câble (sans coupure ?), le train qui passe (assez long, trop long ?), la bascule (1,5 s, finit fort).
 
-### Chantier D, PR 1 : trois maquettes de la gare étrange (D-130)
+### Chantier D, PR 1 : trois maquettes de la gare étrange (D-130) — A choisie (D-172)
 
 - DEBUG → **« Maquette du monde étrange »** : actuelle, **A** (le crépuscule, mieux lu : les carreaux du hall), **B** (l'heure arrêtée : bleu nuit, ambre, horloges), **C** (les objets perdus, dans la brume : vert d'eau, étiquettes de bagage). Rien ne change dans le jeu tant qu'aucune n'est choisie.
 - Communs : liseré de 2 px et une lueur au-dessus, motif du mur tiré du lieu, halo doux autour de Céleste.
 - Tests : `strangeThemes.test.ts`. Captures dans Chromium : la gare étrange (le départ, la montagne des objets perdus) et la tour, dans les quatre versions.
-- [ ] **À choisir** : A, B, C, ou un mélange (une couleur de l'une, le motif d'une autre…).
+- [x] **Choisie** : A, avec les motifs de B et C là où ils ont du sens (D-172).
 - [ ] À vérifier sur téléphone (DEBUG → « Maquette du monde étrange », puis entrer dans la gare étrange) : les appuis se lisent-ils mieux ? Le motif du mur se voit-il, sans gêner ? Le halo autour de Céleste ?
 
 ### Chantier C : le fil discret (D-129)

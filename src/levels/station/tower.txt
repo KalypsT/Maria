@@ -8,6 +8,8 @@
 ; @lantern: station-tower-middle 12 73
 ; @lantern: station-tower-bottom 3 97
 ; @world: strange
+; @tint: station
+; @wall: tags
 ; @music: strange
 ; @difficulty: medium
 ; @ambient: #1a1f2c
