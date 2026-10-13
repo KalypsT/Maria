@@ -2844,3 +2844,10 @@ Retour d'essai de l'utilisateur (de la station balnéaire à la fin), plan valid
 - **Le niveau 8 n'est pas touché** (ses palettes de veilleuse, D-141, D-143) : l'étrange s'y efface.
 - **Rien ne touche à la collision, au mouvement ni à la sauvegarde.**
 - **Tests** : `strangeThemes.test.ts` (toutes les salles étranges ont une nuance sauf au niveau 8 ; les 13 salles de la nounou ; les horloges). **Vérifié dans Chromium** : la maison de la nounou (présent, souvenir, et comparée avec la nuance de la maison), la gare d'autrefois (présent, souvenir), l'école, le train, la cage d'escalier.
+
+## D-175 — Le titre écrit comme par une enfant ; le logo à refaire
+
+- **Demande de l'utilisateur** : revoir le titre et le logo. Propositions comparées sur une page (https://claude.ai/artifact/NrYcu5hQUBCN4gnP6eB3EX) : sept polices « écriture d'enfant », cinq pistes de logo.
+- **Le titre (choix de l'utilisateur)** : **Gaegu Bold, en majuscules, « mode crayon »** : une couleur de crayon par lettre (rose, bleu, jaune, vert, lilas : `--crayon-*`), chaque lettre un peu penchée, le trait qui tremble (filtre SVG `#title-wobble`, ajouté une fois par `TitleScreen`). Le titre est lu « Maria » (`aria-label`).
+- **La police est dans le dépôt** (`src/assets/fonts/gaegu-bold-caps.woff2`, 6,5 Ko, réduite aux majuscules A–Z ; licence OFL à côté). `woff2` ajouté aux fichiers précachés par la PWA : le titre reste juste hors ligne. Le reste de l'interface garde `--ui-font`. Reste un PLACEHOLDER (§45).
+- **Le logo** : l'utilisateur préfère la piste A (les lunettes roses seules, au crayon, sur une feuille à carreaux) et propose la tête de Céleste tirée du jeu (`public/art/celeste/<tenue>-head.png`). Aperçus faits ; choix en attente. `public/icons/` inchangé.

@@ -19,6 +19,13 @@ export interface TitlePwa {
 export type TitleChoice =
   { kind: 'continue' } | { kind: 'new' } | { kind: 'import'; data: SaveData };
 
+/** Le tremblé du crayon (D-175), un filtre SVG appliqué au titre par `style.css`. */
+const TITLE_WOBBLE_ID = 'title-wobble';
+const TITLE_WOBBLE_SVG =
+  `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="${TITLE_WOBBLE_ID}" x="-5%" y="-5%" width="110%" height="110%">` +
+  '<feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4" result="noise"/>' +
+  '<feDisplacementMap in="SourceGraphic" in2="noise" scale="4"/></filter></svg>';
+
 function element<K extends keyof HTMLElementTagNameMap>(
   tag: K,
   parent: HTMLElement,
@@ -58,7 +65,15 @@ export function showTitleScreen(
     portrait.alt = '';
     portrait.draggable = false;
     const panel = element('div', root, 'title-panel');
-    element('h1', panel, undefined, 'MARIA');
+    // Le titre au crayon (D-175) : une lettre par crayon de couleur, le trait qui tremble.
+    const title = element('h1', panel, 'title-name');
+    title.setAttribute('aria-label', 'Maria');
+    for (const letter of 'MARIA') {
+      element('span', title, undefined, letter).setAttribute('aria-hidden', 'true');
+    }
+    if (!document.getElementById(TITLE_WOBBLE_ID)) {
+      document.body.insertAdjacentHTML('beforeend', TITLE_WOBBLE_SVG);
+    }
     if (flags.has(StoryFlag.FinaleGone)) {
       // Après la fin (D-145) : Maria, seule sur son étagère, dans un coin de la page.
       const corner = element('div', root, 'title-maria');
