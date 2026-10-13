@@ -10,6 +10,7 @@
 ; @lantern: nanny-street-houses 4 5
 ; @lantern: nanny-street-busstop 74 19
 ; @world: strange
+; @tint: nanny
 ; @mapped: yes
 ; @music: strange
 ; @difficulty: medium

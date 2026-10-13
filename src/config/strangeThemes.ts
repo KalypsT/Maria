@@ -1,13 +1,33 @@
-import type { ArtPalette } from './art';
+import { STRANGE_PALETTE, type ArtPalette } from './art';
 
 /**
- * Maquettes du monde étrange (D-130), comparées sur la gare étrange avant de choisir une direction
- * (DEBUG → « Maquette du monde étrange »). Chacune garde les silhouettes de D-28 et rend les appuis
- * plus lisibles (liserés plus épais, une lueur au-dessus, des masses moins noires, un halo autour
- * de Céleste) ; elles diffèrent par la couleur et le motif, tirés du lieu réel. PROVISOIRES.
+ * Les nuances du monde étrange (D-172) : la palette « crépuscule » (`STRANGE_PALETTE`) est commune à
+ * tous les mondes étranges ; chaque niveau la fait glisser vers la couleur de son lieu réel et
+ * propose un motif de mur par défaut. Une salle choisit sa nuance par `; @tint:` (aucune : celle de
+ * la maison) et peut imposer son motif par `; @wall:`. Le liseré turquoise, sa lueur et le halo de
+ * Céleste ne changent pas d'un niveau à l'autre (lisibilité des appuis). PLACEHOLDERS, à régler sur
+ * téléphone (DEBUG → « Nuance du monde étrange »).
  */
-export const STRANGE_MOCKUPS = ['A', 'B', 'C'] as const;
-export type StrangeMockup = (typeof STRANGE_MOCKUPS)[number];
+export const STRANGE_TINTS = [
+  'house',
+  'garden',
+  'street',
+  'station',
+  'train',
+  'sea',
+  'nanny',
+] as const;
+export type StrangeTint = (typeof STRANGE_TINTS)[number];
+
+export const STRANGE_TINT_NAMES: Readonly<Record<StrangeTint, string>> = {
+  house: 'la maison (le violet de base)',
+  garden: 'le jardin (violet mousse)',
+  street: 'le quartier (violet craie)',
+  station: 'la gare (violet bleuté)',
+  train: 'le train (violet prune, cuivré)',
+  sea: 'la mer (violet bleu canard)',
+  nanny: 'la nounou (violet passé, autrefois)',
+};
 
 /** Remplissage des silhouettes (meubles, feuillage) et de leurs ombres. */
 function silhouettes(fill: string, dark: string): Partial<ArtPalette> {
@@ -26,72 +46,101 @@ function silhouettes(fill: string, dark: string): Partial<ArtPalette> {
   };
 }
 
-export const STRANGE_MOCKUP_NAMES: Readonly<Record<StrangeMockup, string>> = {
-  A: 'A : le crépuscule, mieux lu',
-  B: 'B : l’heure arrêtée',
-  C: 'C : les objets perdus, dans la brume',
+const STRANGE_TINT_PALETTES: Readonly<Record<StrangeTint, Partial<ArtPalette>>> = {
+  // La maison : le violet de base, le papier peint à pois.
+  house: {},
+  // Le jardin, derrière la haie : dehors, la nuit glisse vers une mousse sombre.
+  garden: {
+    ...silhouettes('#1f2c28', '#141e1b'),
+    wallTop: '#27332f',
+    wallBottom: '#1a2420',
+    structure: '#1a2522',
+    floor: '#1a2522',
+    floorEdge: '#28362f',
+    night: '#466a58',
+    nightLow: '#22382f',
+  },
+  // Le quartier (l'école étrange) : un violet grisé, comme de la craie, les rayures de l'école.
+  street: {
+    ...silhouettes('#26223a', '#1a1729'),
+    wallTop: '#2e2a3e',
+    wallBottom: '#1f1c2c',
+    wainscot: '#28243a',
+    wallpaper: 'rgba(235,230,255,0.12)',
+    wallMotif: 'stripes',
+    structure: '#1f1c30',
+    floor: '#1f1c30',
+    floorEdge: '#2e2a42',
+  },
+  // La gare : la nuit bleue du hall réel glissée dans le violet, ses carreaux.
+  station: {
+    ...silhouettes('#1f2142', '#151830'),
+    wallTop: '#262a4a',
+    wallBottom: '#181b34',
+    wainscot: '#1f2340',
+    wallpaper: 'rgba(215,205,255,0.11)',
+    wallMotif: 'tiles',
+    structure: '#181a33',
+    floor: '#181a33',
+    floorEdge: '#262a4b',
+    night: '#3d4580',
+    nightLow: '#1c2148',
+  },
+  // Le train : la cuisine et le wagon-restaurant, un violet prune, des reflets cuivrés, les carreaux.
+  train: {
+    ...silhouettes('#2a1b38', '#1d1228'),
+    wallTop: '#33213e',
+    wallBottom: '#22162c',
+    wainscot: '#2c1c36',
+    wallpaper: 'rgba(255,190,160,0.12)',
+    wallMotif: 'tiles',
+    structure: '#221630',
+    floor: '#221630',
+    floorEdge: '#35223f',
+    lamp: '255,175,150',
+  },
+  // La mer : un violet tiré vers le bleu canard, sombre (loin du turquoise des liserés), les rayures
+  // du centre de vacances.
+  sea: {
+    ...silhouettes('#18303c', '#0f222c'),
+    wallTop: '#1c3040',
+    wallBottom: '#122230',
+    wainscot: '#182a3a',
+    wallpaper: 'rgba(200,235,255,0.11)',
+    wallMotif: 'stripes',
+    structure: '#142834',
+    floor: '#142834',
+    floorEdge: '#20384a',
+    night: '#2a5a70',
+    nightLow: '#143246',
+  },
+  // La maison de la nounou et ses îlots (niveau 7) : autrefois, un violet passé, un peu poussiéreux,
+  // un papier peint plus chaud. Reste sombre : le souvenir de la bascule est clair et chaud
+  // (`MEMORY_PALETTE`), les deux couches ne se confondent pas.
+  nanny: {
+    ...silhouettes('#2b2236', '#1e1828'),
+    wallTop: '#342a40',
+    wallBottom: '#241d2e',
+    wainscot: '#2e2538',
+    wallpaper: 'rgba(255,215,190,0.11)',
+    structure: '#211a2c',
+    floor: '#211a2c',
+    floorEdge: '#33293f',
+    night: '#55457a',
+    nightLow: '#271e44',
+  },
 };
 
-export const STRANGE_MOCKUP_PALETTES: Readonly<Record<StrangeMockup, Partial<ArtPalette>>> = {
-  // A : la palette « crépuscule » de D-36, telle quelle, mais mieux lue : les carreaux du hall de
-  // la gare au lieu du papier peint de la maison, des masses violettes plutôt que noires.
-  A: {
-    ...silhouettes('#231c3f', '#181231'),
-    wallMotif: 'tiles',
-    wallpaper: 'rgba(255,175,225,0.11)',
-    structure: '#1c1632',
-    floor: '#1c1632',
-    floorEdge: '#2b2347',
-    rim: 'rgba(140,240,225,0.95)',
-    rimWidth: 2,
-    rimGlow: 0.35,
-    halo: 0.22,
-    haloColor: '140,240,225',
-  },
-  // B : la nuit de la gare réelle (bleu nuit, lumière ambrée des lampes) : des horloges arrêtées
-  // chacune à une autre heure, des liserés ambrés.
-  B: {
-    ...silhouettes('#1c2843', '#131c30'),
-    wallTop: '#1e2b48',
-    wallBottom: '#121a30',
-    wallpaper: 'rgba(255,214,150,0.13)',
-    wallMotif: 'clocks',
-    wainscot: '#18223a',
-    structure: '#151e34',
-    floor: '#151e34',
-    floorEdge: '#23314f',
-    night: '#2e4a7a',
-    nightLow: '#16244a',
-    moon: '#ffe1a8',
-    rim: 'rgba(255,206,130,0.95)',
-    lamp: '255,190,110',
-    rimWidth: 2,
-    rimGlow: 0.3,
-    vignetteColor: '4,8,20',
-    halo: 0.24,
-    haloColor: '255,200,120',
-  },
-  // C : les objets perdus dans une brume vert d'eau, des étiquettes de bagage, des liserés dorés
-  // pâles.
-  C: {
-    ...silhouettes('#17323a', '#0f2328'),
-    wallTop: '#22454c',
-    wallBottom: '#122a30',
-    wallpaper: 'rgba(210,255,240,0.10)',
-    wallMotif: 'tags',
-    wainscot: '#173339',
-    structure: '#10262b',
-    floor: '#10262b',
-    floorEdge: '#1b3a40',
-    night: '#2f6b6e',
-    nightLow: '#163c42',
-    moon: '#f4f0d0',
-    rim: 'rgba(255,236,190,0.95)',
-    lamp: '190,255,230',
-    rimWidth: 2,
-    rimGlow: 0.3,
-    vignetteColor: '4,16,18',
-    halo: 0.22,
-    haloColor: '255,236,190',
-  },
-};
+/** Nuance d'une salle (`; @tint:`) ; inconnue ou absente : celle de la maison. */
+export function strangeTint(value: string | undefined): StrangeTint {
+  return STRANGE_TINTS.find((t) => t === value) ?? 'house';
+}
+
+const STRANGE_PALETTES = Object.fromEntries(
+  STRANGE_TINTS.map((t) => [t, { ...STRANGE_PALETTE, ...STRANGE_TINT_PALETTES[t] }]),
+) as Readonly<Record<StrangeTint, Readonly<ArtPalette>>>;
+
+/** Palette du monde étrange dans cette nuance (calculée une fois). */
+export function strangePalette(tint: StrangeTint): Readonly<ArtPalette> {
+  return STRANGE_PALETTES[tint];
+}

@@ -10,6 +10,7 @@
 ; @lantern: nanny-bed-wardrobe 37 12
 ; @lantern: nanny-bed-rug 68 36
 ; @world: strange
+; @tint: nanny
 ; @mapped: yes
 ; @music: strange
 ; @difficulty: medium

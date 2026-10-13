@@ -9,6 +9,7 @@
 ; @lantern: train-strange-dishes-2 48 11
 ; @lantern: train-strange-dishes-3 84 11
 ; @world: strange
+; @tint: train
 ; @music: strange
 ; @hazard: brokendishes
 ; @difficulty: easy

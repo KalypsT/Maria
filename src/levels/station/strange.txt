@@ -6,6 +6,7 @@
 ; @name: Objets perdus
 ; @lantern: station-strange-pile 47 23
 ; @world: strange
+; @tint: station
 ; @music: strange
 ; @hazard: umbrellas
 ; @difficulty: medium

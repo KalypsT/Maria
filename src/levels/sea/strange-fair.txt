@@ -11,6 +11,7 @@
 ; @lantern: sea-strange-fair-carousel 27 3
 ; @lantern: sea-strange-fair-stall 113 13
 ; @world: strange
+; @tint: sea
 ; @outdoor: yes
 ; @music: strange
 ; @difficulty: hard

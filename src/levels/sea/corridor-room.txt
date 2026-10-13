@@ -4,6 +4,7 @@
 ; le décor change.
 ; @name: Le couloir (la chambre)
 ; @world: strange
+; @tint: house
 ; @music: strange
 ; @difficulty: easy
 ; @ambient: #1d1a2c

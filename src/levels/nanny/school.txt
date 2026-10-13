@@ -10,6 +10,8 @@
 ; @lantern: nanny-school-table 39 14
 ; @lantern: nanny-school-desk 90 19
 ; @world: strange
+; @tint: nanny
+; @wall: stripes
 ; @mapped: yes
 ; @music: strange
 ; @difficulty: medium

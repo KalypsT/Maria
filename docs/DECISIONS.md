@@ -2808,3 +2808,39 @@ Retour d'essai de l'utilisateur (de la station balnéaire à la fin), plan valid
 - **Maintenant** : dans le train, jusqu'à l'arrivée seulement ; ensuite, **au dortoir de la mer, sur la couchette du haut, au-dessus de celle de Céleste**, comme dans le train (au-dessus de la carte postale). Même geste : Agir, elle file vers le sac, une bulle maman. Prise dans le train, elle n'est pas au dortoir.
 - **Tests** : `trainArrival.test.ts` (personne dans les voitures à quai, plus la lettre non plus), `seaNight.test.ts` (la lettre au dortoir tant qu'elle n'est pas prise).
 - **Vérifié dans Chromium** : la lettre sur la couchette du haut du dortoir.
+
+## D-172 — Les mondes étranges : la maquette A choisie, plan en 3 PR ; PR 1 : la base et la gare étrange
+
+- **Choix de l'utilisateur** (parmi les maquettes de D-130) : **A, « le crépuscule, mieux lu »**. Réponses aux questions : **une nuance par niveau** (le violet de base glisse vers la couleur du lieu réel) ; de B et C, **seulement les motifs** (les étiquettes de bagage, les horloges arrêtées), là où ils ont du sens ; le **niveau 7** reçoit A (en dernier, avec la bascule vérifiée), **le niveau 8 garde ses palettes de veilleuse** (l'étrange s'y efface) ; **le halo de Céleste partout**.
+- **Plan validé en 3 PR** : 1. la base et la gare étrange ; 2. les niveaux 1 à 6 (maison, jardin et derrière la haie, quartier, gare, train, mer et ses couloirs) ; 3. le niveau 7 (une nuance « autrefois », les horloges arrêtées dans la gare d'autrefois, les deux couches de la bascule lisibles).
+- **PR 1** :
+  - `STRANGE_PALETTE` devient la maquette A : masses violettes plutôt que noires, liseré turquoise de 2 px surmonté d'une lueur, halo doux turquoise autour de Céleste. Les couleurs de fond de D-36 sont gardées.
+  - **Les nuances** (`src/config/strangeThemes.ts`) : chaque salle étrange choisit la sienne par `; @tint:` (aucune : celle de la maison, le violet de base) ; une nuance remplace des couleurs et propose un motif de mur par défaut. **Le motif d'une salle (`; @wall:`) l'emporte** sur celui de la nuance (avant, en D-130, la palette l'emportait). Le liseré, sa lueur et le halo ne changent jamais d'une nuance à l'autre.
+  - **La gare** (`station`) : violet bleuté, les carreaux du hall ; la tour des objets perdus avec **les étiquettes de bagage** (`; @wall: tags`). Les objets perdus gardent les carreaux (le hall à l'envers).
+  - Les maquettes B et C retirées ; leurs motifs (`clocks`, `tags`) gardés.
+  - DEBUG → « Nuance du monde étrange » : celle de la salle, ou une nuance imposée pour comparer.
+- **Test de contraste** : dans chaque nuance, le liseré doit garder un rapport de contraste supérieur à 7 sur le mur, le sol, la structure et les silhouettes (garde-fou pour la mer, dont la nuance ne doit pas s'approcher du turquoise).
+- **Rien ne touche à la collision, au mouvement ni à la sauvegarde.** Le décor est précalculé : aucun coût par image.
+- **Tests** : `strangeThemes.test.ts`. **Vérifié dans Chromium** : les objets perdus (nuance de la gare et de la maison comparées), la tour (étiquettes), le salon étrange, la gare d'autrefois (niveau 7, en base A), un couloir de la mer.
+
+## D-173 — Les mondes étranges, PR 2 : les nuances des niveaux 1 à 6
+
+- **Suite du plan de D-172.** Chaque salle étrange des niveaux 1 à 6 nomme sa nuance (`; @tint:`) ; un test le vérifie. Les nuances (PLACEHOLDERS, à régler sur téléphone) :
+  - **la maison** (`house`) : le violet de base ; le salon étrange (pois) et le passage d'ombres (planches) gardent leur motif ;
+  - **le jardin** (`garden`), derrière la haie (la ronce, le jardin renversé) : dehors, la nuit glisse vers **une mousse sombre** (ciel et silhouettes vert-de-gris). Une première version, trop proche du gris, a été poussée vers le vert après les captures ;
+  - **le quartier** (`street`), l'école étrange : **un violet grisé, comme de la craie**, les rayures de l'école ;
+  - **la gare** (`station`) : inchangée depuis la PR 1 ;
+  - **le train** (`train`), la cuisine étrange et le train de la vaisselle : **un violet prune**, un papier peint et des lampes **cuivrés**, les carreaux du wagon-restaurant ;
+  - **la mer** (`sea`), la fête engloutie, la vague et les couloirs : **un bleu canard sombre**, loin du turquoise des liserés (le test de contraste le garde), les rayures du centre de vacances.
+- **Les couloirs de la mer** prennent la nuance du lieu qu'ils évoquent : le couloir de la chambre, celle de la maison (et ses pois) ; celui de la gare, celle de la gare (et ses carreaux) ; les autres, celle de la mer. Le couloir change de couleur d'un tour à l'autre, comme son décor (D-105).
+- **Rien ne touche à la collision, au mouvement ni à la sauvegarde.**
+- **Vérifié dans Chromium** : la ronce, le jardin renversé (comparé avec la nuance de la maison), l'école étrange, la cuisine étrange, le train de la vaisselle, la fête engloutie, la vague, le couloir.
+
+## D-174 — Les mondes étranges, PR 3 : le niveau 7 (la nounou)
+
+- **Fin du plan de D-172.** Les 13 salles de la maison de la nounou et de ses îlots prennent la nuance **`nanny`** : autrefois, **un violet passé, un peu poussiéreux**, un papier peint plus chaud (PLACEHOLDER). Elle reste sombre : le souvenir de la bascule (`MEMORY_PALETTE`, clair et chaud) ne se confond pas avec le présent.
+- **Les motifs des îlots** tirés du lieu évoqué : l'école d'autrefois, les rayures ; **la gare d'autrefois, les horloges arrêtées** (le motif de la maquette B) ; le train d'autrefois, les carreaux ; les autres, le papier peint à pois de la maison.
+- **La bascule** : le présent garde le liseré épais, sa lueur et le halo ; le souvenir garde sa palette et son voile chaud ; les contours fantômes de l'autre couche gardent leurs couleurs (`SHIFT_LAYER_VIEW`, inchangé : sa couleur de remplissage ne sert qu'aux salles de tuiles, il n'y en a pas au niveau 7).
+- **Le niveau 8 n'est pas touché** (ses palettes de veilleuse, D-141, D-143) : l'étrange s'y efface.
+- **Rien ne touche à la collision, au mouvement ni à la sauvegarde.**
+- **Tests** : `strangeThemes.test.ts` (toutes les salles étranges ont une nuance sauf au niveau 8 ; les 13 salles de la nounou ; les horloges). **Vérifié dans Chromium** : la maison de la nounou (présent, souvenir, et comparée avec la nuance de la maison), la gare d'autrefois (présent, souvenir), l'école, le train, la cage d'escalier.

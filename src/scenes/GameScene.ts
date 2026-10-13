@@ -134,7 +134,6 @@ import {
   TRAIN_NIGHT_PALETTE,
   MAX_ART_SCALE,
   REAL_PALETTE,
-  STRANGE_PALETTE,
   TRAIN_RIDE,
   CHASE_VIEW,
   SHELL_ART,
@@ -213,7 +212,7 @@ import { AttackPhase } from '../core/combat/PlayerAttack';
 import { DustPool } from './DustPool';
 import { HintView } from './HintView';
 import { CelesteHalo } from './CelesteHalo';
-import { STRANGE_MOCKUP_PALETTES, type StrangeMockup } from '../config/strangeThemes';
+import { strangePalette, strangeTint, type StrangeTint } from '../config/strangeThemes';
 import { HINT } from '../config/hint';
 import { STATS } from '../config/stats';
 import { notebookFigures } from '../core/world/notebookFigures';
@@ -586,7 +585,8 @@ export class GameScene extends Phaser.Scene {
   /** Halo autour de Céleste (D-130), selon la palette. */
   private celesteHalo!: CelesteHalo;
   /** Maquette du monde étrange comparée (D-130, outil de debug) ; null : la palette du jeu. */
-  strangeMockup: StrangeMockup | null = null;
+  /** Nuance du monde étrange imposée (D-172, outil de debug) ; null : celle de la salle. */
+  strangeTintOverride: StrangeTint | null = null;
   /** Phase du coup de bâton au pas précédent : son au début du coup. */
   private lastAttackPhase: number = AttackPhase.Idle;
   /** Zone de la salle courante ; null dans un parcours d'essai (hors partie). */
@@ -2715,9 +2715,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** Aperçu du monde étrange (overlay). */
-  /** Maquette du monde étrange à comparer (D-130, outil de debug) ; null : la palette du jeu. */
-  setStrangeMockup(mockup: StrangeMockup | null): void {
-    this.strangeMockup = mockup;
+  /** Nuance du monde étrange à comparer (D-172, outil de debug) ; null : celle de la salle. */
+  setStrangeTintOverride(tint: StrangeTint | null): void {
+    this.strangeTintOverride = tint;
     this.redrawArt();
   }
 
@@ -3221,11 +3221,9 @@ export class GameScene extends Phaser.Scene {
       return NIGHTLIGHT_SOFT_PALETTE;
     }
     if (this.strangeWorld || isStrangeRoom(this.level)) {
-      // Derrière la haie (D-49) : le monde étrange, dehors (ciel violet au lieu du mur).
-      const mockup = this.strangeMockup;
-      const strange = mockup
-        ? { ...STRANGE_PALETTE, ...STRANGE_MOCKUP_PALETTES[mockup] }
-        : STRANGE_PALETTE;
+      // Derrière la haie (D-49) : le monde étrange, dehors (ciel violet au lieu du mur). La nuance
+      // de son lieu (D-172, `; @tint:`).
+      const strange = strangePalette(this.strangeTintOverride ?? strangeTint(this.level.meta.tint));
       return this.level.meta.outdoor ? { ...strange, outdoor: true } : strange;
     }
     if (this.level.meta.world === 'memory') {

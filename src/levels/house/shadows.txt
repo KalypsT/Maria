@@ -3,6 +3,7 @@
 ; @name: Passage d'ombres
 ; @lantern: shadows-shelf 39 29
 ; @world: strange
+; @tint: house
 ; @difficulty: medium
 ; @ambient: #1a1f2c
 ; @note: Maria (étagère de gauche, colonnes 3-6) : jamais atteignable, même en grimpant.

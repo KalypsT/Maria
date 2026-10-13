@@ -7,6 +7,7 @@
 ; @name: Cuisine étrange
 ; @lantern: train-strange-kitchen-shelf 53 6
 ; @world: strange
+; @tint: train
 ; @music: strange
 ; @hazard: hotplates
 ; @difficulty: medium

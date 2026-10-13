@@ -11,6 +11,7 @@
 ; @lantern: nanny-beach-middle 52 15
 ; @lantern: nanny-beach-end 88 15
 ; @world: strange
+; @tint: nanny
 ; @mapped: yes
 ; @music: strange
 ; @difficulty: medium

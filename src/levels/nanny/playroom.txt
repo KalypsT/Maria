@@ -9,6 +9,7 @@
 ; @lantern: nanny-playroom-entry 6 14
 ; @lantern: nanny-playroom-blocks 35 14
 ; @world: strange
+; @tint: nanny
 ; @music: strange
 ; @difficulty: medium
 ; @ambient: #161830

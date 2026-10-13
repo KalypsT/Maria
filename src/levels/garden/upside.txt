@@ -3,6 +3,7 @@
 ; géants mène à la sortie (saut mural).
 ; @name: Jardin renversé
 ; @world: strange
+; @tint: garden
 ; @outdoor: yes
 ; @difficulty: medium
 ; @ambient: #1a1f2c
