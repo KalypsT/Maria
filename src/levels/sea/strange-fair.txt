@@ -39,6 +39,7 @@
 ; @decor: horsepole 138 1 1 10
 ; @decor: drownedstall 135 14 8 10
 ; @decor: drownedstall 143 7 36 17
+; @lantern: sea-strange-fair-arrival 9 18
 ; Légende : # bordure, t toile et b bois (pleins), ~ eau (ramène au dernier appui), C veilleuse (checkpoint), P repère de départ, 1 sortie (liaisons dans zone.ts).
 ####################################################################################################################################################################################
 #.......................................................................................................ttttt.ttttttttttttttttttttttttttttb........................................#
@@ -58,7 +59,7 @@
 #..................b....b...................................................................bbbbbbbbbbbbbbbbbbbbbbbbbbb................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
 #..................b....b..............................................................................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
 #.......................b..............................................................................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
-#.....P.................b..............................................................................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
+#.....P..C..............b..............................................................................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
 #....tttttttttttt.......b..............................................................................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
 #..tttttttttttttttttttttb..............................................................................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#
 #.tttttttttttttttttt....b..............................................................................................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#

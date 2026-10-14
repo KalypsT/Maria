@@ -131,8 +131,10 @@ lantern garden-terrace:garden-terrace-table
 lantern garden-thorns:garden-thorns-bottom
 lantern garden-thorns:garden-thorns-bush
 lantern garden-tree:garden-tree-foot
+lantern garden-upside:garden-upside-arrival
 lantern garden-vegetables:garden-vegetables-planter
 lantern kitchen:kitchen-counter
+lantern living-strange:living-strange-arrival
 lantern nanny-beach:nanny-beach-dune
 lantern nanny-beach:nanny-beach-end
 lantern nanny-beach:nanny-beach-middle
@@ -166,6 +168,7 @@ lantern nanny-street:nanny-street-houses
 lantern nanny-train:nanny-train-rack
 lantern nanny-train:nanny-train-roof
 lantern playground:playground-bench
+lantern school-strange:school-strange-arrival
 lantern school-strange:school-strange-entry
 lantern school-strange:school-strange-ruler
 lantern school-strange:school-strange-sorter
@@ -182,6 +185,7 @@ lantern sea-port:sea-port-office
 lantern sea-promenade:sea-promenade-balustrade
 lantern sea-rocks:sea-rocks-top
 lantern sea-station:sea-station-quay
+lantern sea-strange-fair:sea-strange-fair-arrival
 lantern sea-strange-fair:sea-strange-fair-carousel
 lantern sea-strange-fair:sea-strange-fair-stall
 lantern sea-strange-wave:sea-strange-wave-deck-1
@@ -198,6 +202,7 @@ lantern station-depot:station-depot-wagon
 lantern station-hall:station-hall-clock
 lantern station-lost:station-lost-counter
 lantern station-platforms:station-platforms-footbridge
+lantern station-strange:station-strange-arrival
 lantern station-strange:station-strange-pile
 lantern station-tower:station-tower-bottom
 lantern station-tower:station-tower-high
@@ -212,6 +217,7 @@ lantern train-restaurant:train-restaurant-table
 lantern train-strange-dishes:train-strange-dishes-1
 lantern train-strange-dishes:train-strange-dishes-2
 lantern train-strange-dishes:train-strange-dishes-3
+lantern train-strange-kitchen:train-strange-kitchen-arrival
 lantern train-strange-kitchen:train-strange-kitchen-shelf
 memory bonnet
 memory bookcase

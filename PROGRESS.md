@@ -8,7 +8,7 @@
 
 - **La console** : le mode Sans fin convient. **Fait : choisir son niveau de départ en mode Niveaux** (D-176 : « ◀ Niveau N ▶ », mètres cumulés, le record compte, « Rejouer » revient au niveau choisi ; les distances des niveaux dans la sauvegarde, sans migration). En attente : essai sur téléphone.
 - **Le cahier** : globalement bien (avis de l'utilisateur). **Fait : le nom des lignes de « Mon voyage » au toucher** (D-177, textes à valider). **Fait : Céleste sur la carte, ses lunettes roses** (D-178).
-- **Les lanternes** (D-179, plan en 2 PR) : **PR 1 faite : la lampe-tempête dans le monde réel, la lumière bleu lune du voyage rapide**, le champignon turquoise gardé dans les mondes étranges. Suite : PR 2, une lanterne à l'entrée de chaque monde étrange.
+- **Les lanternes** (D-179, plan en 2 PR) : **PR 1 faite : la lampe-tempête dans le monde réel, la lumière bleu lune du voyage rapide**, le champignon turquoise gardé dans les mondes étranges. **PR 2 faite : une lanterne à l'arrivée de chaque monde étrange** (six, la règle D-34 retirée). **Le plan des lanternes est complet.** Suite : essai sur téléphone.
 
 **Ouvert, plus tard** :
 
@@ -83,6 +83,11 @@ Les anciens paragraphes « Phase en cours », du plus récent au plus ancien ; l
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les lanternes, PR 2 : une lanterne à l'arrivée de chaque monde étrange (D-179)
+
+- Six lanternes d'arrivée (salon étrange, jardin renversé, école étrange, objets perdus, cuisine étrange, fête engloutie), 3 tuiles devant Céleste ; un évanouissement y ramène (la règle D-34 retirée). Noms figés dans la sauvegarde ; `docs/LANTERNES.md` à jour (103 lanternes).
+- [ ] À vérifier sur téléphone : la lanterne se voit-elle à l'arrivée (dans le noir du fondu) ? le monde étrange garde-t-il assez de tension ?
 
 ### Les lanternes, PR 1 : la lampe-tempête, la lumière bleu lune du voyage (D-179)
 
