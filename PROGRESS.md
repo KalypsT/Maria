@@ -8,6 +8,7 @@
 
 - **La console** : le mode Sans fin convient. **Fait : choisir son niveau de départ en mode Niveaux** (D-176 : « ◀ Niveau N ▶ », mètres cumulés, le record compte, « Rejouer » revient au niveau choisi ; les distances des niveaux dans la sauvegarde, sans migration). En attente : essai sur téléphone.
 - **Le cahier** : globalement bien (avis de l'utilisateur). **Fait : le nom des lignes de « Mon voyage » au toucher** (D-177, textes à valider). **Fait : Céleste sur la carte, ses lunettes roses** (D-178).
+- **L'avancement du voyage** (D-180, plan en 3 PR) : un pourcentage dans le cahier (moitié l'histoire, moitié les trouvailles), les jalons séparés des trouvailles, le hochet et la petite cuillère de Maria. **PR 1 faite : le système.** Suite : PR 2, le cahier ; PR 3, le hochet et la cuillère.
 - **Les lanternes** (D-179, plan en 2 PR) : **PR 1 faite : la lampe-tempête dans le monde réel, la lumière bleu lune du voyage rapide**, le champignon turquoise gardé dans les mondes étranges. **PR 2 faite : une lanterne à l'arrivée de chaque monde étrange** (six, la règle D-34 retirée). **Le plan des lanternes est complet.** Suite : essai sur téléphone.
 
 **Ouvert, plus tard** :
@@ -83,6 +84,10 @@ Les anciens paragraphes « Phase en cours », du plus récent au plus ancien ; l
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### L'avancement du voyage, PR 1 : le système (D-180)
+
+- `journeyProgress` : 20 étapes de l'histoire (50 %) et les trouvailles, chacune autant (50 %) ; 100 % seulement à la toute fin. Les jalons (le monde étrange) comptent dans l'histoire. DEBUG → « Trésors » montre le détail.
 
 ### Les lanternes, PR 2 : une lanterne à l'arrivée de chaque monde étrange (D-179)
 
