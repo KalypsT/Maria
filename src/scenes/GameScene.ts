@@ -198,7 +198,7 @@ import { arcadeGame, arcadeLevel, arcadePhase } from '../core/arcade/arcade';
 import { consoleCards } from '../core/arcade/consoleMenu';
 import { monsterChaseParams, monsterEndlessParams } from '../core/arcade/monster';
 import { ArcadeEvent, ArcadePhase, ArcadeRun } from '../core/arcade/run';
-import { arcadeRecord } from '../core/save/arcade';
+import { arcadeChoosable, arcadeRecord, arcadeStartTiles } from '../core/save/arcade';
 import { touchesHazard } from '../core/physics/gridCollision';
 import { isRecordSlot } from '../config/records';
 import { isMemory } from '../config/memories';
@@ -449,13 +449,13 @@ export class GameScene extends Phaser.Scene {
    * records sont sauvegardés).
    */
   private readonly consoleScreen = new ConsoleScreen({
-    play: (game, mode) => {
-      this.startArcade(game, mode);
+    play: (game, mode, level) => {
+      this.startArcade(game, mode, 0, level);
     },
     replay: () => {
       const run = this.arcadeRun;
       if (run) {
-        this.startArcade(run.game, run.mode);
+        this.startArcade(run.game, run.mode, 0, run.firstLevel);
       }
     },
     menu: () => {
@@ -3465,11 +3465,19 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Une partie de la console, depuis le niveau 1 ; en mode Sans fin, depuis le premier morceau (le
-   * debug peut partir d'un autre, `firstChunk`).
+   * Une partie de la console, depuis le niveau `level` (1, ou un niveau déjà atteint dont la
+   * distance de départ est connue, D-176) ; en mode Sans fin, depuis le premier morceau (le debug
+   * peut partir d'un autre, `firstChunk`).
    */
-  private startArcade(game: ArcadeGameId, mode: ArcadeMode, firstChunk = 0): void {
-    this.arcadeRun = new ArcadeRun(game, mode, PHYSICS_STEP_HZ);
+  private startArcade(game: ArcadeGameId, mode: ArcadeMode, firstChunk = 0, level = 1): void {
+    const run = new ArcadeRun(game, mode, PHYSICS_STEP_HZ);
+    const arcade = this.session.data.arcade;
+    const start =
+      level <= arcadeChoosable(arcade, game) ? arcadeStartTiles(arcade, game, level) : null;
+    if (start !== null) {
+      run.startFrom(level, start);
+    }
+    this.arcadeRun = run;
     this.arcadeUp = arcadeGame(game)?.axis === 'up';
     this.consolePlayed = true;
     this.consoleScreen.showPlay();
@@ -3712,7 +3720,7 @@ export class GameScene extends Phaser.Scene {
     }
     this.stopEndless();
     // Le niveau le plus haut atteint ouvre le mode Sans fin (D-167).
-    void this.session.recordArcadeLevel(run.game, run.level);
+    void this.session.recordArcadeLevel(run.game, run.level, run.tilesDone);
     this.setRoom(parseAsciiLevel(level.id, level.text), null, null);
     // Le monstre (D-166) : la poursuite des boss, qui part plus tôt et plus près.
     const chase = this.level.chase;

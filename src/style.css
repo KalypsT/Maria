@@ -1792,6 +1792,36 @@ body {
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
+.console-mode-column {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+  max-width: 240px;
+}
+.console-mode-column .console-mode {
+  max-width: none;
+}
+/* Choisir son niveau de départ (D-176). */
+.console-picker {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+.console-button.console-step {
+  min-width: 44px;
+  min-height: 40px;
+  padding: 4px 10px;
+}
+.console-step:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.console-level {
+  font-weight: 700;
+}
 .console-mode:disabled {
   opacity: 0.5;
   cursor: default;

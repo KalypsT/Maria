@@ -6,7 +6,7 @@
 
 **Focus suivant** (choix de l'utilisateur) :
 
-- **La console** : le mode Sans fin convient ; à ajouter, dans le mode Niveaux, **choisir le niveau à jouer** parmi ceux déjà débloqués. Plan à valider.
+- **La console** : le mode Sans fin convient. **Fait : choisir son niveau de départ en mode Niveaux** (D-176 : « ◀ Niveau N ▶ », mètres cumulés, le record compte, « Rejouer » revient au niveau choisi ; les distances des niveaux dans la sauvegarde, sans migration). En attente : essai sur téléphone.
 - **Le cahier** : pages et contenu à revalider avec l'utilisateur (D-157).
 - **Les lanternes** : l'utilisateur a une idée de modification (questions 3 et 4 de `docs/LANTERNES.md` encore ouvertes).
 
@@ -83,6 +83,13 @@ Les anciens paragraphes « Phase en cours », du plus récent au plus ancien ; l
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### La console : choisir son niveau de départ (D-176)
+
+- Mode Niveaux : « ◀ Niveau N ▶ » sous le bouton, parmi les niveaux atteints dont la distance est connue ; la partie part du niveau choisi, le compteur des mètres cumulés, le record compte ; « Rejouer » revient au niveau choisi.
+- La sauvegarde de la console garde la distance au début de chaque niveau (`arcade.done`, facultative, sans migration). Les parties d'avant n'en ont pas : seul le niveau 1 au début, puis chaque niveau atteint de nouveau s'ajoute.
+- Vérifié dans Chromium : l'écran du mode et le sélecteur.
+- [ ] À vérifier sur téléphone : le sélecteur (taille des flèches au doigt), partir d'un niveau, le compteur, le record.
 
 ### Les images des trésors, des pochettes et des courts souvenirs (D-170)
 
@@ -2179,7 +2186,7 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. La console : choisir le niveau à jouer dans le mode Niveaux (plan à valider).
+1. ~~La console : choisir le niveau à jouer~~ (fait, D-176).
 2. Le cahier : revue avec l'utilisateur.
 3. Les lanternes : l'idée de l'utilisateur.
 4. Les sons au fil de l'eau (`docs/BRUITAGES.md`, liste par priorité), puis la diffusion privée.

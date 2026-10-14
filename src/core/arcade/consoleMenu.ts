@@ -1,5 +1,5 @@
 import { ARCADE_ENDLESS, ARCADE_GAMES, ArcadeMode, type ArcadeGame } from '../../config/arcade';
-import { arcadeReached, arcadeRecord, type ArcadeSave } from '../save/arcade';
+import { arcadeChoosable, arcadeReached, arcadeRecord, type ArcadeSave } from '../save/arcade';
 import { ARCADE_READY, ENDLESS_READY, unlockedArcadeGames } from './arcade';
 
 /** Une case du menu de la console (D-166). */
@@ -19,6 +19,8 @@ export interface ConsoleCard {
   readonly endlessOpen: boolean;
   /** Record du mode Sans fin (m). */
   readonly endlessRecord: number;
+  /** Le niveau le plus haut qu'on peut choisir en mode Niveaux (D-176 ; 1 : seulement le premier). */
+  readonly maxLevel: number;
 }
 
 /** Les huit cases du menu, dans l'ordre, d'après la partie. */
@@ -37,6 +39,7 @@ export function consoleCards(
       endlessReady: ENDLESS_READY.includes(game.id),
       endlessOpen: arcadeReached(arcade, game.id) >= ARCADE_ENDLESS.unlockLevel,
       endlessRecord: arcadeRecord(arcade, game.id, ArcadeMode.Endless),
+      maxLevel: arcadeChoosable(arcade, game.id),
     };
     return { ...card, isNew: card.unlocked && card.ready && !arcade.seen.includes(game.id) };
   });

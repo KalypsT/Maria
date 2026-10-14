@@ -9,16 +9,26 @@ export interface ArcadeRecords {
 /**
  * La console dans la sauvegarde (D-166) : les records, les jeux déjà vus (l'étincelle d'un nouveau
  * jeu), et le niveau le plus haut atteint en mode Niveaux par jeu (D-167 : il ouvre le mode Sans
- * fin). Absente des sauvegardes plus anciennes, ou sans `reached` : vide, sans migration.
+ * fin), et la distance déjà parcourue au début de chaque niveau (D-176 : elle permet de partir d'un
+ * niveau choisi, les mètres cumulés). Absente des sauvegardes plus anciennes, ou sans `reached` ni
+ * `done` : vide, sans migration.
  */
 export interface ArcadeSave {
   records: Partial<Record<ArcadeGameId, ArcadeRecords>>;
   seen: ArcadeGameId[];
   reached: Partial<Record<ArcadeGameId, number>>;
+  /**
+   * Par jeu, `done[i]` : les tuiles des niveaux 1 à i + 1 (ce que le compteur a parcouru au début du
+   * niveau i + 2), croissantes. Écrite au début de chaque niveau, seulement si elle s'allonge.
+   */
+  done: Partial<Record<ArcadeGameId, number[]>>;
 }
 
 /** Niveau atteint le plus grand gardé : une valeur aberrante de la sauvegarde est bornée. */
 const MAX_REACHED = 100_000;
+
+/** Distances gardées par jeu (D-176) : au-delà, on ne choisit plus son niveau plus loin. */
+const MAX_DONE = 1000;
 
 const GAME_IDS: ReadonlySet<string> = new Set(ARCADE_GAMES.map((game) => game.id));
 
@@ -33,7 +43,7 @@ function meters(value: unknown): number {
 }
 
 export function createArcade(): ArcadeSave {
-  return { records: {}, seen: [], reached: {} };
+  return { records: {}, seen: [], reached: {}, done: {} };
 }
 
 /**
@@ -68,6 +78,26 @@ export function sanitizeArcade(raw: unknown): ArcadeSave {
       }
     }
   }
+  const done = data['done'];
+  if (typeof done === 'object' && done !== null && !Array.isArray(done)) {
+    for (const [id, value] of Object.entries(done as Record<string, unknown>)) {
+      if (!isGameId(id) || !Array.isArray(value)) {
+        continue;
+      }
+      // Gardées jusqu'à la première valeur abîmée : la suite ne serait plus sûre.
+      const kept: number[] = [];
+      for (const tiles of value.slice(0, MAX_DONE)) {
+        const last = kept[kept.length - 1] ?? 0;
+        if (typeof tiles !== 'number' || !Number.isInteger(tiles) || tiles <= last) {
+          break;
+        }
+        kept.push(tiles);
+      }
+      if (kept.length > 0) {
+        arcade.done[id] = kept;
+      }
+    }
+  }
   return arcade;
 }
 
@@ -84,6 +114,47 @@ export function reachArcadeLevel(arcade: ArcadeSave, game: ArcadeGameId, level: 
   }
   arcade.reached[game] = value;
   return true;
+}
+
+/**
+ * Le niveau `level` commence en mode Niveaux, `doneTiles` déjà parcourues (D-176) : la distance est
+ * gardée si c'est la suivante connue. Retourne true si elle est ajoutée.
+ */
+export function noteArcadeStart(
+  arcade: ArcadeSave,
+  game: ArcadeGameId,
+  level: number,
+  doneTiles: number,
+): boolean {
+  const done = arcade.done[game] ?? [];
+  const last = done[done.length - 1] ?? 0;
+  const next = level === done.length + 2 && done.length < MAX_DONE;
+  if (!next || !Number.isInteger(doneTiles) || doneTiles <= last) {
+    return false;
+  }
+  arcade.done[game] = [...done, doneTiles];
+  return true;
+}
+
+/** Tuiles déjà parcourues au début du niveau `level` (D-176) ; null : inconnues. */
+export function arcadeStartTiles(
+  arcade: Readonly<ArcadeSave>,
+  game: ArcadeGameId,
+  level: number,
+): number | null {
+  if (level === 1) {
+    return 0;
+  }
+  return arcade.done[game]?.[level - 2] ?? null;
+}
+
+/**
+ * Le niveau le plus haut qu'on peut choisir (D-176) : atteint, et dont la distance de départ est
+ * connue ; au moins 1.
+ */
+export function arcadeChoosable(arcade: Readonly<ArcadeSave>, game: ArcadeGameId): number {
+  const known = (arcade.done[game]?.length ?? 0) + 1;
+  return Math.max(1, Math.min(arcadeReached(arcade, game), known));
 }
 
 /** Record d'un jeu dans un mode (0 : jamais joué). */

@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { ARCADE, ArcadeGameId, ArcadeMode } from '../src/config/arcade';
 import {
+  arcadeChoosable,
   arcadeReached,
+  arcadeStartTiles,
   arcadeRecord,
   createArcade,
+  noteArcadeStart,
   reachArcadeLevel,
   sanitizeArcade,
   submitArcadeScore,
@@ -55,12 +58,14 @@ describe('la console dans la sauvegarde', () => {
       },
       seen: ['cables', 'wind'],
       reached: { jumps: 7, climb: 100_000 },
+      done: {},
     });
     // Une console d'avant le mode Sans fin (D-167), sans `reached`.
     expect(sanitizeArcade({ records: {}, seen: ['jumps'] })).toEqual({
       records: {},
       seen: ['jumps'],
       reached: {},
+      done: {},
     });
   });
 
@@ -69,6 +74,7 @@ describe('la console dans la sauvegarde', () => {
     submitArcadeScore(data.arcade, ArcadeGameId.Cables, ArcadeMode.Levels, 37);
     data.arcade.seen.push(ArcadeGameId.Cables);
     reachArcadeLevel(data.arcade, ArcadeGameId.Cables, 6);
+    noteArcadeStart(data.arcade, ArcadeGameId.Cables, 2, 40);
     const reloaded = deserializeSave(serializeSave(data));
     expect(reloaded.ok && reloaded.data.arcade).toEqual(data.arcade);
     const code = decodeSaveCode(encodeSaveCode(data));
@@ -110,5 +116,47 @@ describe('la console dans la sauvegarde', () => {
     expect((await manager.load()).data?.arcade.records).toEqual({
       cables: { levels: 20, endless: 0 },
     });
+  });
+
+  it('choisir son niveau (D-176) : la distance au début de chaque niveau, mètres cumulés', async () => {
+    const arcade = createArcade();
+    const id = ArcadeGameId.Jumps;
+    expect(arcadeChoosable(arcade, id)).toBe(1);
+    expect(arcadeStartTiles(arcade, id, 1)).toBe(0);
+    expect(arcadeStartTiles(arcade, id, 2)).toBeNull();
+    // Seulement la suivante connue, et croissante.
+    expect(noteArcadeStart(arcade, id, 1, 0)).toBe(false);
+    expect(noteArcadeStart(arcade, id, 3, 90)).toBe(false);
+    expect(noteArcadeStart(arcade, id, 2, 40)).toBe(true);
+    expect(noteArcadeStart(arcade, id, 2, 40)).toBe(false);
+    expect(noteArcadeStart(arcade, id, 3, 30)).toBe(false);
+    expect(noteArcadeStart(arcade, id, 3, 90)).toBe(true);
+    expect(arcade.done).toEqual({ jumps: [40, 90] });
+    expect(arcadeStartTiles(arcade, id, 3)).toBe(90);
+    // Choisi : atteint, et sa distance connue.
+    reachArcadeLevel(arcade, id, 2);
+    expect(arcadeChoosable(arcade, id)).toBe(2);
+    reachArcadeLevel(arcade, id, 9);
+    expect(arcadeChoosable(arcade, id)).toBe(3);
+
+    // Lue jusqu'à la première valeur abîmée.
+    expect(
+      sanitizeArcade({
+        records: {},
+        seen: [],
+        done: { jumps: [40, 90, 80, 120], climb: 'abîmé', cables: [0], inconnu: [5] },
+      }).done,
+    ).toEqual({ jumps: [40, 90] });
+
+    let clock = 0;
+    const manager = new SaveManager(new MemorySaveStorage());
+    const session = new SaveSession(manager, createNewSave('bedroom', 0), () => ++clock);
+    await session.recordArcadeLevel(id, 1, 0);
+    await session.recordArcadeLevel(id, 2, 40);
+    expect(clock).toBe(2);
+    // Repartir du niveau 2 : rien de nouveau.
+    await session.recordArcadeLevel(id, 2, 40);
+    expect(clock).toBe(2);
+    expect((await manager.load()).data?.arcade.done).toEqual({ jumps: [40] });
   });
 });

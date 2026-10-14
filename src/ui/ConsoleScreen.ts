@@ -30,6 +30,11 @@ function icon(svg: string): SVGSVGElement {
   return wrap.firstElementChild as SVGSVGElement;
 }
 
+/** Sous le titre du mode Niveaux : d'où la partie part. */
+function startLabel(level: number): string {
+  return level > 1 ? `Depuis le niveau ${String(level)}` : 'Niveau 1, 2, 3…';
+}
+
 function button(text: string, className: string): HTMLButtonElement {
   const b = document.createElement('button');
   b.type = 'button';
@@ -39,9 +44,9 @@ function button(text: string, className: string): HTMLButtonElement {
 }
 
 export interface ConsoleHandlers {
-  /** Un jeu et un mode choisis : la partie commence. */
-  readonly play: (game: ArcadeGameId, mode: ArcadeMode) => void;
-  /** Rejouer la même partie depuis le niveau 1. */
+  /** Un jeu et un mode choisis : la partie commence (mode Niveaux : au niveau `level`, D-176). */
+  readonly play: (game: ArcadeGameId, mode: ArcadeMode, level: number) => void;
+  /** Rejouer la même partie depuis son niveau de départ. */
   readonly replay: () => void;
   /** Le menu de la console (après une partie). */
   readonly menu: () => void;
@@ -74,6 +79,8 @@ export class ConsoleScreen {
   private cards: readonly ConsoleCard[] = [];
   private shownHud = '';
   private shownBanner: string | null = null;
+  /** Le niveau de départ choisi pour chaque jeu (D-176), le temps que la console reste allumée. */
+  private readonly chosenLevel = new Map<ArcadeGameId, number>();
 
   constructor(
     private readonly handlers: ConsoleHandlers,
@@ -178,10 +185,16 @@ export class ConsoleScreen {
     title.append(icon(GAME_ICONS[card.game.id]), card.game.name);
     const row = document.createElement('div');
     row.className = 'console-modes';
+    const id = card.game.id;
+    const maxLevel = Math.max(1, card.maxLevel);
+    let level = Math.min(this.chosenLevel.get(id) ?? 1, maxLevel);
+    const subtitle = Object.assign(document.createElement('span'), {
+      textContent: startLabel(level),
+    });
     const levels = button('', 'console-mode');
     levels.append(
       Object.assign(document.createElement('strong'), { textContent: 'Niveaux' }),
-      Object.assign(document.createElement('span'), { textContent: 'Niveau 1, 2, 3…' }),
+      subtitle,
       Object.assign(document.createElement('span'), {
         className: 'console-note',
         textContent: card.record > 0 ? `Record ★ ${String(card.record)} m` : 'Record —',
@@ -189,8 +202,34 @@ export class ConsoleScreen {
     );
     levels.addEventListener('click', () => {
       this.handlers.beep('select');
-      this.handlers.play(card.game.id, ArcadeMode.Levels);
+      this.handlers.play(id, ArcadeMode.Levels, level);
     });
+    // Choisir son niveau de départ (D-176) : parmi les niveaux déjà atteints.
+    const picker = document.createElement('div');
+    picker.className = 'console-picker';
+    const less = button('◀', 'console-button console-step');
+    const more = button('▶', 'console-button console-step');
+    less.setAttribute('aria-label', 'Niveau précédent');
+    more.setAttribute('aria-label', 'Niveau suivant');
+    const shown = Object.assign(document.createElement('span'), { className: 'console-level' });
+    const pick = (next: number): void => {
+      level = Math.max(1, Math.min(next, maxLevel));
+      this.chosenLevel.set(id, level);
+      shown.textContent = `Niveau ${String(level)}`;
+      subtitle.textContent = startLabel(level);
+      less.disabled = level <= 1;
+      more.disabled = level >= maxLevel;
+    };
+    pick(level);
+    less.addEventListener('click', () => {
+      this.handlers.beep('move');
+      pick(level - 1);
+    });
+    more.addEventListener('click', () => {
+      this.handlers.beep('move');
+      pick(level + 1);
+    });
+    picker.append(less, shown, more);
     // Le mode Sans fin (D-167) : ses morceaux prêts, et le niveau voulu atteint en mode Niveaux.
     const open = endlessPlayable(card);
     const endless = button('', 'console-mode');
@@ -211,15 +250,24 @@ export class ConsoleScreen {
     );
     endless.addEventListener('click', () => {
       this.handlers.beep('select');
-      this.handlers.play(card.game.id, ArcadeMode.Endless);
+      this.handlers.play(id, ArcadeMode.Endless, 1);
     });
-    row.append(levels, endless);
+    const column = document.createElement('div');
+    column.className = 'console-mode-column';
+    const choosing = maxLevel > 1;
+    column.append(levels, ...(choosing ? [picker] : []));
+    row.append(column, endless);
     const back = button('Retour', 'console-button');
     back.addEventListener('click', () => {
       this.back();
     });
     this.panel.replaceChildren(title, row, back);
-    this.open('mode', open ? [levels, endless, back] : [levels, back], 0);
+    const focus = [
+      ...(choosing ? [less, levels, more] : [levels]),
+      ...(open ? [endless] : []),
+      back,
+    ];
+    this.open('mode', focus, focus.indexOf(levels));
   }
 
   /** L'écran de fin : le score, le record (ou « Nouveau record ! »). */
