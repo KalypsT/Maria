@@ -466,6 +466,8 @@ export const DECOR_KINDS: Readonly<
   lostcounter: { furniture: true },
   /** Étagères des objets perdus (planches traversables). */
   lostshelf: { furniture: true },
+  /** Une place libre sur une étagère des objets perdus (D-180) : un trésor y est posé. Invisible. */
+  shelfgap: { furniture: false },
   /** Haute armoire de rangement (pleine), sur un haut piètement ouvert (D-135). */
   tallcabinet: { furniture: true },
   /** Casiers de consigne (pleins), une lueur turquoise tout en haut. */

@@ -87,6 +87,14 @@ describe('l’aire de jeux (D-61)', () => {
     },
   );
 
+  it(
+    'le hochet de Maria (D-180) : en haut de la cage à écureuil, facile',
+    { timeout: TIMEOUT },
+    () => {
+      expect(reachable(inPlayground(easy), arrival()).has(nodeAt('playground', 34, 18))).toBe(true);
+    },
+  );
+
   it('ne coince jamais Céleste : la maison reste atteignable', { timeout: TIMEOUT }, () => {
     const safe = zoneGraph(true, roomDifficulty, 2, true, OPEN);
     const all = reachable(zoneGraph(true, null, 2, true, OPEN), arrival());

@@ -36,6 +36,21 @@ const STRANGE_ARRIVAL: StoryStep = {
 
 const TRIGGERS: StoryTrigger[] = [
   {
+    // La petite cuillère de Maria (D-180), perdue parmi les choses perdues, sur une étagère du
+    // bureau des objets trouvés : on y monte depuis le comptoir. Agir la prend.
+    id: 'take-spoon',
+    room: 'station-lost',
+    on: 'interact',
+    area: { col: 17, row: 17, w: 5, h: 3 },
+    mark: { col: 19, row: 18 },
+    when: { none: [F.SpoonTaken] },
+    lock: true,
+    steps: [
+      { do: 'flag', id: F.SpoonTaken },
+      { do: 'memory', id: 'spoon' },
+    ],
+  },
+  {
     // Le disque perdu (D-121) : Agir le ramasse ; il ira sur le tourne-disque du grenier.
     id: 'take-record-adventures',
     room: 'station-lost',
@@ -232,6 +247,15 @@ const OMENS: StoryOmen[] = [
 ];
 
 const PROPS: StoryProp[] = [
+  {
+    id: 'spoon',
+    room: 'station-lost',
+    kind: 'spoon',
+    col: 19,
+    row: 19,
+    instant: true,
+    when: { none: [F.SpoonTaken] },
+  },
   // Le disque perdu (D-121), sur l'étagère à chapeaux en haut du mur de gauche.
   {
     id: 'record-adventures',

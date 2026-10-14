@@ -56,7 +56,9 @@ flag living.vanished
 flag maria.bonnet
 flag maria.bottle
 flag maria.headband
+flag maria.rattle
 flag maria.slipper
+flag maria.spoon
 flag memory.letter
 flag memory.postcard
 flag memory.ticket
@@ -234,6 +236,7 @@ memory photo
 memory pink-kitchen
 memory plant
 memory postcard
+memory rattle
 memory record-adventures
 memory record-early
 memory record-lullaby
@@ -241,6 +244,7 @@ memory roger
 memory school-drawing
 memory shape-box
 memory slipper
+memory spoon
 memory ticket
 memory watering-can
 memory white-cloth

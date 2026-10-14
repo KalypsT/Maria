@@ -37,6 +37,18 @@ function hash(x: number, y: number): number {
 }
 
 /** Ligne (tuiles) du premier sol plein sous (x px, ligne), ou la hauteur de la salle. */
+/** Une chose perdue posée en `x` sur la planche de `y` tombe dans une place libre (D-180). */
+function inShelfGap(a: ArtContext, x: number, y: number): boolean {
+  return a.level.decor.some(
+    (d) =>
+      d.kind === 'shelfgap' &&
+      x + 7 > d.col * T &&
+      x < (d.col + d.width) * T &&
+      y >= (d.row - 1) * T &&
+      y <= (d.row + d.height) * T,
+  );
+}
+
 function groundRow(a: ArtContext, x: number, row: number): number {
   const col = Math.floor(x / T);
   for (let r = Math.floor(row); r < a.level.height; r++) {
@@ -1034,9 +1046,15 @@ export function stationDrawers({ tileShape }: ShapeTools): Record<string, Drawer
         ctx.fill();
         tileShape(a, { x, y: row * T, w, h: T }, WOOD, WOOD_LIGHT);
         for (let k = 0; k * 9 + 2 < w - 4; k++) {
-          lostThing(ctx, x + 2 + k * 9, row * T, Math.floor(hash(x + k, row) * 5) + k);
+          const tx = x + 2 + k * 9;
+          if (!inShelfGap(a, tx, row * T)) {
+            lostThing(ctx, tx, row * T, Math.floor(hash(x + k, row) * 5) + k);
+          }
         }
       }
+    },
+    shelfgap() {
+      // Une place libre sur une étagère (D-180) : rien à dessiner, `lostshelf` la laisse vide.
     },
     tallcabinet(a, r) {
       const { ctx } = a;

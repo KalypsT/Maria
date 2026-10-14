@@ -22,6 +22,7 @@
 ; @decor: desklamp 15 22 1 2
 ; @decor: dust 6 10 14 13
 ; @decor: lostshelf 19 8 8 13
+; @decor: shelfgap 19 20 1 1
 ; @decor: tallcabinet 31 6 2 18
 ; @decor: lockers 38 10 5 18
 ; @decor: hatshelf 33 19 2 1

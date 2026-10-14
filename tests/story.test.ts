@@ -843,6 +843,8 @@ describe('quelques mois plus tard (D-43)', () => {
       { room: 'staircase', box: standing(26, 24), id: 'bottle', prop: 'bottle' },
       { room: 'bedroom', box: standing(15, 15), id: 'headband', prop: 'headband' },
       { room: 'garden-tree', box: standing(27, 39), id: 'bonnet', prop: 'bonnet-grass' },
+      { room: 'playground', box: standing(34, 18), id: 'rattle', prop: 'rattle' },
+      { room: 'station-lost', box: standing(19, 19), id: 'spoon', prop: 'spoon' },
     ];
     d.setFlags([...END, F.GardenTreehouse, F.HedgeEntered, F.HedgeDone, F.Grown]);
     for (const c of cases) {
