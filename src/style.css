@@ -1184,6 +1184,19 @@ body {
   color: var(--warning-ink);
 }
 
+/* Le mode debug dans le jeu (D-182) : un petit mot au crayon, tout en bas, sans cadre. */
+.settings button.settings-discreet {
+  display: block;
+  min-height: 0;
+  margin: 18px 0 0 auto;
+  padding: 2px 4px;
+  border: none;
+  background: none;
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+  opacity: 0.55;
+}
+
 /* Les trésors (D-162) : deux colonnes, une couleur par famille. */
 .treasures {
   position: relative;
