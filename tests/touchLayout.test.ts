@@ -131,6 +131,21 @@ describe('computeTouchLayout', () => {
     expect(big.joystickRadius).toBeGreaterThan(small.joystickRadius);
   });
 
+  it('le joystick fantôme attend dans sa zone, en entier dans l’écran (D-182)', () => {
+    for (const { w, h } of SCREENS) {
+      for (const insets of [NO_INSETS, NOTCH]) {
+        const layout = computeTouchLayout(w, h, insets, DEFAULT_CONTROL_SETTINGS, true, true);
+        const { x, y } = layout.joystickRest;
+        const r = layout.joystickRadius;
+        const zone = layout.joystickZone;
+        expect(x - r).toBeGreaterThanOrEqual(zone.left);
+        expect(x + r).toBeLessThanOrEqual(zone.right);
+        expect(y - r).toBeGreaterThanOrEqual(zone.top);
+        expect(y + r).toBeLessThanOrEqual(h - insets.bottom);
+      }
+    }
+  });
+
   it('garde une zone de joystick à gauche, hors bande de sécurité iOS, sans recouvrir les boutons', () => {
     for (const { w, h } of SCREENS) {
       const layout = computeTouchLayout(

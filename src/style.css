@@ -198,6 +198,29 @@ body {
   display: block;
 }
 
+/* Joystick fantôme (D-182) : pâle, à sa place, le bouton qui glisse doucement d'un côté à l'autre,
+   jusqu'au premier déplacement. */
+.touch-joystick-base.ghost,
+.touch-joystick-knob.ghost {
+  display: block;
+  opacity: calc(var(--touch-opacity) * 0.55);
+}
+
+.touch-joystick-knob.ghost {
+  animation: joystick-ghost 2.4s ease-in-out infinite;
+}
+
+@keyframes joystick-ghost {
+  0%,
+  100% {
+    translate: -14px 0;
+  }
+
+  50% {
+    translate: 14px 0;
+  }
+}
+
 .touch-joystick-base {
   border: 2px solid var(--chalk);
   background: var(--chalk-soft);
@@ -1655,7 +1678,8 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .bag-spark,
-  .touch-badge {
+  .touch-badge,
+  .touch-joystick-knob.ghost {
     animation: none;
   }
 

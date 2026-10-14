@@ -38,6 +38,12 @@ export class TouchSource implements InputSource {
   private showShift = false;
   private shiftDimmed = false;
   private shownJoystick = false;
+  /**
+   * Joystick fantôme (D-182) : au repos, pâle, à sa place, jusqu'au premier déplacement de la
+   * session ; le joystick flottant n'apparaît sinon que sous le pouce.
+   */
+  private ghost = true;
+  private shownGhost = false;
   private shownKnobX = Number.NaN;
   private shownKnobY = Number.NaN;
   private shownBaseX = Number.NaN;
@@ -275,6 +281,7 @@ export class TouchSource implements InputSource {
     this.shownMask = -1; // force la mise à jour des états au prochain rendu
     this.shownBaseX = Number.NaN;
     this.shownKnobX = Number.NaN;
+    this.shownGhost = !this.ghost; // le fantôme se replace au prochain rendu
   }
 
   /** Met à jour le DOM seulement quand quelque chose change (pas d'écriture inutile par image). */
@@ -287,10 +294,28 @@ export class TouchSource implements InputSource {
       }
     }
     const stick = this.controller.joystick;
+    if (this.controller.joystickUsed) {
+      this.ghost = false;
+    }
     if (stick.active !== this.shownJoystick) {
       this.shownJoystick = stick.active;
       this.joystickBase.classList.toggle('visible', stick.active);
       this.joystickKnob.classList.toggle('visible', stick.active);
+      this.shownBaseX = Number.NaN;
+      this.shownKnobX = Number.NaN;
+    }
+    const ghost = this.ghost && !stick.active;
+    if (ghost !== this.shownGhost) {
+      this.shownGhost = ghost;
+      this.joystickBase.classList.toggle('ghost', ghost);
+      this.joystickKnob.classList.toggle('ghost', ghost);
+      if (ghost) {
+        const { x, y } = this.layout.joystickRest;
+        const r = this.layout.joystickRadius;
+        const half = r * 0.425;
+        this.joystickBase.style.transform = `translate(${x - r}px, ${y - r}px)`;
+        this.joystickKnob.style.transform = `translate(${x - half}px, ${y - half}px)`;
+      }
     }
     if (stick.active) {
       if (stick.baseX !== this.shownBaseX || stick.baseY !== this.shownBaseY) {

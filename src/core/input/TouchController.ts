@@ -26,6 +26,8 @@ export class TouchController {
   readonly joystick: FloatingJoystick;
   /** Boutons maintenus lors de la dernière lecture (masque de `BUTTON_BIT`). */
   heldMask = 0;
+  /** Le joystick a servi au moins une fois (le joystick fantôme s'en va, D-182). */
+  joystickUsed = false;
   private layout: TouchLayout;
   private readonly ids = new Int32Array(MAX_POINTERS).fill(-1);
   private readonly roles = new Uint8Array(MAX_POINTERS);
@@ -73,6 +75,7 @@ export class TouchController {
     } else if (!this.joystick.active && inRect(this.layout.joystickZone, x, y)) {
       role = Role.Joystick;
       this.joystick.begin(x, y);
+      this.joystickUsed = true;
     }
     if (role === Role.None) {
       return false;

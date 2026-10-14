@@ -29,6 +29,11 @@ export interface TouchLayout {
   /** Zone où un doigt fait apparaître le joystick. */
   readonly joystickZone: Rect;
   readonly joystickRadius: number;
+  /**
+   * Où le joystick fantôme attend le premier déplacement (D-182) : en bas à gauche de sa zone, là
+   * où le pouce se pose naturellement.
+   */
+  readonly joystickRest: { readonly x: number; readonly y: number };
 }
 
 function polar(cx: number, cy: number, distance: number, angleDeg: number): [number, number] {
@@ -109,5 +114,10 @@ export function computeTouchLayout(
     right: Math.max(zoneLeft, width * m.joystickZoneWidthFraction),
     bottom: height,
   };
-  return { buttons, joystickZone, joystickRadius: m.joystickRadius * scale };
+  const joystickRadius = m.joystickRadius * scale;
+  const joystickRest = {
+    x: zoneLeft + margin + joystickRadius,
+    y: height - insets.bottom - margin - joystickRadius,
+  };
+  return { buttons, joystickZone, joystickRadius, joystickRest };
 }

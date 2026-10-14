@@ -38,6 +38,18 @@ function make(): TouchController {
 }
 
 describe('TouchController : rôles des doigts', () => {
+  it('le joystick fantôme s’en va au premier toucher dans sa zone, même bref (D-182)', () => {
+    const c = make();
+    expect(c.joystickUsed).toBe(false);
+    c.pointerDown(1, jump.x, jump.y);
+    c.pointerUp(1);
+    expect(c.joystickUsed).toBe(false);
+    c.pointerDown(2, zoneX, zoneY);
+    c.pointerUp(2);
+    c.releaseAll();
+    expect(c.joystickUsed).toBe(true);
+  });
+
   it('un doigt sur Saut maintient Saut jusqu’au relâchement', () => {
     const c = make();
     expect(c.pointerDown(1, jump.x, jump.y)).toBe(true);
