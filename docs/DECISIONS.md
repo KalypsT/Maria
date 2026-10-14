@@ -2869,3 +2869,9 @@ Retour d'essai de l'utilisateur (de la station balnéaire à la fin), plan valid
 - **Toucher un pictogramme** montre ce que la ligne compte, sous son chiffre, au crayon gris cerné de papier, pendant 3,5 s (`JOURNEY_TIP_MS`) ; le retoucher le cache, un autre le remplace, changer de page l'efface. Coupé en deux lignes si la colonne est étroite.
 - **Les textes (PLACEHOLDER, à valider)** : « Le temps de mon voyage », « Les coquilles trouvées », « Mes souvenirs retrouvés », « Les lieux découverts », « Les fois où je suis tombée dans les pommes » (`JOURNEY_TIPS`, `NotebookPages.ts`). À la première personne, comme le cahier de Céleste.
 - Vérifié dans Chromium (844 × 390) : le toucher, la coupure de ligne.
+
+## D-178 — Le cahier : Céleste sur la carte, ses lunettes roses
+
+- **Demande de l'utilisateur** : changer l'apparence du repère « je suis ici » de la carte. C'était la tête de Céleste (couettes, lunettes), petite ; ce n'est pas Maria (pilier 5 : un repère qui bouge ne peut pas être Maria). **Choix de l'utilisateur** : **les lunettes rondes roses seules**, comme le logo (D-175).
+- Dessinées par le code : deux verres pâles au reflet blanc, la monture rose (`#ff6fa3`, celui du dessin de Céleste) sur un trait d'encre, sur un halo de papier ; elles flottent doucement comme avant. Environ 30 px de large.
+- Vérifié dans Chromium (une carte d'essai).

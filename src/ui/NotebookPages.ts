@@ -15,6 +15,8 @@ import { TRAVEL } from '../config/travel';
 
 /** Taille d'une coquille sur la carte (px CSS, D-148). */
 const MAP_SHELL_PX = 14;
+/** Le rose des lunettes de Céleste sur la carte (D-178, celui de son dessin). */
+const MAP_GLASSES = '#ff6fa3';
 /** Rayon (px CSS) dans lequel un toucher choisit une veilleuse du voyage (D-163). */
 const TRAVEL_HIT_PX = 22;
 /**
@@ -559,7 +561,7 @@ export class NotebookPages {
     if (model.celeste) {
       const p = px(model.celeste);
       const bob = Math.sin(elapsedMs / 300) * 1.5;
-      this.drawCeleste(ctx, p.x, p.y - 8 + bob, blue);
+      this.drawCeleste(ctx, p.x, p.y - 8 + bob, paper, ink);
     }
     // Le compte des coquilles du lieu (D-148), en haut à droite de la page ; rose quand tout y est.
     if (model.shells.total > 0) {
@@ -688,27 +690,64 @@ export class NotebookPages {
     }
   }
 
-  private drawCeleste(ctx: CanvasRenderingContext2D, x: number, y: number, outline: string): void {
-    ctx.fillStyle = '#5a3a2a';
+  /**
+   * Céleste sur la carte (D-178, choix de l'utilisateur) : ses lunettes rondes roses, comme le logo
+   * (D-175), sur un halo de papier pour se lire par-dessus le dessin des salles.
+   */
+  private drawCeleste(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    paper: string,
+    ink: string,
+  ): void {
+    const r = 6.5;
+    const gap = 8;
+    ctx.fillStyle = paper;
     ctx.beginPath();
-    ctx.arc(x - 7, y + 1, 3, 0, Math.PI * 2);
-    ctx.arc(x + 7, y + 1, 3, 0, Math.PI * 2);
+    ctx.ellipse(x, y, gap + r + 4, r + 4, 0, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = '#e7b995';
-    ctx.strokeStyle = outline;
+    // Les verres, pâles, un reflet blanc.
+    ctx.fillStyle = 'rgba(255,255,255,0.75)';
+    ctx.beginPath();
+    ctx.arc(x - gap, y, r, 0, Math.PI * 2);
+    ctx.arc(x + gap, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    // La monture : un trait d'encre fin, le rose par-dessus.
+    glassesFrame(ctx, x, y, gap, r, ink, 3.6);
+    glassesFrame(ctx, x, y, gap, r, MAP_GLASSES, 2.4);
+    ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 1.2;
     ctx.beginPath();
-    ctx.arc(x, y, 6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-    ctx.strokeStyle = '#e0598b';
-    ctx.lineWidth = 1.3;
-    ctx.beginPath();
-    ctx.arc(x - 2.4, y + 0.5, 2, 0, Math.PI * 2);
-    ctx.moveTo(x + 4.4, y + 0.5);
-    ctx.arc(x + 2.4, y + 0.5, 2, 0, Math.PI * 2);
+    ctx.arc(x - gap - 1.2, y - 1.2, r * 0.5, Math.PI * 1.05, Math.PI * 1.45);
+    ctx.moveTo(
+      x + gap - 1.2 + r * 0.5 * Math.cos(Math.PI * 1.05),
+      y - 1.2 + r * 0.5 * Math.sin(Math.PI * 1.05),
+    );
+    ctx.arc(x + gap - 1.2, y - 1.2, r * 0.5, Math.PI * 1.05, Math.PI * 1.45);
     ctx.stroke();
   }
+}
+
+/** La monture des lunettes de la carte (D-178) : deux ronds et le pont. */
+function glassesFrame(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  gap: number,
+  r: number,
+  color: string,
+  width: number,
+): void {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.beginPath();
+  ctx.arc(x - gap, y, r, 0, Math.PI * 2);
+  ctx.moveTo(x + gap + r, y);
+  ctx.arc(x + gap, y, r, 0, Math.PI * 2);
+  ctx.moveTo(x - gap + r * 0.9, y - r * 0.35);
+  ctx.quadraticCurveTo(x, y - r * 0.95, x + gap - r * 0.9, y - r * 0.35);
+  ctx.stroke();
 }
 
 /** Petits dessins d'enfant des salles (`; @icon:`). */

@@ -7,7 +7,7 @@
 **Focus suivant** (choix de l'utilisateur) :
 
 - **La console** : le mode Sans fin convient. **Fait : choisir son niveau de départ en mode Niveaux** (D-176 : « ◀ Niveau N ▶ », mètres cumulés, le record compte, « Rejouer » revient au niveau choisi ; les distances des niveaux dans la sauvegarde, sans migration). En attente : essai sur téléphone.
-- **Le cahier** : globalement bien (avis de l'utilisateur). **Fait : le nom des lignes de « Mon voyage » au toucher** (D-177, textes à valider). En attente : l'apparence du repère de Céleste sur la carte (à choisir).
+- **Le cahier** : globalement bien (avis de l'utilisateur). **Fait : le nom des lignes de « Mon voyage » au toucher** (D-177, textes à valider). **Fait : Céleste sur la carte, ses lunettes roses** (D-178).
 - **Les lanternes** : l'utilisateur a une idée de modification (questions 3 et 4 de `docs/LANTERNES.md` encore ouvertes).
 
 **Ouvert, plus tard** :
@@ -83,6 +83,11 @@ Les anciens paragraphes « Phase en cours », du plus récent au plus ancien ; l
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le cahier : Céleste sur la carte, ses lunettes roses (D-178)
+
+- Le repère « je suis ici » : les lunettes rondes roses seules, comme le logo, sur un halo de papier.
+- [ ] À vérifier sur téléphone : assez visibles sur toutes les cartes ?
 
 ### Le cahier : le nom des lignes de « Mon voyage » (D-177)
 
