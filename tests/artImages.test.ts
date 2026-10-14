@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  MEMORY_IMAGES_PENDING,
   ART_IMAGES,
   FLASHBACK_IMAGES,
   MEMORY_IMAGES,
@@ -32,7 +33,8 @@ describe('les images fournies (D-170)', () => {
     const treasures = [...MEMORIES, ...MARIA_THINGS, ...STRANGE_THINGS];
     // Roger et l'Educaville ont la leur depuis D-69 et D-155, partagée avec le décor.
     const missing = treasures.filter((id) => !MEMORY_IMAGES[id] && !TREASURE_SHARED_IMAGES[id]);
-    expect(missing).toEqual([]);
+    // Les images attendues (D-180), déclarées : seulement celles-là manquent.
+    expect(missing).toEqual(MEMORY_IMAGES_PENDING);
     expect(Object.values(TREASURE_SHARED_IMAGES).filter((file) => !exists(file))).toEqual([]);
     expect(RECORDS.every((record) => exists(RECORD_IMAGES[record.id]))).toBe(true);
     expect(FLASHBACKS.every((id) => exists(FLASHBACK_IMAGES[id]))).toBe(true);

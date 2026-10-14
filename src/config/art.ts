@@ -466,6 +466,8 @@ export const DECOR_KINDS: Readonly<
   lostcounter: { furniture: true },
   /** Étagères des objets perdus (planches traversables). */
   lostshelf: { furniture: true },
+  /** Une place libre sur une étagère des objets perdus (D-180) : un trésor y est posé. Invisible. */
+  shelfgap: { furniture: false },
   /** Haute armoire de rangement (pleine), sur un haut piètement ouvert (D-135). */
   tallcabinet: { furniture: true },
   /** Casiers de consigne (pleins), une lueur turquoise tout en haut. */
@@ -715,6 +717,8 @@ export const MEMORY_IMAGES: Readonly<Partial<Record<MemoryId, string>>> = {
   bottle: 'memory-bottle.webp',
   headband: 'memory-headband.webp',
   bonnet: 'memory-bonnet.webp',
+  rattle: 'memory-rattle.webp',
+  spoon: 'memory-spoon.webp',
   // Le monde étrange (D-170) ; Roger et l'Educaville ont déjà leur image.
   'pink-kitchen': 'memory-pink-kitchen.webp',
   'music-book': 'memory-music-book.webp',
@@ -732,6 +736,12 @@ export const TREASURE_SHARED_IMAGES: Readonly<Partial<Record<MemoryId, string>>>
 };
 
 /** Le nom d'élément de l'image d'un souvenir, dans `ART_IMAGES`. */
+/**
+ * Les trésors dont l'image est encore à fournir (D-180), dessinés par le code en attendant ; les
+ * prompts sont dans `docs/PROMPTS_PERSONNAGES.md`. À retirer d'ici quand l'image arrive.
+ */
+export const MEMORY_IMAGES_PENDING: readonly MemoryId[] = [];
+
 export function memoryImageKey(id: MemoryId): string {
   return `memory-${id}`;
 }

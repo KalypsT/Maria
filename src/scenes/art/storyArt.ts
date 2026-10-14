@@ -534,9 +534,18 @@ const MEMORY_SPAN: Readonly<Record<MemoryProp, readonly [number, number]>> = {
   postcard: [0.88, 0.62],
   'school-drawing': [0.9, 0.72],
   'family-drawing': [0.94, 0.76],
+  rattle: [0.5, 0.8],
+  spoon: [0.8, 0.3],
 };
 type MemoryProp =
-  'watering-can' | 'ticket' | 'letter' | 'postcard' | 'school-drawing' | 'family-drawing';
+  | 'watering-can'
+  | 'ticket'
+  | 'letter'
+  | 'postcard'
+  | 'school-drawing'
+  | 'family-drawing'
+  | 'rattle'
+  | 'spoon';
 
 /** La lueur turquoise du monde étrange autour d'un trésor ; celle, chaude et grise, du torchon. */
 const STRANGE_GLOW = 'rgba(94, 230, 210, 0.35)';
@@ -938,6 +947,8 @@ export function drawProp(
     case 'postcard':
     case 'school-drawing':
     case 'family-drawing':
+    case 'rattle':
+    case 'spoon':
       drawMemoryProp(ctx, kind, w, h, images);
       break;
     case 'baby-photo':

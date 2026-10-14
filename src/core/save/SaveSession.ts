@@ -4,7 +4,7 @@ import type { ControlSettings } from '../../config/controls';
 import type { DisplaySettings } from '../../config/display';
 import type { SaveData } from './saveData';
 import type { SaveManager } from './SaveManager';
-import { reachArcadeLevel, submitArcadeScore } from './arcade';
+import { noteArcadeStart, reachArcadeLevel, submitArcadeScore } from './arcade';
 import { addFaint, addHint, addPlayTime, createStats } from './stats';
 
 /**
@@ -194,10 +194,14 @@ export class SaveSession {
 
   /**
    * Un niveau de la console commence en mode Niveaux (D-167) : garde le plus haut atteint (il ouvre
-   * le mode Sans fin). Écrit seulement s'il monte.
+   * le mode Sans fin) et la distance déjà parcourue (D-176 : choisir son niveau). Écrit seulement
+   * si l'un ou l'autre change.
    */
-  recordArcadeLevel(game: ArcadeGameId, level: number): Promise<void> {
-    return reachArcadeLevel(this.current.arcade, game, level) ? this.persist() : Promise.resolve();
+  recordArcadeLevel(game: ArcadeGameId, level: number, doneTiles = 0): Promise<void> {
+    const arcade = this.current.arcade;
+    const reached = reachArcadeLevel(arcade, game, level);
+    const noted = noteArcadeStart(arcade, game, level, doneTiles);
+    return reached || noted ? this.persist() : Promise.resolve();
   }
 
   /** Jeux de la console vus dans son menu (D-166) : ils ne sont plus « nouveaux ». */

@@ -169,4 +169,25 @@ describe('le menu de la console', () => {
     );
     expect(climb).toMatchObject({ endlessReady: true, endlessOpen: false });
   });
+
+  it('partir d’un niveau choisi (D-176) : les mètres d’avant comptent, Rejouer y revient', () => {
+    const run = new ArcadeRun(ArcadeGameId.Cables, ArcadeMode.Levels, HZ);
+    run.startFrom(4, 100);
+    expect(run.level).toBe(4);
+    expect(run.firstLevel).toBe(4);
+    run.startLevel(40);
+    until(run, ArcadeEvent.Started);
+    run.advance(10);
+    expect(run.meters).toBe(Math.floor(110 * ARCADE.metersPerTile));
+    run.reachGoal();
+    until(run, ArcadeEvent.NextLevel);
+    expect(run.level).toBe(5);
+    expect(run.tilesDone).toBe(140);
+    expect(run.firstLevel).toBe(4);
+    // Le mode Sans fin part toujours du début.
+    const endless = new ArcadeRun(ArcadeGameId.Jumps, ArcadeMode.Endless, HZ);
+    endless.startFrom(4, 100);
+    expect(endless.level).toBe(1);
+    expect(endless.tilesDone).toBe(0);
+  });
 });

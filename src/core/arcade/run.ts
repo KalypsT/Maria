@@ -25,12 +25,15 @@ export const ArcadeEvent = { None: 0, Started: 1, NextLevel: 2, Over: 4, Milesto
 /**
  * Une partie de la console (D-166), pure et indépendante de Phaser : le niveau en cours, la
  * distance parcourue (les niveaux finis, plus la plus grande avancée dans celui-ci) et le rythme.
- * Mode Niveaux : une erreur, et la partie s'arrête ; on recommence au niveau 1. Mode Sans fin
+ * Mode Niveaux : une erreur, et la partie s'arrête ; on recommence au niveau choisi (1, ou un
+ * niveau déjà atteint, D-176 : le compteur part alors des mètres des niveaux d'avant). Mode Sans fin
  * (D-167) : un seul « niveau » sans fanion, la distance sans limite, un repère tous les 100 m.
  * Quitter compte comme une chute : le score atteint compte. Aucune allocation par pas.
  */
 export class ArcadeRun {
   level = 1;
+  /** Le niveau d'où la partie est partie (D-176) : « Rejouer » y revient. */
+  firstLevel = 1;
   phase: ArcadePhase = ArcadePhase.Intro;
   /** Événements du dernier `step`. */
   events = 0;
@@ -49,6 +52,24 @@ export class ArcadeRun {
     readonly mode: ArcadeMode,
     private readonly stepHz: number = PHYSICS_STEP_HZ,
   ) {}
+
+  /**
+   * Partir du niveau `level` (D-176), `doneTiles` : les tuiles des niveaux d'avant, comptées comme
+   * parcourues. Avant le premier `startLevel`, en mode Niveaux seulement.
+   */
+  startFrom(level: number, doneTiles: number): void {
+    if (this.mode === ArcadeMode.Endless || !Number.isInteger(level) || level < 1) {
+      return;
+    }
+    this.level = level;
+    this.firstLevel = level;
+    this.doneTiles = Math.max(0, doneTiles);
+  }
+
+  /** Les tuiles des niveaux finis (et de ceux d'avant le niveau de départ). */
+  get tilesDone(): number {
+    return this.doneTiles;
+  }
 
   /**
    * Le niveau `level` commence ; `lengthTiles` : du départ au fanion. En mode Sans fin, la course

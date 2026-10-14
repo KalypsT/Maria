@@ -24,6 +24,7 @@ import { EntityType } from '../core/level/LevelData';
 import { deserializeSave } from '../core/save/saveData';
 import { formatPlayTime, statsByPlace, totalFaints } from '../core/save/stats';
 import { isMappedRoom, mapPage } from '../core/world/zone';
+import { journeyProgress } from '../core/world/journeyProgress';
 import { HitchMonitor, type FrameWork } from '../core/perf/hitchMonitor';
 import { STRANGE_TINTS, STRANGE_TINT_NAMES } from '../config/strangeThemes';
 import { DEFAULT_MOVEMENT, MOVEMENT_PARAM_RANGES, type MovementParams } from '../config/movement';
@@ -2217,6 +2218,17 @@ export function installDebugOverlay(scene: GameScene): void {
       TREASURES.filter((id) => found.includes(id)).length,
     )}/${String(TREASURES.length)})`;
     treasureList.replaceChildren();
+    // L'avancement du voyage (D-180) : le détail du calcul.
+    const zone = ZONES[0];
+    if (zone) {
+      const p = journeyProgress(zone, scene.session.data);
+      element(
+        'div',
+        treasureList,
+        'dbg-stats',
+        `Voyage ${String(p.percent)} % · histoire ${String(p.story.done)}/${String(p.story.total)} · trouvailles ${String(p.finds.done)}/${String(p.finds.total)}`,
+      );
+    }
     for (const id of TREASURES) {
       const row = element('div', treasureList, 'dbg-actions');
       element('span', row, undefined, `${found.includes(id) ? '✓' : '·'} ${id}`);

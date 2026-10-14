@@ -41,6 +41,10 @@ export const MARIA_THINGS = [
   'headband',
   /** Le bonnet de Maria, à la sortie de derrière la haie (D-49). */
   'bonnet',
+  /** Le hochet de Maria, en haut de la cage à écureuil de l'aire de jeux (D-180). */
+  'rattle',
+  /** La petite cuillère de Maria, sur une étagère du bureau des objets trouvés (D-180). */
+  'spoon',
 ] as const;
 
 /**
@@ -89,6 +93,8 @@ export const MEMORY_NAMES: Readonly<Record<MemoryId, string>> = {
   bottle: 'Le biberon de Maria',
   headband: 'Le bandeau de Maria',
   bonnet: 'Le bonnet de Maria',
+  rattle: 'Le hochet de Maria',
+  spoon: 'La petite cuillère de Maria',
   'shape-box': "L'Educaville",
   roger: 'Roger',
   'pink-kitchen': 'La cuisine rose',

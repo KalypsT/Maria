@@ -190,6 +190,16 @@ describe('la gare (D-66)', () => {
     },
   );
 
+  it(
+    'la petite cuillère de Maria (D-180) : sur une étagère des objets trouvés, facile depuis la porte',
+    { timeout: TIMEOUT },
+    () => {
+      expect(
+        reachable(station(easy), at('station-lost', 1)).has(nodeAt('station-lost', 19, 19)),
+      ).toBe(true);
+    },
+  );
+
   it('le haut des casiers (la lueur) s’atteint depuis le crochet', { timeout: TIMEOUT }, () => {
     const lockers = HOUSE_STORY.triggers.find((t) => t.id === 'station-enter')?.area;
     if (!lockers) {

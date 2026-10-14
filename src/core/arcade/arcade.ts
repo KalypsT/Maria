@@ -25,7 +25,7 @@ export function arcadeGame(id: string): ArcadeGame | undefined {
 
 /**
  * Jeux débloqués (D-166) : par leur capacité (déjà acquise), par leur étape (le monstre), ou dès
- * la console (les sauts). La console elle-même (le cadeau de papa) vient avec la PR 3.
+ * la console (les sauts), elle-même le cadeau de papa au potager.
  */
 export function unlockedArcadeGames(
   abilities: ReadonlySet<string>,

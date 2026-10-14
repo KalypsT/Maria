@@ -18,6 +18,10 @@ export interface TreasureNames {
   room(id: string): string;
 }
 
+/** Un jalon pas encore vécu (D-180) : sous sa case, et sur sa fiche. */
+const MILESTONE_SHORT = 'plus loin';
+const MILESTONE_LONG = 'Plus loin dans mon voyage';
+
 /** La famille d'un trésor ou d'un disque (sa couleur, son titre sur la fiche). */
 type FamilyKey = TreasureFamilyId | 'records';
 
@@ -157,8 +161,10 @@ export class TreasuresPage {
     } else {
       box.textContent = '?';
     }
-    // L'indice (D-160) : la salle si Céleste y est passée, sinon le lieu, sinon « ? ».
-    element('span', button, 'treasure-hint', cell.found ? '' : this.shortWhere(cell.where));
+    // L'indice (D-160) : la salle si Céleste y est passée, sinon le lieu, sinon « ? ». Un jalon
+    // (D-180) : « plus loin », il viendra avec l'histoire.
+    const hint = cell.found ? '' : cell.milestone ? MILESTONE_SHORT : this.shortWhere(cell.where);
+    element('span', button, 'treasure-hint', hint);
     if (cell.isNew) {
       element('span', button, 'treasure-new');
     }
@@ -205,7 +211,11 @@ export class TreasuresPage {
       'p',
       text,
       'treasure-where',
-      `${cell.found ? 'Trouvé' : 'À chercher'} : ${this.longWhere(cell.where)}`,
+      cell.found
+        ? `Trouvé : ${this.longWhere(cell.where)}`
+        : cell.milestone
+          ? MILESTONE_LONG
+          : `À chercher : ${this.longWhere(cell.where)}`,
     );
     const actions = element('div', text, 'treasure-actions');
     const flashback = memory ? flashbackOf(memory) : null;

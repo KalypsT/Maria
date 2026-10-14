@@ -15,6 +15,8 @@ import { TRAVEL } from '../config/travel';
 
 /** Taille d'une coquille sur la carte (px CSS, D-148). */
 const MAP_SHELL_PX = 14;
+/** Le rose des lunettes de Céleste sur la carte (D-178, celui de son dessin). */
+const MAP_GLASSES = '#ff6fa3';
 /** Rayon (px CSS) dans lequel un toucher choisit une veilleuse du voyage (D-163). */
 const TRAVEL_HIT_PX = 22;
 /**
@@ -22,6 +24,20 @@ const TRAVEL_HIT_PX = 22;
  * dans les couleurs des crayons de Céleste.
  */
 const MAP_WASHES = ['#f3c7d2', '#c9dcef', '#f6e3a6', '#cfe5c4', '#ddd0ee'] as const;
+
+/**
+ * Ce que dit une ligne de « Mon voyage » quand on touche son pictogramme (D-177, PLACEHOLDER : à
+ * valider par l'utilisateur), et combien de temps (ms).
+ */
+const JOURNEY_TIPS: Readonly<Record<FigureIcon | 'shell' | 'journey', string>> = {
+  journey: 'Mon voyage accompli',
+  time: 'Le temps de mon voyage',
+  shell: 'Les coquilles trouvées',
+  memories: 'Mes souvenirs retrouvés',
+  places: 'Les lieux découverts',
+  faints: 'Les fois où je suis tombée dans les pommes',
+};
+const JOURNEY_TIP_MS = 3500;
 
 /** Durée du tracé d'une salle découverte depuis la dernière ouverture (ms). */
 const DRAW_IN_MS = 900;
@@ -102,6 +118,11 @@ export class NotebookPages {
   private travelPick: string | null = null;
   /** Les veilleuses où l'on peut aller, à leur place sur la page dessinée (px CSS). */
   private travelSpots: { x: number; y: number; lantern: string }[] = [];
+  /** Les pictogrammes de « Mon voyage » à leur place (px CSS), pour les toucher (D-177). */
+  private readonly journeySpots = Array.from({ length: 6 }, () => ({ x: 0, y: 0, size: 0 }));
+  /** La ligne dont le nom est montré (-1 : aucune), et depuis quand (`performance.now`). */
+  private journeyTip = -1;
+  private journeyTipAt = 0;
 
   constructor() {
     this.shellImage.src = `art/${ART_IMAGES['shell'] ?? 'shell.png'}`;
@@ -109,6 +130,7 @@ export class NotebookPages {
     this.canvas.className = 'notebook-canvas';
     this.canvas.addEventListener('click', (event) => {
       this.pickTravel(event);
+      this.pickJourney(event);
     });
   }
 
@@ -145,6 +167,21 @@ export class NotebookPages {
     this.travelPick = best;
   }
 
+  /** « Mon voyage » (D-177) : toucher un pictogramme montre ce qu'il compte ; le retoucher le cache. */
+  private pickJourney(event: MouseEvent): void {
+    if (this.page !== 'journey') {
+      return;
+    }
+    const rect = this.canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const hit = this.journeySpots.findIndex(
+      (spot) => x >= spot.x && x <= spot.x + spot.size && Math.abs(y - spot.y) <= spot.size / 2,
+    );
+    this.journeyTip = hit === this.journeyTip ? -1 : hit;
+    this.journeyTipAt = performance.now();
+  }
+
   /** Le contenu de cette ouverture du sac (les souvenirs, les capacités, les chiffres). */
   setContent(content: NotebookContent): void {
     this.abilities = new Set(content.abilities);
@@ -161,6 +198,7 @@ export class NotebookPages {
   /** Affiche une page et (re)lance le dessin, une image par rafraîchissement de l'écran. */
   show(page: NotebookPage): void {
     this.page = page;
+    this.journeyTip = -1;
     const tick = () => {
       this.draw(performance.now() - this.openedAt);
       this.frame = requestAnimationFrame(tick);
@@ -176,7 +214,7 @@ export class NotebookPages {
 
   /**
    * Page « Mon voyage » (D-153, choix de l'utilisateur) : peu de texte, un pictogramme et un chiffre
-   * par ligne : le temps de jeu, les coquilles, les souvenirs, les lieux découverts, les
+   * par ligne : l'avancement du voyage (D-180), le temps de jeu, les coquilles, les souvenirs, les lieux découverts, les
    * évanouissements (une petite lune). Deux colonnes en paysage.
    */
   private drawJourney(ctx: CanvasRenderingContext2D, width: number, height: number): void {
@@ -189,10 +227,18 @@ export class NotebookPages {
     const rose = themeColor('--crayon-rose');
     const blue = themeColor('--crayon-blue');
     const lamp = themeColor('--lamp');
+    const paper = themeColor('--paper');
     const font = getComputedStyle(document.body).fontFamily;
     const tally = (t: { found: number; total: number }) =>
       `${String(t.found)} / ${String(t.total)}`;
-    const rows: { icon: FigureIcon | 'shell'; text: string; accent: string; full: boolean }[] = [
+    const rows: {
+      icon: FigureIcon | 'shell' | 'journey';
+      text: string;
+      accent: string;
+      full: boolean;
+    }[] = [
+      // L'avancement du voyage (D-180), en tête.
+      { icon: 'journey', text: `${String(f.percent)} %`, accent: rose, full: f.percent >= 100 },
       { icon: 'time', text: formatPlayTime(f.playMs), accent: lamp, full: false },
       {
         icon: 'shell',
@@ -219,6 +265,10 @@ export class NotebookPages {
     const colW = width / cols;
     const rowH = Math.min(92, (height - 16) / perCol);
     const box = rowH * 0.74;
+    const tipOn =
+      this.journeyTip >= 0 && performance.now() - this.journeyTipAt < JOURNEY_TIP_MS
+        ? this.journeyTip
+        : -1;
     ctx.lineCap = 'round';
     rows.forEach((row, i) => {
       const col = Math.floor(i / perCol);
@@ -231,6 +281,8 @@ export class NotebookPages {
       ctx.stroke();
       if (row.icon === 'shell') {
         this.drawShell(ctx, left + box / 2, cy, box * 0.56);
+      } else if (row.icon === 'journey') {
+        drawJourneyRing(ctx, left + box / 2, cy, box * 0.32, f.percent, pencil, rose);
       } else {
         drawFigureIcon(ctx, row.icon, left + box / 2, cy, box * 0.78, ink, row.accent);
       }
@@ -240,6 +292,29 @@ export class NotebookPages {
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'left';
       ctx.fillText(row.text, left + box + 18, cy);
+      const spot = this.journeySpots[i];
+      if (spot) {
+        spot.x = left;
+        spot.y = cy;
+        spot.size = box;
+      }
+      // Le nom de la ligne touchée (D-177), sous son chiffre, cerné de papier.
+      if (i === tipOn) {
+        const tipSize = Math.round(Math.max(12, Math.min(16, rowH * 0.18)));
+        ctx.font = `600 ${String(tipSize)}px ${font}`;
+        ctx.textBaseline = 'top';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = paper;
+        ctx.fillStyle = pencil;
+        const tx = left + box + 18;
+        let ty = cy + Math.min(30, rowH * 0.36) / 2 + 4;
+        for (const line of wrapText(ctx, JOURNEY_TIPS[row.icon], (col + 1) * colW - tx - 12)) {
+          ctx.strokeText(line, tx, ty);
+          ctx.fillText(line, tx, ty);
+          ty += tipSize * 1.2;
+        }
+      }
     });
   }
 
@@ -417,8 +492,8 @@ export class NotebookPages {
           ctx.stroke();
         }
       }
-      // La veilleuse principale débloquée (D-163), turquoise ; depuis une lanterne, celles où l'on
-      // peut aller palpitent, et la veilleuse choisie est cerclée.
+      // La veilleuse principale débloquée (D-163), bleu lune (D-179) ; depuis une lanterne,
+      // celles où l'on peut aller palpitent, et la veilleuse choisie est cerclée.
       if (room.travel) {
         const p = px(room.travel);
         const open = this.travel !== null && room.travel.open;
@@ -496,7 +571,7 @@ export class NotebookPages {
     if (model.celeste) {
       const p = px(model.celeste);
       const bob = Math.sin(elapsedMs / 300) * 1.5;
-      this.drawCeleste(ctx, p.x, p.y - 8 + bob, blue);
+      this.drawCeleste(ctx, p.x, p.y - 8 + bob, paper, ink);
     }
     // Le compte des coquilles du lieu (D-148), en haut à droite de la page ; rose quand tout y est.
     if (model.shells.total > 0) {
@@ -625,27 +700,64 @@ export class NotebookPages {
     }
   }
 
-  private drawCeleste(ctx: CanvasRenderingContext2D, x: number, y: number, outline: string): void {
-    ctx.fillStyle = '#5a3a2a';
+  /**
+   * Céleste sur la carte (D-178, choix de l'utilisateur) : ses lunettes rondes roses, comme le logo
+   * (D-175), sur un halo de papier pour se lire par-dessus le dessin des salles.
+   */
+  private drawCeleste(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    paper: string,
+    ink: string,
+  ): void {
+    const r = 6.5;
+    const gap = 8;
+    ctx.fillStyle = paper;
     ctx.beginPath();
-    ctx.arc(x - 7, y + 1, 3, 0, Math.PI * 2);
-    ctx.arc(x + 7, y + 1, 3, 0, Math.PI * 2);
+    ctx.ellipse(x, y, gap + r + 4, r + 4, 0, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = '#e7b995';
-    ctx.strokeStyle = outline;
+    // Les verres, pâles, un reflet blanc.
+    ctx.fillStyle = 'rgba(255,255,255,0.75)';
+    ctx.beginPath();
+    ctx.arc(x - gap, y, r, 0, Math.PI * 2);
+    ctx.arc(x + gap, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    // La monture : un trait d'encre fin, le rose par-dessus.
+    glassesFrame(ctx, x, y, gap, r, ink, 3.6);
+    glassesFrame(ctx, x, y, gap, r, MAP_GLASSES, 2.4);
+    ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 1.2;
     ctx.beginPath();
-    ctx.arc(x, y, 6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-    ctx.strokeStyle = '#e0598b';
-    ctx.lineWidth = 1.3;
-    ctx.beginPath();
-    ctx.arc(x - 2.4, y + 0.5, 2, 0, Math.PI * 2);
-    ctx.moveTo(x + 4.4, y + 0.5);
-    ctx.arc(x + 2.4, y + 0.5, 2, 0, Math.PI * 2);
+    ctx.arc(x - gap - 1.2, y - 1.2, r * 0.5, Math.PI * 1.05, Math.PI * 1.45);
+    ctx.moveTo(
+      x + gap - 1.2 + r * 0.5 * Math.cos(Math.PI * 1.05),
+      y - 1.2 + r * 0.5 * Math.sin(Math.PI * 1.05),
+    );
+    ctx.arc(x + gap - 1.2, y - 1.2, r * 0.5, Math.PI * 1.05, Math.PI * 1.45);
     ctx.stroke();
   }
+}
+
+/** La monture des lunettes de la carte (D-178) : deux ronds et le pont. */
+function glassesFrame(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  gap: number,
+  r: number,
+  color: string,
+  width: number,
+): void {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.beginPath();
+  ctx.arc(x - gap, y, r, 0, Math.PI * 2);
+  ctx.moveTo(x + gap + r, y);
+  ctx.arc(x + gap, y, r, 0, Math.PI * 2);
+  ctx.moveTo(x - gap + r * 0.9, y - r * 0.35);
+  ctx.quadraticCurveTo(x, y - r * 0.95, x + gap - r * 0.9, y - r * 0.35);
+  ctx.stroke();
 }
 
 /** Petits dessins d'enfant des salles (`; @icon:`). */
@@ -884,6 +996,43 @@ function drawTreasureOutline(
   ctx.setLineDash([3, 2]);
   ctx.stroke();
   ctx.setLineDash([]);
+}
+
+/**
+ * L'avancement du voyage (D-180) : un cercle au crayon, la part faite repassée en rose depuis le
+ * haut, une petite étoile au milieu.
+ */
+function drawJourneyRing(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  r: number,
+  percent: number,
+  pencil: string,
+  rose: string,
+): void {
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = pencil;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.stroke();
+  if (percent > 0) {
+    ctx.strokeStyle = rose;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(x, y, r, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * percent) / 100);
+    ctx.stroke();
+  }
+  ctx.fillStyle = rose;
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const d = i % 2 === 0 ? r * 0.45 : r * 0.2;
+    ctx.lineTo(x + Math.cos(a) * d, y + Math.sin(a) * d);
+  }
+  ctx.closePath();
+  ctx.fill();
 }
 
 /** Coupe un texte en lignes qui tiennent dans `maxWidth` (px), mot par mot. */

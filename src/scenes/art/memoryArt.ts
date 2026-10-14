@@ -487,6 +487,62 @@ function bottle(ctx: CanvasRenderingContext2D, s: number): void {
   ctx.restore();
 }
 
+/**
+ * Le hochet de Maria (D-180), PLACEHOLDER en attendant son image : une boule rose à pois, son
+ * manche et l'anneau du bas, un ruban fleuri.
+ */
+function rattle(ctx: CanvasRenderingContext2D, s: number): void {
+  ctx.save();
+  ctx.rotate(0.25);
+  ctx.strokeStyle = '#f2b8c6';
+  ctx.lineWidth = s * 0.05;
+  ctx.beginPath();
+  ctx.arc(0, s * 0.3, s * 0.1, 0, Math.PI * 2);
+  ctx.stroke();
+  roundRect(ctx, -s * 0.04, -s * 0.08, s * 0.08, s * 0.32, s * 0.03, '#f6f0e6');
+  ctx.fillStyle = PINK;
+  ctx.beginPath();
+  ctx.arc(0, -s * 0.2, s * 0.17, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#fff4f6';
+  for (const [x, y] of [
+    [-0.07, -0.26],
+    [0.06, -0.15],
+    [0.07, -0.29],
+    [-0.05, -0.12],
+  ] as const) {
+    ctx.beginPath();
+    ctx.arc(s * x, s * y, s * 0.025, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.fillStyle = '#9cc79a';
+  ctx.beginPath();
+  ctx.ellipse(-s * 0.07, -s * 0.02, s * 0.06, s * 0.03, -0.5, 0, Math.PI * 2);
+  ctx.ellipse(s * 0.07, -s * 0.02, s * 0.06, s * 0.03, 0.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+/**
+ * La petite cuillère de Maria (D-180), PLACEHOLDER en attendant son image : une cuillère de bébé
+ * au cuilleron argenté, au manche rose arrondi.
+ */
+function spoon(ctx: CanvasRenderingContext2D, s: number): void {
+  ctx.save();
+  ctx.rotate(-0.15);
+  ctx.fillStyle = '#d9dde4';
+  ctx.beginPath();
+  ctx.ellipse(-s * 0.26, 0, s * 0.13, s * 0.09, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#eef1f5';
+  ctx.beginPath();
+  ctx.ellipse(-s * 0.28, -s * 0.02, s * 0.07, s * 0.04, 0, 0, Math.PI * 2);
+  ctx.fill();
+  roundRect(ctx, -s * 0.15, -s * 0.025, s * 0.14, s * 0.05, s * 0.02, '#d9dde4');
+  roundRect(ctx, -s * 0.03, -s * 0.05, s * 0.36, s * 0.1, s * 0.05, PINK);
+  ctx.restore();
+}
+
 /** Maman (bulle de papa, D-58) : visage et longs cheveux bruns, comme sur la photo de famille. */
 export function momHead(ctx: CanvasRenderingContext2D, x: number, y: number, r: number): void {
   const hair = '#4a2e1f';
@@ -1278,6 +1334,12 @@ export function drawMemory(
       break;
     case 'bottle':
       bottle(ctx, size);
+      break;
+    case 'rattle':
+      rattle(ctx, size);
+      break;
+    case 'spoon':
+      spoon(ctx, size);
       break;
     case 'shape-box':
       // L'Educaville (D-155) : le souvenir garde son nom de la sauvegarde.

@@ -1,7 +1,7 @@
 ; La station balnéaire (D-95), PR 2 : la promenade, sur la digue, le matin. Salle centrale de la
 ; baie : la mer et la plage derrière la balustrade, le phare tout au bout. De gauche à droite : la
-; grille du port (fermée, la suite avec la PR 4) et l'ancre sur son socle ; un lampadaire ;
-; l'escalier de la plage (fermé par une chaîne, la PR 3) ; la longue-vue, la lanterne et le banc des
+; grille du port (ouverte après la première marée, D-100) et l'ancre sur son socle ; un lampadaire ;
+; l'escalier de la plage (son portique, D-164) ; la longue-vue, la lanterne et le banc des
 ; marées ; le kiosque à glaces (coffre, auvents, toit) ; trois lampadaires de plus en plus hauts ; le
 ; centre de la classe de mer (porte 2), ses balcons, son toit et son enseigne ; le parvis de la gare
 ; et ses jardinières ; la gare de la mer (sortie 1).

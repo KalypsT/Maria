@@ -1,3 +1,4 @@
+import { isTreasureMilestone } from '../../config/journey';
 import { MARIA_THINGS, MEMORIES, STRANGE_THINGS } from '../../config/memories';
 import { STRANGE_ROOM_PLACES } from '../../config/places';
 import { RECORD_SLOTS } from '../../config/records';
@@ -58,6 +59,8 @@ export interface TreasureCell {
   /** Trouvé mais pas encore regardé dans le sac. */
   readonly isNew: boolean;
   readonly where: TreasureWhere;
+  /** Un jalon (D-180) : on le trouve forcément en avançant ; sa case vide n'a pas d'indice. */
+  readonly milestone: boolean;
 }
 
 export interface TreasureFamilyView {
@@ -108,6 +111,7 @@ export function treasureBook(input: TreasureBookInput): TreasureBook {
       found,
       isNew: found && !input.viewed.has(id),
       where: treasureWhere(input.spots.get(id), found, input.visitedRooms, input.visitedPlaces),
+      milestone: isTreasureMilestone(id),
     };
   };
   const families = TREASURE_FAMILIES.map((family) => {

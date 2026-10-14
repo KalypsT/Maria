@@ -42,6 +42,9 @@ export const StoryFlag = {
   /** Les affaires de Maria ramassées (D-58) : elles quittent le jeu pour le cahier. */
   SlipperTaken: 'maria.slipper',
   BottleTaken: 'maria.bottle',
+  /** Le hochet et la petite cuillère de Maria (D-180), dans le quartier et à la gare. */
+  RattleTaken: 'maria.rattle',
+  SpoonTaken: 'maria.spoon',
   HeadbandTaken: 'maria.headband',
   BonnetTaken: 'maria.bonnet',
   /** Papa a montré le portillon, après le bonnet (D-60). */
@@ -585,6 +588,9 @@ export const PROP_SIZE = {
   'baby-photo': { w: 11, h: 10 },
   // Les souvenirs de Céleste (D-169). Le dessin de toute la famille couvre celui de la chambre.
   'watering-can': { w: 13, h: 10 },
+  // Le hochet et la petite cuillère de Maria (D-180).
+  rattle: { w: 7, h: 11 },
+  spoon: { w: 10, h: 11 },
   ticket: { w: 11, h: 6 },
   letter: { w: 8, h: 11 },
   postcard: { w: 11, h: 8 },

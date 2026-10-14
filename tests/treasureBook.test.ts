@@ -76,7 +76,7 @@ describe('les trésors du sac (D-162)', () => {
     expect(book.families.map((f) => f.tally.found)).toEqual([1, 1, 0]);
     expect(book.shells).toEqual([{ place: 'house', tally: { found: 1, total: 2 } }]);
     expect(book.shellTally).toEqual({ found: 1, total: 3 });
-    expect(book.total).toEqual({ found: 3, total: 19 + 3 });
+    expect(book.total).toEqual({ found: 3, total: 21 + 3 });
   });
 
   it('les disques : seulement trouvés, jamais comptés', () => {

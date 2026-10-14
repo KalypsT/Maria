@@ -2,6 +2,26 @@
 
 ## Phase en cours
 
+**État au 14 octobre 2026** (état des lieux avec l'utilisateur) : le jeu se joue en entier, du premier soir à la fin (8 niveaux). Toutes les PR jusqu'à #108 (D-175) sont fusionnées dans `main`. La diffusion prévue est **privée** (famille, proches) : les droits de la musique et des bruitages, et l'écran de crédits, ne sont pas bloquants.
+
+**Focus suivant** (choix de l'utilisateur) :
+
+- **La console** : le mode Sans fin convient. **Fait : choisir son niveau de départ en mode Niveaux** (D-176 : « ◀ Niveau N ▶ », mètres cumulés, le record compte, « Rejouer » revient au niveau choisi ; les distances des niveaux dans la sauvegarde, sans migration). En attente : essai sur téléphone.
+- **Le cahier** : globalement bien (avis de l'utilisateur). **Fait : le nom des lignes de « Mon voyage » au toucher** (D-177, textes à valider). **Fait : Céleste sur la carte, ses lunettes roses** (D-178).
+- **L'avancement du voyage** (D-180, plan en 3 PR) : un pourcentage dans le cahier (moitié l'histoire, moitié les trouvailles), les jalons séparés des trouvailles, le hochet et la petite cuillère de Maria. **PR 1 faite : le système.** **PR 2 faite : le cahier** (le pourcentage en tête de « Mon voyage », les jalons « plus loin »). **PR 3 faite : le hochet** (en haut de la cage à écureuil) **et la petite cuillère** (sur une étagère des objets trouvés). **Le plan est complet.** Leurs images sont reçues (D-181). Suite : essai sur téléphone.
+- **Les lanternes** (D-179, plan en 2 PR) : **PR 1 faite : la lampe-tempête dans le monde réel, la lumière bleu lune du voyage rapide**, le champignon turquoise gardé dans les mondes étranges. **PR 2 faite : une lanterne à l'arrivée de chaque monde étrange** (six, la règle D-34 retirée). **Le plan des lanternes est complet.** Suite : essai sur téléphone.
+
+**Ouvert, plus tard** :
+
+- le sac à dos : le contenu des trésors et une récompense par famille complète, à revalider ;
+- le quartier (l'entrée de l'école, le fond du chantier) : l'utilisateur doit le réessayer ;
+- les sons manquants, par priorité : `docs/BRUITAGES.md` ; la musique `memory-play` ;
+- les réglages d'après les essais sur téléphone (mouvement, console, nuances des mondes étranges).
+
+## Historique des chantiers
+
+Les anciens paragraphes « Phase en cours », du plus récent au plus ancien ; le détail de chaque PR est dans « Fait ».
+
 **Le titre et le logo** (D-175, demande de l'utilisateur, sur `ccr-39a7edd3-hvpar5`) : **fait : le titre en Gaegu, majuscules, au crayon** (une couleur par lettre, le trait qui tremble, la police dans le dépôt et hors ligne). **Fait : le logo, les lunettes** (l'image fournie par l'utilisateur ; « MARIA » au crayon dessous sur les grandes icônes, les lunettes seules dans l'onglet ; toutes les icônes par `scripts/make-icons.py`). **En attente** : essai sur téléphone (le titre, l'icône de l'appli installée : la réinstaller pour voir la nouvelle).
 
 **Retour d'essai, du train à la fin** (D-171, sur `ccr-9663ce5d-4k7u2j`) : plan validé en 6 étapes, **toutes faites** : **1. l'écran noir au réveil de la fin** (corrigé : l'image de Maria dans les bras gardait une texture détruite) ; **2. la jetée** (le bassin aux canards retiré, les chaises volantes qui remontent doucement, le fil du retour hors de portée à l'aller, la guérite surélevée) ; **3. la vitesse sur les fils** (comme une poulie : accélère en descente, ralentit en montée ; 900, 300 px/s) ; **4. la maison de la nounou** (les portes vers l'îlot voisin seulement les deux îlots finis, la trappe et l'arche du carrousel redessinées, la couleur de chaque îlot, les passages éteints une fois finis, la voisine en écho étrange) ; **5. le souvenir d'Eden** (le tas qui diminue, les bulles du cache-cache, le rire d'Eden à fournir, la nounou qui regarde) ; **6. les retrouvailles** (Maria retrouvée dans le berceau géant de la chambre grande, la vue rapprochée, le trouble, Agir maintenu pour la serrer, le thème de fin, la chambre qui revient à sa taille). **En attente** : essai sur téléphone (les fils, la jetée, la nounou, Eden, les retrouvailles, le matin enfin jouable) ; le son `eden-giggle` ; la lettre de maman oubliée dans le train se retrouve maintenant au dortoir de la mer (corrigé à la demande de l'utilisateur).
@@ -63,6 +83,49 @@
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### L'avancement du voyage, PR 3 : le hochet et la petite cuillère de Maria (D-180)
+
+- Le hochet en haut de la cage à écureuil de l'aire de jeux ; la petite cuillère sur une étagère des objets trouvés (une place libre sur la planche). Agir les prend. Deux trésors de plus dans la sauvegarde, sans migration. Dessinés par le code en attendant leurs images (prompts fournis).
+- [ ] À vérifier sur téléphone : se voient-ils assez (petits) ? les trouve-t-on sans aide ?
+
+### L'avancement du voyage, PR 2 : le cahier (D-180)
+
+- « Mon voyage » : le pourcentage en première ligne (un cercle au crayon, « Mon voyage accompli » au toucher). « Mes trésors » : les jalons pas encore vécus disent « plus loin », sans indice.
+- [ ] À vérifier sur téléphone : le cercle se lit-il ? le chiffre monte-t-il comme attendu en jouant ?
+
+### L'avancement du voyage, PR 1 : le système (D-180)
+
+- `journeyProgress` : 20 étapes de l'histoire (50 %) et les trouvailles, chacune autant (50 %) ; 100 % seulement à la toute fin. Les jalons (le monde étrange) comptent dans l'histoire. DEBUG → « Trésors » montre le détail.
+
+### Les lanternes, PR 2 : une lanterne à l'arrivée de chaque monde étrange (D-179)
+
+- Six lanternes d'arrivée (salon étrange, jardin renversé, école étrange, objets perdus, cuisine étrange, fête engloutie), 3 tuiles devant Céleste ; un évanouissement y ramène (la règle D-34 retirée). Noms figés dans la sauvegarde ; `docs/LANTERNES.md` à jour (103 lanternes).
+- [ ] À vérifier sur téléphone : la lanterne se voit-elle à l'arrivée (dans le noir du fondu) ? le monde étrange garde-t-il assez de tension ?
+
+### Les lanternes, PR 1 : la lampe-tempête, la lumière bleu lune du voyage (D-179)
+
+- Monde réel : une lampe-tempête (éteinte, allumée) ; la veilleuse principale du voyage, la même en bleu lune (aussi sur la carte du sac). Mondes étranges : le champignon turquoise, inchangé.
+- Vérifié dans Chromium : les textures.
+- [ ] À vérifier sur téléphone : lisible en petit ? éteinte et allumée se distinguent-elles ? le bleu lune du voyage se voit-il ?
+
+### Le cahier : Céleste sur la carte, ses lunettes roses (D-178)
+
+- Le repère « je suis ici » : les lunettes rondes roses seules, comme le logo, sur un halo de papier.
+- [ ] À vérifier sur téléphone : assez visibles sur toutes les cartes ?
+
+### Le cahier : le nom des lignes de « Mon voyage » (D-177)
+
+- Toucher un pictogramme montre ce que la ligne compte, sous son chiffre, 3,5 s. Textes PLACEHOLDER, à valider.
+- Vérifié dans Chromium : le toucher, la coupure de ligne.
+- [ ] À vérifier sur téléphone : assez lisible ? les textes vous conviennent-ils ?
+
+### La console : choisir son niveau de départ (D-176)
+
+- Mode Niveaux : « ◀ Niveau N ▶ » sous le bouton, parmi les niveaux atteints dont la distance est connue ; la partie part du niveau choisi, le compteur des mètres cumulés, le record compte ; « Rejouer » revient au niveau choisi.
+- La sauvegarde de la console garde la distance au début de chaque niveau (`arcade.done`, facultative, sans migration). Les parties d'avant n'en ont pas : seul le niveau 1 au début, puis chaque niveau atteint de nouveau s'ajoute.
+- Vérifié dans Chromium : l'écran du mode et le sélecteur.
+- [ ] À vérifier sur téléphone : le sélecteur (taille des flèches au doigt), partir d'un niveau, le compteur, le record.
 
 ### Les images des trésors, des pochettes et des courts souvenirs (D-170)
 
@@ -2142,7 +2205,7 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 - **Allocation de la caméra** (profileur de tas de Chromium, boucle chaude de 120 000 pas, méthode de la Phase 1) : ~3 octets par pas au sol (un nombre de 12 octets tous les ~4 pas), le joueur restant à 0. Dichotomie : lié aux écritures des hauteurs de référence dans la branche « au sol », pas à la représentation des champs (un `Float64Array` ne change rien) ; cause V8 non identifiée. En jeu réel (Chromium, 20 s après 40 s de jeu), aucune allocation attribuée à la caméra, et Phaser alloue ~4,5 Ko par pas équivalent : impact négligeable. À revoir si des pauses de GC apparaissent sur téléphone.
 - Les fenêtres de timing supposent une arrivée en courant depuis l'arrêt, au bout de la plateforme de départ, et des entrées tenues parfaitement : elles mesurent la tolérance du saut, pas la difficulté au pouce.
-- Le choix « Parcours d'essai » du menu pause reste un outil de prototype, hors partie (D-25) : à retirer ou déplacer (overlay seulement) quand le level design sera validé.
+- Le choix « Parcours d'essai » (D-25) n'existe que dans le build de debug (D-59) : rien à retirer avant la diffusion.
 - La téléportation de l'overlay révèle la salle sur la carte (outil de debug, sauvegarde de test).
 
 - Entrées lues une fois par image : une pression peut tomber sur des pas différents selon la fréquence d'affichage (au plus une image d'écart). La physique elle-même est identique à toutes les fréquences (testé).
@@ -2159,6 +2222,7 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. Essai de la glissade (parcours 11) et du départ du train sur téléphone, réglages exportés du DEBUG.
-2. Le train, PR 3 à 6 (D-83).
-3. Avant d'offrir le jeu : la branche « avant diffusion » (D-152 : lanternes nommées, faites ; la revue des lanternes), puis les stats.
+1. ~~La console : choisir le niveau à jouer~~ (fait, D-176).
+2. Le cahier : revue avec l'utilisateur.
+3. Les lanternes : l'idée de l'utilisateur.
+4. Les sons au fil de l'eau (`docs/BRUITAGES.md`, liste par priorité), puis la diffusion privée.

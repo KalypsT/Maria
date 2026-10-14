@@ -485,6 +485,9 @@ export const PROP_KINDS = [
   'watering-can',
   'ticket',
   'letter',
+  /** Le hochet et la petite cuillère de Maria (D-180) : posés, ils quittent le décor pour le sac. */
+  'rattle',
+  'spoon',
   'postcard',
   'school-drawing',
   'family-drawing',

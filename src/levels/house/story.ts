@@ -214,6 +214,21 @@ export const HOUSE_STORY: StoryData = {
       ],
     },
     {
+      // Le hochet de Maria (D-180), en haut de la cage à écureuil de l'aire de jeux : un peu
+      // caché, facile. Agir le prend ; il quitte le décor pour le sac.
+      id: 'take-rattle',
+      room: 'playground',
+      on: 'interact',
+      area: { col: 32, row: 16, w: 5, h: 3 },
+      mark: { col: 34, row: 17 },
+      when: { none: [F.RattleTaken] },
+      lock: true,
+      steps: [
+        { do: 'flag', id: F.RattleTaken },
+        { do: 'memory', id: 'rattle' },
+      ],
+    },
+    {
       // Au matin, papa boit son café : il ne sait pas où est Maria, il console (D-37).
       id: 'morning-dad',
       room: 'kitchen',
@@ -1196,6 +1211,15 @@ export const HOUSE_STORY: StoryData = {
     { id: 'plant', room: 'kitchen', kind: 'plant', col: 42, row: 16, when: {} },
     // Les souvenirs de Céleste (D-169) : le petit arrosoir sur le premier bac du potager (pris, il
     // disparaît aussitôt), son dessin au mur de la classe.
+    {
+      id: 'rattle',
+      room: 'playground',
+      kind: 'rattle',
+      col: 34,
+      row: 18,
+      instant: true,
+      when: { none: [F.RattleTaken] },
+    },
     {
       id: 'watering-can',
       room: 'garden-vegetables',

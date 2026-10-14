@@ -81,13 +81,14 @@ describe('la fête engloutie (D-102)', () => {
     );
   });
 
-  it('difficile ; deux veilleuses, la seconde avant le saut long ; l’eau partout dessous', () => {
+  it('difficile ; trois veilleuses : l’arrivée (D-179), puis la seconde avant le saut long ; l’eau partout dessous', () => {
     const fair = level(FAIR);
     expect(fair.meta.difficulty).toBe('hard');
     const lamps = fair.entities.filter((e) => e.type === EntityType.Checkpoint);
     expect(lamps.map((e) => [e.col, e.row])).toEqual([
       [27, 3],
       [113, 13],
+      [9, 18],
     ]);
     // Les trois tronçons (vérifiés par legs.test.ts) : facile (saut mural), facile (crochet et
     // glissade), difficile (saut mural).

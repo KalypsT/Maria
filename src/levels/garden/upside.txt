@@ -26,6 +26,7 @@
 ; @decor: eyes 29 9 1 1
 ; @decor: eyes 52 14 1 1
 ; @decor: branch 41 13 2 1
+; @lantern: garden-upside-arrival 6 23
 ; Légende : # mur/sol, b bois, t tissu et v feuillage (pleins), - branche ou étagère et = planche (traversables), ^ orties (piquent), ! ronces (piquent aussi), e jouet mécanique, a araignée, C lanterne (checkpoint), P repère de départ, A objet de capacité, S coquille (nommée par ; @shell:), 1-9 sorties (liaisons dans zone.ts).
 vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 v......................................bb..................v
@@ -50,6 +51,6 @@ v.......................bbbb...............................v
 v...........bbbbb.......bbbb......bbb...bbbbbbbb...........v
 v...........bbbbb.......bbbb......bbb...bbbbbbbb...........v
 v...........bbbbb.---...bbbb......bbb...bbbbbbbb.---...---.v
-v..P........bbbbb.......bbbb......bbb...bbbbbbbb...........v
+v..P..C.....bbbbb.......bbbb......bbb...bbbbbbbb...........v
 ###########!#####!!!!!!!####!!!!!!###!!!########!!!!!!!!!!!#
 ############################################################
