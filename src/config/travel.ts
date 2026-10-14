@@ -3,8 +3,8 @@ import { StoryFlag as F } from './story';
 
 /**
  * Le voyage rapide (D-163) : les veilleuses qui se répondent. Une veilleuse principale par niveau,
- * une lanterne qui existe déjà (son nom fixe, D-152), choisie au carrefour du niveau. Elle devient
- * turquoise une fois le monde étrange du niveau traversé ; depuis n'importe quelle lanterne allumée
+ * une lanterne qui existe déjà (son nom fixe, D-152), choisie au carrefour du niveau. Sa lumière
+ * devient bleu lune (D-179) une fois le monde étrange du niveau traversé ; depuis n'importe quelle lanterne allumée
  * du monde réel, on peut alors y aller, si on pourrait y aller à pied à ce moment-là.
  */
 export interface TravelLantern {
@@ -59,6 +59,9 @@ export const TRAVEL = {
   fadeOutMs: 500,
   darkMs: 300,
   fadeInMs: 650,
-  /** Couleur de la veilleuse principale débloquée, sur la carte du sac (comme le monde étrange). */
-  mapColor: '#3fc9b6',
+  /**
+   * Lumière bleu lune de la veilleuse principale débloquée (D-179), dans le jeu et sur la carte du
+   * sac (le turquoise reste au monde étrange).
+   */
+  mapColor: '#7fa8ec',
 } as const;

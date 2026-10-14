@@ -6,6 +6,7 @@ import { PickupKind, type Pickups } from '../core/world/Pickups';
 import type { RunState } from '../core/world/RunState';
 import { drawShellFallback, drawShellGlint, shellSeed } from './art/shellArt';
 import { drawSticker } from './art/stickerArt';
+import { TRAVEL } from '../config/travel';
 
 const CHECKPOINT_OFF = 'checkpoint-off-placeholder';
 const CHECKPOINT_ON = 'checkpoint-on-placeholder';
@@ -22,17 +23,8 @@ const HEIGHT = 14;
 /** La gommette et son halo (px logiques). */
 const PICKUP_SIZE = ABILITY_STICKER.sizePx + 2 * ABILITY_STICKER.haloPx;
 
-/** Couleurs de la veilleuse : maison réelle, et monde étrange (turquoise, D-34). */
-const REAL_LAMP = {
-  foot: '#9a7352',
-  stem: '#9aa0b3',
-  stemLit: '#f7e3b0',
-  cap: '#6e7590',
-  capLit: '#ffcf7a',
-  dots: '#b9bfd0',
-  dotsLit: '#fff4d0',
-};
-const STRANGE_LAMP: typeof REAL_LAMP = {
+/** Couleurs de la veilleuse champignon des mondes étranges (turquoise, D-34). */
+const STRANGE_LAMP = {
   foot: '#1a2a33',
   stem: '#2c3e48',
   stemLit: '#c8fff4',
@@ -43,16 +35,28 @@ const STRANGE_LAMP: typeof REAL_LAMP = {
 };
 
 /**
- * La veilleuse principale débloquée (le voyage rapide, D-163) : la veilleuse du monde réel, son
- * chapeau turquoise comme celles du monde étrange (un peu d'étrange resté accroché). PLACEHOLDER.
+ * La lampe-tempête du monde réel (D-179, choix de l'utilisateur) : une petite lampe de métal peint,
+ * son verre et sa flamme. PLACEHOLDER.
  */
-const TRAVEL_LAMP: typeof REAL_LAMP = {
-  ...REAL_LAMP,
-  stemLit: '#d8fff6',
-  cap: '#4fa79b',
-  capLit: '#5ee6d2',
-  dots: '#a9ddd4',
-  dotsLit: '#effffb',
+const STORM_LAMP = {
+  metal: '#8a4f3d',
+  metalLit: '#a5634b',
+  glass: 'rgba(196, 204, 218, 0.75)',
+  glassLit: '#ffe3a0',
+  flame: '#ffb54a',
+  flameCore: '#fff4d0',
+};
+
+/**
+ * La veilleuse principale débloquée (le voyage rapide, D-163, D-179) : la lampe-tempête, sa
+ * lumière bleu lune (le turquoise reste au monde étrange). PLACEHOLDER.
+ */
+const TRAVEL_LAMP: typeof STORM_LAMP = {
+  ...STORM_LAMP,
+  glass: 'rgba(170, 195, 230, 0.8)',
+  glassLit: '#c7dcff',
+  flame: TRAVEL.mapColor,
+  flameCore: '#f1f6ff',
 };
 
 /**
@@ -363,25 +367,73 @@ export class WorldView {
       [TRAVEL_OFF, false, true],
       [TRAVEL_ON, true, true],
     ] as const) {
-      const c = travel ? TRAVEL_LAMP : this.strange ? STRANGE_LAMP : REAL_LAMP;
       make(key, WIDTH, HEIGHT, (ctx) => {
-        // Pied en bois, chapeau de champignon, petite fenêtre ronde.
-        ctx.fillStyle = c.foot;
-        ctx.beginPath();
-        ctx.roundRect(1, HEIGHT - 3, WIDTH - 2, 3, 1);
-        ctx.fill();
-        ctx.fillStyle = lit ? c.stemLit : c.stem;
-        ctx.fillRect(WIDTH / 2 - 1.5, HEIGHT - 10, 3, 7);
-        ctx.fillStyle = lit ? c.capLit : c.cap;
-        ctx.beginPath();
-        ctx.ellipse(WIDTH / 2, HEIGHT - 10, WIDTH / 2, 5, 0, Math.PI, 0);
-        ctx.fill();
-        ctx.fillStyle = lit ? c.dotsLit : c.dots;
-        ctx.beginPath();
-        ctx.arc(WIDTH / 2 - 1.5, HEIGHT - 12, 1, 0, Math.PI * 2);
-        ctx.arc(WIDTH / 2 + 2, HEIGHT - 13, 0.8, 0, Math.PI * 2);
-        ctx.fill();
+        if (this.strange && !travel) {
+          drawMushroomLamp(ctx, lit);
+        } else {
+          drawStormLamp(ctx, lit, travel ? TRAVEL_LAMP : STORM_LAMP);
+        }
       });
     }
   }
+}
+
+/** La veilleuse champignon des mondes étranges (D-34) : pied, chapeau, petits points. */
+function drawMushroomLamp(ctx: CanvasRenderingContext2D, lit: boolean): void {
+  const c = STRANGE_LAMP;
+  ctx.fillStyle = c.foot;
+  ctx.beginPath();
+  ctx.roundRect(1, HEIGHT - 3, WIDTH - 2, 3, 1);
+  ctx.fill();
+  ctx.fillStyle = lit ? c.stemLit : c.stem;
+  ctx.fillRect(WIDTH / 2 - 1.5, HEIGHT - 10, 3, 7);
+  ctx.fillStyle = lit ? c.capLit : c.cap;
+  ctx.beginPath();
+  ctx.ellipse(WIDTH / 2, HEIGHT - 10, WIDTH / 2, 5, 0, Math.PI, 0);
+  ctx.fill();
+  ctx.fillStyle = lit ? c.dotsLit : c.dots;
+  ctx.beginPath();
+  ctx.arc(WIDTH / 2 - 1.5, HEIGHT - 12, 1, 0, Math.PI * 2);
+  ctx.arc(WIDTH / 2 + 2, HEIGHT - 13, 0.8, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/**
+ * La lampe-tempête du monde réel (D-179) : le socle, le verre bombé et sa flamme (allumée), les
+ * deux montants, le chapeau, l'anse.
+ */
+function drawStormLamp(ctx: CanvasRenderingContext2D, lit: boolean, c: typeof STORM_LAMP): void {
+  const cx = WIDTH / 2;
+  const metal = lit ? c.metalLit : c.metal;
+  ctx.fillStyle = lit ? c.glassLit : c.glass;
+  ctx.beginPath();
+  ctx.ellipse(cx, HEIGHT - 5.5, 3.3, 3.6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  if (lit) {
+    ctx.fillStyle = c.flame;
+    ctx.beginPath();
+    ctx.moveTo(cx, HEIGHT - 8.4);
+    ctx.quadraticCurveTo(cx + 1.6, HEIGHT - 5.6, cx, HEIGHT - 4);
+    ctx.quadraticCurveTo(cx - 1.6, HEIGHT - 5.6, cx, HEIGHT - 8.4);
+    ctx.fill();
+    ctx.fillStyle = c.flameCore;
+    ctx.beginPath();
+    ctx.ellipse(cx, HEIGHT - 5, 0.6, 1, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.fillStyle = metal;
+  ctx.beginPath();
+  ctx.roundRect(1.5, HEIGHT - 2.2, WIDTH - 3, 2.2, 1);
+  ctx.fill();
+  ctx.fillRect(1.6, HEIGHT - 9, 0.9, 7);
+  ctx.fillRect(WIDTH - 2.5, HEIGHT - 9, 0.9, 7);
+  ctx.beginPath();
+  ctx.roundRect(2.2, HEIGHT - 10.4, WIDTH - 4.4, 1.8, 0.9);
+  ctx.fill();
+  ctx.fillRect(cx - 1, HEIGHT - 11.4, 2, 1.2);
+  ctx.strokeStyle = metal;
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.arc(cx, HEIGHT - 10.6, 2.4, Math.PI, 0);
+  ctx.stroke();
 }

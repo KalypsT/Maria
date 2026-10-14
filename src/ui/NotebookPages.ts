@@ -482,8 +482,8 @@ export class NotebookPages {
           ctx.stroke();
         }
       }
-      // La veilleuse principale débloquée (D-163), turquoise ; depuis une lanterne, celles où l'on
-      // peut aller palpitent, et la veilleuse choisie est cerclée.
+      // La veilleuse principale débloquée (D-163), bleu lune (D-179) ; depuis une lanterne,
+      // celles où l'on peut aller palpitent, et la veilleuse choisie est cerclée.
       if (room.travel) {
         const p = px(room.travel);
         const open = this.travel !== null && room.travel.open;

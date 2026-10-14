@@ -2,14 +2,14 @@
 
 Demande de l'utilisateur (branche « avant diffusion ») : refaire un tour de tous les niveaux pour s'assurer que les lanternes sont toutes bien placées, à des endroits cohérents. Pas d'obligation d'une lanterne par salle.
 
-**Réponses de l'utilisateur** : oui pour la plage (proposition B, faite : `sea-beach-point`), non pour le grand arbre (proposition A). La règle : **des points de sauvegarde utiles, sans trop simplifier le jeu**. Une lanterne coupe un retour vraiment long ou sert plusieurs passages ; elle ne se pose pas avant chaque difficulté, et un passage garde le coût de son échec. Questions 3 (l'aspect dehors) et 4 (les débuts des mondes étranges) : en attente ; rien n'est changé.
+**Réponses de l'utilisateur** : oui pour la plage (proposition B, faite : `sea-beach-point`), non pour le grand arbre (proposition A). La règle : **des points de sauvegarde utiles, sans trop simplifier le jeu**. Une lanterne coupe un retour vraiment long ou sert plusieurs passages ; elle ne se pose pas avant chaque difficulté, et un passage garde le coût de son échec. Question 3 (l'aspect) : une lampe-tempête dans tout le monde réel, la veilleuse champignon turquoise dans les mondes étranges (D-179). Question 4 (les débuts des mondes étranges) : **ajouter une lanterne à l'entrée** (choix de l'utilisateur, à faire : D-179, PR 2).
 
 ## Ce qu'est une lanterne dans le jeu
 
 - **Le point de retour** : après un évanouissement (danger, peur pleine, poursuivant), Céleste revient à la dernière lanterne allumée, **parfois dans une autre salle** (D-25). Une chute dans l'eau ou dans le vide ne compte pas : elle ramène au dernier appui.
 - **Le point de reprise** : « Continuer » après avoir quitté reprend à la dernière lanterne.
 - **Les mondes étranges** (D-34, D-49) : pas de lanterne à l'entrée, volontairement. Un évanouissement avant la première veilleuse turquoise ramène dans le monde réel, et l'entrée (le haut de la bibliothèque, le trou de la haie…) y ramène aussitôt, en version courte.
-- **Le dessin** : partout la même petite veilleuse champignon (blanche dans le monde réel, turquoise dans le monde étrange), posée sur sa tuile.
+- **Le dessin** (D-179, choix de l'utilisateur) : dans le monde réel, une **lampe-tempête** (lumière chaude ; la veilleuse principale du voyage rapide, lumière **bleu lune**) ; dans les mondes étranges, la **veilleuse champignon turquoise**. Posée sur sa tuile, même taille partout.
 
 ## Comment la revue a été faite
 
