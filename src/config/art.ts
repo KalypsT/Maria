@@ -734,6 +734,12 @@ export const TREASURE_SHARED_IMAGES: Readonly<Partial<Record<MemoryId, string>>>
 };
 
 /** Le nom d'élément de l'image d'un souvenir, dans `ART_IMAGES`. */
+/**
+ * Les trésors dont l'image est encore à fournir (D-180), dessinés par le code en attendant ; les
+ * prompts sont dans `docs/PROMPTS_PERSONNAGES.md`. À retirer d'ici quand l'image arrive.
+ */
+export const MEMORY_IMAGES_PENDING: readonly MemoryId[] = ['rattle', 'spoon'];
+
 export function memoryImageKey(id: MemoryId): string {
   return `memory-${id}`;
 }
