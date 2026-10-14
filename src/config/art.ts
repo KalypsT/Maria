@@ -1213,7 +1213,8 @@ export const CONSOLE_PALETTE: Readonly<ArtPalette> = {
  * A de D-130, « le crépuscule, mieux lu ») : fonds violets et bleu nuit, halos roses, des masses
  * violettes plutôt que noires, bords des surfaces praticables en turquoise, épais et surmontés d'une
  * lueur (lisibilité, pilier 1), un halo doux autour de Céleste. Chaque niveau la nuance
- * (`src/config/strangeThemes.ts`).
+ * (`src/config/strangeThemes.ts`). D-182 : un peu plus clair (les silhouettes des meubles se
+ * détachent des murs, l'obscurité et le vignettage moins forts), l'ambiance reste étrange.
  */
 export const STRANGE_PALETTE: Readonly<ArtPalette> = {
   ...REAL_PALETTE,
@@ -1224,28 +1225,28 @@ export const STRANGE_PALETTE: Readonly<ArtPalette> = {
   floor: '#1c1632',
   floorEdge: '#2b2347',
   structure: '#1c1632',
-  wood: '#231c3f',
-  woodLight: '#231c3f',
-  woodDark: '#181231',
-  fabric: '#231c3f',
-  fabricLight: '#231c3f',
-  linen: '#231c3f',
-  toy: '#231c3f',
-  toyLight: '#231c3f',
+  wood: '#312758',
+  woodLight: '#312758',
+  woodDark: '#211944',
+  fabric: '#312758',
+  fabricLight: '#312758',
+  linen: '#312758',
+  toy: '#312758',
+  toyLight: '#312758',
   curtain: '#1d1532',
   night: '#4b3b7c',
   nightLow: '#221a46',
   moon: '#ffd8ee',
   rim: 'rgba(140,240,225,0.95)',
   lamp: '255,160,210',
-  darkness: 0.42,
+  darkness: 0.34,
   silhouettes: true,
-  leaf: '#231c3f',
-  leafLight: '#231c3f',
-  leafDark: '#181231',
+  leaf: '#312758',
+  leafLight: '#312758',
+  leafDark: '#211944',
   // Déjà en silhouettes sur un fond sombre : pas de voile, un vignettage plus présent.
   veil: 0,
-  vignette: 0.5,
+  vignette: 0.4,
   vignetteColor: '6,4,16',
   rimWidth: 2,
   rimGlow: 0.35,
