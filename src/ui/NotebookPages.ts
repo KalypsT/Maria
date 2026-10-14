@@ -23,6 +23,19 @@ const TRAVEL_HIT_PX = 22;
  */
 const MAP_WASHES = ['#f3c7d2', '#c9dcef', '#f6e3a6', '#cfe5c4', '#ddd0ee'] as const;
 
+/**
+ * Ce que dit une ligne de « Mon voyage » quand on touche son pictogramme (D-177, PLACEHOLDER : à
+ * valider par l'utilisateur), et combien de temps (ms).
+ */
+const JOURNEY_TIPS: Readonly<Record<FigureIcon | 'shell', string>> = {
+  time: 'Le temps de mon voyage',
+  shell: 'Les coquilles trouvées',
+  memories: 'Mes souvenirs retrouvés',
+  places: 'Les lieux découverts',
+  faints: 'Les fois où je suis tombée dans les pommes',
+};
+const JOURNEY_TIP_MS = 3500;
+
 /** Durée du tracé d'une salle découverte depuis la dernière ouverture (ms). */
 const DRAW_IN_MS = 900;
 
@@ -102,6 +115,11 @@ export class NotebookPages {
   private travelPick: string | null = null;
   /** Les veilleuses où l'on peut aller, à leur place sur la page dessinée (px CSS). */
   private travelSpots: { x: number; y: number; lantern: string }[] = [];
+  /** Les pictogrammes de « Mon voyage » à leur place (px CSS), pour les toucher (D-177). */
+  private readonly journeySpots = Array.from({ length: 5 }, () => ({ x: 0, y: 0, size: 0 }));
+  /** La ligne dont le nom est montré (-1 : aucune), et depuis quand (`performance.now`). */
+  private journeyTip = -1;
+  private journeyTipAt = 0;
 
   constructor() {
     this.shellImage.src = `art/${ART_IMAGES['shell'] ?? 'shell.png'}`;
@@ -109,6 +127,7 @@ export class NotebookPages {
     this.canvas.className = 'notebook-canvas';
     this.canvas.addEventListener('click', (event) => {
       this.pickTravel(event);
+      this.pickJourney(event);
     });
   }
 
@@ -145,6 +164,21 @@ export class NotebookPages {
     this.travelPick = best;
   }
 
+  /** « Mon voyage » (D-177) : toucher un pictogramme montre ce qu'il compte ; le retoucher le cache. */
+  private pickJourney(event: MouseEvent): void {
+    if (this.page !== 'journey') {
+      return;
+    }
+    const rect = this.canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const hit = this.journeySpots.findIndex(
+      (spot) => x >= spot.x && x <= spot.x + spot.size && Math.abs(y - spot.y) <= spot.size / 2,
+    );
+    this.journeyTip = hit === this.journeyTip ? -1 : hit;
+    this.journeyTipAt = performance.now();
+  }
+
   /** Le contenu de cette ouverture du sac (les souvenirs, les capacités, les chiffres). */
   setContent(content: NotebookContent): void {
     this.abilities = new Set(content.abilities);
@@ -161,6 +195,7 @@ export class NotebookPages {
   /** Affiche une page et (re)lance le dessin, une image par rafraîchissement de l'écran. */
   show(page: NotebookPage): void {
     this.page = page;
+    this.journeyTip = -1;
     const tick = () => {
       this.draw(performance.now() - this.openedAt);
       this.frame = requestAnimationFrame(tick);
@@ -189,6 +224,7 @@ export class NotebookPages {
     const rose = themeColor('--crayon-rose');
     const blue = themeColor('--crayon-blue');
     const lamp = themeColor('--lamp');
+    const paper = themeColor('--paper');
     const font = getComputedStyle(document.body).fontFamily;
     const tally = (t: { found: number; total: number }) =>
       `${String(t.found)} / ${String(t.total)}`;
@@ -219,6 +255,10 @@ export class NotebookPages {
     const colW = width / cols;
     const rowH = Math.min(92, (height - 16) / perCol);
     const box = rowH * 0.74;
+    const tipOn =
+      this.journeyTip >= 0 && performance.now() - this.journeyTipAt < JOURNEY_TIP_MS
+        ? this.journeyTip
+        : -1;
     ctx.lineCap = 'round';
     rows.forEach((row, i) => {
       const col = Math.floor(i / perCol);
@@ -240,6 +280,29 @@ export class NotebookPages {
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'left';
       ctx.fillText(row.text, left + box + 18, cy);
+      const spot = this.journeySpots[i];
+      if (spot) {
+        spot.x = left;
+        spot.y = cy;
+        spot.size = box;
+      }
+      // Le nom de la ligne touchée (D-177), sous son chiffre, cerné de papier.
+      if (i === tipOn) {
+        const tipSize = Math.round(Math.max(12, Math.min(16, rowH * 0.18)));
+        ctx.font = `600 ${String(tipSize)}px ${font}`;
+        ctx.textBaseline = 'top';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = paper;
+        ctx.fillStyle = pencil;
+        const tx = left + box + 18;
+        let ty = cy + Math.min(30, rowH * 0.36) / 2 + 4;
+        for (const line of wrapText(ctx, JOURNEY_TIPS[row.icon], (col + 1) * colW - tx - 12)) {
+          ctx.strokeText(line, tx, ty);
+          ctx.fillText(line, tx, ty);
+          ty += tipSize * 1.2;
+        }
+      }
     });
   }
 

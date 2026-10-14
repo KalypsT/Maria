@@ -2862,3 +2862,10 @@ Retour d'essai de l'utilisateur (de la station balnéaire à la fin), plan valid
 - **Niveaux qu'on peut choisir** : atteints (`reached`) **et** dont la distance de départ est connue. Les parties d'avant D-176 n'ont pas de distances : on ne peut d'abord choisir que le niveau 1, puis chaque niveau atteint de nouveau s'ajoute.
 - **Le mode Sans fin** ne change pas (il part toujours du début).
 - **Tests** : `arcadeSave.test.ts` (les distances, le choix, la lecture), `arcadeRun.test.ts` (partir du niveau 4 : les mètres d'avant, le niveau suivant, le niveau de départ). Vérifié dans Chromium : l'écran du mode, le sélecteur, la partie lancée au niveau choisi.
+
+## D-177 — Le cahier : le nom des lignes de « Mon voyage »
+
+- **Demande de l'utilisateur** : un petit texte quand on touche les pictogrammes de « Mon voyage ».
+- **Toucher un pictogramme** montre ce que la ligne compte, sous son chiffre, au crayon gris cerné de papier, pendant 3,5 s (`JOURNEY_TIP_MS`) ; le retoucher le cache, un autre le remplace, changer de page l'efface. Coupé en deux lignes si la colonne est étroite.
+- **Les textes (PLACEHOLDER, à valider)** : « Le temps de mon voyage », « Les coquilles trouvées », « Mes souvenirs retrouvés », « Les lieux découverts », « Les fois où je suis tombée dans les pommes » (`JOURNEY_TIPS`, `NotebookPages.ts`). À la première personne, comme le cahier de Céleste.
+- Vérifié dans Chromium (844 × 390) : le toucher, la coupure de ligne.

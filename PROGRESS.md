@@ -7,7 +7,7 @@
 **Focus suivant** (choix de l'utilisateur) :
 
 - **La console** : le mode Sans fin convient. **Fait : choisir son niveau de départ en mode Niveaux** (D-176 : « ◀ Niveau N ▶ », mètres cumulés, le record compte, « Rejouer » revient au niveau choisi ; les distances des niveaux dans la sauvegarde, sans migration). En attente : essai sur téléphone.
-- **Le cahier** : pages et contenu à revalider avec l'utilisateur (D-157).
+- **Le cahier** : globalement bien (avis de l'utilisateur). **Fait : le nom des lignes de « Mon voyage » au toucher** (D-177, textes à valider). En attente : l'apparence du repère de Céleste sur la carte (à choisir).
 - **Les lanternes** : l'utilisateur a une idée de modification (questions 3 et 4 de `docs/LANTERNES.md` encore ouvertes).
 
 **Ouvert, plus tard** :
@@ -83,6 +83,12 @@ Les anciens paragraphes « Phase en cours », du plus récent au plus ancien ; l
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Le cahier : le nom des lignes de « Mon voyage » (D-177)
+
+- Toucher un pictogramme montre ce que la ligne compte, sous son chiffre, 3,5 s. Textes PLACEHOLDER, à valider.
+- Vérifié dans Chromium : le toucher, la coupure de ligne.
+- [ ] À vérifier sur téléphone : assez lisible ? les textes vous conviennent-ils ?
 
 ### La console : choisir son niveau de départ (D-176)
 
