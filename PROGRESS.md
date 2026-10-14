@@ -2,6 +2,26 @@
 
 ## Phase en cours
 
+**État au 14 octobre 2026** (état des lieux avec l'utilisateur) : le jeu se joue en entier, du premier soir à la fin (8 niveaux). Toutes les PR jusqu'à #108 (D-175) sont fusionnées dans `main`. La diffusion prévue est **privée** (famille, proches) : les droits de la musique et des bruitages, et l'écran de crédits, ne sont pas bloquants.
+
+**Focus suivant** (choix de l'utilisateur) :
+
+- **La console** : le mode Sans fin convient ; à ajouter, dans le mode Niveaux, **choisir le niveau à jouer** parmi ceux déjà débloqués. Plan à valider.
+- **Le cahier** : pages et contenu à revalider avec l'utilisateur (D-157).
+- **Les lanternes** : l'utilisateur a une idée de modification (questions 3 et 4 de `docs/LANTERNES.md` encore ouvertes).
+
+**Ouvert, plus tard** :
+
+- le sac à dos : le contenu des trésors et une récompense par famille complète, à revalider ;
+- le quartier (l'entrée de l'école, le fond du chantier) : l'utilisateur doit le réessayer ;
+- les images à revoir (le second Roger, le téléphone de la cuisine rose) ;
+- les sons manquants, par priorité : `docs/BRUITAGES.md` ; la musique `memory-play` ;
+- les réglages d'après les essais sur téléphone (mouvement, console, nuances des mondes étranges).
+
+## Historique des chantiers
+
+Les anciens paragraphes « Phase en cours », du plus récent au plus ancien ; le détail de chaque PR est dans « Fait ».
+
 **Le titre et le logo** (D-175, demande de l'utilisateur, sur `ccr-39a7edd3-hvpar5`) : **fait : le titre en Gaegu, majuscules, au crayon** (une couleur par lettre, le trait qui tremble, la police dans le dépôt et hors ligne). **Fait : le logo, les lunettes** (l'image fournie par l'utilisateur ; « MARIA » au crayon dessous sur les grandes icônes, les lunettes seules dans l'onglet ; toutes les icônes par `scripts/make-icons.py`). **En attente** : essai sur téléphone (le titre, l'icône de l'appli installée : la réinstaller pour voir la nouvelle).
 
 **Retour d'essai, du train à la fin** (D-171, sur `ccr-9663ce5d-4k7u2j`) : plan validé en 6 étapes, **toutes faites** : **1. l'écran noir au réveil de la fin** (corrigé : l'image de Maria dans les bras gardait une texture détruite) ; **2. la jetée** (le bassin aux canards retiré, les chaises volantes qui remontent doucement, le fil du retour hors de portée à l'aller, la guérite surélevée) ; **3. la vitesse sur les fils** (comme une poulie : accélère en descente, ralentit en montée ; 900, 300 px/s) ; **4. la maison de la nounou** (les portes vers l'îlot voisin seulement les deux îlots finis, la trappe et l'arche du carrousel redessinées, la couleur de chaque îlot, les passages éteints une fois finis, la voisine en écho étrange) ; **5. le souvenir d'Eden** (le tas qui diminue, les bulles du cache-cache, le rire d'Eden à fournir, la nounou qui regarde) ; **6. les retrouvailles** (Maria retrouvée dans le berceau géant de la chambre grande, la vue rapprochée, le trouble, Agir maintenu pour la serrer, le thème de fin, la chambre qui revient à sa taille). **En attente** : essai sur téléphone (les fils, la jetée, la nounou, Eden, les retrouvailles, le matin enfin jouable) ; le son `eden-giggle` ; la lettre de maman oubliée dans le train se retrouve maintenant au dortoir de la mer (corrigé à la demande de l'utilisateur).
@@ -2142,7 +2162,7 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 - **Allocation de la caméra** (profileur de tas de Chromium, boucle chaude de 120 000 pas, méthode de la Phase 1) : ~3 octets par pas au sol (un nombre de 12 octets tous les ~4 pas), le joueur restant à 0. Dichotomie : lié aux écritures des hauteurs de référence dans la branche « au sol », pas à la représentation des champs (un `Float64Array` ne change rien) ; cause V8 non identifiée. En jeu réel (Chromium, 20 s après 40 s de jeu), aucune allocation attribuée à la caméra, et Phaser alloue ~4,5 Ko par pas équivalent : impact négligeable. À revoir si des pauses de GC apparaissent sur téléphone.
 - Les fenêtres de timing supposent une arrivée en courant depuis l'arrêt, au bout de la plateforme de départ, et des entrées tenues parfaitement : elles mesurent la tolérance du saut, pas la difficulté au pouce.
-- Le choix « Parcours d'essai » du menu pause reste un outil de prototype, hors partie (D-25) : à retirer ou déplacer (overlay seulement) quand le level design sera validé.
+- Le choix « Parcours d'essai » (D-25) n'existe que dans le build de debug (D-59) : rien à retirer avant la diffusion.
 - La téléportation de l'overlay révèle la salle sur la carte (outil de debug, sauvegarde de test).
 
 - Entrées lues une fois par image : une pression peut tomber sur des pas différents selon la fréquence d'affichage (au plus une image d'écart). La physique elle-même est identique à toutes les fréquences (testé).
@@ -2159,6 +2179,7 @@ Sur https://kalypst.github.io/Maria/debug/ (après merge) ; parcours à choisir 
 
 ## Prochaines étapes
 
-1. Essai de la glissade (parcours 11) et du départ du train sur téléphone, réglages exportés du DEBUG.
-2. Le train, PR 3 à 6 (D-83).
-3. Avant d'offrir le jeu : la branche « avant diffusion » (D-152 : lanternes nommées, faites ; la revue des lanternes), puis les stats.
+1. La console : choisir le niveau à jouer dans le mode Niveaux (plan à valider).
+2. Le cahier : revue avec l'utilisateur.
+3. Les lanternes : l'idée de l'utilisateur.
+4. Les sons au fil de l'eau (`docs/BRUITAGES.md`, liste par priorité), puis la diffusion privée.

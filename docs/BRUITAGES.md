@@ -25,6 +25,42 @@ bon moment.
 Dans le monde étrange, les mêmes sons passent automatiquement par un filtre et un écho : pas de
 fichier en plus. **Pas d'ambiances pour l'instant** (décision de l'utilisateur).
 
+## Les sons manquants, par priorité (état du 14 octobre 2026)
+
+Classés d'après ce qu'on entend le plus souvent dans une partie, puis ce qui porte un moment fort.
+Les fichiers à fournir sont aussi dans la liste complète plus bas.
+
+**Priorité 1 : entendus sans arrêt, du premier au dernier niveau**
+
+1. `thought` : chaque bulle de pensée de Céleste (la plus fréquente du jeu, très douce).
+2. `ledge-grab` : se rattraper à un rebord (dès la maison).
+3. `wall-slide` (boucle) et `wall-jump` : le saut mural (dès le jardin, partout ensuite).
+4. `land-big` : la réception d'une grande chute.
+5. `door` : chaque porte de façade.
+6. `map-open` et `map-close` : le sac à dos (on l'ouvre souvent).
+7. `step-fabric` : les pas sur le lit, le canapé, les couchettes (la maison dès le début).
+
+**Priorité 2 : fréquents dans une partie de la partie**
+
+8. `slide` : la glissade (du train à la fin).
+9. `step-metal` : le toit du train, l'échafaudage, la voiture.
+10. `hint` : le fil discret.
+11. `chase-wake` et `chase-rumble` (boucle) : les poursuites (gare, train, mer).
+12. `attack`, `hit`, `enemy-scatter` : le bâton (combat secondaire).
+
+**Priorité 3 : un seul moment, mais un moment qui compte**
+
+13. `lullaby` (4 à 6 notes) : la berceuse du niveau 8.
+14. `erase` : l'effacement du niveau 7.
+15. `wave-warn` : la vague de la mer.
+16. `tunnel` : les tunnels du toit du train.
+17. `eden-giggle` : le rire d'Eden dans son souvenir.
+
+**Facultatif** : les cinq voix de Céleste (`voice-*`).
+
+**Musique** : `memory-play`, le thème des souvenirs jouables (la cuisine rose, Eden), aujourd'hui
+silencieux (`src/assets/audio/LISEZMOI.md`).
+
 ## La liste (tous branchés, chantier B, PR 1 et 2)
 
 ✅ : fourni (D-131, avec le nombre de variantes). Les autres sont encore à fournir.

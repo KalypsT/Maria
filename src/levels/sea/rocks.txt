@@ -3,7 +3,7 @@
 ; une faille (on glisse dessous à marée basse), puis l'arche de la grande aiguille et la pierre de la
 ; cheminée ; la cheminée (saut mural) monte au rocher de la lanterne. À gauche, l'aiguille du
 ; pêcheur et son câble (le crochet), le bloc de la grotte, la grande pierre percée, les marches et le
-; pied du phare (sa porte, la suite avec la PR 4). Marée basse : le fond, ses flaques et ses crabes ;
+; pied du phare (sa porte, D-100). Marée basse : le fond, ses flaques et ses crabes ;
 ; la grotte (on y entre couchée par la gauche) et sa coquille au-delà d'une flaque (défi, moyen : un
 ; saut long depuis la glissade, sous le plafond bas ; la flaque a perdu une tuile, D-148).
 ; Marée haute : les vagues balaient tout ce qui est sous leur ligne ; le saut bas sous l'arche est

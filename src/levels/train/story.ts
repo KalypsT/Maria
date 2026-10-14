@@ -12,8 +12,8 @@ import type {
  * du départ de la classe de mer : sur le quai, la maîtresse, les enfants et leurs sacs ; les
  * parents disent au revoir et restent sur le quai. Dans la voiture-couchettes, en route : la
  * camarade glisse sous la grille, Céleste l'imite (la glissade). Puis la nuit : tout le monde
- * dort, une lueur passe dans le couloir ; Céleste la suit jusqu'au bout de la voiture (la suite
- * avec la PR 3). Les personnages ne bougent jamais à l'écran : ils changent de place dans le noir.
+ * dort, une lueur passe dans le couloir ; Céleste la suit jusqu'au bout de la voiture (la suite :
+ * D-86). Les personnages ne bougent jamais à l'écran : ils changent de place dans le noir.
  */
 
 /** La porte ouverte du train à quai (D-69), sur le quai de droite des quais. */
@@ -263,8 +263,8 @@ const TRIGGERS: StoryTrigger[] = [
     // Fin du monde étrange du train (D-88) : au bout du train de la vaisselle, la cuisine rose, la
     // dînette d'enfance de Céleste. On la regarde, on ne la prend pas : un souvenir de la rubrique
     // « Monde étrange ». Le cercle se referme sur le souvenir jouable de la cuisine (D-89) ; puis
-    // Céleste est assise sur sa couchette, la nuit ; elle pense à Maria, puis à son lit.
-    // PLACEHOLDER : le matin vient avec la PR 6.
+    // Céleste est assise sur sa couchette, la nuit ; elle pense à Maria, puis à son lit (le matin :
+    // D-90).
     id: 'train-pink-kitchen',
     room: 'train-strange-dishes',
     on: 'interact',
@@ -613,7 +613,7 @@ const TIMES: StoryData['times'] = [
   { when: { all: [F.TrainBoarding] }, time: 'evening' },
 ];
 
-/** Le train roule une fois parti (l'arrivée vient avec la PR 6). */
+/** Le train roule une fois parti, jusqu'à l'arrivée à la gare de la mer (D-90). */
 const TRAIN_ROOMS = [
   'train-couchettes',
   'train-compartments',

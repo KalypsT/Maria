@@ -962,8 +962,8 @@ export function seaDrawers({ rounded, tileShape }: ShapeTools): Record<string, D
       }
     },
     lighthousefoot(a, r) {
-      // Le pied du phare (fond) : la tour blanche à bandes rouges, sur son rocher ; la porte, fermée
-      // pour l'instant (le phare vient avec la PR 4).
+      // Le pied du phare (fond) : la tour blanche à bandes rouges, sur son rocher ; la porte, sous la
+      // porte du phare (`; @door:` des rochers, D-100).
       const { ctx } = a;
       const ground = r.y + r.h;
       const tower = { x: r.x + 2 * T, y: r.y, w: r.w - 4 * T, h: r.h };

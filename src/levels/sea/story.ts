@@ -284,7 +284,7 @@ const TRIGGERS: StoryTrigger[] = [
     // carrousel étrange, le livre musical de quand Céleste était toute petite. On le regarde, on ne
     // le prend pas : un souvenir de la rubrique « Monde étrange ». Le cercle se referme ; Céleste est
     // assise sur sa couchette, au dortoir ; elle pense à Maria (la fin d'un monde étrange, D-70),
-    // puis à son lit. PLACEHOLDER : le court souvenir et la nuit viennent avec la PR 9.
+    // puis à son lit (le court souvenir et la nuit : D-105).
     id: 'sea-music-book',
     room: 'sea-strange-wave',
     on: 'interact',
