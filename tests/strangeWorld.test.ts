@@ -143,10 +143,10 @@ describe('monde étrange (D-34)', () => {
     expect(level('shadows').entities.filter((e) => e.type === EntityType.Shell)).toEqual([]);
   });
 
-  it('une seule veilleuse, dans le passage d’ombres', () => {
+  it('une veilleuse à l’arrivée (D-179), une dans le passage d’ombres', () => {
     const lamps = (room: string) =>
       level(room).entities.filter((e) => e.type === EntityType.Checkpoint).length;
-    expect(lamps('living-strange')).toBe(0);
+    expect(lamps('living-strange')).toBe(1);
     expect(lamps('shadows')).toBe(1);
   });
 });
