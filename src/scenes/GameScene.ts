@@ -21,7 +21,7 @@ import {
   msToSteps,
   type MovementParams,
 } from '../config/movement';
-import { CameraController } from '../core/camera/CameraController';
+import { CameraController, storyZoomCenter } from '../core/camera/CameraController';
 import { Chase, ChaseEvent } from '../core/boss/Chase';
 import { CombatEvent, CombatWorld, wavesOf } from '../core/combat/CombatWorld';
 import { FixedStepClock } from '../core/FixedStepClock';
@@ -533,6 +533,14 @@ export class GameScene extends Phaser.Scene {
   /** La vue rapprochée par l'histoire (D-171) : le rapprochement actuel et celui visé. */
   private storyZoom = 1;
   private storyZoomTarget = 1;
+  /**
+   * Le point regardé par une vue rapprochée (D-182) et son rapprochement : la vue s'y centre en se
+   * rapprochant, même dans une petite salle ; gardé jusqu'au retour à 1.
+   */
+  private storyFocusX = 0;
+  private storyFocusY = 0;
+  private storyZoomPeak = 1;
+  private readonly storyCenter = { x: 0, y: 0 };
   /** Maria dans les bras de Céleste (D-143) : l'image de Maria assise, tenue devant elle. */
   private heldMaria!: Phaser.GameObjects.Image;
   private readonly mapSeen = new Set<string>();
@@ -759,6 +767,11 @@ export class GameScene extends Phaser.Scene {
         } else {
           this.camera.focus((col + 0.5) * TILE_SIZE, (row + 0.5) * TILE_SIZE);
           this.storyZoomTarget = zoom;
+          if (zoom > 1) {
+            this.storyFocusX = (col + 0.5) * TILE_SIZE;
+            this.storyFocusY = (row + 0.5) * TILE_SIZE;
+            this.storyZoomPeak = zoom;
+          }
         }
       },
       haptic: (moment) => {
@@ -1259,10 +1272,28 @@ export class GameScene extends Phaser.Scene {
     );
     const main = this.cameras.main;
     this.stepStoryZoom(main);
-    main.centerOn(
-      camera.prevX + (camera.x - camera.prevX) * alpha,
-      camera.prevY + (camera.y - camera.prevY) * alpha,
-    );
+    const centerX = camera.prevX + (camera.x - camera.prevX) * alpha;
+    const centerY = camera.prevY + (camera.y - camera.prevY) * alpha;
+    if (this.storyZoom > 1) {
+      // Vue rapprochée (D-182) : centrée sur le point regardé, bornée avec la vue rapprochée.
+      const center = this.storyCenter;
+      storyZoomCenter(
+        center,
+        centerX,
+        centerY,
+        this.storyFocusX,
+        this.storyFocusY,
+        this.storyZoom,
+        this.storyZoomPeak,
+        camera.viewWidth,
+        camera.viewHeight,
+        this.level.width * TILE_SIZE,
+        this.level.height * TILE_SIZE,
+      );
+      main.centerOn(center.x, center.y);
+    } else {
+      main.centerOn(centerX, centerY);
+    }
     // Monde étrange (D-35) : présage en grimpant, effets, tremblement (visuel seulement).
     const fx = this.fx;
     const glimmer = this.glimmer();

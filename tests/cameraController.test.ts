@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_CAMERA, type CameraParams } from '../src/config/camera';
 import { GAME_HEIGHT, TILE_SIZE as T } from '../src/config/display';
 import { DEFAULT_MOVEMENT, PLAYER_HITBOX } from '../src/config/movement';
-import { CameraController } from '../src/core/camera/CameraController';
+import { CameraController, storyZoomCenter } from '../src/core/camera/CameraController';
 import { spawnPosition, type LevelData } from '../src/core/level/LevelData';
 import { parseAsciiLevel } from '../src/core/level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../src/core/player/PlayerPhysics';
@@ -364,5 +364,29 @@ describe('CameraController', () => {
     r.camera.reset(r.player);
     expect(r.camera.looking).toBe(false);
     expect(r.camera.x).toBeCloseTo(centerX(r.player));
+  });
+});
+
+describe('la vue rapprochée de l’histoire (D-182)', () => {
+  it('se centre sur le point regardé, même dans une salle qui tient dans l’écran', () => {
+    const out = { x: 0, y: 0 };
+    // La chambre : 736 × 352 px, la vue 779 × 360 : la caméra reste au centre de la salle.
+    storyZoomCenter(out, 368, 176, 312, 296, 1.6, 1.6, 779, 360, 736, 352);
+    // Vue rapprochée : 487 × 225 px ; la salle est plus large, le centre va vers Maria.
+    expect(out.x).toBeCloseTo(312);
+    // En hauteur, borné à la salle : la vue rapprochée touche le bas de la salle.
+    expect(out.y).toBeCloseTo(352 - 225 / 2);
+  });
+
+  it('glisse depuis la caméra à mesure que la vue se rapproche, et y revient', () => {
+    const out = { x: 0, y: 0 };
+    storyZoomCenter(out, 368, 176, 312, 296, 1, 1.6, 779, 360, 736, 352);
+    expect(out).toEqual({ x: 368, y: 176 });
+    storyZoomCenter(out, 368, 176, 312, 296, 1.3, 1.6, 779, 360, 736, 352);
+    expect(out.x).toBeGreaterThan(312);
+    expect(out.x).toBeLessThan(368);
+    // Sans rapprochement demandé, la caméra telle quelle.
+    storyZoomCenter(out, 368, 176, 312, 296, 1, 1, 779, 360, 736, 352);
+    expect(out).toEqual({ x: 368, y: 176 });
   });
 });

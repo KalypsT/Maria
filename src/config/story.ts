@@ -5,6 +5,11 @@ import type { PropKind } from '../core/story/story';
  * narratif est un PLACEHOLDER (§45), décrit en données dans `src/levels/<zone>/story.ts`.
  */
 export const StoryFlag = {
+  /**
+   * Le premier soir, à l'ouverture d'une nouvelle partie (D-182) : la vue va un instant jusqu'à
+   * Maria, assise sur le tapis, puis revient sur Céleste.
+   */
+  EveningLook: 'evening.look',
   /** Le soir : Céleste a joué avec Maria. */
   EveningPlayed: 'evening.played',
   /** Le soir : Céleste a pris la couverture de Maria sur l'étagère. */
@@ -390,13 +395,19 @@ export const STORY_TIMING = {
   reunionLookMs: 2600,
   reunionHoldMs: 3600,
   hugHoldMs: 1600,
+  /**
+   * Le premier soir (D-182) : le temps que l'image arrive, puis le regard posé sur Maria, avant que
+   * la vue revienne sur Céleste.
+   */
+  eveningLookDelayMs: 900,
+  eveningLookMs: 2400,
 } as const;
 
 /**
  * La vue qui se rapproche (étape `look` avec `zoom`, D-171) : le rapprochement au plus près, et le
  * temps pour y arriver ou en revenir (ms, à peu près). PROVISOIRE.
  */
-export const STORY_ZOOM = { reunion: 1.5, easeMs: 900 } as const;
+export const STORY_ZOOM = { reunion: 1.5, evening: 1.8, easeMs: 900 } as const;
 
 /**
  * L'écran de fin (D-145), sans texte : Maria seule sur son étagère. Il apparaît lentement ; après

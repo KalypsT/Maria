@@ -11,6 +11,37 @@ export interface CameraSubject {
   readonly grounded: boolean;
 }
 
+/**
+ * Centre de la vue pendant une vue rapprochée de l'histoire (D-171, D-182). La caméra borne son
+ * centre avec la vue entière ; rapprochée (`zoom` > 1), la vue est plus petite et peut aller plus
+ * près du point regardé, même dans une salle qui tient dans l'écran (la chambre). Le centre glisse
+ * de `base` (la caméra) vers ce point, borné à la salle avec la vue rapprochée, à mesure que le
+ * rapprochement monte vers `peak`. Pur ; écrit dans `out`.
+ */
+export function storyZoomCenter(
+  out: { x: number; y: number },
+  baseX: number,
+  baseY: number,
+  focusX: number,
+  focusY: number,
+  zoom: number,
+  peak: number,
+  viewWidth: number,
+  viewHeight: number,
+  boundsWidth: number,
+  boundsHeight: number,
+): void {
+  const blend = peak > 1 ? Math.min(1, Math.max(0, (zoom - 1) / (peak - 1))) : 0;
+  const clampAxis = (target: number, view: number, bounds: number): number => {
+    const half = view / (2 * Math.max(1, zoom));
+    return bounds <= half * 2 ? bounds / 2 : Math.min(bounds - half, Math.max(half, target));
+  };
+  const x = clampAxis(focusX, viewWidth, boundsWidth);
+  const y = clampAxis(focusY, viewHeight, boundsHeight);
+  out.x = baseX + (x - baseX) * blend;
+  out.y = baseY + (y - baseY) * blend;
+}
+
 /** Compteur « jamais » : grand entier, pour ne pas dépasser en incrémentant. */
 const NEVER = 1 << 30;
 
