@@ -29,7 +29,8 @@ const MAP_WASHES = ['#f3c7d2', '#c9dcef', '#f6e3a6', '#cfe5c4', '#ddd0ee'] as co
  * Ce que dit une ligne de « Mon voyage » quand on touche son pictogramme (D-177, PLACEHOLDER : à
  * valider par l'utilisateur), et combien de temps (ms).
  */
-const JOURNEY_TIPS: Readonly<Record<FigureIcon | 'shell', string>> = {
+const JOURNEY_TIPS: Readonly<Record<FigureIcon | 'shell' | 'journey', string>> = {
+  journey: 'Mon voyage accompli',
   time: 'Le temps de mon voyage',
   shell: 'Les coquilles trouvées',
   memories: 'Mes souvenirs retrouvés',
@@ -118,7 +119,7 @@ export class NotebookPages {
   /** Les veilleuses où l'on peut aller, à leur place sur la page dessinée (px CSS). */
   private travelSpots: { x: number; y: number; lantern: string }[] = [];
   /** Les pictogrammes de « Mon voyage » à leur place (px CSS), pour les toucher (D-177). */
-  private readonly journeySpots = Array.from({ length: 5 }, () => ({ x: 0, y: 0, size: 0 }));
+  private readonly journeySpots = Array.from({ length: 6 }, () => ({ x: 0, y: 0, size: 0 }));
   /** La ligne dont le nom est montré (-1 : aucune), et depuis quand (`performance.now`). */
   private journeyTip = -1;
   private journeyTipAt = 0;
@@ -213,7 +214,7 @@ export class NotebookPages {
 
   /**
    * Page « Mon voyage » (D-153, choix de l'utilisateur) : peu de texte, un pictogramme et un chiffre
-   * par ligne : le temps de jeu, les coquilles, les souvenirs, les lieux découverts, les
+   * par ligne : l'avancement du voyage (D-180), le temps de jeu, les coquilles, les souvenirs, les lieux découverts, les
    * évanouissements (une petite lune). Deux colonnes en paysage.
    */
   private drawJourney(ctx: CanvasRenderingContext2D, width: number, height: number): void {
@@ -230,7 +231,14 @@ export class NotebookPages {
     const font = getComputedStyle(document.body).fontFamily;
     const tally = (t: { found: number; total: number }) =>
       `${String(t.found)} / ${String(t.total)}`;
-    const rows: { icon: FigureIcon | 'shell'; text: string; accent: string; full: boolean }[] = [
+    const rows: {
+      icon: FigureIcon | 'shell' | 'journey';
+      text: string;
+      accent: string;
+      full: boolean;
+    }[] = [
+      // L'avancement du voyage (D-180), en tête.
+      { icon: 'journey', text: `${String(f.percent)} %`, accent: rose, full: f.percent >= 100 },
       { icon: 'time', text: formatPlayTime(f.playMs), accent: lamp, full: false },
       {
         icon: 'shell',
@@ -273,6 +281,8 @@ export class NotebookPages {
       ctx.stroke();
       if (row.icon === 'shell') {
         this.drawShell(ctx, left + box / 2, cy, box * 0.56);
+      } else if (row.icon === 'journey') {
+        drawJourneyRing(ctx, left + box / 2, cy, box * 0.32, f.percent, pencil, rose);
       } else {
         drawFigureIcon(ctx, row.icon, left + box / 2, cy, box * 0.78, ink, row.accent);
       }
@@ -986,6 +996,43 @@ function drawTreasureOutline(
   ctx.setLineDash([3, 2]);
   ctx.stroke();
   ctx.setLineDash([]);
+}
+
+/**
+ * L'avancement du voyage (D-180) : un cercle au crayon, la part faite repassée en rose depuis le
+ * haut, une petite étoile au milieu.
+ */
+function drawJourneyRing(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  r: number,
+  percent: number,
+  pencil: string,
+  rose: string,
+): void {
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = pencil;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.stroke();
+  if (percent > 0) {
+    ctx.strokeStyle = rose;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(x, y, r, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * percent) / 100);
+    ctx.stroke();
+  }
+  ctx.fillStyle = rose;
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const d = i % 2 === 0 ? r * 0.45 : r * 0.2;
+    ctx.lineTo(x + Math.cos(a) * d, y + Math.sin(a) * d);
+  }
+  ctx.closePath();
+  ctx.fill();
 }
 
 /** Coupe un texte en lignes qui tiennent dans `maxWidth` (px), mot par mot. */

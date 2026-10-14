@@ -1,6 +1,7 @@
 import { MARIA_THINGS, MEMORIES, MEMORIES_LATER, STRANGE_THINGS } from '../../config/memories';
 import type { SaveData } from '../save/saveData';
 import { totalFaints } from '../save/stats';
+import { journeyProgress } from './journeyProgress';
 import { zoneShells } from './shells';
 import { isMappedRoom, type Zone } from './zone';
 
@@ -21,11 +22,13 @@ export interface NotebookFigures {
   readonly memories: Tally;
   readonly places: Tally;
   readonly faints: number;
+  /** L'avancement du voyage (D-180), de 0 à 100. */
+  readonly percent: number;
 }
 
 export function notebookFigures(
   zone: Zone,
-  data: Pick<Readonly<SaveData>, 'stats' | 'progression'>,
+  data: Pick<Readonly<SaveData>, 'stats' | 'progression' | 'story'>,
 ): NotebookFigures {
   const { collectibles, memories, mapRevealed } = data.progression;
   const shells = zoneShells(zone);
@@ -54,5 +57,6 @@ export function notebookFigures(
     },
     places: { found: visited, total: rooms },
     faints: totalFaints(data.stats),
+    percent: journeyProgress(zone, data).percent,
   };
 }

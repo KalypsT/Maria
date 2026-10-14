@@ -19,6 +19,7 @@ describe('la page « Mon voyage » du cahier (D-153)', () => {
       memories: { found: 0, total: MEMORIES.length + MARIA_THINGS.length + STRANGE_THINGS.length },
       places: { found: 0, total: mapped },
       faints: 0,
+      percent: 0,
     });
   });
 
