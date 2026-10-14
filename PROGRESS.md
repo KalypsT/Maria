@@ -4,6 +4,8 @@
 
 **État au 14 octobre 2026** (état des lieux avec l'utilisateur) : le jeu se joue en entier, du premier soir à la fin (8 niveaux). Toutes les PR jusqu'à #108 (D-175) sont fusionnées dans `main`. La diffusion prévue est **privée** (famille, proches) : les droits de la musique et des bruitages, et l'écran de crédits, ne sont pas bloquants.
 
+**Revue avant la sortie privée** (14 octobre, demande de l'utilisateur, sur `ccr-5ce2aae4-wsgcf2`) : `docs/REVUE_SORTIE.md` (ce qui manque et ce qui peut être amélioré, par priorité, et un plan pour le week-end). En attente : les réponses de l'utilisateur (sa joueuse, son téléphone, la dédicace, le dépôt public), puis le choix des corrections.
+
 **Focus suivant** (choix de l'utilisateur) :
 
 - **La console** : le mode Sans fin convient. **Fait : choisir son niveau de départ en mode Niveaux** (D-176 : « ◀ Niveau N ▶ », mètres cumulés, le record compte, « Rejouer » revient au niveau choisi ; les distances des niveaux dans la sauvegarde, sans migration). En attente : essai sur téléphone.
