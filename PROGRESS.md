@@ -8,14 +8,13 @@
 
 - **La console** : le mode Sans fin convient. **Fait : choisir son niveau de départ en mode Niveaux** (D-176 : « ◀ Niveau N ▶ », mètres cumulés, le record compte, « Rejouer » revient au niveau choisi ; les distances des niveaux dans la sauvegarde, sans migration). En attente : essai sur téléphone.
 - **Le cahier** : globalement bien (avis de l'utilisateur). **Fait : le nom des lignes de « Mon voyage » au toucher** (D-177, textes à valider). **Fait : Céleste sur la carte, ses lunettes roses** (D-178).
-- **L'avancement du voyage** (D-180, plan en 3 PR) : un pourcentage dans le cahier (moitié l'histoire, moitié les trouvailles), les jalons séparés des trouvailles, le hochet et la petite cuillère de Maria. **PR 1 faite : le système.** **PR 2 faite : le cahier** (le pourcentage en tête de « Mon voyage », les jalons « plus loin »). **PR 3 faite : le hochet** (en haut de la cage à écureuil) **et la petite cuillère** (sur une étagère des objets trouvés). **Le plan est complet.** Suite : leurs images (prompts dans `docs/PROMPTS_PERSONNAGES.md`) ; essai sur téléphone.
+- **L'avancement du voyage** (D-180, plan en 3 PR) : un pourcentage dans le cahier (moitié l'histoire, moitié les trouvailles), les jalons séparés des trouvailles, le hochet et la petite cuillère de Maria. **PR 1 faite : le système.** **PR 2 faite : le cahier** (le pourcentage en tête de « Mon voyage », les jalons « plus loin »). **PR 3 faite : le hochet** (en haut de la cage à écureuil) **et la petite cuillère** (sur une étagère des objets trouvés). **Le plan est complet.** Leurs images sont reçues (D-181). Suite : essai sur téléphone.
 - **Les lanternes** (D-179, plan en 2 PR) : **PR 1 faite : la lampe-tempête dans le monde réel, la lumière bleu lune du voyage rapide**, le champignon turquoise gardé dans les mondes étranges. **PR 2 faite : une lanterne à l'arrivée de chaque monde étrange** (six, la règle D-34 retirée). **Le plan des lanternes est complet.** Suite : essai sur téléphone.
 
 **Ouvert, plus tard** :
 
 - le sac à dos : le contenu des trésors et une récompense par famille complète, à revalider ;
 - le quartier (l'entrée de l'école, le fond du chantier) : l'utilisateur doit le réessayer ;
-- les images à revoir (le second Roger, le téléphone de la cuisine rose) ;
 - les sons manquants, par priorité : `docs/BRUITAGES.md` ; la musique `memory-play` ;
 - les réglages d'après les essais sur téléphone (mouvement, console, nuances des mondes étranges).
 

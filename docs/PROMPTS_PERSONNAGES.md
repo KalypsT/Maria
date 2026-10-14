@@ -791,6 +791,6 @@ hors ligne).
 ### Reçues (D-170)
 
 Toutes les images ci-dessus sont reçues et intégrées (`public/art/memory-*.webp`, `record-*.webp`,
-`flashback-*.jpg`). Retouches possibles, si l'utilisateur le souhaite : retirer le second Roger,
-flou, au fond de `flashback-roger` ; retirer le téléphone de `memory-pink-kitchen` ; les cheveux de
-Céleste plus foncés dans `flashback-music-book` et `flashback-white-cloth`.
+`flashback-*.jpg`). Retouches faites (D-181) : le second Roger retiré de `flashback-roger`, le téléphone retiré de
+`memory-pink-kitchen`, les cheveux de Céleste châtains dans `flashback-music-book` et
+`flashback-white-cloth`. Le hochet et la petite cuillère de Maria (D-180) : reçus aussi.

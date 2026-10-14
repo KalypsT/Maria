@@ -589,8 +589,8 @@ export const PROP_SIZE = {
   // Les souvenirs de Céleste (D-169). Le dessin de toute la famille couvre celui de la chambre.
   'watering-can': { w: 13, h: 10 },
   // Le hochet et la petite cuillère de Maria (D-180).
-  rattle: { w: 8, h: 10 },
-  spoon: { w: 10, h: 5 },
+  rattle: { w: 7, h: 11 },
+  spoon: { w: 10, h: 11 },
   ticket: { w: 11, h: 6 },
   letter: { w: 8, h: 11 },
   postcard: { w: 11, h: 8 },

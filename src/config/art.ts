@@ -717,6 +717,8 @@ export const MEMORY_IMAGES: Readonly<Partial<Record<MemoryId, string>>> = {
   bottle: 'memory-bottle.webp',
   headband: 'memory-headband.webp',
   bonnet: 'memory-bonnet.webp',
+  rattle: 'memory-rattle.webp',
+  spoon: 'memory-spoon.webp',
   // Le monde étrange (D-170) ; Roger et l'Educaville ont déjà leur image.
   'pink-kitchen': 'memory-pink-kitchen.webp',
   'music-book': 'memory-music-book.webp',
@@ -738,7 +740,7 @@ export const TREASURE_SHARED_IMAGES: Readonly<Partial<Record<MemoryId, string>>>
  * Les trésors dont l'image est encore à fournir (D-180), dessinés par le code en attendant ; les
  * prompts sont dans `docs/PROMPTS_PERSONNAGES.md`. À retirer d'ici quand l'image arrive.
  */
-export const MEMORY_IMAGES_PENDING: readonly MemoryId[] = ['rattle', 'spoon'];
+export const MEMORY_IMAGES_PENDING: readonly MemoryId[] = [];
 
 export function memoryImageKey(id: MemoryId): string {
   return `memory-${id}`;
