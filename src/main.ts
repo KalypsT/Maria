@@ -1,13 +1,21 @@
 import Phaser from 'phaser';
 import { PLACEHOLDER_COLORS, type DisplaySettings } from './config/display';
 import { computeGameWidth, computeRenderScale, renderSize } from './core/gameSize';
-import { SaveLibrary } from './core/save/SaveLibrary';
+import { SAVE_SLOTS, SaveLibrary } from './core/save/SaveLibrary';
+import type { SaveManager } from './core/save/SaveManager';
+import type { SlotSummary } from './core/save/slots';
 import { SaveSession, SettingsSession } from './core/save/SaveSession';
 import { createNewSave, type SaveData } from './core/save/saveData';
 import { migrateLegacySettings, type GameSettings } from './core/save/settingsData';
-import { roomName, startRoom } from './levels';
+import { startRoom } from './levels';
 import { openBrowserSaveStorage, requestPersistentStorage } from './platform/browserSaveStorage';
-import { AUDIO_KEY, DISPLAY_SETTINGS_EVENT, GameScene, SESSION_KEY } from './scenes/GameScene';
+import {
+  AUDIO_KEY,
+  DISPLAY_SETTINGS_EVENT,
+  GameScene,
+  LIBRARY_KEY,
+  SESSION_KEY,
+} from './scenes/GameScene';
 import { AudioPlayer } from './platform/audioPlayer';
 import { installHint } from './core/platform/install';
 import { installEnvironment, Pwa } from './platform/pwa';
@@ -40,7 +48,12 @@ function newGame(): SaveData {
   return createNewSave(startRoom().level.id, Date.now());
 }
 
-function startGame(parent: HTMLElement, session: SaveSession, audio: AudioPlayer): Phaser.Game {
+function startGame(
+  parent: HTMLElement,
+  session: SaveSession,
+  audio: AudioPlayer,
+  library: SaveLibrary,
+): Phaser.Game {
   let display: DisplaySettings = session.settings.data.display;
   /** Taille du canvas : largeur logique (D-01) × échelle de rendu (D-18). */
   const canvasSize = () => {
@@ -66,6 +79,7 @@ function startGame(parent: HTMLElement, session: SaveSession, audio: AudioPlayer
     scene: [GameScene],
   });
   game.registry.set(SESSION_KEY, session);
+  game.registry.set(LIBRARY_KEY, library);
   game.registry.set(AUDIO_KEY, audio);
   const fitGameSize = () => {
     const { width, height } = canvasSize();
@@ -145,34 +159,42 @@ async function boot(): Promise<void> {
   const library = new SaveLibrary(await openBrowserSaveStorage());
   const opened = await library.open(legacySettings);
   const settings = new SettingsSession(library.settingsManager, opened.settings);
-  const slot = opened.lastSlot;
-  const manager = library.slotManager(slot);
-  const report = await manager.load();
-  const saved = report.data;
+  // Toutes les parties chargées, pour l'accueil et sa page des parties (D-184).
+  const managers = new Map(SAVE_SLOTS.map((slot) => [slot, library.slotManager(slot)]));
+  const summaries: SlotSummary[] = await Promise.all(
+    [...managers].map(async ([slot, manager]) => ({ slot, report: await manager.load() })),
+  );
+  const managerOf = (slot: number): SaveManager => managers.get(slot) ?? library.slotManager(slot);
   // Musique (D-57) : thème de l'accueil, qui démarre au premier toucher.
   const audio = new AudioPlayer(settings.data.audio);
   audio.setMusic('title');
   const choice = await showTitleScreen(
-    report,
-    saved ? roomName(saved.checkpoint.levelId) : null,
+    {
+      summaries,
+      lastSlot: opened.lastSlot,
+      erase: (slot) =>
+        managerOf(slot)
+          .clear()
+          .then(
+            () => true,
+            () => false,
+          ),
+    },
     pwa,
     installHint(installEnvironment()),
   );
   // Demandé après un geste de l'utilisateur : certains navigateurs l'exigent.
   void requestPersistentStorage();
+  const saved = summaries.find((s) => s.slot === choice.slot)?.report.data ?? null;
   const data =
-    choice.kind === 'continue' && saved
-      ? saved
-      : choice.kind === 'import'
-        ? choice.data
-        : newGame();
-  const session = new SaveSession(manager, data, Date.now, settings);
-  void library.setLastSlot(slot);
-  if (choice.kind !== 'continue') {
+    choice.kind === 'play' && saved ? saved : choice.kind === 'import' ? choice.data : newGame();
+  const session = new SaveSession(managerOf(choice.slot), data, Date.now, settings, choice.slot);
+  if (choice.kind !== 'play') {
     // Nouvelle partie ou import : écrite tout de suite (l'ancienne devient l'état précédent).
     await session.persist();
   }
-  const game = startGame(parent, session, audio);
+  void library.setLastSlot(choice.slot);
+  const game = startGame(parent, session, audio, library);
   crash.session = session;
   crash.game = game;
   game.events.on(Phaser.Core.Events.POST_RENDER, () => {

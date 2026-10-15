@@ -112,6 +112,7 @@ import { showEndScreen } from '../ui/EndScreen';
 import { ShellJarView } from './ShellJarView';
 import { HideoutView } from './HideoutView';
 import { hideAt } from '../core/fx/hideouts';
+import type { SaveLibrary } from '../core/save/SaveLibrary';
 import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
 import {
   ART_IMAGES,
@@ -251,6 +252,8 @@ const HELD_MARIA_TEXTURE = 'prop-maria-sit';
 const HELD_MARIA_AT = { x: 2, xPerBody: 3.5, yPerBody: -10 } as const;
 /** Clé du registre Phaser où main.ts dépose la partie en cours (D-22). */
 export const SESSION_KEY = 'maria-session';
+/** Les parties de l'appareil (D-184), pour le debug. */
+export const LIBRARY_KEY = 'maria-library';
 /** Clé du registre où main.ts dépose le lecteur de musique (D-57). */
 export const AUDIO_KEY = 'maria-audio';
 
@@ -547,6 +550,8 @@ export class GameScene extends Phaser.Scene {
   /** Changement de salle en cours (D-25). */
   readonly transition = new RoomTransition(this.worldParams);
   session!: SaveSession;
+  /** Les parties de l'appareil (D-184) : pour le debug ; absentes hors du démarrage normal. */
+  library: SaveLibrary | null = null;
   private worldView!: WorldView;
   /** Le bocal à coquilles de la chambre (D-148). */
   private shellJar!: ShellJarView;
@@ -691,6 +696,7 @@ export class GameScene extends Phaser.Scene {
 
   create(): void {
     this.session = this.registry.get(SESSION_KEY) as SaveSession;
+    this.library = (this.registry.get(LIBRARY_KEY) as SaveLibrary | undefined) ?? null;
     this.audio = this.registry.get(AUDIO_KEY) as AudioPlayer;
     this.story = new StoryDirector(HOUSE_STORY, {
       flagCleared: (id) => {

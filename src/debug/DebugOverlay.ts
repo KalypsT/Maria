@@ -21,6 +21,7 @@ import { DEFAULT_WORLD, WORLD_PARAM_RANGES, type WorldParams } from '../config/w
 import { DEFAULT_PUPPET, PUPPET_PARAM_RANGES, type PuppetParams } from '../config/puppet';
 import { ART_FINISH_RANGES, DEFAULT_ART_FINISH, type ArtFinish } from '../config/art';
 import { EntityType } from '../core/level/LevelData';
+import { SAVE_SLOTS } from '../core/save/SaveLibrary';
 import { deserializeSave } from '../core/save/saveData';
 import { deserializeSettings } from '../core/save/settingsData';
 import { formatPlayTime, statsByPlace, totalFaints } from '../core/save/stats';
@@ -2328,10 +2329,22 @@ export function installDebugOverlay(scene: GameScene): void {
     const checkpoints = scene.run.checkpoints
       .map((c, i) => `${c.id}${c.activated ? ' ✓' : ''}${i === scene.run.current ? ' ←' : ''}`)
       .join('  ');
+    // Les autres parties (D-184) : leur état, sans les charger dans le jeu.
+    let others = '';
+    const library = scene.library;
+    if (library) {
+      for (const slot of SAVE_SLOTS) {
+        if (slot !== scene.session.slot) {
+          const other = await library.slotStorage(slot).read();
+          others += `partie ${String(slot)} : ${describe(other.main)}, précédent ${describe(other.previous)}\n`;
+        }
+      }
+    }
     saveInfo.textContent =
-      `stockage ${manager.storage.kind}${manager.lastError ? `  erreur : ${manager.lastError}` : ''}\n` +
+      `partie ${String(scene.session.slot)}, stockage ${manager.storage.kind}${manager.lastError ? `  erreur : ${manager.lastError}` : ''}\n` +
       `principal ${describe(slots.main)}\nprécédent ${describe(slots.previous)}\n` +
       `réglages ${describeSettings(settingsSlots.main)}, précédent ${describeSettings(settingsSlots.previous)}${settingsManager.lastError ? `  erreur : ${settingsManager.lastError}` : ''}\n` +
+      others +
       `checkpoints ${checkpoints || '(aucun)'}\n\n${JSON.stringify(scene.session.data, null, 1)}\n\n` +
       JSON.stringify(scene.session.settings.data, null, 1);
   };
@@ -2360,7 +2373,7 @@ export function installDebugOverlay(scene: GameScene): void {
         .then(refreshSave);
     },
   );
-  element('button', saveActions, undefined, 'Effacer la sauvegarde').addEventListener(
+  element('button', saveActions, undefined, 'Effacer cette partie').addEventListener(
     'click',
     () => {
       void scene.session.manager.clear().then(() => {

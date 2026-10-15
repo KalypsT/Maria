@@ -881,6 +881,92 @@ body {
   opacity: 0.8;
 }
 
+/* La page des parties (D-184) : trois cartes de cahier, à la place du menu. */
+#title-screen.title-slots-open .title-celeste,
+#title-screen.title-slots-open .title-maria {
+  display: none;
+}
+
+.title-panel h2.title-slots-heading {
+  margin: 0;
+  font: 700 clamp(22px, 6vh, 32px) / 1.1 var(--ui-font);
+  color: var(--crayon-blue);
+}
+
+.title-slots {
+  display: flex;
+  gap: min(2.5vw, 18px);
+  justify-content: center;
+}
+
+.title-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  width: min(29vw, 220px);
+}
+
+.title-panel .title-slot-open {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  min-height: min(58vh, 250px);
+  padding: 8px 6px;
+  border-radius: var(--sketch-radius-panel);
+  background: var(--paper-light);
+  box-shadow: 2px 3px 0 var(--drop-shadow);
+}
+
+.title-slot-empty .title-slot-open {
+  border-style: dashed;
+  background: transparent;
+  box-shadow: none;
+}
+
+.title-slot-portrait {
+  height: min(26vh, 120px);
+  width: auto;
+  margin-bottom: 2px;
+  pointer-events: none;
+}
+
+.title-slot-name {
+  font-weight: 700;
+}
+
+.title-slot-room {
+  font-size: 0.85rem;
+}
+
+.title-slot-line {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.title-slot-new {
+  margin-top: 6px;
+  color: var(--crayon-rose);
+  font-weight: 600;
+}
+
+.title-panel button.title-slot-erase {
+  min-width: 0;
+  min-height: 32px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.title-panel button.title-slot-erase.title-confirm {
+  border-color: var(--warning-ink);
+  color: var(--warning-ink);
+  opacity: 1;
+}
+
 /* Code de sauvegarde (export / import), ouvert depuis le sac : au-dessus de lui. */
 .save-dialog {
   position: fixed;

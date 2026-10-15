@@ -67,6 +67,8 @@ export class SaveSession {
     private readonly now: () => number = Date.now,
     /** Les réglages de l'appareil (D-184), hors de la partie. */
     readonly settings: SettingsSession = SettingsSession.inMemory(),
+    /** Le numéro de la partie (D-184), de 1 à `SAVE_SLOT_COUNT`. */
+    readonly slot = 1,
   ) {}
 
   get data(): Readonly<SaveData> {
