@@ -169,8 +169,12 @@ export function playIntro(audio: IntroAudio): Promise<() => void> {
       window.removeEventListener('keydown', onKey);
       document.removeEventListener('visibilitychange', onVisibility);
       skipButton.hidden = true;
+      // Les images et les canvas de travail ne servent plus : la mémoire revient au jeu.
+      images = null;
+      buffer.width = buffer.height = vignette.width = vignette.height = 0;
       resolve(() => {
         root.remove();
+        canvas.width = canvas.height = 0;
       });
     };
 
