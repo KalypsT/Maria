@@ -1,19 +1,24 @@
-import { DEFAULT_CONTROL_SETTINGS, type ControlSettings } from '../../config/controls';
-import { DEFAULT_DISPLAY_SETTINGS, type DisplaySettings } from '../../config/display';
-import { DEFAULT_AUDIO_SETTINGS, type AudioSettings } from '../../config/audio';
-import { parseControlSettings, sanitizeControlSettings } from '../settings/controlSettings';
-import { parseDisplaySettings, sanitizeDisplaySettings } from '../settings/displaySettings';
-import { sanitizeAudioSettings } from '../settings/audioSettings';
 import { LEGACY_STORY_FLAGS } from '../../config/story';
 import type { LevelEntity } from '../level/LevelData';
 import { createArcade, sanitizeArcade, type ArcadeSave } from './arcade';
 import { createStats, sanitizeStats, type GameStats } from './stats';
+import {
+  checksum,
+  isRecord,
+  readRecord,
+  writeRecord,
+  type DecodeResult as RecordDecodeResult,
+  type SaveProblem,
+} from './checksum';
+import { sanitizeSettings, type GameSettings } from './settingsData';
+
+export { checksum, type SaveProblem };
 
 /**
  * Sauvegarde (décision D-22) : format versionné, validé strictement, protégé par une somme de
  * contrôle. Pur et indépendant du stockage (IndexedDB, localStorage ou mémoire).
  */
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 const RECORD_FORMAT = 'maria-save';
 const CODE_PREFIX = 'MARIA1';
 const MAX_ID_LENGTH = 64;
@@ -27,8 +32,6 @@ export interface SaveData {
   checkpoint: { levelId: string; checkpointId: string | null };
   /** Checkpoints déjà activés, sous la forme `salle:identifiant`. */
   activatedCheckpoints: string[];
-  /** Son (D-57) : absent des sauvegardes plus anciennes, valeurs par défaut (aucune migration). */
-  settings: { controls: ControlSettings; display: DisplaySettings; audio: AudioSettings };
   /** Progression permanente : prévue, vide tant que ces systèmes n'existent pas. */
   progression: {
     abilities: string[];
@@ -71,19 +74,7 @@ export interface SaveRecord {
   payload: string;
 }
 
-export type SaveProblem =
-  /** Texte illisible (JSON invalide ou tronqué). */
-  | 'unreadable'
-  /** Pas un enregistrement de sauvegarde de MARIA. */
-  | 'format'
-  /** Contenu modifié ou abîmé (somme de contrôle fausse). */
-  | 'checksum'
-  /** Version plus récente que ce jeu. */
-  | 'future-version'
-  /** Contenu ne respectant pas le schéma. */
-  | 'schema';
-
-export type DecodeResult = { ok: true; data: SaveData } | { ok: false; problem: SaveProblem };
+export type DecodeResult = RecordDecodeResult<SaveData>;
 
 /**
  * Identifiant d'un checkpoint dans sa salle : le nom fixe de sa lanterne (`; @lantern:`, D-152). Une
@@ -93,35 +84,12 @@ export function checkpointId(lantern: Readonly<LevelEntity>): string {
   return lantern.name ?? `c${String(lantern.col)}-${String(lantern.row)}`;
 }
 
-/** FNV-1a 32 bits, en hexadécimal : détecte les altérations accidentelles (pas une signature). */
-export function checksum(text: string): string {
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < text.length; i++) {
-    hash ^= text.charCodeAt(i);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return (hash >>> 0).toString(16).padStart(8, '0');
-}
-
-export function createNewSave(
-  levelId: string,
-  now: number,
-  settings: SaveData['settings'] = {
-    controls: { ...DEFAULT_CONTROL_SETTINGS },
-    display: { ...DEFAULT_DISPLAY_SETTINGS },
-    audio: { ...DEFAULT_AUDIO_SETTINGS },
-  },
-): SaveData {
+export function createNewSave(levelId: string, now: number): SaveData {
   return {
     version: SAVE_VERSION,
     savedAt: now,
     checkpoint: { levelId, checkpointId: null },
     activatedCheckpoints: [],
-    settings: {
-      controls: { ...settings.controls },
-      display: { ...settings.display },
-      audio: { ...settings.audio },
-    },
     progression: {
       abilities: [],
       collectibles: [],
@@ -135,25 +103,6 @@ export function createNewSave(
     stats: createStats(),
     arcade: createArcade(),
   };
-}
-
-/**
- * Migration depuis les réglages stockés avant la sauvegarde (D-13, D-18 : `localStorage`). Des textes
- * absents ou invalides donnent les valeurs par défaut.
- */
-export function migrateLegacySettings(
-  controlsText: string | null,
-  displayText: string | null,
-): SaveData['settings'] {
-  return {
-    controls: parseControlSettings(controlsText),
-    display: parseDisplaySettings(displayText),
-    audio: { ...DEFAULT_AUDIO_SETTINGS },
-  };
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function isId(value: unknown): value is string {
@@ -175,8 +124,8 @@ function stringList(value: unknown): string[] | null {
 }
 
 /**
- * Validation stricte de la structure (un seul défaut rejette tout) ; les réglages, eux, sont
- * seulement bornés (un réglage hors bornes ne doit pas faire perdre la progression).
+ * Validation stricte de la structure (un seul défaut rejette tout) ; les stats et la console, elles,
+ * sont seulement bornées.
  */
 export function validateSaveData(raw: unknown): SaveData | null {
   if (!isRecord(raw) || raw['version'] !== SAVE_VERSION) {
@@ -184,7 +133,6 @@ export function validateSaveData(raw: unknown): SaveData | null {
   }
   const savedAt = raw['savedAt'];
   const checkpoint = raw['checkpoint'];
-  const settings = raw['settings'];
   const progression = raw['progression'];
   if (typeof savedAt !== 'number' || !Number.isFinite(savedAt) || savedAt < 0) {
     return null;
@@ -197,7 +145,7 @@ export function validateSaveData(raw: unknown): SaveData | null {
     return null;
   }
   const activated = stringList(raw['activatedCheckpoints']);
-  if (!activated || !isRecord(settings) || !isRecord(progression)) {
+  if (!activated || !isRecord(progression)) {
     return null;
   }
   const story = raw['story'];
@@ -231,11 +179,6 @@ export function validateSaveData(raw: unknown): SaveData | null {
     savedAt,
     checkpoint: { levelId: checkpoint['levelId'], checkpointId: cp },
     activatedCheckpoints: activated,
-    settings: {
-      controls: sanitizeControlSettings(settings['controls']),
-      display: sanitizeDisplaySettings(settings['display']),
-      audio: sanitizeAudioSettings(settings['audio']),
-    },
     progression: {
       abilities,
       collectibles,
@@ -275,7 +218,29 @@ export function migrateSaveData(raw: unknown): unknown {
       activatedCheckpoints: [],
     };
   }
+  if (data['version'] === 3) {
+    // v3 → v4 (D-184) : les réglages sont communs à toutes les parties, stockés à part.
+    data = { ...data, version: 4 };
+    delete data['settings'];
+  }
   return data;
+}
+
+/**
+ * Les réglages d'une sauvegarde d'avant les parties multiples (versions 1 à 3, D-184), pour en faire
+ * les réglages de l'appareil. Null si le texte n'est pas une sauvegarde intacte ou n'en a pas.
+ */
+export function legacySaveSettings(text: string | null): GameSettings | null {
+  const record = readRecord(text, RECORD_FORMAT);
+  if (!record.ok || record.version > 3) {
+    return null;
+  }
+  try {
+    const raw: unknown = JSON.parse(record.payload);
+    return isRecord(raw) && isRecord(raw['settings']) ? sanitizeSettings(raw['settings']) : null;
+  } catch {
+    return null;
+  }
 }
 
 export function encodeRecord(data: Readonly<SaveData>): SaveRecord {
@@ -285,7 +250,7 @@ export function encodeRecord(data: Readonly<SaveData>): SaveRecord {
 
 /** Enregistrement → texte stocké. */
 export function serializeSave(data: Readonly<SaveData>): string {
-  return JSON.stringify(encodeRecord(data));
+  return writeRecord(RECORD_FORMAT, SAVE_VERSION, JSON.stringify(data));
 }
 
 /**
@@ -308,28 +273,8 @@ function decodePayload(version: number, payload: string): DecodeResult {
 
 /** Texte stocké → données valides, ou la raison du refus. Ne lève jamais d'exception. */
 export function deserializeSave(text: string | null): DecodeResult {
-  if (text === null) {
-    return { ok: false, problem: 'unreadable' };
-  }
-  let raw: unknown;
-  try {
-    raw = JSON.parse(text);
-  } catch {
-    return { ok: false, problem: 'unreadable' };
-  }
-  if (
-    !isRecord(raw) ||
-    raw['format'] !== RECORD_FORMAT ||
-    typeof raw['version'] !== 'number' ||
-    typeof raw['checksum'] !== 'string' ||
-    typeof raw['payload'] !== 'string'
-  ) {
-    return { ok: false, problem: 'format' };
-  }
-  if (checksum(raw['payload']) !== raw['checksum']) {
-    return { ok: false, problem: 'checksum' };
-  }
-  return decodePayload(raw['version'], raw['payload']);
+  const record = readRecord(text, RECORD_FORMAT);
+  return record.ok ? decodePayload(record.version, record.payload) : record;
 }
 
 function toBase64Url(text: string): string {

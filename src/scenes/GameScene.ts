@@ -112,7 +112,7 @@ import { showEndScreen } from '../ui/EndScreen';
 import { ShellJarView } from './ShellJarView';
 import { HideoutView } from './HideoutView';
 import { hideAt } from '../core/fx/hideouts';
-import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
+import type { SaveLibrary } from '../core/save/SaveLibrary';
 import {
   ART_IMAGES,
   CELESTE_PART_IMAGES,
@@ -251,6 +251,8 @@ const HELD_MARIA_TEXTURE = 'prop-maria-sit';
 const HELD_MARIA_AT = { x: 2, xPerBody: 3.5, yPerBody: -10 } as const;
 /** Clé du registre Phaser où main.ts dépose la partie en cours (D-22). */
 export const SESSION_KEY = 'maria-session';
+/** Les parties de l'appareil (D-184), pour le debug. */
+export const LIBRARY_KEY = 'maria-library';
 /** Clé du registre où main.ts dépose le lecteur de musique (D-57). */
 export const AUDIO_KEY = 'maria-audio';
 
@@ -547,6 +549,8 @@ export class GameScene extends Phaser.Scene {
   /** Changement de salle en cours (D-25). */
   readonly transition = new RoomTransition(this.worldParams);
   session!: SaveSession;
+  /** Les parties de l'appareil (D-184) : pour le debug ; absentes hors du démarrage normal. */
+  library: SaveLibrary | null = null;
   private worldView!: WorldView;
   /** Le bocal à coquilles de la chambre (D-148). */
   private shellJar!: ShellJarView;
@@ -691,6 +695,7 @@ export class GameScene extends Phaser.Scene {
 
   create(): void {
     this.session = this.registry.get(SESSION_KEY) as SaveSession;
+    this.library = (this.registry.get(LIBRARY_KEY) as SaveLibrary | undefined) ?? null;
     this.audio = this.registry.get(AUDIO_KEY) as AudioPlayer;
     this.story = new StoryDirector(HOUSE_STORY, {
       flagCleared: (id) => {
@@ -801,7 +806,7 @@ export class GameScene extends Phaser.Scene {
     this.lullaby = new LullabyView(this);
     this.ride = new RideView(this);
     const save = this.session.data;
-    this.haptics.enabled = save.settings.controls.vibration;
+    this.haptics.enabled = this.session.settings.data.controls.vibration;
     const { room, checkpointId } = savedReturn(this.session);
     this.level = this.roomLevel(room.level);
     this.ground = roomGround(this.level.id);
@@ -875,7 +880,7 @@ export class GameScene extends Phaser.Scene {
     this.controls.sources.push(keyboard);
     const detachKeyboard = keyboard.attach(window);
     let detachTouch: (() => void) | undefined;
-    const controlSettings = { ...save.settings.controls };
+    const controlSettings = { ...this.session.settings.data.controls };
     // En dev et dans le build de debug, `?touch` force l'affichage sur ordinateur (essai à la souris).
     const forceTouch = __DEBUG_TOOLS__ && new URLSearchParams(location.search).has('touch');
     if (forceTouch || TouchSource.isTouchDevice()) {
@@ -885,7 +890,7 @@ export class GameScene extends Phaser.Scene {
       this.controls.sources.push(this.touch);
       detachTouch = this.touch.attach(window);
     }
-    this.displaySettings = { ...save.settings.display };
+    this.displaySettings = { ...this.session.settings.data.display };
     this.backpack = new Backpack({
       onClose: () => {
         this.setPaused(false);
@@ -904,7 +909,7 @@ export class GameScene extends Phaser.Scene {
         onDisplayChange: (settings) => {
           this.setDisplaySettings(settings);
         },
-        audio: save.settings.audio,
+        audio: this.session.settings.data.audio,
         onAudioChange: (settings, persist) => {
           this.audio.setSettings(settings);
           if (persist) {
@@ -918,28 +923,16 @@ export class GameScene extends Phaser.Scene {
           this.touch?.setSettings(settings);
           this.haptics.enabled = settings.vibration;
         },
-        onExportSave: () => {
-          showExportDialog(this.session.data);
-        },
-        onImportSave: () => {
-          void showImportDialog().then(async (data) => {
-            if (data) {
-              // La partie importée remplace l'actuelle (qui devient l'état précédent), puis relance.
-              await this.session.replace(data);
-              location.reload();
-            }
-          });
-        },
         debugTools: __DEBUG_TOOLS__,
         onSwitchDebug: () => {
           // Même site, donc même sauvegarde : on reprend à la dernière lanterne dans l'autre version.
-          void this.session.manager.flush().then(() => {
+          void this.session.flush().then(() => {
             location.assign(debugSwitchUrl(import.meta.env.BASE_URL, __DEBUG_TOOLS__));
           });
         },
         onQuitToTitle: () => {
           // Écritures en cours terminées, puis relance : le démarrage affiche l'accueil.
-          void this.session.manager.flush().then(() => {
+          void this.session.flush().then(() => {
             location.reload();
           });
         },
@@ -1818,7 +1811,7 @@ export class GameScene extends Phaser.Scene {
     this.audio.setMusic('ending');
     void this.session
       .setCheckpoint(room, null)
-      .then(() => this.session.manager.flush())
+      .then(() => this.session.flush())
       .then(() => {
         // Toutes les coquilles trouvées : le petit escargot de la fin (D-148).
         const shells = this.shellCount();
@@ -3050,7 +3043,7 @@ export class GameScene extends Phaser.Scene {
     const run = this.run;
     const chase = this.combat.chase;
     const active =
-      data.settings.controls.hint &&
+      this.session.settings.data.controls.hint &&
       this.zone !== null &&
       !this.story.busy &&
       !this.memoryPlay &&

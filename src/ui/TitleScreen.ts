@@ -3,9 +3,19 @@ import { growthPhase } from '../config/growth';
 import { END_SCREEN, StoryFlag } from '../config/story';
 import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 import type { InstallHint } from '../core/platform/install';
-import type { LoadReport } from '../core/save/SaveManager';
+import { formatPlayTime } from '../core/save/stats';
 import type { SaveData } from '../core/save/saveData';
-import { showImportDialog } from './SaveCodeDialog';
+import {
+  continueSlot,
+  firstFreeSlot,
+  formatSavedAt,
+  slotData,
+  slotUnreadable,
+  type SlotSummary,
+} from '../core/save/slots';
+import { journeyProgress } from '../core/world/journeyProgress';
+import { roomName, ZONES } from '../levels';
+import { showExportDialog, showImportDialog } from './SaveCodeDialog';
 
 /** Ce que l'écran de départ sait de la PWA (D-23) : mise à jour prête, installation possible. */
 export interface TitlePwa {
@@ -17,7 +27,18 @@ export interface TitlePwa {
 }
 
 export type TitleChoice =
-  { kind: 'continue' } | { kind: 'new' } | { kind: 'import'; data: SaveData };
+  | { kind: 'play'; slot: number }
+  | { kind: 'new'; slot: number }
+  | { kind: 'import'; slot: number; data: SaveData };
+
+/** Les parties de l'appareil (D-184), telles que chargées au démarrage. */
+export interface TitleSlots {
+  summaries: SlotSummary[];
+  /** La dernière partie jouée. */
+  lastSlot: number;
+  /** Efface une partie (principal et précédent) ; false si le stockage a refusé. */
+  erase: (slot: number) => Promise<boolean>;
+}
 
 /** Le tremblé du crayon (D-175), un filtre SVG appliqué au titre par `style.css`. */
 const TITLE_WOBBLE_ID = 'title-wobble';
@@ -43,46 +64,87 @@ function element<K extends keyof HTMLElementTagNameMap>(
   return el;
 }
 
+/** Céleste telle qu'elle est dans une partie (D-43) : l'image de sa phase. */
+function portraitOf(data: Readonly<SaveData> | null): string {
+  return TITLE_IMAGES[growthPhase(new Set(data?.story.flags ?? [])).outfit];
+}
+
 /**
- * Écran de départ minimal (placeholder, D-22, spec §21.3) : « Continuer » s'il existe une
- * sauvegarde, « Nouvelle partie » (confirmée si elle efface une partie), import d'un code. Après la
- * fin du jeu (D-145), Maria sur son étagère dans un coin de la page.
+ * Une confirmation au second toucher : le premier montre la question (`ask`), puis tout revient
+ * (`reset`) si le second toucher ne vient pas à temps.
+ */
+function confirmTwice(
+  button: HTMLButtonElement,
+  ask: () => void,
+  reset: () => void,
+  action: () => void,
+): void {
+  let timer = 0;
+  button.addEventListener('click', () => {
+    if (timer === 0) {
+      ask();
+      button.classList.add('title-confirm');
+      timer = window.setTimeout(() => {
+        timer = 0;
+        reset();
+        button.classList.remove('title-confirm');
+      }, SLOT_CONFIRM_MS);
+      return;
+    }
+    window.clearTimeout(timer);
+    timer = 0;
+    action();
+  });
+}
+
+/** Une confirmation au second toucher sur un bouton de texte : il pose la question. */
+function confirmButton(button: HTMLButtonElement, question: string, action: () => void): void {
+  const label = button.textContent;
+  confirmTwice(
+    button,
+    () => {
+      button.textContent = question;
+    },
+    () => {
+      button.textContent = label;
+    },
+    action,
+  );
+}
+
+/** Délai pour confirmer (effacer, remplacer), après quoi le bouton revient à son texte. */
+const SLOT_CONFIRM_MS = 4000;
+
+/**
+ * Écran de départ (placeholder, D-22, spec §21.3) : « Continuer » reprend la dernière partie jouée,
+ * « Les parties » ouvre la page des parties (D-184), qui en montre trois (en commencer une, en
+ * reprendre une ; sous « … », son code de sauvegarde et l'effacer) ; en bas, discret, l'import
+ * d'un code. Après la fin du jeu (D-145), Maria sur son
+ * étagère dans un coin de la page.
  */
 export function showTitleScreen(
-  report: LoadReport,
-  levelName: string | null,
+  slots: TitleSlots,
   pwa: TitlePwa | null = null,
   hint: InstallHint = 'none',
 ): Promise<TitleChoice> {
   return new Promise((resolve) => {
+    const summaries = [...slots.summaries];
     const root = element('div', document.body);
     root.id = 'title-screen';
     root.setAttribute(UI_OVERLAY_ATTRIBUTE, '');
     const portrait = element('img', root, 'title-celeste');
-    // Céleste telle qu'elle est dans la partie sauvegardée (D-43).
-    const flags = new Set(report.data?.story.flags ?? []);
-    portrait.src = TITLE_IMAGES[growthPhase(flags).outfit];
     portrait.alt = '';
     portrait.draggable = false;
     const panel = element('div', root, 'title-panel');
-    // Le titre au crayon (D-175) : une lettre par crayon de couleur, le trait qui tremble.
-    const title = element('h1', panel, 'title-name');
-    title.setAttribute('aria-label', 'Maria');
-    for (const letter of 'MARIA') {
-      element('span', title, undefined, letter).setAttribute('aria-hidden', 'true');
-    }
     if (!document.getElementById(TITLE_WOBBLE_ID)) {
       document.body.insertAdjacentHTML('beforeend', TITLE_WOBBLE_SVG);
     }
-    if (flags.has(StoryFlag.FinaleGone)) {
-      // Après la fin (D-145) : Maria, seule sur son étagère, dans un coin de la page.
-      const corner = element('div', root, 'title-maria');
-      const maria = element('img', corner);
-      maria.src = END_SCREEN.mariaImage;
-      maria.alt = '';
-      maria.draggable = false;
-      element('div', corner, 'title-maria-shelf');
-    }
+    const corner = element('div', root, 'title-maria');
+    const maria = element('img', corner);
+    maria.src = END_SCREEN.mariaImage;
+    maria.alt = '';
+    maria.draggable = false;
+    element('div', corner, 'title-maria-shelf');
     // La version (D-152), pour les retours d'essai.
     element('p', root, 'title-version', `Version ${__APP_VERSION__}`);
     let unsubscribe = () => {
@@ -93,79 +155,253 @@ export function showTitleScreen(
       root.remove();
       resolve(choice);
     };
-    if (report.data) {
-      const resume = element('button', panel, 'pause-primary', 'Continuer');
-      resume.addEventListener('click', () => {
-        done({ kind: 'continue' });
-      });
-      if (levelName) {
-        element('p', panel, 'save-hint', levelName);
+    const showMain = () => {
+      unsubscribe();
+      root.classList.remove('title-slots-open');
+      panel.replaceChildren();
+      const current = continueSlot(summaries, slots.lastSlot);
+      const summary = summaries.find((s) => s.slot === current);
+      const data = summary ? slotData(summary) : null;
+      // Céleste telle qu'elle est dans la partie à reprendre (D-43).
+      portrait.src = portraitOf(data);
+      // Après la fin (D-145) : Maria, seule sur son étagère, dans un coin de la page.
+      corner.style.display = data?.story.flags.includes(StoryFlag.FinaleGone) ? '' : 'none';
+      // Le titre au crayon (D-175) : une lettre par crayon de couleur, le trait qui tremble.
+      const title = element('h1', panel, 'title-name');
+      title.setAttribute('aria-label', 'Maria');
+      for (const letter of 'MARIA') {
+        element('span', title, undefined, letter).setAttribute('aria-hidden', 'true');
       }
-      if (report.source === 'previous') {
-        element(
-          'p',
-          panel,
-          'save-hint',
-          'La dernière sauvegarde était abîmée : la précédente a été récupérée.',
-        );
-      }
-    } else if (report.mainProblem !== null || report.previousProblem !== null) {
-      element('p', panel, 'save-error', 'Sauvegarde illisible : une nouvelle partie commence.');
-    }
-    const fresh = element(
-      'button',
-      panel,
-      report.data ? undefined : 'pause-primary',
-      'Nouvelle partie',
-    );
-    let confirming = false;
-    fresh.addEventListener('click', () => {
-      if (report.data && !confirming) {
-        confirming = true;
-        fresh.textContent = 'Effacer la partie en cours ?';
-        return;
-      }
-      done({ kind: 'new' });
-    });
-    element('button', panel, 'title-small', 'Importer un code').addEventListener('click', () => {
-      void showImportDialog().then((data) => {
-        if (data) {
-          done({ kind: 'import', data });
-        }
-      });
-    });
-
-    // Mise à jour et installation (D-23), recalculées quand l'état de la PWA change.
-    const extra = element('div', panel, 'title-pwa');
-    const renderPwa = () => {
-      extra.replaceChildren();
-      if (pwa?.updateReady) {
-        element('p', extra, 'save-hint', 'Nouvelle version disponible.');
-        element('button', extra, 'title-small', 'Mettre à jour').addEventListener('click', () => {
-          void pwa.applyUpdate();
+      if (current !== null && summary && data) {
+        element('button', panel, 'pause-primary', 'Continuer').addEventListener('click', () => {
+          done({ kind: 'play', slot: current });
         });
-      }
-      if (pwa?.canInstall) {
-        element('button', extra, 'title-small', 'Installer le jeu').addEventListener(
+        const room = roomName(data.checkpoint.levelId);
+        if (room) {
+          element('p', panel, 'save-hint', room);
+        }
+        if (summary.report.source === 'previous') {
+          element(
+            'p',
+            panel,
+            'save-hint',
+            'La dernière sauvegarde était abîmée : la précédente a été récupérée.',
+          );
+        }
+        element('button', panel, undefined, 'Les parties').addEventListener('click', () => {
+          showSlots();
+        });
+      } else {
+        if (summaries.some(slotUnreadable)) {
+          element('p', panel, 'save-error', 'Sauvegarde illisible.');
+        }
+        const free = firstFreeSlot(summaries);
+        element('button', panel, 'pause-primary', 'Nouvelle partie').addEventListener(
           'click',
           () => {
-            void pwa.promptInstall();
+            if (free === null) {
+              showSlots();
+            } else {
+              done({ kind: 'new', slot: free });
+            }
           },
         );
+        // Discret : effacer une sauvegarde illisible, ou importer un code (un nouvel appareil).
+        element('button', panel, 'title-small', 'Les parties').addEventListener('click', () => {
+          showSlots();
+        });
       }
-      if (hint === 'ios-share') {
-        element(
-          'p',
-          extra,
-          'save-hint title-install-hint',
-          'Plein écran et sauvegarde protégée : Partager, puis « Sur l’écran d’accueil ». ' +
-            'Une partie commencée ici se reprend là-bas avec le code de sauvegarde.',
-        );
+
+      // Mise à jour et installation (D-23), recalculées quand l'état de la PWA change.
+      const extra = element('div', panel, 'title-pwa');
+      const renderPwa = () => {
+        extra.replaceChildren();
+        if (pwa?.updateReady) {
+          element('p', extra, 'save-hint', 'Nouvelle version disponible.');
+          element('button', extra, 'title-small', 'Mettre à jour').addEventListener('click', () => {
+            void pwa.applyUpdate();
+          });
+        }
+        if (pwa?.canInstall) {
+          element('button', extra, 'title-small', 'Installer le jeu').addEventListener(
+            'click',
+            () => {
+              void pwa.promptInstall();
+            },
+          );
+        }
+        if (hint === 'ios-share') {
+          element(
+            'p',
+            extra,
+            'save-hint title-install-hint',
+            'Plein écran et sauvegarde protégée : Partager, puis « Sur l’écran d’accueil ». ' +
+              'Une partie commencée ici se reprend là-bas avec le code de sauvegarde.',
+          );
+        }
+      };
+      renderPwa();
+      if (pwa) {
+        unsubscribe = pwa.subscribe(renderPwa);
       }
     };
-    renderPwa();
-    if (pwa) {
-      unsubscribe = pwa.subscribe(renderPwa);
+
+    /** Un code collé (D-22) : dans une place libre, sinon à la place d'une partie choisie. */
+    const startImport = () => {
+      void showImportDialog().then((data) => {
+        if (!data) {
+          return;
+        }
+        const free = firstFreeSlot(summaries);
+        if (free === null) {
+          showSlots(data);
+        } else {
+          done({ kind: 'import', slot: free, data });
+        }
+      });
+    };
+
+    /**
+     * La page des parties (D-184) : une carte par emplacement. Avec `importing`, toutes les places
+     * sont prises : on choisit la partie que le code remplace (second toucher pour confirmer).
+     */
+    function showSlots(importing: SaveData | null = null): void {
+      unsubscribe();
+      unsubscribe = () => {
+        // Pas de PWA sur cette page.
+      };
+      root.classList.add('title-slots-open');
+      panel.replaceChildren();
+      element(
+        'h2',
+        panel,
+        'title-slots-heading',
+        importing ? 'Remplacer quelle partie ?' : 'Les parties',
+      );
+      const row = element('div', panel, 'title-slots');
+      const now = Date.now();
+      const zone = ZONES[0];
+      for (const summary of summaries) {
+        const { slot } = summary;
+        const data = slotData(summary);
+        const unreadable = slotUnreadable(summary);
+        const card = element('div', row, 'title-slot');
+        const open = element('button', card, 'title-slot-open');
+        const label = `Partie ${String(slot)}`;
+        if (data) {
+          const image = element('img', open, 'title-slot-portrait');
+          image.src = portraitOf(data);
+          image.alt = '';
+          image.draggable = false;
+          element('span', open, 'title-slot-name', label);
+          element('span', open, 'title-slot-room', roomName(data.checkpoint.levelId) ?? '');
+          const percent = zone ? `${String(journeyProgress(zone, data).percent)} % · ` : '';
+          element(
+            'span',
+            open,
+            'title-slot-line',
+            `${percent}${formatPlayTime(data.stats.playMs)}`,
+          );
+          element('span', open, 'title-slot-line', formatSavedAt(data.savedAt, now));
+        } else {
+          card.classList.add('title-slot-empty');
+          element('span', open, 'title-slot-name', label);
+          if (unreadable) {
+            element('span', open, 'title-slot-line save-error', 'Sauvegarde illisible');
+          } else {
+            element('span', open, 'title-slot-new', 'Nouvelle partie');
+          }
+        }
+        if (importing) {
+          // Le code prend la place de cette partie : un second toucher le confirme.
+          const ask = element('span', open, 'title-slot-ask', 'Toucher encore pour remplacer');
+          ask.hidden = true;
+          confirmTwice(
+            open,
+            () => {
+              ask.hidden = false;
+            },
+            () => {
+              ask.hidden = true;
+            },
+            () => {
+              done({ kind: 'import', slot, data: importing });
+            },
+          );
+          continue;
+        }
+        if (data) {
+          open.addEventListener('click', () => {
+            done({ kind: 'play', slot });
+          });
+        } else if (unreadable) {
+          open.disabled = true;
+        } else {
+          open.addEventListener('click', () => {
+            done({ kind: 'new', slot });
+          });
+        }
+        if (data || unreadable) {
+          addSlotMenu(card, summary);
+        }
+      }
+      if (importing) {
+        element('button', panel, 'title-small', 'Annuler').addEventListener('click', () => {
+          showSlots();
+        });
+        return;
+      }
+      const actions = element('div', panel, 'title-slots-actions');
+      element('button', actions, 'title-small', 'Retour').addEventListener('click', showMain);
+      // Discret (D-184) : reprendre une partie venue d'un autre appareil ou du navigateur.
+      element('button', actions, 'title-link', 'Importer un code').addEventListener(
+        'click',
+        startImport,
+      );
     }
+
+    /** Le « … » d'une partie : son code de sauvegarde, et l'effacer. */
+    function addSlotMenu(card: HTMLElement, summary: SlotSummary): void {
+      const { slot } = summary;
+      const data = slotData(summary);
+      const more = element('button', card, 'title-slot-more', '…');
+      more.setAttribute('aria-label', `Partie ${String(slot)} : plus`);
+      const menu = element('div', card, 'title-slot-menu');
+      menu.hidden = true;
+      more.addEventListener('click', () => {
+        menu.hidden = !menu.hidden;
+        more.hidden = !menu.hidden;
+      });
+      if (data) {
+        element('button', menu, undefined, 'Code de sauvegarde').addEventListener('click', () => {
+          showExportDialog(data);
+        });
+      }
+      const erase = element('button', menu, undefined, 'Effacer');
+      confirmButton(erase, 'Effacer pour de bon ?', () => {
+        erase.disabled = true;
+        void slots.erase(slot).then((erased) => {
+          if (!erased) {
+            erase.textContent = 'Échec : réessayer';
+            erase.disabled = false;
+            return;
+          }
+          const index = summaries.indexOf(summary);
+          summaries[index] = {
+            slot,
+            report: {
+              data: null,
+              source: 'none',
+              mainProblem: null,
+              previousProblem: null,
+              readFailed: false,
+            },
+          };
+          showSlots();
+        });
+      });
+    }
+
+    showMain();
   });
 }

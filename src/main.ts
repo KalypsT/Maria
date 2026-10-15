@@ -1,14 +1,22 @@
 import Phaser from 'phaser';
 import { PLACEHOLDER_COLORS, type DisplaySettings } from './config/display';
 import { computeGameWidth, computeRenderScale, renderSize } from './core/gameSize';
-import { SaveManager } from './core/save/SaveManager';
-import { SaveSession } from './core/save/SaveSession';
-import { createNewSave, migrateLegacySettings, type SaveData } from './core/save/saveData';
-import { roomName, startRoom } from './levels';
+import { SAVE_SLOTS, SaveLibrary } from './core/save/SaveLibrary';
+import type { SaveManager } from './core/save/SaveManager';
+import type { SlotSummary } from './core/save/slots';
+import { SaveSession, SettingsSession } from './core/save/SaveSession';
+import { createNewSave, type SaveData } from './core/save/saveData';
+import { migrateLegacySettings, type GameSettings } from './core/save/settingsData';
+import { startRoom } from './levels';
 import { openBrowserSaveStorage, requestPersistentStorage } from './platform/browserSaveStorage';
-import { AUDIO_KEY, DISPLAY_SETTINGS_EVENT, GameScene, SESSION_KEY } from './scenes/GameScene';
+import {
+  AUDIO_KEY,
+  DISPLAY_SETTINGS_EVENT,
+  GameScene,
+  LIBRARY_KEY,
+  SESSION_KEY,
+} from './scenes/GameScene';
 import { AudioPlayer } from './platform/audioPlayer';
-import { DEFAULT_AUDIO_SETTINGS } from './config/audio';
 import { installHint } from './core/platform/install';
 import { installEnvironment, Pwa } from './platform/pwa';
 import { showTitleScreen } from './ui/TitleScreen';
@@ -24,8 +32,8 @@ function getParent(): HTMLElement {
   return element;
 }
 
-/** Réglages stockés avant la sauvegarde (D-13, D-18), repris dans une nouvelle partie. */
-function legacySettings(): SaveData['settings'] {
+/** Réglages stockés avant la sauvegarde (D-13, D-18), repris s'il n'y a pas encore de réglages. */
+function legacySettings(): GameSettings {
   try {
     return migrateLegacySettings(
       localStorage.getItem('maria.settings.controls'),
@@ -37,11 +45,16 @@ function legacySettings(): SaveData['settings'] {
 }
 
 function newGame(): SaveData {
-  return createNewSave(startRoom().level.id, Date.now(), legacySettings());
+  return createNewSave(startRoom().level.id, Date.now());
 }
 
-function startGame(parent: HTMLElement, session: SaveSession, audio: AudioPlayer): Phaser.Game {
-  let display: DisplaySettings = session.data.settings.display;
+function startGame(
+  parent: HTMLElement,
+  session: SaveSession,
+  audio: AudioPlayer,
+  library: SaveLibrary,
+): Phaser.Game {
+  let display: DisplaySettings = session.settings.data.display;
   /** Taille du canvas : largeur logique (D-01) × échelle de rendu (D-18). */
   const canvasSize = () => {
     const scale = computeRenderScale(
@@ -66,6 +79,7 @@ function startGame(parent: HTMLElement, session: SaveSession, audio: AudioPlayer
     scene: [GameScene],
   });
   game.registry.set(SESSION_KEY, session);
+  game.registry.set(LIBRARY_KEY, library);
   game.registry.set(AUDIO_KEY, audio);
   const fitGameSize = () => {
     const { width, height } = canvasSize();
@@ -88,7 +102,7 @@ function startGame(parent: HTMLElement, session: SaveSession, audio: AudioPlayer
  */
 const crash = {
   game: null as Phaser.Game | null,
-  manager: null as SaveManager | null,
+  session: null as SaveSession | null,
   lastFrameAt: 0,
   errorAt: -1,
   detail: null as string | null,
@@ -96,7 +110,7 @@ const crash = {
 };
 
 function resumeAfterCrash(): void {
-  const writes = crash.manager?.flush() ?? Promise.resolve();
+  const writes = crash.session?.flush() ?? Promise.resolve();
   void writes.finally(() => {
     location.reload();
   });
@@ -141,34 +155,47 @@ async function boot(): Promise<void> {
   // Service worker (build principal seulement, D-23) : enregistré au plus tôt.
   const pwa = new Pwa();
   pwa.start();
-  const manager = new SaveManager(await openBrowserSaveStorage());
-  const report = await manager.load();
-  const saved = report.data;
+  // Les parties de l'appareil (D-184) : l'ancienne sauvegarde unique est reprise dans la partie 1.
+  const library = new SaveLibrary(await openBrowserSaveStorage());
+  const opened = await library.open(legacySettings);
+  const settings = new SettingsSession(library.settingsManager, opened.settings);
+  // Toutes les parties chargées, pour l'accueil et sa page des parties (D-184).
+  const managers = new Map(SAVE_SLOTS.map((slot) => [slot, library.slotManager(slot)]));
+  const summaries: SlotSummary[] = await Promise.all(
+    [...managers].map(async ([slot, manager]) => ({ slot, report: await manager.load() })),
+  );
+  const managerOf = (slot: number): SaveManager => managers.get(slot) ?? library.slotManager(slot);
   // Musique (D-57) : thème de l'accueil, qui démarre au premier toucher.
-  const audio = new AudioPlayer(saved?.settings.audio ?? DEFAULT_AUDIO_SETTINGS);
+  const audio = new AudioPlayer(settings.data.audio);
   audio.setMusic('title');
   const choice = await showTitleScreen(
-    report,
-    saved ? roomName(saved.checkpoint.levelId) : null,
+    {
+      summaries,
+      lastSlot: opened.lastSlot,
+      erase: (slot) =>
+        managerOf(slot)
+          .clear()
+          .then(
+            () => true,
+            () => false,
+          ),
+    },
     pwa,
     installHint(installEnvironment()),
   );
   // Demandé après un geste de l'utilisateur : certains navigateurs l'exigent.
   void requestPersistentStorage();
+  const saved = summaries.find((s) => s.slot === choice.slot)?.report.data ?? null;
   const data =
-    choice.kind === 'continue' && saved
-      ? saved
-      : choice.kind === 'import'
-        ? choice.data
-        : newGame();
-  audio.setSettings(data.settings.audio);
-  const session = new SaveSession(manager, data);
-  if (choice.kind !== 'continue') {
+    choice.kind === 'play' && saved ? saved : choice.kind === 'import' ? choice.data : newGame();
+  const session = new SaveSession(managerOf(choice.slot), data, Date.now, settings, choice.slot);
+  if (choice.kind !== 'play') {
     // Nouvelle partie ou import : écrite tout de suite (l'ancienne devient l'état précédent).
     await session.persist();
   }
-  const game = startGame(parent, session, audio);
-  crash.manager = manager;
+  void library.setLastSlot(choice.slot);
+  const game = startGame(parent, session, audio, library);
+  crash.session = session;
   crash.game = game;
   game.events.on(Phaser.Core.Events.POST_RENDER, () => {
     crash.lastFrameAt = performance.now();

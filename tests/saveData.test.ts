@@ -1,7 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_CONTROL_SETTINGS } from '../src/config/controls';
-import { DEFAULT_DISPLAY_SETTINGS } from '../src/config/display';
-import { DEFAULT_AUDIO_SETTINGS } from '../src/config/audio';
 import {
   checkpointId,
   checksum,
@@ -9,22 +6,18 @@ import {
   decodeSaveCode,
   deserializeSave,
   encodeSaveCode,
-  migrateLegacySettings,
+  legacySaveSettings,
   migrateSaveData,
   serializeSave,
   validateSaveData,
   type SaveData,
 } from '../src/core/save/saveData';
 import { LEGACY_STORY_FLAGS } from '../src/config/story';
-import { serializeControlSettings } from '../src/core/settings/controlSettings';
-import { serializeDisplaySettings } from '../src/core/settings/displaySettings';
 
 function sample(): SaveData {
   const data = createNewSave('premiers-pas', 1_700_000_000_000);
   data.checkpoint = { levelId: 'kitchen', checkpointId: 'kitchen-counter' };
   data.activatedCheckpoints = ['kitchen:kitchen-counter', 'bedroom:bedroom-toybox'];
-  data.settings.controls.buttonScale = 1.2;
-  data.settings.display.renderMode = 'screen';
   data.story.flags = ['evening.played'];
   return data;
 }
@@ -62,7 +55,7 @@ describe('saveData', () => {
     expect(deserializeSave(JSON.stringify(bad))).toEqual({ ok: false, problem: 'schema' });
   });
 
-  it('valide strictement la structure, mais borne seulement les réglages', () => {
+  it('valide strictement la structure', () => {
     const data = sample();
     expect(validateSaveData({ ...data, savedAt: -1 })).toBeNull();
     expect(
@@ -71,57 +64,48 @@ describe('saveData', () => {
     expect(
       validateSaveData({ ...data, progression: { ...data.progression, abilities: [3] } }),
     ).toBeNull();
-    expect(validateSaveData({ ...data, version: 4 })).toBeNull();
+    expect(validateSaveData({ ...data, version: 3 })).toBeNull();
+    expect(validateSaveData({ ...data, version: 5 })).toBeNull();
     expect(validateSaveData({ ...data, story: undefined })).toBeNull();
     expect(validateSaveData({ ...data, story: { flags: [''] } })).toBeNull();
-    const odd = validateSaveData({
-      ...data,
-      settings: { controls: { buttonScale: 99 }, display: { renderMode: '8k' } },
-    });
-    expect(odd?.settings.controls.buttonScale).toBeLessThanOrEqual(1.5);
-    expect(odd?.settings.display).toEqual(DEFAULT_DISPLAY_SETTINGS);
-    expect(odd?.activatedCheckpoints).toEqual(data.activatedCheckpoints);
+    // Des réglages restés dans le contenu (D-184) sont ignorés.
+    const odd = validateSaveData({ ...data, settings: { controls: 'n’importe quoi' } });
+    expect(odd).toEqual(data);
   });
 
-  it('reprend les réglages stockés avant la sauvegarde (D-13, D-18)', () => {
-    const migrated = migrateLegacySettings(
-      serializeControlSettings({ ...DEFAULT_CONTROL_SETTINGS, opacity: 0.4 }),
-      serializeDisplaySettings({ renderMode: 'screen' }),
-    );
-    expect(migrated.controls.opacity).toBe(0.4);
-    expect(migrated.display.renderMode).toBe('screen');
-    expect(migrateLegacySettings(null, 'n’importe quoi')).toEqual({
-      controls: DEFAULT_CONTROL_SETTINGS,
-      display: DEFAULT_DISPLAY_SETTINGS,
-      audio: DEFAULT_AUDIO_SETTINGS,
+  it('migre une sauvegarde de la version 3 (D-184) : les réglages sortent de la partie', () => {
+    const current = sample();
+    const settings = {
+      controls: { buttonScale: 1.2, opacity: 0.4 },
+      display: { renderMode: 'screen' },
+      audio: { volume: 0.25, muted: true, sfxVolume: 0.4 },
+    };
+    const payload = JSON.stringify({ ...current, version: 3, settings });
+    const text = JSON.stringify({
+      format: 'maria-save',
+      version: 3,
+      checksum: checksum(payload),
+      payload,
     });
-  });
-
-  it('garde les réglages du son, et en donne par défaut à une sauvegarde plus ancienne (D-57)', () => {
-    const data = sample();
-    data.settings.audio = { volume: 0.25, muted: true, sfxVolume: 0.4 };
-    expect(deserializeSave(serializeSave(data))).toMatchObject({
+    expect(deserializeSave(text)).toEqual({ ok: true, data: current });
+    // Les réglages de l'ancienne sauvegarde deviennent ceux de l'appareil.
+    expect(legacySaveSettings(text)).toMatchObject({
+      controls: { buttonScale: 1.2, opacity: 0.4 },
+      display: { renderMode: 'screen' },
+      audio: { volume: 0.25, muted: true, sfxVolume: 0.4 },
+    });
+    expect(legacySaveSettings(text.replace('kitchen', 'cuisine'))).toBeNull();
+    expect(legacySaveSettings(serializeSave(current))).toBeNull();
+    expect(legacySaveSettings(null)).toBeNull();
+    // Un code exporté par la version 3 s'importe encore.
+    const bytes = new TextEncoder().encode(payload);
+    const base64 = btoa(String.fromCharCode(...bytes))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+    expect(decodeSaveCode(`MARIA1.${base64}.${checksum(payload)}`)).toEqual({
       ok: true,
-      data: { settings: { audio: { volume: 0.25, muted: true, sfxVolume: 0.4 } } },
-    });
-    const older = { controls: data.settings.controls, display: data.settings.display };
-    expect(validateSaveData({ ...data, settings: older })?.settings.audio).toEqual(
-      DEFAULT_AUDIO_SETTINGS,
-    );
-    const odd = validateSaveData({
-      ...data,
-      settings: { ...data.settings, audio: { volume: 7, muted: 'oui', sfxVolume: -1 } },
-    });
-    expect(odd?.settings.audio).toEqual({ volume: 1, muted: false, sfxVolume: 0 });
-    // Une sauvegarde d'avant les bruitages (D-126) : leur volume par défaut.
-    const beforeSfx = validateSaveData({
-      ...data,
-      settings: { ...data.settings, audio: { volume: 0.5, muted: false } },
-    });
-    expect(beforeSfx?.settings.audio).toEqual({
-      volume: 0.5,
-      muted: false,
-      sfxVolume: DEFAULT_AUDIO_SETTINGS.sfxVolume,
+      data: current,
     });
   });
 
@@ -196,7 +180,7 @@ describe('saveData', () => {
       ok: true,
       data: expected,
     });
-    expect(migrateSaveData(v1)).toMatchObject({ version: 3 });
+    expect(migrateSaveData(v1)).toMatchObject({ version: 4 });
     expect(migrateSaveData('texte')).toBe('texte');
   });
 
