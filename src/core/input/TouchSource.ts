@@ -48,6 +48,8 @@ export class TouchSource implements InputSource {
   private shownKnobY = Number.NaN;
   private shownBaseX = Number.NaN;
   private shownBaseY = Number.NaN;
+  /** Largeur de la fenêtre au dernier calcul de la disposition (px CSS). */
+  private layoutWidth = 0;
 
   constructor(parent: HTMLElement, settings: Readonly<ControlSettings>) {
     this.settings = { ...settings };
@@ -73,6 +75,11 @@ export class TouchSource implements InputSource {
 
   get activeCount(): number {
     return this.controller.activeCount;
+  }
+
+  /** Part de la largeur de l'écran couverte par les boutons de droite (D-183), de 0 à 1. */
+  get rightCover(): number {
+    return this.layoutWidth > 0 ? this.layout.rightReach / this.layoutWidth : 0;
   }
 
   setSettings(settings: Readonly<ControlSettings>): void {
@@ -219,6 +226,7 @@ export class TouchSource implements InputSource {
   }
 
   private computeLayout(): TouchLayout {
+    this.layoutWidth = window.innerWidth;
     return computeTouchLayout(
       window.innerWidth,
       window.innerHeight,

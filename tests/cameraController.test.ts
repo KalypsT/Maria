@@ -390,3 +390,47 @@ describe('la vue rapprochée de l’histoire (D-182)', () => {
     expect(out).toEqual({ x: 368, y: 176 });
   });
 });
+
+describe('la marge des boutons tactiles (D-183)', () => {
+  const PAD = 200;
+
+  it('près du mur de droite, Céleste reste à gauche des boutons', () => {
+    const screenX = (r: Rig) => centerX(r.player) - (r.camera.x - r.camera.viewWidth / 2);
+    const without = rig(room(80, 40));
+    without.input.moveX = 1;
+    without.run(900);
+    // Sans marge, la vue s'arrête au mur et Céleste passe sous les boutons.
+    expect(screenX(without)).toBeGreaterThan(without.camera.viewWidth - PAD);
+
+    const r = rig(room(80, 40));
+    r.camera.rightPad = PAD;
+    r.input.moveX = 1;
+    r.run(900, () => {
+      expect(r.camera.x + r.camera.viewWidth / 2).toBeLessThanOrEqual(80 * T + PAD);
+    });
+    expect(screenX(r)).toBeLessThan(r.camera.viewWidth - PAD);
+  });
+
+  it('ne change rien à gauche de la salle', () => {
+    const r = rig(room(80, 40));
+    r.camera.rightPad = PAD;
+    r.input.moveX = -1;
+    r.run(900, () => {
+      expect(r.camera.x - r.camera.viewWidth / 2).toBeGreaterThanOrEqual(0);
+    });
+    expect(r.camera.x).toBe(r.camera.viewWidth / 2);
+  });
+
+  it('une salle plus petite que la vue s’écarte des boutons', () => {
+    const r = rig(room(30, 15, undefined, 1));
+    r.camera.rightPad = 100;
+    r.input.moveX = 1;
+    r.run(300, () => {
+      expect(r.camera.x).toBe((30 * T + 100) / 2);
+      // Le mur de droite reste à gauche des boutons.
+      expect(30 * T - (r.camera.x - r.camera.viewWidth / 2)).toBeLessThanOrEqual(
+        r.camera.viewWidth - 100,
+      );
+    });
+  });
+});

@@ -155,6 +155,17 @@ describe('computeTouchLayout', () => {
     expect(big.joystickRadius).toBeGreaterThan(small.joystickRadius);
   });
 
+  it('mesure la largeur couverte par les boutons de droite, pour la caméra (D-183)', () => {
+    for (const { w, h } of SCREENS) {
+      const layout = computeTouchLayout(w, h, NOTCH, DEFAULT_CONTROL_SETTINGS, true, true);
+      for (const b of layout.buttons.filter((candidate) => candidate.action !== 'Map')) {
+        expect(w - (b.x - b.r)).toBeLessThanOrEqual(layout.rightReach + 0.001);
+      }
+      expect(layout.rightReach).toBeGreaterThan(0);
+      expect(layout.rightReach).toBeLessThan(w / 2);
+    }
+  });
+
   it('le joystick fantôme attend dans sa zone, en entier dans l’écran (D-182)', () => {
     for (const { w, h } of SCREENS) {
       for (const insets of [NO_INSETS, NOTCH]) {

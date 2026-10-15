@@ -1181,6 +1181,7 @@ export class GameScene extends Phaser.Scene {
         }
       }
       camera.lookInput = input.moveY;
+      this.padCamera();
       if (!story.busy) {
         // Un regard de l'histoire (D-122) ne survit pas à son script, ni la vue rapprochée.
         camera.release();
@@ -2716,8 +2717,14 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  /** La caméra peut dépasser la salle à droite de la largeur des boutons tactiles (D-183). */
+  private padCamera(): void {
+    this.camera.rightPad = this.touch ? this.touch.rightCover * this.camera.viewWidth : 0;
+  }
+
   private resetCamera(): void {
     const camera = this.camera;
+    this.padCamera();
     camera.setBounds(this.level.width * TILE_SIZE, this.level.height * TILE_SIZE);
     camera.reset(this.player);
     this.cameras.main.centerOn(camera.x, camera.y);
@@ -2730,6 +2737,7 @@ export class GameScene extends Phaser.Scene {
   private readonly onResize = (): void => {
     const scale = this.renderScale;
     this.camera.setView(this.scale.width / scale, this.scale.height / scale);
+    this.padCamera();
     this.cameras.main.setZoom(this.roomZoom * scale * this.storyZoom);
     this.cameras.main.centerOn(this.camera.x, this.camera.y);
     const artScale = this.computeArtScale();

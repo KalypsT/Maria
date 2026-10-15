@@ -72,6 +72,11 @@ export class CameraController {
   groundFeetY = 0;
   /** Décalage courant de l'anticipation horizontale (px). */
   lookAheadOffset = 0;
+  /**
+   * Dépassement permis à droite de la salle (px) : la largeur des boutons tactiles (D-183). Près du
+   * mur de droite, Céleste reste à gauche des boutons ; au-delà du mur, la couleur d'ambiance.
+   */
+  rightPad = 0;
   private lookAheadTarget = 0;
   private runDir = 0;
   private runSteps = 0;
@@ -325,16 +330,20 @@ export class CameraController {
     }
   }
 
-  /** Reste dans la salle ; centrée sur un axe où la salle est plus petite que la vue. */
+  /**
+   * Reste dans la salle (prolongée à droite de `rightPad`) ; centrée sur un axe où elle est plus
+   * petite que la vue.
+   */
   private clampToBounds(): void {
     const halfW = this.viewWidth / 2;
     const halfH = this.viewHeight / 2;
-    if (this.boundsWidth <= this.viewWidth) {
-      this.x = this.boundsWidth / 2;
+    const width = this.boundsWidth + this.rightPad;
+    if (width <= this.viewWidth) {
+      this.x = width / 2;
     } else if (this.x < halfW) {
       this.x = halfW;
-    } else if (this.x > this.boundsWidth - halfW) {
-      this.x = this.boundsWidth - halfW;
+    } else if (this.x > width - halfW) {
+      this.x = width - halfW;
     }
     if (this.boundsHeight <= this.viewHeight) {
       this.y = this.boundsHeight / 2;

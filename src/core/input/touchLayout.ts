@@ -34,6 +34,11 @@ export interface TouchLayout {
    * où le pouce se pose naturellement.
    */
   readonly joystickRest: { readonly x: number; readonly y: number };
+  /**
+   * Largeur couverte par les boutons de droite depuis le bord droit (px CSS) : la caméra peut
+   * dépasser la salle d'autant à droite, pour que Céleste ne passe pas dessous (D-183).
+   */
+  readonly rightReach: number;
 }
 
 function polar(cx: number, cy: number, distance: number, angleDeg: number): [number, number] {
@@ -120,5 +125,11 @@ export function computeTouchLayout(
     x: zoneLeft + margin + joystickRadius,
     y: height - insets.bottom - margin - joystickRadius,
   };
-  return { buttons, joystickZone, joystickRadius, joystickRest };
+  let leftmost = width;
+  for (const b of buttons) {
+    if (b.action !== 'Map' && b.action !== 'Pause') {
+      leftmost = Math.min(leftmost, b.x - b.r);
+    }
+  }
+  return { buttons, joystickZone, joystickRadius, joystickRest, rightReach: width - leftmost };
 }
