@@ -524,13 +524,15 @@ describe('histoire de la maison (D-31)', () => {
     expect(Math.abs(row - (maria?.row ?? 0))).toBeLessThanOrEqual(1);
     expect(looks[1]).toBe('look retour');
     expect(log.filter((l) => l.startsWith('think'))).toEqual(['think heart']);
-    // Une seule fois, et jamais une fois que Céleste a joué avec Maria.
+    // Une seule fois, et jamais une fois que Céleste a joué avec Maria, ni après la première nuit.
     d.step('bedroom', start, false);
     expect(d.busy).toBe(false);
-    const later = new StoryDirector(HOUSE_STORY, recorder().host, HZ);
-    later.setFlags([F.EveningPlayed]);
-    later.step('bedroom', start, false);
-    expect(later.busy).toBe(false);
+    for (const flag of [F.EveningPlayed, F.Slept]) {
+      const later = new StoryDirector(HOUSE_STORY, recorder().host, HZ);
+      later.setFlags([flag]);
+      later.step('bedroom', start, false);
+      expect(later.busy, flag).toBe(false);
+    }
   });
 
   it('le soir (couverture comprise) se joue dans la chambre sans grimper, par des passages faciles', () => {

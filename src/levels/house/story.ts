@@ -67,7 +67,7 @@ export const HOUSE_STORY: StoryData = {
       room: 'bedroom',
       on: 'touch',
       area: { col: 7, row: 13, w: 11, h: 3 },
-      when: { none: [F.EveningLook, F.EveningPlayed] },
+      when: { none: [F.EveningLook, F.EveningPlayed, F.Slept] },
       lock: true,
       steps: [
         { do: 'flag', id: F.EveningLook },
