@@ -20,6 +20,7 @@ import { AudioPlayer } from './platform/audioPlayer';
 import { installHint } from './core/platform/install';
 import { installEnvironment, Pwa } from './platform/pwa';
 import { showTitleScreen } from './ui/TitleScreen';
+import { playIntro } from './ui/IntroScreen';
 import { showErrorScreen } from './ui/ErrorScreen';
 import { CRASH_GUARD } from './config/perf';
 import { errorDetail, looksFrozen } from './core/platform/crashGuard';
@@ -159,16 +160,22 @@ async function boot(): Promise<void> {
   const library = new SaveLibrary(await openBrowserSaveStorage());
   const opened = await library.open(legacySettings);
   const settings = new SettingsSession(library.settingsManager, opened.settings);
-  // Toutes les parties chargées, pour l'accueil et sa page des parties (D-184).
+  // Toutes les parties chargées, pour l'accueil et sa page des parties (D-184), pendant l'intro.
   const managers = new Map(SAVE_SLOTS.map((slot) => [slot, library.slotManager(slot)]));
-  const summaries: SlotSummary[] = await Promise.all(
+  const loading: Promise<SlotSummary[]> = Promise.all(
     [...managers].map(async ([slot, manager]) => ({ slot, report: await manager.load() })),
   );
   const managerOf = (slot: number): SaveManager => managers.get(slot) ?? library.slotManager(slot);
-  // Musique (D-57) : thème de l'accueil, qui démarre au premier toucher.
   const audio = new AudioPlayer(settings.data.audio);
+  // L'intro (D-185), à chaque lancement ; `?nointro` la saute en dev et dans le build de debug.
+  const closeIntro =
+    __DEBUG_TOOLS__ && new URLSearchParams(location.search).has('nointro')
+      ? () => undefined
+      : await playIntro(audio);
+  const summaries = await loading;
+  // Musique (D-57) : thème de l'accueil (il démarre au premier toucher si l'intro n'en a pas eu).
   audio.setMusic('title');
-  const choice = await showTitleScreen(
+  const shown = showTitleScreen(
     {
       summaries,
       lastSlot: opened.lastSlot,
@@ -183,6 +190,9 @@ async function boot(): Promise<void> {
     pwa,
     installHint(installEnvironment()),
   );
+  // L'écran titre est posé sous l'intro (le même papier) : on peut la retirer sans éclair.
+  closeIntro();
+  const choice = await shown;
   // Demandé après un geste de l'utilisateur : certains navigateurs l'exigent.
   void requestPersistentStorage();
   const saved = summaries.find((s) => s.slot === choice.slot)?.report.data ?? null;

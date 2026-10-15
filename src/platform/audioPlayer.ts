@@ -320,6 +320,23 @@ export class AudioPlayer {
   }
 
   /**
+   * Lit un thème en mémoire à l'avance (l'intro, D-185) : demandé plus tard, il démarre aussitôt,
+   * sans attendre son fichier.
+   */
+  preload(track: MusicTrack): void {
+    const url = this.files.get(track);
+    if (!url) {
+      return;
+    }
+    let voice = this.voices.get(track);
+    if (!voice) {
+      voice = new TrackVoice(url);
+      this.voices.set(track, voice);
+    }
+    voice.load();
+  }
+
+  /**
    * Joue un disque une fois en entier (D-121), à la place des thèmes ; le reprendre le relance du
    * début. Faux si le disque n'a pas de fichier.
    */

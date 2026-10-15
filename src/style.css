@@ -476,6 +476,47 @@ body {
 }
 
 /* Écran de départ (placeholder, D-22). */
+/*
+ * L'intro au lancement (D-185) : un canvas plein écran, au-dessus de l'écran titre qui la suit.
+ * « Passer », discret, n'apparaît qu'après un toucher.
+ */
+#intro-screen {
+  position: fixed;
+  z-index: 36;
+  inset: 0;
+  background: #000;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#intro-screen canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.intro-skip {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  right: calc(env(safe-area-inset-right, 0px) + 18px);
+  padding: 10px 18px;
+  border: 1px solid rgb(243 234 215 / 35%);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 35%);
+  color: rgb(243 234 215 / 85%);
+  font: inherit;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.intro-skip:focus-visible {
+  outline: 2px solid var(--crayon-rose);
+  outline-offset: 2px;
+}
+
 #title-screen {
   position: fixed;
   z-index: 35;
