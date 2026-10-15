@@ -27,6 +27,7 @@ import { CombatEvent, CombatWorld, wavesOf } from '../core/combat/CombatWorld';
 import { FixedStepClock } from '../core/FixedStepClock';
 import { InputController } from '../core/input/InputController';
 import { KeyboardSource } from '../core/input/KeyboardSource';
+import { BackButtonSource } from '../core/input/BackButtonSource';
 import { TouchSource } from '../core/input/TouchSource';
 import {
   EntityType,
@@ -881,6 +882,10 @@ export class GameScene extends Phaser.Scene {
     const keyboard = new KeyboardSource();
     this.controls.sources.push(keyboard);
     const detachKeyboard = keyboard.attach(window);
+    // Le retour d'Android presse Pause au lieu de quitter le jeu (D-186).
+    const backButton = new BackButtonSource(window.history);
+    this.controls.sources.push(backButton);
+    const detachBackButton = backButton.attach(window);
     let detachTouch: (() => void) | undefined;
     const controlSettings = { ...this.session.settings.data.controls };
     // En dev et dans le build de debug, `?touch` force l'affichage sur ordinateur (essai à la souris).
@@ -970,6 +975,7 @@ export class GameScene extends Phaser.Scene {
     this.scale.on(Phaser.Scale.Events.RESIZE, this.onResize);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       detachKeyboard();
+      detachBackButton();
       detachTouch?.();
       document.removeEventListener('visibilitychange', onVisibility);
       this.backpack.destroy();
