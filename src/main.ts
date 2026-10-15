@@ -26,6 +26,7 @@ import { CRASH_GUARD } from './config/perf';
 import { errorDetail, looksFrozen } from './core/platform/crashGuard';
 import { consumeQuietRelaunch, markQuietRelaunch } from './core/platform/quietRelaunch';
 import { sessionMarks } from './platform/sessionMarks';
+import { keepScreenAwake } from './platform/screenWake';
 
 function getParent(): HTMLElement {
   const element = document.getElementById('game');
@@ -157,6 +158,8 @@ document.addEventListener('visibilitychange', () => {
 
 async function boot(): Promise<void> {
   const parent = getParent();
+  // L'écran reste allumé pendant l'intro, les scènes et le jeu (D-186).
+  keepScreenAwake();
   // Service worker (build principal seulement, D-23) : enregistré au plus tôt.
   const pwa = new Pwa();
   pwa.start();
