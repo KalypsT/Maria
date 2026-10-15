@@ -104,19 +104,24 @@ function hash(n: number): number {
 /**
  * L'intro au lancement (D-185). Un canvas plein écran dessine les plans décrits par
  * `INTRO_SHOTS` ; la boîte à musique attend le premier toucher (qui permet aussi le son), puis
- * l'intro se déroule. Un toucher montre « Passer ». Elle se termine sur le papier de l'écran titre
- * (la promesse rend de quoi la retirer, une fois l'écran titre posé dessous). Rien ne doit bloquer le jeu : image manquante, erreur ou délai dépassé, elle
- * s'efface aussitôt.
+ * l'intro se déroule. Un toucher montre « Passer » (d'emblée si elle a déjà été vue en entier,
+ * `seen`, D-186). Elle se termine sur le papier de l'écran titre (la promesse rend de quoi la
+ * retirer, une fois l'écran titre posé dessous). Rien ne doit bloquer le jeu : image manquante,
+ * erreur ou délai dépassé, elle s'efface aussitôt.
  */
-export function playIntro(audio: IntroAudio): Promise<IntroResult> {
+export function playIntro(audio: IntroAudio, seen = false): Promise<IntroResult> {
   return new Promise((resolve) => {
     const shots = INTRO_SHOTS;
     const schedule = introSchedule(shots);
-    const director = new IntroDirector({
-      totalMs: schedule.totalMs,
-      skipButtonMs: INTRO.skipButtonMs,
-      skipFadeMs: INTRO.skipFadeMs,
-    });
+    // Déjà vue en entier sur l'appareil (D-186) : « Passer » d'emblée.
+    const director = new IntroDirector(
+      {
+        totalMs: schedule.totalMs,
+        skipButtonMs: INTRO.skipButtonMs,
+        skipFadeMs: INTRO.skipFadeMs,
+      },
+      seen,
+    );
     const root = document.createElement('div');
     root.id = 'intro-screen';
     root.setAttribute(UI_OVERLAY_ATTRIBUTE, '');

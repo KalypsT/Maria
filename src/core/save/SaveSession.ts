@@ -53,6 +53,15 @@ export class SettingsSession {
     this.current.audio = { ...audio };
     return this.manager.save(this.current);
   }
+
+  /** L'intro vue en entier (D-186) : écrit une seule fois. */
+  markIntroSeen(): Promise<void> {
+    if (this.current.introSeen) {
+      return Promise.resolve();
+    }
+    this.current.introSeen = true;
+    return this.manager.save(this.current);
+  }
 }
 
 /**
