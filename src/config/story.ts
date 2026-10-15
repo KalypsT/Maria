@@ -419,7 +419,17 @@ export const END_SCREEN = {
   /** Quelques scintillements qui passent près de Maria, puis plus rien. */
   sparkles: 5,
   sparkleMs: 2600,
-  continueAfterMs: 5000,
+  /**
+   * La dédicace (D-183, choix de l'utilisateur) : écrite au crayon sous l'étagère, une fois les
+   * scintillements passés (ms après l'arrivée de l'écran), en `dedicationWriteMs` ; puis la petite
+   * signature, `signatureDelayMs` plus tard. Le petit rond pour continuer vient après.
+   */
+  dedication: 'Pour Céleste et sa maman',
+  signature: 'Papa',
+  dedicationDelayMs: 5600,
+  dedicationWriteMs: 3200,
+  signatureDelayMs: 700,
+  continueAfterMs: 10000,
   /** L'image de Maria (fournie par l'utilisateur, D-31), par rapport à la racine du site. */
   mariaImage: 'art/maria.png',
   /**

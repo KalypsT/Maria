@@ -6,6 +6,17 @@
   src: url('./assets/fonts/gaegu-bold-caps.woff2') format('woff2');
 }
 
+/*
+ * La même, réduite au latin, avec un « é » composé dans son trait : la dédicace de l'écran de fin
+ * (D-183, `scripts/make-dedication-font.py`).
+ */
+@font-face {
+  font-family: 'Maria Hand';
+  font-weight: 700;
+  font-display: block;
+  src: url('./assets/fonts/gaegu-bold-latin.woff2') format('woff2');
+}
+
 :root {
   /*
    * Thème (PLACEHOLDER, direction artistique ouverte §45, choix « C ») : menus et écran de départ
@@ -58,6 +69,7 @@
   --ui-font: ui-rounded, 'SF Pro Rounded', 'Nunito', system-ui, sans-serif;
   /* Le titre, écrit comme par une enfant (D-175, PLACEHOLDER §45). */
   --title-font: 'Maria Title', var(--ui-font);
+  --hand-font: 'Maria Hand', var(--ui-font);
 
   /* Marges de l'encoche / barre d'accueil, pour les futurs éléments d'interface. */
   --safe-top: env(safe-area-inset-top, 0px);
@@ -483,12 +495,16 @@ body {
   color: var(--ink);
 }
 
-/* L'écran de fin (D-145), sans texte : Maria seule sur son étagère, sur la page du cahier. */
+/*
+ * L'écran de fin (D-145) : Maria seule sur son étagère, sur la page du cahier ; dessous, la seule
+ * ligne de texte, la dédicace (D-183).
+ */
 #end-screen {
   position: fixed;
   z-index: 40;
   inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   background:
@@ -670,6 +686,50 @@ body {
   100% {
     opacity: 0;
     transform: translateY(-14px) scale(1);
+  }
+}
+
+/*
+ * La dédicace (D-183) : écrite au crayon de gauche à droite, une fois les scintillements passés,
+ * dans le bas vide de la lumière ; la signature, en petit, au bout de la ligne.
+ */
+.end-dedication {
+  display: flex;
+  flex-direction: column;
+  margin-top: -9vh;
+  color: var(--ink);
+  font-family: var(--hand-font);
+  font-weight: 700;
+  pointer-events: none;
+  user-select: none;
+}
+
+.end-dedication-text {
+  margin: 0;
+  font-size: clamp(20px, 7vh, 36px);
+  line-height: 1.2;
+  clip-path: inset(-25% 100% -25% 0);
+  animation: end-write var(--dedication-ms) ease-in-out var(--dedication-delay) both;
+}
+
+@keyframes end-write {
+  to {
+    clip-path: inset(-25% -2% -25% 0);
+  }
+}
+
+.end-dedication-signature {
+  margin: 0.15em 0 0;
+  color: var(--ink-soft);
+  font-size: clamp(14px, 4.4vh, 22px);
+  text-align: right;
+  animation: end-in 1400ms ease-out var(--signature-delay) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .end-dedication-text {
+    clip-path: none;
+    animation: end-in 1400ms ease-out var(--dedication-delay) both;
   }
 }
 
