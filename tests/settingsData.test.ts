@@ -70,6 +70,17 @@ describe('settingsData (D-184)', () => {
       controls: DEFAULT_CONTROL_SETTINGS,
       display: DEFAULT_DISPLAY_SETTINGS,
       audio: DEFAULT_AUDIO_SETTINGS,
+      introSeen: false,
     });
+  });
+
+  it('l’intro vue (D-186) : retenue, absente des anciens réglages', () => {
+    const seen = { ...createSettings(), introSeen: true };
+    const read = deserializeSettings(serializeSettings(seen));
+    expect(read.ok && read.data.introSeen).toBe(true);
+    expect(sanitizeSettings({ introSeen: 'oui' }).introSeen).toBe(false);
+    const old = JSON.parse(JSON.stringify(createSettings())) as Record<string, unknown>;
+    delete old['introSeen'];
+    expect(sanitizeSettings(old).introSeen).toBe(false);
   });
 });

@@ -14,6 +14,8 @@ export interface GameSettings {
   controls: ControlSettings;
   display: DisplaySettings;
   audio: AudioSettings;
+  /** L'intro a été vue en entier une fois sur l'appareil (D-186) : « Passer » est montré d'emblée. */
+  introSeen: boolean;
 }
 
 export const SETTINGS_VERSION = 1;
@@ -24,6 +26,7 @@ export function createSettings(): GameSettings {
     controls: { ...DEFAULT_CONTROL_SETTINGS },
     display: { ...DEFAULT_DISPLAY_SETTINGS },
     audio: { ...DEFAULT_AUDIO_SETTINGS },
+    introSeen: false,
   };
 }
 
@@ -32,6 +35,7 @@ export function copySettings(settings: Readonly<GameSettings>): GameSettings {
     controls: { ...settings.controls },
     display: { ...settings.display },
     audio: { ...settings.audio },
+    introSeen: settings.introSeen,
   };
 }
 
@@ -42,6 +46,7 @@ export function sanitizeSettings(raw: unknown): GameSettings {
     controls: sanitizeControlSettings(source['controls']),
     display: sanitizeDisplaySettings(source['display']),
     audio: sanitizeAudioSettings(source['audio']),
+    introSeen: source['introSeen'] === true,
   };
 }
 
@@ -57,6 +62,7 @@ export function migrateLegacySettings(
     controls: parseControlSettings(controlsText),
     display: parseDisplaySettings(displayText),
     audio: { ...DEFAULT_AUDIO_SETTINGS },
+    introSeen: false,
   };
 }
 

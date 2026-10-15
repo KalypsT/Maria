@@ -22,8 +22,13 @@ import { installEnvironment, Pwa } from './platform/pwa';
 import { showTitleScreen } from './ui/TitleScreen';
 import { playIntro } from './ui/IntroScreen';
 import { showErrorScreen } from './ui/ErrorScreen';
+import { showStorageProblem } from './ui/StorageProblemScreen';
+import type { SaveLibraryStorage } from './core/save/SaveStorage';
 import { CRASH_GUARD } from './config/perf';
 import { errorDetail, looksFrozen } from './core/platform/crashGuard';
+import { consumeQuietRelaunch, markQuietRelaunch } from './core/platform/quietRelaunch';
+import { sessionMarks } from './platform/sessionMarks';
+import { keepScreenAwake } from './platform/screenWake';
 
 function getParent(): HTMLElement {
   const element = document.getElementById('game');
@@ -111,6 +116,8 @@ const crash = {
 };
 
 function resumeAfterCrash(): void {
+  // Au retour, l'accueil directement, sans l'intro (D-186).
+  markQuietRelaunch(sessionMarks());
   const writes = crash.session?.flush() ?? Promise.resolve();
   void writes.finally(() => {
     location.reload();
@@ -151,13 +158,29 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+/**
+ * Le stockage des parties (D-186) : tant qu'IndexedDB ne répond pas (le jeu ouvert ailleurs), un
+ * écran le dit et propose de réessayer, plutôt que de jouer ailleurs sans le dire.
+ */
+async function openLibraryStorage(): Promise<SaveLibraryStorage> {
+  for (;;) {
+    const opening = await openBrowserSaveStorage();
+    if (opening.ok) {
+      return opening.storage;
+    }
+    await showStorageProblem(opening.reason);
+  }
+}
+
 async function boot(): Promise<void> {
   const parent = getParent();
+  // L'écran reste allumé pendant l'intro, les scènes et le jeu (D-186).
+  keepScreenAwake();
   // Service worker (build principal seulement, D-23) : enregistré au plus tôt.
   const pwa = new Pwa();
   pwa.start();
   // Les parties de l'appareil (D-184) : l'ancienne sauvegarde unique est reprise dans la partie 1.
-  const library = new SaveLibrary(await openBrowserSaveStorage());
+  const library = new SaveLibrary(await openLibraryStorage());
   const opened = await library.open(legacySettings);
   const settings = new SettingsSession(library.settingsManager, opened.settings);
   // Toutes les parties chargées, pour l'accueil et sa page des parties (D-184), pendant l'intro.
@@ -167,11 +190,17 @@ async function boot(): Promise<void> {
   );
   const managerOf = (slot: number): SaveManager => managers.get(slot) ?? library.slotManager(slot);
   const audio = new AudioPlayer(settings.data.audio);
-  // L'intro (D-185), à chaque lancement ; `?nointro` la saute en dev et dans le build de debug.
+  // L'intro (D-185), à chaque lancement, sauf après « Oups ! » ou « Mettre à jour » (D-186) ;
+  // `?nointro` la saute en dev et dans le build de debug.
+  const quiet = consumeQuietRelaunch(sessionMarks());
   const intro =
-    __DEBUG_TOOLS__ && new URLSearchParams(location.search).has('nointro')
+    quiet || (__DEBUG_TOOLS__ && new URLSearchParams(location.search).has('nointro'))
       ? { close: () => undefined, completed: false }
-      : await playIntro(audio);
+      : await playIntro(audio, settings.data.introSeen);
+  if (intro.completed) {
+    // Vue en entier une fois : « Passer » d'emblée aux lancements suivants (D-186).
+    void settings.markIntroSeen();
+  }
   const summaries = await loading;
   // Musique (D-57) : thème de l'accueil (il démarre au premier toucher si l'intro n'en a pas eu).
   audio.setMusic('title');

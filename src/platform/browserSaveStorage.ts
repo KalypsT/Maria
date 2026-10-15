@@ -1,3 +1,4 @@
+import { openSaveStorage, StorageWaitError, type StorageOpening } from '../core/save/openStorage';
 import {
   MemorySaveLibraryStorage,
   type KeyWrite,
@@ -61,8 +62,9 @@ export class IndexedDbSaveStorage implements SaveLibraryStorage {
 
   static open(): Promise<IndexedDbSaveStorage> {
     return new Promise((resolve, reject) => {
+      let blocked = false;
       const timer = window.setTimeout(() => {
-        reject(new Error('IndexedDB : ouverture trop longue'));
+        reject(new StorageWaitError(blocked ? 'blocked' : 'timeout'));
       }, OPEN_TIMEOUT_MS);
       const request = indexedDB.open(DB_NAME, DB_VERSION);
       request.onupgradeneeded = () => {
@@ -79,6 +81,9 @@ export class IndexedDbSaveStorage implements SaveLibraryStorage {
         reject(request.error ?? new Error('IndexedDB : ouverture impossible'));
       };
       // Bloquée par un onglet de l'ancienne version : on attend qu'il se ferme, jusqu'au délai.
+      request.onblocked = () => {
+        blocked = true;
+      };
     });
   }
 
@@ -160,19 +165,16 @@ export class LocalSaveStorage implements SaveLibraryStorage {
   }
 }
 
-/** Meilleur stockage disponible : IndexedDB, sinon localStorage, sinon mémoire (session seule). */
-export async function openBrowserSaveStorage(): Promise<SaveLibraryStorage> {
-  if (typeof indexedDB !== 'undefined') {
-    try {
-      return await IndexedDbSaveStorage.open();
-    } catch {
-      // Repli ci-dessous.
-    }
-  }
-  if (LocalSaveStorage.available()) {
-    return new LocalSaveStorage();
-  }
-  return new MemorySaveLibraryStorage();
+/**
+ * Meilleur stockage disponible (D-186) : IndexedDB, sinon localStorage, sinon mémoire (session
+ * seule) ; pas de repli si IndexedDB ne répond pas (voir `openSaveStorage`).
+ */
+export function openBrowserSaveStorage(): Promise<StorageOpening> {
+  return openSaveStorage({
+    indexedDb: typeof indexedDB === 'undefined' ? null : () => IndexedDbSaveStorage.open(),
+    local: () => (LocalSaveStorage.available() ? new LocalSaveStorage() : null),
+    memory: () => new MemorySaveLibraryStorage(),
+  });
 }
 
 /**

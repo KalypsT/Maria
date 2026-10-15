@@ -27,6 +27,7 @@ import { CombatEvent, CombatWorld, wavesOf } from '../core/combat/CombatWorld';
 import { FixedStepClock } from '../core/FixedStepClock';
 import { InputController } from '../core/input/InputController';
 import { KeyboardSource } from '../core/input/KeyboardSource';
+import { BackButtonSource } from '../core/input/BackButtonSource';
 import { TouchSource } from '../core/input/TouchSource';
 import {
   EntityType,
@@ -109,6 +110,8 @@ import { TRAVEL_LANTERNS } from '../config/travel';
 import { FlashbackView } from '../ui/FlashbackView';
 import { Hud } from '../ui/Hud';
 import { showEndScreen } from '../ui/EndScreen';
+import { markQuietRelaunch } from '../core/platform/quietRelaunch';
+import { sessionMarks } from '../platform/sessionMarks';
 import { ShellJarView } from './ShellJarView';
 import { HideoutView } from './HideoutView';
 import { hideAt } from '../core/fx/hideouts';
@@ -879,6 +882,10 @@ export class GameScene extends Phaser.Scene {
     const keyboard = new KeyboardSource();
     this.controls.sources.push(keyboard);
     const detachKeyboard = keyboard.attach(window);
+    // Le retour d'Android presse Pause au lieu de quitter le jeu (D-186).
+    const backButton = new BackButtonSource(window.history);
+    this.controls.sources.push(backButton);
+    const detachBackButton = backButton.attach(window);
     let detachTouch: (() => void) | undefined;
     const controlSettings = { ...this.session.settings.data.controls };
     // En dev et dans le build de debug, `?touch` force l'affichage sur ordinateur (essai à la souris).
@@ -926,12 +933,15 @@ export class GameScene extends Phaser.Scene {
         debugTools: __DEBUG_TOOLS__,
         onSwitchDebug: () => {
           // Même site, donc même sauvegarde : on reprend à la dernière lanterne dans l'autre version.
+          markQuietRelaunch(sessionMarks());
           void this.session.flush().then(() => {
             location.assign(debugSwitchUrl(import.meta.env.BASE_URL, __DEBUG_TOOLS__));
           });
         },
         onQuitToTitle: () => {
-          // Écritures en cours terminées, puis relance : le démarrage affiche l'accueil.
+          // Écritures en cours terminées, puis relance : le démarrage affiche l'accueil, sans
+          // l'intro (D-186).
+          markQuietRelaunch(sessionMarks());
           void this.session.flush().then(() => {
             location.reload();
           });
@@ -965,6 +975,7 @@ export class GameScene extends Phaser.Scene {
     this.scale.on(Phaser.Scale.Events.RESIZE, this.onResize);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       detachKeyboard();
+      detachBackButton();
       detachTouch?.();
       document.removeEventListener('visibilitychange', onVisibility);
       this.backpack.destroy();
@@ -1821,6 +1832,8 @@ export class GameScene extends Phaser.Scene {
         );
       })
       .then(() => {
+        // L'accueil, sans rejouer l'intro juste après la fin (D-186).
+        markQuietRelaunch(sessionMarks());
         location.reload();
       });
   }

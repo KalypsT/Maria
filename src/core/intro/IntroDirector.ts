@@ -7,6 +7,9 @@
  * - `done` : finie (jouée en entier, passée, ou impossible à charger).
  *
  * Mise en arrière-plan : le temps de l'intro s'arrête (`pause` / `resume`).
+ *
+ * Déjà vue en entier sur l'appareil (`alwaysSkippable`, D-186) : « Passer » est montré d'emblée,
+ * dès la boîte qui attend, et jusqu'à la fin.
  */
 export type IntroPhase = 'loading' | 'waiting' | 'playing' | 'leaving' | 'done';
 
@@ -27,7 +30,10 @@ export class IntroDirector {
   private frozenMs = 0;
   private playedThrough = false;
 
-  constructor(private readonly timing: IntroTiming) {}
+  constructor(
+    private readonly timing: IntroTiming,
+    private readonly alwaysSkippable = false,
+  ) {}
 
   get phase(): IntroPhase {
     return this.state;
@@ -108,6 +114,9 @@ export class IntroDirector {
 
   /** Le bouton « Passer » est-il montré ? */
   skipVisible(now: number): boolean {
+    if (this.alwaysSkippable) {
+      return this.state === 'waiting' || this.state === 'playing';
+    }
     return this.state === 'playing' && now < this.skipUntil;
   }
 

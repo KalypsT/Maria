@@ -1,5 +1,7 @@
 import { registerSW } from 'virtual:pwa-register';
 import type { InstallEnvironment } from '../core/platform/install';
+import { markQuietRelaunch } from '../core/platform/quietRelaunch';
+import { sessionMarks } from './sessionMarks';
 
 /** Événement `beforeinstallprompt` (Chrome, Android), absent des types du DOM. */
 interface InstallPromptEvent extends Event {
@@ -50,6 +52,8 @@ export class Pwa {
 
   /** Active la nouvelle version et recharge (à n'appeler qu'en dehors d'une partie). */
   applyUpdate(): Promise<void> {
+    // La nouvelle version s'ouvre sur l'accueil, sans rejouer l'intro (D-186).
+    markQuietRelaunch(sessionMarks());
     return this.updateServiceWorker(true);
   }
 

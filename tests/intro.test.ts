@@ -261,6 +261,32 @@ describe('les commandes de l’intro', () => {
   });
 });
 
+describe('l’intro déjà vue (D-186)', () => {
+  const timing = { totalMs: 10_000, skipButtonMs: 3000, skipFadeMs: 500 };
+
+  it('« Passer » est montré dès la boîte qui attend, sans toucher', () => {
+    const d = new IntroDirector(timing, true);
+    expect(d.skipVisible(0)).toBe(false);
+    d.ready();
+    expect(d.skipVisible(0)).toBe(true);
+    d.skip(100);
+    expect(d.phase).toBe('leaving');
+    expect(d.skipVisible(200)).toBe(false);
+    expect(d.update(700)).toBe('done');
+    expect(d.completed).toBe(false);
+  });
+
+  it('« Passer » reste montré pendant tout le déroulé ; vue jusqu’au bout, elle compte', () => {
+    const d = new IntroDirector(timing, true);
+    d.ready();
+    d.press(0);
+    expect(d.skipVisible(9000)).toBe(true);
+    expect(d.update(10_000)).toBe('done');
+    expect(d.skipVisible(10_000)).toBe(false);
+    expect(d.completed).toBe(true);
+  });
+});
+
 describe('le plan 8 : le titre s’écrit sur l’écran titre', () => {
   const entrance = titleEntranceSchedule(TITLE_ENTRANCE, 5);
 
