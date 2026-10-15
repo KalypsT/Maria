@@ -15,7 +15,7 @@ import {
 } from '../core/save/slots';
 import { journeyProgress } from '../core/world/journeyProgress';
 import { roomName, ZONES } from '../levels';
-import { showImportDialog } from './SaveCodeDialog';
+import { showExportDialog, showImportDialog } from './SaveCodeDialog';
 
 /** Ce que l'écran de départ sait de la PWA (D-23) : mise à jour prête, installation possible. */
 export interface TitlePwa {
@@ -69,18 +69,24 @@ function portraitOf(data: Readonly<SaveData> | null): string {
   return TITLE_IMAGES[growthPhase(new Set(data?.story.flags ?? [])).outfit];
 }
 
-/** Une confirmation au second toucher : le bouton change de texte, puis revient s'il est oublié. */
-function confirmButton(button: HTMLButtonElement, question: string, action: () => void): void {
-  const label = button.textContent;
+/**
+ * Une confirmation au second toucher : le premier montre la question (`ask`), puis tout revient
+ * (`reset`) si le second toucher ne vient pas à temps.
+ */
+function confirmTwice(
+  button: HTMLButtonElement,
+  ask: () => void,
+  reset: () => void,
+  action: () => void,
+): void {
   let timer = 0;
-  button.addEventListener('click', (event) => {
-    event.stopPropagation();
+  button.addEventListener('click', () => {
     if (timer === 0) {
-      button.textContent = question;
+      ask();
       button.classList.add('title-confirm');
       timer = window.setTimeout(() => {
         timer = 0;
-        button.textContent = label;
+        reset();
         button.classList.remove('title-confirm');
       }, SLOT_CONFIRM_MS);
       return;
@@ -91,13 +97,29 @@ function confirmButton(button: HTMLButtonElement, question: string, action: () =
   });
 }
 
-/** Délai pour confirmer un effacement, après quoi le bouton revient à son texte. */
+/** Une confirmation au second toucher sur un bouton de texte : il pose la question. */
+function confirmButton(button: HTMLButtonElement, question: string, action: () => void): void {
+  const label = button.textContent;
+  confirmTwice(
+    button,
+    () => {
+      button.textContent = question;
+    },
+    () => {
+      button.textContent = label;
+    },
+    action,
+  );
+}
+
+/** Délai pour confirmer (effacer, remplacer), après quoi le bouton revient à son texte. */
 const SLOT_CONFIRM_MS = 4000;
 
 /**
  * Écran de départ (placeholder, D-22, spec §21.3) : « Continuer » reprend la dernière partie jouée,
  * « Les parties » ouvre la page des parties (D-184), qui en montre trois (en commencer une, en
- * reprendre une, en effacer une) ; import d'un code. Après la fin du jeu (D-145), Maria sur son
+ * reprendre une ; sous « … », son code de sauvegarde et l'effacer) ; en bas, discret, l'import
+ * d'un code. Après la fin du jeu (D-145), Maria sur son
  * étagère dans un coin de la page.
  */
 export function showTitleScreen(
@@ -133,14 +155,6 @@ export function showTitleScreen(
       root.remove();
       resolve(choice);
     };
-    const importInto = (slot: number) => {
-      void showImportDialog().then((data) => {
-        if (data) {
-          done({ kind: 'import', slot, data });
-        }
-      });
-    };
-
     const showMain = () => {
       unsubscribe();
       root.classList.remove('title-slots-open');
@@ -174,7 +188,9 @@ export function showTitleScreen(
             'La dernière sauvegarde était abîmée : la précédente a été récupérée.',
           );
         }
-        element('button', panel, undefined, 'Les parties').addEventListener('click', showSlots);
+        element('button', panel, undefined, 'Les parties').addEventListener('click', () => {
+          showSlots();
+        });
       } else {
         if (summaries.some(slotUnreadable)) {
           element('p', panel, 'save-error', 'Sauvegarde illisible.');
@@ -190,15 +206,11 @@ export function showTitleScreen(
             }
           },
         );
-        if (free === null) {
-          element('button', panel, undefined, 'Les parties').addEventListener('click', showSlots);
-        }
+        // Discret : effacer une sauvegarde illisible, ou importer un code (un nouvel appareil).
+        element('button', panel, 'title-small', 'Les parties').addEventListener('click', () => {
+          showSlots();
+        });
       }
-      // L'import remplace la partie à reprendre, ou va dans une place libre.
-      const target = current ?? firstFreeSlot(summaries) ?? slots.lastSlot;
-      element('button', panel, 'title-small', 'Importer un code').addEventListener('click', () => {
-        importInto(target);
-      });
 
       // Mise à jour et installation (D-23), recalculées quand l'état de la PWA change.
       const extra = element('div', panel, 'title-pwa');
@@ -234,21 +246,45 @@ export function showTitleScreen(
       }
     };
 
-    /** La page des parties (D-184) : une carte par emplacement. */
-    function showSlots(): void {
+    /** Un code collé (D-22) : dans une place libre, sinon à la place d'une partie choisie. */
+    const startImport = () => {
+      void showImportDialog().then((data) => {
+        if (!data) {
+          return;
+        }
+        const free = firstFreeSlot(summaries);
+        if (free === null) {
+          showSlots(data);
+        } else {
+          done({ kind: 'import', slot: free, data });
+        }
+      });
+    };
+
+    /**
+     * La page des parties (D-184) : une carte par emplacement. Avec `importing`, toutes les places
+     * sont prises : on choisit la partie que le code remplace (second toucher pour confirmer).
+     */
+    function showSlots(importing: SaveData | null = null): void {
       unsubscribe();
       unsubscribe = () => {
         // Pas de PWA sur cette page.
       };
       root.classList.add('title-slots-open');
       panel.replaceChildren();
-      element('h2', panel, 'title-slots-heading', 'Les parties');
+      element(
+        'h2',
+        panel,
+        'title-slots-heading',
+        importing ? 'Remplacer quelle partie ?' : 'Les parties',
+      );
       const row = element('div', panel, 'title-slots');
       const now = Date.now();
       const zone = ZONES[0];
       for (const summary of summaries) {
         const { slot } = summary;
         const data = slotData(summary);
+        const unreadable = slotUnreadable(summary);
         const card = element('div', row, 'title-slot');
         const open = element('button', card, 'title-slot-open');
         const label = `Partie ${String(slot)}`;
@@ -267,49 +303,103 @@ export function showTitleScreen(
             `${percent}${formatPlayTime(data.stats.playMs)}`,
           );
           element('span', open, 'title-slot-line', formatSavedAt(data.savedAt, now));
-          open.addEventListener('click', () => {
-            done({ kind: 'play', slot });
-          });
-        } else if (slotUnreadable(summary)) {
-          card.classList.add('title-slot-empty');
-          element('span', open, 'title-slot-name', label);
-          element('span', open, 'title-slot-line save-error', 'Sauvegarde illisible');
-          open.disabled = true;
         } else {
           card.classList.add('title-slot-empty');
           element('span', open, 'title-slot-name', label);
-          element('span', open, 'title-slot-new', 'Nouvelle partie');
+          if (unreadable) {
+            element('span', open, 'title-slot-line save-error', 'Sauvegarde illisible');
+          } else {
+            element('span', open, 'title-slot-new', 'Nouvelle partie');
+          }
+        }
+        if (importing) {
+          // Le code prend la place de cette partie : un second toucher le confirme.
+          const ask = element('span', open, 'title-slot-ask', 'Toucher encore pour remplacer');
+          ask.hidden = true;
+          confirmTwice(
+            open,
+            () => {
+              ask.hidden = false;
+            },
+            () => {
+              ask.hidden = true;
+            },
+            () => {
+              done({ kind: 'import', slot, data: importing });
+            },
+          );
+          continue;
+        }
+        if (data) {
+          open.addEventListener('click', () => {
+            done({ kind: 'play', slot });
+          });
+        } else if (unreadable) {
+          open.disabled = true;
+        } else {
           open.addEventListener('click', () => {
             done({ kind: 'new', slot });
           });
         }
-        if (data || slotUnreadable(summary)) {
-          const erase = element('button', card, 'title-slot-erase', 'Effacer');
-          confirmButton(erase, 'Effacer pour de bon ?', () => {
-            erase.disabled = true;
-            void slots.erase(slot).then((erased) => {
-              if (!erased) {
-                erase.textContent = 'Échec : réessayer';
-                erase.disabled = false;
-                return;
-              }
-              const index = summaries.indexOf(summary);
-              summaries[index] = {
-                slot,
-                report: {
-                  data: null,
-                  source: 'none',
-                  mainProblem: null,
-                  previousProblem: null,
-                  readFailed: false,
-                },
-              };
-              showSlots();
-            });
-          });
+        if (data || unreadable) {
+          addSlotMenu(card, summary);
         }
       }
-      element('button', panel, 'title-small', 'Retour').addEventListener('click', showMain);
+      if (importing) {
+        element('button', panel, 'title-small', 'Annuler').addEventListener('click', () => {
+          showSlots();
+        });
+        return;
+      }
+      const actions = element('div', panel, 'title-slots-actions');
+      element('button', actions, 'title-small', 'Retour').addEventListener('click', showMain);
+      // Discret (D-184) : reprendre une partie venue d'un autre appareil ou du navigateur.
+      element('button', actions, 'title-link', 'Importer un code').addEventListener(
+        'click',
+        startImport,
+      );
+    }
+
+    /** Le « … » d'une partie : son code de sauvegarde, et l'effacer. */
+    function addSlotMenu(card: HTMLElement, summary: SlotSummary): void {
+      const { slot } = summary;
+      const data = slotData(summary);
+      const more = element('button', card, 'title-slot-more', '…');
+      more.setAttribute('aria-label', `Partie ${String(slot)} : plus`);
+      const menu = element('div', card, 'title-slot-menu');
+      menu.hidden = true;
+      more.addEventListener('click', () => {
+        menu.hidden = !menu.hidden;
+        more.hidden = !menu.hidden;
+      });
+      if (data) {
+        element('button', menu, undefined, 'Code de sauvegarde').addEventListener('click', () => {
+          showExportDialog(data);
+        });
+      }
+      const erase = element('button', menu, undefined, 'Effacer');
+      confirmButton(erase, 'Effacer pour de bon ?', () => {
+        erase.disabled = true;
+        void slots.erase(slot).then((erased) => {
+          if (!erased) {
+            erase.textContent = 'Échec : réessayer';
+            erase.disabled = false;
+            return;
+          }
+          const index = summaries.indexOf(summary);
+          summaries[index] = {
+            slot,
+            report: {
+              data: null,
+              source: 'none',
+              mainProblem: null,
+              previousProblem: null,
+              readFailed: false,
+            },
+          };
+          showSlots();
+        });
+      });
     }
 
     showMain();

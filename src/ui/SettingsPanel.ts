@@ -26,9 +26,6 @@ export interface SettingsPanelOptions {
    * commandes pendant le réglage.
    */
   onPreview: (active: boolean) => void;
-  /** Code de sauvegarde (D-22) : afficher pour copier, ou importer. */
-  onExportSave: () => void;
-  onImportSave: () => void;
   /** Retour à l'écran d'accueil (après confirmation). */
   onQuitToTitle: () => void;
   /**
@@ -104,16 +101,6 @@ export class SettingsPanel {
         });
       });
     }
-    element('h3', panel, undefined, 'Sauvegarde');
-    const saveRow = element('div', panel, 'settings-buttons');
-    element('button', saveRow, undefined, 'Code de sauvegarde').addEventListener(
-      'click',
-      options.onExportSave,
-    );
-    element('button', saveRow, undefined, 'Importer un code').addEventListener(
-      'click',
-      options.onImportSave,
-    );
     if (options.debugTools && options.levels.length > 1) {
       this.addLevelChoice(panel);
     }

@@ -113,7 +113,6 @@ import { ShellJarView } from './ShellJarView';
 import { HideoutView } from './HideoutView';
 import { hideAt } from '../core/fx/hideouts';
 import type { SaveLibrary } from '../core/save/SaveLibrary';
-import { showExportDialog, showImportDialog } from '../ui/SaveCodeDialog';
 import {
   ART_IMAGES,
   CELESTE_PART_IMAGES,
@@ -923,18 +922,6 @@ export class GameScene extends Phaser.Scene {
           void this.session.setControls(settings);
           this.touch?.setSettings(settings);
           this.haptics.enabled = settings.vibration;
-        },
-        onExportSave: () => {
-          showExportDialog(this.session.data);
-        },
-        onImportSave: () => {
-          void showImportDialog().then(async (data) => {
-            if (data) {
-              // La partie importée remplace l'actuelle (qui devient l'état précédent), puis relance.
-              await this.session.replace(data);
-              location.reload();
-            }
-          });
         },
         debugTools: __DEBUG_TOOLS__,
         onSwitchDebug: () => {

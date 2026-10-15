@@ -265,12 +265,6 @@ export class SaveSession {
     return this.persist();
   }
 
-  /** Remplace toute la partie (import d'un code de sauvegarde). */
-  replace(data: SaveData): Promise<void> {
-    this.current = data;
-    return this.persist();
-  }
-
   persist(): Promise<void> {
     this.current.savedAt = this.now();
     return this.manager.save(this.current);

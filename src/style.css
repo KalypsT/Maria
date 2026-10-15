@@ -887,6 +887,10 @@ body {
   display: none;
 }
 
+#title-screen.title-slots-open .title-panel {
+  gap: 6px;
+}
+
 .title-panel h2.title-slots-heading {
   margin: 0;
   font: 700 clamp(22px, 6vh, 32px) / 1.1 var(--ui-font);
@@ -914,7 +918,7 @@ body {
   justify-content: center;
   gap: 2px;
   min-width: 0;
-  min-height: min(58vh, 250px);
+  min-height: min(50vh, 250px);
   padding: 8px 6px;
   border-radius: var(--sketch-radius-panel);
   background: var(--paper-light);
@@ -953,21 +957,74 @@ body {
   font-weight: 600;
 }
 
-.title-panel button.title-slot-erase {
+.title-slot-ask {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--warning-ink);
+}
+
+.title-slot-ask[hidden] {
+  display: none;
+}
+
+/* Le « … » d'une partie et son petit menu (son code, l'effacer). */
+.title-panel button.title-slot-more {
+  align-self: center;
+  min-width: 56px;
+  min-height: 32px;
+  padding: 0 10px;
+  border-color: transparent;
+  background: transparent;
+  font-size: 1.1rem;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.title-slot-more[hidden],
+.title-slot-menu[hidden] {
+  display: none;
+}
+
+.title-slot-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title-panel .title-slot-menu button {
   min-width: 0;
   min-height: 32px;
   padding: 2px 8px;
   font-size: 0.75rem;
-  opacity: 0.7;
 }
 
-.title-panel button.title-slot-erase.title-confirm {
+.title-panel .title-slot-menu button.title-confirm,
+.title-panel button.title-slot-open.title-confirm {
   border-color: var(--warning-ink);
   color: var(--warning-ink);
-  opacity: 1;
 }
 
-/* Code de sauvegarde (export / import), ouvert depuis le sac : au-dessus de lui. */
+.title-slots-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Un lien plutôt qu'un bouton : l'import reste discret (D-184). */
+.title-panel button.title-link {
+  min-width: 0;
+  min-height: 36px;
+  padding: 4px 6px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Code de sauvegarde (export / import), ouvert depuis la page des parties (D-184). */
 .save-dialog {
   position: fixed;
   z-index: 50;

@@ -7,7 +7,7 @@ import { createNewSave } from '../src/core/save/saveData';
 import { createSettings } from '../src/core/save/settingsData';
 
 describe('SaveSession', () => {
-  it('enregistre checkpoint, réglages et import, relus après « fermeture »', async () => {
+  it('enregistre le checkpoint, relu après « fermeture »', async () => {
     const storage = new MemorySaveStorage();
     let clock = 10;
     const session = new SaveSession(
@@ -21,10 +21,6 @@ describe('SaveSession', () => {
     expect(reloaded.data?.checkpoint).toEqual({ levelId: 'checkpoints', checkpointId: 'c4-7' });
     expect(reloaded.data?.activatedCheckpoints).toEqual(['checkpoints:c4-7']);
     expect(reloaded.data?.savedAt).toBe(11);
-
-    const imported = createNewSave('tour', 0);
-    await session.replace(imported);
-    expect((await new SaveManager(storage).load()).data?.checkpoint.levelId).toBe('tour');
   });
 
   it('écrit les réglages à part, communs à toutes les parties (D-184)', async () => {
