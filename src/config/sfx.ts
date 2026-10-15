@@ -118,22 +118,46 @@ export const STEP_SLOT: Readonly<Record<Surface, SfxSlot>> = {
   leaves: 'step-leaves',
 };
 
-/** Volume propre de chaque emplacement (1 par défaut), avant le volume des bruitages. */
+/**
+ * Volume propre de chaque emplacement (1 par défaut), avant le volume des bruitages. Les valeurs
+ * marquées « provisoire » sont réglées pour les sons de synthèse (D-186) : à revoir quand le vrai
+ * son arrive (les fichiers sont tous ramenés à la même crête, pas à la même sonie).
+ */
 export const SFX_GAIN: Readonly<Partial<Record<SfxSlot, number>>> = {
   'step-wood': 0.55,
-  'step-fabric': 0.45,
+  /** Provisoire (D-186). */
+  'step-fabric': 0.28,
   'step-grass': 0.55,
   'step-stone': 0.55,
   'step-sand': 0.55,
-  'step-metal': 0.55,
+  /** Provisoire (D-186). */
+  'step-metal': 0.45,
   'step-leaves': 0.55,
   jump: 0.6,
   land: 0.7,
-  'wall-slide': 0.5,
+  /** Provisoire (D-186). */
+  'land-big': 0.75,
+  /** Provisoire (D-186). */
+  'wall-slide': 0.16,
   'cable-slide': 0.5,
-  'chase-rumble': 0.6,
-  thought: 0.5,
-  hint: 0.5,
+  /** Provisoire (D-186). */
+  hit: 0.7,
+  /** Provisoire (D-186). */
+  'chase-wake': 0.55,
+  /** Provisoire (D-186). */
+  'chase-rumble': 0.28,
+  /** Provisoire (D-186). */
+  lullaby: 0.5,
+  /** Provisoire (D-186). */
+  door: 0.42,
+  /** Provisoire (D-186). */
+  'map-open': 0.5,
+  /** Provisoire (D-186). */
+  'map-close': 0.5,
+  /** Provisoire (D-186). */
+  thought: 0.28,
+  /** Provisoire (D-186). */
+  hint: 0.4,
   'voice-hop': 0.7,
   'voice-effort': 0.7,
   'voice-ouch': 0.8,
