@@ -1,12 +1,21 @@
-import { MemorySaveStorage, type SaveSlots, type SaveStorage } from '../core/save/SaveStorage';
+import {
+  MemorySaveLibraryStorage,
+  type KeyWrite,
+  type SaveLibraryStorage,
+  type SaveSlots,
+} from '../core/save/SaveStorage';
 
 const DB_NAME = 'maria';
-const DB_VERSION = 1;
-const STORE = 'save';
-const MAIN_KEY = 'main';
-const PREVIOUS_KEY = 'previous';
-const LOCAL_MAIN = 'maria.save.main';
-const LOCAL_PREVIOUS = 'maria.save.previous';
+/** Version 2 (D-184) : le magasin des parties s'ajoute ; celui de l'ancienne sauvegarde reste. */
+const DB_VERSION = 2;
+/** L'ancienne sauvegarde unique (D-22), lue seulement pour la reprise. */
+const LEGACY_STORE = 'save';
+const STORE = 'library';
+const LEGACY_MAIN_KEY = 'main';
+const LEGACY_PREVIOUS_KEY = 'previous';
+const LOCAL_LEGACY_MAIN = 'maria.save.main';
+const LOCAL_LEGACY_PREVIOUS = 'maria.save.previous';
+const LOCAL_PREFIX = 'maria.library.';
 /** Au-delà, IndexedDB est jugé indisponible (certains navigateurs ne répondent jamais). */
 const OPEN_TIMEOUT_MS = 3000;
 
@@ -39,11 +48,16 @@ function asText(value: unknown): string | null {
   return typeof value === 'string' ? value : null;
 }
 
-/** IndexedDB (D-22) : les deux emplacements sont écrits dans une seule transaction (atomique). */
-export class IndexedDbSaveStorage implements SaveStorage {
+/** IndexedDB (D-22, D-184) : plusieurs clés écrites dans une seule transaction (atomique). */
+export class IndexedDbSaveStorage implements SaveLibraryStorage {
   readonly kind = 'IndexedDB';
 
-  private constructor(private readonly db: IDBDatabase) {}
+  private constructor(private readonly db: IDBDatabase) {
+    // Une version plus récente du jeu ouverte ailleurs : céder la base plutôt que la bloquer.
+    db.onversionchange = () => {
+      db.close();
+    };
+  }
 
   static open(): Promise<IndexedDbSaveStorage> {
     return new Promise((resolve, reject) => {
@@ -64,70 +78,61 @@ export class IndexedDbSaveStorage implements SaveStorage {
         window.clearTimeout(timer);
         reject(request.error ?? new Error('IndexedDB : ouverture impossible'));
       };
-      request.onblocked = () => {
-        window.clearTimeout(timer);
-        reject(new Error('IndexedDB : ouverture bloquée'));
-      };
+      // Bloquée par un onglet de l'ancienne version : on attend qu'il se ferme, jusqu'au délai.
     });
   }
 
-  async read(): Promise<SaveSlots> {
+  async get(keys: readonly string[]): Promise<(string | null)[]> {
     const store = this.db.transaction(STORE, 'readonly').objectStore(STORE);
-    const [main, previous] = await Promise.all([
-      requestResult<unknown>(store.get(MAIN_KEY)),
-      requestResult<unknown>(store.get(PREVIOUS_KEY)),
-    ]);
-    return { main: asText(main), previous: asText(previous) };
+    const values = await Promise.all(keys.map((key) => requestResult<unknown>(store.get(key))));
+    return values.map(asText);
   }
 
-  write(slots: SaveSlots): Promise<void> {
+  set(writes: readonly KeyWrite[]): Promise<void> {
     const tx = this.db.transaction(STORE, 'readwrite');
     const store = tx.objectStore(STORE);
-    if (slots.previous === null) {
-      store.delete(PREVIOUS_KEY);
-    } else {
-      store.put(slots.previous, PREVIOUS_KEY);
-    }
-    if (slots.main === null) {
-      store.delete(MAIN_KEY);
-    } else {
-      store.put(slots.main, MAIN_KEY);
+    for (const [key, value] of writes) {
+      if (value === null) {
+        store.delete(key);
+      } else {
+        store.put(value, key);
+      }
     }
     return transactionDone(tx);
   }
 
-  clear(): Promise<void> {
-    const tx = this.db.transaction(STORE, 'readwrite');
-    tx.objectStore(STORE).clear();
-    return transactionDone(tx);
+  async readLegacy(): Promise<SaveSlots> {
+    if (!this.db.objectStoreNames.contains(LEGACY_STORE)) {
+      return { main: null, previous: null };
+    }
+    const store = this.db.transaction(LEGACY_STORE, 'readonly').objectStore(LEGACY_STORE);
+    const [main, previous] = await Promise.all([
+      requestResult<unknown>(store.get(LEGACY_MAIN_KEY)),
+      requestResult<unknown>(store.get(LEGACY_PREVIOUS_KEY)),
+    ]);
+    return { main: asText(main), previous: asText(previous) };
   }
 }
 
 /**
- * Repli sur localStorage (IndexedDB indisponible, navigation privée…). Pas de transaction : le
- * précédent est écrit avant le principal, pour qu'une interruption laisse au moins un état valide.
+ * Repli sur localStorage (IndexedDB indisponible, navigation privée…). Pas de transaction : les clés
+ * sont écrites dans l'ordre donné, pour qu'une interruption laisse au moins un état valide.
  */
-export class LocalSaveStorage implements SaveStorage {
+export class LocalSaveStorage implements SaveLibraryStorage {
   readonly kind = 'localStorage';
 
-  read(): Promise<SaveSlots> {
-    return Promise.resolve({
-      main: localStorage.getItem(LOCAL_MAIN),
-      previous: localStorage.getItem(LOCAL_PREVIOUS),
-    });
+  get(keys: readonly string[]): Promise<(string | null)[]> {
+    return Promise.resolve(keys.map((key) => localStorage.getItem(LOCAL_PREFIX + key)));
   }
 
-  write(slots: SaveSlots): Promise<void> {
+  set(writes: readonly KeyWrite[]): Promise<void> {
     try {
-      if (slots.previous === null) {
-        localStorage.removeItem(LOCAL_PREVIOUS);
-      } else {
-        localStorage.setItem(LOCAL_PREVIOUS, slots.previous);
-      }
-      if (slots.main === null) {
-        localStorage.removeItem(LOCAL_MAIN);
-      } else {
-        localStorage.setItem(LOCAL_MAIN, slots.main);
+      for (const [key, value] of writes) {
+        if (value === null) {
+          localStorage.removeItem(LOCAL_PREFIX + key);
+        } else {
+          localStorage.setItem(LOCAL_PREFIX + key, value);
+        }
       }
       return Promise.resolve();
     } catch (error) {
@@ -135,10 +140,11 @@ export class LocalSaveStorage implements SaveStorage {
     }
   }
 
-  clear(): Promise<void> {
-    localStorage.removeItem(LOCAL_MAIN);
-    localStorage.removeItem(LOCAL_PREVIOUS);
-    return Promise.resolve();
+  readLegacy(): Promise<SaveSlots> {
+    return Promise.resolve({
+      main: localStorage.getItem(LOCAL_LEGACY_MAIN),
+      previous: localStorage.getItem(LOCAL_LEGACY_PREVIOUS),
+    });
   }
 
   /** Vrai si localStorage accepte une écriture. */
@@ -155,7 +161,7 @@ export class LocalSaveStorage implements SaveStorage {
 }
 
 /** Meilleur stockage disponible : IndexedDB, sinon localStorage, sinon mémoire (session seule). */
-export async function openBrowserSaveStorage(): Promise<SaveStorage> {
+export async function openBrowserSaveStorage(): Promise<SaveLibraryStorage> {
   if (typeof indexedDB !== 'undefined') {
     try {
       return await IndexedDbSaveStorage.open();
@@ -166,7 +172,7 @@ export async function openBrowserSaveStorage(): Promise<SaveStorage> {
   if (LocalSaveStorage.available()) {
     return new LocalSaveStorage();
   }
-  return new MemorySaveStorage();
+  return new MemorySaveLibraryStorage();
 }
 
 /**

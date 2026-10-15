@@ -22,6 +22,7 @@ import { DEFAULT_PUPPET, PUPPET_PARAM_RANGES, type PuppetParams } from '../confi
 import { ART_FINISH_RANGES, DEFAULT_ART_FINISH, type ArtFinish } from '../config/art';
 import { EntityType } from '../core/level/LevelData';
 import { deserializeSave } from '../core/save/saveData';
+import { deserializeSettings } from '../core/save/settingsData';
 import { formatPlayTime, statsByPlace, totalFaints } from '../core/save/stats';
 import { isMappedRoom, mapPage } from '../core/world/zone';
 import { journeyProgress } from '../core/world/journeyProgress';
@@ -2305,6 +2306,9 @@ export function installDebugOverlay(scene: GameScene): void {
   const refreshSave = async () => {
     const manager = scene.session.manager;
     const slots = await manager.storage.read();
+    // Les réglages, communs à toutes les parties (D-184).
+    const settingsManager = scene.session.settings.manager;
+    const settingsSlots = await settingsManager.storage.read();
     const describe = (text: string | null) => {
       if (text === null) {
         return 'vide';
@@ -2314,13 +2318,22 @@ export function installDebugOverlay(scene: GameScene): void {
         ? `valide (${new Date(result.data.savedAt).toLocaleTimeString()})`
         : `refusé : ${result.problem}`;
     };
+    const describeSettings = (text: string | null) => {
+      if (text === null) {
+        return 'vide';
+      }
+      const result = deserializeSettings(text);
+      return result.ok ? 'valide' : `refusé : ${result.problem}`;
+    };
     const checkpoints = scene.run.checkpoints
       .map((c, i) => `${c.id}${c.activated ? ' ✓' : ''}${i === scene.run.current ? ' ←' : ''}`)
       .join('  ');
     saveInfo.textContent =
       `stockage ${manager.storage.kind}${manager.lastError ? `  erreur : ${manager.lastError}` : ''}\n` +
       `principal ${describe(slots.main)}\nprécédent ${describe(slots.previous)}\n` +
-      `checkpoints ${checkpoints || '(aucun)'}\n\n${JSON.stringify(scene.session.data, null, 1)}`;
+      `réglages ${describeSettings(settingsSlots.main)}, précédent ${describeSettings(settingsSlots.previous)}${settingsManager.lastError ? `  erreur : ${settingsManager.lastError}` : ''}\n` +
+      `checkpoints ${checkpoints || '(aucun)'}\n\n${JSON.stringify(scene.session.data, null, 1)}\n\n` +
+      JSON.stringify(scene.session.settings.data, null, 1);
   };
   saveSection.addEventListener('toggle', () => {
     if (saveSection.open) {

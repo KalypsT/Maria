@@ -3,19 +3,70 @@ import type { AudioSettings } from '../../config/audio';
 import type { ControlSettings } from '../../config/controls';
 import type { DisplaySettings } from '../../config/display';
 import type { SaveData } from './saveData';
-import type { SaveManager } from './SaveManager';
+import { RecordManager, type SaveManager } from './SaveManager';
+import { MemorySaveStorage } from './SaveStorage';
+import {
+  copySettings,
+  createSettings,
+  deserializeSettings,
+  serializeSettings,
+  type GameSettings,
+} from './settingsData';
 import { noteArcadeStart, reachArcadeLevel, submitArcadeScore } from './arcade';
 import { addFaint, addHint, addPlayTime, createStats } from './stats';
 
+/** Réglages de l'appareil (D-184), communs à toutes les parties : écrits à part à chaque changement. */
+export class SettingsSession {
+  private readonly current: GameSettings;
+
+  constructor(
+    readonly manager: RecordManager<GameSettings>,
+    settings: Readonly<GameSettings>,
+  ) {
+    this.current = copySettings(settings);
+  }
+
+  /** Réglages par défaut, gardés en mémoire seulement (tests). */
+  static inMemory(settings: Readonly<GameSettings> = createSettings()): SettingsSession {
+    const manager = new RecordManager(new MemorySaveStorage(), {
+      serialize: serializeSettings,
+      deserialize: deserializeSettings,
+    });
+    return new SettingsSession(manager, settings);
+  }
+
+  get data(): Readonly<GameSettings> {
+    return this.current;
+  }
+
+  setControls(controls: Readonly<ControlSettings>): Promise<void> {
+    this.current.controls = { ...controls };
+    return this.manager.save(this.current);
+  }
+
+  setDisplay(display: Readonly<DisplaySettings>): Promise<void> {
+    this.current.display = { ...display };
+    return this.manager.save(this.current);
+  }
+
+  setAudio(audio: Readonly<AudioSettings>): Promise<void> {
+    this.current.audio = { ...audio };
+    return this.manager.save(this.current);
+  }
+}
+
 /**
- * Partie en cours (D-22) : la sauvegarde courante et les modifications du jeu (checkpoint, salle,
- * réglages), écrites par `SaveManager`. Pure : l'horloge est injectée.
+ * Partie en cours (D-22) : la sauvegarde courante et les modifications du jeu (checkpoint, salle…),
+ * écrites par `SaveManager` dans l'emplacement de la partie (D-184) ; les réglages, communs à toutes
+ * les parties, par `settings`. Pure : l'horloge est injectée.
  */
 export class SaveSession {
   constructor(
     readonly manager: SaveManager,
     private current: SaveData,
     private readonly now: () => number = Date.now,
+    /** Les réglages de l'appareil (D-184), hors de la partie. */
+    readonly settings: SettingsSession = SettingsSession.inMemory(),
   ) {}
 
   get data(): Readonly<SaveData> {
@@ -141,18 +192,15 @@ export class SaveSession {
   }
 
   setControls(controls: Readonly<ControlSettings>): Promise<void> {
-    this.current.settings.controls = { ...controls };
-    return this.persist();
+    return this.settings.setControls(controls);
   }
 
   setDisplay(display: Readonly<DisplaySettings>): Promise<void> {
-    this.current.settings.display = { ...display };
-    return this.persist();
+    return this.settings.setDisplay(display);
   }
 
   setAudio(audio: Readonly<AudioSettings>): Promise<void> {
-    this.current.settings.audio = { ...audio };
-    return this.persist();
+    return this.settings.setAudio(audio);
   }
 
   /**
@@ -224,5 +272,10 @@ export class SaveSession {
   persist(): Promise<void> {
     this.current.savedAt = this.now();
     return this.manager.save(this.current);
+  }
+
+  /** Attend la fin des écritures en cours, de la partie et des réglages (avant de quitter). */
+  async flush(): Promise<void> {
+    await Promise.all([this.manager.flush(), this.settings.manager.flush()]);
   }
 }
