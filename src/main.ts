@@ -22,6 +22,8 @@ import { installEnvironment, Pwa } from './platform/pwa';
 import { showTitleScreen } from './ui/TitleScreen';
 import { playIntro } from './ui/IntroScreen';
 import { showErrorScreen } from './ui/ErrorScreen';
+import { showStorageProblem } from './ui/StorageProblemScreen';
+import type { SaveLibraryStorage } from './core/save/SaveStorage';
 import { CRASH_GUARD } from './config/perf';
 import { errorDetail, looksFrozen } from './core/platform/crashGuard';
 import { consumeQuietRelaunch, markQuietRelaunch } from './core/platform/quietRelaunch';
@@ -156,6 +158,20 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+/**
+ * Le stockage des parties (D-186) : tant qu'IndexedDB ne répond pas (le jeu ouvert ailleurs), un
+ * écran le dit et propose de réessayer, plutôt que de jouer ailleurs sans le dire.
+ */
+async function openLibraryStorage(): Promise<SaveLibraryStorage> {
+  for (;;) {
+    const opening = await openBrowserSaveStorage();
+    if (opening.ok) {
+      return opening.storage;
+    }
+    await showStorageProblem(opening.reason);
+  }
+}
+
 async function boot(): Promise<void> {
   const parent = getParent();
   // L'écran reste allumé pendant l'intro, les scènes et le jeu (D-186).
@@ -164,7 +180,7 @@ async function boot(): Promise<void> {
   const pwa = new Pwa();
   pwa.start();
   // Les parties de l'appareil (D-184) : l'ancienne sauvegarde unique est reprise dans la partie 1.
-  const library = new SaveLibrary(await openBrowserSaveStorage());
+  const library = new SaveLibrary(await openLibraryStorage());
   const opened = await library.open(legacySettings);
   const settings = new SettingsSession(library.settingsManager, opened.settings);
   // Toutes les parties chargées, pour l'accueil et sa page des parties (D-184), pendant l'intro.
