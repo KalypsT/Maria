@@ -476,6 +476,47 @@ body {
 }
 
 /* Écran de départ (placeholder, D-22). */
+/*
+ * L'intro au lancement (D-185) : un canvas plein écran, au-dessus de l'écran titre qui la suit.
+ * « Passer », discret, n'apparaît qu'après un toucher.
+ */
+#intro-screen {
+  position: fixed;
+  z-index: 36;
+  inset: 0;
+  background: #000;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#intro-screen canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.intro-skip {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  right: calc(env(safe-area-inset-right, 0px) + 18px);
+  padding: 10px 18px;
+  border: 1px solid rgb(243 234 215 / 35%);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 35%);
+  color: rgb(243 234 215 / 85%);
+  font: inherit;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.intro-skip:focus-visible {
+  outline: 2px solid var(--crayon-rose);
+  outline-offset: 2px;
+}
+
 #title-screen {
   position: fixed;
   z-index: 35;
@@ -879,6 +920,43 @@ body {
   min-height: 36px;
   font-size: 0.85rem;
   opacity: 0.8;
+}
+
+/*
+ * Le plan 8 de l'intro (D-185) : après l'intro vue en entier, MARIA s'écrit lettre par lettre au
+ * crayon (comme la dédicace, D-183), puis Céleste apparaît, puis le menu. Durées et départs
+ * posés par TitleScreen (`TITLE_ENTRANCE`). Rien n'est touchable avant la fin : un toucher sur la
+ * page montre tout (la classe est retirée).
+ */
+#title-screen.title-entrance .title-name span {
+  clip-path: inset(-25% 100% -25% 0);
+  animation: end-write var(--entrance-letter-ms) ease-in-out var(--letter-delay) both;
+}
+
+#title-screen.title-entrance .title-celeste {
+  animation: title-rise var(--entrance-portrait-ms) ease-out var(--entrance-portrait-delay) both;
+}
+
+#title-screen.title-entrance .title-panel > :not(.title-name),
+#title-screen.title-entrance .title-maria,
+#title-screen.title-entrance .title-version {
+  animation: end-in var(--entrance-panel-ms) ease-out var(--entrance-panel-delay) both;
+}
+
+#title-screen.title-entrance .title-panel {
+  pointer-events: none;
+}
+
+@keyframes title-rise {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
 }
 
 /* La page des parties (D-184) : trois cartes de cahier, à la place du menu. */

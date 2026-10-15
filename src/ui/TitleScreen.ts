@@ -1,4 +1,5 @@
 import { TITLE_IMAGES } from '../config/art';
+import { TITLE_ENTRANCE } from '../config/intro';
 import { growthPhase } from '../config/growth';
 import { END_SCREEN, StoryFlag } from '../config/story';
 import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
@@ -13,6 +14,7 @@ import {
   slotUnreadable,
   type SlotSummary,
 } from '../core/save/slots';
+import { titleEntranceSchedule } from '../core/intro/titleEntrance';
 import { journeyProgress } from '../core/world/journeyProgress';
 import { roomName, ZONES } from '../levels';
 import { showExportDialog, showImportDialog } from './SaveCodeDialog';
@@ -39,6 +41,17 @@ export interface TitleSlots {
   /** Efface une partie (principal et précédent) ; false si le stockage a refusé. */
   erase: (slot: number) => Promise<boolean>;
 }
+
+/** Comment l'écran titre s'affiche. */
+export interface TitleOptions {
+  /**
+   * Après l'intro vue en entier (D-185) : le plan 8, MARIA s'écrit lettre par lettre, puis
+   * Céleste, puis le menu. Un toucher (ou une touche) montre tout aussitôt.
+   */
+  entrance?: boolean;
+}
+
+const TITLE_LETTERS = 'MARIA';
 
 /** Le tremblé du crayon (D-175), un filtre SVG appliqué au titre par `style.css`. */
 const TITLE_WOBBLE_ID = 'title-wobble';
@@ -126,12 +139,55 @@ export function showTitleScreen(
   slots: TitleSlots,
   pwa: TitlePwa | null = null,
   hint: InstallHint = 'none',
+  options: TitleOptions = {},
 ): Promise<TitleChoice> {
   return new Promise((resolve) => {
     const summaries = [...slots.summaries];
     const root = element('div', document.body);
     root.id = 'title-screen';
     root.setAttribute(UI_OVERLAY_ATTRIBUTE, '');
+    const entrance = titleEntranceSchedule(TITLE_ENTRANCE, TITLE_LETTERS.length);
+    let endEntrance = () => {
+      // Remplacé ci-dessous si le titre s'écrit.
+    };
+    if (options.entrance && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      root.classList.add('title-entrance');
+      const ms = (value: number) => `${String(value)}ms`;
+      root.style.setProperty('--entrance-letter-ms', ms(TITLE_ENTRANCE.letterMs));
+      root.style.setProperty('--entrance-portrait-ms', ms(TITLE_ENTRANCE.portraitMs));
+      root.style.setProperty('--entrance-portrait-delay', ms(entrance.portraitStart));
+      root.style.setProperty('--entrance-panel-ms', ms(TITLE_ENTRANCE.panelMs));
+      root.style.setProperty('--entrance-panel-delay', ms(entrance.panelStart));
+      // Jusque-là, rien n'est touchable (le menu est invisible) : un toucher montre tout.
+      const timer = window.setTimeout(() => {
+        endEntrance();
+      }, entrance.totalMs);
+      const skip = (event: Event) => {
+        if (event.type === 'pointerdown') {
+          // Au doigt, le clic arrive après : il ne doit pas appuyer sur le bouton apparu dessous.
+          const swallow = (click: Event) => {
+            click.stopPropagation();
+            click.preventDefault();
+          };
+          window.addEventListener('click', swallow, { capture: true, once: true });
+          window.setTimeout(() => {
+            window.removeEventListener('click', swallow, { capture: true });
+          }, TITLE_ENTRANCE.swallowClickMs);
+        }
+        endEntrance();
+      };
+      endEntrance = () => {
+        window.clearTimeout(timer);
+        root.classList.remove('title-entrance');
+        root.removeEventListener('pointerdown', skip);
+        window.removeEventListener('keydown', skip);
+        endEntrance = () => {
+          // Déjà fait.
+        };
+      };
+      root.addEventListener('pointerdown', skip);
+      window.addEventListener('keydown', skip);
+    }
     const portrait = element('img', root, 'title-celeste');
     portrait.alt = '';
     portrait.draggable = false;
@@ -151,6 +207,7 @@ export function showTitleScreen(
       // Remplacé ci-dessous si la PWA est active.
     };
     const done = (choice: TitleChoice) => {
+      endEntrance();
       unsubscribe();
       root.remove();
       resolve(choice);
@@ -169,8 +226,13 @@ export function showTitleScreen(
       // Le titre au crayon (D-175) : une lettre par crayon de couleur, le trait qui tremble.
       const title = element('h1', panel, 'title-name');
       title.setAttribute('aria-label', 'Maria');
-      for (const letter of 'MARIA') {
-        element('span', title, undefined, letter).setAttribute('aria-hidden', 'true');
+      let index = 0;
+      for (const letter of TITLE_LETTERS) {
+        const span = element('span', title, undefined, letter);
+        span.setAttribute('aria-hidden', 'true');
+        // Le plan 8 (D-185) : le début du trait de chaque lettre, sans effet hors de l'entrée.
+        span.style.setProperty('--letter-delay', `${String(entrance.letterStarts[index] ?? 0)}ms`);
+        index++;
       }
       if (current !== null && summary && data) {
         element('button', panel, 'pause-primary', 'Continuer').addEventListener('click', () => {
