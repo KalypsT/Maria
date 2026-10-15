@@ -5,25 +5,38 @@ import type { ButtonAction } from '../core/input/InputAction';
  * téléphone ; l'utilisateur peut aussi ajuster taille et opacité dans le menu pause (spec §40).
  */
 export const TOUCH_METRICS = {
-  /** Marge entre les commandes et le bord bas de l'écran (hors zones sûres). */
+  /** Marge entre les commandes et le bord bas de l'écran (hors zones sûres) : joystick, sac. */
   margin: 20,
-  /** Marge côté droit, plus large : un pouce trop près du bord appuie à côté (essais sur téléphone). */
-  rightMargin: 56,
-  jumpRadius: 46,
+  /**
+   * Marge entre le bouton le plus à droite (Action) et le bord droit, plus large : un pouce trop
+   * près du bord appuie à côté (essais sur téléphone).
+   */
+  rightMargin: 66,
+  /** Marge entre Saut, le bouton le plus bas, et le bord bas (D-183) : le coin reste libre. */
+  jumpBottomMargin: 36,
+  /** Saut, le bouton le plus utilisé, est le plus grand (D-183). */
+  jumpRadius: 50,
   attackRadius: 36,
-  abilityRadius: 32,
-  /** Bouton Basculer (D-107), à gauche d'Action, sur la rangée du bas. */
-  shiftRadius: 32,
+  abilityRadius: 36,
+  /** Bouton Basculer (D-107). */
+  shiftRadius: 34,
   /** Rayon des petites icônes (Pause, Carte). */
   iconRadius: 22,
   /** Écart entre deux boutons voisins. */
   buttonGap: 16,
-  /** Action est dans le coin bas droit ; Saut est placé au-dessus (degrés autour d'Action : 90 = au-dessus). */
-  jumpAngleDeg: 100,
-  /** Capacité est à gauche de Saut (degrés autour de Saut : 180 = à gauche). */
-  abilityAngleDeg: 165,
-  /** Basculer est à gauche d'Action (degrés autour d'Action : 180 = à gauche). */
-  shiftAngleDeg: 180,
+  /**
+   * L'éventail (D-183) : Saut là où le pouce se pose, les autres boutons autour de lui, chacun à un
+   * pas du pouce (degrés autour de Saut : 0 = à droite, 90 = au-dessus). Action au-dessus, un peu à
+   * droite : Agir sert surtout aux moments calmes.
+   */
+  attackAngleDeg: 75,
+  /** Glisser à gauche, un peu plus bas : glisser puis sauter, le pouce roule vers la droite. */
+  abilityAngleDeg: 186,
+  /**
+   * Basculer en haut à gauche : en plein vol, le pouce roule de Saut à Basculer sans lâcher Saut
+   * (le parapluie reste ouvert, voir `TouchController`).
+   */
+  shiftAngleDeg: 128,
   /** Bande gauche non tactile : le balayage retour d'iOS ne peut pas être neutralisé (D-03). */
   edgeGuard: 28,
   /** Distance maximale de la base du joystick à son bouton (déplacement du pouce). */

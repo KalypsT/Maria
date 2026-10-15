@@ -17,6 +17,8 @@ function inRect(rect: Rect, x: number, y: number): boolean {
  * - un doigt posé sur un bouton (avec marge généreuse) reste un doigt de bouton. Il garde ce
  *   bouton tant qu'il reste dans sa zone d'appui ; il ne passe à un autre que s'il en sort (un
  *   pouce qui dérive un peu ne déclenche pas le bouton voisin) ;
+ * - un doigt parti de Saut garde Saut tant qu'il est sur Basculer (D-183) : en plein vol, le pouce
+ *   roule de Saut à Basculer et le parapluie reste ouvert pendant la bascule ;
  * - un doigt posé dans la zone gauche fait apparaître le joystick (un seul à la fois) et le garde
  *   jusqu'au relâchement, même s'il sort de la zone ;
  * - les autres doigts sont ignorés.
@@ -33,6 +35,8 @@ export class TouchController {
   private readonly roles = new Uint8Array(MAX_POINTERS);
   /** Bouton tenu par chaque doigt de bouton (index dans `layout.buttons`). */
   private readonly heldButton = new Int8Array(MAX_POINTERS).fill(-1);
+  /** Le doigt a commencé sur Saut (1) : il garde Saut sur Basculer (D-183). */
+  private readonly fromJump = new Uint8Array(MAX_POINTERS);
   private readonly xs = new Float32Array(MAX_POINTERS);
   private readonly ys = new Float32Array(MAX_POINTERS);
 
@@ -72,6 +76,7 @@ export class TouchController {
     if (button !== -1) {
       role = Role.Button;
       this.heldButton[slot] = button;
+      this.fromJump[slot] = this.layout.buttons[button]?.action === 'Jump' ? 1 : 0;
     } else if (!this.joystick.active && inRect(this.layout.joystickZone, x, y)) {
       role = Role.Joystick;
       this.joystick.begin(x, y);
@@ -111,6 +116,7 @@ export class TouchController {
     this.ids[slot] = -1;
     this.roles[slot] = Role.None;
     this.heldButton[slot] = -1;
+    this.fromJump[slot] = 0;
   }
 
   /** Relâche tout (perte de focus, pause, rotation) : aucune commande ne reste « collée ». */
@@ -118,6 +124,7 @@ export class TouchController {
     this.ids.fill(-1);
     this.roles.fill(Role.None);
     this.heldButton.fill(-1);
+    this.fromJump.fill(0);
     this.joystick.end();
     this.heldMask = 0;
   }
@@ -141,6 +148,9 @@ export class TouchController {
         const target = this.layout.buttons[button];
         if (target) {
           mask |= BUTTON_BIT[target.action];
+          if (target.action === 'Shift' && this.fromJump[i] === 1) {
+            mask |= BUTTON_BIT.Jump;
+          }
         }
       }
     }
