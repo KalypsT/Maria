@@ -2961,4 +2961,9 @@ Demande de l'utilisateur : une introduction « vidéo » au lancement. Story-boa
   - `?nointro` saute l'intro (dev et build de debug seulement).
   - **Tests** (`intro.test.ts`) : la durée, les passages dans leurs plans, les images et les musiques, les coupes qui se raccordent, Maria (ci-dessus), les clés, le cadrage, l'écran couvert, le fondu enchaîné, le temps du décor, la fin sur le papier ; les états (attente, « Passer », passée, finie, arrière-plan, échec).
   - Vérifié dans Chromium (1280 × 720, et téléphone 844 × 390 à l'échelle 3) : l'attente, chaque plan, « Passer », la fin sur l'écran titre.
-- **PR 2 (à venir)** : le plan 8, le titre qui s'écrit lettre par lettre sur l'écran titre (seulement après l'intro jouée en entier) ; les réglages après un essai sur téléphone ; en option, un MP4 de l'intro pour la partager.
+- **PR 2 : le plan 8** (faite).
+  - **Le titre s'écrit** sur l'écran titre, **seulement après l'intro vue en entier** (passée, impossible à charger, ou `?nointro` : l'écran titre habituel). Sur le papier où l'intro s'est fondue : MARIA lettre par lettre, au crayon (le trait de la dédicace, D-183), puis Céleste qui apparaît en montant un peu, puis le menu (≈ 4,3 s ; l'intro et le titre font ≈ 44 s). Calendrier pur (`titleEntranceSchedule`), réglages dans `TITLE_ENTRANCE` (PROVISOIRE).
+  - **Un toucher (ou une touche) montre tout aussitôt.** Le menu n'est pas touchable avant ; le clic qui suit ce toucher est ignoré (700 ms), sinon un doigt posé à l'endroit de « Nouvelle partie » la lançait (vu dans Chromium). Mouvements réduits (réglage du système) : l'écran titre habituel.
+  - `IntroDirector.completed` : vue jusqu'au bout. **Tests** : l'ordre (les lettres, Céleste, le menu), la durée totale, seulement après l'intro vue en entier.
+  - Vérifié dans Chromium (téléphone 844 × 390) : l'intro jusqu'au bout, l'écriture du titre, le toucher qui montre tout sans lancer de partie.
+- **Ensuite** : les réglages après un essai sur téléphone ; en option, un MP4 de l'intro pour la partager.
