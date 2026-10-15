@@ -38,6 +38,18 @@ function make(): TouchController {
 }
 
 describe('TouchController : rôles des doigts', () => {
+  it('le joystick fantôme s’en va au premier toucher dans sa zone, même bref (D-182)', () => {
+    const c = make();
+    expect(c.joystickUsed).toBe(false);
+    c.pointerDown(1, jump.x, jump.y);
+    c.pointerUp(1);
+    expect(c.joystickUsed).toBe(false);
+    c.pointerDown(2, zoneX, zoneY);
+    c.pointerUp(2);
+    c.releaseAll();
+    expect(c.joystickUsed).toBe(true);
+  });
+
   it('un doigt sur Saut maintient Saut jusqu’au relâchement', () => {
     const c = make();
     expect(c.pointerDown(1, jump.x, jump.y)).toBe(true);
@@ -164,6 +176,64 @@ describe('TouchController : combinaisons (spec §12.3)', () => {
     const raw = readInput(c);
     expect(raw.moveX).toBe(1);
     expect(raw.held).toBe(BUTTON_BIT.Jump);
+  });
+});
+
+describe('TouchController : le pouce qui roule de Saut à Basculer (D-183)', () => {
+  const full = computeTouchLayout(
+    W,
+    H,
+    { top: 0, right: 0, bottom: 0, left: 0 },
+    DEFAULT_CONTROL_SETTINGS,
+    true,
+    true,
+  );
+  const at = (action: string) => {
+    const b = full.buttons.find((candidate) => candidate.action === action);
+    if (!b) {
+      throw new Error(`bouton ${action} absent`);
+    }
+    return b;
+  };
+  const makeFull = () => new TouchController(full, DEFAULT_CONTROL_SETTINGS);
+
+  it('un doigt parti de Saut garde Saut sur Basculer : le parapluie reste ouvert', () => {
+    const c = makeFull();
+    c.pointerDown(1, at('Jump').x, at('Jump').y);
+    c.pointerMove(1, at('Shift').x, at('Shift').y);
+    expect(readInput(c).held).toBe(BUTTON_BIT.Jump | BUTTON_BIT.Shift);
+    // Retour sur Saut : Saut seul, sans nouvel appui (il n'a jamais été lâché).
+    c.pointerMove(1, at('Jump').x, at('Jump').y);
+    expect(readInput(c).held).toBe(BUTTON_BIT.Jump);
+  });
+
+  it('plus loin que Basculer, Saut est lâché', () => {
+    const c = makeFull();
+    c.pointerDown(1, at('Jump').x, at('Jump').y);
+    c.pointerMove(1, at('Shift').x, at('Shift').y);
+    c.pointerMove(1, at('Attack').x, at('Attack').y);
+    expect(readInput(c).held).toBe(BUTTON_BIT.Attack);
+  });
+
+  it('seul un doigt parti de Saut garde Saut', () => {
+    for (const from of ['Shift', 'Attack', 'Ability']) {
+      const c = makeFull();
+      c.pointerDown(1, at(from).x, at(from).y);
+      c.pointerMove(1, at('Shift').x, at('Shift').y);
+      expect(readInput(c).held, from).toBe(BUTTON_BIT.Shift);
+      c.pointerUp(1);
+      // Le doigt suivant, posé sur Basculer, ne garde rien de l'ancien.
+      c.pointerDown(2, at('Shift').x, at('Shift').y);
+      expect(readInput(c).held, from).toBe(BUTTON_BIT.Shift);
+    }
+  });
+
+  it('Glisser puis Saut en roulant le pouce : le saut long', () => {
+    const c = makeFull();
+    c.pointerDown(1, at('Ability').x, at('Ability').y);
+    expect(readInput(c).held).toBe(BUTTON_BIT.Ability);
+    c.pointerMove(1, at('Jump').x, at('Jump').y);
+    expect(readInput(c).held).toBe(BUTTON_BIT.Jump);
   });
 });
 

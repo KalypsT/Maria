@@ -12,6 +12,9 @@ import { DEFAULT_AUDIO_SETTINGS } from './config/audio';
 import { installHint } from './core/platform/install';
 import { installEnvironment, Pwa } from './platform/pwa';
 import { showTitleScreen } from './ui/TitleScreen';
+import { showErrorScreen } from './ui/ErrorScreen';
+import { CRASH_GUARD } from './config/perf';
+import { errorDetail, looksFrozen } from './core/platform/crashGuard';
 
 function getParent(): HTMLElement {
   const element = document.getElementById('game');
@@ -78,6 +81,61 @@ function startGame(parent: HTMLElement, session: SaveSession, audio: AudioPlayer
   return game;
 }
 
+/**
+ * Le filet en cas d'erreur (D-182) : une erreur non rattrapée qui fige le jeu (plus aucune image
+ * rendue, appli visible) montre l'écran « Oups ». Reprendre termine les écritures en cours de la
+ * sauvegarde, puis recharge la page : « Continuer » ramène à la dernière lanterne.
+ */
+const crash = {
+  game: null as Phaser.Game | null,
+  manager: null as SaveManager | null,
+  lastFrameAt: 0,
+  errorAt: -1,
+  detail: null as string | null,
+  timer: 0,
+};
+
+function resumeAfterCrash(): void {
+  const writes = crash.manager?.flush() ?? Promise.resolve();
+  void writes.finally(() => {
+    location.reload();
+  });
+}
+
+function scheduleCrashCheck(): void {
+  window.clearTimeout(crash.timer);
+  crash.timer = window.setTimeout(() => {
+    if (crash.errorAt < 0 || !crash.game) {
+      return;
+    }
+    if (looksFrozen(performance.now(), crash.errorAt, crash.lastFrameAt, document.hidden)) {
+      showErrorScreen(crash.detail, resumeAfterCrash);
+    } else if (crash.lastFrameAt > crash.errorAt) {
+      crash.errorAt = -1; // La boucle continue : l'erreur était sans conséquence.
+    }
+  }, CRASH_GUARD.stallMs + 100);
+}
+
+function onUncaught(reason: unknown): void {
+  crash.errorAt = performance.now();
+  crash.detail = errorDetail(reason);
+  scheduleCrashCheck();
+}
+
+window.addEventListener('error', (event) => {
+  onUncaught(event.error ?? event.message);
+});
+window.addEventListener('unhandledrejection', (event) => {
+  onUncaught(event.reason);
+});
+document.addEventListener('visibilitychange', () => {
+  // De retour au premier plan : les images n'ont pas pu être rendues entre-temps, on regarde à neuf.
+  if (!document.hidden && crash.errorAt >= 0) {
+    crash.errorAt = performance.now();
+    scheduleCrashCheck();
+  }
+});
+
 async function boot(): Promise<void> {
   const parent = getParent();
   // Service worker (build principal seulement, D-23) : enregistré au plus tôt.
@@ -109,7 +167,15 @@ async function boot(): Promise<void> {
     // Nouvelle partie ou import : écrite tout de suite (l'ancienne devient l'état précédent).
     await session.persist();
   }
-  startGame(parent, session, audio);
+  const game = startGame(parent, session, audio);
+  crash.manager = manager;
+  crash.game = game;
+  game.events.on(Phaser.Core.Events.POST_RENDER, () => {
+    crash.lastFrameAt = performance.now();
+  });
 }
 
-void boot();
+boot().catch((reason: unknown) => {
+  // Le démarrage lui-même a échoué : rien ne s'affichera sans cet écran.
+  showErrorScreen(errorDetail(reason), resumeAfterCrash);
+});

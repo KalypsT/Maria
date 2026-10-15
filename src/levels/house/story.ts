@@ -1,4 +1,4 @@
-import { STORY_TIMING as S, StoryFlag as F } from '../../config/story';
+import { STORY_TIMING as S, STORY_ZOOM, StoryFlag as F } from '../../config/story';
 import type { StoryData, StoryStep, TileArea } from '../../core/story/story';
 import { STATION_STORY } from '../station/story';
 import { TRAIN_STORY } from '../train/story';
@@ -60,6 +60,25 @@ const HEDGE_ARRIVAL: StoryStep = {
  */
 export const HOUSE_STORY: StoryData = {
   triggers: [
+    {
+      // À l'ouverture d'une nouvelle partie (D-182) : la vue va jusqu'à Maria, assise sur le tapis
+      // (trop petite pour être vue d'emblée), puis revient sur Céleste, qui pense à elle.
+      id: 'evening-look',
+      room: 'bedroom',
+      on: 'touch',
+      area: { col: 7, row: 13, w: 11, h: 3 },
+      when: { none: [F.EveningLook, F.EveningPlayed, F.Slept] },
+      lock: true,
+      steps: [
+        { do: 'flag', id: F.EveningLook },
+        { do: 'wait', ms: S.eveningLookDelayMs },
+        { do: 'look', col: 19, row: 18, zoom: STORY_ZOOM.evening },
+        { do: 'wait', ms: S.eveningLookMs },
+        { do: 'look' },
+        { do: 'wait', ms: STORY_ZOOM.easeMs },
+        { do: 'thought', icon: 'heart', ms: S.thoughtMs },
+      ],
+    },
     {
       id: 'evening-play',
       room: 'bedroom',

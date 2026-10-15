@@ -29,7 +29,10 @@ export const STRANGE_TINT_NAMES: Readonly<Record<StrangeTint, string>> = {
   nanny: 'la nounou (violet passé, autrefois)',
 };
 
-/** Remplissage des silhouettes (meubles, feuillage) et de leurs ombres. */
+/**
+ * Remplissage des silhouettes (meubles, feuillage) et de leurs ombres. D-182 : un peu plus clairs
+ * que les murs de leur nuance, pour qu'on reconnaisse les meubles sans quitter la nuit étrange.
+ */
 function silhouettes(fill: string, dark: string): Partial<ArtPalette> {
   return {
     wood: fill,
@@ -51,7 +54,7 @@ const STRANGE_TINT_PALETTES: Readonly<Record<StrangeTint, Partial<ArtPalette>>> 
   house: {},
   // Le jardin, derrière la haie : dehors, la nuit glisse vers une mousse sombre.
   garden: {
-    ...silhouettes('#1f2c28', '#141e1b'),
+    ...silhouettes('#2e413b', '#1e2d29'),
     wallTop: '#27332f',
     wallBottom: '#1a2420',
     structure: '#1a2522',
@@ -62,7 +65,7 @@ const STRANGE_TINT_PALETTES: Readonly<Record<StrangeTint, Partial<ArtPalette>>> 
   },
   // Le quartier (l'école étrange) : un violet grisé, comme de la craie, les rayures de l'école.
   street: {
-    ...silhouettes('#26223a', '#1a1729'),
+    ...silhouettes('#352f51', '#242039'),
     wallTop: '#2e2a3e',
     wallBottom: '#1f1c2c',
     wainscot: '#28243a',
@@ -74,7 +77,7 @@ const STRANGE_TINT_PALETTES: Readonly<Record<StrangeTint, Partial<ArtPalette>>> 
   },
   // La gare : la nuit bleue du hall réel glissée dans le violet, ses carreaux.
   station: {
-    ...silhouettes('#1f2142', '#151830'),
+    ...silhouettes('#2a2d5a', '#1d2142'),
     wallTop: '#262a4a',
     wallBottom: '#181b34',
     wainscot: '#1f2340',
@@ -88,7 +91,7 @@ const STRANGE_TINT_PALETTES: Readonly<Record<StrangeTint, Partial<ArtPalette>>> 
   },
   // Le train : la cuisine et le wagon-restaurant, un violet prune, des reflets cuivrés, les carreaux.
   train: {
-    ...silhouettes('#2a1b38', '#1d1228'),
+    ...silhouettes('#3c2750', '#2a1a3a'),
     wallTop: '#33213e',
     wallBottom: '#22162c',
     wainscot: '#2c1c36',
@@ -102,7 +105,7 @@ const STRANGE_TINT_PALETTES: Readonly<Record<StrangeTint, Partial<ArtPalette>>> 
   // La mer : un violet tiré vers le bleu canard, sombre (loin du turquoise des liserés), les rayures
   // du centre de vacances.
   sea: {
-    ...silhouettes('#18303c', '#0f222c'),
+    ...silhouettes('#224456', '#15313f'),
     wallTop: '#1c3040',
     wallBottom: '#122230',
     wainscot: '#182a3a',
@@ -118,7 +121,7 @@ const STRANGE_TINT_PALETTES: Readonly<Record<StrangeTint, Partial<ArtPalette>>> 
   // un papier peint plus chaud. Reste sombre : le souvenir de la bascule est clair et chaud
   // (`MEMORY_PALETTE`), les deux couches ne se confondent pas.
   nanny: {
-    ...silhouettes('#2b2236', '#1e1828'),
+    ...silhouettes('#3c304c', '#2a2238'),
     wallTop: '#342a40',
     wallBottom: '#241d2e',
     wainscot: '#2e2538',

@@ -2,10 +2,11 @@ import { END_SCREEN } from '../config/story';
 import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 
 /**
- * L'écran de fin (D-145, §11, §12), sans texte : sur la page du cahier, Maria seule, assise sur
- * son étagère, sous une lumière douce ; quelques scintillements passent près d'elle, puis plus
- * rien. Après un moment, un petit rond invite à continuer : un toucher ou une touche, et la
- * promesse se résout (la scène relance l'accueil). Maria ne bouge pas (pilier 5).
+ * L'écran de fin (D-145, §11, §12) : sur la page du cahier, Maria seule, assise sur son étagère,
+ * sous une lumière douce ; quelques scintillements passent près d'elle, puis plus rien. Seul texte,
+ * la dédicace (D-183) s'écrit au crayon sous l'étagère, signée en petit. Après un moment, un petit
+ * rond invite à continuer : un toucher ou une touche, et la promesse se résout (la scène relance
+ * l'accueil). Maria ne bouge pas (pilier 5).
  *
  * Toutes les coquilles trouvées (`snail`, D-148) : un petit escargot vivant traverse lentement
  * l'étagère vers Maria et laisse une trace argentée, sans rien expliquer.
@@ -61,6 +62,22 @@ export function showEndScreen(baseUrl: string, snail = false): Promise<void> {
       scene.appendChild(sparkle);
     }
     root.appendChild(scene);
+    root.style.setProperty('--dedication-delay', `${String(END_SCREEN.dedicationDelayMs)}ms`);
+    root.style.setProperty('--dedication-ms', `${String(END_SCREEN.dedicationWriteMs)}ms`);
+    root.style.setProperty(
+      '--signature-delay',
+      `${String(END_SCREEN.dedicationDelayMs + END_SCREEN.dedicationWriteMs + END_SCREEN.signatureDelayMs)}ms`,
+    );
+    const dedication = document.createElement('div');
+    dedication.className = 'end-dedication';
+    const words = document.createElement('p');
+    words.className = 'end-dedication-text';
+    words.textContent = END_SCREEN.dedication;
+    const signature = document.createElement('p');
+    signature.className = 'end-dedication-signature';
+    signature.textContent = END_SCREEN.signature;
+    dedication.append(words, signature);
+    root.appendChild(dedication);
     const next = document.createElement('button');
     next.className = 'end-next';
     next.type = 'button';

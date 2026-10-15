@@ -11,6 +11,37 @@ export interface CameraSubject {
   readonly grounded: boolean;
 }
 
+/**
+ * Centre de la vue pendant une vue rapprochée de l'histoire (D-171, D-182). La caméra borne son
+ * centre avec la vue entière ; rapprochée (`zoom` > 1), la vue est plus petite et peut aller plus
+ * près du point regardé, même dans une salle qui tient dans l'écran (la chambre). Le centre glisse
+ * de `base` (la caméra) vers ce point, borné à la salle avec la vue rapprochée, à mesure que le
+ * rapprochement monte vers `peak`. Pur ; écrit dans `out`.
+ */
+export function storyZoomCenter(
+  out: { x: number; y: number },
+  baseX: number,
+  baseY: number,
+  focusX: number,
+  focusY: number,
+  zoom: number,
+  peak: number,
+  viewWidth: number,
+  viewHeight: number,
+  boundsWidth: number,
+  boundsHeight: number,
+): void {
+  const blend = peak > 1 ? Math.min(1, Math.max(0, (zoom - 1) / (peak - 1))) : 0;
+  const clampAxis = (target: number, view: number, bounds: number): number => {
+    const half = view / (2 * Math.max(1, zoom));
+    return bounds <= half * 2 ? bounds / 2 : Math.min(bounds - half, Math.max(half, target));
+  };
+  const x = clampAxis(focusX, viewWidth, boundsWidth);
+  const y = clampAxis(focusY, viewHeight, boundsHeight);
+  out.x = baseX + (x - baseX) * blend;
+  out.y = baseY + (y - baseY) * blend;
+}
+
 /** Compteur « jamais » : grand entier, pour ne pas dépasser en incrémentant. */
 const NEVER = 1 << 30;
 
@@ -41,6 +72,11 @@ export class CameraController {
   groundFeetY = 0;
   /** Décalage courant de l'anticipation horizontale (px). */
   lookAheadOffset = 0;
+  /**
+   * Dépassement permis à droite de la salle (px) : la largeur des boutons tactiles (D-183). Près du
+   * mur de droite, Céleste reste à gauche des boutons ; au-delà du mur, la couleur d'ambiance.
+   */
+  rightPad = 0;
   private lookAheadTarget = 0;
   private runDir = 0;
   private runSteps = 0;
@@ -294,16 +330,20 @@ export class CameraController {
     }
   }
 
-  /** Reste dans la salle ; centrée sur un axe où la salle est plus petite que la vue. */
+  /**
+   * Reste dans la salle (prolongée à droite de `rightPad`) ; centrée sur un axe où elle est plus
+   * petite que la vue.
+   */
   private clampToBounds(): void {
     const halfW = this.viewWidth / 2;
     const halfH = this.viewHeight / 2;
-    if (this.boundsWidth <= this.viewWidth) {
-      this.x = this.boundsWidth / 2;
+    const width = this.boundsWidth + this.rightPad;
+    if (width <= this.viewWidth) {
+      this.x = width / 2;
     } else if (this.x < halfW) {
       this.x = halfW;
-    } else if (this.x > this.boundsWidth - halfW) {
-      this.x = this.boundsWidth - halfW;
+    } else if (this.x > width - halfW) {
+      this.x = width - halfW;
     }
     if (this.boundsHeight <= this.viewHeight) {
       this.y = this.boundsHeight / 2;

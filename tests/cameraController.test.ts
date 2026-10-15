@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_CAMERA, type CameraParams } from '../src/config/camera';
 import { GAME_HEIGHT, TILE_SIZE as T } from '../src/config/display';
 import { DEFAULT_MOVEMENT, PLAYER_HITBOX } from '../src/config/movement';
-import { CameraController } from '../src/core/camera/CameraController';
+import { CameraController, storyZoomCenter } from '../src/core/camera/CameraController';
 import { spawnPosition, type LevelData } from '../src/core/level/LevelData';
 import { parseAsciiLevel } from '../src/core/level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../src/core/player/PlayerPhysics';
@@ -364,5 +364,73 @@ describe('CameraController', () => {
     r.camera.reset(r.player);
     expect(r.camera.looking).toBe(false);
     expect(r.camera.x).toBeCloseTo(centerX(r.player));
+  });
+});
+
+describe('la vue rapprochée de l’histoire (D-182)', () => {
+  it('se centre sur le point regardé, même dans une salle qui tient dans l’écran', () => {
+    const out = { x: 0, y: 0 };
+    // La chambre : 736 × 352 px, la vue 779 × 360 : la caméra reste au centre de la salle.
+    storyZoomCenter(out, 368, 176, 312, 296, 1.6, 1.6, 779, 360, 736, 352);
+    // Vue rapprochée : 487 × 225 px ; la salle est plus large, le centre va vers Maria.
+    expect(out.x).toBeCloseTo(312);
+    // En hauteur, borné à la salle : la vue rapprochée touche le bas de la salle.
+    expect(out.y).toBeCloseTo(352 - 225 / 2);
+  });
+
+  it('glisse depuis la caméra à mesure que la vue se rapproche, et y revient', () => {
+    const out = { x: 0, y: 0 };
+    storyZoomCenter(out, 368, 176, 312, 296, 1, 1.6, 779, 360, 736, 352);
+    expect(out).toEqual({ x: 368, y: 176 });
+    storyZoomCenter(out, 368, 176, 312, 296, 1.3, 1.6, 779, 360, 736, 352);
+    expect(out.x).toBeGreaterThan(312);
+    expect(out.x).toBeLessThan(368);
+    // Sans rapprochement demandé, la caméra telle quelle.
+    storyZoomCenter(out, 368, 176, 312, 296, 1, 1, 779, 360, 736, 352);
+    expect(out).toEqual({ x: 368, y: 176 });
+  });
+});
+
+describe('la marge des boutons tactiles (D-183)', () => {
+  const PAD = 200;
+
+  it('près du mur de droite, Céleste reste à gauche des boutons', () => {
+    const screenX = (r: Rig) => centerX(r.player) - (r.camera.x - r.camera.viewWidth / 2);
+    const without = rig(room(80, 40));
+    without.input.moveX = 1;
+    without.run(900);
+    // Sans marge, la vue s'arrête au mur et Céleste passe sous les boutons.
+    expect(screenX(without)).toBeGreaterThan(without.camera.viewWidth - PAD);
+
+    const r = rig(room(80, 40));
+    r.camera.rightPad = PAD;
+    r.input.moveX = 1;
+    r.run(900, () => {
+      expect(r.camera.x + r.camera.viewWidth / 2).toBeLessThanOrEqual(80 * T + PAD);
+    });
+    expect(screenX(r)).toBeLessThan(r.camera.viewWidth - PAD);
+  });
+
+  it('ne change rien à gauche de la salle', () => {
+    const r = rig(room(80, 40));
+    r.camera.rightPad = PAD;
+    r.input.moveX = -1;
+    r.run(900, () => {
+      expect(r.camera.x - r.camera.viewWidth / 2).toBeGreaterThanOrEqual(0);
+    });
+    expect(r.camera.x).toBe(r.camera.viewWidth / 2);
+  });
+
+  it('une salle plus petite que la vue s’écarte des boutons', () => {
+    const r = rig(room(30, 15, undefined, 1));
+    r.camera.rightPad = 100;
+    r.input.moveX = 1;
+    r.run(300, () => {
+      expect(r.camera.x).toBe((30 * T + 100) / 2);
+      // Le mur de droite reste à gauche des boutons.
+      expect(30 * T - (r.camera.x - r.camera.viewWidth / 2)).toBeLessThanOrEqual(
+        r.camera.viewWidth - 100,
+      );
+    });
   });
 });

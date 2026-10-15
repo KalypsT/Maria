@@ -63,7 +63,7 @@ function element<K extends keyof HTMLElementTagNameMap>(
 
 /**
  * Les réglages du sac (D-159, l'ancien menu pause, D-59) : aide, son, commandes tactiles,
- * sauvegarde, retour à l'accueil, mode debug, sur deux colonnes. Les réglages d'essai ne sont que
+ * sauvegarde, retour à l'accueil, mode debug (discret dans le jeu, D-182), sur deux colonnes. Les réglages d'essai ne sont que
  * dans le build de debug.
  */
 export class SettingsPanel {
@@ -117,19 +117,41 @@ export class SettingsPanel {
     if (options.debugTools && options.levels.length > 1) {
       this.addLevelChoice(panel);
     }
-    element('h3', panel, undefined, 'Mode debug');
-    const debug = element(
-      'button',
-      panel,
-      undefined,
-      options.debugTools ? 'Quitter le mode debug' : 'Passer en mode debug',
-    );
-    debug.addEventListener('click', () => {
-      debug.disabled = true;
-      options.onSwitchDebug();
-    });
+    if (options.debugTools) {
+      element('h3', panel, undefined, 'Mode debug');
+      const debug = element('button', panel, undefined, 'Quitter le mode debug');
+      debug.addEventListener('click', () => {
+        debug.disabled = true;
+        options.onSwitchDebug();
+      });
+    }
     // Retour à l'accueil, en bas des réglages (choix de l'utilisateur, D-159).
     this.addQuit(panel);
+    if (!options.debugTools) {
+      this.addDiscreetDebug(panel);
+    }
+  }
+
+  /**
+   * Dans le jeu (D-182) : le passage au mode debug reste possible, mais discret, tout en bas, en
+   * petit, et confirmé par un second toucher (on n'y va pas par erreur).
+   */
+  private addDiscreetDebug(parent: HTMLElement): void {
+    const debug = element('button', parent, 'settings-discreet', 'mode debug');
+    let confirming = false;
+    debug.addEventListener('click', () => {
+      if (!confirming) {
+        confirming = true;
+        debug.textContent = 'ouvrir le mode debug ? toucher encore';
+        return;
+      }
+      debug.disabled = true;
+      this.options.onSwitchDebug();
+    });
+    this.refreshers.push(() => {
+      confirming = false;
+      debug.textContent = 'mode debug';
+    });
   }
 
   /** Remet chaque réglage à jour (à l'ouverture du sac). */

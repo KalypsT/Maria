@@ -499,6 +499,42 @@ describe('histoire de la maison (D-31)', () => {
     ]);
   });
 
+  it('le premier soir, la vue va jusqu’à Maria sur le tapis, puis revient sur Céleste (D-182)', () => {
+    const { log, host } = recorder();
+    host.look = (col, row, zoom) => {
+      log.push(
+        col === null ? 'look retour' : `look ${String(col)},${String(row)} ×${String(zoom)}`,
+      );
+    };
+    const d = new StoryDirector(HOUSE_STORY, host, HZ);
+    const start = standing(12, 15);
+    d.step('bedroom', start, false);
+    expect(d.busy).toBe(true);
+    expect(d.locked).toBe(true);
+    for (let i = 0; i < 2000 && d.busy; i++) {
+      d.step('bedroom', start, false);
+    }
+    expect(d.flags.has(F.EveningLook)).toBe(true);
+    const maria = HOUSE_STORY.props.find((p) => p.id === 'maria-rug');
+    const looks = log.filter((l) => l.startsWith('look'));
+    expect(looks).toHaveLength(2);
+    expect(looks[0]).toMatch(/^look \d+,\d+ ×1\.8$/);
+    const [col = 0, row = 0] = (looks[0]?.match(/\d+/g) ?? []).map(Number);
+    expect(Math.abs(col - (maria?.col ?? 0))).toBeLessThanOrEqual(1);
+    expect(Math.abs(row - (maria?.row ?? 0))).toBeLessThanOrEqual(1);
+    expect(looks[1]).toBe('look retour');
+    expect(log.filter((l) => l.startsWith('think'))).toEqual(['think heart']);
+    // Une seule fois, et jamais une fois que Céleste a joué avec Maria, ni après la première nuit.
+    d.step('bedroom', start, false);
+    expect(d.busy).toBe(false);
+    for (const flag of [F.EveningPlayed, F.Slept]) {
+      const later = new StoryDirector(HOUSE_STORY, recorder().host, HZ);
+      later.setFlags([flag]);
+      later.step('bedroom', start, false);
+      expect(later.busy, flag).toBe(false);
+    }
+  });
+
   it('le soir (couverture comprise) se joue dans la chambre sans grimper, par des passages faciles', () => {
     const level = zone.rooms.get('bedroom');
     if (!level) {

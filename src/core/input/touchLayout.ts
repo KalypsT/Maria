@@ -29,6 +29,16 @@ export interface TouchLayout {
   /** Zone où un doigt fait apparaître le joystick. */
   readonly joystickZone: Rect;
   readonly joystickRadius: number;
+  /**
+   * Où le joystick fantôme attend le premier déplacement (D-182) : en bas à gauche de sa zone, là
+   * où le pouce se pose naturellement.
+   */
+  readonly joystickRest: { readonly x: number; readonly y: number };
+  /**
+   * Largeur couverte par les boutons de droite depuis le bord droit (px CSS) : la caméra peut
+   * dépasser la salle d'autant à droite, pour que Céleste ne passe pas dessous (D-183).
+   */
+  readonly rightReach: number;
 }
 
 function polar(cx: number, cy: number, distance: number, angleDeg: number): [number, number] {
@@ -52,12 +62,14 @@ export function computeTouchLayout(
 ): TouchLayout {
   const m = TOUCH_METRICS;
   const margin = m.margin;
-  // Fenêtre très basse (barre du navigateur) : la pile Saut/Action est réduite pour tenir.
+  const attackAngle = (m.attackAngleDeg * Math.PI) / 180;
+  // Fenêtre très basse (barre du navigateur) : l'éventail est réduit pour tenir (d'Action en haut
+  // à Saut en bas).
   const stackHeight =
-    m.attackRadius +
-    Math.sin((m.jumpAngleDeg * Math.PI) / 180) * (m.attackRadius + m.jumpRadius + m.buttonGap) +
-    m.jumpRadius;
-  const available = height - insets.top - insets.bottom - margin * 2;
+    m.jumpRadius +
+    Math.sin(attackAngle) * (m.jumpRadius + m.attackRadius + m.buttonGap) +
+    m.attackRadius;
+  const available = height - insets.top - insets.bottom - margin - m.jumpBottomMargin;
   const scale =
     settings.buttonScale * Math.min(1, available / (stackHeight * settings.buttonScale));
   const gap = m.buttonGap * scale;
@@ -68,27 +80,26 @@ export function computeTouchLayout(
   const iconR = m.iconRadius * scale;
   const buttons: TouchButtonLayout[] = [];
 
-  // Action dans le coin bas droit, Saut au-dessus (légèrement à gauche) : le pouce qui dérive
-  // vers le bas ou le bord n'atteint pas Saut par erreur, et inversement.
+  // L'éventail (D-183) : Saut là où le pouce se pose, les autres autour de lui. Action, le plus à
+  // droite, garde sa marge au bord ; Saut, le plus bas, la sienne : le coin bas droit reste libre.
   const rightEdge = width - insets.right - m.rightMargin;
-  const attackX = rightEdge - attackR;
-  const attackY = height - insets.bottom - margin - attackR;
-  const [jumpX, jumpY] = polar(attackX, attackY, attackR + jumpR + gap, m.jumpAngleDeg);
+  const jumpX = rightEdge - attackR - Math.cos(attackAngle) * (jumpR + attackR + gap);
+  const jumpY = height - insets.bottom - m.jumpBottomMargin - jumpR;
   const enabled = TOUCH_BUTTONS_ENABLED;
 
   if (enabled.Jump) {
     buttons.push({ action: 'Jump', x: jumpX, y: jumpY, r: jumpR });
   }
   if (enabled.Attack) {
-    buttons.push({ action: 'Attack', x: attackX, y: attackY, r: attackR });
+    const [x, y] = polar(jumpX, jumpY, jumpR + attackR + gap, m.attackAngleDeg);
+    buttons.push({ action: 'Attack', x, y, r: attackR });
   }
   if (enabled.Ability || showAbility) {
     const [x, y] = polar(jumpX, jumpY, jumpR + abilityR + gap, m.abilityAngleDeg);
     buttons.push({ action: 'Ability', x, y, r: abilityR });
   }
   if (enabled.Shift || showShift) {
-    // Sur la rangée du bas, à gauche d'Action : le pouce y glisse depuis Saut sans le toucher.
-    const [x, y] = polar(attackX, attackY, attackR + shiftR + gap, m.shiftAngleDeg);
+    const [x, y] = polar(jumpX, jumpY, jumpR + shiftR + gap, m.shiftAngleDeg);
     buttons.push({ action: 'Shift', x, y, r: shiftR });
   }
 
@@ -109,5 +120,16 @@ export function computeTouchLayout(
     right: Math.max(zoneLeft, width * m.joystickZoneWidthFraction),
     bottom: height,
   };
-  return { buttons, joystickZone, joystickRadius: m.joystickRadius * scale };
+  const joystickRadius = m.joystickRadius * scale;
+  const joystickRest = {
+    x: zoneLeft + margin + joystickRadius,
+    y: height - insets.bottom - margin - joystickRadius,
+  };
+  let leftmost = width;
+  for (const b of buttons) {
+    if (b.action !== 'Map' && b.action !== 'Pause') {
+      leftmost = Math.min(leftmost, b.x - b.r);
+    }
+  }
+  return { buttons, joystickZone, joystickRadius, joystickRest, rightReach: width - leftmost };
 }

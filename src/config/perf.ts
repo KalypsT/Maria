@@ -15,3 +15,17 @@ export const HITCH = {
   /** Saccades récentes gardées pour la liste de l'overlay. */
   recentCount: 8,
 } as const;
+
+/**
+ * Le filet en cas d'erreur (D-182) : une erreur qui arrête la boucle du jeu (une exception dans
+ * une image arrête Phaser pour de bon) laisse un écran figé. Après une erreur non rattrapée, si
+ * aucune image n'a été rendue pendant `stallMs` alors que l'appli est visible, l'écran « Oups »
+ * propose de reprendre à la dernière lanterne. Une erreur sans conséquence (un bouton, un son)
+ * ne montre rien : la boucle continue.
+ */
+export const CRASH_GUARD = {
+  /** Plus long qu'un chargement de salle ou qu'un dessin de décor sur un téléphone lent. */
+  stallMs: 2500,
+  /** Longueur maximale du détail technique affiché en petit (pour les retours d'essai). */
+  detailMaxChars: 160,
+} as const;
