@@ -28,6 +28,14 @@ import {
   type IntroLayer,
 } from '../core/intro/introTimeline';
 
+/** L'intro finie : de quoi la retirer, et si elle a été vue jusqu'au bout. */
+export interface IntroResult {
+  /** Retire l'intro, une fois l'écran titre posé dessous (le même papier : pas d'éclair). */
+  close: () => void;
+  /** Vue en entier : l'écran titre joue le plan 8 (le titre qui s'écrit). */
+  completed: boolean;
+}
+
 /** Ce que l'intro demande au lecteur de musique. */
 export interface IntroAudio {
   setMusic(track: MusicTrack | null): void;
@@ -100,7 +108,7 @@ function hash(n: number): number {
  * (la promesse rend de quoi la retirer, une fois l'écran titre posé dessous). Rien ne doit bloquer le jeu : image manquante, erreur ou délai dépassé, elle
  * s'efface aussitôt.
  */
-export function playIntro(audio: IntroAudio): Promise<() => void> {
+export function playIntro(audio: IntroAudio): Promise<IntroResult> {
   return new Promise((resolve) => {
     const shots = INTRO_SHOTS;
     const schedule = introSchedule(shots);
@@ -172,9 +180,12 @@ export function playIntro(audio: IntroAudio): Promise<() => void> {
       // Les images et les canvas de travail ne servent plus : la mémoire revient au jeu.
       images = null;
       buffer.width = buffer.height = vignette.width = vignette.height = 0;
-      resolve(() => {
-        root.remove();
-        canvas.width = canvas.height = 0;
+      resolve({
+        close: () => {
+          root.remove();
+          canvas.width = canvas.height = 0;
+        },
+        completed: director.completed,
       });
     };
 

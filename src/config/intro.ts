@@ -354,3 +354,25 @@ export const INTRO_TOY_TOWN = {
     [3600, 1],
   ],
 } as const;
+
+/**
+ * Le plan 8 (D-185), joué par l'écran titre après l'intro vue en entière : sur le papier, MARIA
+ * s'écrit lettre par lettre au crayon, puis Céleste apparaît, puis le menu. Un toucher montre tout
+ * aussitôt. PROVISOIRE (ms).
+ */
+export const TITLE_ENTRANCE = {
+  /** Avant la première lettre. */
+  startMs: 300,
+  /** Le trait d'une lettre. */
+  letterMs: 420,
+  /** D'une lettre à la suivante (un peu plus que le trait : on voit chaque lettre se poser). */
+  letterGapMs: 520,
+  /** Céleste, après les lettres (son fondu). */
+  portraitMs: 1000,
+  /** Le menu, en dernier (son fondu). */
+  panelMs: 800,
+  /** Céleste commence avant la fin de la dernière lettre, le menu avant la fin de Céleste. */
+  overlapMs: 200,
+  /** Le toucher qui montre tout ne vaut pas clic sur le menu apparu dessous (ms). */
+  swallowClickMs: 700,
+} as const;

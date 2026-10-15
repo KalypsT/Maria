@@ -168,9 +168,9 @@ async function boot(): Promise<void> {
   const managerOf = (slot: number): SaveManager => managers.get(slot) ?? library.slotManager(slot);
   const audio = new AudioPlayer(settings.data.audio);
   // L'intro (D-185), à chaque lancement ; `?nointro` la saute en dev et dans le build de debug.
-  const closeIntro =
+  const intro =
     __DEBUG_TOOLS__ && new URLSearchParams(location.search).has('nointro')
-      ? () => undefined
+      ? { close: () => undefined, completed: false }
       : await playIntro(audio);
   const summaries = await loading;
   // Musique (D-57) : thème de l'accueil (il démarre au premier toucher si l'intro n'en a pas eu).
@@ -189,9 +189,11 @@ async function boot(): Promise<void> {
     },
     pwa,
     installHint(installEnvironment()),
+    // Le plan 8 de l'intro : le titre s'écrit, seulement après l'intro vue en entier.
+    { entrance: intro.completed },
   );
   // L'écran titre est posé sous l'intro (le même papier) : on peut la retirer sans éclair.
-  closeIntro();
+  intro.close();
   const choice = await shown;
   // Demandé après un geste de l'utilisateur : certains navigateurs l'exigent.
   void requestPersistentStorage();

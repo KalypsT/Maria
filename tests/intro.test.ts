@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { isMusicTrack } from '../src/config/audio';
-import { INTRO, INTRO_IMAGES, INTRO_SHOTS, type IntroShot } from '../src/config/intro';
+import {
+  INTRO,
+  INTRO_IMAGES,
+  INTRO_SHOTS,
+  TITLE_ENTRANCE,
+  type IntroShot,
+} from '../src/config/intro';
 import { IntroDirector } from '../src/core/intro/IntroDirector';
+import { titleEntranceSchedule } from '../src/core/intro/titleEntrance';
 import {
   cameraAt,
   coverScale,
@@ -251,5 +258,45 @@ describe('les commandes de l’intro', () => {
     const early = new IntroDirector(timing);
     early.skip(0);
     expect(early.phase).toBe('done');
+  });
+});
+
+describe('le plan 8 : le titre s’écrit sur l’écran titre', () => {
+  const entrance = titleEntranceSchedule(TITLE_ENTRANCE, 5);
+
+  it('les lettres une à une, puis Céleste, puis le menu', () => {
+    expect(entrance.letterStarts).toHaveLength(5);
+    entrance.letterStarts.forEach((start, i) => {
+      expect(start).toBeGreaterThan(entrance.letterStarts[i - 1] ?? -1);
+    });
+    const last = entrance.letterStarts[4] ?? 0;
+    expect(entrance.portraitStart).toBeGreaterThan(last);
+    expect(entrance.panelStart).toBeGreaterThan(entrance.portraitStart);
+    expect(entrance.totalMs).toBe(entrance.panelStart + TITLE_ENTRANCE.panelMs);
+  });
+
+  it('l’intro et le titre font environ 45 s', () => {
+    const all = schedule.totalMs + entrance.totalMs;
+    expect(all).toBeGreaterThanOrEqual(42_000);
+    expect(all).toBeLessThanOrEqual(48_000);
+  });
+
+  it('seulement après l’intro vue en entier (ni passée, ni impossible)', () => {
+    const timing = { totalMs: 10_000, skipButtonMs: 3000, skipFadeMs: 500 };
+    const watched = new IntroDirector(timing);
+    watched.ready();
+    watched.press(0);
+    watched.update(10_000);
+    expect(watched.completed).toBe(true);
+    const skipped = new IntroDirector(timing);
+    skipped.ready();
+    skipped.press(0);
+    skipped.skip(9_000);
+    skipped.update(9_600);
+    expect(skipped.phase).toBe('done');
+    expect(skipped.completed).toBe(false);
+    const failed = new IntroDirector(timing);
+    failed.abort();
+    expect(failed.completed).toBe(false);
   });
 });

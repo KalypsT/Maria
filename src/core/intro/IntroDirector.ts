@@ -25,11 +25,17 @@ export class IntroDirector {
   private leaveAt = -1;
   /** Temps de l'intro au moment où elle a été passée (l'image reste figée dessous). */
   private frozenMs = 0;
+  private playedThrough = false;
 
   constructor(private readonly timing: IntroTiming) {}
 
   get phase(): IntroPhase {
     return this.state;
+  }
+
+  /** Vue jusqu'au bout (ni passée, ni impossible à jouer) : l'écran titre joue alors le plan 8. */
+  get completed(): boolean {
+    return this.playedThrough;
   }
 
   /** Les images sont prêtes : la boîte attend. */
@@ -122,6 +128,7 @@ export class IntroDirector {
     if (this.state === 'playing' && this.elapsed(now) >= this.timing.totalMs) {
       this.frozenMs = this.timing.totalMs;
       this.state = 'done';
+      this.playedThrough = true;
     } else if (this.state === 'leaving' && this.leaveProgress(now) >= 1) {
       this.state = 'done';
     }
