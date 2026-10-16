@@ -121,17 +121,19 @@ export const STEP_SLOT: Readonly<Record<Surface, SfxSlot>> = {
 /**
  * Volume propre de chaque emplacement (1 par défaut), avant le volume des bruitages. Les valeurs
  * marquées « provisoire » sont réglées pour les sons de synthèse (D-186) : à revoir quand le vrai
- * son arrive (les fichiers sont tous ramenés à la même crête, pas à la même sonie).
+ * son arrive (les fichiers sont tous ramenés à la même crête, pas à la même sonie). Celles marquées
+ * D-188 : les sons de l'utilisateur, calés sur la force mesurée des sons déjà réglés (un pas sur le
+ * bois, la réception) ; à régler sur téléphone.
  */
 export const SFX_GAIN: Readonly<Partial<Record<SfxSlot, number>>> = {
   'step-wood': 0.55,
-  /** Provisoire (D-186). */
-  'step-fabric': 0.28,
+  /** D-188 (le son de l'utilisateur). */
+  'step-fabric': 0.13,
   'step-grass': 0.55,
   'step-stone': 0.55,
   'step-sand': 0.55,
-  /** Provisoire (D-186). */
-  'step-metal': 0.45,
+  /** D-188 (le son de l'utilisateur). */
+  'step-metal': 0.31,
   'step-leaves': 0.55,
   jump: 0.6,
   land: 0.7,
@@ -140,22 +142,24 @@ export const SFX_GAIN: Readonly<Partial<Record<SfxSlot, number>>> = {
   /** Provisoire (D-186). */
   'wall-slide': 0.16,
   'cable-slide': 0.5,
-  /** Provisoire (D-186). */
-  hit: 0.7,
+  /** D-188 (le son de l'utilisateur). */
+  attack: 0.84,
+  /** D-188 (le son de l'utilisateur). */
+  hit: 0.72,
   /** Provisoire (D-186). */
   'chase-wake': 0.55,
-  /** Provisoire (D-186). */
-  'chase-rumble': 0.28,
-  /** Provisoire (D-186). */
-  lullaby: 0.5,
-  /** Provisoire (D-186). */
-  door: 0.42,
-  /** Provisoire (D-186). */
-  'map-open': 0.5,
-  /** Provisoire (D-186). */
-  'map-close': 0.5,
-  /** Provisoire (D-186). */
-  thought: 0.28,
+  /** D-188 (le son de l'utilisateur). */
+  'chase-rumble': 0.22,
+  /** D-188 (le son de l'utilisateur). */
+  lullaby: 0.6,
+  /** D-188 (le son de l'utilisateur). */
+  door: 0.32,
+  /** D-188 (le son de l'utilisateur). */
+  'map-open': 0.32,
+  /** D-188 (le son de l'utilisateur). */
+  'map-close': 0.44,
+  /** D-188 (le son de l'utilisateur). */
+  thought: 0.15,
   /** Provisoire (D-186). */
   hint: 0.4,
   'voice-hop': 0.7,
