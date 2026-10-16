@@ -2,6 +2,8 @@
 
 ## Phase en cours
 
+**Les sons de l'utilisateur** (D-188, sur `ccr-ca04681d-t9vjup`) : dix bruitages (la bulle de pensée, la porte, le sac, les pas sur le tissu et le métal, le bâton, le coup, le grondement, la berceuse) et la musique des souvenirs jouables (`memory-play`), à la place des provisoires ; découpés en variantes, la berceuse en cinq notes, le grondement en boucle ; volumes calés sur les sons déjà réglés. En attente : essai sur téléphone (les volumes) ; les sons encore provisoires (`docs/BRUITAGES.md`).
+
 **État au 14 octobre 2026** (état des lieux avec l'utilisateur) : le jeu se joue en entier, du premier soir à la fin (8 niveaux). Toutes les PR jusqu'à #108 (D-175) sont fusionnées dans `main`. La diffusion prévue est **privée** (famille, proches) : les droits de la musique et des bruitages, et l'écran de crédits, ne sont pas bloquants.
 
 **Revue avant la sortie privée** (14 octobre, demande de l'utilisateur, sur `ccr-5ce2aae4-wsgcf2`) : `docs/REVUE_SORTIE.md` (ce qui manque et ce qui peut être amélioré, par priorité, et un plan pour le week-end). Réponses reçues (une joueuse peu habituée, sans mode doux ; pas d'iPhone ; la dédicace « Pour Céleste et sa maman »). **Fait (D-182)** : le joystick fantôme, le regard vers Maria au premier soir (et la vue rapprochée centrée sur ce qu'elle regarde), les mondes étranges un peu plus clairs, l'écran « Oups ! » en cas d'erreur, le mode debug discret dans les réglages. **Fait (D-183, choix de l'utilisateur)** : les boutons de droite en éventail autour de Saut (maquette https://claude.ai/artifact/2EQdcrW9bSMsJ9he3HoU27, « A ») et le pouce qui roule de Saut à Basculer sans lâcher Saut ; la caméra qui dépasse le mur de droite de la largeur des boutons (Céleste n'est plus cachée dessous) ; la dédicace « Pour Céleste et sa maman », signée Papa, sur l'écran de fin (sans crédits). Le dépôt est public (réponse de l'utilisateur) : le site demande aux moteurs de recherche de ne pas le référencer (`noindex`, demande de l'utilisateur). En cours (l'utilisateur) : les sons ; la musique plus tard ; une dernière partie complète sur téléphone (à regarder en particulier : les boutons au pouce, la bascule en planant, la caméra près des murs de droite, l'écran de fin).
@@ -91,6 +93,11 @@ Les anciens paragraphes « Phase en cours », du plus récent au plus ancien ; l
 - mouvement et difficulté validés pour l'instant ; valeurs du saut mural jamais réglées au téléphone.
 
 ## Fait
+
+### Les sons de l'utilisateur : dix bruitages et `memory-play` (D-188)
+
+- Les provisoires de synthèse remplacés ; les pas en 4 variantes, la berceuse en 5 notes, le grondement en boucle de 11,7 s ; `SFX_GAIN` calé par mesure.
+- [ ] À vérifier sur téléphone : les volumes relatifs (la bulle de pensée, les pas sur le tissu, le grondement sous la musique), la berceuse, la musique des souvenirs jouables.
 
 ### L'avancement du voyage, PR 3 : le hochet et la petite cuillère de Maria (D-180)
 

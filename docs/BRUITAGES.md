@@ -25,49 +25,39 @@ bon moment.
 Dans le monde étrange, les mêmes sons passent automatiquement par un filtre et un écho : pas de
 fichier en plus. **Pas d'ambiances pour l'instant** (décision de l'utilisateur).
 
-## Les sons manquants, par priorité (état du 14 octobre 2026)
+## Les sons manquants, par priorité (état du 16 octobre 2026)
 
-Depuis le 15 octobre (D-186), tous ces sons ont un **provisoire de synthèse** (🧪 dans la liste plus
-bas), sauf `eden-giggle` et les voix, encore silencieux : la priorité reste celle-ci pour les
-remplacer.
-
-Classés d'après ce qu'on entend le plus souvent dans une partie, puis ce qui porte un moment fort.
-Les fichiers à fournir sont aussi dans la liste complète plus bas.
+Le 16 octobre (D-188), l'utilisateur a fourni `thought`, `door`, `map-open`, `map-close`,
+`step-fabric`, `step-metal`, `attack`, `hit`, `chase-rumble`, `lullaby`, et la musique
+`memory-play`. Les autres sons ont un **provisoire de synthèse** (🧪 dans la liste plus bas, D-186),
+sauf `eden-giggle` et les voix, encore silencieux : la priorité reste celle-ci pour les remplacer.
 
 **Priorité 1 : entendus sans arrêt, du premier au dernier niveau**
 
-1. `thought` : chaque bulle de pensée de Céleste (la plus fréquente du jeu, très douce).
-2. `ledge-grab` : se rattraper à un rebord (dès la maison).
-3. `wall-slide` (boucle) et `wall-jump` : le saut mural (dès le jardin, partout ensuite).
-4. `land-big` : la réception d'une grande chute.
-5. `door` : chaque porte de façade.
-6. `map-open` et `map-close` : le sac à dos (on l'ouvre souvent).
-7. `step-fabric` : les pas sur le lit, le canapé, les couchettes (la maison dès le début).
+1. `ledge-grab` : se rattraper à un rebord (dès la maison).
+2. `wall-slide` (boucle) et `wall-jump` : le saut mural (dès le jardin, partout ensuite).
+3. `land-big` : la réception d'une grande chute.
 
 **Priorité 2 : fréquents dans une partie de la partie**
 
-8. `slide` : la glissade (du train à la fin).
-9. `step-metal` : le toit du train, l'échafaudage, la voiture.
-10. `hint` : le fil discret.
-11. `chase-wake` et `chase-rumble` (boucle) : les poursuites (gare, train, mer).
-12. `attack`, `hit`, `enemy-scatter` : le bâton (combat secondaire).
+4. `slide` : la glissade (du train à la fin).
+5. `hint` : le fil discret.
+6. `chase-wake` : un poursuivant s'éveille (gare, train, mer).
+7. `enemy-scatter` : un ennemi se disperse.
 
 **Priorité 3 : un seul moment, mais un moment qui compte**
 
-13. `lullaby` (4 à 6 notes) : la berceuse du niveau 8.
-14. `erase` : l'effacement du niveau 7.
-15. `wave-warn` : la vague de la mer.
-16. `tunnel` : les tunnels du toit du train.
-17. `eden-giggle` : le rire d'Eden dans son souvenir.
+8. `erase` : l'effacement du niveau 7.
+9. `wave-warn` : la vague de la mer.
+10. `tunnel` : les tunnels du toit du train.
+11. `eden-giggle` : le rire d'Eden dans son souvenir.
 
-**Facultatif** : les cinq voix de Céleste (`voice-*`).
-
-**Musique** : `memory-play`, le thème des souvenirs jouables (la cuisine rose, Eden), aujourd'hui
-silencieux (`src/assets/audio/LISEZMOI.md`).
+**Facultatif** : les cinq voix de Céleste (`voice-*`) ; une seconde prise de `attack` et de `hit`
+(aujourd'hui une seule, la hauteur varie un peu à chaque coup).
 
 ## La liste (tous branchés, chantier B, PR 1 et 2)
 
-✅ : fourni (D-131, avec le nombre de variantes). 🧪 : **provisoire**, fabriqué par synthèse
+✅ : fourni (D-131, D-188, avec le nombre de variantes). 🧪 : **provisoire**, fabriqué par synthèse
 (D-186, `scripts/make-placeholder-sfx.py`) en attendant le vrai : un fichier déposé sous le même nom
 le remplace (retirer d'abord les fichiers provisoires de l'emplacement, leurs variantes ne sont pas forcément les mêmes, et revoir son volume propre, `SFX_GAIN`, marqué « provisoire »). Sans marque :
 encore silencieux (`eden-giggle`, les voix).
@@ -77,11 +67,11 @@ encore silencieux (`eden-giggle`, les voix).
 | Emplacement         | Quand                                                       | Variantes |
 | ------------------- | ----------------------------------------------------------- | --------- |
 | `step-wood` ✅ ×4   | un pas sur du bois (parquet, meuble, planche)               | 3–4       |
-| `step-fabric` 🧪    | un pas sur du tissu (lit, canapé, couchette, valise)        | 3–4       |
+| `step-fabric` ✅ ×4 | un pas sur du tissu (lit, canapé, couchette, valise)        | 3–4       |
 | `step-grass` ✅ ×4  | un pas dans l'herbe, la terre                               | 3–4       |
 | `step-stone` ✅ ×4  | un pas sur la pierre, les pavés, le carrelage               | 3–4       |
 | `step-sand` ✅ ×4   | un pas dans le sable                                        | 3–4       |
-| `step-metal` 🧪     | un pas sur du métal (toit du train, échafaudage, voiture)   | 3–4       |
+| `step-metal` ✅ ×4  | un pas sur du métal (toit du train, échafaudage, voiture)   | 3–4       |
 | `step-leaves` ✅ ×3 | un pas sur une haie, un buisson, un nid                     | 2–3       |
 | `jump` ✅           | le décollage d'un saut : un froissement, un petit souffle   | 2         |
 | `land` ✅           | une réception ordinaire (par-dessus le pas)                 | 2         |
@@ -106,19 +96,19 @@ encore silencieux (`eden-giggle`, les voix).
 
 ### Le combat, les dangers, les poursuites
 
-| Emplacement        | Quand                                          | Variantes |
-| ------------------ | ---------------------------------------------- | --------- |
-| `attack` 🧪        | le coup de bâton qui fend l'air                | 2–3       |
-| `hit` 🧪           | le bâton touche un ennemi (sourd, pas violent) | 2         |
-| `enemy-scatter` 🧪 | un ennemi se disperse                          | 1–2       |
-| `chase-wake` 🧪    | un poursuivant s'éveille                       | 1         |
-| `chase-rumble` 🧪  | le grondement du poursuivant (**boucle**)      | 1         |
-| `train-warn` ✅    | un train s'annonce en gare                     | 1         |
-| `train-pass` ✅    | un train passe en gare                         | 1         |
-| `tunnel` 🧪        | le train entre dans un tunnel (sur le toit)    | 1         |
-| `wave-warn` 🧪     | la vague s'annonce                             | 1         |
-| `erase` 🧪         | l'effacement s'annonce (niveau 7)              | 1         |
-| `lullaby` 🧪       | une étoile de la berceuse s'annonce (niveau 8) | 4–6       |
+| Emplacement          | Quand                                          | Variantes |
+| -------------------- | ---------------------------------------------- | --------- |
+| `attack` ✅ ×1       | le coup de bâton qui fend l'air                | 2–3       |
+| `hit` ✅ ×1          | le bâton touche un ennemi (sourd, pas violent) | 2         |
+| `enemy-scatter` 🧪   | un ennemi se disperse                          | 1–2       |
+| `chase-wake` 🧪      | un poursuivant s'éveille                       | 1         |
+| `chase-rumble` ✅ ×1 | le grondement du poursuivant (**boucle**)      | 1         |
+| `train-warn` ✅      | un train s'annonce en gare                     | 1         |
+| `train-pass` ✅      | un train passe en gare                         | 1         |
+| `tunnel` 🧪          | le train entre dans un tunnel (sur le toit)    | 1         |
+| `wave-warn` 🧪       | la vague s'annonce                             | 1         |
+| `erase` 🧪           | l'effacement s'annonce (niveau 7)              | 1         |
+| `lullaby` ✅ ×5      | une étoile de la berceuse s'annonce (niveau 8) | 4–6       |
 
 `lullaby` : une seule note de boîte à musique par fichier, chaque variante une note différente de la
 même gamme douce (tirées au hasard, elles font une petite mélodie).
@@ -128,11 +118,11 @@ même gamme douce (tirées au hasard, elles font une petite mélodie).
 | Emplacement           | Quand                                                                                        | Variantes |
 | --------------------- | -------------------------------------------------------------------------------------------- | --------- |
 | `checkpoint` ✅       | une veilleuse s'allume                                                                       | 1         |
-| `door` 🧪             | une porte de façade s'ouvre                                                                  | 1–2       |
-| `thought` 🧪          | une bulle de pensée apparaît (très doux)                                                     | 1         |
+| `door` ✅ ×1          | une porte de façade s'ouvre                                                                  | 1–2       |
+| `thought` ✅ ×1       | une bulle de pensée apparaît (très doux)                                                     | 1         |
 | `hint` 🧪             | le fil discret se montre (un tintement)                                                      | 1         |
-| `map-open` 🧪         | la page du cahier s'ouvre (la carte)                                                         | 1         |
-| `map-close` 🧪        | la page du cahier se referme                                                                 | 1         |
+| `map-open` ✅ ×1      | la page du cahier s'ouvre (la carte)                                                         | 1         |
+| `map-close` ✅ ×1     | la page du cahier se referme                                                                 | 1         |
 | `toy-phone-ring` ✅   | le téléphone de l'Educaville sonne tout seul, au bout de l'école étrange (**boucle**, D-155) | 1         |
 | `toy-phone-pickup` ✅ | Céleste décroche : le clic du combiné, puis le silence (D-155)                               | 1         |
 | `eden-giggle`         | dans le souvenir d'Eden, il pouffe derrière sa cachette quand Céleste ouvre les yeux (D-171) | 1–2       |
