@@ -257,8 +257,16 @@ export interface StoryTrigger {
   /** Tuile où une petite étincelle signale ce qu'on peut faire (déclencheur Agir). */
   readonly mark?: { readonly col: number; readonly row: number };
   readonly when: FlagCondition;
-  /** Commandes de Céleste suspendues pendant le script. */
+  /**
+   * Commandes de Céleste suspendues pendant le script. Un déclencheur `touch` qui les suspend attend
+   * qu'elle ait les pieds au sol (D-189) : en plein saut, elle retomberait sans pouvoir se rattraper.
+   */
   readonly lock: boolean;
+  /**
+   * Déclencheur `touch` qui part même en l'air (D-189) : une zone qu'un saut pourrait franchir sans
+   * s'y poser (devant une porte qu'on ne doit pas atteindre sans passer par lui).
+   */
+  readonly airborne?: boolean;
   /**
    * Rejouable (D-38) : un objet qu'on regarde autant qu'on veut. Seulement pour Agir, et avec des
    * étapes sans effet sur l'histoire (bulles, attentes, souvenir).

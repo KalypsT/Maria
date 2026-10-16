@@ -1110,7 +1110,7 @@ export class GameScene extends Phaser.Scene {
       const held =
         this.controls.isHeld('Interact') ||
         (story.interactable >= 0 && this.controls.isHeld('Attack'));
-      story.step(this.level.id, this.player.box, pressed, held);
+      story.step(this.level.id, this.player.box, pressed, held, this.player.grounded);
       if (this.recordPicker.isOpen()) {
         // Le tourne-disque s'est ouvert (D-121) : le jeu s'arrête jusqu'au choix.
         this.freezeInterpolation();
