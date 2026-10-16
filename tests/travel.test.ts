@@ -3,6 +3,7 @@ import { StoryFlag as F } from '../src/config/story';
 import { TRAVEL_LANTERNS } from '../src/config/travel';
 import { checkCondition } from '../src/core/story/story';
 import {
+  departureKeys,
   departureProblem,
   litLanternNear,
   reachableRooms,
@@ -17,7 +18,6 @@ import {
 import { buildZone, isMappedRoom, isStrangeRoom, returnLantern } from '../src/core/world/zone';
 import { Tile, tileAt } from '../src/core/level/LevelData';
 import { storyProblems } from '../src/core/story/storyProblems';
-import { openingPage } from '../src/core/world/backpack';
 import { TILE_SIZE as T } from '../src/config/display';
 import { HOUSE } from '../src/levels/house/zone';
 import { HOUSE_STORY } from '../src/levels/house/story';
@@ -121,7 +121,9 @@ describe('les veilleuses principales', () => {
 
   it('une lanterne inconnue est refusée', () => {
     expect(() =>
-      travelPoints(zone, [{ level: 'house', lantern: 'nowhere', unlockedBy: [F.Slept] }]),
+      travelPoints(zone, [
+        { level: 'house', lantern: 'nowhere', unlockedBy: [F.Slept], title: '?', icon: 'house' },
+      ]),
     ).toThrow(/nowhere/);
   });
 });
@@ -274,7 +276,19 @@ describe('le voyage dans le jeu (PR 2)', () => {
     expect(travelOffered(options('bedroom', AFTER_END))).toBe(true);
   });
 
-  it('Agir à une lanterne ouvre la carte', () => {
-    expect(openingPage('travel', true)).toBe('map');
+  it('on part seulement d’une veilleuse bleue débloquée (D-189)', () => {
+    const before = departureKeys(points, new Set());
+    expect(before.size).toBe(0);
+    const after = departureKeys(points, new Set(AFTER_END));
+    expect([...after].sort()).toEqual(points.map((p) => `${p.room}:${p.lantern}`).sort());
+    // Une autre lanterne allumée de la chambre ne fait pas partir.
+    expect([...after].every((key) => points.some((p) => key === `${p.room}:${p.lantern}`))).toBe(
+      true,
+    );
+  });
+
+  it('chaque veilleuse a son nom et son dessin sur la page « Voyager » (D-189)', () => {
+    expect(new Set(points.map((p) => p.title)).size).toBe(points.length);
+    expect(points.every((p) => p.title.length > 0)).toBe(true);
   });
 });

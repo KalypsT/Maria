@@ -34,6 +34,8 @@
   --crayon-rose: #d9788f;
   --crayon-rose-soft: #f1ccd3;
   --crayon-blue: #4f6f8f;
+  /* La lumière bleu lune des veilleuses du voyage (D-179, `TRAVEL.mapColor`). */
+  --travel-moon: #7fa8ec;
   /* Les crayons du titre (D-175), une couleur par lettre. */
   --crayon-yellow: #e2b44a;
   --crayon-green: #6f9a5b;
@@ -1886,6 +1888,151 @@ body {
 .touch-heart {
   width: 60%;
   height: 60%;
+}
+
+/*
+ * La page « Voyager » (D-189) : ouverte par Agir à une veilleuse bleue. Les six veilleuses du voyage,
+ * chacune son lieu ; on en choisit une, puis « Partir ».
+ */
+#travel-page {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  background: var(--scrim);
+}
+#travel-page[hidden] {
+  display: none;
+}
+.travel-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  max-height: calc(100% - 16px);
+  padding: 12px 18px 14px;
+  overflow-y: auto;
+  border: 2px solid var(--pencil);
+  border-radius: var(--sketch-radius-panel);
+  background: var(--paper);
+  box-shadow: 3px 4px 0 var(--drop-shadow);
+}
+.travel-title {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--hand-font);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.travel-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.travel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 108px);
+  gap: 10px;
+}
+.travel-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 82px;
+  padding: 4px;
+  border: 2px solid var(--ink-soft);
+  border-radius: 8px;
+  background: var(--paper-light);
+  color: var(--ink);
+  font-family: var(--ui-font);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+/* La lueur bleu lune des veilleuses où l'on peut aller (D-179). */
+.travel-card.open::after {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--travel-moon);
+  box-shadow: 0 0 6px var(--travel-moon);
+  content: '';
+}
+.travel-card.selected {
+  outline: 3px solid var(--crayon-rose);
+  outline-offset: 2px;
+}
+.travel-card:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+.travel-card.locked {
+  border: 2px dashed var(--pencil);
+  background: transparent;
+}
+.travel-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  color: var(--pencil);
+  font-family: var(--hand-font);
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.travel-icon svg {
+  width: 100%;
+  height: 100%;
+}
+.travel-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.travel-note {
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  font-style: italic;
+}
+.travel-go {
+  min-width: 140px;
+  padding: 8px 22px;
+  border: 2px solid var(--ink);
+  border-radius: var(--sketch-radius);
+  background: var(--crayon-rose-soft);
+  color: var(--ink);
+  font-family: var(--ui-font);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.travel-go:disabled {
+  border-color: var(--pencil);
+  background: transparent;
+  color: var(--pencil);
+  cursor: default;
 }
 
 /* Le tourne-disque du grenier (D-121) : une rangée de pochettes, sans texte. */

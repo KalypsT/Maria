@@ -2176,6 +2176,50 @@ function drawIcon(
       ctx.fillStyle = CONSOLE_PINK;
       ctx.fillRect(cx + 3, cy + 3.4, 4, 0.9);
       break;
+    case 'travel': {
+      // Le voyage (D-189) : deux lampes-tempête à la lumière bleu lune (leur anse, leur chapeau,
+      // leur verre, leur socle), en bas ; un fil en pointillés fait un arc de l'une à l'autre, une
+      // flèche au bout.
+      for (const x of [cx - 7, cx + 7]) {
+        const glow = ctx.createRadialGradient(x, cy + 3.5, 0, x, cy + 3.5, 5);
+        glow.addColorStop(0, 'rgba(127, 168, 236, 0.7)');
+        glow.addColorStop(1, 'rgba(127, 168, 236, 0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(x - 5, cy - 1.5, 10, 10);
+        ctx.strokeStyle = INK;
+        ctx.lineWidth = 0.7;
+        ctx.beginPath();
+        ctx.arc(x, cy + 0.2, 1.5, Math.PI, 0);
+        ctx.stroke();
+        ctx.fillStyle = INK;
+        ctx.beginPath();
+        ctx.moveTo(x - 2.4, cy + 1.6);
+        ctx.lineTo(x, cy + 0.2);
+        ctx.lineTo(x + 2.4, cy + 1.6);
+        ctx.fill();
+        ctx.fillStyle = '#7fa8ec';
+        ctx.fillRect(x - 1.8, cy + 1.6, 3.6, 4.4);
+        ctx.fillStyle = '#e8f0ff';
+        ctx.fillRect(x - 0.5, cy + 2.6, 1, 2.2);
+        ctx.fillStyle = INK;
+        ctx.fillRect(x - 2.6, cy + 6, 5.2, 1.3);
+      }
+      ctx.strokeStyle = '#4f6f8f';
+      ctx.lineWidth = 1;
+      ctx.lineCap = 'round';
+      ctx.setLineDash([1.4, 1.6]);
+      ctx.beginPath();
+      ctx.moveTo(cx - 7, cy - 1.5);
+      ctx.quadraticCurveTo(cx, cy - 10, cx + 6, cy - 2.2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(cx + 3.2, cy - 3.6);
+      ctx.lineTo(cx + 6.4, cy - 1.8);
+      ctx.lineTo(cx + 6.6, cy - 5.4);
+      ctx.stroke();
+      break;
+    }
     case 'drop': {
       // Le saut vers le bas (D-189) : une planche fine, en pointillés là où l'on passe ; une flèche
       // qui la traverse, vers le bas.

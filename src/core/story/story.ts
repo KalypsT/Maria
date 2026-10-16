@@ -120,6 +120,11 @@ export const THOUGHT_ICONS = [
    * vers le bas.
    */
   'drop',
+  /**
+   * Le voyage (D-189) : deux lanternes à la lumière bleu lune, reliées par un fil en pointillés qui
+   * fait un arc de l'une à l'autre.
+   */
+  'travel',
   /** La mer, son soleil et une vague (D-169) : là où part le train de la classe. */
   'sea',
   /** La maison, sa fenêtre allumée (D-169) : Céleste y pense, loin de chez elle. */

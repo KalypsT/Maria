@@ -306,6 +306,12 @@ export const StoryFlag = {
    * qu'on peut traverser, sa bulle et l'indice ; une fois par partie.
    */
   HelpDrop: 'help.drop',
+  /**
+   * La découverte du voyage (D-189) : la première fois que Céleste arrive à une veilleuse bleue d'où
+   * l'on peut voyager, elle scintille, et Céleste pense à deux lanternes reliées ; une fois par
+   * partie.
+   */
+  HelpTravel: 'help.travel',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 

@@ -101,6 +101,7 @@ import {
   travelOffered,
   travelOptions,
   travelPoints,
+  departureKeys,
   travelScript,
   travelUnlocked,
   type DepartureProblem,
@@ -109,6 +110,7 @@ import {
 } from '../core/world/travel';
 import { TRAVEL_LANTERNS } from '../config/travel';
 import { FlashbackView } from '../ui/FlashbackView';
+import { TravelPage } from '../ui/TravelPage';
 import { Hud } from '../ui/Hud';
 import { showEndScreen } from '../ui/EndScreen';
 import { markQuietRelaunch } from '../core/platform/quietRelaunch';
@@ -449,6 +451,21 @@ export class GameScene extends Phaser.Scene {
   );
   /** Dernier sens du joystick ou des flèches devant le tourne-disque (un pas par poussée). */
   private recordMoveDir = 0;
+  /**
+   * La page « Voyager » (D-189), ouverte par Agir à une veilleuse bleue : le jeu est arrêté pendant
+   * le choix, comme devant le tourne-disque.
+   */
+  private readonly travelPage = new TravelPage(
+    (lantern) => {
+      this.closeTravel();
+      this.travelTo(lantern);
+    },
+    () => {
+      this.closeTravel();
+    },
+  );
+  /** Dernier sens du joystick ou des flèches devant la page « Voyager » (un pas par poussée). */
+  private travelMoveDir = 0;
   /**
    * La console (D-166) : son écran (le jeu attend pendant les menus), la partie en cours, et ce
    * qu'il faut retrouver en l'éteignant (comme un souvenir jouable, hors de la partie : seuls les
@@ -983,6 +1000,7 @@ export class GameScene extends Phaser.Scene {
       document.removeEventListener('visibilitychange', onVisibility);
       this.backpack.destroy();
       this.recordPicker.destroy();
+      this.travelPage.destroy();
       this.consoleScreen.destroy();
       this.hud.destroy();
       this.flashbackView.destroy();
@@ -1014,6 +1032,10 @@ export class GameScene extends Phaser.Scene {
     }
     if (this.recordPicker.isOpen()) {
       this.stepRecordPicker(mapPressed || pausePressed);
+      return;
+    }
+    if (this.travelPage.isOpen()) {
+      this.stepTravelPage(mapPressed || pausePressed);
       return;
     }
     if (this.consoleScreen.isOpen()) {
@@ -1124,9 +1146,10 @@ export class GameScene extends Phaser.Scene {
         this.openDoor(this.nearDoor);
       }
       this.nearTravel = travel && !story.busy ? lantern : -1;
+      this.stepTravelHelp();
       if (this.nearTravel >= 0 && pressed && this.player.grounded) {
-        // La carte du sac, en mode voyage : le jeu s'arrête jusqu'au choix.
-        this.setPaused(true, 'travel');
+        // La page « Voyager » (D-189) : le jeu s'arrête jusqu'au choix.
+        this.openTravel();
         this.freezeInterpolation();
         break;
       }
@@ -1572,6 +1595,60 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * La page « Voyager » (D-189) : les six veilleuses du voyage, depuis celle-ci ; on en choisit une
+   * où l'on peut aller, puis « Partir ».
+   */
+  private openTravel(): void {
+    const { options } = this.travelState();
+    this.clock.reset();
+    this.touch?.releaseAll();
+    this.travelMoveDir = 0;
+    this.audio.sfx.stopLoops();
+    this.travelPage.open(
+      options.map(({ point, state }) => ({
+        lantern: point.lantern,
+        title: point.title,
+        icon: point.icon,
+        state,
+      })),
+    );
+    this.audio.sfx.play('map-open');
+  }
+
+  /** Devant la page « Voyager » : gauche et droite, Agir, Action ou Saut ; Pause ou Carte referment. */
+  private stepTravelPage(closePressed: boolean): void {
+    const controls = this.controls;
+    if (closePressed) {
+      this.closeTravel();
+      return;
+    }
+    const dir = controls.moveX > 0.5 ? 1 : controls.moveX < -0.5 ? -1 : 0;
+    if (dir !== 0 && dir !== this.travelMoveDir) {
+      this.travelPage.move(dir);
+    }
+    this.travelMoveDir = dir;
+    const confirm = controls.consumePressed('Interact');
+    const attack = controls.consumePressed('Attack');
+    const jump = controls.consumePressed('Jump');
+    if (confirm || attack || jump) {
+      this.travelPage.confirm();
+    }
+  }
+
+  private closeTravel(): void {
+    if (!this.travelPage.isOpen()) {
+      return;
+    }
+    this.travelPage.close();
+    this.clock.reset();
+    this.touch?.releaseAll();
+    this.controls.consumePressed('Jump');
+    this.controls.consumePressed('Interact');
+    this.controls.consumePressed('Attack');
+    this.audio.sfx.play('map-close');
+  }
+
   /** Un disque choisi joue une fois en entier, où que soit Céleste ; ou le disque s'arrête. */
   private chooseRecord(choice: RecordChoice): void {
     if (choice === 'stop') {
@@ -1627,16 +1704,7 @@ export class GameScene extends Phaser.Scene {
         void this.session.persist();
       }
       const content = this.notebookContent();
-      this.backpack.open(
-        openingPage(trigger, content.startPlace !== null),
-        content,
-        trigger === 'travel'
-          ? (lantern) => {
-              this.setPaused(false);
-              this.travelTo(lantern);
-            }
-          : null,
-      );
+      this.backpack.open(openingPage(trigger, content.startPlace !== null), content);
       // Le sac ouvert : ses trésors sont connus, son étincelle s'éteint (D-162).
       for (const id of this.session.data.progression.memories) {
         this.bagKnown.add(id);
@@ -2185,8 +2253,14 @@ export class GameScene extends Phaser.Scene {
     const zone = this.zone;
     const flags = this.story.flags;
     const lit = this.session.data.activatedCheckpoints;
-    const lantern = zone
-      ? litLanternNear(this.level, this.player.box, (key) => lit.includes(key))
+    // On part seulement d'une veilleuse bleue débloquée, allumée (D-189).
+    const departures = zone ? departureKeys(this.travelPoints(zone), flags) : null;
+    const lantern = departures
+      ? litLanternNear(
+          this.level,
+          this.player.box,
+          (key) => departures.has(key) && lit.includes(key),
+        )
       : null;
     const problem = departureProblem({
       level: zone ? this.level : null,
@@ -2248,9 +2322,14 @@ export class GameScene extends Phaser.Scene {
     const checkpoints = this.run.checkpoints;
     const box = this.player.box;
     let index = -1;
+    // Seulement la veilleuse bleue de la salle (D-189 : plus n'importe quelle lanterne allumée).
+    const departure = this.roomTravelLantern();
+    if (departure === null) {
+      return -1;
+    }
     for (let i = 0; i < checkpoints.length; i++) {
       const c = checkpoints[i];
-      if (c?.activated && nearLantern(c.col, c.row, box)) {
+      if (c?.activated && c.id === departure && nearLantern(c.col, c.row, box)) {
         index = i;
         break;
       }
@@ -2765,6 +2844,31 @@ export class GameScene extends Phaser.Scene {
       ],
     });
     this.hud.showHint(DROP_HELP.hint, ABILITY_HINT_MS);
+  }
+
+  /**
+   * La découverte du voyage (D-189) : la première fois que Céleste arrive à une veilleuse bleue
+   * d'où l'on peut voyager, la veilleuse scintille, et Céleste pense à deux lanternes reliées ;
+   * l'étincelle d'Agir montre où toucher. Une fois par partie (l'étape est sauvegardée).
+   */
+  private stepTravelHelp(): void {
+    const story = this.story;
+    const lamp = this.nearTravel >= 0 ? this.run.checkpoints[this.nearTravel] : undefined;
+    if (!lamp || story.busy || story.flags.has(StoryFlag.HelpTravel)) {
+      return;
+    }
+    story.run({
+      id: 'help-travel',
+      room: this.level.id,
+      on: 'interact',
+      when: {},
+      lock: false,
+      steps: [
+        { do: 'flag', id: StoryFlag.HelpTravel },
+        { do: 'sparkle', area: { col: lamp.col - 1, row: lamp.row - 2, w: 3, h: 3 }, ms: 1600 },
+        { do: 'thought', icon: 'travel', ms: STORY_TIMING.thoughtMs + 800 },
+      ],
+    });
   }
 
   /** La caméra peut dépasser la salle à droite de la largeur des boutons tactiles (D-183). */
