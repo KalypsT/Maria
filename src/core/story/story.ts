@@ -108,8 +108,18 @@ export const THOUGHT_ICONS = [
   'call',
   /** Une manette : la console de salon (le cadeau de papa). */
   'gamepad',
-  /** Une petite télé et sa console : elle est installée dans la chambre. */
-  'tv',
+  /** Un paquet cadeau, son ruban et son nœud (D-189) : papa a une surprise. */
+  'gift',
+  /**
+   * La chambre de Céleste dans la maison (D-189) : le toit, son lit à la couverture rose, la télé
+   * et la console sur le bureau. La console est installée là.
+   */
+  'tv-bedroom',
+  /**
+   * Aide du saut vers le bas (D-189) : une planche en pointillés et une flèche qui passe au travers,
+   * vers le bas.
+   */
+  'drop',
   /** La mer, son soleil et une vague (D-169) : là où part le train de la classe. */
   'sea',
   /** La maison, sa fenêtre allumée (D-169) : Céleste y pense, loin de chez elle. */

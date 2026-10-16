@@ -69,6 +69,7 @@ import { checkpointId } from '../core/save/saveData';
 import type { SaveSession } from '../core/save/SaveSession';
 import {
   ABILITY_HELP_ICONS,
+  DROP_HELP,
   ABILITY_HINTS,
   ABILITY_HINT_MS,
   Ability,
@@ -202,7 +203,7 @@ import { consoleCards } from '../core/arcade/consoleMenu';
 import { monsterChaseParams, monsterEndlessParams } from '../core/arcade/monster';
 import { ArcadeEvent, ArcadePhase, ArcadeRun } from '../core/arcade/run';
 import { arcadeChoosable, arcadeRecord, arcadeStartTiles } from '../core/save/arcade';
-import { touchesHazard } from '../core/physics/gridCollision';
+import { isGrounded, touchesHazard } from '../core/physics/gridCollision';
 import { isRecordSlot } from '../config/records';
 import { isMemory } from '../config/memories';
 import { drawnCanvas, recordDrawing, treasureDrawing } from '../ui/treasureDrawing';
@@ -516,6 +517,8 @@ export class GameScene extends Phaser.Scene {
   private consoleMoveDir = 0;
   /** Dans la chambre, un jeu de la console pas encore vu (D-166) : l'étincelle sur la télé. */
   private consoleNews = false;
+  /** Pas passés immobile sur une planche traversable, pour l'aide du saut vers le bas (D-189). */
+  private dropHelpSteps = 0;
   /** Souvenir jouable en cours (D-89), null sinon ; et ce qu'il faut retrouver à sa fin. */
   private memoryPlay: PlayableMemory | null = null;
   private memoryReturn: {
@@ -1127,6 +1130,7 @@ export class GameScene extends Phaser.Scene {
         this.freezeInterpolation();
         break;
       }
+      this.stepDropHelp();
       const locked = story.locked;
       input.moveX = locked ? 0 : this.controls.moveX;
       input.moveY = locked ? 0 : this.controls.moveY;
@@ -1461,6 +1465,10 @@ export class GameScene extends Phaser.Scene {
           ? [{ room: cube.room, ...cube.at, color: TOWER_CUBES[k]?.color ?? '#ec8fab' }]
           : [],
       ),
+      // La console et un jeu pas encore vu (D-189) : « nouveau » sur la télé de la chambre.
+      news: this.consoleHasNews()
+        ? { room: CONSOLE_TV.room, col: CONSOLE_TV.col, row: CONSOLE_TV.row }
+        : null,
       // Les veilleuses principales débloquées (D-163) ; celles où l'on peut aller d'ici.
       travel: (() => {
         const { options, problem } = this.travelState();
@@ -2723,6 +2731,42 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * L'aide du saut vers le bas (D-189) : la première fois que Céleste reste immobile sur une
+   * planche qu'on peut traverser, sa bulle (la planche en pointillés, la flèche) et l'indice. Une
+   * fois par partie (l'étape est sauvegardée).
+   */
+  private stepDropHelp(): void {
+    const player = this.player;
+    const story = this.story;
+    const box = player.box;
+    const waiting =
+      this.zone !== null &&
+      !story.busy &&
+      !story.flags.has(StoryFlag.HelpDrop) &&
+      player.grounded &&
+      Math.abs(player.vx) < 1 &&
+      isGrounded(this.level, box, true) &&
+      !isGrounded(this.level, box, false);
+    this.dropHelpSteps = waiting ? this.dropHelpSteps + 1 : 0;
+    if (this.dropHelpSteps < msToSteps(DROP_HELP.standMs, PHYSICS_STEP_HZ)) {
+      return;
+    }
+    this.dropHelpSteps = 0;
+    story.run({
+      id: 'help-drop',
+      room: this.level.id,
+      on: 'interact',
+      when: {},
+      lock: false,
+      steps: [
+        { do: 'flag', id: StoryFlag.HelpDrop },
+        { do: 'thought', icon: 'drop', ms: ABILITY_HINT_MS },
+      ],
+    });
+    this.hud.showHint(DROP_HELP.hint, ABILITY_HINT_MS);
+  }
+
   /** La caméra peut dépasser la salle à droite de la largeur des boutons tactiles (D-183). */
   private padCamera(): void {
     this.camera.rightPad = this.touch ? this.touch.rightCover * this.camera.viewWidth : 0;
@@ -3349,7 +3393,13 @@ export class GameScene extends Phaser.Scene {
     const near = memory
       ? memory.interactable >= 0
       : (story.interactable >= 0 || this.nearDoor !== 0 || this.nearTravel >= 0) && !story.busy;
-    this.touch?.setLabel('Attack', near ? 'Agir' : null);
+    // Agir maintenu (D-189) : le bouton devient un cœur qui se remplit, comme celui de la scène.
+    const holding =
+      !memory && !story.busy && story.data.triggers[story.interactable]?.hold !== undefined;
+    this.touch?.setHeart('Attack', holding ? story.holdProgress : null);
+    if (!holding) {
+      this.touch?.setLabel('Attack', near ? 'Agir' : null);
+    }
     const door = this.level.doors.find((d) => d.id === this.nearDoor);
     const mark = this.storyView.doorMark;
     // Souvenir jouable : la lueur chaude sur ce qu'il faut faire, avec l'étincelle (D-189).
@@ -3946,18 +3996,27 @@ export class GameScene extends Phaser.Scene {
    * niveau) et un de ses jeux, jouable, n'a pas encore été vu dans son menu.
    */
   private refreshConsoleNews(): void {
+    this.consoleNews =
+      this.zone !== null && this.level.id === CONSOLE_TV.room && this.consoleHasNews();
+  }
+
+  /**
+   * La console est dans la chambre (offerte, pas pendant le dernier niveau) et un de ses jeux,
+   * jouable, n'a pas encore été vu dans son menu : la télé scintille, la carte du sac le montre
+   * (D-189).
+   */
+  private consoleHasNews(): boolean {
     const flags = this.story.flags;
     const there =
-      this.zone !== null &&
-      this.level.id === CONSOLE_TV.room &&
-      ((flags.has(StoryFlag.ConsoleGift) && !flags.has(StoryFlag.GrownFourth)) ||
-        flags.has(StoryFlag.FinaleGone));
+      (flags.has(StoryFlag.ConsoleGift) && !flags.has(StoryFlag.GrownFourth)) ||
+      flags.has(StoryFlag.FinaleGone);
     const data = this.session.data;
-    this.consoleNews =
+    return (
       there &&
       consoleCards(new Set(data.progression.abilities), flags, data.arcade).some(
         (card) => card.isNew,
-      );
+      )
+    );
   }
 
   /** Un bip de la console (D-166, PLACEHOLDER). */

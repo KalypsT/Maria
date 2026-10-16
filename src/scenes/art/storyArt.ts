@@ -456,19 +456,20 @@ function drawQuayTrain(ctx: CanvasRenderingContext2D, w: number, h: number, day 
   ctx.fillStyle = '#26324a';
   ctx.fillRect(24, top + 8, 4, h - top - 12);
   ctx.fillRect(w - 28, top + 8, 4, h - top - 12);
-  // Fenêtres éteintes, de part et d'autre de la porte.
+  // Les fenêtres, de part et d'autre de la porte : de nuit, allumées d'une lumière chaude (D-189 :
+  // un train qui attend ses voyageurs, rien d'étrange).
   const door = { x: w / 2 - 10, w: 20, top: top + 10 };
-  ctx.fillStyle = '#9fb7cf';
+  ctx.fillStyle = day ? '#9fb7cf' : '#f3d79a';
   for (let x = x0 + 8; x < x0 + cw - 16; x += 18) {
     if (x + 12 > door.x - 4 && x < door.x + door.w + 4) {
       continue;
     }
     ctx.fillRect(x, top + 12, 12, 14);
   }
-  ctx.fillStyle = '#9fb7cf';
   ctx.fillRect(4, top + 12, 14, 14);
   ctx.fillRect(w - 18, top + 12, 14, 14);
-  // La porte ouverte : l'ombre dedans, la lueur turquoise ; de jour (D-90), l'intérieur éclairé.
+  // La porte ouverte : de jour (D-90), l'intérieur éclairé ; de nuit, la lumière chaude du couloir
+  // (D-189 : la lueur turquoise faisait croire au monde étrange).
   ctx.fillStyle = day ? '#5b5f73' : '#141a26';
   ctx.fillRect(door.x, door.top, door.w, h - door.top);
   if (day) {
@@ -478,10 +479,10 @@ function drawQuayTrain(ctx: CanvasRenderingContext2D, w: number, h: number, day 
     ctx.fillRect(door.x + door.w, door.top, 4, h - door.top);
     return;
   }
-  const glow = ctx.createRadialGradient(w / 2, h - 18, 0, w / 2, h - 18, 26);
-  glow.addColorStop(0, 'rgba(150, 245, 230, 0.95)');
-  glow.addColorStop(0.45, 'rgba(110, 228, 214, 0.55)');
-  glow.addColorStop(1, 'rgba(110, 228, 214, 0)');
+  const glow = ctx.createRadialGradient(w / 2, h - 22, 0, w / 2, h - 22, 30);
+  glow.addColorStop(0, 'rgba(255, 228, 160, 0.95)');
+  glow.addColorStop(0.5, 'rgba(242, 196, 120, 0.6)');
+  glow.addColorStop(1, 'rgba(242, 196, 120, 0.15)');
   ctx.save();
   ctx.beginPath();
   ctx.rect(door.x, door.top, door.w, h - door.top);
@@ -493,8 +494,8 @@ function drawQuayTrain(ctx: CanvasRenderingContext2D, w: number, h: number, day 
   ctx.fillStyle = '#5a7db0';
   ctx.fillRect(door.x + door.w, door.top, 4, h - door.top);
   const spill = ctx.createLinearGradient(0, h - 10, 0, h);
-  spill.addColorStop(0, 'rgba(120, 236, 220, 0)');
-  spill.addColorStop(1, 'rgba(120, 236, 220, 0.6)');
+  spill.addColorStop(0, 'rgba(242, 200, 121, 0)');
+  spill.addColorStop(1, 'rgba(242, 200, 121, 0.55)');
   ctx.fillStyle = spill;
   ctx.beginPath();
   ctx.moveTo(door.x, h - 10);
@@ -1650,19 +1651,20 @@ function drawIcon(
       ctx.fill();
       break;
     case 'train': {
-      // Un train (D-69) : une voiture bleue, sa porte ouverte et la lueur turquoise.
+      // Un train (D-69) : une voiture bleue, sa porte ouverte et sa lumière chaude (D-189 : plus
+      // de lueur turquoise, rien d'étrange).
       ctx.fillStyle = '#3d5f8f';
       ctx.beginPath();
       ctx.roundRect(cx - 9, cy - 5, 18, 10, 2);
       ctx.fill();
       ctx.fillStyle = '#efe6d2';
       ctx.fillRect(cx - 9, cy + 2, 18, 1.2);
-      ctx.fillStyle = '#bcd0e4';
+      ctx.fillStyle = '#f3d79a';
       ctx.fillRect(cx - 7, cy - 3, 3.5, 3);
       ctx.fillRect(cx + 3.5, cy - 3, 3.5, 3);
       const glow = ctx.createRadialGradient(cx, cy + 1, 0, cx, cy + 1, 4);
-      glow.addColorStop(0, 'rgba(150, 245, 230, 1)');
-      glow.addColorStop(1, 'rgba(90, 210, 196, 0.9)');
+      glow.addColorStop(0, 'rgba(255, 236, 180, 1)');
+      glow.addColorStop(1, 'rgba(242, 196, 120, 0.95)');
       ctx.fillStyle = glow;
       ctx.fillRect(cx - 1.8, cy - 3.5, 3.6, 8.5);
       ctx.fillStyle = INK;
@@ -2118,20 +2120,85 @@ function drawIcon(
     case 'gamepad':
       drawGamepad(ctx, cx, cy, 1);
       break;
-    case 'tv':
-      // La télé et sa console : installée dans la chambre (D-166).
-      drawTv(ctx, cx - 8, cy - 7, 13, 10);
-      ctx.fillStyle = TV_BODY;
-      ctx.fillRect(cx - 3, cy + 3, 3, 2);
-      ctx.fillRect(cx - 5, cy + 5, 7, 1.5);
+    case 'gift':
+      // Un paquet cadeau (D-189) : la boîte rose, le ruban jaune en croix, le nœud.
       ctx.fillStyle = CONSOLE_PINK;
       ctx.strokeStyle = CONSOLE_DARK;
-      ctx.lineWidth = 0.6;
+      ctx.lineWidth = 0.7;
       ctx.beginPath();
-      ctx.roundRect(cx + 3, cy + 2.5, 6, 4, 1);
+      ctx.roundRect(cx - 6.5, cy - 2.5, 13, 9.5, 1);
       ctx.fill();
       ctx.stroke();
+      ctx.beginPath();
+      ctx.roundRect(cx - 7.5, cy - 4.5, 15, 3, 1);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#f2c14e';
+      ctx.fillRect(cx - 1, cy - 4.5, 2, 11.5);
+      ctx.beginPath();
+      ctx.ellipse(cx - 2.6, cy - 5.8, 2.6, 1.6, -0.5, 0, Math.PI * 2);
+      ctx.ellipse(cx + 2.6, cy - 5.8, 2.6, 1.6, 0.5, 0, Math.PI * 2);
+      ctx.fill();
       break;
+    case 'tv-bedroom':
+      // Sa chambre, dans la maison (D-189) : le toit et les murs ; dedans, son lit et sa couverture
+      // rose, la télé et la console sur le bureau.
+      ctx.fillStyle = '#f3ead7';
+      ctx.fillRect(cx - 8.5, cy - 2, 17, 9.5);
+      ctx.strokeStyle = '#d9788f';
+      ctx.lineWidth = 1.4;
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx - 10, cy - 1.5);
+      ctx.lineTo(cx, cy - 8.5);
+      ctx.lineTo(cx + 10, cy - 1.5);
+      ctx.stroke();
+      // Le lit : la tête de lit, l'oreiller, la couverture rose.
+      ctx.fillStyle = WOOD_DARK;
+      ctx.fillRect(cx - 8, cy - 0.5, 1.8, 7.5);
+      ctx.fillStyle = WOOD;
+      ctx.fillRect(cx - 6.5, cy + 4.5, 6.5, 2.5);
+      ctx.fillStyle = '#fdf8ee';
+      ctx.fillRect(cx - 6.2, cy + 2.6, 2.2, 1.9);
+      ctx.fillStyle = '#f19bb5';
+      ctx.fillRect(cx - 4, cy + 2.2, 4.2, 2.6);
+      // Le bureau, la télé (son écran pastel) et la console rose.
+      ctx.fillStyle = WOOD;
+      ctx.fillRect(cx + 1, cy + 4.3, 7.5, 1.3);
+      ctx.fillRect(cx + 1.6, cy + 5.6, 1.1, 1.9);
+      ctx.fillRect(cx + 6.8, cy + 5.6, 1.1, 1.9);
+      ctx.fillStyle = TV_BODY;
+      ctx.beginPath();
+      ctx.roundRect(cx + 1.5, cy - 1.5, 7, 5.8, 1);
+      ctx.fill();
+      ctx.fillStyle = CONSOLE_SCREEN;
+      ctx.fillRect(cx + 2.5, cy - 0.5, 5, 3.6);
+      ctx.fillStyle = CONSOLE_PINK;
+      ctx.fillRect(cx + 3, cy + 3.4, 4, 0.9);
+      break;
+    case 'drop': {
+      // Le saut vers le bas (D-189) : une planche fine, en pointillés là où l'on passe ; une flèche
+      // qui la traverse, vers le bas.
+      ctx.fillStyle = WOOD;
+      ctx.fillRect(cx - 9, cy - 0.8, 6, 2);
+      ctx.fillRect(cx + 3, cy - 0.8, 6, 2);
+      ctx.fillStyle = 'rgba(199,157,111,0.55)';
+      for (let x = cx - 2.5; x < cx + 2.5; x += 2) {
+        ctx.fillRect(x, cy - 0.8, 1, 2);
+      }
+      ctx.strokeStyle = PINK;
+      ctx.lineWidth = 1.6;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 7);
+      ctx.lineTo(cx, cy + 6);
+      ctx.moveTo(cx - 3, cy + 3);
+      ctx.lineTo(cx, cy + 6.5);
+      ctx.lineTo(cx + 3, cy + 3);
+      ctx.stroke();
+      break;
+    }
     case 'locked':
       // Une porte cintrée et son cadenas.
       ctx.fillStyle = WOOD_DARK;

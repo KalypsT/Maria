@@ -114,14 +114,17 @@ describe('fin de la gare (D-69)', () => {
     }
   });
 
-  it('le train à quai : seulement après les mois, posé sur le quai, une bulle « ? »', () => {
+  it('le train à quai : seulement après les mois, posé sur le quai, une bulle « la mer », rien d’étrange (D-189)', () => {
     const train = prop('quay-train');
     expect(train.room).toBe('station-platforms');
     expect(checkCondition(new Set([F.StationDone]), train.when)).toBe(false);
     expect(checkCondition(new Set([F.GrownOlder]), train.when)).toBe(true);
     const hint = trigger('station-train');
     expect(hint.on).toBe('touch');
-    expect(hint.steps.some((s) => s.do === 'thought' && s.icon === 'question')).toBe(true);
+    expect(hint.steps.some((s) => s.do === 'thought' && s.icon === 'sea')).toBe(true);
+    // Ni scintillement ni présage devant sa porte : ce n'est pas le monde étrange.
+    expect(hint.steps.some((s) => s.do === 'sparkle')).toBe(false);
+    expect(HOUSE_STORY.omens.some((o) => o.room === 'station-platforms')).toBe(false);
     // On n'y monte pas (encore) : aucun changement de salle.
     expect(rooms(hint.steps)).toEqual([]);
   });

@@ -506,7 +506,8 @@ export const HOUSE_STORY: StoryData = {
     },
     {
       // La console (D-166) : au premier passage au potager, papa appelle Céleste et lui offre une
-      // console de salon (la manette), qu'il installe dans sa chambre (la télé). Sans texte.
+      // console de salon (la manette), qu'il installe dans sa chambre (la télé). Sans texte. D-189 :
+      // plus clair, un paquet cadeau d'abord, et sa chambre dans la maison, la télé sur le bureau.
       id: 'garden-console',
       room: 'garden-vegetables',
       on: 'touch',
@@ -517,12 +518,14 @@ export const HOUSE_STORY: StoryData = {
         { do: 'flag', id: F.ConsoleGift },
         { do: 'thought', icon: 'call', ms: S.lookMs, by: 'dad-garden' },
         { do: 'wait', ms: S.lookMs },
-        { do: 'thought', icon: 'gamepad', ms: S.thoughtMs, by: 'dad-garden' },
+        { do: 'thought', icon: 'gift', ms: S.thoughtMs, by: 'dad-garden' },
         { do: 'wait', ms: S.thoughtMs },
         { do: 'thought', icon: 'wonder', ms: S.thoughtMs },
         { do: 'wait', ms: S.lookMs },
-        { do: 'thought', icon: 'tv', ms: S.thoughtMs, by: 'dad-garden' },
+        { do: 'thought', icon: 'gamepad', ms: S.thoughtMs, by: 'dad-garden' },
         { do: 'wait', ms: S.thoughtMs },
+        { do: 'thought', icon: 'tv-bedroom', ms: S.thoughtMs + 800, by: 'dad-garden' },
+        { do: 'wait', ms: S.thoughtMs + 800 },
       ],
     },
     {

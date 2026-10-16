@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { TILE_SIZE as T } from '../config/display';
 import {
   CHARACTER_LOOP_MS,
+  HOLD_HEART_SCALE,
   PROP_SIZE,
   STORY_TIMING,
   THOUGHT_SCALE,
@@ -196,10 +197,13 @@ export class StoryView {
     this.showBubble(this.thought, this.thoughtSpec);
     this.showBubble(this.speech, this.speechSpec);
     this.sparkle.setTexture(SPARKLE_KEY).setScale(1 / scale);
-    this.texture(HEART_EMPTY_KEY, HOLD_HEART_SIZE, HOLD_HEART_SIZE, (ctx) => {
+    const heart = HOLD_HEART_SIZE * HOLD_HEART_SCALE;
+    this.texture(HEART_EMPTY_KEY, heart, heart, (ctx) => {
+      ctx.scale(HOLD_HEART_SCALE, HOLD_HEART_SCALE);
       drawHoldHeart(ctx, false);
     });
-    this.texture(HEART_FULL_KEY, HOLD_HEART_SIZE, HOLD_HEART_SIZE, (ctx) => {
+    this.texture(HEART_FULL_KEY, heart, heart, (ctx) => {
+      ctx.scale(HOLD_HEART_SCALE, HOLD_HEART_SCALE);
       drawHoldHeart(ctx, true);
     });
     this.heartEmpty.setTexture(HEART_EMPTY_KEY).setScale(1 / scale);
@@ -385,7 +389,9 @@ export class StoryView {
         this.popHeartImage
           .setVisible(true)
           .setAlpha(alpha)
-          .setScale((MEMORY_HEART.scale * Math.min(1, 0.6 + k * 2)) / this.artScale)
+          .setScale(
+            (MEMORY_HEART.scale * Math.min(1, 0.6 + k * 2)) / HOLD_HEART_SCALE / this.artScale,
+          )
           .setPosition(this.popHeartX, this.popHeartY - MEMORY_HEART.risePx * k);
       }
     }
@@ -409,7 +415,8 @@ export class StoryView {
       const progress = this.director.holdProgress;
       const pulse = 0.85 + 0.15 * Math.sin((now / SPARKLE_MS) * Math.PI * 2);
       const x = (trigger.mark.col + 0.5) * T;
-      const y = (trigger.mark.row + 0.5) * T - pulse * 2;
+      // Un peu plus haut que l'étincelle : il est deux fois plus grand (D-189).
+      const y = (trigger.mark.row + 0.5) * T - pulse * 2 - 4;
       const grow = (1 + 0.25 * progress) / this.artScale;
       this.sparkle.setVisible(false);
       this.heartEmpty.setVisible(true).setPosition(x, y).setScale(grow).setAlpha(pulse);

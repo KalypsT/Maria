@@ -1882,6 +1882,12 @@ body {
   height: 72%;
 }
 
+/* Agir maintenu (D-189) : un cœur à la place du libellé, qui se remplit. */
+.touch-heart {
+  width: 60%;
+  height: 60%;
+}
+
 /* Le tourne-disque du grenier (D-121) : une rangée de pochettes, sans texte. */
 #record-picker {
   position: fixed;

@@ -194,8 +194,9 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // Le train à quai (D-69) : en passant devant sa porte ouverte, la lueur scintille ; Céleste
-    // s'arrête, une bulle « ? ». On n'y monte pas (encore) : la suite reste ouverte.
+    // Le train à quai (D-69) : en passant devant sa porte ouverte, Céleste s'arrête et pense à la
+    // mer (D-189 : plus de scintillement ni de « ? », rien d'étrange ; elle a envie de partir). La
+    // porte, éclairée, et l'étincelle d'Agir montrent où monter.
     id: 'station-train',
     room: 'station-platforms',
     on: 'touch',
@@ -204,13 +205,7 @@ const TRIGGERS: StoryTrigger[] = [
     lock: true,
     steps: [
       { do: 'flag', id: F.StationTrain },
-      {
-        do: 'sparkle',
-        area: { col: TRAIN_DOOR.col - 1, row: TRAIN_DOOR.row - 3, w: 3, h: 4 },
-        ms: S.cradleSparkleMs + 800,
-      },
-      { do: 'wait', ms: 600 },
-      { do: 'thought', icon: 'question', ms: S.thoughtMs + 800 },
+      { do: 'thought', icon: 'sea', ms: S.thoughtMs + 800 },
       { do: 'wait', ms: S.lookMs },
     ],
   },
@@ -236,14 +231,8 @@ const TRIGGERS: StoryTrigger[] = [
 const OMENS: StoryOmen[] = [
   // En grimpant vers le haut des casiers : la lumière vacille, les couleurs se refroidissent.
   { room: 'station-lost', when: { none: [F.StationDone] }, col: 40, row: 8, radius: 10 },
-  // Devant la porte ouverte du train à quai (D-69) : la suite, jusqu'au départ (D-85).
-  {
-    room: 'station-platforms',
-    when: { all: [F.GrownOlder], none: [F.TrainBoarding] },
-    col: TRAIN_DOOR.col,
-    row: TRAIN_DOOR.row,
-    radius: 10,
-  },
+  // Devant la porte ouverte du train à quai : plus de présage (D-189), ce n'est pas le monde
+  // étrange.
 ];
 
 const PROPS: StoryProp[] = [

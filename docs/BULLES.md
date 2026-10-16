@@ -261,9 +261,10 @@ Le dernier niveau est tout entier un moment-pivot : Maria y reste, avec deux all
 | B-156 | Le tourne-disque sans disque                                    | C    | tourne-disque et « ? » | inchangé            |
 | B-157 | La fin de chaque souvenir jouable                               | C    | cœur                   | inchangé            |
 | B-158 | Le cadeau (D-166) : au potager, papa appelle Céleste            | papa | —                      | « ! » (nouveau)     |
-| B-159 | … papa montre la console de salon                               | papa | —                      | manette (nouveau)   |
+| B-159 | … papa a un cadeau (D-189)                                      | papa | —                      | paquet cadeau       |
 | B-160 | … Céleste, émerveillée                                          | C    | —                      | émerveillement      |
-| B-161 | … papa : elle sera dans sa chambre                              | papa | —                      | télé (nouveau)      |
+| B-161 | … papa montre la console de salon                               | papa | —                      | manette (nouveau)   |
+| B-162 | … papa : elle est installée dans sa chambre (D-189)             | papa | télé                   | sa chambre, la télé |
 
 ---
 

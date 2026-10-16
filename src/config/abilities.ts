@@ -36,6 +36,17 @@ export const ABILITY_HINTS: Readonly<Record<Ability, string>> = {
 };
 
 /**
+ * L'aide du saut vers le bas (D-189) : ce n'est pas une capacité (on sait le faire dès le début),
+ * mais rien ne l'apprenait. La première fois que Céleste reste debout, immobile, sur une planche
+ * qu'on peut traverser, une bulle (la planche en pointillés et la flèche) et l'indice. PROVISOIRE.
+ */
+export const DROP_HELP = {
+  /** Immobile sur la planche pendant ce temps (ms). */
+  standMs: 1200,
+  hint: 'Sur une planche fine : pousser vers le bas et sauter, Céleste passe au travers.',
+} as const;
+
+/**
  * Bulle d'aide à l'obtention (D-62, demande de l'utilisateur) : un pictogramme au-dessus de
  * Céleste qui montre le geste. Aussi dans la page « Mes capacités » du cahier.
  */

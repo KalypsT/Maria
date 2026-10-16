@@ -526,6 +526,30 @@ export class NotebookPages {
           ctx.lineDashOffset = 0;
         }
       }
+      // Quelque chose de nouveau (D-189 : la console, un jeu pas encore vu) : une étincelle dorée
+      // qui respire et « nouveau » au crayon rose, comme sur la console.
+      if (room.news) {
+        const p = px(room.news);
+        const beat = 0.5 + 0.5 * Math.sin(elapsedMs / 300);
+        const r = 4 + 1.5 * beat;
+        ctx.fillStyle = lamp;
+        ctx.strokeStyle = ink;
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        for (let i = 0; i < 8; i++) {
+          const a = (i * Math.PI) / 4;
+          const d = i % 2 === 0 ? r : r * 0.35;
+          ctx.lineTo(p.x + Math.cos(a) * d, p.y + Math.sin(a) * d);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = rose;
+        ctx.font = `italic 700 13px ${font}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('nouveau !', p.x, p.y - 7);
+      }
       // Les coquilles (D-148) : trouvées, dessinées ; vues mais pas prises, en pointillés.
       for (const s of room.shells) {
         const p = px(s);

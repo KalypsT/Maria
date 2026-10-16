@@ -3,6 +3,16 @@ import { BUTTON_BIT, type ButtonAction, type InputSource, type RawInput } from '
 import { TouchController } from './TouchController';
 import { computeTouchLayout, type Insets, type TouchLayout } from './touchLayout';
 
+/**
+ * Le cœur du bouton Agir maintenu (D-189) : le contour, et le cœur plein découvert de bas en haut
+ * (la hauteur de la bande `touch-heart-fill`, dans un repère de 24).
+ */
+const HEART_BUTTON_SVG = `<svg class="touch-heart" viewBox="0 0 24 24" aria-hidden="true">
+<defs><clipPath id="touch-heart-clip"><rect class="touch-heart-fill" x="0" y="24" width="24" height="24"/></clipPath></defs>
+<path d="M12 21C5 15.5 2 12.2 2 8.4 2 5.4 4.4 3 7.3 3c1.9 0 3.6 1 4.7 2.6C13.1 4 14.8 3 16.7 3 19.6 3 22 5.4 22 8.4c0 3.8-3 7.1-10 12.6z" fill="#e0598b" clip-path="url(#touch-heart-clip)"/>
+<path d="M12 21C5 15.5 2 12.2 2 8.4 2 5.4 4.4 3 7.3 3c1.9 0 3.6 1 4.7 2.6C13.1 4 14.8 3 16.7 3 19.6 3 22 5.4 22 8.4c0 3.8-3 7.1-10 12.6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+</svg>`;
+
 const LABELS: Readonly<Record<ButtonAction, string>> = {
   Jump: 'Saut',
   Attack: 'Action',
@@ -32,6 +42,9 @@ export class TouchSource implements InputSource {
   private readonly buttonElements = new Map<ButtonAction, HTMLElement>();
   /** Un dessin à la place du libellé (le sac, D-159), et son nom pour l'accessibilité. */
   private readonly icons = new Map<ButtonAction, { html: string; label: string }>();
+  /** Le cœur d'Agir maintenu (D-189) : la bande qui le remplit, et sa hauteur montrée. */
+  private heartFill: SVGRectElement | null = null;
+  private shownHeart = -1;
   private readonly badges = new Map<ButtonAction, string | null>();
   private shownMask = 0;
   private showAbility = false;
@@ -143,6 +156,38 @@ export class TouchSource implements InputSource {
       element.append(badge);
     }
     badge.innerHTML = html;
+  }
+
+  /**
+   * Agir maintenu (D-189) : un cœur à la place du libellé du bouton, qui se remplit de bas en haut
+   * comme celui de la scène (`progress` de 0 à 1) ; null rend le libellé (`setLabel`).
+   */
+  setHeart(action: ButtonAction, progress: number | null): void {
+    const element = this.buttonElements.get(action);
+    if (!element) {
+      return;
+    }
+    if (progress === null) {
+      if (this.heartFill) {
+        this.heartFill = null;
+        this.shownHeart = -1;
+        element.textContent = '';
+        element.removeAttribute('aria-label');
+      }
+      return;
+    }
+    if (!this.heartFill || !element.contains(this.heartFill)) {
+      element.innerHTML = HEART_BUTTON_SVG;
+      element.setAttribute('aria-label', 'Serrer fort');
+      element.classList.add('contextual');
+      this.heartFill = element.querySelector<SVGRectElement>('.touch-heart-fill');
+      this.shownHeart = -1;
+    }
+    const value = Math.round(Math.min(1, Math.max(0, progress)) * 40) / 40;
+    if (value !== this.shownHeart && this.heartFill) {
+      this.shownHeart = value;
+      this.heartFill.setAttribute('y', String(24 * (1 - value)));
+    }
   }
 
   /** Libellé d'un bouton (Action devient « Agir » près de ce qu'on peut faire, D-31). */

@@ -301,6 +301,11 @@ export const StoryFlag = {
    * géant, Maria y dort. Elle la prend dans ses bras en maintenant Agir (`FinaleFound`).
    */
   FinaleCradleSeen: 'finale.cradle-seen',
+  /**
+   * L'aide du saut vers le bas (D-189) : la première fois que Céleste s'arrête sur une planche
+   * qu'on peut traverser, sa bulle et l'indice ; une fois par partie.
+   */
+  HelpDrop: 'help.drop',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -477,6 +482,12 @@ export const CAT_SCALE = 2;
  * sur téléphone.
  */
 export const STREET_PASSERBY_SCALE = 0.75;
+
+/**
+ * Le cœur d'Agir maintenu (D-171), au-dessus de Maria : deux fois sa taille d'origine (D-189 : il
+ * passait inaperçu), soit 28 px logiques.
+ */
+export const HOLD_HEART_SCALE = 2;
 
 /**
  * Taille des objets de mise en scène (px logiques). Maria est un peu plus grande qu'un vrai poupon à
