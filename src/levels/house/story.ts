@@ -373,17 +373,26 @@ export const HOUSE_STORY: StoryData = {
         // Le berceau scintille, puis le cercle se referme sur Céleste.
         {
           do: 'hush',
-          ms: S.cradleSparkleMs + S.nightFadeOutMs + S.nightBlackMs + S.nightFadeInMs + 1200,
+          ms:
+            S.cradleSparkleMs +
+            S.nightFadeOutMs +
+            S.nightBlackMs +
+            S.nightFadeInMs +
+            S.faintLieMs +
+            S.faintSitMs,
         },
         { do: 'sparkle', area: { col: 24, row: 3, w: 5, h: 3 }, ms: S.cradleSparkleMs + 600 },
         { do: 'wait', ms: S.cradleSparkleMs },
         { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
         { do: 'flag', id: F.StrangeDone },
         { do: 'room', room: 'bedroom', col: 12, row: 15, facing: 1, returnPoint: true },
-        { do: 'pose', pose: 'sit' },
+        // Évanouie, allongée, les yeux fermés (D-189) ; elle se redresse, assise.
+        { do: 'pose', pose: 'lie' },
         { do: 'wait', ms: S.nightBlackMs },
         { do: 'fadeIn', ms: S.nightFadeInMs },
-        { do: 'wait', ms: 1200 },
+        { do: 'wait', ms: S.faintLieMs },
+        { do: 'pose', pose: 'sit' },
+        { do: 'wait', ms: S.faintSitMs },
         { do: 'thought', icon: 'maria', ms: S.thoughtMs + 800 },
         { do: 'wait', ms: S.lookMs + 600 },
         // Papa passe la tête par la porte : il s'inquiète, sans rien savoir (D-37).
@@ -697,18 +706,27 @@ export const HOUSE_STORY: StoryData = {
       steps: [
         {
           do: 'hush',
-          ms: S.cradleSparkleMs + S.nightFadeOutMs + S.nightBlackMs + S.nightFadeInMs + 1200,
+          ms:
+            S.cradleSparkleMs +
+            S.nightFadeOutMs +
+            S.nightBlackMs +
+            S.nightFadeInMs +
+            S.faintLieMs +
+            S.faintSitMs,
         },
         { do: 'sparkle', area: { col: 22, row: 5, w: 5, h: 3 }, ms: S.cradleSparkleMs + 600 },
         { do: 'wait', ms: S.cradleSparkleMs },
         { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
         { do: 'flag', id: F.HedgeDone },
         { do: 'room', room: 'garden-tree', col: 29, row: 39, facing: -1, returnPoint: true },
-        // Assise dans l'herbe, comme au réveil (D-58) ; elle se relève dès qu'on la fait bouger.
-        { do: 'pose', pose: 'sit' },
+        // Évanouie, allongée, les yeux fermés (D-189) ; elle se redresse, assise.
+        { do: 'pose', pose: 'lie' },
         { do: 'wait', ms: S.nightBlackMs },
         { do: 'fadeIn', ms: S.nightFadeInMs },
-        { do: 'wait', ms: 1200 },
+        { do: 'wait', ms: S.faintLieMs },
+        // Assise dans l'herbe, comme au réveil (D-58) ; elle se relève dès qu'on la fait bouger.
+        { do: 'pose', pose: 'sit' },
+        { do: 'wait', ms: S.faintSitMs },
         { do: 'thought', icon: 'maria', ms: S.thoughtMs + 800 },
         { do: 'wait', ms: S.lookMs + 600 },
       ],
@@ -818,10 +836,13 @@ export const HOUSE_STORY: StoryData = {
         { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
         { do: 'flag', id: F.SchoolDone },
         { do: 'room', room: 'schoolyard', col: 12, row: 23, facing: 1, returnPoint: true },
-        { do: 'pose', pose: 'sit' },
+        // Évanouie, allongée, les yeux fermés (D-189) ; elle se redresse, assise.
+        { do: 'pose', pose: 'lie' },
         { do: 'wait', ms: S.nightBlackMs },
         { do: 'fadeIn', ms: S.nightFadeInMs },
-        { do: 'wait', ms: 1200 },
+        { do: 'wait', ms: S.faintLieMs },
+        { do: 'pose', pose: 'sit' },
+        { do: 'wait', ms: S.faintSitMs },
         // Maman est venue la chercher, à hauteur d'enfant : un cœur.
         { do: 'thought', icon: 'heart', ms: S.holdMs, by: 'mom-yard' },
         { do: 'wait', ms: S.holdMs },

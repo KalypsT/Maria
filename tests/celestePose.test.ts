@@ -152,6 +152,25 @@ describe('Céleste en papier découpé (D-29)', () => {
     expect(poser.sitting).toBe(false);
   });
 
+  it('évanouie (D-189) : allongée, les jambes droites devant, les yeux fermés ; puis assise', () => {
+    const poser = new CelestePoser(DEFAULT_PUPPET, DT, MAX_RUN);
+    poser.lying = true;
+    run(poser, subject(PlayerState.Idle), 240);
+    expect(poser.pose.lie).toBeGreaterThan(0.95);
+    expect(poser.pose.bodyTilt).toBeLessThan(-1.5);
+    expect(poser.pose.legFront).toBeGreaterThan(1.5);
+    expect(poser.pose.eyesClosed).toBe(1);
+    // Elle se redresse, assise : les yeux ouverts.
+    poser.lying = false;
+    poser.sitting = true;
+    run(poser, subject(PlayerState.Idle), 240);
+    expect(poser.pose.eyesClosed).toBe(0);
+    expect(poser.pose.lie).toBeLessThan(0.05);
+    expect(poser.pose.bodyTilt).toBeGreaterThan(-0.2);
+    poser.reset();
+    expect(poser.lying).toBe(false);
+  });
+
   it('sous le parapluie (D-62), le bras le tient en haut ; au sol, il se referme', () => {
     const poser = new CelestePoser(DEFAULT_PUPPET, DT, MAX_RUN);
     run(poser, subject(PlayerState.Glide, MAX_RUN, 50), 60);

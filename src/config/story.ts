@@ -363,6 +363,12 @@ export const STORY_TIMING = {
   nightFadeOutMs: 1900,
   nightBlackMs: 2000,
   nightFadeInMs: 2600,
+  /**
+   * Le retour d'un monde étrange (D-189) : Céleste reste allongée, les yeux fermés, ce temps après
+   * le retour de l'image ; puis elle se redresse, assise, et le reste un instant avant sa bulle.
+   */
+  faintLieMs: 1300,
+  faintSitMs: 600,
   /** Durée d'affichage d'une bulle de pensée. */
   thoughtMs: 3000,
   /** Apparition et disparition d'une bulle. */

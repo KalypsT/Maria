@@ -143,10 +143,13 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
       { do: 'flag', id: F.StationDone },
       { do: 'room', room: 'station-hall', ...UNDER_CLOCK, facing: -1, returnPoint: true },
-      { do: 'pose', pose: 'sit' },
+      // Évanouie, allongée, les yeux fermés (D-189) ; elle se redresse, assise.
+      { do: 'pose', pose: 'lie' },
       { do: 'wait', ms: S.nightBlackMs },
       { do: 'fadeIn', ms: S.nightFadeInMs },
-      { do: 'wait', ms: 1200 },
+      { do: 'wait', ms: S.faintLieMs },
+      { do: 'pose', pose: 'sit' },
+      { do: 'wait', ms: S.faintSitMs },
       { do: 'thought', icon: 'maria', ms: S.thoughtMs },
       { do: 'wait', ms: S.thoughtMs + 300 },
       // Papa est venu la chercher, à hauteur d'enfant : un cœur, et Céleste lui répond.

@@ -54,3 +54,20 @@ export const HAZARD_INSET_PX = 2;
  * d'autre de la tuile où l'on se tient devant elle.
  */
 export const DOOR_REACH_TILES = 2;
+
+/**
+ * L'affichage de la peur (D-189, piste C de la maquette) : trois veilleuses qui s'éteignent en haut
+ * de l'écran (une par cran qui reste avant l'évanouissement), et un froid léger qui gagne les bords
+ * de l'écran (un voile bleu nuit et des hachures au crayon) ; au dernier cran, Céleste frissonne et
+ * le voile bat comme un cœur. PROVISOIRE, à régler sur téléphone.
+ */
+export const FEAR_LOOK = {
+  /** Force du froid au dernier cran avant l'évanouissement (0 à 1) ; proportionnelle avant. */
+  coldMax: 0.6,
+  /** Les hachures du froid : longueur d'un trait (px CSS) et surface par trait (px² CSS). */
+  hatchPx: 16,
+  hatchAreaPx: 170,
+  /** Le frisson de Céleste au dernier cran : amplitude (px logiques) et fréquence (Hz). */
+  shiverPx: 0.6,
+  shiverHz: 14,
+} as const;

@@ -123,6 +123,7 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
     }
     let dark = false;
     let holding = false;
+    let lying = false;
     let gone = false;
     let room = t.room;
     for (const step of t.steps) {
@@ -146,6 +147,7 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
           problems.push(`${what} : Maria prise ou posée sous les yeux du joueur`);
         }
         holding = holds;
+        lying = step.pose === 'lie';
       } else if (step.do === 'end') {
         // La fin du jeu (D-145) : dans le noir, la dernière étape ; l'accueil suit.
         if (!dark) {
@@ -200,6 +202,10 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
     }
     if (holding) {
       problems.push(`${what} : se termine avec Maria dans les bras`);
+    }
+    if (lying) {
+      // Allongée (D-189) : elle se redresse avant que le joueur ne la reprenne en main.
+      problems.push(`${what} : se termine avec Céleste allongée`);
     }
     if (gone && !ending) {
       problems.push(`${what} : se termine sans Céleste`);

@@ -137,12 +137,14 @@ export const THOUGHT_ICONS = [
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
 /**
- * Poses imposées par un script (Céleste assise pour jouer, puis au réveil). `hold` (D-143) : debout,
+ * Poses imposées par un script (Céleste assise pour jouer, puis au réveil). `lie` (D-189) : allongée,
+ * les yeux fermés, évanouie au retour d'un monde étrange ; jamais à la fin d'un script (vérifié
+ * par `storyProblems`). `hold` (D-143) : debout,
  * Maria dans les bras, immobile ; `hold-sit` (D-144) : assise, Maria dans les bras. Maria y est
  * prise et posée seulement dans le noir, jamais à la fin d'un script (Céleste ne marche jamais en la
  * portant, pilier 5 ; vérifié par `storyProblems`).
  */
-export type ScriptPose = 'sit' | 'stand' | 'hold' | 'hold-sit';
+export type ScriptPose = 'sit' | 'stand' | 'hold' | 'hold-sit' | 'lie';
 
 /** Maria dans les bras de Céleste dans cette pose (D-143, D-144). */
 export function holdsMaria(pose: ScriptPose): boolean {

@@ -1759,3 +1759,18 @@ export const BUBBLE_PORTRAITS = {
 
 /** La part du bas d'un portrait de bulle qui s'efface (D-189). */
 export const BUBBLE_PORTRAIT_FADE = 0.3;
+
+/**
+ * Les yeux fermés de Céleste illustrée (D-189 : évanouie au retour d'un monde étrange) : une
+ * paupière dessinée par le code, posée sur l'œil de la tête de chaque tenue (px logiques depuis le
+ * point d'attache de la tête, son cou), de la couleur de sa peau. En attendant d'éventuelles têtes
+ * « yeux fermés » fournies.
+ */
+export const CELESTE_EYELIDS: Readonly<
+  Partial<Record<CelesteOutfit, { readonly x: number; readonly y: number; readonly skin: string }>>
+> = {
+  pyjama: { x: 2.8, y: -6.4, skin: '#f3ad82' },
+  tee: { x: 2.05, y: -6, skin: '#f7a677' },
+  jacket: { x: 2.55, y: -5.9, skin: '#fbac7b' },
+  dress: { x: 2.45, y: -6, skin: '#f9ab7f' },
+};

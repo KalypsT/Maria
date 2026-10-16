@@ -64,7 +64,7 @@ import {
 } from '../config/playableMemories';
 import { MemoryEvent, PlayableMemory } from '../core/memory/PlayableMemory';
 import { cubeTower, teaCup } from './art/memoryArt';
-import { DEFAULT_WORLD, type WorldParams } from '../config/world';
+import { DEFAULT_WORLD, FEAR_LOOK, type WorldParams } from '../config/world';
 import { checkpointId } from '../core/save/saveData';
 import type { SaveSession } from '../core/save/SaveSession';
 import {
@@ -743,6 +743,7 @@ export class GameScene extends Phaser.Scene {
       },
       pose: (pose) => {
         this.poser.sitting = pose === 'sit' || pose === 'hold-sit';
+        this.poser.lying = pose === 'lie';
         this.poser.holding = holdsMaria(pose);
       },
       think: (icon, ms, by) => {
@@ -1245,8 +1246,13 @@ export class GameScene extends Phaser.Scene {
     const alpha = this.clock.alpha;
     const player = this.player;
     const box = player.box;
+    // Au dernier cran de la peur (D-189) : Céleste frissonne (l'image seulement, pas la physique).
+    const shiver =
+      this.hud.shivering && !this.memoryPlay
+        ? FEAR_LOOK.shiverPx * Math.sin((this.time.now / 1000) * FEAR_LOOK.shiverHz * Math.PI * 2)
+        : 0;
     this.puppet.render(
-      player.prevX + (box.x - player.prevX) * alpha + box.width / 2,
+      player.prevX + (box.x - player.prevX) * alpha + box.width / 2 + shiver,
       player.prevY + (box.y - player.prevY) * alpha + box.height,
       player.facing,
       feel.scaleX,
@@ -2701,6 +2707,7 @@ export class GameScene extends Phaser.Scene {
     this.loadPassersby();
     this.refreshConsoleNews();
     this.poser.sitting = false;
+    this.poser.lying = false;
     this.fx.reset();
     this.fx.load(level, isStrangeRoom(level), this.palette(), this.story.timeOfDay() === 'morning');
     // Arrivée dans une salle qui roule déjà : à pleine vitesse (le départ, lui, se voit).
@@ -4362,6 +4369,7 @@ export class GameScene extends Phaser.Scene {
     this.applyGrowth();
     this.props.load(this.story.data.props, this.level.id, this.story.flags);
     this.poser.sitting = false;
+    this.poser.lying = false;
     this.poser.holding = false;
     this.redrawArt();
   }
