@@ -9,7 +9,7 @@ Demande de l'utilisateur (branche « avant diffusion ») : refaire un tour de to
 - **Le point de retour** : après un évanouissement (danger, peur pleine, poursuivant), Céleste revient à la dernière lanterne allumée, **parfois dans une autre salle** (D-25). Une chute dans l'eau ou dans le vide ne compte pas : elle ramène au dernier appui.
 - **Le point de reprise** : « Continuer » après avoir quitté reprend à la dernière lanterne.
 - **Les mondes étranges** (D-179, choix de l'utilisateur ; avant : D-34, D-49, pas de lanterne à l'entrée) : **une lanterne à l'arrivée de chacun**, quelques tuiles devant Céleste (`*-arrival`) ; elle s'allume dès qu'on la touche. Un évanouissement y ramène, sans repasser par le monde réel. L'entrée (le haut de la bibliothèque, le trou de la haie…) reste rejouable, en version courte, si l'on en ressort.
-- **Le dessin** (D-179, choix de l'utilisateur) : dans le monde réel, une **lampe-tempête** (lumière chaude ; la veilleuse principale du voyage rapide, lumière **bleu lune**) ; dans les mondes étranges, la **veilleuse champignon turquoise**. Posée sur sa tuile, même taille partout.
+- **Le dessin** (D-179, choix de l'utilisateur) : dans le monde réel, une **lampe-tempête** (lumière chaude ; la veilleuse principale du voyage rapide, lumière **bleu lune**) ; dans les mondes étranges, la **veilleuse champignon turquoise**. Posée sur sa tuile, même taille partout. **Le voyage** (D-189) : on ne part que d'une veilleuse bleu lune débloquée, par la page « Voyager » (Agir) ; les autres lanternes ne servent qu'au retour.
 
 ## Comment la revue a été faite
 
