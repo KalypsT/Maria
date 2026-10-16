@@ -144,8 +144,9 @@ export const INTRO_SHOTS: readonly IntroShot[] = [
   {
     id: 'music-box',
     scene: 'music-box',
-    durationMs: 5000,
+    durationMs: 4000,
     enter: { kind: 'cut' },
+    // La seule musique de l'intro (choix de l'utilisateur) ; l'écran titre passe ensuite à `title`.
     music: 'ending',
     camera: { from: { x: 960, y: 540, zoom: 1 }, to: { x: 960, y: 530, zoom: 1.06 } },
     sprites: [{ image: 'musicBox', x: 960, bottom: 820, height: 470, shadow: 380 }],
@@ -156,20 +157,20 @@ export const INTRO_SHOTS: readonly IntroShot[] = [
       radius: 640,
       strength: [
         [0, 0.12],
-        [2600, 0.6],
+        [2000, 0.6],
       ],
     },
     motes: { color: 'warm', count: 36, area: [560, 200, 1360, 820], rise: false },
     darkness: [
       [0, 0.72],
-      [2600, 0],
+      [2000, 0],
     ],
   },
   {
     id: 'drawing',
     scene: 'drawing',
-    durationMs: 5000,
-    enter: { kind: 'dissolve', ms: 1500 },
+    durationMs: 4000,
+    enter: { kind: 'dissolve', ms: 1200 },
     camera: { from: { x: 960, y: 540, zoom: 1 }, to: { x: 1150, y: 600, zoom: 1.6 } },
     sprites: [],
   },
@@ -177,7 +178,7 @@ export const INTRO_SHOTS: readonly IntroShot[] = [
     // Le dessin s'efface dans le noir : Maria n'apparaît jamais sous nos yeux (pilier 5).
     id: 'evening',
     scene: 'room',
-    durationMs: 8000,
+    durationMs: 6000,
     enter: { kind: 'dip', ms: 1400, holdMs: 200, color: BLACK },
     camera: { from: { x: 900, y: 540, zoom: 1 }, to: ROOM_CAMERA },
     sprites: [
@@ -191,10 +192,10 @@ export const INTRO_SHOTS: readonly IntroShot[] = [
       y: 250,
       scale: 1.15,
       opacity: [
-        [1800, 0],
-        [2300, 1],
-        [6200, 1],
-        [6700, 0],
+        [1600, 0],
+        [2000, 1],
+        [4400, 1],
+        [4800, 0],
       ],
     },
   },
@@ -202,7 +203,7 @@ export const INTRO_SHOTS: readonly IntroShot[] = [
     // Elle grandit (pyjama, puis robe) ; Maria reste à sa place, la même.
     id: 'growing',
     scene: 'room',
-    durationMs: 5000,
+    durationMs: 4000,
     enter: { kind: 'cut' },
     camera: { from: ROOM_CAMERA, to: ROOM_CAMERA },
     sprites: [
@@ -214,8 +215,8 @@ export const INTRO_SHOTS: readonly IntroShot[] = [
         breathe: true,
         // La robe arrive par-dessus avant que le pyjama ne s'efface : le décor ne transparaît pas.
         opacity: [
-          [1600, 1],
-          [3200, 0],
+          [1300, 1],
+          [2400, 0],
         ],
         shadow: 260,
       },
@@ -226,8 +227,8 @@ export const INTRO_SHOTS: readonly IntroShot[] = [
         height: 705,
         breathe: true,
         opacity: [
-          [1200, 0],
-          [2600, 1],
+          [900, 0],
+          [1900, 1],
         ],
         shadow: 270,
       },
@@ -240,16 +241,15 @@ export const INTRO_SHOTS: readonly IntroShot[] = [
       radius: 700,
       strength: [
         [0, 0.33],
-        [5000, 0.24],
+        [4000, 0.24],
       ],
     },
   },
   {
     id: 'cradle',
     scene: 'cradle',
-    durationMs: 5200,
-    enter: { kind: 'dip', ms: 900, holdMs: 1000, color: BLACK },
-    music: null,
+    durationMs: 4200,
+    enter: { kind: 'dip', ms: 900, holdMs: 600, color: BLACK },
     camera: { from: { x: 960, y: 540, zoom: 1 }, to: { x: 760, y: 470, zoom: 1.2 } },
     sprites: [],
     glow: {
@@ -258,8 +258,8 @@ export const INTRO_SHOTS: readonly IntroShot[] = [
       y: 420,
       radius: 560,
       strength: [
-        [1800, 0],
-        [4800, 0.9],
+        [1200, 0],
+        [3800, 0.9],
       ],
     },
     motes: { color: 'teal', count: 40, area: [300, 120, 900, 560], rise: true },
@@ -268,10 +268,9 @@ export const INTRO_SHOTS: readonly IntroShot[] = [
     // La lueur envahit l'image, puis la chambre basculée apparaît.
     id: 'lost',
     scene: 'strange',
-    durationMs: 7000,
-    enter: { kind: 'dip', ms: 1400, holdMs: 150, color: '#bff5ee' },
-    music: 'strange',
-    camera: { from: { x: 1150, y: 560, zoom: 1 }, to: LOST_CAMERA_END, startMs: 0, moveMs: 6000 },
+    durationMs: 5500,
+    enter: { kind: 'dip', ms: 1200, holdMs: 150, color: '#bff5ee' },
+    camera: { from: { x: 1150, y: 560, zoom: 1 }, to: LOST_CAMERA_END, startMs: 0, moveMs: 4500 },
     sprites: CELESTE_STRANGE,
     glow: { color: 'teal', x: 1140, y: 520, radius: 760, strength: [[0, 0.42]] },
     motes: { color: 'teal', count: 60, area: [-200, -100, 2200, 1150], rise: true },
@@ -280,9 +279,9 @@ export const INTRO_SHOTS: readonly IntroShot[] = [
     // La caméra glisse jusqu'à Céleste (même décor : pas de coupure visible).
     id: 'celeste',
     scene: 'strange',
-    durationMs: 4800,
+    durationMs: 4000,
     enter: { kind: 'cut' },
-    camera: { from: LOST_CAMERA_END, to: { x: 560, y: 600, zoom: 1.15 }, moveMs: 2000 },
+    camera: { from: LOST_CAMERA_END, to: { x: 560, y: 600, zoom: 1.15 }, moveMs: 1600 },
     sprites: CELESTE_STRANGE,
     glow: {
       color: 'teal',
@@ -291,7 +290,7 @@ export const INTRO_SHOTS: readonly IntroShot[] = [
       radius: 820,
       strength: [
         [0, 0.42],
-        [2000, 0.5],
+        [1600, 0.5],
       ],
     },
     motes: { color: 'teal', count: 60, area: [-200, -100, 2200, 1150], rise: true },
@@ -350,8 +349,8 @@ export const INTRO_TOY_TOWN = {
   ],
   eyeRadius: 7,
   eyesOpen: [
-    [2500, 0],
-    [3600, 1],
+    [1800, 0],
+    [2800, 1],
   ],
 } as const;
 
