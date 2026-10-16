@@ -1007,11 +1007,20 @@ export function drawProp(
       drawTeaTable(ctx, w, h, images.get('roger') ?? null);
       break;
     case 'tea-cup':
-      ctx.save();
-      ctx.translate(w / 2, h / 2);
-      teaCup(ctx, Math.min(w, h));
-      ctx.restore();
+    case 'tea-cups-2':
+    case 'tea-cups-3': {
+      // Une tasse, ou deux, ou trois l'une dans l'autre (D-189), du bas vers le haut, à la place de
+      // la tasse seule (5 px de haut) ; chacune dépasse de 2 px de celle d'en dessous.
+      const cups = kind === 'tea-cup' ? 1 : kind === 'tea-cups-2' ? 2 : 3;
+      const cup = PROP_SIZE['tea-cup'];
+      for (let i = 0; i < cups; i++) {
+        ctx.save();
+        ctx.translate(w / 2, h - cup.h / 2 - i * 2);
+        teaCup(ctx, Math.min(cup.w, cup.h));
+        ctx.restore();
+      }
       break;
+    }
     case 'white-cloth':
       // Le torchon blanc (D-116), dans le petit lit de la sieste : on le regarde, on ne le prend pas.
       drawTreasureProp(ctx, memoryImageKey('white-cloth'), w, h, images, SOFT_GLOW, () => {

@@ -416,6 +416,9 @@ export const PROP_KINDS = [
   'toy-kitchen',
   'tea-table',
   'tea-cup',
+  /** Les tasses qui attendent sur la dînette, l'une dans l'autre (D-189 : trois tasses). */
+  'tea-cups-2',
+  'tea-cups-3',
   /**
    * Le reflet du miroir de la nounou (D-110) : Céleste toute petite, dans la vitre ; puis passée de
    * l'autre côté (elle change de place dans le noir).

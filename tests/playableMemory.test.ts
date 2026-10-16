@@ -11,7 +11,7 @@ import {
 } from '../src/config/playableMemories';
 import { MemoryEvent, PlayableMemory } from '../src/core/memory/PlayableMemory';
 import { StoryDirector, type StoryHost } from '../src/core/story/StoryDirector';
-import type { StoryData, TileArea } from '../src/core/story/story';
+import { checkCondition, type StoryData, type TileArea } from '../src/core/story/story';
 
 const HZ = 120;
 const DATA = PLAYABLE_MEMORIES.kitchen;
@@ -55,9 +55,31 @@ function playAll(memory: PlayableMemory): number[] {
 }
 
 describe('souvenir jouable (D-89)', () => {
-  it('le souvenir de la cuisine : remuer, verser (la tasse en main), servir Roger et ses peluches', () => {
-    expect(DATA.actions.map((a) => a.gesture)).toEqual(['stir', 'pour', 'serve']);
-    expect(DATA.actions.map((a) => a.carry)).toEqual([false, true, false]);
+  it('le souvenir de la cuisine : remuer, puis trois fois verser (la tasse en main) et servir une peluche (D-189)', () => {
+    expect(DATA.actions.map((a) => a.gesture)).toEqual([
+      'stir',
+      'pour',
+      'serve',
+      'pour',
+      'serve',
+      'pour',
+      'serve',
+    ]);
+    expect(DATA.actions.map((a) => a.carry)).toEqual([
+      false,
+      true,
+      false,
+      true,
+      false,
+      true,
+      false,
+    ]);
+    // Trois peluches, trois places : chaque tasse servie a sa place sur le plateau et son cœur.
+    const serves = DATA.actions.filter((a) => a.gesture === 'serve');
+    expect(new Set(serves.map((a) => a.mark.col)).size).toBe(3);
+    expect(new Set(serves.map((a) => a.heart?.x)).size).toBe(3);
+    const tableCups = DATA.props.filter((p) => p.id.startsWith('cup-table'));
+    expect(new Set(tableCups.map((p) => p.dx ?? 0)).size).toBe(3);
     expect(playableOf('pink-kitchen')).toBe('kitchen');
     expect(playableOf('roger')).toBeNull();
     expect(STRANGE_THINGS).toContain('pink-kitchen');
@@ -111,12 +133,54 @@ describe('souvenir jouable (D-89)', () => {
     run(memory, ms(PLAYABLE_MEMORY_TIMING.gestureMs) + 1, inside(pour.area));
     expect(run(memory, 1, inside(pour.area), true) & MemoryEvent.Gesture).toBeTruthy();
     expect(memory.carrying).toBe(true);
-    expect(memory.flags.has(KITCHEN_MEMORY_STEP.poured)).toBe(true);
+    expect(memory.flags.has(KITCHEN_MEMORY_STEP.poured1)).toBe(true);
     run(memory, ms(PLAYABLE_MEMORY_TIMING.gestureMs) + 1, away);
     expect(run(memory, 1, inside(serve.area), true) & MemoryEvent.Gesture).toBeTruthy();
     expect(memory.carrying).toBe(false);
-    expect(memory.flags.has(KITCHEN_MEMORY_STEP.served)).toBe(true);
-    expect(memory.current).toBeNull();
+    expect(memory.flags.has(KITCHEN_MEMORY_STEP.served1)).toBe(true);
+    // Puis la deuxième tasse, à verser.
+    expect(memory.current?.gesture).toBe('pour');
+  });
+
+  it('les tasses sur la dînette : trois, deux, une, puis aucune ; une de plus sur la table à chaque service (D-189)', () => {
+    const memory = new PlayableMemory(DATA, HZ);
+    const shown = (prefix: string) =>
+      DATA.props
+        .filter((p) => p.id.startsWith(prefix) && checkCondition(memory.flags, p.when))
+        .map((p) => p.kind);
+    run(memory, ms(PLAYABLE_MEMORY_TIMING.introMs) + 1);
+    const dinette: string[][] = [shown('cups-dinette')];
+    const table: number[] = [shown('cup-table').length];
+    for (const action of DATA.actions) {
+      run(memory, 1, inside(action.area), true);
+      run(memory, ms(PLAYABLE_MEMORY_TIMING.gestureMs) + 1, inside(action.area));
+      if (action.gesture !== 'stir') {
+        dinette.push(shown('cups-dinette'));
+        table.push(shown('cup-table').length);
+      }
+    }
+    expect(dinette).toEqual([
+      ['tea-cups-3'],
+      ['tea-cups-2'],
+      ['tea-cups-2'],
+      ['tea-cup'],
+      ['tea-cup'],
+      [],
+      [],
+    ]);
+    expect(table).toEqual([0, 0, 1, 1, 2, 2, 3]);
+  });
+
+  it('une lueur sur chaque action des deux souvenirs, dans la salle (D-189)', () => {
+    for (const data of Object.values(PLAYABLE_MEMORIES)) {
+      for (const action of data.actions) {
+        expect(action.glow, `${data.room} ${action.gesture}`).toBeDefined();
+        const glow = action.glow ?? { x: -1, y: -1 };
+        // Près de l'étincelle : au plus quelques tuiles.
+        expect(Math.abs(glow.x - (action.mark.col + 0.5) * T)).toBeLessThan(3 * T);
+        expect(glow.y).toBeGreaterThan(action.mark.row * T);
+      }
+    }
   });
 
   it('la fin : un cœur, le noir, la petite cuisine seule, puis le noir et la fin', () => {

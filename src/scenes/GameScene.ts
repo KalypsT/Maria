@@ -3352,6 +3352,8 @@ export class GameScene extends Phaser.Scene {
     this.touch?.setLabel('Attack', near ? 'Agir' : null);
     const door = this.level.doors.find((d) => d.id === this.nearDoor);
     const mark = this.storyView.doorMark;
+    // Souvenir jouable : la lueur chaude sur ce qu'il faut faire, avec l'étincelle (D-189).
+    this.storyView.glowAt = memory?.markShown ? (memory.current?.glow ?? null) : null;
     if (memory) {
       // Souvenir jouable : l'étincelle montre l'action à faire.
       this.storyView.doorMark = memory.markShown ? (memory.current?.mark ?? null) : null;
@@ -4028,6 +4030,10 @@ export class GameScene extends Phaser.Scene {
         this.poser.gestureSteps = msToSteps(PLAYABLE_MEMORY_TIMING.gestureMs, PHYSICS_STEP_HZ);
         if (action.sparkle) {
           this.fx.sparkle(action.sparkle, PLAYABLE_MEMORY_TIMING.gestureMs);
+        }
+        if (action.heart) {
+          // Une peluche servie est contente (D-189).
+          this.storyView.popHeart(action.heart.x, action.heart.y);
         }
       }
       this.poser.carrying = memory.carrying;

@@ -7,6 +7,7 @@ import {
   THOUGHT_SCALE,
   towerCubesMask,
 } from '../config/story';
+import { MEMORY_GLOW, MEMORY_HEART } from '../config/playableMemories';
 import type { PropStage } from '../core/story/PropStage';
 import type { StoryDirector } from '../core/story/StoryDirector';
 import {
@@ -43,6 +44,8 @@ const SPARKLE_KEY = 'story-sparkle';
 /** Le cœur d'Agir maintenu (D-171) : vide, et plein (découvert de bas en haut). */
 const HEART_EMPTY_KEY = 'story-hold-heart';
 const HEART_FULL_KEY = 'story-hold-heart-full';
+/** La lueur d'un souvenir jouable sur ce qu'il faut faire (D-189). */
+const GLOW_KEY = 'story-memory-glow';
 /** Pulsation de l'étincelle (ms). */
 const SPARKLE_MS = 1300;
 
@@ -71,6 +74,17 @@ export class StoryView {
   private readonly sparkle: Phaser.GameObjects.Image;
   private readonly heartEmpty: Phaser.GameObjects.Image;
   private readonly heartFull: Phaser.GameObjects.Image;
+  private readonly glow: Phaser.GameObjects.Image;
+  /** Le petit cœur qui monte (D-189) et son départ (ms, -1 : aucun). */
+  private readonly popHeartImage: Phaser.GameObjects.Image;
+  private popHeartAt = -1;
+  private popHeartX = 0;
+  private popHeartY = 0;
+  /**
+   * Souvenir jouable (D-189) : le centre de la lueur chaude sur ce qu'il faut faire (px de la salle),
+   * posé par la scène (null : aucune).
+   */
+  glowAt: { readonly x: number; readonly y: number } | null = null;
   /**
    * Étincelle d'une porte de façade à portée (D-61), tuile au-dessus de la porte ; posée par la
    * scène (null : aucune).
@@ -121,6 +135,22 @@ export class StoryView {
       .image(0, 0, '__DEFAULT')
       .setDepth(PROP_DEPTH + 1)
       .setVisible(false);
+    this.glow = scene.add
+      .image(0, 0, '__DEFAULT')
+      .setDepth(PROP_DEPTH + 1)
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setVisible(false);
+    this.popHeartImage = scene.add
+      .image(0, 0, '__DEFAULT')
+      .setDepth(PROP_DEPTH + 1)
+      .setVisible(false);
+  }
+
+  /** Un petit cœur qui naît en (x, y) (px de la salle), monte et s'efface (D-189). */
+  popHeart(x: number, y: number): void {
+    this.popHeartAt = this.scene.time.now;
+    this.popHeartX = x;
+    this.popHeartY = y;
   }
 
   /** Échelle de l'écran ou images fournies changées : textures redessinées. */
@@ -174,6 +204,17 @@ export class StoryView {
     });
     this.heartEmpty.setTexture(HEART_EMPTY_KEY).setScale(1 / scale);
     this.heartFull.setTexture(HEART_FULL_KEY).setScale(1 / scale);
+    this.texture(GLOW_KEY, MEMORY_GLOW.sizePx, MEMORY_GLOW.sizePx, (ctx) => {
+      const c = MEMORY_GLOW.sizePx / 2;
+      const halo = ctx.createRadialGradient(c, c, 0, c, c, c);
+      halo.addColorStop(0, MEMORY_GLOW.core);
+      halo.addColorStop(0.45, MEMORY_GLOW.halo);
+      halo.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = halo;
+      ctx.fillRect(0, 0, MEMORY_GLOW.sizePx, MEMORY_GLOW.sizePx);
+    });
+    this.glow.setTexture(GLOW_KEY).setScale(1 / scale);
+    this.popHeartImage.setTexture(HEART_FULL_KEY);
     this.rebuild();
   }
 
@@ -319,6 +360,34 @@ export class StoryView {
         );
     } else if (this.speech.visible) {
       this.speech.setVisible(false);
+    }
+    const glowAt = this.glowAt;
+    if (glowAt) {
+      // La lueur respire doucement (D-189).
+      const k = 0.5 + 0.5 * Math.sin((now / MEMORY_GLOW.pulseMs) * Math.PI * 2);
+      const { alphaMin, alphaMax, grow } = MEMORY_GLOW;
+      this.glow
+        .setVisible(true)
+        .setPosition(glowAt.x, glowAt.y)
+        .setAlpha(alphaMin + (alphaMax - alphaMin) * k)
+        .setScale((1 + grow * k) / this.artScale);
+    } else if (this.glow.visible) {
+      this.glow.setVisible(false);
+    }
+    if (this.popHeartAt >= 0) {
+      const k = (now - this.popHeartAt) / MEMORY_HEART.ms;
+      if (k >= 1) {
+        this.popHeartAt = -1;
+        this.popHeartImage.setVisible(false);
+      } else {
+        // Il apparaît vite, monte, puis s'efface.
+        const alpha = Math.min(1, k * 5, (1 - k) * 2.5);
+        this.popHeartImage
+          .setVisible(true)
+          .setAlpha(alpha)
+          .setScale((MEMORY_HEART.scale * Math.min(1, 0.6 + k * 2)) / this.artScale)
+          .setPosition(this.popHeartX, this.popHeartY - MEMORY_HEART.risePx * k);
+      }
     }
     // Petit mouvement en boucle des personnages, chacun à son rythme.
     for (let i = 0; i < this.propImages.length; i++) {

@@ -538,6 +538,8 @@ export const PROP_SIZE = {
   'toy-kitchen': { w: 30, h: 30 },
   'tea-table': { w: 64, h: 30 },
   'tea-cup': { w: 6, h: 5 },
+  'tea-cups-2': { w: 6, h: 7 },
+  'tea-cups-3': { w: 6, h: 9 },
   // Le reflet du miroir de la nounou (D-110) : Céleste toute petite, plus petite qu'elle.
   reflection: { w: 16, h: 26 },
   'reflection-through': { w: 16, h: 26 },
