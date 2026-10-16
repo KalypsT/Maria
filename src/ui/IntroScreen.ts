@@ -503,9 +503,6 @@ export function playIntro(audio: IntroAudio, seen = false): Promise<IntroResult>
           audio.setMusic(music);
         }
       }
-      if (lastCue < 0) {
-        audio.preload('strange');
-      }
       lastCue = index;
     };
 

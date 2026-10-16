@@ -36,9 +36,9 @@ function mariaOf(shot: IntroShot) {
 }
 
 describe('le déroulé de l’intro (D-185)', () => {
-  it('dure environ 40 s (puis le titre s’écrit sur l’écran titre : ≈ 45 s en tout)', () => {
-    expect(schedule.totalMs).toBeGreaterThanOrEqual(36_000);
-    expect(schedule.totalMs).toBeLessThanOrEqual(42_000);
+  it('dure environ 32 s (puis le titre s’écrit sur l’écran titre : ≈ 36 s en tout)', () => {
+    expect(schedule.totalMs).toBeGreaterThanOrEqual(30_000);
+    expect(schedule.totalMs).toBeLessThanOrEqual(33_000);
   });
 
   it('chaque passage tient dans son plan, la fin aussi', () => {
@@ -54,20 +54,16 @@ describe('le déroulé de l’intro (D-185)', () => {
   it('les images et les musiques existent', () => {
     expect(Object.values(INTRO_IMAGES).filter((file) => !ART.has(file))).toEqual([]);
     const cues = INTRO_SHOTS.map((shot) => shot.music).filter((m) => m !== undefined && m !== null);
-    expect(cues).toEqual(['ending', 'strange']);
+    expect(cues).toEqual(['ending']);
     for (const cue of cues) {
       expect(isMusicTrack(cue)).toBe(true);
       expect(MUSIC.has(cue)).toBe(true);
     }
   });
 
-  it('la musique : la boîte dès le toucher, le silence au berceau, le monde étrange ensuite', () => {
+  it('une seule musique, de la boîte à la fin : `ending` dès le toucher, jamais changée', () => {
     expect(INTRO_SHOTS[0]?.music).toBe('ending');
-    const cradle = INTRO_SHOTS.findIndex((shot) => shot.id === 'cradle');
-    const lost = INTRO_SHOTS.findIndex((shot) => shot.id === 'lost');
-    expect(INTRO_SHOTS[cradle]?.music).toBeNull();
-    expect(INTRO_SHOTS[lost]?.music).toBe('strange');
-    expect(cradle).toBeLessThan(lost);
+    expect(INTRO_SHOTS.slice(1).every((shot) => shot.music === undefined)).toBe(true);
   });
 
   it('une coupe franche dans le même décor se raccorde (même cadrage)', () => {
@@ -301,10 +297,10 @@ describe('le plan 8 : le titre s’écrit sur l’écran titre', () => {
     expect(entrance.totalMs).toBe(entrance.panelStart + TITLE_ENTRANCE.panelMs);
   });
 
-  it('l’intro et le titre font environ 45 s', () => {
+  it('l’intro et le titre font environ 36 s', () => {
     const all = schedule.totalMs + entrance.totalMs;
-    expect(all).toBeGreaterThanOrEqual(42_000);
-    expect(all).toBeLessThanOrEqual(48_000);
+    expect(all).toBeGreaterThanOrEqual(34_000);
+    expect(all).toBeLessThanOrEqual(38_000);
   });
 
   it('seulement après l’intro vue en entier (ni passée, ni impossible)', () => {
