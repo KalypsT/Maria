@@ -229,7 +229,9 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
         box.height > 2 * TILE_SIZE &&
         !CHARACTER_KINDS.has(prop.kind) &&
         !WALL_PROP_KINDS.has(prop.kind) &&
-        !WINDOW_PROP_KINDS.has(prop.kind)
+        !WINDOW_PROP_KINDS.has(prop.kind) &&
+        // Le berceau deux fois trop grand, la tête de Maria qui dépasse du bord (D-171, D-189).
+        prop.kind !== 'big-cradle-maria'
       ) {
         problems.push(`${what} : trop grand`);
       }
