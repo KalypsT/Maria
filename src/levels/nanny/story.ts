@@ -421,6 +421,9 @@ const PROPS: StoryData['props'] = [
       kind: o.pale,
       ...o.at,
       when: { none: [litBy(k)] },
+      // Il cède la place au cube en couleur sous les yeux de Céleste (D-189) : sans quoi, rallumé
+      // près d'elle (les deux derniers), il restait dessous, et on le croyait encore là une fois pris.
+      instant: true,
     },
     {
       id: `play-${o.kind}`,
@@ -444,6 +447,8 @@ const PROPS: StoryData['props'] = [
       kind: 'color-bloom',
       ...o.bloom,
       when: { all: [o.flag] },
+      // La couleur revient au moment du geste, même à l'écran (D-189).
+      instant: true,
     },
   ]),
   {
