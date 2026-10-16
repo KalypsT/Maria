@@ -485,11 +485,13 @@ export const STREET_PASSERBY_SCALE = 0.75;
 export const PROP_SIZE = {
   'maria-sit': { w: 8, h: 13 },
   cradle: { w: 30, h: 16 },
-  'cradle-maria': { w: 30, h: 16 },
+  // Plus haut que le berceau seul, pour la tête de Maria qui dépasse du bord (D-189 : elle était
+  // coupée par le haut de l'image) ; le bas reste au même endroit.
+  'cradle-maria': { w: 30, h: 20 },
   'cradle-undone': { w: 30, h: 16 },
   // Le berceau de poupée, deux fois trop grand (la chambre grande, D-171).
   'big-cradle': { w: 60, h: 32 },
-  'big-cradle-maria': { w: 60, h: 32 },
+  'big-cradle-maria': { w: 60, h: 40 },
   'big-cradle-empty': { w: 60, h: 32 },
   // Les affaires de Maria : à la forme de leur image (D-170).
   slipper: { w: 8, h: 6 },

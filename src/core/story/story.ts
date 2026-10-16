@@ -593,6 +593,12 @@ export interface StoryProp {
   /** Tuile où il est posé : centre du bas de la tuile. */
   readonly col: number;
   readonly row: number;
+  /**
+   * Décalage fin (px logiques) depuis le centre du bas de la tuile (D-189) : un petit objet posé sur
+   * un autre, qui n'est pas aligné sur les tuiles (la tasse sur la dînette).
+   */
+  readonly dx?: number;
+  readonly dy?: number;
   /** Tourné vers la gauche. */
   readonly flip?: boolean;
   /**

@@ -122,6 +122,11 @@ export const KITCHEN_MEMORY_STEP = {
 } as const;
 
 const DINETTE = { col: 11, row: 19 };
+/**
+ * La tasse posée sur la dînette (px depuis le centre du bas de sa tuile) : la dînette fait 30 px de
+ * haut, son plan de travail est à 22 px du sol ; la tasse au bout, à droite de la théière.
+ */
+const CUP_ON_DINETTE = { dx: 10, dy: -21 };
 const TEA_TABLE = { col: 27, row: 19 };
 
 /**
@@ -162,11 +167,14 @@ const KITCHEN: PlayableMemoryData = {
     // La dînette rose (sans la lueur du monde étrange) ; la tasse attend dessus jusqu'au thé versé.
     { id: 'toy-kitchen', room: 'memory-kitchen', kind: 'toy-kitchen', ...DINETTE, when: {} },
     {
+      // Sur le plan de travail, au bout, devant le bec de la théière (D-189 : elle flottait au-dessus,
+      // à côté du meuble).
       id: 'cup-dinette',
       room: 'memory-kitchen',
       kind: 'tea-cup',
-      col: DINETTE.col + 1,
-      row: DINETTE.row - 2,
+      ...DINETTE,
+      dx: CUP_ON_DINETTE.dx,
+      dy: CUP_ON_DINETTE.dy,
       when: { none: [KITCHEN_MEMORY_STEP.poured] },
       instant: true,
     },

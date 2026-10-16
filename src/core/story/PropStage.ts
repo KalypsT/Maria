@@ -7,8 +7,8 @@ import { boxesOverlap, checkCondition, type StoryProp } from './story';
 export function propBox(prop: StoryProp): Box {
   const size = PROP_SIZE[prop.kind];
   return {
-    x: (prop.col + 0.5) * TILE_SIZE - size.w / 2,
-    y: (prop.row + 1) * TILE_SIZE - size.h,
+    x: (prop.col + 0.5) * TILE_SIZE - size.w / 2 + (prop.dx ?? 0),
+    y: (prop.row + 1) * TILE_SIZE - size.h + (prop.dy ?? 0),
     width: size.w,
     height: size.h,
   };
