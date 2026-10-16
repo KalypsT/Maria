@@ -1743,3 +1743,19 @@ export const LULLABY_VIEW = {
   /** Une étoile qui s'annonce : battement du vacillement (ms). */
   flickerMs: 110,
 } as const;
+
+/**
+ * Les portraits des bulles (D-189, demande de l'utilisateur) : la tête et un peu des épaules de
+ * papa, maman et Eden, découpées dans leur image (fractions de l'image : coin haut gauche, largeur,
+ * hauteur ; l'image, par son fichier, comme dans `CHARACTER_IMAGES`), à la place des têtes dessinées
+ * par le code. Le bas du portrait s'efface en douceur.
+ * Sans l'image, la tête dessinée reste.
+ */
+export const BUBBLE_PORTRAITS = {
+  dad: { image: 'dad-hall.png', x: 0.38, y: 0, w: 0.5, h: 0.21 },
+  mom: { image: 'mom-sofa.png', x: 0.02, y: 0, w: 0.62, h: 0.31 },
+  eden: { image: 'eden-small.png', x: 0.02, y: 0, w: 0.6, h: 0.47 },
+} as const;
+
+/** La part du bas d'un portrait de bulle qui s'efface (D-189). */
+export const BUBBLE_PORTRAIT_FADE = 0.3;

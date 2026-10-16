@@ -270,6 +270,8 @@ Le dernier niveau est tout entier un moment-pivot : Maria y reste, avec deux all
 
 ## Le rendu (indépendant du contenu)
 
+- **Les portraits** (D-189, demande de l'utilisateur) : les pictogrammes de papa, de maman et d'Eden (« où est Eden ? ») sont la tête découpée dans leur image (`dad-hall`, `mom-sofa`, `eden-small`), le bas qui s'efface ; comme Maria, qui avait déjà la sienne. Sans l'image, la tête dessinée par le code reste.
+
 Tout reste **dessiné par le code**, une seule fois au chargement (aucun coût pendant le jeu). Défauts constatés sur la planche actuelle, et leur correction (maquette : https://claude.ai/artifact/AgbA6JRNEMACrZzPv7Rfim, avec le code du prototype, `prototype-bulles.txt`) :
 
 - **les pictogrammes débordent** du nuage (cabane, grue, carrousel, cubes, crochet, tourne-disque, photo de famille) : chaque pictogramme est dessiné à part, mesuré, puis **posé dans une zone sûre** du nuage ; il ne déborde plus jamais, quel que soit son dessin ;

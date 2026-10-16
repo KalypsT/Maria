@@ -1,4 +1,4 @@
-import { memoryImageKey } from '../../config/art';
+import { BUBBLE_PORTRAIT_FADE, BUBBLE_PORTRAITS, memoryImageKey } from '../../config/art';
 import { PROP_SIZE, TOWER_CUBES } from '../../config/story';
 import type { PropKind, ThoughtIcon } from '../../core/story/story';
 import { fitScale, type BubbleKind, type BubbleSide, type SafeBox } from '../../core/story/bubble';
@@ -1339,6 +1339,68 @@ function drawCubeSlots(ctx: CanvasRenderingContext2D, cx: number, cy: number, ma
   });
 }
 
+/** La plus grande dimension d'un portrait de bulle (px logiques du pictogramme, D-189). */
+const PORTRAIT_SIZE = 19;
+/** Les portraits découpés et effacés en bas (D-189) : une fois par image, gardés. */
+const portraitCache = new Map<string, HTMLCanvasElement>();
+
+/**
+ * Un portrait de bulle (D-189) : la tête découpée dans l'image d'un personnage, le bas qui s'efface,
+ * centré en (cx, cy), sa plus grande dimension `size`. Faux si l'image manque (on dessine alors la
+ * tête du code).
+ */
+function drawPortrait(
+  ctx: CanvasRenderingContext2D,
+  images: ReadonlyMap<string, CanvasImageSource>,
+  crop: {
+    readonly image: string;
+    readonly x: number;
+    readonly y: number;
+    readonly w: number;
+    readonly h: number;
+  },
+  cx: number,
+  cy: number,
+  size: number,
+): boolean {
+  const image = images.get(crop.image);
+  if (!image) {
+    return false;
+  }
+  let portrait = portraitCache.get(crop.image);
+  const iw = (image as { width: number }).width;
+  const ih = (image as { height: number }).height;
+  if (!portrait || portrait.dataset['source'] !== `${String(iw)}x${String(ih)}`) {
+    portrait = document.createElement('canvas');
+    portrait.dataset['source'] = `${String(iw)}x${String(ih)}`;
+    portrait.width = Math.max(1, Math.round(crop.w * iw));
+    portrait.height = Math.max(1, Math.round(crop.h * ih));
+    const p = portrait.getContext('2d');
+    if (!p) {
+      return false;
+    }
+    p.drawImage(image, -crop.x * iw, -crop.y * ih);
+    // Le bas s'efface : pas de coupure nette dans la bulle.
+    const fade = p.createLinearGradient(
+      0,
+      portrait.height * (1 - BUBBLE_PORTRAIT_FADE),
+      0,
+      portrait.height,
+    );
+    fade.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    fade.addColorStop(1, 'rgba(0, 0, 0, 1)');
+    p.globalCompositeOperation = 'destination-out';
+    p.fillStyle = fade;
+    p.fillRect(0, 0, portrait.width, portrait.height);
+    portraitCache.set(crop.image, portrait);
+  }
+  const scale = size / Math.max(portrait.width, portrait.height);
+  const w = portrait.width * scale;
+  const h = portrait.height * scale;
+  ctx.drawImage(portrait, cx - w / 2, cy - h / 2, w, h);
+  return true;
+}
+
 function drawIcon(
   ctx: CanvasRenderingContext2D,
   icon: ThoughtIcon,
@@ -1545,20 +1607,23 @@ function drawIcon(
       ctx.stroke();
       break;
     case 'eden-where':
-      // Où est Eden ? (D-171) : son visage, blond à la coupe au bol (D-122), et un « ? ».
-      faceIcon(ctx, cx - 2, cy + 1);
-      ctx.fillStyle = '#e8c96a';
-      ctx.beginPath();
-      ctx.arc(cx - 2, cy + 0.6, 6.8, Math.PI, Math.PI * 2);
-      ctx.lineTo(cx + 4.8, cy + 0.2);
-      ctx.lineTo(cx - 8.8, cy + 0.2);
-      ctx.closePath();
-      ctx.fill();
-      ctx.fillStyle = INK;
-      for (const s of [-1, 1]) {
+      // Où est Eden ? (D-171) : son visage (son portrait, tiré de son image, D-189 ; sans elle,
+      // dessiné : blond à la coupe au bol, D-122), et un « ? ».
+      if (!drawPortrait(ctx, images, BUBBLE_PORTRAITS.eden, cx - 3, cy + 0.5, PORTRAIT_SIZE - 2)) {
+        faceIcon(ctx, cx - 2, cy + 1);
+        ctx.fillStyle = '#e8c96a';
         ctx.beginPath();
-        ctx.arc(cx - 2 + s * 2.4, cy + 2.2, 0.8, 0, Math.PI * 2);
+        ctx.arc(cx - 2, cy + 0.6, 6.8, Math.PI, Math.PI * 2);
+        ctx.lineTo(cx + 4.8, cy + 0.2);
+        ctx.lineTo(cx - 8.8, cy + 0.2);
+        ctx.closePath();
         ctx.fill();
+        ctx.fillStyle = INK;
+        for (const s of [-1, 1]) {
+          ctx.beginPath();
+          ctx.arc(cx - 2 + s * 2.4, cy + 2.2, 0.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
       ctx.strokeStyle = PINK;
       ctx.lineWidth = 1.5;
@@ -1623,10 +1688,15 @@ function drawIcon(
       break;
     }
     case 'mom':
-      momHead(ctx, cx, cy - 2, 4.8);
+      // Le portrait de maman, tiré de son image (D-189) ; sans elle, la tête dessinée.
+      if (!drawPortrait(ctx, images, BUBBLE_PORTRAITS.mom, cx, cy, PORTRAIT_SIZE)) {
+        momHead(ctx, cx, cy - 2, 4.8);
+      }
       break;
     case 'dad':
-      dadHead(ctx, cx, cy - 2, 4.8);
+      if (!drawPortrait(ctx, images, BUBBLE_PORTRAITS.dad, cx, cy, PORTRAIT_SIZE)) {
+        dadHead(ctx, cx, cy - 2, 4.8);
+      }
       break;
     case 'crane':
       // La grue du chantier (D-63) : mât, flèche, crochet ; un petit point jaune au bout (le parapluie).
