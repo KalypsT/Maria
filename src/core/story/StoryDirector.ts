@@ -56,9 +56,10 @@ export interface StoryHost {
   console?(): void;
   /**
    * Regard (D-122) : la vue va vers cette tuile ; null : elle revient sur Céleste. `zoom` (D-171) :
-   * elle se rapproche aussi (1 : sans rapprochement).
+   * elle se rapproche aussi (1 : sans rapprochement). `glideMs` (D-191) : déjà rapprochée, elle y
+   * glisse lentement (0 : comme d'habitude).
    */
-  look?(col: number | null, row: number | null, zoom: number): void;
+  look?(col: number | null, row: number | null, zoom: number, glideMs: number): void;
   /** Une vibration (D-171). */
   haptic?(moment: HapticMoment): void;
   /** Céleste est sortie de la salle (D-144) : invisible jusqu'au prochain changement de salle. */
@@ -460,7 +461,7 @@ export class StoryDirector {
         this.host.console?.();
         break;
       case 'look':
-        this.host.look?.(step.col ?? null, step.row ?? null, step.zoom ?? 1);
+        this.host.look?.(step.col ?? null, step.row ?? null, step.zoom ?? 1, step.glideMs ?? 0);
         break;
       case 'haptic':
         this.host.haptic?.(step.moment);

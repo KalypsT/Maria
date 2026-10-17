@@ -14,6 +14,8 @@ import type { Box } from '../physics/gridCollision';
 /** Condition sur les étapes vécues : toutes celles de `all`, aucune de `none`. */
 export interface FlagCondition {
   readonly all?: readonly string[];
+  /** Au moins une de ces étapes (D-191). */
+  readonly any?: readonly string[];
   readonly none?: readonly string[];
 }
 
@@ -258,6 +260,11 @@ export type StoryStep =
       readonly row?: number;
       /** La vue se rapproche aussi (D-171), puis revient avec elle. */
       readonly zoom?: number;
+      /**
+       * Déjà rapprochée, la vue glisse lentement jusqu'à cette tuile en `glideMs` (D-191 : le regard
+       * le long de l'étagère), au lieu d'y aller d'un coup.
+       */
+      readonly glideMs?: number;
     }
   /** Une vibration (D-171, non bloquant), si le joueur les a gardées. */
   | { readonly do: 'haptic'; readonly moment: HapticMoment }
@@ -559,6 +566,18 @@ export const PROP_KINDS = [
   'postcard',
   'school-drawing',
   'family-drawing',
+  /**
+   * Les jouets d'avant (D-191), dans la chambre : une boîte en carton fermée sur l'étagère du
+   * surmeuble, pendant tout le jeu ; à la fin, ouverte, et autour d'elle les jouets du monde étrange,
+   * ordinaires (à leur taille, un peu passés, sans lueur) : ils étaient là, rangés.
+   */
+  'toy-box',
+  'toy-box-open',
+  'old-roger',
+  'old-toy-town',
+  'old-pink-kitchen',
+  'old-music-book',
+  'old-white-cloth',
   ...PASSERBY_KINDS,
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
@@ -739,6 +758,10 @@ export function checkCondition(flags: ReadonlySet<string>, when: FlagCondition):
     if (flags.has(flag)) {
       return false;
     }
+  }
+  const any = when.any;
+  if (any && !any.some((flag) => flags.has(flag))) {
+    return false;
   }
   return true;
 }

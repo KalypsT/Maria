@@ -299,6 +299,78 @@ function drawGate(ctx: CanvasRenderingContext2D, w: number, h: number, open: boo
   ctx.fillRect(w - 5, 4, 5, 2);
 }
 
+/**
+ * La boîte des jouets d'avant (D-191), en carton, sur l'étagère : fermée (ses rabats rabattus, un
+ * ruban adhésif), ou ouverte (ses rabats dressés de part et d'autre, le dedans dans l'ombre). Le
+ * corps reste à la même place et à la même taille.
+ */
+function drawToyBox(ctx: CanvasRenderingContext2D, w: number, h: number, open: boolean): void {
+  const body = PROP_SIZE['toy-box'];
+  const x = (w - body.w) / 2;
+  const y = h - body.h;
+  const card = '#c89a64';
+  const cardDark = '#a87b4a';
+  if (open) {
+    // Les rabats, dressés et un peu penchés vers le dehors.
+    ctx.fillStyle = cardDark;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - 3, y - 3);
+    ctx.lineTo(x + 3, y - 3);
+    ctx.lineTo(x + 4, y);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x + body.w, y);
+    ctx.lineTo(x + body.w + 3, y - 3);
+    ctx.lineTo(x + body.w - 3, y - 3);
+    ctx.lineTo(x + body.w - 4, y);
+    ctx.fill();
+  }
+  ctx.fillStyle = card;
+  ctx.fillRect(x, y, body.w, body.h);
+  ctx.fillStyle = cardDark;
+  ctx.fillRect(x, y + body.h - 1, body.w, 1);
+  if (open) {
+    // Le dedans, dans l'ombre, vu par l'ouverture.
+    ctx.fillStyle = '#5e4630';
+    ctx.fillRect(x + 1, y, body.w - 2, 1.5);
+  } else {
+    // Le couvercle rabattu et le ruban adhésif au milieu.
+    ctx.fillStyle = cardDark;
+    ctx.fillRect(x, y, body.w, 1);
+    ctx.fillStyle = 'rgba(240, 226, 196, 0.85)';
+    ctx.fillRect(x + body.w / 2 - 1, y, 2, 3);
+  }
+}
+
+/**
+ * Un jouet d'avant (D-191) : son image fournie, à sa taille, sous un léger voile pâle (un peu passé,
+ * rangé depuis longtemps), sans la lueur du monde étrange ; sinon son dessin par le code.
+ */
+function drawOldToy(
+  ctx: CanvasRenderingContext2D,
+  key: string,
+  w: number,
+  h: number,
+  images: ReadonlyMap<string, CanvasImageSource>,
+  fallback: () => void,
+): void {
+  const image = images.get(key);
+  if (image) {
+    drawContained(ctx, image, w, h);
+  } else {
+    fallback();
+  }
+  ctx.save();
+  ctx.globalCompositeOperation = 'source-atop';
+  ctx.fillStyle = OLD_TOY_VEIL;
+  ctx.fillRect(0, 0, w, h);
+  ctx.restore();
+}
+
+/** Le voile des jouets d'avant (D-191). PROVISOIRE. */
+const OLD_TOY_VEIL = 'rgba(232, 222, 206, 0.22)';
+
 /** Couverture de Maria, pliée : rose à pois clairs, bord festonné. */
 function drawBlanket(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   ctx.fillStyle = '#f19bb5';
@@ -1022,6 +1094,52 @@ export function drawProp(
       }
       break;
     }
+    case 'toy-box':
+      drawToyBox(ctx, w, h, false);
+      break;
+    case 'toy-box-open':
+      drawToyBox(ctx, w, h, true);
+      break;
+    case 'old-roger':
+      drawOldToy(ctx, 'roger', w, h, images, () => {
+        ctx.save();
+        ctx.translate(w / 2, h * 0.56);
+        roger(ctx, Math.min(w, h) * 1.05);
+        ctx.restore();
+      });
+      break;
+    case 'old-toy-town':
+      drawOldToy(ctx, 'toy-town', w, h, images, () => {
+        ctx.save();
+        ctx.translate(w / 2, h / 2);
+        toyTown(ctx, Math.min(w, h), 'still');
+        ctx.restore();
+      });
+      break;
+    case 'old-pink-kitchen':
+      drawOldToy(ctx, memoryImageKey('pink-kitchen'), w, h, images, () => {
+        ctx.save();
+        ctx.translate(w / 2, h / 2);
+        pinkKitchen(ctx, Math.min(w, h));
+        ctx.restore();
+      });
+      break;
+    case 'old-music-book':
+      drawOldToy(ctx, memoryImageKey('music-book'), w, h, images, () => {
+        ctx.save();
+        ctx.translate(w / 2, h / 2);
+        musicBook(ctx, Math.min(w, h));
+        ctx.restore();
+      });
+      break;
+    case 'old-white-cloth':
+      drawOldToy(ctx, memoryImageKey('white-cloth'), w, h, images, () => {
+        ctx.save();
+        ctx.translate(w / 2, h / 2);
+        whiteCloth(ctx, Math.min(w, h));
+        ctx.restore();
+      });
+      break;
     case 'white-cloth':
       // Le torchon blanc (D-116), dans le petit lit de la sieste : on le regarde, on ne le prend pas.
       drawTreasureProp(ctx, memoryImageKey('white-cloth'), w, h, images, SOFT_GLOW, () => {

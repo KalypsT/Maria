@@ -1740,6 +1740,11 @@ export function installDebugOverlay(scene: GameScene): void {
         FINALE_REPLAY.morning,
       ],
       [
+        'Rejouer la fin : ranger Maria',
+        [...together, F.FinaleMorning, F.FinaleAwake, F.FinalePlayed],
+        FINALE_REPLAY.shelf,
+      ],
+      [
         'Rejouer la fin : le départ',
         [...together, F.FinaleMorning, F.FinaleAwake, F.FinalePlayed, F.FinaleShelved],
         FINALE_REPLAY.leave,

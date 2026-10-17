@@ -291,6 +291,11 @@ export const StoryFlag = {
   FinaleShelved: 'finale.shelved',
   /** Céleste est sortie par la porte : le dernier plan, sur Maria (D-144). */
   FinaleGone: 'finale.gone',
+  /**
+   * Les jouets d'avant (D-191) : dans le noir, au moment de ranger Maria, la boîte de l'étagère est
+   * ouverte, les jouets du monde étrange posés autour. Ils y restent.
+   */
+  FinaleToys: 'finale.toys',
   /** Les souvenirs qu'on emporte (D-169) : pris, ils quittent le décor. */
   WateringCanTaken: 'memory.watering-can',
   TicketTaken: 'memory.ticket',
@@ -414,6 +419,14 @@ export const STORY_TIMING = {
   letGoBlackMs: 900,
   shelfLookMs: 4600,
   /**
+   * Les jouets d'avant (D-191) : la vue se rapproche de la cuisine rose, au pied du bureau, et s'y
+   * pose ; puis elle glisse jusqu'au bout de l'étagère, et le long de l'étagère jusqu'à la boîte,
+   * lentement. PROVISOIRE.
+   */
+  toysFirstLookMs: 2200,
+  toysGlideUpMs: 2400,
+  toysGlideAlongMs: 3600,
+  /**
    * Partir (D-190) : la porte s'ouvre (la lumière du couloir), Céleste se retourne vers Maria ce
    * temps-là ; elle sort, le noir tenu ; la porte se ferme (la lumière s'amincit, s'éteint).
    */
@@ -458,7 +471,11 @@ export const STORY_WALK_MAX_MS = 3000;
  * La vue qui se rapproche (étape `look` avec `zoom`, D-171) : le rapprochement au plus près, et le
  * temps pour y arriver ou en revenir (ms, à peu près). PROVISOIRE.
  */
-export const STORY_ZOOM = { reunion: 1.5, evening: 1.8, easeMs: 900 } as const;
+/**
+ * Les vues rapprochées de l'histoire. `toys` (D-191) : les jouets d'avant, petits, regardés de plus
+ * près que Maria au premier soir. PROVISOIRE.
+ */
+export const STORY_ZOOM = { reunion: 1.5, evening: 1.8, toys: 2.4, easeMs: 900 } as const;
 
 /**
  * L'écran de fin (D-145), sans texte : Maria seule sur son étagère. Il apparaît lentement ; après
@@ -691,6 +708,15 @@ export const PROP_SIZE = {
   postcard: { w: 11, h: 8 },
   'school-drawing': { w: 22, h: 15 },
   'family-drawing': { w: 52, h: 46 },
+  // Les jouets d'avant (D-191) : à côté de Maria (8 × 13, déjà un peu agrandie), à leur taille ;
+  // la boîte ouverte, ses rabats de part et d'autre. PROVISOIRE.
+  'toy-box': { w: 14, h: 9 },
+  'toy-box-open': { w: 20, h: 12 },
+  'old-roger': { w: 11, h: 12 },
+  'old-toy-town': { w: 17, h: 10 },
+  'old-pink-kitchen': { w: 20, h: 16 },
+  'old-music-book': { w: 10, h: 7 },
+  'old-white-cloth': { w: 9, h: 6 },
   'height-chart': { w: 7, h: 40 },
   'height-chart-grown': { w: 7, h: 40 },
   'height-chart-older': { w: 7, h: 40 },

@@ -42,6 +42,25 @@ export function storyZoomCenter(
   out.y = baseY + (y - baseY) * blend;
 }
 
+/**
+ * Le regard qui glisse (D-191) : la vue rapprochée va d'un point à un autre en `ms`, en douceur
+ * (lente au départ et à l'arrivée), `elapsed` ms après son départ. Pur ; écrit dans `out`.
+ */
+export function storyGlide(
+  out: { x: number; y: number },
+  fromX: number,
+  fromY: number,
+  toX: number,
+  toY: number,
+  elapsed: number,
+  ms: number,
+): void {
+  const k = ms <= 0 ? 1 : Math.min(1, Math.max(0, elapsed / ms));
+  const e = k * k * (3 - 2 * k);
+  out.x = fromX + (toX - fromX) * e;
+  out.y = fromY + (toY - fromY) * e;
+}
+
 /** Compteur « jamais » : grand entier, pour ne pas dépasser en incrémentant. */
 const NEVER = 1 << 30;
 
