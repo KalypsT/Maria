@@ -208,7 +208,7 @@ import { ArcadeEvent, ArcadePhase, ArcadeRun } from '../core/arcade/run';
 import { arcadeChoosable, arcadeRecord, arcadeStartTiles } from '../core/save/arcade';
 import { isGrounded, touchesHazard } from '../core/physics/gridCollision';
 import { isRecordSlot } from '../config/records';
-import { MARIA_THINGS, isMemory } from '../config/memories';
+import { isMemory } from '../config/memories';
 import { drawnCanvas, recordDrawing, treasureDrawing } from '../ui/treasureDrawing';
 import { drawSticker } from './art/stickerArt';
 import { canPlayRecords, recordShelf, type RecordChoice } from '../core/audio/records';
@@ -1980,12 +1980,9 @@ export class GameScene extends Phaser.Scene {
       .then(() => {
         // Toutes les coquilles trouvées : le petit escargot de la fin (D-148).
         const shells = this.shellCount();
-        // Les affaires de Maria retrouvées, autour d'elle (D-190).
-        const found = this.session.data.progression.memories;
         return showEndScreen(
           import.meta.env.BASE_URL,
           shells.total > 0 && shells.found === shells.total,
-          MARIA_THINGS.filter((id) => found.includes(id)),
         );
       })
       .then(() => {

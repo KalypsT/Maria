@@ -125,7 +125,7 @@ function drawSparkles(
     const angle = (i / sparkles.count) * TAU + hash(i + 7) * 0.6;
     const r = sparkles.radius * (0.55 + hash(i + 17) * 0.45);
     const x = sparkles.x + Math.cos(angle) * r;
-    const y = sparkles.y + Math.sin(angle) * r * 0.75;
+    const y = sparkles.y + Math.sin(angle) * r * (sparkles.flat ?? 0.75);
     const twinkle = 0.5 + 0.5 * Math.sin(t / (380 + hash(i + 27) * 420) + i);
     const size = (7 + hash(i + 37) * 8) * (0.6 + 0.4 * twinkle);
     c.globalAlpha = strength * (0.45 + 0.55 * twinkle);

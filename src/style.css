@@ -802,6 +802,10 @@ body {
 }
 
 /* Les affaires de Maria retrouvées (D-190) : l'étagère s'élargit, elles sont posées autour d'elle. */
+.end-scene-wide {
+  width: min(80vh, 520px);
+}
+
 .end-shelf-wide {
   left: 2%;
   right: 2%;
@@ -913,6 +917,15 @@ body {
   to {
     width: 8%;
   }
+}
+
+/* L'étagère élargie des jouets d'avant (D-191) : l'escargot garde sa taille et son chemin. */
+.end-scene-wide .end-snail {
+  width: 8%;
+}
+
+.end-scene-wide .end-trail {
+  right: 22%;
 }
 
 .end-sparkle {

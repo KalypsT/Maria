@@ -141,12 +141,14 @@ export interface FilmShot {
   readonly sfx?: readonly (readonly [number, SfxSlot])[];
   /**
    * Le monde étrange, un instant (D-190, le dernier signe) : des étoiles turquoise qui scintillent
-   * autour d'un point, et un halo léger ; leur intensité au fil du plan.
+   * autour d'un point, et un halo léger ; leur intensité au fil du plan. `flat` : la hauteur de
+   * l'ovale où elles s'allument, par rapport à sa largeur (absente : 0,75).
    */
   readonly sparkles?: {
     readonly x: number;
     readonly y: number;
     readonly radius: number;
+    readonly flat?: number;
     readonly count: number;
     readonly strength: IntroKeys;
   };
@@ -251,6 +253,11 @@ const sunAcross = (ms: number): IntroKeys => [
   [0, 1180],
   [ms, 820],
 ];
+/**
+ * L'étagère de Maria et des jouets d'avant (D-191), dans les décors : son milieu, sa demi-largeur,
+ * la hauteur de l'ovale qui l'entoure (par rapport à sa largeur).
+ */
+const SHELF = { x: 1345, y: 560, radius: 200, flat: 0.42 } as const;
 /** La boîte à musique, sur la traverse du lit cabane, dans les décors. */
 const MUSIC_BOX = { x: 312, y: 612 } as const;
 /**
@@ -401,7 +408,9 @@ const WEEKS: readonly FilmShot[] = [
     sun: sunAcross(1800),
   },
   {
-    // Maria, la même : la vue s'approche lentement, le soleil passe sur elle.
+    // Maria, la même : la vue s'approche lentement, le soleil passe sur elle. Autour d'elle, sur
+    // l'étagère floue du décor, les jouets d'avant (D-191) : la vue est sur elle, eux restent
+    // flous, et le soleil passe sur eux aussi.
     id: 'maria',
     scene: 'maria',
     durationMs: 8000,
@@ -414,7 +423,7 @@ const WEEKS: readonly FilmShot[] = [
       color: 'warm',
       x: 960,
       y: 560,
-      radius: 620,
+      radius: 760,
       strength: [
         [0, 0.05],
         [3600, 0.42],
@@ -425,8 +434,9 @@ const WEEKS: readonly FilmShot[] = [
   {
     // Le dernier signe (§12, choix B) : la dernière nuit, la chambre vide. La musique se tait. La
     // boîte à musique, sur son étagère au-dessus du lit, s'éclaire en turquoise et joue seule trois
-    // notes de la berceuse ; des étoiles turquoise s'allument au mur autour de Maria. Elle ne bouge
-    // pas. Puis tout redevient normal. Le jeu s'est ouvert sur cette boîte (l'intro, plan 1).
+    // notes de la berceuse ; des étoiles turquoise s'allument autour de l'étagère, de Maria et des
+    // jouets d'avant (D-191). Elle ne bouge pas. Puis tout redevient normal. Le jeu s'est ouvert
+    // sur cette boîte (l'intro, plan 1).
     id: 'last-sign',
     scene: 'last-sign',
     durationMs: 9400,
@@ -452,11 +462,13 @@ const WEEKS: readonly FilmShot[] = [
       [3400, 'lullaby'],
       [4400, 'lullaby'],
     ],
+    // Autour de toute l'étagère (D-191) : Maria et les jouets d'avant, ensemble.
     sparkles: {
-      x: 1320,
-      y: 555,
-      radius: 150,
-      count: 9,
+      x: SHELF.x,
+      y: SHELF.y,
+      radius: SHELF.radius,
+      flat: SHELF.flat,
+      count: 14,
       strength: [
         [3200, 0],
         [4000, 1],

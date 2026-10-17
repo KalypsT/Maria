@@ -1,5 +1,3 @@
-import { MEMORY_IMAGES } from '../config/art';
-import type { MARIA_THINGS } from '../config/memories';
 import { END_SCREEN } from '../config/story';
 import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 
@@ -13,20 +11,16 @@ import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
  * Toutes les coquilles trouvées (`snail`, D-148) : un petit escargot vivant traverse lentement
  * l'étagère vers Maria et laisse une trace argentée, sans rien expliquer.
  *
- * Les affaires de Maria retrouvées (`things`, D-190) : posées autour d'elle, sur l'étagère élargie.
+ * Les jouets d'avant (D-191) : posés autour d'elle, comme dans sa chambre, sur l'étagère élargie.
  */
-export function showEndScreen(
-  baseUrl: string,
-  snail = false,
-  things: readonly (typeof MARIA_THINGS)[number][] = [],
-): Promise<void> {
+export function showEndScreen(baseUrl: string, snail = false): Promise<void> {
   return new Promise((resolve) => {
     const root = document.createElement('div');
     root.id = 'end-screen';
     root.setAttribute(UI_OVERLAY_ATTRIBUTE, '');
     root.style.setProperty('--end-fade', `${String(END_SCREEN.fadeInMs)}ms`);
     const scene = document.createElement('div');
-    scene.className = 'end-scene';
+    scene.className = 'end-scene end-scene-wide';
     const light = document.createElement('div');
     light.className = 'end-light';
     const maria = document.createElement('img');
@@ -35,27 +29,19 @@ export function showEndScreen(
     maria.alt = '';
     maria.draggable = false;
     const shelf = document.createElement('div');
-    shelf.className = 'end-shelf';
+    shelf.className = 'end-shelf end-shelf-wide';
     scene.append(light);
-    if (things.length > 0) {
-      shelf.classList.add('end-shelf-wide');
-      for (const id of things) {
-        const file = MEMORY_IMAGES[id];
-        if (!file) {
-          continue;
-        }
-        const spot = END_SCREEN.things[id];
-        const thing = document.createElement('img');
-        thing.className = 'end-thing';
-        thing.src = `${baseUrl}art/${file}`;
-        thing.alt = '';
-        thing.draggable = false;
-        thing.style.left = `${String(spot.left)}%`;
-        thing.style.height = `${String(spot.height)}%`;
-        scene.appendChild(thing);
-      }
+    for (const toy of END_SCREEN.toys) {
+      const thing = document.createElement('img');
+      thing.className = 'end-thing';
+      thing.src = `${baseUrl}${toy.image}`;
+      thing.alt = '';
+      thing.draggable = false;
+      thing.style.left = `${String(toy.left)}%`;
+      thing.style.height = `${String(toy.height)}%`;
+      scene.appendChild(thing);
     }
-    // Maria devant ses affaires.
+    // Maria devant eux.
     scene.append(maria, shelf);
     if (snail) {
       scene.style.setProperty('--snail-ms', `${String(END_SCREEN.snailMs)}ms`);

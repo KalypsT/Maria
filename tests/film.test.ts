@@ -211,7 +211,7 @@ describe('les films de la fin (D-190)', () => {
     ).toBe(true);
   });
 
-  it('le dernier signe : le silence, la boîte à musique et ses trois notes, les étoiles autour de Maria', () => {
+  it('le dernier signe : le silence, la boîte à musique et ses trois notes, les étoiles autour de l’étagère', () => {
     const shots = FILMS.weeks.shots;
     const last = shots.at(-1) as FilmShot;
     expect(last.id).toBe('last-sign');
@@ -231,6 +231,12 @@ describe('les films de la fin (D-190)', () => {
     expect(keyValue(glow?.strength, first, 0)).toBeGreaterThan(0.5);
     const stars = last.sparkles;
     expect(stars?.x).toBeGreaterThan(glow?.x ?? 0);
+    // Autour de toute l'étagère (D-191) : Maria au milieu, les jouets d'avant de part et d'autre
+    // (l'étagère fait environ 300 px du plan) ; un ovale plus large que haut.
+    const maria = 1320;
+    expect(Math.abs((stars?.x ?? 0) - maria)).toBeLessThan((stars?.radius ?? 0) * 0.5);
+    expect((stars?.radius ?? 0) * 2).toBeGreaterThanOrEqual(360);
+    expect(stars?.flat ?? 0.75).toBeLessThan(0.75);
     expect(keyValue(stars?.strength, first, 0)).toBe(0);
     // Puis tout redevient normal, avant la fin du plan.
     expect(keyValue(glow?.strength, last.durationMs, 1)).toBe(0);

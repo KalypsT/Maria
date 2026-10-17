@@ -508,18 +508,18 @@ export const END_SCREEN = {
   snailDelayMs: 3400,
   shellImage: 'art/shell.png',
   /**
-   * Les affaires de Maria retrouvées (D-190), posées autour d'elle sur l'étagère (élargie) : le
-   * milieu de chacune (% de la largeur de la scène) et sa hauteur (% de sa hauteur), Maria au
-   * milieu (devant elles). Seulement celles que le joueur a trouvées. PROVISOIRE.
+   * Les jouets d'avant (D-191, à la place des affaires de Maria de D-190), autour d'elle sur
+   * l'étagère, comme dans sa chambre : leur image (par rapport à la racine du site), le milieu de
+   * chacun (% de la largeur de la scène, élargie avec l'étagère) et sa hauteur (% de sa hauteur),
+   * Maria au milieu, devant eux. Tous : on les a tous trouvés pour arriver à la fin. PROVISOIRE.
    */
-  things: {
-    slipper: { left: 11, height: 8 },
-    bottle: { left: 21, height: 11 },
-    bonnet: { left: 29, height: 9 },
-    rattle: { left: 72, height: 11 },
-    spoon: { left: 81, height: 9 },
-    headband: { left: 90, height: 7 },
-  },
+  toys: [
+    { id: 'shape-box', image: 'art/toy-town.png', left: 12, height: 15 },
+    { id: 'roger', image: 'art/roger.png', left: 30, height: 28 },
+    { id: 'music-book', image: 'art/memory-music-book.webp', left: 66.5, height: 12 },
+    { id: 'white-cloth', image: 'art/memory-white-cloth.webp', left: 77, height: 9 },
+    { id: 'pink-kitchen', image: 'art/memory-pink-kitchen.webp', left: 88.5, height: 20 },
+  ],
 } as const;
 
 /** Période du petit mouvement en boucle des personnages (ms), D-37. */
