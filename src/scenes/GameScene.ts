@@ -746,6 +746,9 @@ export class GameScene extends Phaser.Scene {
         this.poser.lying = pose === 'lie';
         this.poser.holding = holdsMaria(pose);
       },
+      face: (facing) => {
+        this.player.facing = facing;
+      },
       think: (icon, ms, by) => {
         this.storyView.think(icon, ms, by);
         this.audio.sfx.play('thought');
@@ -3490,7 +3493,14 @@ export class GameScene extends Phaser.Scene {
     // Le train arrêté (D-90) : ni tunnel ni valise qui tombe.
     this.combat.still = this.level.meta.vehicle === 'train' && !story.moving(this.level.id);
     const memory = this.memoryPlay;
-    if (this.props.update(memory ? memory.flags : story.flags, view, veil)) {
+    if (
+      this.props.update(
+        memory ? memory.flags : story.flags,
+        view,
+        veil,
+        !memory && this.poser.holding,
+      )
+    ) {
       this.storyView.refresh();
     }
     if (veil >= 1 && (story.timeOfDay() !== this.drawnTime || this.isDim() !== this.drawnDim)) {

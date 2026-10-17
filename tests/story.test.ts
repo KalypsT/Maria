@@ -392,6 +392,26 @@ describe('objets de mise en scène (pilier 5)', () => {
     expect(stage.shown).toEqual([false]);
   });
 
+  it('Maria dans les bras de Céleste : aucune autre Maria posée, changée dans le noir (D-190)', () => {
+    const stage = new PropStage();
+    const props = [
+      { id: 'm', room: 'r', kind: 'maria-sit' as const, col: 3, row: 3, when: {} },
+      { id: 'c', room: 'r', kind: 'cradle' as const, col: 6, row: 3, when: {} },
+    ];
+    const flags = new Set<string>();
+    stage.load(props, 'r', flags);
+    expect(stage.shown).toEqual([true, true]);
+    // Prise sous les yeux du joueur : rien ne change.
+    expect(stage.update(flags, view, 0, true)).toBe(false);
+    // Dans le noir : Maria posée disparaît, le reste ne bouge pas.
+    expect(stage.update(flags, view, 1, true)).toBe(true);
+    expect(stage.shown).toEqual([false, true]);
+    expect(stage.update(flags, view, 1, false)).toBe(true);
+    expect(stage.shown).toEqual([true, true]);
+    stage.load(props, 'r', flags, true);
+    expect(stage.shown).toEqual([false, true]);
+  });
+
   it('un objet ramassé disparaît aussitôt ; jamais Maria', () => {
     const stage = new PropStage();
     const props = [

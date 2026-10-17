@@ -200,6 +200,11 @@ export type StoryStep =
       readonly returnPoint?: boolean;
     }
   | { readonly do: 'pose'; readonly pose: ScriptPose }
+  /**
+   * Céleste se tourne vers `facing` (D-190, non bloquant), sous les yeux du joueur : elle se tourne
+   * seulement, elle ne se déplace pas.
+   */
+  | { readonly do: 'face'; readonly facing: 1 | -1 }
   /** Scintillements étranges dans une zone de la salle (non bloquant, D-35). */
   | { readonly do: 'sparkle'; readonly area: TileArea; readonly ms: number }
   /** Souvenir trouvé (D-38), sauvegardé aussitôt ; sans effet s'il l'est déjà. */

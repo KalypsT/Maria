@@ -29,6 +29,8 @@ export interface StoryHost {
   /** Céleste passe dans la salle `room` (dans le noir) ; le script continue. */
   room(room: string, col: number, row: number, facing: 1 | -1, returnPoint: boolean): void;
   pose(pose: ScriptPose): void;
+  /** Céleste se tourne, sans se déplacer (D-190). */
+  face?(facing: 1 | -1): void;
   /** Bulle au-dessus de Céleste, ou du personnage `by` (objet de mise en scène). */
   think(icon: ThoughtIcon, ms: number, by?: string): void;
   /** Scintillements étranges dans une zone (tuiles) de la salle courante. */
@@ -396,6 +398,9 @@ export class StoryDirector {
         break;
       case 'pose':
         this.host.pose(step.pose);
+        break;
+      case 'face':
+        this.host.face?.(step.facing);
         break;
       case 'sparkle':
         this.host.sparkle(step.area, step.ms);

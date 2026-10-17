@@ -406,6 +406,13 @@ export const STORY_TIMING = {
    */
   rugDriftMs: 3200,
   rugLookMs: 4400,
+  /**
+   * Lâcher Maria (D-190) : le noir, plus lent qu'un fondu court, quand on relâche Agir ; le noir
+   * tenu ; puis, Maria posée, le regard rapproché sur elles deux.
+   */
+  letGoFadeMs: 1100,
+  letGoBlackMs: 900,
+  shelfLookMs: 4600,
   /** Le dernier plan : la vue reste sur Maria, puis un très léger signe du monde étrange. */
   lastShotMs: 2600,
   glimmerMs: 2800,

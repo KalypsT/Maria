@@ -98,6 +98,36 @@ const MARIA_RUG = { col: 19, row: 19 };
 export const MARIA_SHELF = { col: 33, row: 11 };
 const SHELF_STAND = { col: 35, row: 11 };
 const SHELF_GLOW: TileArea = { col: 31, row: 9, w: 5, h: 3 };
+/** Le dernier câlin (D-190) : le cœur à tenir, au-dessus de Maria dans les bras de Céleste. */
+const SHELF_HEART = { col: 34, row: 8 };
+/** Maria posée (D-190) : la vue se rapproche d'elles deux. */
+const SHELF_LOOK = { col: 34, row: 10 };
+/**
+ * Ranger Maria (§11, D-190). Dans le noir, Céleste est devant l'étagère du surmeuble, là où était la
+ * couverture le premier soir, Maria dans les bras. Le dernier câlin : Agir maintenu, le cœur se
+ * remplit et reste plein tant qu'on tient ; **relâcher, c'est la poser** : le noir, Maria assise
+ * sur l'étagère, les bras de Céleste vides. Elle la regarde, longtemps ; puis elle se tourne vers
+ * la porte. Elle ne la prend et ne la pose que dans le noir (pilier 5).
+ */
+const PUT_AWAY: readonly StoryStep[] = [
+  { do: 'fadeOut', ms: S.fadeMs },
+  { do: 'place', ...SHELF_STAND, facing: -1 },
+  { do: 'pose', pose: 'hold' },
+  { do: 'fadeIn', ms: S.fadeMs },
+  { do: 'wait', ms: S.lookMs },
+  { do: 'await', mode: 'hold', mark: SHELF_HEART, ms: S.hugHoldMs },
+  { do: 'fadeOut', ms: S.letGoFadeMs },
+  { do: 'flag', id: F.FinaleShelved },
+  { do: 'pose', pose: 'stand' },
+  { do: 'wait', ms: S.letGoBlackMs },
+  { do: 'fadeIn', ms: S.nightFadeInMs },
+  { do: 'look', ...SHELF_LOOK, zoom: STORY_ZOOM.evening },
+  { do: 'wait', ms: S.shelfLookMs },
+  { do: 'look' },
+  { do: 'wait', ms: STORY_ZOOM.easeMs },
+  { do: 'face', facing: 1 },
+  { do: 'wait', ms: S.lookMs },
+];
 /**
  * Devant la porte de la chambre, sur toute la hauteur : en sortant, le dernier plan (D-144). On ne
  * peut pas atteindre la porte sans y passer.
@@ -490,7 +520,7 @@ const TRIGGERS: StoryTrigger[] = [
     // Puis le réflexe (D-190, §11) : c'est le joueur qui ouvre l'histoire du soir, aussi longue que
     // la première fois ; elle s'efface, et la pensée de Céleste s'en va vers les copains de la
     // classe de mer. La vue se rapproche d'elles deux, comme au premier soir : elle la regarde.
-    // Elle a grandi.
+    // Elle a grandi. Puis elle la range (`PUT_AWAY`).
     id: 'finale-play',
     room: 'bedroom',
     on: 'interact',
@@ -515,29 +545,20 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.rugLookMs },
       { do: 'look' },
       { do: 'wait', ms: STORY_ZOOM.easeMs },
-      { do: 'pose', pose: 'stand' },
-      { do: 'thought', icon: 'maria-shelf', ms: S.thoughtMs },
+      ...PUT_AWAY,
     ],
   },
   {
-    // Ranger Maria (§11) : dans le noir, Céleste la porte sur l'étagère du surmeuble, là où était la
-    // couverture le premier soir, et la pose avec soin. Le dernier câlin.
+    // Ranger Maria (§11, D-190), pour une partie reprise entre le tapis et l'étagère (ou d'avant
+    // D-190) : Maria est sur le tapis ; Agir, et Céleste la range.
     id: 'finale-shelf',
     room: 'bedroom',
     on: 'interact',
     area: RUG_AREA,
-    mark: { col: 19, row: 18 },
+    mark: RUG_MARK,
     when: { all: [F.FinalePlayed], none: [F.FinaleShelved] },
     lock: true,
-    steps: [
-      { do: 'fadeOut', ms: S.fadeMs },
-      { do: 'flag', id: F.FinaleShelved },
-      { do: 'place', ...SHELF_STAND, facing: -1 },
-      { do: 'fadeIn', ms: S.fadeMs },
-      { do: 'wait', ms: S.lookMs },
-      { do: 'thought', icon: 'heart', ms: S.holdMs },
-      { do: 'wait', ms: S.holdMs + S.lookMs },
-    ],
+    steps: PUT_AWAY,
   },
   {
     // C'est le joueur qui fait sortir Céleste (D-138). Le dernier plan (§12) : la vue reste sur
