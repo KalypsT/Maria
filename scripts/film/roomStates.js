@@ -7,5 +7,7 @@ const MORNING = ['finale.morning', 'finale.awake', 'finale.together'];
 
 export const STATES = {
   day: {},
+  // Un autre jour, le chat n'est pas sur le tabouret (D-191).
+  'day-nocat': { removeProps: ['cat-sleep-finale'] },
   night: { dropFlags: MORNING },
 };

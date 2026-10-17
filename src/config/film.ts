@@ -54,6 +54,8 @@ export const FILM_IMAGES = {
    * jeu dans un même cadre (`scripts/film/capture-room.js`) ; Maria de près sur son étagère.
    */
   roomDay: 'art/film/room-day.webp',
+  /** Le même jour, sans le chat sur le tabouret (D-191). */
+  roomDayNoCat: 'art/film/room-day-nocat.webp',
   roomNight: 'art/film/room-night.webp',
   mariaClose: 'art/film/maria-close.webp',
   /**
@@ -61,8 +63,16 @@ export const FILM_IMAGES = {
    * (`scripts/art-cutout.py`), faite pour 9 ans (D-190) ; à cette taille, elle passe pour 7 ans.
    */
   celesteSchool: 'art/film/celeste-school.png',
-  /** Son cartable posé (PLACEHOLDER, dessiné par `scripts/make-intro-art.py film`). */
+  /**
+   * Ses traces dans la chambre, les jours qui passent (D-191) : son cartable posé, son gilet, un
+   * dessin, un livre ouvert, ses chaussons. PLACEHOLDERS, dessinés par
+   * `scripts/make-intro-art.py film`.
+   */
   schoolbag: 'art/film/schoolbag.png',
+  cardigan: 'art/film/cardigan.png',
+  drawing: 'art/film/drawing.png',
+  openBook: 'art/film/open-book.png',
+  slippers: 'art/film/slippers.png',
 } as const;
 export type FilmImage = keyof typeof FILM_IMAGES;
 
@@ -95,6 +105,75 @@ export const FILM_ROOM = {
   /** La porte de la chambre (vers le couloir), au bas du mur de droite : sa lumière, ouverte. */
   door: { x: 1872, y: 822, w: 48, h: 150, spill: 240 },
 } as const;
+
+/**
+ * L'heure et le temps d'un jour (D-191) : `gold` le matin, soleil bas et doré ; `noon` midi, clair ;
+ * `rain` la pluie, gris, des gouttes sur la vitre, pas de soleil ; `dusk` le soir, orangé.
+ */
+export type FilmDay = 'gold' | 'noon' | 'rain' | 'dusk';
+
+/**
+ * Leur lumière, dessinée par le film par-dessus le décor : la teinte de toute la pièce (sa couleur,
+ * sa force, sa façon de se poser), la couleur et la force du carré de soleil (null : pas de
+ * soleil), la teinte du ciel dans la vitre, et le nombre de gouttes qui coulent sur la vitre.
+ * PROVISOIRE.
+ */
+export const FILM_DAYS: Readonly<
+  Record<
+    FilmDay,
+    {
+      readonly tint: string;
+      readonly tintAlpha: number;
+      readonly tintMode: 'multiply' | 'soft-light';
+      readonly sun: string | null;
+      readonly sunAlpha: number;
+      readonly sky: string;
+      readonly skyAlpha: number;
+      readonly rain: number;
+    }
+  >
+> = {
+  gold: {
+    tint: '#ffc06e',
+    tintAlpha: 0.32,
+    tintMode: 'soft-light',
+    sun: 'rgb(255, 200, 120)',
+    sunAlpha: 0.2,
+    sky: '#ffdca0',
+    skyAlpha: 0.4,
+    rain: 0,
+  },
+  noon: {
+    tint: '#ffffff',
+    tintAlpha: 0.18,
+    tintMode: 'soft-light',
+    sun: 'rgb(255, 246, 220)',
+    sunAlpha: 0.13,
+    sky: '#cfeaff',
+    skyAlpha: 0.3,
+    rain: 0,
+  },
+  rain: {
+    tint: '#7a8698',
+    tintAlpha: 0.5,
+    tintMode: 'multiply',
+    sun: null,
+    sunAlpha: 0,
+    sky: '#97a3b2',
+    skyAlpha: 0.75,
+    rain: 34,
+  },
+  dusk: {
+    tint: '#ff9e6e',
+    tintAlpha: 0.42,
+    tintMode: 'multiply',
+    sun: 'rgb(255, 150, 90)',
+    sunAlpha: 0.16,
+    sky: '#ff9e7c',
+    skyAlpha: 0.6,
+    rain: 0,
+  },
+};
 
 /** Un plan du film. Deux plans consécutifs du même décor (`scene`) partagent son temps. */
 export interface FilmShot {
@@ -131,6 +210,8 @@ export interface FilmShot {
     readonly scale: number;
     readonly opacity: IntroKeys;
   };
+  /** L'heure et le temps du jour (D-191) ; absent : la lumière du décor, telle quelle. */
+  readonly day?: FilmDay;
   /** Le carré de soleil : sa place sous la fenêtre au fil du plan (x, px du plan). */
   readonly sun?: IntroKeys;
   /** La porte de la chambre : ouverte de 0 (fermée) à 1, la lumière du couloir (D-190). */
@@ -240,6 +321,15 @@ const WHOLE: FilmShot['camera'] = {
   from: { x: 960, y: 540, zoom: 1 },
   to: { x: 960, y: 540, zoom: 1 },
 };
+/**
+ * Les jours et les nuits (D-191, retour d'essai) : plus près, la moitié de la chambre où passe sa
+ * vie (la fenêtre, l'étagère, le bureau, le tabouret, la porte) ; le sol reste dans l'image sur un
+ * téléphone (plus large que 16:9, l'image est rognée en haut et en bas). PROVISOIRE.
+ */
+const DAYS: FilmShot['camera'] = {
+  from: { x: 1181, y: 640, zoom: 1.3 },
+  to: { x: 1181, y: 640, zoom: 1.3 },
+};
 /** Une nuit (un noir) : de plus en plus courte. */
 const night = (ms: number, holdMs: number): IntroTransition => ({
   kind: 'dip',
@@ -272,8 +362,17 @@ const CELESTE_SCHOOL: FilmSprite = {
   height: 112,
   flip: true,
 };
-/** Son cartable, posé sous le bureau, entre le caisson et le pied (PROVISOIRE). */
+/**
+ * Les traces de sa vie, une ou deux par jour (D-191) ; jamais Maria ni les jouets. Son cartable,
+ * posé sous le bureau, entre le caisson et le pied ; son gilet sur le tabouret (le chat n'y dort
+ * pas ce jour-là) ; un dessin contre le fond du surmeuble ; un livre ouvert par terre ; ses
+ * chaussons près de la porte (elle est à l'école). Places PROVISOIRES.
+ */
 const SCHOOLBAG: FilmSprite = { image: 'schoolbag', x: 1440, bottom: 972, height: 40 };
+const CARDIGAN: FilmSprite = { image: 'cardigan', x: 1034, bottom: 884, height: 76 };
+const DRAWING: FilmSprite = { image: 'drawing', x: 1405, bottom: 733, height: 62 };
+const OPEN_BOOK: FilmSprite = { image: 'openBook', x: 700, bottom: 976, height: 24 };
+const SLIPPERS: FilmSprite = { image: 'slippers', x: 1688, bottom: 975, height: 22 };
 
 /**
  * Quelques semaines (D-191), quand la porte s'est refermée : la chambre, Maria sur son étagère.
@@ -282,6 +381,9 @@ const SCHOOLBAG: FilmSprite = { image: 'schoolbag', x: 1440, bottom: 972, height
  * jours en fondus : le cartable là, pas là, là (l'école, sa vie à elle). Maria ne bouge pas. Puis
  * tout ralentit sur Maria, la même ; le dernier signe ; le noir. Céleste reste une enfant : la
  * fin ne la fait pas grandir au-delà du jeu.
+ *
+ * Retour d'essai : les jours se ressemblaient. Chacun a maintenant son heure et son temps (`day`) et
+ * ses traces à elle ; le chat dort sur le tabouret, ou pas ; la vue est plus près.
  */
 const WEEKS: readonly FilmShot[] = [
   {
@@ -299,58 +401,62 @@ const WEEKS: readonly FilmShot[] = [
     scene: 'night-1',
     durationMs: 5200,
     enter: night(1800, 900),
-    camera: WHOLE,
+    camera: DAYS,
     backdrop: 'roomNight',
     sprites: [],
   },
   {
+    // La pluie ; son gilet sur le tabouret.
     id: 'day-2',
     scene: 'day-2',
-    durationMs: 4000,
+    durationMs: 4200,
     enter: night(1400, 500),
-    camera: WHOLE,
-    backdrop: 'roomDay',
-    sprites: [],
-    sun: sunAcross(4000),
+    camera: DAYS,
+    backdrop: 'roomDayNoCat',
+    sprites: [CARDIGAN],
+    day: 'rain',
   },
   {
     id: 'night-2',
     scene: 'night-2',
     durationMs: 2900,
     enter: night(1000, 300),
-    camera: WHOLE,
+    camera: DAYS,
     backdrop: 'roomNight',
     sprites: [],
   },
   {
+    // Le matin ; un dessin contre le fond du surmeuble ; le chat sur le tabouret.
     id: 'day-3',
     scene: 'day-3',
-    durationMs: 2400,
+    durationMs: 3200,
     enter: night(800, 200),
-    camera: WHOLE,
+    camera: DAYS,
     backdrop: 'roomDay',
-    sprites: [],
-    sun: sunAcross(2400),
+    sprites: [DRAWING],
+    sun: sunAcross(3200),
+    day: 'gold',
   },
   {
     id: 'night-3',
     scene: 'night-3',
     durationMs: 1500,
     enter: night(600, 100),
-    camera: WHOLE,
+    camera: DAYS,
     backdrop: 'roomNight',
     sprites: [],
   },
   {
-    // Un jour, la porte s'ouvre : elle rentre de l'école, son cartable sur le dos, un moment ;
+    // En fin de journée, la porte s'ouvre : elle rentre de l'école, son cartable sur le dos ;
     // elle s'efface, le cartable reste, posé sous le bureau ; la porte se referme.
     id: 'school',
     scene: 'school',
     durationMs: 7600,
     enter: night(400, 80),
-    camera: WHOLE,
+    camera: DAYS,
     backdrop: 'roomDay',
     sprites: [
+      DRAWING,
       {
         ...CELESTE_SCHOOL,
         opacity: [
@@ -368,7 +474,11 @@ const WEEKS: readonly FilmShot[] = [
         ],
       },
     ],
-    sun: sunAcross(7600),
+    sun: [
+      [0, 1060],
+      [7600, 940],
+    ],
+    day: 'dusk',
     door: [
       [0, 0],
       [700, 1],
@@ -377,35 +487,39 @@ const WEEKS: readonly FilmShot[] = [
     ],
   },
   {
+    // Midi : le cartable, un livre ouvert par terre ; le chat est parti.
     id: 'bag-1',
     scene: 'bag-1',
-    durationMs: 2200,
+    durationMs: 2800,
     enter: dissolve(700),
-    camera: WHOLE,
-    backdrop: 'roomDay',
-    sprites: [SCHOOLBAG],
-    sun: sunAcross(2200),
+    camera: DAYS,
+    backdrop: 'roomDayNoCat',
+    sprites: [SCHOOLBAG, OPEN_BOOK],
+    sun: sunAcross(2800),
+    day: 'noon',
   },
   {
-    // Elle est à l'école.
+    // La pluie : elle est à l'école ; ses chaussons près de la porte.
     id: 'bag-0',
     scene: 'bag-0',
-    durationMs: 1800,
+    durationMs: 2600,
     enter: dissolve(600),
-    camera: WHOLE,
+    camera: DAYS,
     backdrop: 'roomDay',
-    sprites: [],
-    sun: sunAcross(1800),
+    sprites: [SLIPPERS],
+    day: 'rain',
   },
   {
+    // Un matin : le cartable, prêt ; son gilet, un dessin.
     id: 'bag-2',
     scene: 'bag-2',
-    durationMs: 1800,
+    durationMs: 2800,
     enter: dissolve(600),
-    camera: WHOLE,
-    backdrop: 'roomDay',
-    sprites: [SCHOOLBAG],
-    sun: sunAcross(1800),
+    camera: DAYS,
+    backdrop: 'roomDayNoCat',
+    sprites: [SCHOOLBAG, CARDIGAN, DRAWING],
+    sun: sunAcross(2800),
+    day: 'gold',
   },
   {
     // Maria, la même : la vue s'approche lentement, le soleil passe sur elle. Autour d'elle, sur

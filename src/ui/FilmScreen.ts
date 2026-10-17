@@ -4,9 +4,11 @@ import type { SfxSlot } from '../config/sfx';
 import {
   FILM,
   FILM_IMAGES,
+  FILM_DAYS,
   FILM_ROOM,
   FILMS,
   type Film,
+  type FilmDay,
   type FilmId,
   type FilmImage,
   type FilmShot,
@@ -79,14 +81,70 @@ function drawDoor(c: CanvasRenderingContext2D, open: number): void {
   c.restore();
 }
 
-/** Le carré de soleil : de la fenêtre au sol, vers la gauche, ajouté à l'image. */
-function drawSun(c: CanvasRenderingContext2D, left: number): void {
+/**
+ * Le ciel du jour dans la vitre (D-191) : sa teinte, et la pluie qui coule sur le verre (des traits
+ * qui descendent, quelques gouttes posées).
+ */
+function drawSky(c: CanvasRenderingContext2D, day: FilmDay, t: number): void {
+  const look = FILM_DAYS[day];
+  const { x, y, w, h } = FILM_ROOM.window;
+  c.save();
+  c.beginPath();
+  c.rect(x, y, w, h);
+  c.clip();
+  c.globalAlpha = look.skyAlpha;
+  c.fillStyle = look.sky;
+  c.fillRect(x, y, w, h);
+  c.strokeStyle = 'rgb(226, 234, 244)';
+  c.fillStyle = 'rgb(226, 234, 244)';
+  c.lineCap = 'round';
+  c.lineWidth = 3;
+  for (let i = 0; i < look.rain; i++) {
+    const a = hash(i + 41);
+    const b = hash(i + 97);
+    const px = x + a * w;
+    const py = y + ((b * h + (t / 1000) * (260 + a * 220)) % h);
+    const len = 18 + b * 22;
+    c.globalAlpha = 0.35 + 0.3 * b;
+    c.beginPath();
+    c.moveTo(px, py);
+    c.lineTo(px - 3, py + len);
+    c.stroke();
+    // Une goutte posée, qui ne coule pas.
+    c.globalAlpha = 0.45;
+    c.beginPath();
+    c.arc(x + hash(i + 151) * w, y + hash(i + 211) * h, 2.5 + b * 2, 0, TAU);
+    c.fill();
+  }
+  c.restore();
+}
+
+/** La lumière du jour sur toute la pièce (D-191), par-dessus le décor et les objets. */
+function drawDayTint(c: CanvasRenderingContext2D, day: FilmDay): void {
+  const look = FILM_DAYS[day];
+  c.save();
+  c.globalCompositeOperation = look.tintMode;
+  c.globalAlpha = look.tintAlpha;
+  c.fillStyle = look.tint;
+  c.fillRect(0, 0, INTRO_VIEW.width, INTRO_VIEW.height);
+  c.restore();
+}
+
+/**
+ * Le carré de soleil : de la fenêtre au sol, vers la gauche, ajouté à l'image ; sa couleur et sa
+ * force selon le jour (D-191).
+ */
+function drawSun(c: CanvasRenderingContext2D, left: number, day: FilmDay | undefined): void {
   const { window: win, floorY, sun } = FILM_ROOM;
+  const look = day ? FILM_DAYS[day] : null;
+  if (look?.sun === null) {
+    return;
+  }
   const top = win.y + win.h;
   c.save();
   c.globalCompositeOperation = 'lighter';
-  c.globalAlpha = sun.alpha;
-  c.fillStyle = 'rgb(255, 214, 150)';
+  c.globalAlpha = look ? look.sunAlpha : sun.alpha;
+  c.fillStyle = look?.sun ?? 'rgb(255, 214, 150)';
   c.beginPath();
   c.moveTo(left, top);
   c.lineTo(left + sun.width, top);
@@ -234,8 +292,11 @@ export function playFilm(id: FilmId, audio?: FilmAudio): Promise<void> {
       if (backdrop) {
         c.drawImage(backdrop, 0, 0, INTRO_VIEW.width, INTRO_VIEW.height);
       }
+      if (shot.day) {
+        drawSky(c, shot.day, layer.sceneMs);
+      }
       if (shot.sun) {
-        drawSun(c, keyValue(shot.sun, t, 0));
+        drawSun(c, keyValue(shot.sun, t, 0), shot.day);
       }
       if (shot.door) {
         drawDoor(c, keyValue(shot.door, t, 0));
@@ -268,6 +329,9 @@ export function playFilm(id: FilmId, audio?: FilmAudio): Promise<void> {
           c.restore();
         }
         c.globalAlpha = 1;
+      }
+      if (shot.day) {
+        drawDayTint(c, shot.day);
       }
       if (shot.bubble) {
         const b = shot.bubble;

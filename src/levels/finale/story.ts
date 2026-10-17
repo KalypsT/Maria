@@ -116,24 +116,30 @@ const OLD_TOYS = {
   'old-white-cloth': { col: 35, row: 11, dx: -3, dy: -6 },
   'old-pink-kitchen': { col: 33, row: 19 },
 } as const;
-/** Le regard sur les jouets (D-191) : la cuisine rose, le bout de l'étagère, puis la boîte. */
+/**
+ * Le regard sur les jouets (D-191, D-192) : la cuisine rose, le bout de l'étagère, puis la place
+ * vide de Maria, entre Roger et le livre.
+ */
 const TOYS_LOOK_KITCHEN = { col: 33, row: 18 };
 const TOYS_LOOK_SHELF = { col: 31, row: 11 };
-const TOYS_LOOK_BOX = { col: 35, row: 11 };
+/** Debout sur le tapis, Maria dans les bras, tournée vers le bureau (D-192). */
+const RUG_STAND = { col: 21, row: 19 };
 /**
- * Ranger Maria (§11, D-190). Dans le noir, Céleste est devant l'étagère du surmeuble, là où était la
- * couverture le premier soir, Maria dans les bras. Dans le même noir, la boîte de l'étagère s'est
- * ouverte : les jouets d'avant sont là, autour (D-191). La vue se rapproche de la cuisine rose, au
- * pied du bureau, puis glisse lentement le long de l'étagère : ils étaient là, rangés ; elle n'y
- * faisait plus attention. Le dernier câlin : Agir maintenu, le cœur se remplit et reste plein tant
- * qu'on tient ; **relâcher, c'est la poser** : le noir, Maria assise parmi eux, les bras de Céleste
- * vides. Elle la regarde, longtemps ; puis elle se tourne vers la porte. Elle ne la prend et ne la
- * pose que dans le noir (pilier 5).
+ * Là où Céleste peut la poser (D-192) : debout sur l'étagère du surmeuble, à droite de sa place
+ * (jusqu'au bout, devant les livres) ; l'étincelle d'Agir sur la place vide.
  */
-const PUT_AWAY: readonly StoryStep[] = [
+const SHELF_AREA: TileArea = { col: 34, row: 9, w: 3, h: 3 };
+/**
+ * La prendre dans ses bras (D-192), après le tapis. Dans le noir, Céleste est debout sur le tapis,
+ * Maria dans les bras. La vue se rapproche de la cuisine rose, au pied du bureau, puis glisse
+ * lentement jusqu'à l'étagère et le long des jouets d'avant (D-191) : ils étaient là, rangés ; elle
+ * n'y faisait plus attention. Elle s'arrête sur la place vide, une lumière chaude dessus ; puis elle
+ * revient sur Céleste, et le joueur la mène, Maria dans les bras, jusqu'à l'étagère.
+ */
+const PICK_UP: readonly StoryStep[] = [
   { do: 'fadeOut', ms: S.fadeMs },
-  { do: 'flag', id: F.FinaleToys },
-  { do: 'place', ...SHELF_STAND, facing: -1 },
+  { do: 'flag', id: F.FinaleCarrying },
+  { do: 'place', ...RUG_STAND, facing: 1 },
   { do: 'pose', pose: 'hold' },
   { do: 'fadeIn', ms: S.fadeMs },
   { do: 'wait', ms: S.lookMs },
@@ -141,13 +147,24 @@ const PUT_AWAY: readonly StoryStep[] = [
   { do: 'wait', ms: S.toysFirstLookMs },
   { do: 'look', ...TOYS_LOOK_SHELF, zoom: STORY_ZOOM.toys, glideMs: S.toysGlideUpMs },
   { do: 'wait', ms: S.toysGlideUpMs + S.lookMs },
-  { do: 'look', ...TOYS_LOOK_BOX, zoom: STORY_ZOOM.toys, glideMs: S.toysGlideAlongMs },
-  { do: 'wait', ms: S.toysGlideAlongMs + S.lookMs },
+  { do: 'look', ...MARIA_SHELF, zoom: STORY_ZOOM.toys, glideMs: S.toysGlideAlongMs },
+  { do: 'wait', ms: S.toysGlideAlongMs + S.placeLookMs },
   { do: 'look' },
   { do: 'wait', ms: STORY_ZOOM.easeMs },
+];
+/**
+ * Ranger Maria (§11, D-190, D-192). Le joueur a mené Céleste sur l'étagère, Maria dans les bras ;
+ * Agir : elle se tourne vers la place vide. Le dernier câlin : Agir maintenu, le cœur se remplit et
+ * reste plein tant qu'on tient ; **relâcher, c'est la poser** : le noir, Maria assise parmi les
+ * jouets d'avant, les bras de Céleste vides. Elle la regarde, longtemps ; puis elle se tourne vers
+ * la porte. Elle ne la prend et ne la pose que dans le noir (pilier 5).
+ */
+const PUT_AWAY: readonly StoryStep[] = [
+  { do: 'face', facing: -1 },
   { do: 'await', mode: 'hold', mark: SHELF_HEART, ms: S.hugHoldMs },
   { do: 'fadeOut', ms: S.letGoFadeMs },
   { do: 'flag', id: F.FinaleShelved },
+  { do: 'place', ...SHELF_STAND, facing: -1 },
   { do: 'pose', pose: 'stand' },
   { do: 'wait', ms: S.letGoBlackMs },
   { do: 'fadeIn', ms: S.nightFadeInMs },
@@ -188,6 +205,8 @@ export const FINALE_REPLAY = {
   reunion: { room: 'finale-big', ...BIG_CRADLE_SIDE },
   morning: { room: 'bedroom', ...BED_SEAT },
   shelf: { room: 'bedroom', ...RUG_SEAT },
+  /** Maria dans les bras, sur le tapis, à porter jusqu'à l'étagère (D-192). */
+  carry: { room: 'bedroom', ...RUG_STAND },
   leave: { room: 'bedroom', ...SHELF_STAND },
 } as const;
 
@@ -558,7 +577,8 @@ const TRIGGERS: StoryTrigger[] = [
     // Puis le réflexe (D-190, §11) : c'est le joueur qui ouvre l'histoire du soir, aussi longue que
     // la première fois ; elle s'efface, et la pensée de Céleste s'en va vers les copains de la
     // classe de mer. La vue se rapproche d'elles deux, comme au premier soir : elle la regarde ;
-    // le contrechamp de l'intro (un film) : elle a grandi. Puis elle la range (`PUT_AWAY`).
+    // le contrechamp de l'intro (un film) : elle a grandi. Puis elle la prend dans ses bras, et le
+    // joueur la porte jusqu'à l'étagère (`PICK_UP`, D-192).
     id: 'finale-play',
     room: 'bedroom',
     on: 'interact',
@@ -586,18 +606,30 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.lookMs },
       { do: 'look' },
       { do: 'wait', ms: STORY_ZOOM.easeMs },
-      ...PUT_AWAY,
+      ...PICK_UP,
     ],
   },
   {
-    // Ranger Maria (§11, D-190), pour une partie reprise entre le tapis et l'étagère (ou d'avant
-    // D-190) : Maria est sur le tapis ; Agir, et Céleste la range.
-    id: 'finale-shelf',
+    // Une partie reprise entre le tapis et l'étagère d'avant D-192 : Maria est sur le tapis ;
+    // Agir, et Céleste la prend dans ses bras (les mêmes gestes).
+    id: 'finale-pickup',
     room: 'bedroom',
     on: 'interact',
     area: RUG_AREA,
     mark: RUG_MARK,
-    when: { all: [F.FinalePlayed], none: [F.FinaleShelved] },
+    when: { all: [F.FinalePlayed], none: [F.FinaleCarrying, F.FinaleShelved] },
+    lock: true,
+    steps: PICK_UP,
+  },
+  {
+    // Ranger Maria (§11, D-190, D-192) : le joueur l'a portée jusqu'à l'étagère ; Agir, sur la place
+    // vide, entre les jouets d'avant.
+    id: 'finale-shelf',
+    room: 'bedroom',
+    on: 'interact',
+    area: SHELF_AREA,
+    mark: MARIA_SHELF,
+    when: { all: [F.FinaleCarrying], none: [F.FinaleShelved] },
     lock: true,
     steps: PUT_AWAY,
   },
@@ -762,7 +794,15 @@ const PROPS: StoryData['props'] = [
     room: 'bedroom',
     kind: 'maria-sit',
     ...MARIA_RUG,
-    when: { all: [F.FinalePlayed], none: [F.FinaleShelved] },
+    when: { all: [F.FinalePlayed], none: [F.FinaleCarrying, F.FinaleShelved] },
+  },
+  // … dans ses bras (D-192) : une lumière chaude sur sa place vide, entre les jouets d'avant.
+  {
+    id: 'empty-place',
+    room: 'bedroom',
+    kind: 'empty-place',
+    ...MARIA_SHELF,
+    when: { all: [F.FinaleCarrying], none: [F.FinaleShelved] },
   },
   // … rangée sur l'étagère du surmeuble. Elle y reste (Céleste ne revient pas la chercher).
   {
@@ -773,28 +813,29 @@ const PROPS: StoryData['props'] = [
     when: { all: [F.FinaleShelved] },
   },
   // Les jouets d'avant (D-191) : la boîte fermée sur l'étagère pendant tout le jeu, sans rien qui la
-  // signale ; ouverte dans le noir où Céleste vient ranger Maria, les jouets autour, pour toujours
-  // (aussi dans une partie rangée ou finie avant eux).
+  // signale. Ouverte dès les retrouvailles (D-192 : c'est ce moment qui déclenche tout), dans le
+  // noir où Céleste prend Maria dans ses bras : on les voit en revenant dans la vraie chambre, la
+  // nuit ; ils y restent pour toujours.
   {
     id: 'toy-box',
     room: 'bedroom',
     kind: 'toy-box',
     ...TOY_BOX,
-    when: { none: [F.FinaleToys, F.FinaleShelved] },
+    when: { none: [F.FinaleFound] },
   },
   {
     id: 'toy-box-open',
     room: 'bedroom',
     kind: 'toy-box-open',
     ...TOY_BOX,
-    when: { any: [F.FinaleToys, F.FinaleShelved] },
+    when: { all: [F.FinaleFound] },
   },
   ...Object.entries(OLD_TOYS).map(([kind, at]) => ({
     id: kind,
     room: 'bedroom',
     kind: kind as keyof typeof OLD_TOYS,
     ...at,
-    when: { any: [F.FinaleToys, F.FinaleShelved] },
+    when: { all: [F.FinaleFound] },
   })),
   {
     id: 'family-drawing',
@@ -812,7 +853,13 @@ export const FINALE_STORY: Pick<
 > & {
   readonly dim: NonNullable<StoryData['dim']>;
   readonly music: NonNullable<StoryData['music']>;
+  readonly carrying: NonNullable<StoryData['carrying']>;
 } = {
+  // Céleste porte Maria jusqu'à l'étagère (D-192), hors script.
+  carrying: {
+    room: 'bedroom',
+    when: { all: [F.FinaleCarrying], none: [F.FinaleShelved] },
+  },
   triggers: TRIGGERS,
   props: PROPS,
   omens: [

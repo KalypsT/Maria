@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   FILM,
   FILM_IMAGES,
+  FILM_DAYS,
   FILM_ROOM,
   FILMS,
   isFilmId,
@@ -115,9 +116,9 @@ describe('les films de la fin (D-190)', () => {
     const steps = play?.steps ?? [];
     const film = steps.findIndex((s) => s.do === 'film');
     const zoom = steps.findIndex((s) => s.do === 'look' && s.zoom !== undefined);
-    const putAway = steps.findIndex((s) => s.do === 'await' && s.mode === 'hold');
+    const pickUp = steps.findIndex((s) => s.do === 'pose' && s.pose === 'hold');
     expect(film).toBeGreaterThan(zoom);
-    expect(film).toBeLessThan(putAway);
+    expect(film).toBeLessThan(pickUp);
   });
 
   it('aucune image en trop : chaque image sert à un film, chaque fichier du film est utilisé', () => {
@@ -144,22 +145,86 @@ describe('les films de la fin (D-190)', () => {
     expect(shots.slice(lastNight + 1).every((s) => s.enter.kind === 'dissolve')).toBe(true);
     // La chambre de ce matin-là, toujours : Céleste ne grandit pas au-delà du jeu.
     for (const shot of shots.filter((s) => s.id !== 'maria')) {
-      expect(['roomDay', 'roomNight'], shot.id).toContain(shot.backdrop);
+      expect(['roomDay', 'roomDayNoCat', 'roomNight'], shot.id).toContain(shot.backdrop);
     }
     // Maria, puis le dernier signe.
     expect(shots.at(-2)?.id).toBe('maria');
     expect(shots.at(-1)?.id).toBe('last-sign');
   });
 
-  it('le soleil : seulement le jour, sous la fenêtre', () => {
+  it('le soleil : seulement le jour, jamais sous la pluie, sous la fenêtre', () => {
     for (const shot of FILMS.weeks.shots) {
       if (shot.sun) {
-        expect(shot.backdrop, shot.id).toBe('roomDay');
+        expect(shot.backdrop, shot.id).toMatch(/^roomDay/);
+        expect(shot.day, shot.id).not.toBe('rain');
       }
     }
     const win = FILM_ROOM.window;
     expect(win.x + win.w).toBeLessThanOrEqual(1920);
     expect(win.y + win.h).toBeLessThan(FILM_ROOM.floorY);
+  });
+
+  it('les jours se distinguent (D-191) : jamais deux jours de suite à la même heure ni avec les mêmes traces', () => {
+    const shots = FILMS.weeks.shots;
+    // Après le départ, avant Maria de près : les jours ont chacun leur heure ; les nuits, aucune.
+    const after = shots.slice(
+      1,
+      shots.findIndex((s) => s.id === 'maria'),
+    );
+    const days = after.filter((s) => s.backdrop !== 'roomNight');
+    expect(days.length).toBeGreaterThanOrEqual(5);
+    for (const day of days) {
+      expect(day.day, day.id).toBeDefined();
+    }
+    for (const nightShot of after.filter((s) => s.backdrop === 'roomNight')) {
+      expect(nightShot.day, nightShot.id).toBeUndefined();
+    }
+    const traces = (shot: FilmShot) =>
+      shot.sprites
+        .filter((sp) => sp.image !== 'celesteSchool')
+        .map((sp) => sp.image)
+        .sort()
+        .join();
+    for (let i = 1; i < days.length; i++) {
+      const [a, b] = [days[i - 1] as FilmShot, days[i] as FilmShot];
+      expect(b.day, b.id).not.toBe(a.day);
+      expect(`${b.backdrop} ${traces(b)}`, b.id).not.toBe(`${a.backdrop} ${traces(a)}`);
+    }
+    // Toutes les heures, et des traces chaque jour ; jamais Maria ni les jouets.
+    expect(new Set(days.map((d) => d.day))).toEqual(new Set(['gold', 'noon', 'rain', 'dusk']));
+    for (const day of days) {
+      expect(traces(day), day.id).not.toBe('');
+      expect(traces(day), day.id).not.toMatch(/maria/i);
+    }
+    // La pluie : des gouttes sur la vitre ; les autres jours, aucune.
+    for (const [id, look] of Object.entries(FILM_DAYS)) {
+      expect(look.rain > 0, id).toBe(id === 'rain');
+      expect(look.sun === null, id).toBe(id === 'rain');
+    }
+  });
+
+  it('les jours et les nuits, plus près : dans l’image, le sol visible sur un téléphone', () => {
+    const shots = FILMS.weeks.shots;
+    const after = shots.slice(
+      1,
+      shots.findIndex((s) => s.id === 'maria'),
+    );
+    for (const shot of after) {
+      for (const cam of [shot.camera.from, shot.camera.to]) {
+        expect(cam.zoom, shot.id).toBeGreaterThan(1.2);
+        // En 16:9, la vue tient dans le plan (pas de bord noir).
+        const halfW = 960 / cam.zoom;
+        const halfH = 540 / cam.zoom;
+        expect(cam.x - halfW, shot.id).toBeGreaterThanOrEqual(0);
+        expect(cam.x + halfW, shot.id).toBeLessThanOrEqual(1920);
+        expect(cam.y - halfH, shot.id).toBeGreaterThanOrEqual(0);
+        expect(cam.y + halfH, shot.id).toBeLessThanOrEqual(1080);
+        // Sur un téléphone (844 × 390), l'image est rognée en haut et en bas : le sol (le
+        // cartable, les chaussons) reste dans la vue.
+        const phoneHalfH = (1920 / cam.zoom) * (390 / 844) * 0.5;
+        expect(cam.y + phoneHalfH, shot.id).toBeGreaterThan(FILM_ROOM.floorY);
+      }
+    }
   });
 
   it('elle rentre de l’école, une fois : la porte ouverte tant qu’elle est là ; son cartable reste', () => {

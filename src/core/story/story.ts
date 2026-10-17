@@ -14,8 +14,6 @@ import type { Box } from '../physics/gridCollision';
 /** Condition sur les étapes vécues : toutes celles de `all`, aucune de `none`. */
 export interface FlagCondition {
   readonly all?: readonly string[];
-  /** Au moins une de ces étapes (D-191). */
-  readonly any?: readonly string[];
   readonly none?: readonly string[];
 }
 
@@ -578,6 +576,8 @@ export const PROP_KINDS = [
   'old-pink-kitchen',
   'old-music-book',
   'old-white-cloth',
+  /** Sa place vide sur l'étagère, une lumière chaude, pendant qu'on porte Maria (D-192). */
+  'empty-place',
   ...PASSERBY_KINDS,
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
@@ -746,6 +746,13 @@ export interface StoryData {
     readonly when: FlagCondition;
     readonly track: MusicTrack | null;
   }[];
+  /**
+   * Céleste porte Maria dans ses bras (D-192), hors script, dans cette salle, tant que la condition
+   * est vraie : le joueur la mène (marcher, sauter), sans rien qui demande les mains. Maria est
+   * portée, elle ne bouge pas d'elle-même (pilier 5, décision de l'utilisateur). Elle y arrive et
+   * en repart dans le noir d'un script, comme toujours.
+   */
+  readonly carrying?: { readonly room: string; readonly when: FlagCondition };
 }
 
 export function checkCondition(flags: ReadonlySet<string>, when: FlagCondition): boolean {
@@ -758,10 +765,6 @@ export function checkCondition(flags: ReadonlySet<string>, when: FlagCondition):
     if (flags.has(flag)) {
       return false;
     }
-  }
-  const any = when.any;
-  if (any && !any.some((flag) => flags.has(flag))) {
-    return false;
   }
   return true;
 }

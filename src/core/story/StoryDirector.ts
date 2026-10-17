@@ -217,6 +217,12 @@ export class StoryDirector {
     return false;
   }
 
+  /** Céleste porte Maria dans cette salle, hors script (D-192). */
+  carrying(room: string): boolean {
+    const rule = this.data.carrying;
+    return rule !== undefined && rule.room === room && !this.busy && this.check(rule.when);
+  }
+
   /** Lumières éteintes dans la salle (la nuit dans le train, D-85). */
   dim(room: string): boolean {
     for (const rule of this.data.dim ?? []) {
