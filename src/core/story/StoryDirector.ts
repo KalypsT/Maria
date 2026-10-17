@@ -1,6 +1,7 @@
 import { TILE_SIZE } from '../../config/display';
 import type { MusicTrack } from '../../config/audio';
 import type { HapticMoment } from '../../config/haptics';
+import type { FilmId } from '../../config/film';
 import type { FlashbackId } from '../../config/memories';
 import type { PlayableMemoryId } from '../../config/playableMemories';
 import { PHYSICS_STEP_HZ, msToSteps } from '../../config/movement';
@@ -34,6 +35,8 @@ export interface StoryHost {
   face?(facing: 1 | -1): void;
   /** La lumière du couloir dans la sortie `exit` : la porte s'ouvre, ou se ferme (D-190). */
   door?(exit: number, open: boolean, ms: number): void;
+  /** Un film de la fin (D-190) : la scène le joue, puis appelle `endFilm`. */
+  film?(id: FilmId): void;
   /** Bulle au-dessus de Céleste, ou du personnage `by` (objet de mise en scène). */
   think(icon: ThoughtIcon, ms: number, by?: string): void;
   /** Scintillements étranges dans une zone (tuiles) de la salle courante. */
@@ -91,6 +94,8 @@ export class StoryDirector {
   holdProgress = 0;
   /** Un souvenir jouable est en cours (D-89) : le script attend `endPlay`. */
   playing = false;
+  /** Un film de la fin est en cours (D-190) : le script attend `endFilm`. */
+  filming = false;
   /** Céleste marche dans un script (étape `walk`, D-190) : -1 ou 1 ; 0 sinon. */
   walkX = 0;
   /** Hitbox de Céleste au dernier pas (l'étape `walk`). */
@@ -245,11 +250,17 @@ export class StoryDirector {
     this.interactable = -1;
     this.flashback = null;
     this.playing = false;
+    this.filming = false;
   }
 
   /** Fin du souvenir jouable (D-89) : le script reprend au pas suivant. */
   endPlay(): void {
     this.playing = false;
+  }
+
+  /** Fin du film (D-190) : le script reprend au pas suivant. */
+  endFilm(): void {
+    this.filming = false;
   }
 
   /**
@@ -378,6 +389,14 @@ export class StoryDirector {
           this.stepTotal = msToSteps(STORY_WALK_MAX_MS, this.stepHz);
           this.walkX = step.facing;
           return;
+        case 'film':
+          // Sans scène pour le jouer (les tests), le script continue.
+          if (this.host.film) {
+            this.filming = true;
+            this.host.film(step.id);
+            return;
+          }
+          continue;
         default:
           this.apply(step);
       }
@@ -468,8 +487,8 @@ export class StoryDirector {
       this.running = null;
       return;
     }
-    if (step.do === 'play') {
-      if (!this.playing) {
+    if (step.do === 'play' || step.do === 'film') {
+      if (step.do === 'play' ? !this.playing : !this.filming) {
         this.next();
       }
       return;

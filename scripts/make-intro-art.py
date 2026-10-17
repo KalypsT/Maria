@@ -1,11 +1,15 @@
 """Prépare les images de l'intro (D-185) dans public/art/intro/.
 
-Usage : python3 scripts/make-intro-art.py
+Usage : python3 scripts/make-intro-art.py (tout) ; python3 scripts/make-intro-art.py morning (le
+décor du contrechamp de la fin seulement, D-190)
 
 Sources :
 - `scripts/intro/room-evening.webp` : la chambre du premier soir, capturée dans le jeu (build de
   production, navigateur 1600 × 900 à l'échelle 2, donc 3200 × 1800 ; « Nouvelle partie », la vue
   large de la chambre). Si la chambre change, refaire la capture et relancer ce script ;
+- `scripts/intro/room-morning.webp` (D-190, le contrechamp du film de la fin) : la même chambre, le
+  même cadre, le matin de la fin (debug « Rejouer la fin : le matin », dev, 1600 × 900 à l'échelle
+  2, les outils de debug et l'étincelle masqués) ; Céleste et Maria sur le lit, hors du cadrage ;
 - les illustrations de `public/art/` (Céleste, la ville-jouet, les objets d'enfance).
 
 Tout ce qui coûte (flou, silhouettes, halos) est calculé ici, une fois : l'intro ne fait que
@@ -17,6 +21,7 @@ Dépendances (hors du jeu, outil ponctuel) : pip install pillow numpy
 
 import math
 import os
+import sys
 
 import numpy as np
 from PIL import Image, ImageChops, ImageEnhance, ImageFilter
@@ -25,6 +30,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ART = os.path.join(ROOT, "public", "art")
 OUT = os.path.join(ART, "intro")
 ROOM = os.path.join(ROOT, "scripts", "intro", "room-evening.webp")
+ROOM_MORNING = os.path.join(ROOT, "scripts", "intro", "room-morning.webp")
 
 TEAL = (80, 225, 210)
 # Marge des halos autour des silhouettes, en px de l'image source : `INTRO_RIM_PAD` (src/config/intro.ts).
@@ -55,6 +61,14 @@ def evening(room):
     crop = room.crop((1150, 1060, 2350, 1735)).resize((1280, 720), Image.LANCZOS)
     crop = crop.filter(ImageFilter.GaussianBlur(2.6))
     save(ImageEnhance.Brightness(crop).enhance(0.82).convert("RGB"), "evening.webp")
+
+
+def morning():
+    """Le contrechamp de la fin (D-190) : le coin du tapis du plan 3, le matin, flou de même."""
+    room = Image.open(ROOM_MORNING).convert("RGB")
+    crop = room.crop((1150, 1060, 2350, 1735)).resize((1280, 720), Image.LANCZOS)
+    crop = crop.filter(ImageFilter.GaussianBlur(2.6))
+    save(ImageEnhance.Brightness(crop).enhance(0.96).convert("RGB"), "morning.webp")
 
 
 def cradle(room):
@@ -137,6 +151,10 @@ def celeste_rim():
 
 def main():
     os.makedirs(OUT, exist_ok=True)
+    if sys.argv[1:] == ["morning"]:
+        # Seulement le décor du contrechamp (D-190), sans refaire ceux de l'intro.
+        morning()
+        return
     room = clean_room()
     evening(room)
     cradle(room)
@@ -152,6 +170,7 @@ def main():
         shadow(name, height, out_name)
     toy_town()
     celeste_rim()
+    morning()
 
 
 if __name__ == "__main__":

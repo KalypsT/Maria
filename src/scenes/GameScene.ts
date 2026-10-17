@@ -113,6 +113,7 @@ import { FlashbackView } from '../ui/FlashbackView';
 import { TravelPage } from '../ui/TravelPage';
 import { Hud } from '../ui/Hud';
 import { showEndScreen } from '../ui/EndScreen';
+import { playFilm } from '../ui/FilmScreen';
 import { markQuietRelaunch } from '../core/platform/quietRelaunch';
 import { sessionMarks } from '../platform/sessionMarks';
 import { ShellJarView } from './ShellJarView';
@@ -552,6 +553,8 @@ export class GameScene extends Phaser.Scene {
   private celesteGone = false;
   /** La fin du jeu (D-145) : plus rien ne bouge, l'écran de fin, puis l'accueil. */
   private ended = false;
+  /** Un film de la fin joue par-dessus le jeu (D-190) : le jeu attend sa fin. */
+  private filmPlaying = false;
   /** Le très léger signe du dernier plan (D-144) : début (ms, -1 : aucun) et durée. */
   private glimmerAtMs = -1;
   private glimmerMs = 1;
@@ -748,6 +751,14 @@ export class GameScene extends Phaser.Scene {
       },
       face: (facing) => {
         this.player.facing = facing;
+      },
+      film: (id) => {
+        this.filmPlaying = true;
+        void playFilm(id).then(() => {
+          this.filmPlaying = false;
+          this.controls.clearPressed();
+          this.story.endFilm();
+        });
       },
       door: (id, open, ms) => {
         const exit = this.level.exits.find((e) => e.id === id);
@@ -1044,6 +1055,11 @@ export class GameScene extends Phaser.Scene {
     this.controls.update();
     const mapPressed = this.controls.consumePressed('Map');
     const pausePressed = this.controls.consumePressed('Pause');
+    if (this.filmPlaying) {
+      // Un film de la fin (D-190) : le jeu attend, les pressions sont oubliées.
+      this.controls.clearPressed();
+      return;
+    }
     if (this.paused) {
       // Le sac ouvert (D-159) : Carte ou Pause le referment, le jeu reste arrêté.
       if (mapPressed || pausePressed) {

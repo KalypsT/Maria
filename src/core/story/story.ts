@@ -1,3 +1,4 @@
+import type { FilmId } from '../../config/film';
 import type { MusicTrack } from '../../config/audio';
 import type { HapticMoment } from '../../config/haptics';
 import type { FlashbackId } from '../../config/memories';
@@ -216,6 +217,11 @@ export type StoryStep =
    * `ms` (la porte s'ouvre), ou s'amincit vers le mur et s'éteint (la porte se ferme, son bruit).
    */
   | { readonly do: 'door'; readonly exit: number; readonly open: boolean; readonly ms: number }
+  /**
+   * Un film de la fin (D-190, bloquant) : des plans illustrés par-dessus le jeu, arrêté ; il
+   * apparaît et s'en va en fondu enchaîné sur l'image du jeu. Le script reprend à sa fin.
+   */
+  | { readonly do: 'film'; readonly id: FilmId }
   /** Scintillements étranges dans une zone de la salle (non bloquant, D-35). */
   | { readonly do: 'sparkle'; readonly area: TileArea; readonly ms: number }
   /** Souvenir trouvé (D-38), sauvegardé aussitôt ; sans effet s'il l'est déjà. */

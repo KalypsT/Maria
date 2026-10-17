@@ -36,6 +36,11 @@ export class InputController {
     return (this.held & BUTTON_BIT[action]) !== 0;
   }
 
+  /** Oublie toutes les pressions pas encore consommées (un film de la fin, D-190). */
+  clearPressed(): void {
+    this.pressed = 0;
+  }
+
   /** Vrai si l'action a été pressée depuis la dernière consommation ; efface le front. */
   consumePressed(action: ButtonAction): boolean {
     const bit = BUTTON_BIT[action];

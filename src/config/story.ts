@@ -402,10 +402,10 @@ export const STORY_TIMING = {
   flashbackMs: 7000,
   /**
    * Le matin (D-190) : après l'histoire, la pensée de Céleste part vers ses copains (la bulle) ;
-   * puis la vue se rapproche d'elles deux et y reste.
+   * puis la vue se rapproche d'elles deux et y reste, jusqu'au contrechamp (le film).
    */
   rugDriftMs: 3200,
-  rugLookMs: 4400,
+  rugLookMs: 3000,
   /**
    * Lâcher Maria (D-190) : le noir, plus lent qu'un fondu court, quand on relâche Agir ; le noir
    * tenu ; puis, Maria posée, le regard rapproché sur elles deux.

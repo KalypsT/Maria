@@ -379,6 +379,30 @@ describe('StoryDirector', () => {
     ]);
   });
 
+  it('un film (D-190) : le script attend sa fin ; sans scène pour le jouer, il continue', () => {
+    const { log, host } = recorder();
+    const films: string[] = [];
+    const d = new StoryDirector(
+      story([{ do: 'film', id: 'contrechamp' }]),
+      { ...host, film: (id) => films.push(id) },
+      HZ,
+    );
+    d.step('r', standing(2, 3), true);
+    expect(films).toEqual(['contrechamp']);
+    for (let i = 0; i < 50; i++) {
+      d.step('r', standing(2, 3), false);
+    }
+    expect(d.busy).toBe(true);
+    d.endFilm();
+    d.step('r', standing(2, 3), false);
+    expect(d.busy).toBe(false);
+    expect(log).toEqual(['flag done']);
+    const bare = recorder();
+    const b = new StoryDirector(story([{ do: 'film', id: 'contrechamp' }]), bare.host, HZ);
+    b.step('r', standing(2, 3), true);
+    expect(b.busy).toBe(false);
+  });
+
   it('Agir attendu : jamais dans le noir, toujours les commandes suspendues (D-190)', () => {
     const zone = buildZone(HOUSE);
     const mark = { col: 20, row: 18 };

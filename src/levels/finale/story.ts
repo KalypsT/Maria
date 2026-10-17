@@ -525,8 +525,8 @@ const TRIGGERS: StoryTrigger[] = [
     // Sur le tapis, comme le premier soir (D-31) : Céleste s'assoit en face de Maria, le câlin.
     // Puis le réflexe (D-190, §11) : c'est le joueur qui ouvre l'histoire du soir, aussi longue que
     // la première fois ; elle s'efface, et la pensée de Céleste s'en va vers les copains de la
-    // classe de mer. La vue se rapproche d'elles deux, comme au premier soir : elle la regarde.
-    // Elle a grandi. Puis elle la range (`PUT_AWAY`).
+    // classe de mer. La vue se rapproche d'elles deux, comme au premier soir : elle la regarde ;
+    // le contrechamp de l'intro (un film) : elle a grandi. Puis elle la range (`PUT_AWAY`).
     id: 'finale-play',
     room: 'bedroom',
     on: 'interact',
@@ -549,6 +549,9 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.rugDriftMs + S.lookMs },
       { do: 'look', ...RUG_LOOK, zoom: STORY_ZOOM.evening },
       { do: 'wait', ms: S.rugLookMs },
+      // Le contrechamp de l'intro (D-190) : le premier soir, puis ce matin. Elle a grandi.
+      { do: 'film', id: 'contrechamp' },
+      { do: 'wait', ms: S.lookMs },
       { do: 'look' },
       { do: 'wait', ms: STORY_ZOOM.easeMs },
       ...PUT_AWAY,

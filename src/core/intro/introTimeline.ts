@@ -1,10 +1,20 @@
-import type { IntroCamera, IntroKeys, IntroShot } from '../../config/intro';
+import type { IntroCamera, IntroKeys, IntroShot, IntroTransition } from '../../config/intro';
 
 /**
- * Le déroulé de l'intro (D-185), sans dessin : à un instant donné, quels plans sont visibles, avec
- * quelle opacité, quel voile de couleur et quel cadrage. Fonctions pures, testées ; l'écran
- * (`IntroScreen`) ne fait que dessiner ce qu'elles décrivent.
+ * Le déroulé de l'intro (D-185), et du film de la fin (D-190), sans dessin : à un instant donné,
+ * quels plans sont visibles, avec quelle opacité, quel voile de couleur et quel cadrage. Fonctions
+ * pures, testées ; les écrans (`IntroScreen`, `FilmScreen`) ne font que dessiner ce qu'elles
+ * décrivent.
  */
+
+/** Ce que le déroulé connaît d'un plan (ceux de l'intro, ceux du film). */
+export interface TimelineShot {
+  /** Deux plans consécutifs du même décor le partagent (son temps continue). */
+  readonly scene: string;
+  readonly durationMs: number;
+  readonly enter: IntroTransition;
+  readonly camera: IntroShot['camera'];
+}
 
 /** Valeur interpolée (linéaire) entre des clés triées ; avant la première, après la dernière : bornée. */
 export function keyValue(keys: IntroKeys | undefined, t: number, fallback = 1): number {
@@ -34,7 +44,7 @@ export function smooth(t: number): number {
 }
 
 /** Cadrage d'un plan à `localMs` (copié dans `out`, sans allocation). */
-export function cameraAt(shot: IntroShot, localMs: number, out: IntroCamera): IntroCamera {
+export function cameraAt(shot: TimelineShot, localMs: number, out: IntroCamera): IntroCamera {
   const { from, to, moveMs, startMs } = shot.camera;
   const start = startMs ?? 0;
   const span = moveMs ?? shot.durationMs - start;
@@ -63,7 +73,7 @@ export interface IntroSchedule {
   totalMs: number;
 }
 
-export function introSchedule(shots: readonly IntroShot[]): IntroSchedule {
+export function introSchedule(shots: readonly TimelineShot[]): IntroSchedule {
   const starts: number[] = [];
   const sceneStarts: number[] = [];
   let t = 0;
@@ -136,7 +146,7 @@ export function shotIndexAt(schedule: IntroSchedule, elapsedMs: number): number 
  * couleur `outroColor` ; `ended` dès que tout est joué.
  */
 export function introFrameAt(
-  shots: readonly IntroShot[],
+  shots: readonly TimelineShot[],
   schedule: IntroSchedule,
   elapsedMs: number,
   outroMs: number,
@@ -189,7 +199,7 @@ export function introFrameAt(
  * Quand la caméra reste sur le même décor d'un plan à l'autre par une coupe franche, l'image doit
  * se raccorder : le cadrage de fin du premier est celui de début du second.
  */
-export function cutsMatch(prev: IntroShot, next: IntroShot): boolean {
+export function cutsMatch(prev: TimelineShot, next: TimelineShot): boolean {
   const end = cameraAt(prev, prev.durationMs, { x: 0, y: 0, zoom: 1 });
   const start = cameraAt(next, 0, { x: 0, y: 0, zoom: 1 });
   return (
