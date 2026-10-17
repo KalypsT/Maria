@@ -77,7 +77,7 @@ def morning():
 
 FILM_SRC = os.path.join(ROOT, "scripts", "film")
 FILM_OUT = os.path.join(ART, "film")
-FILM_ROOMS = ["day", "night"]
+FILM_ROOMS = ["day", "day-nocat", "night"]
 
 
 def film_sources():
@@ -110,6 +110,7 @@ def film():
     close = rooms["day"].crop((1900, 760, 2500, 1098)).resize((1920, 1080), Image.LANCZOS)
     film_save(close.filter(ImageFilter.GaussianBlur(7)), "maria-close.webp")
     schoolbag()
+    traces()
 
 
 def schoolbag():
@@ -132,6 +133,55 @@ def schoolbag():
     d.line((52, 150, 148, 150), fill=blue_dark, width=5)
     img.save(os.path.join(FILM_OUT, "schoolbag.png"))
     print("film/schoolbag.png")
+
+
+def traces():
+    """Ses traces dans la chambre, les jours qui passent (D-191, PLACEHOLDERS) : son gilet plié sur
+    le tabouret, une manche qui pend ; un dessin d'enfant ; un livre ouvert ; ses chaussons."""
+    # Le gilet : plié sur l'assise du tabouret (le haut), une manche qui pend (à droite).
+    img = Image.new("RGBA", (220, 200), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    coral, coral_dark, cream = (226, 134, 127, 255), (190, 104, 99, 255), (250, 238, 214, 255)
+    d.rounded_rectangle((4, 6, 216, 58), radius=18, fill=coral)
+    d.line((14, 32, 206, 32), fill=coral_dark, width=4)
+    for bx in (60, 100, 140):
+        d.ellipse((bx - 5, 14, bx + 5, 24), fill=cream)
+    d.rounded_rectangle((156, 40, 200, 196), radius=16, fill=coral)
+    d.rectangle((156, 176, 200, 196), fill=coral_dark)
+    img.save(os.path.join(FILM_OUT, "cardigan.png"))
+    # Un dessin d'enfant : la maison, le soleil, une petite fille.
+    img = Image.new("RGBA", (200, 160), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rectangle((4, 4, 196, 156), fill=(252, 247, 236, 255), outline=(214, 204, 186, 255), width=3)
+    d.ellipse((140, 18, 180, 58), fill=(250, 196, 70, 255))
+    d.rectangle((30, 82, 100, 140), outline=(214, 92, 120, 255), width=6)
+    d.polygon([(22, 84), (65, 40), (108, 84)], outline=(214, 92, 120, 255), width=6)
+    d.ellipse((128, 82, 146, 100), outline=(90, 120, 200, 255), width=5)
+    d.line((137, 100, 137, 128), fill=(90, 120, 200, 255), width=5)
+    d.line((137, 128, 126, 146), fill=(90, 120, 200, 255), width=5)
+    d.line((137, 128, 148, 146), fill=(90, 120, 200, 255), width=5)
+    d.line((122, 110, 152, 110), fill=(90, 120, 200, 255), width=5)
+    d.line((8, 148, 192, 148), fill=(110, 180, 90, 255), width=6)
+    img.save(os.path.join(FILM_OUT, "drawing.png"))
+    # Un livre ouvert, posé par terre : deux pages, la couverture qui dépasse.
+    img = Image.new("RGBA", (240, 80), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.polygon([(6, 72), (120, 78), (234, 72), (226, 30), (120, 36), (14, 30)], fill=(88, 128, 176, 255))
+    d.polygon([(16, 66), (118, 70), (118, 22), (24, 12)], fill=(250, 246, 236, 255))
+    d.polygon([(122, 70), (224, 66), (216, 12), (122, 22)], fill=(244, 238, 226, 255))
+    for k in range(4):
+        d.line((34, 26 + k * 10, 104, 32 + k * 10), fill=(180, 172, 160, 255), width=3)
+        d.line((136, 32 + k * 10, 206, 26 + k * 10), fill=(180, 172, 160, 255), width=3)
+    img.save(os.path.join(FILM_OUT, "open-book.png"))
+    # Ses chaussons, l'un à côté de l'autre.
+    img = Image.new("RGBA", (200, 70), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    for x0 in (6, 104):
+        d.ellipse((x0, 18, x0 + 90, 66), fill=(238, 150, 176, 255))
+        d.ellipse((x0 + 40, 26, x0 + 84, 56), fill=(214, 112, 146, 255))
+        d.ellipse((x0 + 8, 8, x0 + 34, 30), fill=(252, 236, 242, 255))
+    img.save(os.path.join(FILM_OUT, "slippers.png"))
+    print("film/cardigan.png drawing.png open-book.png slippers.png")
 
 
 def cradle(room):
