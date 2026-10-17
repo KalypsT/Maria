@@ -37,7 +37,7 @@ function conditionFlags(when: FlagCondition): string[] {
  * - chaque déclencheur se désactive lui-même (il note une étape que sa condition exclut) ;
  * - Céleste n'est déplacée ou ne change de salle que dans le noir (entre un fondu au noir et le
  *   retour de l'image), debout sur un sol ; Maria n'arrive dans ses bras et n'en repart que dans le
- *   noir, et jamais à la fin d'un script (D-143) ;
+ *   noir, et jamais à la fin d'un script (D-143), sauf pour la porter (D-192) ;
  * - les étapes des conditions sont notées par un déclencheur ;
  * - les objets reposent sur une surface.
  */
@@ -123,7 +123,18 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
       problems.push(`${what} : ne se désactive pas (rejoué sans fin)`);
     }
     let dark = false;
-    let holding = false;
+    // Céleste porte Maria (D-192) : un script qui part pendant le portage la tient déjà dans ses
+    // bras ; un script qui écrit l'étape du portage peut se terminer avec Maria dans les bras.
+    const carry = story.carrying;
+    const carryFlags = carry?.when.all ?? [];
+    const writes = (flags: readonly string[]) =>
+      t.steps.some((s) => s.do === 'flag' && flags.includes(s.id));
+    const carried =
+      carry !== undefined &&
+      t.room === carry.room &&
+      carryFlags.length > 0 &&
+      carryFlags.every((f) => (t.when.all ?? []).includes(f));
+    let holding = carried;
     let lying = false;
     let gone = false;
     let room = t.room;
@@ -233,8 +244,16 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
     if (dark && !ending) {
       problems.push(`${what} : se termine dans le noir`);
     }
-    if (holding) {
+    const stillCarried =
+      carry !== undefined &&
+      room === carry.room &&
+      (carried || writes(carryFlags)) &&
+      !writes(carry.when.none ?? []);
+    if (holding && !stillCarried) {
       problems.push(`${what} : se termine avec Maria dans les bras`);
+    }
+    if (!holding && stillCarried) {
+      problems.push(`${what} : le portage sans Maria dans les bras`);
     }
     if (lying) {
       // Allongée (D-189) : elle se redresse avant que le joueur ne la reprenne en main.

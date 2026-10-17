@@ -576,6 +576,8 @@ export const PROP_KINDS = [
   'old-pink-kitchen',
   'old-music-book',
   'old-white-cloth',
+  /** Sa place vide sur l'étagère, une lumière chaude, pendant qu'on porte Maria (D-192). */
+  'empty-place',
   ...PASSERBY_KINDS,
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
@@ -744,6 +746,13 @@ export interface StoryData {
     readonly when: FlagCondition;
     readonly track: MusicTrack | null;
   }[];
+  /**
+   * Céleste porte Maria dans ses bras (D-192), hors script, dans cette salle, tant que la condition
+   * est vraie : le joueur la mène (marcher, sauter), sans rien qui demande les mains. Maria est
+   * portée, elle ne bouge pas d'elle-même (pilier 5, décision de l'utilisateur). Elle y arrive et
+   * en repart dans le noir d'un script, comme toujours.
+   */
+  readonly carrying?: { readonly room: string; readonly when: FlagCondition };
 }
 
 export function checkCondition(flags: ReadonlySet<string>, when: FlagCondition): boolean {

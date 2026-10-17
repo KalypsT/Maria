@@ -571,6 +571,8 @@ export class GameScene extends Phaser.Scene {
   private readonly storyCenter = { x: 0, y: 0 };
   /** Le regard qui glisse (D-191) : d'où, vers où, depuis quand (`time.now`), en combien de ms. */
   private readonly storyGlide = { fromX: 0, fromY: 0, toX: 0, toY: 0, start: 0, ms: 0 };
+  /** Céleste porte Maria, hors script (D-192) : les capacités qui demandent les mains coupées. */
+  private carryingMaria = false;
   /** Maria dans les bras de Céleste (D-143) : l'image de Maria assise, tenue devant elle. */
   private heldMaria!: Phaser.GameObjects.Image;
   private readonly mapSeen = new Set<string>();
@@ -1217,12 +1219,21 @@ export class GameScene extends Phaser.Scene {
       }
       this.stepDropHelp();
       const locked = story.locked;
+      // Céleste porte Maria (D-192) : les bras pris, elle marche et saute, rien d'autre.
+      const carrying = story.carrying(this.level.id);
+      if (carrying !== this.carryingMaria) {
+        this.carryingMaria = carrying;
+        this.applyAbilities();
+      }
+      if (carrying) {
+        this.poser.holding = true;
+      }
       // Céleste marche seule dans un script (D-190).
       input.moveX = story.walkX !== 0 ? story.walkX : locked ? 0 : this.controls.moveX;
       input.moveY = locked ? 0 : this.controls.moveY;
       input.jumpPressed = this.controls.consumePressed('Jump') && !locked;
       input.jumpHeld = this.controls.isHeld('Jump') && !locked;
-      input.abilityPressed = this.controls.consumePressed('Ability') && !locked;
+      input.abilityPressed = this.controls.consumePressed('Ability') && !locked && !carrying;
       if (
         this.poser.sitting &&
         !locked &&
@@ -1230,10 +1241,10 @@ export class GameScene extends Phaser.Scene {
       ) {
         this.poser.sitting = false; // Céleste se relève dès qu'on la fait bouger.
       }
-      this.stepShift(this.controls.consumePressed('Shift') && !locked);
+      this.stepShift(this.controls.consumePressed('Shift') && !locked && !carrying);
       this.stepErase();
       this.player.step(input);
-      combat.step(this.player, action && !near && !locked);
+      combat.step(this.player, action && !near && !locked && !carrying);
       const chase = combat.chase;
       if (chase && !chase.horizontal && (chase.events & ChaseEvent.Wake) !== 0) {
         this.fx.shake(CHASE_VIEW.wakeShakeMs, CHASE_VIEW.wakeShakeStrength);
@@ -2811,14 +2822,17 @@ export class GameScene extends Phaser.Scene {
     // Dans la console (D-166), seulement les capacités que le jeu prête.
     const owned = this.arcadeRun ? [] : this.session.data.progression.abilities;
     const lent = this.zone ? [] : (this.level.meta.abilities ?? '').split(/\s+/);
+    // Maria dans les bras (D-192) : rien de ce qui demande les mains (s'accrocher, le parapluie et
+    // son crochet, la glissade, la bascule) ; marcher et sauter suffisent jusqu'à l'étagère.
+    const hands = !this.carryingMaria;
     const has = (ability: Ability) => owned.includes(ability) || lent.includes(ability);
-    this.player.canClimb = this.debugClimb || has(Ability.Climb);
-    this.player.canWallJump = this.debugWallJump || has(Ability.WallJump);
-    this.player.canGlide = this.debugUmbrella || has(Ability.Umbrella);
+    this.player.canClimb = hands && (this.debugClimb || has(Ability.Climb));
+    this.player.canWallJump = hands && (this.debugWallJump || has(Ability.WallJump));
+    this.player.canGlide = hands && (this.debugUmbrella || has(Ability.Umbrella));
     // Le crochet (D-65) s'ajoute au parapluie : il ne sert qu'en planant.
-    this.player.canHook = this.debugHook || has(Ability.Hook);
-    this.player.canSlide = this.debugSlide || has(Ability.Slide);
-    this.canShift = this.debugShift || has(Ability.Shift);
+    this.player.canHook = hands && (this.debugHook || has(Ability.Hook));
+    this.player.canSlide = hands && (this.debugSlide || has(Ability.Slide));
+    this.canShift = hands && (this.debugShift || has(Ability.Shift));
     // Le bouton Basculer n'apparaît qu'avec la bascule (D-107), pâli dans une salle sans couches.
     this.touch?.setShiftState(this.canShift, this.level.layers === null);
     // Le bouton Capacité n'apparaît qu'avec la glissade (D-84).

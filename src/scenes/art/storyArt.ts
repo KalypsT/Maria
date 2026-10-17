@@ -1094,6 +1094,26 @@ export function drawProp(
       }
       break;
     }
+    case 'empty-place': {
+      // Une lumière chaude sur la place vide (D-192), posée sur l'étagère, et une petite étoile.
+      const glow = ctx.createRadialGradient(w / 2, h * 0.7, 1, w / 2, h * 0.7, w / 2);
+      glow.addColorStop(0, 'rgba(255, 226, 160, 0.75)');
+      glow.addColorStop(1, 'rgba(255, 226, 160, 0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, w, h);
+      ctx.save();
+      ctx.translate(w / 2, h * 0.38);
+      ctx.fillStyle = 'rgba(255, 246, 214, 0.9)';
+      ctx.beginPath();
+      ctx.moveTo(0, -3);
+      ctx.quadraticCurveTo(0, 0, 3, 0);
+      ctx.quadraticCurveTo(0, 0, 0, 3);
+      ctx.quadraticCurveTo(0, 0, -3, 0);
+      ctx.quadraticCurveTo(0, 0, 0, -3);
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
     case 'toy-box':
       drawToyBox(ctx, w, h, false);
       break;

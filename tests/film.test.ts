@@ -116,9 +116,9 @@ describe('les films de la fin (D-190)', () => {
     const steps = play?.steps ?? [];
     const film = steps.findIndex((s) => s.do === 'film');
     const zoom = steps.findIndex((s) => s.do === 'look' && s.zoom !== undefined);
-    const putAway = steps.findIndex((s) => s.do === 'await' && s.mode === 'hold');
+    const pickUp = steps.findIndex((s) => s.do === 'pose' && s.pose === 'hold');
     expect(film).toBeGreaterThan(zoom);
-    expect(film).toBeLessThan(putAway);
+    expect(film).toBeLessThan(pickUp);
   });
 
   it('aucune image en trop : chaque image sert à un film, chaque fichier du film est utilisé', () => {

@@ -93,5 +93,8 @@ export const MILESTONES: readonly Milestone[] = [
   // l'étagère (D-190) ; une partie d'avant, restée sur son lit ou sur le tapis, a l'étincelle et
   // la bulle de la porte fermée.
   { trigger: 'finale-play' },
+  // Porter Maria jusqu'à l'étagère (D-192) : la poser sur sa place vide. Une partie d'avant, restée
+  // sur le tapis, a l'étincelle du tapis et la bulle de la porte fermée.
+  { trigger: 'finale-shelf' },
   { trigger: 'finale-leave' },
 ];

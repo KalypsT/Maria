@@ -14,7 +14,12 @@ import { surfaceUnder } from '../src/core/analysis/surfaces';
 import type { Box } from '../src/core/physics/gridCollision';
 import { PropStage, canChangeProp, propBox } from '../src/core/story/PropStage';
 import { StoryDirector, type StoryHost } from '../src/core/story/StoryDirector';
-import { checkCondition, type StoryData, type StoryStep } from '../src/core/story/story';
+import {
+  checkCondition,
+  type FlagCondition,
+  type StoryData,
+  type StoryStep,
+} from '../src/core/story/story';
 import { storyProblems } from '../src/core/story/storyProblems';
 import { buildZone } from '../src/core/world/zone';
 import { HOUSE_STORY } from '../src/levels/house/story';
@@ -600,6 +605,58 @@ describe('histoire de la maison (D-31)', () => {
     );
     expect(hold([fade, { do: 'pose', pose: 'hold' }, back])).toEqual([
       'déclencheur h : se termine avec Maria dans les bras',
+    ]);
+  });
+
+  it('porter Maria (D-192) : un script peut rendre la main avec Maria dans les bras, s’il commence le portage', () => {
+    const carry = (when: FlagCondition, steps: StoryData['triggers'][number]['steps']): string[] =>
+      storyProblems(
+        {
+          ...HOUSE_STORY,
+          carrying: { room: 'bedroom', when: { all: ['carry'], none: ['done'] } },
+          triggers: [
+            {
+              id: 'c',
+              room: 'bedroom',
+              on: 'interact',
+              area: { col: 20, row: 15, w: 7, h: 5 },
+              mark: { col: 23, row: 16 },
+              when,
+              lock: true,
+              repeat: false,
+              steps: [{ do: 'flag', id: 'x' }, ...steps],
+            },
+          ],
+        },
+        zone,
+      ).filter((p) => p.startsWith('déclencheur c') && p.includes('Maria'));
+    const fade = { do: 'fadeOut', ms: 100 } as const;
+    const back = { do: 'fadeIn', ms: 100 } as const;
+    // La prendre dans le noir et rendre la main : le portage commence.
+    expect(
+      carry({}, [fade, { do: 'flag', id: 'carry' }, { do: 'pose', pose: 'hold' }, back]),
+    ).toEqual([]);
+    // Pendant le portage, le script la tient déjà : la poser dans le noir, le portage fini.
+    expect(
+      carry({ all: ['carry'] }, [
+        fade,
+        { do: 'flag', id: 'done' },
+        { do: 'pose', pose: 'stand' },
+        back,
+      ]),
+    ).toEqual([]);
+    // La poser sous les yeux du joueur, non.
+    expect(
+      carry({ all: ['carry'] }, [
+        { do: 'pose', pose: 'stand' },
+        fade,
+        { do: 'flag', id: 'done' },
+        back,
+      ]),
+    ).toEqual(['déclencheur c : Maria prise ou posée sous les yeux du joueur']);
+    // Commencer le portage sans la prendre dans ses bras, non.
+    expect(carry({}, [fade, { do: 'flag', id: 'carry' }, back])).toEqual([
+      'déclencheur c : le portage sans Maria dans les bras',
     ]);
   });
 

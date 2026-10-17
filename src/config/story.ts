@@ -287,6 +287,11 @@ export const StoryFlag = {
   FinaleAwake: 'finale.awake',
   /** Sur le tapis, comme le premier soir : le cœur, le livre commence… et s'efface. */
   FinalePlayed: 'finale.played',
+  /**
+   * Après le tapis (D-192) : Céleste a pris Maria dans ses bras ; le joueur la porte jusqu'à
+   * l'étagère.
+   */
+  FinaleCarrying: 'finale.carrying',
   /** Maria rangée avec soin sur l'étagère du surmeuble (là où était la couverture) ; le câlin. */
   FinaleShelved: 'finale.shelved',
   /** Céleste est sortie par la porte : le dernier plan, sur Maria (D-144). */
@@ -426,7 +431,9 @@ export const STORY_TIMING = {
    */
   toysFirstLookMs: 2200,
   toysGlideUpMs: 2400,
-  toysGlideAlongMs: 3600,
+  toysGlideAlongMs: 2600,
+  /** D-192 : la vue reste sur la place vide de Maria, avant de rendre la main au joueur. */
+  placeLookMs: 1800,
   /**
    * Partir (D-190) : la porte s'ouvre (la lumière du couloir), Céleste se retourne vers Maria ce
    * temps-là ; elle sort, le noir tenu ; la porte se ferme (la lumière s'amincit, s'éteint).
@@ -718,6 +725,8 @@ export const PROP_SIZE = {
   'old-pink-kitchen': { w: 20, h: 16 },
   'old-music-book': { w: 10, h: 7 },
   'old-white-cloth': { w: 9, h: 6 },
+  // Sa place vide sur l'étagère, pendant qu'on la porte (D-192) : une lumière chaude.
+  'empty-place': { w: 22, h: 18 },
   'height-chart': { w: 7, h: 40 },
   'height-chart-grown': { w: 7, h: 40 },
   'height-chart-older': { w: 7, h: 40 },
