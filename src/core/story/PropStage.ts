@@ -23,6 +23,14 @@ export function canChangeProp(box: Box, view: Box, veil: number): boolean {
 }
 
 /**
+ * Montré à ce moment : sa condition, et jamais Maria posée quelque part pendant que Céleste la tient
+ * dans ses bras (D-190, pilier 5 : une seule Maria). Elle la prend et la pose dans le noir.
+ */
+function wantedNow(prop: StoryProp, flags: ReadonlySet<string>, holding: boolean): boolean {
+  return checkCondition(flags, prop.when) && !(holding && prop.kind === 'maria-sit');
+}
+
+/**
  * Objets de mise en scène de la salle courante (§33) : chacun est montré quand sa condition est
  * vraie, mais le changement attend que `canChangeProp` l'autorise. Aucune allocation dans `update`.
  */
@@ -32,14 +40,17 @@ export class PropStage {
   shown: boolean[] = [];
 
   /** Nouvelle salle : état immédiat (l'écran est noir pendant un changement de salle). */
-  load(all: readonly StoryProp[], room: string, flags: ReadonlySet<string>): void {
+  load(all: readonly StoryProp[], room: string, flags: ReadonlySet<string>, holding = false): void {
     this.props = all.filter((p) => p.room === room);
     this.boxes = this.props.map(propBox);
-    this.shown = this.props.map((p) => checkCondition(flags, p.when));
+    this.shown = this.props.map((p) => wantedNow(p, flags, holding));
   }
 
-  /** Applique les changements permis ; vrai si un objet a changé. */
-  update(flags: ReadonlySet<string>, view: Box, veil: number): boolean {
+  /**
+   * Applique les changements permis ; vrai si un objet a changé. `holding` : Céleste tient Maria
+   * dans ses bras.
+   */
+  update(flags: ReadonlySet<string>, view: Box, veil: number, holding = false): boolean {
     let changed = false;
     const props = this.props;
     for (let i = 0; i < props.length; i++) {
@@ -48,7 +59,7 @@ export class PropStage {
       if (!prop || !box) {
         continue;
       }
-      const wanted = checkCondition(flags, prop.when);
+      const wanted = wantedNow(prop, flags, holding);
       if (wanted !== this.shown[i] && (prop.instant === true || canChangeProp(box, view, veil))) {
         this.shown[i] = wanted;
         changed = true;

@@ -1,9 +1,11 @@
 import { TILE_SIZE } from '../../config/display';
 import type { MusicTrack } from '../../config/audio';
 import type { HapticMoment } from '../../config/haptics';
+import type { FilmId } from '../../config/film';
 import type { FlashbackId } from '../../config/memories';
 import type { PlayableMemoryId } from '../../config/playableMemories';
 import { PHYSICS_STEP_HZ, msToSteps } from '../../config/movement';
+import { STORY_WALK_MAX_MS } from '../../config/story';
 import type { Box } from '../physics/gridCollision';
 import {
   areaOverlaps,
@@ -29,6 +31,12 @@ export interface StoryHost {
   /** Céleste passe dans la salle `room` (dans le noir) ; le script continue. */
   room(room: string, col: number, row: number, facing: 1 | -1, returnPoint: boolean): void;
   pose(pose: ScriptPose): void;
+  /** Céleste se tourne, sans se déplacer (D-190). */
+  face?(facing: 1 | -1): void;
+  /** La lumière du couloir dans la sortie `exit` : la porte s'ouvre, ou se ferme (D-190). */
+  door?(exit: number, open: boolean, ms: number): void;
+  /** Un film de la fin (D-190) : la scène le joue, puis appelle `endFilm`. */
+  film?(id: FilmId): void;
   /** Bulle au-dessus de Céleste, ou du personnage `by` (objet de mise en scène). */
   think(icon: ThoughtIcon, ms: number, by?: string): void;
   /** Scintillements étranges dans une zone (tuiles) de la salle courante. */
@@ -79,10 +87,19 @@ export class StoryDirector {
   flashbackProgress = 0;
   /** Déclencheur Agir disponible là où se tient Céleste (-1 : aucun). */
   interactable = -1;
-  /** Agir maintenu sur un déclencheur `hold` (D-171) : de 0 à 1, il part à 1. */
+  /**
+   * Agir maintenu sur un déclencheur `hold` (D-171) : de 0 à 1, il part à 1. Dans une étape
+   * `await` maintenue (D-190), il reste à 1 tant qu'on tient.
+   */
   holdProgress = 0;
   /** Un souvenir jouable est en cours (D-89) : le script attend `endPlay`. */
   playing = false;
+  /** Un film de la fin est en cours (D-190) : le script attend `endFilm`. */
+  filming = false;
+  /** Céleste marche dans un script (étape `walk`, D-190) : -1 ou 1 ; 0 sinon. */
+  walkX = 0;
+  /** Hitbox de Céleste au dernier pas (l'étape `walk`). */
+  private box: Box | null = null;
   private running: StoryTrigger | null = null;
   private stepIndex = 0;
   private stepElapsed = 0;
@@ -131,6 +148,12 @@ export class StoryDirector {
   /** Commandes de Céleste suspendues (script bloquant en cours). */
   get locked(): boolean {
     return this.running?.lock ?? false;
+  }
+
+  /** L'étape `await` en cours (D-190) : le script attend Agir ; sinon null. */
+  get awaiting(): Extract<StoryStep, { do: 'await' }> | null {
+    const step = this.running?.steps[this.stepIndex];
+    return step?.do === 'await' ? step : null;
   }
 
   /** Identifiant du script en cours (debug), sinon null. */
@@ -221,16 +244,23 @@ export class StoryDirector {
   /** Arrête le script en cours et lève le voile (changement de salle, réapparition). */
   cancel(): void {
     this.running = null;
+    this.walkX = 0;
     this.veil = 0;
     this.veilShape = 'plain';
     this.interactable = -1;
     this.flashback = null;
     this.playing = false;
+    this.filming = false;
   }
 
   /** Fin du souvenir jouable (D-89) : le script reprend au pas suivant. */
   endPlay(): void {
     this.playing = false;
+  }
+
+  /** Fin du film (D-190) : le script reprend au pas suivant. */
+  endFilm(): void {
+    this.filming = false;
   }
 
   /**
@@ -241,6 +271,7 @@ export class StoryDirector {
   step(room: string, box: Box, interact: boolean, held = false, grounded = true): void {
     const left = this.lastRoom !== null && this.lastRoom !== room ? this.lastRoom : null;
     this.lastRoom = room;
+    this.box = box;
     const triggers = this.data.triggers;
     if (left !== null) {
       // Salle quittée : ses déclencheurs `leave` (instantanés, ils ne bloquent rien).
@@ -253,7 +284,7 @@ export class StoryDirector {
       }
     }
     if (this.running) {
-      this.advance();
+      this.advance(interact, held);
       return;
     }
     const before = this.interactable;
@@ -322,6 +353,7 @@ export class StoryDirector {
     if (!trigger) {
       return;
     }
+    this.walkX = 0;
     for (;;) {
       this.stepIndex++;
       const step = trigger.steps[this.stepIndex];
@@ -350,6 +382,21 @@ export class StoryDirector {
           this.playing = true;
           this.host.play(step.id);
           return;
+        case 'await':
+          this.holdProgress = 0;
+          return;
+        case 'walk':
+          this.stepTotal = msToSteps(STORY_WALK_MAX_MS, this.stepHz);
+          this.walkX = step.facing;
+          return;
+        case 'film':
+          // Sans scène pour le jouer (les tests), le script continue.
+          if (this.host.film) {
+            this.filming = true;
+            this.host.film(step.id);
+            return;
+          }
+          continue;
         default:
           this.apply(step);
       }
@@ -384,6 +431,12 @@ export class StoryDirector {
         break;
       case 'pose':
         this.host.pose(step.pose);
+        break;
+      case 'face':
+        this.host.face?.(step.facing);
+        break;
+      case 'door':
+        this.host.door?.(step.exit, step.open, step.ms);
         break;
       case 'sparkle':
         this.host.sparkle(step.area, step.ms);
@@ -426,21 +479,51 @@ export class StoryDirector {
     }
   }
 
-  /** Avance l'étape bloquante courante d'un pas. */
-  private advance(): void {
+  /** Avance l'étape bloquante courante d'un pas (Agir appuyé, maintenu : l'étape `await`). */
+  private advance(interact = false, held = false): void {
     const trigger = this.running;
     const step = trigger?.steps[this.stepIndex];
     if (!step) {
       this.running = null;
       return;
     }
-    if (step.do === 'play') {
-      if (!this.playing) {
+    if (step.do === 'play' || step.do === 'film') {
+      if (step.do === 'play' ? !this.playing : !this.filming) {
         this.next();
       }
       return;
     }
+    if (step.do === 'await') {
+      if (step.mode === 'press') {
+        if (interact) {
+          this.next();
+        }
+        return;
+      }
+      // Maintenu (D-190) : le cœur se remplit, reste plein tant qu'on tient ; lâché plein, le
+      // script reprend ; lâché avant, il se vide doucement (comme D-171).
+      const total = Math.max(1, msToSteps(step.ms ?? 0, this.stepHz));
+      if (held) {
+        this.holdProgress = Math.min(1, this.holdProgress + 1 / total);
+      } else if (this.holdProgress >= 1) {
+        this.holdProgress = 0;
+        this.next();
+      } else {
+        this.holdProgress = Math.max(0, this.holdProgress - HOLD_DRAIN / total);
+      }
+      return;
+    }
     this.stepElapsed++;
+    if (step.do === 'walk') {
+      // Arrivée quand le milieu de sa hitbox passe la colonne, ou au bout du temps permis.
+      const box = this.box;
+      const x = box ? (box.x + box.width / 2) / TILE_SIZE : step.col + 0.5;
+      if ((x - (step.col + 0.5)) * step.facing >= 0 || this.stepElapsed >= this.stepTotal) {
+        this.walkX = 0;
+        this.next();
+      }
+      return;
+    }
     const k = this.stepTotal <= 0 ? 1 : Math.min(1, this.stepElapsed / this.stepTotal);
     if (step.do === 'fadeOut') {
       this.veil = this.veilFrom + (1 - this.veilFrom) * k;

@@ -31,6 +31,7 @@ import { HitchMonitor, type FrameWork } from '../core/perf/hitchMonitor';
 import { STRANGE_TINTS, STRANGE_TINT_NAMES } from '../config/strangeThemes';
 import { DEFAULT_MOVEMENT, MOVEMENT_PARAM_RANGES, type MovementParams } from '../config/movement';
 import { LEVELS, ZONES, levelName } from '../levels';
+import { FINALE_REPLAY } from '../levels/finale/story';
 import { shellTally, zoneShells } from '../core/world/shells';
 import type { GameScene } from '../scenes/GameScene';
 import {
@@ -1689,6 +1690,8 @@ export function installDebugOverlay(scene: GameScene): void {
   // chambre immense (D-141), son ciel (D-142), la chambre grande et Maria retrouvée (D-143), le
   // matin (D-144) et l'après-fin (D-145).
   const phaseFour = steps.find(([, flags]) => flags.includes(F.GrownFourth));
+  // Rejouer la fin (D-190) : les étapes jusque-là, et Céleste à sa place.
+  const replays: [string, string[], { room: string; col: number; row: number }][] = [];
   if (phaseFour) {
     const night = [...phaseFour[1], F.FinaleRug, F.FinaleCradle, F.FinaleGoodnight, F.FinaleNight];
     const sky = [...night, F.FinaleEntered, F.FinaleMusicBox, F.FinaleSky];
@@ -1729,6 +1732,19 @@ export function installDebugOverlay(scene: GameScene): void {
         ],
       ],
     );
+    replays.push(
+      ['Rejouer la fin : les retrouvailles', [...sky, F.FinaleBig], FINALE_REPLAY.reunion],
+      [
+        'Rejouer la fin : le matin',
+        [...together, F.FinaleMorning, F.FinaleAwake],
+        FINALE_REPLAY.morning,
+      ],
+      [
+        'Rejouer la fin : le départ',
+        [...together, F.FinaleMorning, F.FinaleAwake, F.FinalePlayed, F.FinaleShelved],
+        FINALE_REPLAY.leave,
+      ],
+    );
   }
   const current = [...scene.story.flags].sort().join();
   for (const [label, flags] of steps) {
@@ -1742,6 +1758,13 @@ export function installDebugOverlay(scene: GameScene): void {
     scene.setStoryFlags(storySelect.value ? storySelect.value.split(',') : []);
     storySelect.blur();
   });
+  for (const [label, flags, spot] of replays) {
+    element('button', panel, undefined, label).addEventListener('click', (event) => {
+      scene.playStoryFrom(flags, spot.room, spot.col, spot.row);
+      storySelect.value = '';
+      (event.currentTarget as HTMLElement).blur();
+    });
+  }
   // Souvenir jouable (D-89) : comme depuis le cahier (hors partie, retour ici à la fin).
   element('button', panel, undefined, 'Jouer le souvenir de la cuisine').addEventListener(
     'click',

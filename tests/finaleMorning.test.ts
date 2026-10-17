@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { STORY_TIMING as S, StoryFlag as F } from '../src/config/story';
+import { STORY_ZOOM, StoryFlag as F } from '../src/config/story';
 import { Tile, tileAt } from '../src/core/level/LevelData';
 import { checkCondition, holdsMaria, type StoryStep } from '../src/core/story/story';
 import { StoryDirector } from '../src/core/story/StoryDirector';
@@ -76,10 +76,12 @@ describe('le matin (D-144)', () => {
     expect(actions(SHELVED)).toEqual([]);
     expect(actions(GONE)).toEqual([]);
     expect(flagsOf(trigger('finale-morning').steps)).toEqual([F.FinaleMorning, F.FinaleAwake]);
-    expect(flagsOf(trigger('finale-play').steps)).toEqual([F.FinalePlayed]);
+    // Le tapis mène d'une traite à l'étagère (D-190) ; une partie reprise entre les deux range
+    // Maria depuis le tapis.
+    expect(flagsOf(trigger('finale-play').steps)).toEqual([F.FinalePlayed, F.FinaleShelved]);
     expect(flagsOf(trigger('finale-shelf').steps)).toEqual([F.FinaleShelved]);
     expect(MILESTONES.map((m) => ('trigger' in m ? m.trigger : ''))).toEqual(
-      expect.arrayContaining(['finale-morning', 'finale-play', 'finale-shelf', 'finale-leave']),
+      expect.arrayContaining(['finale-play', 'finale-leave']),
     );
   });
 
@@ -122,13 +124,19 @@ describe('le matin (D-144)', () => {
     expect(rug).toEqual(trigger('evening-play').area);
   });
 
-  it('le tapis, comme le premier soir : le cœur, le livre commence… et s’efface ; elle la regarde', () => {
+  it('le tapis, comme le premier soir : le cœur ; Agir, l’histoire ; sa pensée part ; elle la regarde', () => {
     const steps = trigger('finale-play').steps;
     const first = trigger('evening-play').steps;
     const seat = (list: readonly StoryStep[]) => list.find((s) => s.do === 'place');
     expect(seat(steps)).toEqual(seat(first));
     const icons = steps.flatMap((s) => (s.do === 'thought' ? [s.icon] : []));
-    expect(icons).toEqual(['heart', 'book', 'maria-shelf']);
+    expect(icons).toEqual(['heart', 'book', 'friends']);
+    // Le réflexe (D-190) : c'est le joueur qui ouvre l'histoire, l'étincelle sur la place de Maria.
+    const press = index(steps, (s) => s.do === 'await');
+    expect(steps[press]).toEqual({ do: 'await', mode: 'press', mark: trigger('finale-play').mark });
+    expect(press).toBeGreaterThan(index(steps, (s) => s.do === 'thought' && s.icon === 'heart'));
+    expect(press).toBeLessThan(index(steps, (s) => s.do === 'thought' && s.icon === 'book'));
+    // L'histoire aussi longue que la première fois ; puis la pensée s'en va.
     const book = need(
       steps.find((s) => s.do === 'thought' && s.icon === 'book'),
       'livre',
@@ -137,24 +145,49 @@ describe('le matin (D-144)', () => {
       first.find((s) => s.do === 'thought' && s.icon === 'book'),
       'livre du premier soir',
     );
-    expect(book.do === 'thought' && firstBook.do === 'thought' && book.ms < firstBook.ms).toBe(
+    expect(book.do === 'thought' && firstBook.do === 'thought' && book.ms === firstBook.ms).toBe(
       true,
     );
-    expect(S.fadingBookMs).toBeLessThan(S.holdMs);
+    // La vue se rapproche d'elles deux, comme au premier soir, puis revient.
+    const look = index(steps, (s) => s.do === 'look' && s.zoom !== undefined);
+    expect(look).toBeGreaterThan(index(steps, (s) => s.do === 'thought' && s.icon === 'friends'));
+    expect(steps[look]).toMatchObject({ zoom: STORY_ZOOM.evening });
+    expect(steps.slice(look + 1)).toContainEqual({ do: 'look' });
   });
 
-  it('ranger Maria sur l’étagère du surmeuble, là où était la couverture ; le dernier câlin', () => {
+  it('ranger Maria sur l’étagère, là où était la couverture : tenir, le cœur ; lâcher, la poser', () => {
     // L'étagère traversable du surmeuble, sous Maria ; la couverture y était le premier soir.
     expect(tileAt(bedroom, MARIA_SHELF.col, MARIA_SHELF.row + 1)).toBe(Tile.OneWay);
     const blanket = need(trigger('evening-blanket').area, 'couverture');
     expect(MARIA_SHELF.col).toBeGreaterThanOrEqual(blanket.col);
     expect(MARIA_SHELF.col).toBeLessThan(blanket.col + blanket.w);
     const steps = trigger('finale-shelf').steps;
-    const shelved = index(steps, (s) => s.do === 'flag' && s.id === F.FinaleShelved);
-    expect(shelved).toBeGreaterThan(index(steps, (s) => s.do === 'fadeOut'));
-    expect(index(steps, (s) => s.do === 'thought' && s.icon === 'heart')).toBeGreaterThan(
-      index(steps, (s) => s.do === 'fadeIn'),
+    // Les mêmes gestes à la fin du tapis (D-190).
+    expect(trigger('finale-play').steps.slice(-steps.length)).toEqual(steps);
+    // Dans le noir, Maria dans les bras, devant l'étagère.
+    const hold = index(steps, (s) => s.do === 'pose' && s.pose === 'hold');
+    expect(hold).toBeGreaterThan(index(steps, (s) => s.do === 'fadeOut'));
+    // Le dernier câlin : Agir maintenu, sous les yeux du joueur ; plus de bulle « étagère » ni
+    // de cœur après.
+    const wait = index(steps, (s) => s.do === 'await');
+    expect(steps[wait]).toMatchObject({ do: 'await', mode: 'hold' });
+    expect(wait).toBeGreaterThan(index(steps, (s) => s.do === 'fadeIn'));
+    expect(steps.filter((s) => s.do === 'thought')).toEqual([]);
+    // Lâcher : le noir, Maria sur l'étagère, les bras vides.
+    const after = steps.slice(wait + 1);
+    expect(after[0]?.do).toBe('fadeOut');
+    const shelved = index(after, (s) => s.do === 'flag' && s.id === F.FinaleShelved);
+    const empty = index(after, (s) => s.do === 'pose' && s.pose === 'stand');
+    expect(shelved).toBeLessThan(index(after, (s) => s.do === 'fadeIn'));
+    expect(empty).toBeLessThan(index(after, (s) => s.do === 'fadeIn'));
+    // Elle la regarde de près, puis se tourne vers la porte (à droite).
+    expect(after).toContainEqual(expect.objectContaining({ do: 'look', zoom: STORY_ZOOM.evening }));
+    const door = need(
+      bedroom.exits.find((e) => e.id === 1),
+      'porte',
     );
+    expect(door.col).toBeGreaterThan(MARIA_SHELF.col);
+    expect(after.filter((s) => s.do === 'face')).toEqual([{ do: 'face', facing: 1 }]);
   });
 
   it('la chambre reste fermée jusqu’à ce que Maria soit rangée ; ensuite, la porte', () => {
@@ -187,21 +220,51 @@ describe('le dernier plan (D-144, §12)', () => {
     }
   });
 
-  it('Céleste sort ; la vue reste sur Maria ; un très léger signe ; tout redevient normal ; le noir', () => {
+  it('partir (D-190) : la porte s’ouvre, elle se retourne vers Maria, sort ; la porte se ferme', () => {
+    const door = need(
+      bedroom.exits.find((e) => e.id === 1),
+      'porte',
+    );
+    const open = index(steps, (s) => s.do === 'door' && s.open);
+    const back = index(steps, (s) => s.do === 'face' && s.facing === -1);
+    const away = index(steps, (s) => s.do === 'face' && s.facing === 1);
+    const walk = index(steps, (s) => s.do === 'walk');
+    const gone = index(steps, (s) => s.do === 'gone');
+    const close = index(steps, (s) => s.do === 'door' && !s.open);
+    expect(steps[open]).toMatchObject({ exit: door.id });
+    // Elle se retourne vers Maria (à gauche, l'étagère), longtemps, puis vers la porte.
+    expect(MARIA_SHELF.col).toBeLessThan(door.col);
+    expect(open).toBeLessThan(back);
+    expect(back).toBeLessThan(away);
+    expect(steps[back + 1]).toMatchObject({ do: 'wait' });
+    // Elle marche d'elle-même jusque dans la porte, sans la passer ; puis le noir.
+    expect(away).toBeLessThan(walk);
+    const step = steps[walk];
+    expect(step?.do === 'walk' && step.facing === 1 && step.col < door.col).toBe(true);
+    expect(step?.do === 'walk' && step.col >= need(leave.area, 'zone').col).toBe(true);
+    expect(steps[walk + 1]).toMatchObject({ do: 'fadeOut' });
+    // La porte se ferme sous les yeux du joueur, Céleste partie.
+    expect(close).toBeGreaterThan(gone);
+    expect(close).toBeGreaterThan(index(steps, (s) => s.do === 'fadeIn'));
+    expect(steps[close]).toMatchObject({ exit: door.id });
+  });
+
+  it('Céleste partie, la porte fermée : le film des années ; le noir ; la fin', () => {
     expect(flagsOf(steps)).toEqual([F.FinaleGone]);
     const gone = index(steps, (s) => s.do === 'gone');
     expect(gone).toBeGreaterThan(index(steps, (s) => s.do === 'fadeOut'));
-    expect(steps).toContainEqual({ do: 'look', ...MARIA_SHELF });
-    const back = index(steps, (s) => s.do === 'fadeIn');
-    const glimmer = index(steps, (s) => s.do === 'glimmer');
-    expect(glimmer).toBeGreaterThan(back);
-    expect(steps).toContainEqual(expect.objectContaining({ do: 'sparkle' }));
-    expect(steps).toContainEqual(expect.objectContaining({ do: 'hush' }));
-    // Maria ne bouge pas : rien ne la déplace pendant le plan.
+    const closed = index(steps, (s) => s.do === 'door' && !s.open);
+    const film = index(steps, (s) => s.do === 'film');
+    expect(steps[film]).toEqual({ do: 'film', id: 'years' });
+    expect(film).toBeGreaterThan(closed);
+    // Il finit dans le noir : le jeu y passe aussitôt, l'étape de la fin s'y écrit.
+    expect(steps[film + 1]).toEqual({ do: 'fadeOut', ms: 0 });
+    const flag = index(steps, (s) => s.do === 'flag');
+    expect(flag).toBeGreaterThan(film);
+    // Maria ne bouge pas : rien ne la déplace.
     expect(steps.filter((s) => s.do === 'flag' || s.do === 'toggle')).toHaveLength(1);
-    // Le noir, puis l'écran de fin et l'accueil (D-145) : la dernière étape. « Continuer »
-    // reprendra dans le couloir ; elle ne revient pas la chercher.
-    expect(index(steps.slice(glimmer), (s) => s.do === 'fadeOut')).toBeGreaterThan(0);
+    // L'écran de fin et l'accueil (D-145) : la dernière étape. « Continuer » reprendra dans le
+    // couloir ; elle ne revient pas la chercher.
     expect(steps.at(-1)).toEqual({ do: 'end', room: AFTER_END_ROOM });
     expect(
       HOUSE_STORY.triggers

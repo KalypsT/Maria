@@ -794,3 +794,50 @@ Toutes les images ci-dessus sont reçues et intégrées (`public/art/memory-*.we
 `flashback-*.jpg`). Retouches faites (D-181) : le second Roger retiré de `flashback-roger`, le téléphone retiré de
 `memory-pink-kitchen`, les cheveux de Céleste châtains dans `flashback-music-book` et
 `flashback-white-cloth`. Le hochet et la petite cuillère de Maria (D-180) : reçus aussi.
+
+## D-190 : la fin
+
+### Le contrechamp (facultatif) : Céleste assise devant Maria (reçue)
+
+Le film du contrechamp utilise aujourd'hui l'illustration debout de l'écran de départ
+(`celeste-tee.png`), le même cadre que Céleste en pyjama dans l'intro. Une version assise, tournée
+vers Maria, rendrait le moment plus intime. Même conversation que la phase 4, `celeste-tee.png` joint :
+
+```
+Same girl, strictly identical (same face, round pink glasses, freckles, ponytail with its pink
+scrunchie, green t-shirt, light-blue straight jeans, white sneakers with small pink flowers, same
+illustration style, same colors, same line and texture), now SITTING on the floor, strict side
+profile facing right, knees bent in front of her, hands resting on her knees, head slightly tilted
+down, looking softly at something small on the floor in front of her (out of frame). Calm and a
+little pensive, the hint of a smile. Full body, plain pure white background, no shadow, no text.
+```
+
+Fichier : `celeste-tee-sit.png` (fond détouré comme les autres).
+
+### Céleste qui grandit (D-190, PR 7) : 9, 12, 15 et 18 ans (reçues)
+
+Le film des années montre Céleste traverser sa chambre, de plus en plus grande. En attendant ces
+images, des silhouettes provisoires (mêmes noms, dans `public/art/film/`). **Une conversation**,
+`celeste-tee.png` joint au premier message (et de nouveau si le visage dérive). Fond blanc uni : je
+détoure et je mets à l'échelle. Le visage doit rester **le sien** à chaque âge : mêmes yeux, mêmes
+taches de rousseur, **lunettes rondes roses** (un peu plus fines en grandissant), cheveux bruns.
+
+Début commun (premier message seulement) :
+
+```
+This is Céleste at 7 years old (attached). I am going to ask you for the same girl at 9, 12, 15 and
+18 years old, one image per message. Keep her recognizable at every age: same face shape, same
+eyes, freckles, brown hair, round pink glasses (slightly thinner frames as she grows), same
+illustration style, same colors, same line and paper-like texture. Full body, plain pure white
+background, no shadow, no text, no logo.
+```
+
+| Fichier          | Message                                                                                                                                                                                                                                                                                |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `celeste-9.png`  | `Céleste at 9 years old, standing, strict side profile facing right, a school backpack on her back, simple everyday clothes (a striped long-sleeve top, jeans, sneakers), ponytail with a pink scrunchie, calm expression.`                                                            |
+| `celeste-12.png` | `Céleste at 12 years old, SITTING cross-legged (as if on a bed, the bed not drawn), strict side profile facing right, headphones on her ears, looking down at a book open on her knees, loose shoulder-length hair, hoodie and leggings, relaxed.`                                     |
+| `celeste-15.png` | `Céleste at 15 years old, standing, strict side profile facing right, looking down at a smartphone held in both hands, hair in a loose low ponytail, oversized sweater, jeans, white sneakers.`                                                                                        |
+| `celeste-18.png` | `Céleste at 18 years old, a young woman, standing, side profile facing LEFT, one hand on the handle of a rolling suitcase beside her, a light coat, hair down, glancing back over her shoulder with a soft, slightly sad little smile, as if saying goodbye to something in her room.` |
+
+Je les remplace aux mêmes noms ; la taille et la place dans la chambre sont réglées dans
+`src/config/film.ts` (`CELESTE_AT`).

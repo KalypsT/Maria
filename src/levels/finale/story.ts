@@ -16,6 +16,10 @@ import type { StoryData, StoryStep, StoryTrigger, TileArea } from '../../core/st
 const RUG_AREA: TileArea = { col: 18, row: 17, w: 4, h: 3 };
 /** Assise sur le tapis, à sa place du premier soir, tournée vers la place vide de Maria. */
 const RUG_SEAT = { col: 21, row: 19 };
+/** L'étincelle du tapis, au-dessus de la place de Maria (D-31). */
+const RUG_MARK = { col: 19, row: 18 };
+/** Le matin (D-190) : la vue se rapproche d'elles deux, entre Céleste et Maria. */
+const RUG_LOOK = { col: 20, row: 18 };
 /** Le berceau, sur le coffre à jouets (D-31) ; on l'atteint du sol ou du dessus du coffre. */
 export const FINALE_CRADLE = { col: 23, row: 17 };
 const CRADLE_AREA: TileArea = { col: 20, row: 15, w: 7, h: 5 };
@@ -93,12 +97,46 @@ const MARIA_RUG = { col: 19, row: 19 };
  */
 export const MARIA_SHELF = { col: 33, row: 11 };
 const SHELF_STAND = { col: 35, row: 11 };
-const SHELF_GLOW: TileArea = { col: 31, row: 9, w: 5, h: 3 };
+/** Le dernier câlin (D-190) : le cœur à tenir, au-dessus de Maria dans les bras de Céleste. */
+const SHELF_HEART = { col: 34, row: 8 };
+/** Maria posée (D-190) : la vue se rapproche d'elles deux. */
+const SHELF_LOOK = { col: 34, row: 10 };
+/**
+ * Ranger Maria (§11, D-190). Dans le noir, Céleste est devant l'étagère du surmeuble, là où était la
+ * couverture le premier soir, Maria dans les bras. Le dernier câlin : Agir maintenu, le cœur se
+ * remplit et reste plein tant qu'on tient ; **relâcher, c'est la poser** : le noir, Maria assise
+ * sur l'étagère, les bras de Céleste vides. Elle la regarde, longtemps ; puis elle se tourne vers
+ * la porte. Elle ne la prend et ne la pose que dans le noir (pilier 5).
+ */
+const PUT_AWAY: readonly StoryStep[] = [
+  { do: 'fadeOut', ms: S.fadeMs },
+  { do: 'place', ...SHELF_STAND, facing: -1 },
+  { do: 'pose', pose: 'hold' },
+  { do: 'fadeIn', ms: S.fadeMs },
+  { do: 'wait', ms: S.lookMs },
+  { do: 'await', mode: 'hold', mark: SHELF_HEART, ms: S.hugHoldMs },
+  { do: 'fadeOut', ms: S.letGoFadeMs },
+  { do: 'flag', id: F.FinaleShelved },
+  { do: 'pose', pose: 'stand' },
+  { do: 'wait', ms: S.letGoBlackMs },
+  { do: 'fadeIn', ms: S.nightFadeInMs },
+  { do: 'look', ...SHELF_LOOK, zoom: STORY_ZOOM.evening },
+  { do: 'wait', ms: S.shelfLookMs },
+  { do: 'look' },
+  { do: 'wait', ms: STORY_ZOOM.easeMs },
+  { do: 'face', facing: 1 },
+  { do: 'wait', ms: S.lookMs },
+];
 /**
  * Devant la porte de la chambre, sur toute la hauteur : en sortant, le dernier plan (D-144). On ne
  * peut pas atteindre la porte sans y passer.
  */
 const LEAVE_AREA: TileArea = { col: 41, row: 9, w: 4, h: 11 };
+/** La porte de la chambre (sortie 1, vers le couloir), au bas du mur de droite. */
+const BEDROOM_DOOR = 1;
+/** Partir (D-190) : la vue, entre Maria et la porte ; Céleste marche jusque dans la porte. */
+const LEAVE_LOOK = { col: 38, row: 14 };
+const LEAVE_COL = 43;
 /**
  * Après la fin (D-145) : « Continuer » reprend dans le couloir, juste derrière la porte de la
  * chambre (son départ) ; Céleste ne revient pas chercher Maria.
@@ -109,6 +147,16 @@ const FAMILY_DRAWING = { col: 37, row: 5 };
 /** Le lit : Agir pour se coucher (le premier soir, D-37). */
 const BED_AREA: TileArea = { col: 7, row: 13, w: 11, h: 3 };
 const BED_SEAT = { col: 12, row: 15 };
+
+/**
+ * Rejouer la fin (outil de debug, D-190) : où poser Céleste. Devant le berceau géant, avant de
+ * découvrir Maria ; sur son lit, le matin, Maria à côté d'elle ; devant l'étagère, Maria rangée.
+ */
+export const FINALE_REPLAY = {
+  reunion: { room: 'finale-big', ...BIG_CRADLE_SIDE },
+  morning: { room: 'bedroom', ...BED_SEAT },
+  leave: { room: 'bedroom', ...SHELF_STAND },
+} as const;
 
 const TRIGGERS: StoryTrigger[] = [
   {
@@ -349,8 +397,11 @@ const TRIGGERS: StoryTrigger[] = [
     // Le câlin (D-171) : Agir maintenu, le cœur se remplit. Dans le noir, Céleste la prend dans
     // ses bras ; le cœur du prologue, deux battements ; le thème de fin commence ; l'étrange s'en
     // va en scintillements. Le cercle se referme sur elles et se rouvre sur la vraie chambre, la
-    // nuit : la chambre est revenue à sa taille. Céleste assise sur son lit, Maria dans les bras ;
-    // dans le noir, Maria à côté d'elle (pilier 5 : elle ne change de place que dans le noir).
+    // nuit : la chambre est revenue à sa taille. Céleste assise sur son lit, Maria dans les bras, un
+    // long temps sans bulle ; elle s'endort avec elle. Le matin, elle se réveille Maria dans les
+    // bras ; dans le noir, Maria à côté d'elle (pilier 5 : elle ne change de place que dans le
+    // noir) ; l'étincelle sur le tapis. Une seule nuit, un seul cœur (D-190) : avant, un second
+    // cœur, un troisième sur le lit, puis le lit à rejoindre pour le matin, et un quatrième.
     id: 'finale-big-hug',
     room: 'finale-big',
     on: 'interact',
@@ -370,25 +421,30 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'thought', icon: 'heart', ms: S.reunionHoldMs },
       { do: 'wait', ms: S.lookMs },
       { do: 'sparkle', area: BIG_RELEASE, ms: S.reunionHoldMs },
-      { do: 'wait', ms: S.reunionHoldMs },
-      { do: 'thought', icon: 'heart', ms: S.holdMs },
-      { do: 'wait', ms: S.holdMs + S.lookMs },
+      { do: 'wait', ms: S.reunionHoldMs + S.lookMs },
       { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
       { do: 'flag', id: F.FinaleHome },
       { do: 'room', room: 'bedroom', ...BED_SEAT, facing: -1, returnPoint: true },
       { do: 'pose', pose: 'hold-sit' },
       { do: 'wait', ms: S.nightBlackMs },
       { do: 'fadeIn', ms: S.nightFadeInMs, shape: 'iris' },
-      { do: 'wait', ms: S.reunionLookMs },
-      { do: 'thought', icon: 'heart', ms: S.holdMs },
-      { do: 'wait', ms: S.holdMs + S.reunionLookMs },
+      { do: 'wait', ms: S.homeHoldMs },
+      // Elle s'endort, Maria dans les bras : la nuit, puis le matin (D-144).
       { do: 'fadeOut', ms: S.nightFadeOutMs },
+      // Le matin d'abord : Maria, dans les bras, ne s'affiche jamais aussi à côté d'elle.
+      { do: 'flag', id: F.FinaleMorning },
       { do: 'flag', id: F.FinaleTogether },
       { do: 'place', ...BED_SEAT, facing: -1 },
-      { do: 'pose', pose: 'sit' },
+      { do: 'pose', pose: 'hold-sit' },
       { do: 'wait', ms: S.nightBlackMs },
       { do: 'fadeIn', ms: S.nightFadeInMs },
+      { do: 'wait', ms: S.holdMs + S.lookMs },
+      { do: 'fadeOut', ms: S.fadeMs },
+      { do: 'flag', id: F.FinaleAwake },
+      { do: 'pose', pose: 'sit' },
+      { do: 'fadeIn', ms: S.fadeMs },
       { do: 'wait', ms: S.lookMs },
+      { do: 'sparkle', area: RUG_AREA, ms: S.cradleSparkleMs },
     ],
   },
   {
@@ -433,8 +489,9 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // Le matin (D-144) : Céleste s'endort, Maria à côté d'elle ; elle se réveille, Maria dans les
-    // bras, le cœur. Elle la pose à côté d'elle (dans le noir) ; une étincelle sur le tapis, là où
+    // Le matin (D-144), pour une partie d'avant D-190 restée sur son lit, Maria à côté d'elle (le
+    // câlin mène maintenant d'une traite au matin) : Céleste s'endort ; elle se réveille, Maria dans
+    // les bras, le cœur. Elle la pose à côté d'elle (dans le noir) ; une étincelle sur le tapis, là où
     // était la toute première action du jeu.
     id: 'finale-morning',
     room: 'bedroom',
@@ -464,14 +521,16 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // Sur le tapis, comme le premier soir (D-31) : Céleste s'assoit en face de Maria, un câlin,
-    // l'histoire du soir commence… et s'efface. Elle la regarde : elle a grandi (§11). Puis elle
-    // pense à l'étagère où la ranger.
+    // Sur le tapis, comme le premier soir (D-31) : Céleste s'assoit en face de Maria, le câlin.
+    // Puis le réflexe (D-190, §11) : c'est le joueur qui ouvre l'histoire du soir, aussi longue que
+    // la première fois ; elle s'efface, et la pensée de Céleste s'en va vers les copains de la
+    // classe de mer. La vue se rapproche d'elles deux, comme au premier soir : elle la regarde ;
+    // le contrechamp de l'intro (un film) : elle a grandi. Puis elle la range (`PUT_AWAY`).
     id: 'finale-play',
     room: 'bedroom',
     on: 'interact',
     area: RUG_AREA,
-    mark: { col: 19, row: 18 },
+    mark: RUG_MARK,
     when: { all: [F.FinaleAwake], none: [F.FinalePlayed] },
     lock: true,
     steps: [
@@ -482,36 +541,39 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'fadeIn', ms: S.fadeMs },
       { do: 'thought', icon: 'heart', ms: S.holdMs },
       { do: 'wait', ms: S.holdMs + 200 },
-      { do: 'thought', icon: 'book', ms: S.fadingBookMs },
-      { do: 'wait', ms: S.fadingBookMs + S.holdMs + S.lookMs },
-      { do: 'pose', pose: 'stand' },
-      { do: 'thought', icon: 'maria-shelf', ms: S.thoughtMs },
+      { do: 'await', mode: 'press', mark: RUG_MARK },
+      { do: 'thought', icon: 'book', ms: S.holdMs },
+      { do: 'wait', ms: S.holdMs + S.thoughtFadeMs },
+      { do: 'thought', icon: 'friends', ms: S.rugDriftMs },
+      { do: 'wait', ms: S.rugDriftMs + S.lookMs },
+      { do: 'look', ...RUG_LOOK, zoom: STORY_ZOOM.evening },
+      { do: 'wait', ms: S.rugLookMs },
+      // Le contrechamp de l'intro (D-190) : le premier soir, puis ce matin. Elle a grandi.
+      { do: 'film', id: 'contrechamp' },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'look' },
+      { do: 'wait', ms: STORY_ZOOM.easeMs },
+      ...PUT_AWAY,
     ],
   },
   {
-    // Ranger Maria (§11) : dans le noir, Céleste la porte sur l'étagère du surmeuble, là où était la
-    // couverture le premier soir, et la pose avec soin. Le dernier câlin.
+    // Ranger Maria (§11, D-190), pour une partie reprise entre le tapis et l'étagère (ou d'avant
+    // D-190) : Maria est sur le tapis ; Agir, et Céleste la range.
     id: 'finale-shelf',
     room: 'bedroom',
     on: 'interact',
     area: RUG_AREA,
-    mark: { col: 19, row: 18 },
+    mark: RUG_MARK,
     when: { all: [F.FinalePlayed], none: [F.FinaleShelved] },
     lock: true,
-    steps: [
-      { do: 'fadeOut', ms: S.fadeMs },
-      { do: 'flag', id: F.FinaleShelved },
-      { do: 'place', ...SHELF_STAND, facing: -1 },
-      { do: 'fadeIn', ms: S.fadeMs },
-      { do: 'wait', ms: S.lookMs },
-      { do: 'thought', icon: 'heart', ms: S.holdMs },
-      { do: 'wait', ms: S.holdMs + S.lookMs },
-    ],
+    steps: PUT_AWAY,
   },
   {
-    // C'est le joueur qui fait sortir Céleste (D-138). Le dernier plan (§12) : la vue reste sur
-    // Maria ; un très léger signe du monde étrange ; Maria ne bouge pas ; tout redevient normal ; le
-    // noir. L'écran de fin, puis l'accueil (D-145). Céleste ne revient pas la chercher.
+    // C'est le joueur qui mène Céleste à la porte (D-138). Partir (D-190) : la vue se cale sur la
+    // chambre, Maria et la porte ; la porte s'ouvre, la lumière du couloir ; Céleste se retourne
+    // vers Maria, un long moment ; puis elle sort, d'elle-même. La porte se ferme, la lumière
+    // s'amincit et s'éteint. Le film des années : le temps passe, Maria reste. Le noir ; l'écran de
+    // fin, puis l'accueil (D-145). Céleste ne revient pas la chercher.
     id: 'finale-leave',
     room: 'bedroom',
     on: 'touch',
@@ -521,27 +583,29 @@ const TRIGGERS: StoryTrigger[] = [
     // Un saut ne doit pas mener à la porte sans passer par le dernier plan (D-189).
     airborne: true,
     steps: [
+      { do: 'look', ...LEAVE_LOOK },
+      { do: 'door', exit: BEDROOM_DOOR, open: true, ms: S.doorOpenMs },
+      { do: 'wait', ms: S.doorOpenMs },
+      { do: 'face', facing: -1 },
+      { do: 'wait', ms: S.lookBackMs },
+      { do: 'face', facing: 1 },
+      { do: 'wait', ms: S.lookMs / 2 },
+      { do: 'walk', col: LEAVE_COL, facing: 1 },
       { do: 'fadeOut', ms: S.fadeMs },
-      { do: 'flag', id: F.FinaleGone },
       { do: 'gone' },
-      { do: 'look', ...MARIA_SHELF },
-      {
-        do: 'hush',
-        ms:
-          S.nightFadeInMs +
-          S.lastShotMs +
-          S.glimmerMs +
-          S.lookMs +
-          S.nightFadeOutMs +
-          S.nightBlackMs,
-      },
-      { do: 'fadeIn', ms: S.nightFadeInMs },
-      { do: 'wait', ms: S.lastShotMs },
-      { do: 'glimmer', ms: S.glimmerMs },
-      { do: 'sparkle', area: SHELF_GLOW, ms: S.glimmerMs },
-      { do: 'wait', ms: S.glimmerMs + S.lookMs },
-      { do: 'fadeOut', ms: S.nightFadeOutMs },
+      { do: 'wait', ms: S.leaveBlackMs },
+      { do: 'fadeIn', ms: S.fadeMs * 2 },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'door', exit: BEDROOM_DOOR, open: false, ms: S.doorCloseMs },
+      { do: 'wait', ms: S.doorCloseMs + S.lookMs },
+      // Le film des années (D-190) : les nuits, puis les années ; Maria, la même. Il finit dans
+      // le noir : le jeu y passe aussitôt.
+      { do: 'film', id: 'years' },
+      { do: 'fadeOut', ms: 0 },
       { do: 'wait', ms: S.nightBlackMs },
+      // Écrite dans le noir, à la toute fin : rien de l'après-fin (le dessin de famille, la
+      // console) n'apparaît avant, et le thème de fin continue jusqu'à l'écran de fin (D-190).
+      { do: 'flag', id: F.FinaleGone },
       // L'écran de fin, puis l'accueil (D-145).
       { do: 'end', room: AFTER_END_ROOM },
     ],
@@ -736,9 +800,10 @@ export const FINALE_STORY: Pick<
   // La nuit : les lumières éteintes, seule la veilleuse reste (D-85).
   dim: [{ room: 'bedroom', when: { all: [F.FinaleNight], none: [F.FinaleMorning] } }],
   // Les retrouvailles (D-171) : le silence, le berceau découvert ; puis le thème de fin, une
-  // variation de la boîte à musique, du câlin jusqu'au matin.
+  // variation de la boîte à musique, du câlin jusqu'à l'écran de fin, le matin compris (D-190).
+  // Après la fin, la maison retrouve sa musique.
   music: [
     { when: { all: [F.FinaleCradleSeen], none: [F.FinaleFound] }, track: null },
-    { when: { all: [F.FinaleFound], none: [F.FinaleMorning] }, track: 'ending' },
+    { when: { all: [F.FinaleFound], none: [F.FinaleGone] }, track: 'ending' },
   ],
 };

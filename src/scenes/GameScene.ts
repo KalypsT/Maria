@@ -113,6 +113,7 @@ import { FlashbackView } from '../ui/FlashbackView';
 import { TravelPage } from '../ui/TravelPage';
 import { Hud } from '../ui/Hud';
 import { showEndScreen } from '../ui/EndScreen';
+import { playFilm } from '../ui/FilmScreen';
 import { markQuietRelaunch } from '../core/platform/quietRelaunch';
 import { sessionMarks } from '../platform/sessionMarks';
 import { ShellJarView } from './ShellJarView';
@@ -207,7 +208,7 @@ import { ArcadeEvent, ArcadePhase, ArcadeRun } from '../core/arcade/run';
 import { arcadeChoosable, arcadeRecord, arcadeStartTiles } from '../core/save/arcade';
 import { isGrounded, touchesHazard } from '../core/physics/gridCollision';
 import { isRecordSlot } from '../config/records';
-import { isMemory } from '../config/memories';
+import { MARIA_THINGS, isMemory } from '../config/memories';
 import { drawnCanvas, recordDrawing, treasureDrawing } from '../ui/treasureDrawing';
 import { drawSticker } from './art/stickerArt';
 import { canPlayRecords, recordShelf, type RecordChoice } from '../core/audio/records';
@@ -552,6 +553,8 @@ export class GameScene extends Phaser.Scene {
   private celesteGone = false;
   /** La fin du jeu (D-145) : plus rien ne bouge, l'écran de fin, puis l'accueil. */
   private ended = false;
+  /** Un film de la fin joue par-dessus le jeu (D-190) : le jeu attend sa fin. */
+  private filmPlaying = false;
   /** Le très léger signe du dernier plan (D-144) : début (ms, -1 : aucun) et durée. */
   private glimmerAtMs = -1;
   private glimmerMs = 1;
@@ -745,6 +748,42 @@ export class GameScene extends Phaser.Scene {
         this.poser.sitting = pose === 'sit' || pose === 'hold-sit';
         this.poser.lying = pose === 'lie';
         this.poser.holding = holdsMaria(pose);
+      },
+      face: (facing) => {
+        this.player.facing = facing;
+      },
+      film: (id) => {
+        this.filmPlaying = true;
+        // Le film règle lui-même la musique et ses bruitages (D-190) ; l'histoire reprend après.
+        void playFilm(id, {
+          setMusic: (track) => {
+            this.audio.setMusic(track);
+          },
+          sfx: (slot) => {
+            this.audio.sfx.play(slot);
+          },
+        }).then(() => {
+          this.filmPlaying = false;
+          this.controls.clearPressed();
+          this.story.endFilm();
+        });
+      },
+      door: (id, open, ms) => {
+        const exit = this.level.exits.find((e) => e.id === id);
+        if (!exit) {
+          return;
+        }
+        this.storyView.door(
+          exit.col * TILE_SIZE,
+          exit.rowMin * TILE_SIZE,
+          (exit.rowMax - exit.rowMin + 1) * TILE_SIZE,
+          exit.side === 'right' ? -1 : 1,
+          open,
+          ms,
+        );
+        if (!open) {
+          this.audio.sfx.play('door');
+        }
       },
       think: (icon, ms, by) => {
         this.storyView.think(icon, ms, by);
@@ -1024,6 +1063,11 @@ export class GameScene extends Phaser.Scene {
     this.controls.update();
     const mapPressed = this.controls.consumePressed('Map');
     const pausePressed = this.controls.consumePressed('Pause');
+    if (this.filmPlaying) {
+      // Un film de la fin (D-190) : le jeu attend, les pressions sont oubliées.
+      this.controls.clearPressed();
+      return;
+    }
     if (this.paused) {
       // Le sac ouvert (D-159) : Carte ou Pause le referment, le jeu reste arrêté.
       if (mapPressed || pausePressed) {
@@ -1128,14 +1172,16 @@ export class GameScene extends Phaser.Scene {
       // Le voyage rapide (D-163) : près d'une lanterne allumée, si aucun déclencheur ni porte.
       const lantern = this.zone && !story.busy && door === 0 ? this.travelLanternNear() : -1;
       const travel = lantern >= 0 && story.interactable < 0;
-      const near = story.interactable >= 0 || door !== 0 || travel;
+      // Le script peut attendre Agir (D-190) : Action sert d'Agir là aussi.
+      const awaiting = story.awaiting !== null;
+      const near = story.interactable >= 0 || door !== 0 || travel || awaiting;
       const interact = this.controls.consumePressed('Interact');
       const action = this.controls.consumePressed('Attack');
       const pressed = interact || (near && action);
       // Agir maintenu (D-171) : Agir, ou Action quand elle sert d'Agir.
       const held =
         this.controls.isHeld('Interact') ||
-        (story.interactable >= 0 && this.controls.isHeld('Attack'));
+        ((story.interactable >= 0 || awaiting) && this.controls.isHeld('Attack'));
       story.step(this.level.id, this.player.box, pressed, held, this.player.grounded);
       if (this.recordPicker.isOpen()) {
         // Le tourne-disque s'est ouvert (D-121) : le jeu s'arrête jusqu'au choix.
@@ -1156,7 +1202,8 @@ export class GameScene extends Phaser.Scene {
       }
       this.stepDropHelp();
       const locked = story.locked;
-      input.moveX = locked ? 0 : this.controls.moveX;
+      // Céleste marche seule dans un script (D-190).
+      input.moveX = story.walkX !== 0 ? story.walkX : locked ? 0 : this.controls.moveX;
       input.moveY = locked ? 0 : this.controls.moveY;
       input.jumpPressed = this.controls.consumePressed('Jump') && !locked;
       input.jumpHeld = this.controls.isHeld('Jump') && !locked;
@@ -1908,9 +1955,12 @@ export class GameScene extends Phaser.Scene {
       .then(() => {
         // Toutes les coquilles trouvées : le petit escargot de la fin (D-148).
         const shells = this.shellCount();
+        // Les affaires de Maria retrouvées, autour d'elle (D-190).
+        const found = this.session.data.progression.memories;
         return showEndScreen(
           import.meta.env.BASE_URL,
           shells.total > 0 && shells.found === shells.total,
+          MARIA_THINGS.filter((id) => found.includes(id)),
         );
       })
       .then(() => {
@@ -2830,6 +2880,8 @@ export class GameScene extends Phaser.Scene {
       this.zone !== null &&
       !story.busy &&
       !story.flags.has(StoryFlag.HelpDrop) &&
+      // Pas au matin de la fin (D-190) : Céleste vient de ranger Maria, sur le surmeuble.
+      !(story.flags.has(StoryFlag.FinaleAwake) && !story.flags.has(StoryFlag.FinaleGone)) &&
       player.grounded &&
       Math.abs(player.vx) < 1 &&
       isGrounded(this.level, box, true) &&
@@ -3488,7 +3540,14 @@ export class GameScene extends Phaser.Scene {
     // Le train arrêté (D-90) : ni tunnel ni valise qui tombe.
     this.combat.still = this.level.meta.vehicle === 'train' && !story.moving(this.level.id);
     const memory = this.memoryPlay;
-    if (this.props.update(memory ? memory.flags : story.flags, view, veil)) {
+    if (
+      this.props.update(
+        memory ? memory.flags : story.flags,
+        view,
+        veil,
+        !memory && this.poser.holding,
+      )
+    ) {
       this.storyView.refresh();
     }
     if (veil >= 1 && (story.timeOfDay() !== this.drawnTime || this.isDim() !== this.drawnDim)) {
@@ -3501,12 +3560,16 @@ export class GameScene extends Phaser.Scene {
     if ((veil >= 1 || !story.busy) && this.atTide(this.level) !== this.level) {
       this.swapTide();
     }
+    const awaiting = memory ? null : story.awaiting;
     const near = memory
       ? memory.interactable >= 0
-      : (story.interactable >= 0 || this.nearDoor !== 0 || this.nearTravel >= 0) && !story.busy;
-    // Agir maintenu (D-189) : le bouton devient un cœur qui se remplit, comme celui de la scène.
+      : ((story.interactable >= 0 || this.nearDoor !== 0 || this.nearTravel >= 0) && !story.busy) ||
+        awaiting !== null;
+    // Agir maintenu (D-189) : le bouton devient un cœur qui se remplit, comme celui de la scène ;
+    // aussi quand le script l'attend (D-190).
     const holding =
-      !memory && !story.busy && story.data.triggers[story.interactable]?.hold !== undefined;
+      awaiting?.mode === 'hold' ||
+      (!memory && !story.busy && story.data.triggers[story.interactable]?.hold !== undefined);
     this.touch?.setHeart('Attack', holding ? story.holdProgress : null);
     if (!holding) {
       this.touch?.setLabel('Attack', near ? 'Agir' : null);
@@ -3538,7 +3601,10 @@ export class GameScene extends Phaser.Scene {
     music.room = isMusicTrack(roomTrack) ? roomTrack : null;
     // L'histoire peut imposer sa musique, ou le silence (les retrouvailles, D-171).
     const told = story.music();
-    this.audio.setMusic(told !== undefined ? told : chooseMusic(music));
+    // La fin du jeu (D-145) a mis le thème de fin dans ce même pas : il reste.
+    if (!this.ended) {
+      this.audio.setMusic(told !== undefined ? told : chooseMusic(music));
+    }
   }
 
   /** Centre du fondu en cercle (D-35) : Céleste, en px CSS de la page. */
@@ -4361,6 +4427,25 @@ export class GameScene extends Phaser.Scene {
         this.puppet.x + facing * (HELD_MARIA_AT.x + HELD_MARIA_AT.xPerBody * body),
         this.puppet.y + HELD_MARIA_AT.yPerBody * body + this.poser.pose.bodyY,
       );
+  }
+
+  /**
+   * Outil de debug (D-190) : étapes de l'histoire remplacées (sans sauvegarde), puis Céleste posée
+   * dans une salle, debout sur la case (`col`, `row`). Pour rejouer la fin sans refaire le jeu.
+   */
+  playStoryFrom(flags: readonly string[], room: string, col: number, row: number): void {
+    this.setStoryFlags(flags);
+    this.teleportToRoom(room);
+    if (this.level.id !== room) {
+      return;
+    }
+    this.player.reset(
+      (col + 0.5) * TILE_SIZE - this.growth.hitbox.width / 2,
+      (row + 1) * TILE_SIZE - this.growth.hitbox.height,
+      this.level,
+    );
+    this.feel.reset(this.player);
+    this.resetCamera();
   }
 
   /** Outil de debug : étapes de l'histoire remplacées (sans sauvegarde), salle redessinée. */

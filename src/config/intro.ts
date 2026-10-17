@@ -124,15 +124,18 @@ export interface IntroShot {
 
 const BLACK = '#0b0a10';
 
-/** La place de Maria sur le tapis, la même dans les deux plans de la chambre (pilier 5). */
-const MARIA_ON_RUG: IntroSprite = {
+/**
+ * La place de Maria sur le tapis, la même dans les deux plans de la chambre (pilier 5), et dans le
+ * contrechamp du film de la fin (D-190).
+ */
+export const MARIA_ON_RUG: IntroSprite = {
   image: 'maria',
   x: 1140,
   bottom: 950,
   height: 250,
   shadow: 230,
 };
-const ROOM_CAMERA: IntroCamera = { x: 1010, y: 540, zoom: 1.04 };
+export const ROOM_CAMERA: IntroCamera = { x: 1010, y: 540, zoom: 1.04 };
 /** Céleste au bord du monde étrange : hors de l'image au plan 6, elle y est déjà. */
 const CELESTE_STRANGE: readonly IntroSprite[] = [
   { image: 'celesteRim', x: 60, bottom: 1040, height: 720, breathe: true, opacity: [[0, 0.55]] },
@@ -146,8 +149,9 @@ export const INTRO_SHOTS: readonly IntroShot[] = [
     scene: 'music-box',
     durationMs: 4000,
     enter: { kind: 'cut' },
-    // La seule musique de l'intro (choix de l'utilisateur) ; l'écran titre passe ensuite à `title`.
-    music: 'ending',
+    // La seule musique de l'intro (D-187), celle de l'écran titre, qui continue sans coupure :
+    // le thème de fin (`ending`) est réservé à la fin (D-190).
+    music: 'title',
     camera: { from: { x: 960, y: 540, zoom: 1 }, to: { x: 960, y: 530, zoom: 1.06 } },
     sprites: [{ image: 'musicBox', x: 960, bottom: 820, height: 470, shadow: 380 }],
     glow: {

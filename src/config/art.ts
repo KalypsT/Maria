@@ -1755,6 +1755,9 @@ export const BUBBLE_PORTRAITS = {
   dad: { image: 'dad-hall.png', x: 0.38, y: 0, w: 0.5, h: 0.21 },
   mom: { image: 'mom-sofa.png', x: 0.02, y: 0, w: 0.62, h: 0.31 },
   eden: { image: 'eden-small.png', x: 0.02, y: 0, w: 0.6, h: 0.47 },
+  /** Les copains de la classe de mer (D-190) : la camarade du train et le garçon à la casquette. */
+  classmate: { image: 'classmate.png', x: 0, y: 0, w: 1, h: 0.3 },
+  'kid-cap': { image: 'kid-cap-quay.png', x: 0, y: 0, w: 1, h: 0.3 },
 } as const;
 
 /** La part du bas d'un portrait de bulle qui s'efface (D-189). */

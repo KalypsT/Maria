@@ -3,7 +3,12 @@ import { DIFFICULTY_MIN_WINDOW_MS } from '../src/config/levelDesign';
 import { DEFAULT_MOVEMENT, PLAYER_HITBOX } from '../src/config/movement';
 import { TILE_SIZE as T } from '../src/config/display';
 import { MARIA_THINGS, MEMORIES, MEMORIES_LATER, STRANGE_THINGS } from '../src/config/memories';
-import { LEGACY_STORY_FLAGS, PROP_SIZE, StoryFlag as F } from '../src/config/story';
+import {
+  LEGACY_STORY_FLAGS,
+  PROP_SIZE,
+  STORY_WALK_MAX_MS,
+  StoryFlag as F,
+} from '../src/config/story';
 import { analyzeLevel } from '../src/core/analysis/analyzeLevel';
 import { surfaceUnder } from '../src/core/analysis/surfaces';
 import type { Box } from '../src/core/physics/gridCollision';
@@ -263,6 +268,180 @@ describe('StoryDirector', () => {
     expect(d.veil).toBeLessThan(1);
   });
 
+  it('le script attend Agir (D-190) : un appui ; ou maintenu, plein tant qu’on tient, et lâché', () => {
+    const at = standing(2, 3);
+    const mark = { col: 2, row: 2 };
+    const pressed = recorder();
+    const p = new StoryDirector(
+      story([
+        { do: 'await', mode: 'press', mark },
+        { do: 'wait', ms: 10 },
+      ]),
+      pressed.host,
+      HZ,
+    );
+    p.step('r', at, true);
+    expect(p.awaiting).toEqual({ do: 'await', mode: 'press', mark });
+    for (let i = 0; i < 50; i++) {
+      p.step('r', at, false, true);
+    }
+    // Tenir ne suffit pas : il faut appuyer.
+    expect(p.awaiting).not.toBeNull();
+    p.step('r', at, true);
+    expect(p.awaiting).toBeNull();
+
+    const held = recorder();
+    const h = new StoryDirector(
+      story([{ do: 'await', mode: 'hold', mark, ms: 200 }]),
+      held.host,
+      HZ,
+    );
+    h.step('r', at, true);
+    for (let i = 0; i < 10; i++) {
+      h.step('r', at, false, true);
+    }
+    expect(h.holdProgress).toBeCloseTo(0.5);
+    // Lâché avant d'être plein : il se vide, le script attend toujours.
+    h.step('r', at, false, false);
+    expect(h.holdProgress).toBeLessThan(0.5);
+    expect(h.awaiting).not.toBeNull();
+    for (let i = 0; i < 100; i++) {
+      h.step('r', at, false, true);
+    }
+    // Plein, et il le reste tant qu'on tient.
+    expect(h.holdProgress).toBe(1);
+    expect(h.awaiting).not.toBeNull();
+    expect(held.log).toEqual([]);
+    // Lâcher, c'est le geste : le script reprend.
+    h.step('r', at, false, false);
+    expect(h.awaiting).toBeNull();
+    expect(h.holdProgress).toBe(0);
+    expect(held.log).toEqual(['flag done']);
+  });
+
+  it('Céleste marche (D-190) : vers où elle regarde, jusqu’à la colonne, ou au bout du temps', () => {
+    const { log, host } = recorder();
+    const d = new StoryDirector(story([{ do: 'walk', col: 8, facing: 1 }]), host, HZ);
+    d.step('r', standing(2, 3), true);
+    expect(d.walkX).toBe(1);
+    d.step('r', standing(5, 3), false);
+    expect(d.walkX).toBe(1);
+    d.step('r', standing(8, 3), false);
+    expect(d.walkX).toBe(0);
+    expect(log).toEqual(['flag done']);
+    // Bloquée : elle n'arrive jamais, le script reprend quand même.
+    const stuck = recorder();
+    const s = new StoryDirector(story([{ do: 'walk', col: 30, facing: 1 }]), stuck.host, HZ);
+    s.step('r', standing(2, 3), true);
+    for (let i = 0; i < (STORY_WALK_MAX_MS / 1000) * HZ + 2; i++) {
+      s.step('r', standing(2, 3), false);
+    }
+    expect(s.walkX).toBe(0);
+    expect(stuck.log).toEqual(['flag done']);
+  });
+
+  it('marcher : jamais avec Maria dans les bras, jamais dans le noir ; une porte qui existe (D-190)', () => {
+    const zone = buildZone(HOUSE);
+    const problems = (steps: StoryStep[]): string[] =>
+      storyProblems(
+        {
+          ...HOUSE_STORY,
+          triggers: [
+            {
+              id: 'w',
+              room: 'bedroom',
+              on: 'interact',
+              area: { col: 18, row: 17, w: 4, h: 3 },
+              mark: { col: 19, row: 18 },
+              when: { none: ['w'] },
+              lock: true,
+              steps: [...steps, { do: 'flag', id: 'w' }],
+            },
+          ],
+        },
+        zone,
+      ).filter((p) => p.startsWith('déclencheur w :'));
+    expect(problems([{ do: 'walk', col: 30, facing: 1 }])).toEqual([]);
+    expect(
+      problems([
+        { do: 'fadeOut', ms: 100 },
+        { do: 'pose', pose: 'hold' },
+        { do: 'fadeIn', ms: 100 },
+        { do: 'walk', col: 30, facing: 1 },
+        { do: 'fadeOut', ms: 100 },
+        { do: 'pose', pose: 'stand' },
+        { do: 'fadeIn', ms: 100 },
+      ]),
+    ).toEqual(['déclencheur w : Céleste marche avec Maria dans les bras']);
+    expect(problems([{ do: 'door', exit: 1, open: true, ms: 100 }])).toEqual([]);
+    expect(problems([{ do: 'door', exit: 7, open: true, ms: 100 }])).toEqual([
+      'déclencheur w : pas de sortie 7 dans bedroom',
+    ]);
+  });
+
+  it('un film (D-190) : le script attend sa fin ; sans scène pour le jouer, il continue', () => {
+    const { log, host } = recorder();
+    const films: string[] = [];
+    const d = new StoryDirector(
+      story([{ do: 'film', id: 'contrechamp' }]),
+      { ...host, film: (id) => films.push(id) },
+      HZ,
+    );
+    d.step('r', standing(2, 3), true);
+    expect(films).toEqual(['contrechamp']);
+    for (let i = 0; i < 50; i++) {
+      d.step('r', standing(2, 3), false);
+    }
+    expect(d.busy).toBe(true);
+    d.endFilm();
+    d.step('r', standing(2, 3), false);
+    expect(d.busy).toBe(false);
+    expect(log).toEqual(['flag done']);
+    const bare = recorder();
+    const b = new StoryDirector(story([{ do: 'film', id: 'contrechamp' }]), bare.host, HZ);
+    b.step('r', standing(2, 3), true);
+    expect(b.busy).toBe(false);
+  });
+
+  it('Agir attendu : jamais dans le noir, toujours les commandes suspendues (D-190)', () => {
+    const zone = buildZone(HOUSE);
+    const mark = { col: 20, row: 18 };
+    const dark = { ...HOUSE_STORY, triggers: [] } as StoryData;
+    const bad = (steps: StoryStep[], lock: boolean): string[] =>
+      storyProblems(
+        {
+          ...dark,
+          triggers: [
+            {
+              id: 'a',
+              room: 'bedroom',
+              on: 'interact',
+              area: { col: 18, row: 17, w: 4, h: 3 },
+              mark,
+              when: { none: ['a'] },
+              lock,
+              steps: [...steps, { do: 'flag', id: 'a' }],
+            },
+          ],
+        },
+        zone,
+      ).filter((p) => p.startsWith('déclencheur a :'));
+    expect(bad([{ do: 'await', mode: 'press', mark }], true)).toEqual([]);
+    expect(
+      bad(
+        [
+          { do: 'fadeOut', ms: 100 },
+          { do: 'await', mode: 'press', mark },
+          { do: 'fadeIn', ms: 100 },
+        ],
+        true,
+      ).some((p) => p.includes('dans le noir')),
+    ).toBe(true);
+    expect(
+      bad([{ do: 'await', mode: 'press', mark }], false).some((p) => p.includes('suspendre')),
+    ).toBe(true);
+  });
+
   it('setFlags arrête le script et lève le voile', () => {
     const { host } = recorder();
     const d = new StoryDirector(story([{ do: 'fadeOut', ms: 100 }]), host, HZ);
@@ -300,6 +479,26 @@ describe('objets de mise en scène (pilier 5)', () => {
     expect(stage.shown).toEqual([true]);
     expect(stage.update(flags, { ...view, x: 400 }, 0)).toBe(true);
     expect(stage.shown).toEqual([false]);
+  });
+
+  it('Maria dans les bras de Céleste : aucune autre Maria posée, changée dans le noir (D-190)', () => {
+    const stage = new PropStage();
+    const props = [
+      { id: 'm', room: 'r', kind: 'maria-sit' as const, col: 3, row: 3, when: {} },
+      { id: 'c', room: 'r', kind: 'cradle' as const, col: 6, row: 3, when: {} },
+    ];
+    const flags = new Set<string>();
+    stage.load(props, 'r', flags);
+    expect(stage.shown).toEqual([true, true]);
+    // Prise sous les yeux du joueur : rien ne change.
+    expect(stage.update(flags, view, 0, true)).toBe(false);
+    // Dans le noir : Maria posée disparaît, le reste ne bouge pas.
+    expect(stage.update(flags, view, 1, true)).toBe(true);
+    expect(stage.shown).toEqual([false, true]);
+    expect(stage.update(flags, view, 1, false)).toBe(true);
+    expect(stage.shown).toEqual([true, true]);
+    stage.load(props, 'r', flags, true);
+    expect(stage.shown).toEqual([false, true]);
   });
 
   it('un objet ramassé disparaît aussitôt ; jamais Maria', () => {

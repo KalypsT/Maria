@@ -12,11 +12,21 @@ import {
   type IntroCamera,
   type IntroGlowColor,
   type IntroImage,
-  type IntroShot,
   type IntroSprite,
 } from '../config/intro';
 import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 import { IntroDirector } from '../core/intro/IntroDirector';
+import {
+  TAU,
+  createGlows,
+  drawGlow as drawGlowOn,
+  drawHeartBubble,
+  drawMotes,
+  drawShadow,
+  drawSprite as drawSpriteOn,
+  loadImage,
+  paintVignette,
+} from './filmDraw';
 import {
   cameraAt,
   coverScale,
@@ -44,30 +54,10 @@ export interface IntroAudio {
 
 type Images = Record<IntroImage, HTMLImageElement>;
 
-const GLOW_RGB: Readonly<Record<IntroGlowColor, string>> = {
-  warm: '255, 176, 96',
-  teal: '80, 225, 210',
-};
-const MOTE_FILL: Readonly<Record<IntroGlowColor, string>> = {
-  warm: 'rgb(255, 214, 160)',
-  teal: 'rgb(150, 245, 230)',
-};
 /** Images entourées d'un halo : leur hauteur affichée est celle de l'objet, sans la marge. */
 const RIMMED: ReadonlySet<IntroImage> = new Set<IntroImage>(['celesteRim', 'toyTown']);
 const PAPER_LINE = 'rgb(214, 210, 198)';
 const PAPER_MARGIN = 'rgb(226, 160, 160)';
-const TAU = Math.PI * 2;
-/** Les deux petits ronds sous la bulle (décalage et rayon, px à l'échelle 1). */
-const BUBBLE_DOTS = [
-  [-40, 78, 14],
-  [-62, 108, 8],
-] as const;
-
-function loadImage(src: string): Promise<HTMLImageElement> {
-  const img = new Image();
-  img.src = src;
-  return img.decode().then(() => img);
-}
 
 async function loadImages(): Promise<Images> {
   const entries = await Promise.all(
@@ -76,29 +66,6 @@ async function loadImages(): Promise<Images> {
     ),
   );
   return Object.fromEntries(entries) as Images;
-}
-
-/** Un halo radial, dessiné une fois, posé ensuite à l'échelle voulue. */
-function makeGlow(rgb: string): HTMLCanvasElement {
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 256;
-  const ctx = canvas.getContext('2d');
-  if (ctx) {
-    const g = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
-    g.addColorStop(0, `rgba(${rgb}, 1)`);
-    g.addColorStop(0.35, `rgba(${rgb}, 0.45)`);
-    g.addColorStop(0.7, `rgba(${rgb}, 0.12)`);
-    g.addColorStop(1, `rgba(${rgb}, 0)`);
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, 256, 256);
-  }
-  return canvas;
-}
-
-/** Pseudo-hasard fixe (0 → 1) : les poussières sont les mêmes à chaque lancement. */
-function hash(n: number): number {
-  const x = Math.sin(n * 12.9898) * 43758.5453;
-  return x - Math.floor(x);
 }
 
 /**
@@ -139,10 +106,7 @@ export function playIntro(audio: IntroAudio, seen = false): Promise<IntroResult>
     const buffer = document.createElement('canvas');
     const bufferCtx = buffer.getContext('2d');
     const vignette = document.createElement('canvas');
-    const glows: Record<IntroGlowColor, HTMLCanvasElement> = {
-      warm: makeGlow(GLOW_RGB.warm),
-      teal: makeGlow(GLOW_RGB.teal),
-    };
+    const glows = createGlows();
     const frame = createIntroFrame();
     const camera: IntroCamera = { x: 0, y: 0, zoom: 1 };
     let images: Images | null = null;
@@ -161,15 +125,7 @@ export function playIntro(audio: IntroAudio, seen = false): Promise<IntroResult>
       canvas.width = buffer.width = vignette.width = width;
       canvas.height = buffer.height = vignette.height = height;
       cover = coverScale(width, height, INTRO_VIEW.width, INTRO_VIEW.height);
-      const v = vignette.getContext('2d');
-      if (v) {
-        const r = Math.hypot(width, height) / 2;
-        const g = v.createRadialGradient(width / 2, height / 2, r * 0.45, width / 2, height / 2, r);
-        g.addColorStop(0, 'rgba(0, 0, 0, 0)');
-        g.addColorStop(1, `rgba(0, 0, 0, ${INTRO.vignette})`);
-        v.fillStyle = g;
-        v.fillRect(0, 0, width, height);
-      }
+      paintVignette(vignette, INTRO.vignette);
     };
 
     const finish = () => {
@@ -203,23 +159,7 @@ export function playIntro(audio: IntroAudio, seen = false): Promise<IntroResult>
       t: number,
     ) => {
       const pad = RIMMED.has(s.image) ? INTRO_RIM_PAD : 0;
-      const scale = s.height / (img.naturalHeight - 2 * pad);
-      const breath = s.breathe ? 1 + INTRO.breathAmount * Math.sin((TAU * t) / INTRO.breathMs) : 1;
-      const w = img.naturalWidth * scale;
-      const h = img.naturalHeight * scale * breath;
-      c.drawImage(img, s.x - w / 2, s.bottom + pad * scale - h, w, h);
-    };
-
-    const drawShadow = (c: CanvasRenderingContext2D, x: number, y: number, w: number) => {
-      c.fillStyle = 'rgb(10, 12, 30)';
-      for (let i = 0; i < 3; i++) {
-        const k = 1 - i * 0.22;
-        c.globalAlpha = 0.14;
-        c.beginPath();
-        c.ellipse(x, y, (w / 2) * k, w * 0.07 * k, 0, 0, TAU);
-        c.fill();
-      }
-      c.globalAlpha = 1;
+      drawSpriteOn(c, img, s, t, pad, INTRO.breathMs, INTRO.breathAmount);
     };
 
     const drawGlow = (
@@ -230,40 +170,7 @@ export function playIntro(audio: IntroAudio, seen = false): Promise<IntroResult>
       r: number,
       alpha: number,
     ) => {
-      if (alpha <= 0) {
-        return;
-      }
-      c.globalCompositeOperation = 'lighter';
-      c.globalAlpha = Math.min(1, alpha);
-      c.drawImage(glows[color], x - r, y - r, r * 2, r * 2);
-      c.globalAlpha = 1;
-      c.globalCompositeOperation = 'source-over';
-    };
-
-    const drawMotes = (c: CanvasRenderingContext2D, shot: IntroShot, t: number) => {
-      const motes = shot.motes;
-      if (!motes) {
-        return;
-      }
-      const [x0, y0, x1, y1] = motes.area;
-      const w = x1 - x0;
-      const h = y1 - y0;
-      c.fillStyle = MOTE_FILL[motes.color];
-      for (let i = 0; i < motes.count; i++) {
-        const a = hash(i + 1);
-        const b = hash(i + 101);
-        const phase = hash(i + 201) * TAU;
-        const sway = Math.sin(t / (2400 + a * 2600) + phase) * 22;
-        const x = x0 + a * w + sway;
-        const y = motes.rise
-          ? y1 - ((b * h + t * (0.018 + a * 0.03)) % h)
-          : y0 + b * h + Math.cos(t / (3000 + b * 2000) + phase) * 16;
-        c.globalAlpha = 0.25 + 0.6 * Math.abs(Math.sin(t / 1400 + phase));
-        c.beginPath();
-        c.arc(x, y, 1.4 + hash(i + 301) * 2.4, 0, TAU);
-        c.fill();
-      }
-      c.globalAlpha = 1;
+      drawGlowOn(c, glows, color, x, y, r, alpha);
     };
 
     const drawPaper = (c: CanvasRenderingContext2D, img: HTMLImageElement) => {
@@ -327,40 +234,6 @@ export function playIntro(audio: IntroAudio, seen = false): Promise<IntroResult>
           c.globalAlpha = 1;
         }
       }
-    };
-
-    const drawBubble = (
-      c: CanvasRenderingContext2D,
-      x: number,
-      y: number,
-      s: number,
-      alpha: number,
-    ) => {
-      if (alpha <= 0) {
-        return;
-      }
-      c.globalAlpha = alpha;
-      c.fillStyle = 'rgba(246, 238, 222, 0.94)';
-      c.strokeStyle = 'rgb(120, 104, 92)';
-      c.lineWidth = 4;
-      c.beginPath();
-      c.ellipse(x, y, 62 * s, 53 * s, 0, 0, TAU);
-      c.fill();
-      c.stroke();
-      for (const [dx, dy, r] of BUBBLE_DOTS) {
-        c.beginPath();
-        c.arc(x + dx * s, y + dy * s, r * s, 0, TAU);
-        c.fill();
-        c.stroke();
-      }
-      const k = 30 * s;
-      c.fillStyle = 'rgb(222, 112, 140)';
-      c.beginPath();
-      c.moveTo(x, y + k * 0.75);
-      c.bezierCurveTo(x - k * 1.3, y - k * 0.1, x - k * 0.6, y - k * 1.05, x, y - k * 0.45);
-      c.bezierCurveTo(x + k * 0.6, y - k * 1.05, x + k * 1.3, y - k * 0.1, x, y + k * 0.75);
-      c.fill();
-      c.globalAlpha = 1;
     };
 
     /** L'étincelle de la boîte qui attend : « on peut toucher ici ». */
@@ -428,9 +301,9 @@ export function playIntro(audio: IntroAudio, seen = false): Promise<IntroResult>
       }
       if (shot.bubble) {
         const b = shot.bubble;
-        drawBubble(c, b.x, b.y, b.scale, keyValue(b.opacity, t, 0));
+        drawHeartBubble(c, b.x, b.y, b.scale, keyValue(b.opacity, t, 0));
       }
-      drawMotes(c, shot, layer.sceneMs);
+      drawMotes(c, shot.motes, layer.sceneMs);
       if (shot.darkness) {
         const d = keyValue(shot.darkness, t, 0);
         if (d > 0) {
@@ -555,7 +428,7 @@ export function playIntro(audio: IntroAudio, seen = false): Promise<IntroResult>
     document.addEventListener('visibilitychange', onVisibility);
     resize();
 
-    audio.preload('ending');
+    audio.preload('title');
     const timeout = new Promise<null>((done) => {
       window.setTimeout(() => {
         done(null);

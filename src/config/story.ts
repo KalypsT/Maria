@@ -400,8 +400,27 @@ export const STORY_TIMING = {
   monthsFadeInMs: 3200,
   /** Court souvenir (D-68) : la vignette, apparition et disparition comprises. */
   flashbackMs: 7000,
-  /** Le matin (D-144) : la bulle du livre du soir, qui commence… et s'efface vite. */
-  fadingBookMs: 1100,
+  /**
+   * Le matin (D-190) : après l'histoire, la pensée de Céleste part vers ses copains (la bulle) ;
+   * puis la vue se rapproche d'elles deux et y reste, jusqu'au contrechamp (le film).
+   */
+  rugDriftMs: 3200,
+  rugLookMs: 3000,
+  /**
+   * Lâcher Maria (D-190) : le noir, plus lent qu'un fondu court, quand on relâche Agir ; le noir
+   * tenu ; puis, Maria posée, le regard rapproché sur elles deux.
+   */
+  letGoFadeMs: 1100,
+  letGoBlackMs: 900,
+  shelfLookMs: 4600,
+  /**
+   * Partir (D-190) : la porte s'ouvre (la lumière du couloir), Céleste se retourne vers Maria ce
+   * temps-là ; elle sort, le noir tenu ; la porte se ferme (la lumière s'amincit, s'éteint).
+   */
+  doorOpenMs: 700,
+  lookBackMs: 2800,
+  leaveBlackMs: 900,
+  doorCloseMs: 1800,
   /** Le dernier plan : la vue reste sur Maria, puis un très léger signe du monde étrange. */
   lastShotMs: 2600,
   glimmerMs: 2800,
@@ -412,6 +431,8 @@ export const STORY_TIMING = {
   reunionLookMs: 2600,
   reunionHoldMs: 3600,
   hugHoldMs: 1600,
+  /** De retour dans la vraie chambre (D-190) : Céleste sur son lit, Maria dans les bras, sans bulle. */
+  homeHoldMs: 5200,
   /**
    * Le premier soir (D-182) : le temps que l'image arrive, puis le regard posé sur Maria, avant que
    * la vue revienne sur Céleste.
@@ -419,6 +440,19 @@ export const STORY_TIMING = {
   eveningLookDelayMs: 900,
   eveningLookMs: 2400,
 } as const;
+
+/**
+ * La lumière du couloir dans la porte de la chambre (étape `door`, D-190) : l'ouverture, et ce qui
+ * déborde sur le sol (sur `spillTiles` tuiles). Ajoutée à l'image. PROVISOIRE.
+ */
+export const DOOR_LIGHT = {
+  light: { color: 0xffc070, alpha: 0.9 },
+  spill: { color: 0xffc070, alpha: 0.35 },
+  spillTiles: 3,
+} as const;
+
+/** Une marche de script (étape `walk`, D-190) ne dure jamais plus que ça (ms), arrivée ou non. */
+export const STORY_WALK_MAX_MS = 3000;
 
 /**
  * La vue qui se rapproche (étape `look` avec `zoom`, D-171) : le rapprochement au plus près, et le
@@ -456,6 +490,19 @@ export const END_SCREEN = {
   snailMs: 48000,
   snailDelayMs: 3400,
   shellImage: 'art/shell.png',
+  /**
+   * Les affaires de Maria retrouvées (D-190), posées autour d'elle sur l'étagère (élargie) : le
+   * milieu de chacune (% de la largeur de la scène) et sa hauteur (% de sa hauteur), Maria au
+   * milieu (devant elles). Seulement celles que le joueur a trouvées. PROVISOIRE.
+   */
+  things: {
+    slipper: { left: 11, height: 8 },
+    bottle: { left: 21, height: 11 },
+    bonnet: { left: 29, height: 9 },
+    rattle: { left: 72, height: 11 },
+    spoon: { left: 81, height: 9 },
+    headband: { left: 90, height: 7 },
+  },
 } as const;
 
 /** Période du petit mouvement en boucle des personnages (ms), D-37. */

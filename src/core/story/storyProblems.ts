@@ -1,3 +1,4 @@
+import { isFilmId } from '../../config/film';
 import { TILE_SIZE } from '../../config/display';
 import { isAbility } from '../../config/abilities';
 import { isMemory } from '../../config/memories';
@@ -165,6 +166,38 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
           problems.push(`${what} : Céleste disparaît sous les yeux du joueur`);
         }
         gone = true;
+      } else if (step.do === 'walk') {
+        // Céleste marche (D-190) : sous les yeux du joueur, jamais avec Maria dans les bras.
+        if (holding) {
+          problems.push(`${what} : Céleste marche avec Maria dans les bras`);
+        }
+        if (dark) {
+          problems.push(`${what} : Céleste marche dans le noir`);
+        }
+        inRoom(room, { col: step.col, row: 0, w: 1, h: 1 }, what);
+      } else if (step.do === 'film') {
+        // Un film (D-190) : connu, dans un script qui suspend les commandes.
+        const id: string = step.id;
+        if (!isFilmId(id)) {
+          problems.push(`${what} : film inconnu ${id}`);
+        }
+        if (!t.lock) {
+          problems.push(`${what} : film sans suspendre les commandes`);
+        }
+      } else if (step.do === 'door') {
+        const exit = step.exit;
+        if (!zone.rooms.get(room)?.exits.some((e) => e.id === exit)) {
+          problems.push(`${what} : pas de sortie ${String(exit)} dans ${room}`);
+        }
+      } else if (step.do === 'await') {
+        // Le joueur agit (D-190) : il faut voir, et Céleste attend sans bouger.
+        if (dark) {
+          problems.push(`${what} : Agir attendu dans le noir`);
+        }
+        if (!t.lock) {
+          problems.push(`${what} : Agir attendu sans suspendre les commandes`);
+        }
+        inRoom(room, { ...step.mark, w: 1, h: 1 }, what);
       } else if (step.do === 'fadeOut') {
         dark = true;
       } else if (step.do === 'fadeIn') {

@@ -197,8 +197,6 @@ describe('silences de Maria dans l’histoire (D-57)', () => {
         'evening-sleep',
         // Les retrouvailles (D-171) : Maria dans le berceau géant.
         'finale-big-cradle',
-        // Le dernier plan (D-144) : la vue reste sur Maria.
-        'finale-leave',
         'hedge-enter',
         'living-see',
         'living-vanish',

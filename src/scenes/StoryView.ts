@@ -4,6 +4,7 @@ import {
   CHARACTER_LOOP_MS,
   HOLD_HEART_SCALE,
   PROP_SIZE,
+  DOOR_LIGHT,
   STORY_TIMING,
   THOUGHT_SCALE,
   towerCubesMask,
@@ -78,6 +79,13 @@ export class StoryView {
   private readonly glow: Phaser.GameObjects.Image;
   /** Le petit cœur qui monte (D-189) et son départ (ms, -1 : aucun). */
   private readonly popHeartImage: Phaser.GameObjects.Image;
+  /** La lumière du couloir dans une sortie (D-190) : la porte qui s'ouvre, puis se ferme. */
+  private readonly doorLight: Phaser.GameObjects.Graphics;
+  private doorRect: { x: number; y: number; h: number; inward: 1 | -1 } | null = null;
+  private doorOpen = true;
+  private doorFrom = 0;
+  private doorMs = 1;
+  private doorK = -1;
   private popHeartAt = -1;
   private popHeartX = 0;
   private popHeartY = 0;
@@ -145,6 +153,24 @@ export class StoryView {
       .image(0, 0, '__DEFAULT')
       .setDepth(PROP_DEPTH + 1)
       .setVisible(false);
+    this.doorLight = scene.add
+      .graphics()
+      .setDepth(PROP_DEPTH - 1)
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setVisible(false);
+  }
+
+  /**
+   * La lumière du couloir dans une sortie (D-190) : `x` la gauche de l'ouverture (px, la tuile du
+   * mur), `y` son haut, `h` sa hauteur ; `inward` : vers où elle déborde dans la salle. Elle s'allume en
+   * `ms` (la porte s'ouvre) ; fermée, elle s'amincit vers le mur et s'éteint.
+   */
+  door(x: number, y: number, h: number, inward: 1 | -1, open: boolean, ms: number): void {
+    this.doorRect = { x, y, h, inward };
+    this.doorOpen = open;
+    this.doorFrom = this.scene.time.now;
+    this.doorMs = Math.max(1, ms);
+    this.doorK = -1;
   }
 
   /** Un petit cœur qui naît en (x, y) (px de la salle), monte et s'efface (D-189). */
@@ -227,6 +253,8 @@ export class StoryView {
     for (const image of this.propImages) {
       image.destroy();
     }
+    this.doorRect = null;
+    this.doorLight.clear().setVisible(false);
     this.speechEnd = -1;
     this.speech.setVisible(false);
     this.loopKeys = this.stage.props.map((prop) =>
@@ -334,6 +362,7 @@ export class StoryView {
   /** Une image : bulle au-dessus de la tête de Céleste (pieds en x, y), étincelle. */
   render(x: number, y: number, headHeight: number): void {
     const now = this.scene.time.now;
+    this.renderDoor(now);
     const thought = this.thought;
     this.celesteX = x;
     if (now < this.thoughtEnd) {
@@ -407,16 +436,20 @@ export class StoryView {
         image.setTexture(key);
       }
     }
+    // Le script attend Agir (D-190) : son étincelle, ou son cœur s'il faut le maintenir.
+    const awaiting = this.director.awaiting;
     const trigger = this.director.data.triggers[this.director.interactable];
-    const mark = trigger?.mark ?? this.doorMark;
-    const hold = trigger?.hold !== undefined && trigger.mark !== undefined && !this.director.busy;
-    if (hold) {
+    const mark = awaiting?.mark ?? trigger?.mark ?? this.doorMark;
+    const hold = awaiting
+      ? awaiting.mode === 'hold'
+      : trigger?.hold !== undefined && trigger.mark !== undefined && !this.director.busy;
+    if (hold && mark) {
       // Agir maintenu (D-171) : un cœur qui se remplit, de bas en haut, à la place de l'étincelle.
       const progress = this.director.holdProgress;
       const pulse = 0.85 + 0.15 * Math.sin((now / SPARKLE_MS) * Math.PI * 2);
-      const x = (trigger.mark.col + 0.5) * T;
+      const x = (mark.col + 0.5) * T;
       // Un peu plus haut que l'étincelle : il est deux fois plus grand (D-189).
-      const y = (trigger.mark.row + 0.5) * T - pulse * 2 - 4;
+      const y = (mark.row + 0.5) * T - pulse * 2 - 4;
       const grow = (1 + 0.25 * progress) / this.artScale;
       this.sparkle.setVisible(false);
       this.heartEmpty.setVisible(true).setPosition(x, y).setScale(grow).setAlpha(pulse);
@@ -433,7 +466,7 @@ export class StoryView {
       this.heartEmpty.setVisible(false);
       this.heartFull.setVisible(false);
     }
-    if (mark && !this.director.busy) {
+    if (mark && (!this.director.busy || awaiting)) {
       const pulse = 0.75 + 0.25 * Math.sin((now / SPARKLE_MS) * Math.PI * 2);
       this.sparkle
         .setVisible(true)
@@ -442,6 +475,46 @@ export class StoryView {
     } else if (this.sparkle.visible) {
       this.sparkle.setVisible(false);
     }
+  }
+
+  /** La lumière du couloir (D-190) : redessinée seulement quand elle change. */
+  private renderDoor(now: number): void {
+    const rect = this.doorRect;
+    if (!rect) {
+      return;
+    }
+    const k = Math.min(1, (now - this.doorFrom) / this.doorMs);
+    if (k === this.doorK) {
+      return;
+    }
+    this.doorK = k;
+    // Ouverte : la lumière monte ; fermée : elle s'amincit vers le mur, puis plus rien.
+    const width = this.doorOpen ? 1 : 1 - k;
+    const alpha = this.doorOpen ? k : 1;
+    const g = this.doorLight.clear();
+    if (width <= 0) {
+      g.setVisible(false);
+      this.doorRect = null;
+      return;
+    }
+    const { light, spill, spillTiles } = DOOR_LIGHT;
+    const inward = rect.inward;
+    // L'ouverture (une tuile, dans le mur), qui s'amincit vers le dehors.
+    const left = inward > 0 ? rect.x : rect.x + T * (1 - width);
+    g.fillStyle(light.color, light.alpha * alpha).fillRect(left, rect.y, T * width, rect.h);
+    // La lumière qui déborde sur le sol de la salle, en trapèze, depuis le bord intérieur.
+    const edge = inward > 0 ? rect.x + T : rect.x;
+    const floor = rect.y + rect.h;
+    const reach = T * spillTiles * width;
+    g.fillStyle(spill.color, spill.alpha * alpha);
+    g.beginPath();
+    g.moveTo(edge, floor);
+    g.lineTo(edge + inward * reach, floor);
+    g.lineTo(edge + inward * reach * 0.6, floor - T * 0.6);
+    g.lineTo(edge, floor - T * 0.6);
+    g.closePath();
+    g.fillPath();
+    g.setVisible(true);
   }
 
   private texture(

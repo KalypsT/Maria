@@ -1,3 +1,4 @@
+import type { FilmId } from '../../config/film';
 import type { MusicTrack } from '../../config/audio';
 import type { HapticMoment } from '../../config/haptics';
 import type { FlashbackId } from '../../config/memories';
@@ -133,6 +134,11 @@ export const THOUGHT_ICONS = [
   'hide-seek',
   /** Eden (blond, la coupe au bol) et un « ? » (D-171) : où s'est-il caché ? */
   'eden-where',
+  /**
+   * Les copains de la classe de mer (D-190), leurs deux visages : Céleste pense à eux, à sa vie à
+   * elle, au lieu de l'histoire du soir.
+   */
+  'friends',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
@@ -195,6 +201,27 @@ export type StoryStep =
       readonly returnPoint?: boolean;
     }
   | { readonly do: 'pose'; readonly pose: ScriptPose }
+  /**
+   * Céleste se tourne vers `facing` (D-190, non bloquant), sous les yeux du joueur : elle se tourne
+   * seulement, elle ne se déplace pas.
+   */
+  | { readonly do: 'face'; readonly facing: 1 | -1 }
+  /**
+   * Céleste marche (D-190, bloquant), sous les yeux du joueur, vers `facing`, jusqu'à ce que le
+   * milieu de sa hitbox passe la colonne `col` (au plus `STORY_WALK_MAX_MS`). Jamais Maria dans
+   * les bras (pilier 5, vérifié par `storyProblems`).
+   */
+  | { readonly do: 'walk'; readonly col: number; readonly facing: 1 | -1 }
+  /**
+   * La lumière du couloir dans une sortie de la salle (D-190, non bloquant) : elle s'allume en
+   * `ms` (la porte s'ouvre), ou s'amincit vers le mur et s'éteint (la porte se ferme, son bruit).
+   */
+  | { readonly do: 'door'; readonly exit: number; readonly open: boolean; readonly ms: number }
+  /**
+   * Un film de la fin (D-190, bloquant) : des plans illustrés par-dessus le jeu, arrêté ; il
+   * apparaît et s'en va en fondu enchaîné sur l'image du jeu. Le script reprend à sa fin.
+   */
+  | { readonly do: 'film'; readonly id: FilmId }
   /** Scintillements étranges dans une zone de la salle (non bloquant, D-35). */
   | { readonly do: 'sparkle'; readonly area: TileArea; readonly ms: number }
   /** Souvenir trouvé (D-38), sauvegardé aussitôt ; sans effet s'il l'est déjà. */
@@ -249,6 +276,19 @@ export type StoryStep =
    * étape `room` la ramène, avant la fin du script (vérifié par `storyProblems`).
    */
   | { readonly do: 'gone' }
+  /**
+   * Le joueur agit (D-190, bloquant) : le script attend Agir, l'étincelle d'Agir sur la tuile
+   * `mark`. `press` : un appui. `hold` : Agir maintenu, le cœur se remplit en `ms` (comme un
+   * déclencheur `hold`, D-171), puis reste plein tant qu'on tient ; le script reprend quand on
+   * lâche (relâcher, c'est le geste). Image visible, script qui suspend les commandes (vérifié par
+   * `storyProblems`).
+   */
+  | {
+      readonly do: 'await';
+      readonly mode: 'press' | 'hold';
+      readonly mark: { readonly col: number; readonly row: number };
+      readonly ms?: number;
+    }
   /**
    * Un très léger signe du monde étrange (D-144, §12, non bloquant) : pendant `ms`, la lumière se
    * refroidit et vacille (le présage), le mobile tourne un instant plus vite ; puis tout redevient
