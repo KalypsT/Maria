@@ -412,6 +412,8 @@ export const STORY_TIMING = {
   reunionLookMs: 2600,
   reunionHoldMs: 3600,
   hugHoldMs: 1600,
+  /** De retour dans la vraie chambre (D-190) : Céleste sur son lit, Maria dans les bras, sans bulle. */
+  homeHoldMs: 5200,
   /**
    * Le premier soir (D-182) : le temps que l'image arrive, puis le regard posé sur Maria, avant que
    * la vue revienne sur Céleste.

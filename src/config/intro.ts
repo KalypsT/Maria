@@ -146,8 +146,9 @@ export const INTRO_SHOTS: readonly IntroShot[] = [
     scene: 'music-box',
     durationMs: 4000,
     enter: { kind: 'cut' },
-    // La seule musique de l'intro (choix de l'utilisateur) ; l'écran titre passe ensuite à `title`.
-    music: 'ending',
+    // La seule musique de l'intro (D-187), celle de l'écran titre, qui continue sans coupure :
+    // le thème de fin (`ending`) est réservé à la fin (D-190).
+    music: 'title',
     camera: { from: { x: 960, y: 540, zoom: 1 }, to: { x: 960, y: 530, zoom: 1.06 } },
     sprites: [{ image: 'musicBox', x: 960, bottom: 820, height: 470, shadow: 380 }],
     glow: {

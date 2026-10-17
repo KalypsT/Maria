@@ -555,7 +555,7 @@ export function playIntro(audio: IntroAudio, seen = false): Promise<IntroResult>
     document.addEventListener('visibilitychange', onVisibility);
     resize();
 
-    audio.preload('ending');
+    audio.preload('title');
     const timeout = new Promise<null>((done) => {
       window.setTimeout(() => {
         done(null);

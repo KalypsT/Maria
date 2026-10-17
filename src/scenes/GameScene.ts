@@ -4363,6 +4363,25 @@ export class GameScene extends Phaser.Scene {
       );
   }
 
+  /**
+   * Outil de debug (D-190) : étapes de l'histoire remplacées (sans sauvegarde), puis Céleste posée
+   * dans une salle, debout sur la case (`col`, `row`). Pour rejouer la fin sans refaire le jeu.
+   */
+  playStoryFrom(flags: readonly string[], room: string, col: number, row: number): void {
+    this.setStoryFlags(flags);
+    this.teleportToRoom(room);
+    if (this.level.id !== room) {
+      return;
+    }
+    this.player.reset(
+      (col + 0.5) * TILE_SIZE - this.growth.hitbox.width / 2,
+      (row + 1) * TILE_SIZE - this.growth.hitbox.height,
+      this.level,
+    );
+    this.feel.reset(this.player);
+    this.resetCamera();
+  }
+
   /** Outil de debug : étapes de l'histoire remplacées (sans sauvegarde), salle redessinée. */
   setStoryFlags(flags: readonly string[]): void {
     this.story.setFlags(flags);

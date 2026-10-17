@@ -31,6 +31,8 @@ const SEEN = [...BIG_FLAGS, F.FinaleCradleSeen];
 const FOUND = [...SEEN, F.FinaleFound];
 const HOME = [...FOUND, F.FinaleHome];
 const TOGETHER = [...HOME, F.FinaleTogether];
+/** Après le câlin (D-190) : le matin, Maria à côté d'elle. */
+const AWAKE = [...TOGETHER, F.FinaleMorning, F.FinaleAwake];
 /** Une partie d'avant D-171 : par la porte de la chambre grande, Maria dans son berceau. */
 const OLD_HOME = [...BIG_FLAGS, F.FinaleHome];
 /** Debout sur le coffre à jouets, à côté du berceau géant. */
@@ -238,14 +240,21 @@ describe('les retrouvailles (D-171)', () => {
     expect(near(OLD_HOME)).toBe(0);
   });
 
-  it('le câlin : Agir maintenu ; dans le noir, dans ses bras ; le cœur ; le cercle ; sa vraie chambre', () => {
+  it('le câlin : Agir maintenu ; dans le noir, dans ses bras ; le cœur ; le cercle ; sa vraie chambre ; le matin', () => {
     const hug = trigger('finale-big-hug');
     expect(hug.room).toBe(BIG);
     expect(hug.hold).toBeGreaterThanOrEqual(1000);
     expect(hug.mark).toBeDefined();
     expect(actions(BIG, SEEN)).toEqual(['finale-big-hug']);
     expect(actions(BIG, FOUND)).toEqual([]);
-    expect(flagsOf(hug.steps)).toEqual([F.FinaleFound, F.FinaleHome, F.FinaleTogether]);
+    // D'une traite jusqu'au matin (D-190).
+    expect(flagsOf(hug.steps)).toEqual([
+      F.FinaleFound,
+      F.FinaleHome,
+      F.FinaleMorning,
+      F.FinaleTogether,
+      F.FinaleAwake,
+    ]);
     const at = (pred: (s: StoryStep) => boolean) => hug.steps.findIndex(pred);
     const hold = at((s) => s.do === 'pose' && s.pose === 'hold');
     const heart = at((s) => s.do === 'thought' && s.icon === 'heart');
@@ -257,11 +266,17 @@ describe('les retrouvailles (D-171)', () => {
     expect(circle).toBeGreaterThan(heart);
     expect(home).toBeGreaterThan(circle);
     expect(hug.steps[home]).toMatchObject({ room: 'bedroom', returnPoint: true });
-    // Sur son lit, Maria dans les bras ; puis, dans le noir, à côté d'elle.
+    // Un seul cœur : plus de second cœur, ni sur le lit, ni au réveil (D-190).
+    expect(hug.steps.filter((s) => s.do === 'thought')).toHaveLength(1);
+    // Sur son lit, Maria dans les bras, la nuit, puis le matin ; à côté d'elle dans le noir.
     expect(hug.steps.slice(home)).toContainEqual({ do: 'pose', pose: 'hold-sit' });
-    expect(hug.steps.at(-1)?.do).toBe('wait');
     expect(hug.steps.filter((s) => s.do === 'pose').at(-1)).toEqual({ do: 'pose', pose: 'sit' });
-    // La chambre reste fermée : Céleste pense à dormir ; le lit mène au matin (D-144).
+    const awake = at((s) => s.do === 'flag' && s.id === F.FinaleAwake);
+    expect(hug.steps[awake - 1]?.do).toBe('fadeOut');
+    // Puis le tapis : son étincelle, la prochaine chose à faire.
+    expect(hug.steps.at(-1)).toMatchObject({ do: 'sparkle', area: trigger('finale-play').area });
+    expect(actions('bedroom', AWAKE)).toEqual(['finale-play']);
+    // Une partie d'avant D-190 restée sur son lit : la chambre fermée, le lit mène au matin.
     expect(director(TOGETHER).lockIcon('bedroom', 1)).toBe('bed');
     expect(actions('bedroom', TOGETHER)).toEqual(['finale-morning']);
   });
@@ -294,11 +309,16 @@ describe('les retrouvailles (D-171)', () => {
     expect(story.holdProgress).toBe(0);
   });
 
-  it('la musique : le silence devant le berceau, le thème de fin du câlin jusqu’au matin', () => {
+  it('la musique : le silence devant le berceau, le thème de fin du câlin jusqu’à la fin', () => {
     expect(director(BIG_FLAGS).music()).toBeUndefined();
     expect(director(SEEN).music()).toBeNull();
     expect(director(FOUND).music()).toBe('ending');
     expect(director(TOGETHER).music()).toBe('ending');
-    expect(director([...TOGETHER, F.FinaleMorning]).music()).toBeUndefined();
+    // Le matin aussi (D-190), jusqu'au départ ; après la fin, la maison retrouve sa musique.
+    expect(director(AWAKE).music()).toBe('ending');
+    expect(director([...AWAKE, F.FinalePlayed, F.FinaleShelved]).music()).toBe('ending');
+    expect(
+      director([...AWAKE, F.FinalePlayed, F.FinaleShelved, F.FinaleGone]).music(),
+    ).toBeUndefined();
   });
 });

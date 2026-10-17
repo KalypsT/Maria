@@ -110,6 +110,15 @@ const FAMILY_DRAWING = { col: 37, row: 5 };
 const BED_AREA: TileArea = { col: 7, row: 13, w: 11, h: 3 };
 const BED_SEAT = { col: 12, row: 15 };
 
+/**
+ * Rejouer la fin (outil de debug, D-190) : où poser Céleste. Devant le berceau géant, avant de
+ * découvrir Maria ; sur son lit, le matin, Maria à côté d'elle.
+ */
+export const FINALE_REPLAY = {
+  reunion: { room: 'finale-big', ...BIG_CRADLE_SIDE },
+  morning: { room: 'bedroom', ...BED_SEAT },
+} as const;
+
 const TRIGGERS: StoryTrigger[] = [
   {
     // Le tapis vide : là où, le premier soir, Céleste jouait avec Maria (D-31). Elle s'y assoit à
@@ -349,8 +358,11 @@ const TRIGGERS: StoryTrigger[] = [
     // Le câlin (D-171) : Agir maintenu, le cœur se remplit. Dans le noir, Céleste la prend dans
     // ses bras ; le cœur du prologue, deux battements ; le thème de fin commence ; l'étrange s'en
     // va en scintillements. Le cercle se referme sur elles et se rouvre sur la vraie chambre, la
-    // nuit : la chambre est revenue à sa taille. Céleste assise sur son lit, Maria dans les bras ;
-    // dans le noir, Maria à côté d'elle (pilier 5 : elle ne change de place que dans le noir).
+    // nuit : la chambre est revenue à sa taille. Céleste assise sur son lit, Maria dans les bras, un
+    // long temps sans bulle ; elle s'endort avec elle. Le matin, elle se réveille Maria dans les
+    // bras ; dans le noir, Maria à côté d'elle (pilier 5 : elle ne change de place que dans le
+    // noir) ; l'étincelle sur le tapis. Une seule nuit, un seul cœur (D-190) : avant, un second
+    // cœur, un troisième sur le lit, puis le lit à rejoindre pour le matin, et un quatrième.
     id: 'finale-big-hug',
     room: 'finale-big',
     on: 'interact',
@@ -370,25 +382,30 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'thought', icon: 'heart', ms: S.reunionHoldMs },
       { do: 'wait', ms: S.lookMs },
       { do: 'sparkle', area: BIG_RELEASE, ms: S.reunionHoldMs },
-      { do: 'wait', ms: S.reunionHoldMs },
-      { do: 'thought', icon: 'heart', ms: S.holdMs },
-      { do: 'wait', ms: S.holdMs + S.lookMs },
+      { do: 'wait', ms: S.reunionHoldMs + S.lookMs },
       { do: 'fadeOut', ms: S.nightFadeOutMs, shape: 'iris' },
       { do: 'flag', id: F.FinaleHome },
       { do: 'room', room: 'bedroom', ...BED_SEAT, facing: -1, returnPoint: true },
       { do: 'pose', pose: 'hold-sit' },
       { do: 'wait', ms: S.nightBlackMs },
       { do: 'fadeIn', ms: S.nightFadeInMs, shape: 'iris' },
-      { do: 'wait', ms: S.reunionLookMs },
-      { do: 'thought', icon: 'heart', ms: S.holdMs },
-      { do: 'wait', ms: S.holdMs + S.reunionLookMs },
+      { do: 'wait', ms: S.homeHoldMs },
+      // Elle s'endort, Maria dans les bras : la nuit, puis le matin (D-144).
       { do: 'fadeOut', ms: S.nightFadeOutMs },
+      // Le matin d'abord : Maria, dans les bras, ne s'affiche jamais aussi à côté d'elle.
+      { do: 'flag', id: F.FinaleMorning },
       { do: 'flag', id: F.FinaleTogether },
       { do: 'place', ...BED_SEAT, facing: -1 },
-      { do: 'pose', pose: 'sit' },
+      { do: 'pose', pose: 'hold-sit' },
       { do: 'wait', ms: S.nightBlackMs },
       { do: 'fadeIn', ms: S.nightFadeInMs },
+      { do: 'wait', ms: S.holdMs + S.lookMs },
+      { do: 'fadeOut', ms: S.fadeMs },
+      { do: 'flag', id: F.FinaleAwake },
+      { do: 'pose', pose: 'sit' },
+      { do: 'fadeIn', ms: S.fadeMs },
       { do: 'wait', ms: S.lookMs },
+      { do: 'sparkle', area: RUG_AREA, ms: S.cradleSparkleMs },
     ],
   },
   {
@@ -433,8 +450,9 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // Le matin (D-144) : Céleste s'endort, Maria à côté d'elle ; elle se réveille, Maria dans les
-    // bras, le cœur. Elle la pose à côté d'elle (dans le noir) ; une étincelle sur le tapis, là où
+    // Le matin (D-144), pour une partie d'avant D-190 restée sur son lit, Maria à côté d'elle (le
+    // câlin mène maintenant d'une traite au matin) : Céleste s'endort ; elle se réveille, Maria dans
+    // les bras, le cœur. Elle la pose à côté d'elle (dans le noir) ; une étincelle sur le tapis, là où
     // était la toute première action du jeu.
     id: 'finale-morning',
     room: 'bedroom',
@@ -736,9 +754,10 @@ export const FINALE_STORY: Pick<
   // La nuit : les lumières éteintes, seule la veilleuse reste (D-85).
   dim: [{ room: 'bedroom', when: { all: [F.FinaleNight], none: [F.FinaleMorning] } }],
   // Les retrouvailles (D-171) : le silence, le berceau découvert ; puis le thème de fin, une
-  // variation de la boîte à musique, du câlin jusqu'au matin.
+  // variation de la boîte à musique, du câlin jusqu'à l'écran de fin, le matin compris (D-190).
+  // Après la fin, la maison retrouve sa musique.
   music: [
     { when: { all: [F.FinaleCradleSeen], none: [F.FinaleFound] }, track: null },
-    { when: { all: [F.FinaleFound], none: [F.FinaleMorning] }, track: 'ending' },
+    { when: { all: [F.FinaleFound], none: [F.FinaleGone] }, track: 'ending' },
   ],
 };

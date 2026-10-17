@@ -54,15 +54,16 @@ describe('le déroulé de l’intro (D-185)', () => {
   it('les images et les musiques existent', () => {
     expect(Object.values(INTRO_IMAGES).filter((file) => !ART.has(file))).toEqual([]);
     const cues = INTRO_SHOTS.map((shot) => shot.music).filter((m) => m !== undefined && m !== null);
-    expect(cues).toEqual(['ending']);
+    expect(cues).toEqual(['title']);
     for (const cue of cues) {
       expect(isMusicTrack(cue)).toBe(true);
       expect(MUSIC.has(cue)).toBe(true);
     }
   });
 
-  it('une seule musique, de la boîte à la fin : `ending` dès le toucher, jamais changée', () => {
-    expect(INTRO_SHOTS[0]?.music).toBe('ending');
+  it('une seule musique, de la boîte à la fin : `title` dès le toucher, jamais changée', () => {
+    // Celle de l'écran titre, qui continue ; le thème de fin est réservé à la fin (D-190).
+    expect(INTRO_SHOTS[0]?.music).toBe('title');
     expect(INTRO_SHOTS.slice(1).every((shot) => shot.music === undefined)).toBe(true);
   });
 

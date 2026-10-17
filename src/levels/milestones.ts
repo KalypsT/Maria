@@ -89,8 +89,8 @@ export const MILESTONES: readonly Milestone[] = [
   { trigger: 'finale-big' },
   { trigger: 'finale-big-cradle' },
   { trigger: 'finale-big-hug' },
-  // Le matin (D-144) : le réveil, le tapis, l'étagère, la porte.
-  { trigger: 'finale-morning' },
+  // Le matin (D-144) : le tapis, l'étagère, la porte. Le câlin mène d'une traite au réveil (D-190) ;
+  // une partie d'avant restée sur son lit a l'étincelle du lit et la bulle de la porte fermée.
   { trigger: 'finale-play' },
   { trigger: 'finale-shelf' },
   { trigger: 'finale-leave' },

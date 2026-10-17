@@ -79,7 +79,7 @@ describe('le matin (D-144)', () => {
     expect(flagsOf(trigger('finale-play').steps)).toEqual([F.FinalePlayed]);
     expect(flagsOf(trigger('finale-shelf').steps)).toEqual([F.FinaleShelved]);
     expect(MILESTONES.map((m) => ('trigger' in m ? m.trigger : ''))).toEqual(
-      expect.arrayContaining(['finale-morning', 'finale-play', 'finale-shelf', 'finale-leave']),
+      expect.arrayContaining(['finale-play', 'finale-shelf', 'finale-leave']),
     );
   });
 
