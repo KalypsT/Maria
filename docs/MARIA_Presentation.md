@@ -8,17 +8,17 @@ Les détails complets sont dans le dépôt `KalypsT/Maria` (`docs/MARIA_Specific
 
 ## 1. En bref
 
-|                 |                                                                                                                                                                                |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Titre**       | MARIA                                                                                                                                                                          |
-| **Genre**       | Action-platformer 2D, Metroidvania compact                                                                                                                                     |
+|                 |                                                                                                                                                                |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Titre**       | MARIA                                                                                                                                                          |
+| **Genre**       | Action-platformer 2D, Metroidvania compact                                                                                                                     |
 | **Plateforme**  | Navigateur mobile en **paysage** (tactile d'abord), aussi jouable au clavier ; installable comme application (PWA), **hors ligne** après le premier chargement |
-| **Joueur**      | Solo                                                                                                                                                                           |
-| **Public visé** | Diffusion **privée** (famille, proches). Joueuse principale : une maman, peu habituée aux jeux vidéo. Dédicace : « Pour Céleste et sa maman »                                  |
-| **Durée**       | Une partie complète, du premier soir à la fin, sur 8 niveaux                                                                                                                   |
-| **Langue**      | Français, avec **presque aucun texte** : bulles à pictogrammes, pas de dialogues écrits                                                                                        |
-| **Publication** | GitHub Pages : https://kalypst.github.io/Maria/ (build de debug sur `/Maria/debug/`)                                                                                           |
-| **État**        | **Le jeu se joue en entier**, des huit niveaux jusqu'à la fin et l'après-fin. Le travail actuel est du polissage d'après les essais sur téléphone                              |
+| **Joueur**      | Solo                                                                                                                                                           |
+| **Public visé** | Diffusion **privée** (famille, proches). Joueuse principale : une maman, peu habituée aux jeux vidéo. Dédicace : « Pour Céleste et sa maman »                  |
+| **Durée**       | Une partie complète, du premier soir à la fin, sur 8 niveaux                                                                                                   |
+| **Langue**      | Français, avec **presque aucun texte** : bulles à pictogrammes, pas de dialogues écrits                                                                        |
+| **Publication** | GitHub Pages : https://kalypst.github.io/Maria/ (build de debug sur `/Maria/debug/`)                                                                           |
+| **État**        | **Le jeu se joue en entier**, des huit niveaux jusqu'à la fin et l'après-fin. Le travail actuel est du polissage d'après les essais sur téléphone              |
 
 **Le pitch** : Céleste, une petite fille aux lunettes rondes roses, perd son poupon préféré, Maria. Elle la cherche dans sa maison, son jardin, son quartier, puis de plus en plus loin. En chemin, le monde réel se mêle à un **monde étrange** : celui des choses que l'on perd en grandissant. Céleste **grandit réellement** au fil de l'aventure. À la fin, elle retrouve Maria, mais elle ne peut pas retrouver l'enfance qu'elle avait avec elle.
 
