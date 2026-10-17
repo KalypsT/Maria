@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { STORY_TIMING as S, StoryFlag as F } from '../src/config/story';
+import { STORY_ZOOM, StoryFlag as F } from '../src/config/story';
 import { Tile, tileAt } from '../src/core/level/LevelData';
 import { checkCondition, holdsMaria, type StoryStep } from '../src/core/story/story';
 import { StoryDirector } from '../src/core/story/StoryDirector';
@@ -122,13 +122,19 @@ describe('le matin (D-144)', () => {
     expect(rug).toEqual(trigger('evening-play').area);
   });
 
-  it('le tapis, comme le premier soir : le cœur, le livre commence… et s’efface ; elle la regarde', () => {
+  it('le tapis, comme le premier soir : le cœur ; Agir, l’histoire ; sa pensée part ; elle la regarde', () => {
     const steps = trigger('finale-play').steps;
     const first = trigger('evening-play').steps;
     const seat = (list: readonly StoryStep[]) => list.find((s) => s.do === 'place');
     expect(seat(steps)).toEqual(seat(first));
     const icons = steps.flatMap((s) => (s.do === 'thought' ? [s.icon] : []));
-    expect(icons).toEqual(['heart', 'book', 'maria-shelf']);
+    expect(icons).toEqual(['heart', 'book', 'friends', 'maria-shelf']);
+    // Le réflexe (D-190) : c'est le joueur qui ouvre l'histoire, l'étincelle sur la place de Maria.
+    const press = index(steps, (s) => s.do === 'await');
+    expect(steps[press]).toEqual({ do: 'await', mode: 'press', mark: trigger('finale-play').mark });
+    expect(press).toBeGreaterThan(index(steps, (s) => s.do === 'thought' && s.icon === 'heart'));
+    expect(press).toBeLessThan(index(steps, (s) => s.do === 'thought' && s.icon === 'book'));
+    // L'histoire aussi longue que la première fois ; puis la pensée s'en va.
     const book = need(
       steps.find((s) => s.do === 'thought' && s.icon === 'book'),
       'livre',
@@ -137,10 +143,14 @@ describe('le matin (D-144)', () => {
       first.find((s) => s.do === 'thought' && s.icon === 'book'),
       'livre du premier soir',
     );
-    expect(book.do === 'thought' && firstBook.do === 'thought' && book.ms < firstBook.ms).toBe(
+    expect(book.do === 'thought' && firstBook.do === 'thought' && book.ms === firstBook.ms).toBe(
       true,
     );
-    expect(S.fadingBookMs).toBeLessThan(S.holdMs);
+    // La vue se rapproche d'elles deux, comme au premier soir, puis revient.
+    const look = index(steps, (s) => s.do === 'look' && s.zoom !== undefined);
+    expect(look).toBeGreaterThan(index(steps, (s) => s.do === 'thought' && s.icon === 'friends'));
+    expect(steps[look]).toMatchObject({ zoom: STORY_ZOOM.evening });
+    expect(steps.slice(look + 1)).toContainEqual({ do: 'look' });
   });
 
   it('ranger Maria sur l’étagère du surmeuble, là où était la couverture ; le dernier câlin', () => {

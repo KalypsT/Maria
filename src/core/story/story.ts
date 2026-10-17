@@ -133,6 +133,11 @@ export const THOUGHT_ICONS = [
   'hide-seek',
   /** Eden (blond, la coupe au bol) et un « ? » (D-171) : où s'est-il caché ? */
   'eden-where',
+  /**
+   * Les copains de la classe de mer (D-190), leurs deux visages : Céleste pense à eux, à sa vie à
+   * elle, au lieu de l'histoire du soir.
+   */
+  'friends',
 ] as const;
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
@@ -249,6 +254,19 @@ export type StoryStep =
    * étape `room` la ramène, avant la fin du script (vérifié par `storyProblems`).
    */
   | { readonly do: 'gone' }
+  /**
+   * Le joueur agit (D-190, bloquant) : le script attend Agir, l'étincelle d'Agir sur la tuile
+   * `mark`. `press` : un appui. `hold` : Agir maintenu, le cœur se remplit en `ms` (comme un
+   * déclencheur `hold`, D-171), puis reste plein tant qu'on tient ; le script reprend quand on
+   * lâche (relâcher, c'est le geste). Image visible, script qui suspend les commandes (vérifié par
+   * `storyProblems`).
+   */
+  | {
+      readonly do: 'await';
+      readonly mode: 'press' | 'hold';
+      readonly mark: { readonly col: number; readonly row: number };
+      readonly ms?: number;
+    }
   /**
    * Un très léger signe du monde étrange (D-144, §12, non bloquant) : pendant `ms`, la lumière se
    * refroidit et vacille (le présage), le mobile tourne un instant plus vite ; puis tout redevient

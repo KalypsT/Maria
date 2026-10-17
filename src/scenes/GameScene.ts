@@ -1128,14 +1128,16 @@ export class GameScene extends Phaser.Scene {
       // Le voyage rapide (D-163) : près d'une lanterne allumée, si aucun déclencheur ni porte.
       const lantern = this.zone && !story.busy && door === 0 ? this.travelLanternNear() : -1;
       const travel = lantern >= 0 && story.interactable < 0;
-      const near = story.interactable >= 0 || door !== 0 || travel;
+      // Le script peut attendre Agir (D-190) : Action sert d'Agir là aussi.
+      const awaiting = story.awaiting !== null;
+      const near = story.interactable >= 0 || door !== 0 || travel || awaiting;
       const interact = this.controls.consumePressed('Interact');
       const action = this.controls.consumePressed('Attack');
       const pressed = interact || (near && action);
       // Agir maintenu (D-171) : Agir, ou Action quand elle sert d'Agir.
       const held =
         this.controls.isHeld('Interact') ||
-        (story.interactable >= 0 && this.controls.isHeld('Attack'));
+        ((story.interactable >= 0 || awaiting) && this.controls.isHeld('Attack'));
       story.step(this.level.id, this.player.box, pressed, held, this.player.grounded);
       if (this.recordPicker.isOpen()) {
         // Le tourne-disque s'est ouvert (D-121) : le jeu s'arrête jusqu'au choix.
@@ -3501,12 +3503,16 @@ export class GameScene extends Phaser.Scene {
     if ((veil >= 1 || !story.busy) && this.atTide(this.level) !== this.level) {
       this.swapTide();
     }
+    const awaiting = memory ? null : story.awaiting;
     const near = memory
       ? memory.interactable >= 0
-      : (story.interactable >= 0 || this.nearDoor !== 0 || this.nearTravel >= 0) && !story.busy;
-    // Agir maintenu (D-189) : le bouton devient un cœur qui se remplit, comme celui de la scène.
+      : ((story.interactable >= 0 || this.nearDoor !== 0 || this.nearTravel >= 0) && !story.busy) ||
+        awaiting !== null;
+    // Agir maintenu (D-189) : le bouton devient un cœur qui se remplit, comme celui de la scène ;
+    // aussi quand le script l'attend (D-190).
     const holding =
-      !memory && !story.busy && story.data.triggers[story.interactable]?.hold !== undefined;
+      awaiting?.mode === 'hold' ||
+      (!memory && !story.busy && story.data.triggers[story.interactable]?.hold !== undefined);
     this.touch?.setHeart('Attack', holding ? story.holdProgress : null);
     if (!holding) {
       this.touch?.setLabel('Attack', near ? 'Agir' : null);

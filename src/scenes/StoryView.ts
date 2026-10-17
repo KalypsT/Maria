@@ -407,16 +407,20 @@ export class StoryView {
         image.setTexture(key);
       }
     }
+    // Le script attend Agir (D-190) : son étincelle, ou son cœur s'il faut le maintenir.
+    const awaiting = this.director.awaiting;
     const trigger = this.director.data.triggers[this.director.interactable];
-    const mark = trigger?.mark ?? this.doorMark;
-    const hold = trigger?.hold !== undefined && trigger.mark !== undefined && !this.director.busy;
-    if (hold) {
+    const mark = awaiting?.mark ?? trigger?.mark ?? this.doorMark;
+    const hold = awaiting
+      ? awaiting.mode === 'hold'
+      : trigger?.hold !== undefined && trigger.mark !== undefined && !this.director.busy;
+    if (hold && mark) {
       // Agir maintenu (D-171) : un cœur qui se remplit, de bas en haut, à la place de l'étincelle.
       const progress = this.director.holdProgress;
       const pulse = 0.85 + 0.15 * Math.sin((now / SPARKLE_MS) * Math.PI * 2);
-      const x = (trigger.mark.col + 0.5) * T;
+      const x = (mark.col + 0.5) * T;
       // Un peu plus haut que l'étincelle : il est deux fois plus grand (D-189).
-      const y = (trigger.mark.row + 0.5) * T - pulse * 2 - 4;
+      const y = (mark.row + 0.5) * T - pulse * 2 - 4;
       const grow = (1 + 0.25 * progress) / this.artScale;
       this.sparkle.setVisible(false);
       this.heartEmpty.setVisible(true).setPosition(x, y).setScale(grow).setAlpha(pulse);
@@ -433,7 +437,7 @@ export class StoryView {
       this.heartEmpty.setVisible(false);
       this.heartFull.setVisible(false);
     }
-    if (mark && !this.director.busy) {
+    if (mark && (!this.director.busy || awaiting)) {
       const pulse = 0.75 + 0.25 * Math.sin((now / SPARKLE_MS) * Math.PI * 2);
       this.sparkle
         .setVisible(true)

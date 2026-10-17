@@ -263,6 +263,96 @@ describe('StoryDirector', () => {
     expect(d.veil).toBeLessThan(1);
   });
 
+  it('le script attend Agir (D-190) : un appui ; ou maintenu, plein tant qu’on tient, et lâché', () => {
+    const at = standing(2, 3);
+    const mark = { col: 2, row: 2 };
+    const pressed = recorder();
+    const p = new StoryDirector(
+      story([
+        { do: 'await', mode: 'press', mark },
+        { do: 'wait', ms: 10 },
+      ]),
+      pressed.host,
+      HZ,
+    );
+    p.step('r', at, true);
+    expect(p.awaiting).toEqual({ do: 'await', mode: 'press', mark });
+    for (let i = 0; i < 50; i++) {
+      p.step('r', at, false, true);
+    }
+    // Tenir ne suffit pas : il faut appuyer.
+    expect(p.awaiting).not.toBeNull();
+    p.step('r', at, true);
+    expect(p.awaiting).toBeNull();
+
+    const held = recorder();
+    const h = new StoryDirector(
+      story([{ do: 'await', mode: 'hold', mark, ms: 200 }]),
+      held.host,
+      HZ,
+    );
+    h.step('r', at, true);
+    for (let i = 0; i < 10; i++) {
+      h.step('r', at, false, true);
+    }
+    expect(h.holdProgress).toBeCloseTo(0.5);
+    // Lâché avant d'être plein : il se vide, le script attend toujours.
+    h.step('r', at, false, false);
+    expect(h.holdProgress).toBeLessThan(0.5);
+    expect(h.awaiting).not.toBeNull();
+    for (let i = 0; i < 100; i++) {
+      h.step('r', at, false, true);
+    }
+    // Plein, et il le reste tant qu'on tient.
+    expect(h.holdProgress).toBe(1);
+    expect(h.awaiting).not.toBeNull();
+    expect(held.log).toEqual([]);
+    // Lâcher, c'est le geste : le script reprend.
+    h.step('r', at, false, false);
+    expect(h.awaiting).toBeNull();
+    expect(h.holdProgress).toBe(0);
+    expect(held.log).toEqual(['flag done']);
+  });
+
+  it('Agir attendu : jamais dans le noir, toujours les commandes suspendues (D-190)', () => {
+    const zone = buildZone(HOUSE);
+    const mark = { col: 20, row: 18 };
+    const dark = { ...HOUSE_STORY, triggers: [] } as StoryData;
+    const bad = (steps: StoryStep[], lock: boolean): string[] =>
+      storyProblems(
+        {
+          ...dark,
+          triggers: [
+            {
+              id: 'a',
+              room: 'bedroom',
+              on: 'interact',
+              area: { col: 18, row: 17, w: 4, h: 3 },
+              mark,
+              when: { none: ['a'] },
+              lock,
+              steps: [...steps, { do: 'flag', id: 'a' }],
+            },
+          ],
+        },
+        zone,
+      ).filter((p) => p.startsWith('déclencheur a :'));
+    expect(bad([{ do: 'await', mode: 'press', mark }], true)).toEqual([]);
+    expect(
+      bad(
+        [
+          { do: 'fadeOut', ms: 100 },
+          { do: 'await', mode: 'press', mark },
+          { do: 'fadeIn', ms: 100 },
+        ],
+        true,
+      ).some((p) => p.includes('dans le noir')),
+    ).toBe(true);
+    expect(
+      bad([{ do: 'await', mode: 'press', mark }], false).some((p) => p.includes('suspendre')),
+    ).toBe(true);
+  });
+
   it('setFlags arrête le script et lève le voile', () => {
     const { host } = recorder();
     const d = new StoryDirector(story([{ do: 'fadeOut', ms: 100 }]), host, HZ);

@@ -79,7 +79,10 @@ export class StoryDirector {
   flashbackProgress = 0;
   /** Déclencheur Agir disponible là où se tient Céleste (-1 : aucun). */
   interactable = -1;
-  /** Agir maintenu sur un déclencheur `hold` (D-171) : de 0 à 1, il part à 1. */
+  /**
+   * Agir maintenu sur un déclencheur `hold` (D-171) : de 0 à 1, il part à 1. Dans une étape
+   * `await` maintenue (D-190), il reste à 1 tant qu'on tient.
+   */
   holdProgress = 0;
   /** Un souvenir jouable est en cours (D-89) : le script attend `endPlay`. */
   playing = false;
@@ -131,6 +134,12 @@ export class StoryDirector {
   /** Commandes de Céleste suspendues (script bloquant en cours). */
   get locked(): boolean {
     return this.running?.lock ?? false;
+  }
+
+  /** L'étape `await` en cours (D-190) : le script attend Agir ; sinon null. */
+  get awaiting(): Extract<StoryStep, { do: 'await' }> | null {
+    const step = this.running?.steps[this.stepIndex];
+    return step?.do === 'await' ? step : null;
   }
 
   /** Identifiant du script en cours (debug), sinon null. */
@@ -253,7 +262,7 @@ export class StoryDirector {
       }
     }
     if (this.running) {
-      this.advance();
+      this.advance(interact, held);
       return;
     }
     const before = this.interactable;
@@ -350,6 +359,9 @@ export class StoryDirector {
           this.playing = true;
           this.host.play(step.id);
           return;
+        case 'await':
+          this.holdProgress = 0;
+          return;
         default:
           this.apply(step);
       }
@@ -426,8 +438,8 @@ export class StoryDirector {
     }
   }
 
-  /** Avance l'étape bloquante courante d'un pas. */
-  private advance(): void {
+  /** Avance l'étape bloquante courante d'un pas (Agir appuyé, maintenu : l'étape `await`). */
+  private advance(interact = false, held = false): void {
     const trigger = this.running;
     const step = trigger?.steps[this.stepIndex];
     if (!step) {
@@ -437,6 +449,26 @@ export class StoryDirector {
     if (step.do === 'play') {
       if (!this.playing) {
         this.next();
+      }
+      return;
+    }
+    if (step.do === 'await') {
+      if (step.mode === 'press') {
+        if (interact) {
+          this.next();
+        }
+        return;
+      }
+      // Maintenu (D-190) : le cœur se remplit, reste plein tant qu'on tient ; lâché plein, le
+      // script reprend ; lâché avant, il se vide doucement (comme D-171).
+      const total = Math.max(1, msToSteps(step.ms ?? 0, this.stepHz));
+      if (held) {
+        this.holdProgress = Math.min(1, this.holdProgress + 1 / total);
+      } else if (this.holdProgress >= 1) {
+        this.holdProgress = 0;
+        this.next();
+      } else {
+        this.holdProgress = Math.max(0, this.holdProgress - HOLD_DRAIN / total);
       }
       return;
     }

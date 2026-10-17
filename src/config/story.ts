@@ -400,8 +400,12 @@ export const STORY_TIMING = {
   monthsFadeInMs: 3200,
   /** Court souvenir (D-68) : la vignette, apparition et disparition comprises. */
   flashbackMs: 7000,
-  /** Le matin (D-144) : la bulle du livre du soir, qui commence… et s'efface vite. */
-  fadingBookMs: 1100,
+  /**
+   * Le matin (D-190) : après l'histoire, la pensée de Céleste part vers ses copains (la bulle) ;
+   * puis la vue se rapproche d'elles deux et y reste.
+   */
+  rugDriftMs: 3200,
+  rugLookMs: 4400,
   /** Le dernier plan : la vue reste sur Maria, puis un très léger signe du monde étrange. */
   lastShotMs: 2600,
   glimmerMs: 2800,

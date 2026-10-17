@@ -16,6 +16,10 @@ import type { StoryData, StoryStep, StoryTrigger, TileArea } from '../../core/st
 const RUG_AREA: TileArea = { col: 18, row: 17, w: 4, h: 3 };
 /** Assise sur le tapis, à sa place du premier soir, tournée vers la place vide de Maria. */
 const RUG_SEAT = { col: 21, row: 19 };
+/** L'étincelle du tapis, au-dessus de la place de Maria (D-31). */
+const RUG_MARK = { col: 19, row: 18 };
+/** Le matin (D-190) : la vue se rapproche d'elles deux, entre Céleste et Maria. */
+const RUG_LOOK = { col: 20, row: 18 };
 /** Le berceau, sur le coffre à jouets (D-31) ; on l'atteint du sol ou du dessus du coffre. */
 export const FINALE_CRADLE = { col: 23, row: 17 };
 const CRADLE_AREA: TileArea = { col: 20, row: 15, w: 7, h: 5 };
@@ -482,14 +486,16 @@ const TRIGGERS: StoryTrigger[] = [
     ],
   },
   {
-    // Sur le tapis, comme le premier soir (D-31) : Céleste s'assoit en face de Maria, un câlin,
-    // l'histoire du soir commence… et s'efface. Elle la regarde : elle a grandi (§11). Puis elle
-    // pense à l'étagère où la ranger.
+    // Sur le tapis, comme le premier soir (D-31) : Céleste s'assoit en face de Maria, le câlin.
+    // Puis le réflexe (D-190, §11) : c'est le joueur qui ouvre l'histoire du soir, aussi longue que
+    // la première fois ; elle s'efface, et la pensée de Céleste s'en va vers les copains de la
+    // classe de mer. La vue se rapproche d'elles deux, comme au premier soir : elle la regarde.
+    // Elle a grandi.
     id: 'finale-play',
     room: 'bedroom',
     on: 'interact',
     area: RUG_AREA,
-    mark: { col: 19, row: 18 },
+    mark: RUG_MARK,
     when: { all: [F.FinaleAwake], none: [F.FinalePlayed] },
     lock: true,
     steps: [
@@ -500,8 +506,15 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'fadeIn', ms: S.fadeMs },
       { do: 'thought', icon: 'heart', ms: S.holdMs },
       { do: 'wait', ms: S.holdMs + 200 },
-      { do: 'thought', icon: 'book', ms: S.fadingBookMs },
-      { do: 'wait', ms: S.fadingBookMs + S.holdMs + S.lookMs },
+      { do: 'await', mode: 'press', mark: RUG_MARK },
+      { do: 'thought', icon: 'book', ms: S.holdMs },
+      { do: 'wait', ms: S.holdMs + S.thoughtFadeMs },
+      { do: 'thought', icon: 'friends', ms: S.rugDriftMs },
+      { do: 'wait', ms: S.rugDriftMs + S.lookMs },
+      { do: 'look', ...RUG_LOOK, zoom: STORY_ZOOM.evening },
+      { do: 'wait', ms: S.rugLookMs },
+      { do: 'look' },
+      { do: 'wait', ms: STORY_ZOOM.easeMs },
       { do: 'pose', pose: 'stand' },
       { do: 'thought', icon: 'maria-shelf', ms: S.thoughtMs },
     ],

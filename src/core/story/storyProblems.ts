@@ -165,6 +165,15 @@ export function storyProblems(story: StoryData, zone: Zone): string[] {
           problems.push(`${what} : Céleste disparaît sous les yeux du joueur`);
         }
         gone = true;
+      } else if (step.do === 'await') {
+        // Le joueur agit (D-190) : il faut voir, et Céleste attend sans bouger.
+        if (dark) {
+          problems.push(`${what} : Agir attendu dans le noir`);
+        }
+        if (!t.lock) {
+          problems.push(`${what} : Agir attendu sans suspendre les commandes`);
+        }
+        inRoom(room, { ...step.mark, w: 1, h: 1 }, what);
       } else if (step.do === 'fadeOut') {
         dark = true;
       } else if (step.do === 'fadeIn') {

@@ -1637,6 +1637,18 @@ function drawIcon(
       ctx.arc(cx + 7, cy + 0.6, 0.85, 0, Math.PI * 2);
       ctx.fill();
       break;
+    case 'friends':
+      // Les copains de la classe de mer (D-190) : deux visages côte à côte, tirés de leurs images ;
+      // sans elles, deux visages dessinés.
+      for (const [who, dx] of [
+        [BUBBLE_PORTRAITS.classmate, -5],
+        [BUBBLE_PORTRAITS['kid-cap'], 5],
+      ] as const) {
+        if (!drawPortrait(ctx, images, who, cx + dx, cy + 0.5, PORTRAIT_SIZE - 4)) {
+          faceIcon(ctx, cx + dx, cy + 1);
+        }
+      }
+      break;
     case 'handle': {
       // Une porte, la poignée tout en haut, et une petite main qui n'y arrive pas (D-46).
       ctx.fillStyle = WOOD_DARK;
