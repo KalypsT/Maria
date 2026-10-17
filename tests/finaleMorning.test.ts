@@ -78,12 +78,8 @@ describe('le matin (D-144)', () => {
     expect(flagsOf(trigger('finale-morning').steps)).toEqual([F.FinaleMorning, F.FinaleAwake]);
     // Le tapis mène d'une traite à l'étagère (D-190) ; une partie reprise entre les deux range
     // Maria depuis le tapis.
-    expect(flagsOf(trigger('finale-play').steps)).toEqual([
-      F.FinalePlayed,
-      F.FinaleToys,
-      F.FinaleShelved,
-    ]);
-    expect(flagsOf(trigger('finale-shelf').steps)).toEqual([F.FinaleToys, F.FinaleShelved]);
+    expect(flagsOf(trigger('finale-play').steps)).toEqual([F.FinalePlayed, F.FinaleShelved]);
+    expect(flagsOf(trigger('finale-shelf').steps)).toEqual([F.FinaleShelved]);
     expect(MILESTONES.map((m) => ('trigger' in m ? m.trigger : ''))).toEqual(
       expect.arrayContaining(['finale-play', 'finale-leave']),
     );
@@ -194,7 +190,7 @@ describe('le matin (D-144)', () => {
     expect(after.filter((s) => s.do === 'face')).toEqual([{ do: 'face', facing: 1 }]);
   });
 
-  it('les jouets d’avant (D-191) : la boîte fermée pendant le jeu ; ouverte dans le noir, les jouets autour, pour toujours', () => {
+  it('les jouets d’avant (D-191, D-192) : la boîte fermée pendant le jeu ; ouverte dès les retrouvailles, les jouets autour, pour toujours', () => {
     /** Les jouets d'avant et la boîte de la chambre à ce moment. */
     const toys = (flags: readonly string[]) => {
       const set = new Set(flags);
@@ -216,14 +212,30 @@ describe('le matin (D-144)', () => {
       'old-white-cloth',
       'toy-box-open',
     ];
-    // Une nouvelle partie, le premier soir, tout le jeu jusqu'au tapis : la boîte, fermée, seule.
-    for (const flags of [[], [F.EveningPlayed], SKY, TOGETHER, AWAKE, PLAYED]) {
+    // Une nouvelle partie, le premier soir, tout le jeu jusqu'au berceau géant : la boîte, fermée.
+    const reunion = [...SKY, F.FinaleBig, F.FinaleCradleSeen];
+    for (const flags of [[], [F.EveningPlayed], SKY, reunion]) {
       expect(toys(flags)).toEqual(['toy-box']);
     }
-    // Dans le noir de l'étagère, puis pour toujours ; aussi dans une partie rangée ou finie avant.
-    expect(toys([...PLAYED, F.FinaleToys])).toEqual(all);
-    expect(toys(SHELVED)).toEqual(all);
-    expect(toys(GONE)).toEqual(all);
+    // Maria retrouvée : ouverte, les jouets autour, dès le retour dans la vraie chambre, la nuit ;
+    // puis pour toujours.
+    for (const flags of [[...reunion, F.FinaleFound], TOGETHER, AWAKE, PLAYED, SHELVED, GONE]) {
+      expect(toys(flags)).toEqual(all);
+    }
+    // Ils sortent de la boîte dans le noir où Céleste prend Maria (le berceau géant, ou le berceau
+    // de la chambre d'une partie plus ancienne), jamais sous les yeux du joueur.
+    for (const id of ['finale-big-hug', 'finale-found']) {
+      const steps = trigger(id).steps;
+      const found = index(steps, (s) => s.do === 'flag' && s.id === F.FinaleFound);
+      expect(found, id).toBeGreaterThan(index(steps, (s) => s.do === 'fadeOut'));
+      expect(found, id).toBeLessThan(index(steps, (s) => s.do === 'fadeIn'));
+    }
+    // La chambre grande (le monde étrange des retrouvailles) n'en a aucun.
+    expect(
+      HOUSE_STORY.props.filter(
+        (p) => p.room !== 'bedroom' && (p.kind.startsWith('old-') || p.kind.startsWith('toy-box')),
+      ),
+    ).toEqual([]);
     // Ouverte à la place de la boîte fermée ; jamais rien qu'on puisse prendre ou regarder.
     expect({ ...prop('toy-box-open'), id: '', kind: '', when: {} }).toEqual({
       ...prop('toy-box'),
@@ -254,11 +266,8 @@ describe('le matin (D-144)', () => {
     expect(tileAt(bedroom, kitchen.col, MARIA_SHELF.row + 1)).toBe(Tile.OneWay);
   });
 
-  it('les jouets d’avant : écrits dans le noir ; la vue les regarde, puis glisse le long de l’étagère, avant le dernier câlin', () => {
+  it('les jouets d’avant : la vue les regarde, puis glisse le long de l’étagère, avant le dernier câlin', () => {
     const steps = trigger('finale-shelf').steps;
-    const toys = index(steps, (s) => s.do === 'flag' && s.id === F.FinaleToys);
-    expect(toys).toBeGreaterThan(index(steps, (s) => s.do === 'fadeOut'));
-    expect(toys).toBeLessThan(index(steps, (s) => s.do === 'fadeIn'));
     const hold = index(steps, (s) => s.do === 'await');
     const looks = steps.slice(0, hold).flatMap((s) => (s.do === 'look' ? [s] : []));
     // Rapprochée, puis deux glissements lents, puis le retour sur Céleste et Maria.

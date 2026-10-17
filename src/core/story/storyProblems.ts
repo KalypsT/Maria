@@ -27,7 +27,7 @@ function standable(level: LevelData, col: number, row: number): boolean {
 }
 
 function conditionFlags(when: FlagCondition): string[] {
-  return [...(when.all ?? []), ...(when.any ?? []), ...(when.none ?? [])];
+  return [...(when.all ?? []), ...(when.none ?? [])];
 }
 
 /**

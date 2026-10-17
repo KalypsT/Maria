@@ -292,8 +292,9 @@ export const StoryFlag = {
   /** Céleste est sortie par la porte : le dernier plan, sur Maria (D-144). */
   FinaleGone: 'finale.gone',
   /**
-   * Les jouets d'avant (D-191) : dans le noir, au moment de ranger Maria, la boîte de l'étagère est
-   * ouverte, les jouets du monde étrange posés autour. Ils y restent.
+   * Les jouets d'avant (D-191) : écrite au moment de ranger Maria. Plus écrite depuis D-192 (ils
+   * sortent de la boîte dès les retrouvailles, `FinaleFound`) ; gardée pour les parties qui la
+   * portent (la liste figée des identifiants de la sauvegarde).
    */
   FinaleToys: 'finale.toys',
   /** Les souvenirs qu'on emporte (D-169) : pris, ils quittent le décor. */

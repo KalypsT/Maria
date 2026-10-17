@@ -122,17 +122,16 @@ const TOYS_LOOK_SHELF = { col: 31, row: 11 };
 const TOYS_LOOK_BOX = { col: 35, row: 11 };
 /**
  * Ranger Maria (§11, D-190). Dans le noir, Céleste est devant l'étagère du surmeuble, là où était la
- * couverture le premier soir, Maria dans les bras. Dans le même noir, la boîte de l'étagère s'est
- * ouverte : les jouets d'avant sont là, autour (D-191). La vue se rapproche de la cuisine rose, au
- * pied du bureau, puis glisse lentement le long de l'étagère : ils étaient là, rangés ; elle n'y
- * faisait plus attention. Le dernier câlin : Agir maintenu, le cœur se remplit et reste plein tant
+ * couverture le premier soir, Maria dans les bras. Les jouets d'avant sont là, autour, sortis de la
+ * boîte depuis les retrouvailles (D-191, D-192). La vue se rapproche de la cuisine rose, au pied
+ * du bureau, puis glisse lentement le long de l'étagère : ils étaient là, rangés ; elle n'y faisait
+ * plus attention. Le dernier câlin : Agir maintenu, le cœur se remplit et reste plein tant
  * qu'on tient ; **relâcher, c'est la poser** : le noir, Maria assise parmi eux, les bras de Céleste
  * vides. Elle la regarde, longtemps ; puis elle se tourne vers la porte. Elle ne la prend et ne la
  * pose que dans le noir (pilier 5).
  */
 const PUT_AWAY: readonly StoryStep[] = [
   { do: 'fadeOut', ms: S.fadeMs },
-  { do: 'flag', id: F.FinaleToys },
   { do: 'place', ...SHELF_STAND, facing: -1 },
   { do: 'pose', pose: 'hold' },
   { do: 'fadeIn', ms: S.fadeMs },
@@ -773,28 +772,29 @@ const PROPS: StoryData['props'] = [
     when: { all: [F.FinaleShelved] },
   },
   // Les jouets d'avant (D-191) : la boîte fermée sur l'étagère pendant tout le jeu, sans rien qui la
-  // signale ; ouverte dans le noir où Céleste vient ranger Maria, les jouets autour, pour toujours
-  // (aussi dans une partie rangée ou finie avant eux).
+  // signale. Ouverte dès les retrouvailles (D-192 : c'est ce moment qui déclenche tout), dans le
+  // noir où Céleste prend Maria dans ses bras : on les voit en revenant dans la vraie chambre, la
+  // nuit ; ils y restent pour toujours.
   {
     id: 'toy-box',
     room: 'bedroom',
     kind: 'toy-box',
     ...TOY_BOX,
-    when: { none: [F.FinaleToys, F.FinaleShelved] },
+    when: { none: [F.FinaleFound] },
   },
   {
     id: 'toy-box-open',
     room: 'bedroom',
     kind: 'toy-box-open',
     ...TOY_BOX,
-    when: { any: [F.FinaleToys, F.FinaleShelved] },
+    when: { all: [F.FinaleFound] },
   },
   ...Object.entries(OLD_TOYS).map(([kind, at]) => ({
     id: kind,
     room: 'bedroom',
     kind: kind as keyof typeof OLD_TOYS,
     ...at,
-    when: { any: [F.FinaleToys, F.FinaleShelved] },
+    when: { all: [F.FinaleFound] },
   })),
   {
     id: 'family-drawing',

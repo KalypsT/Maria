@@ -14,8 +14,6 @@ import type { Box } from '../physics/gridCollision';
 /** Condition sur les étapes vécues : toutes celles de `all`, aucune de `none`. */
 export interface FlagCondition {
   readonly all?: readonly string[];
-  /** Au moins une de ces étapes (D-191). */
-  readonly any?: readonly string[];
   readonly none?: readonly string[];
 }
 
@@ -758,10 +756,6 @@ export function checkCondition(flags: ReadonlySet<string>, when: FlagCondition):
     if (flags.has(flag)) {
       return false;
     }
-  }
-  const any = when.any;
-  if (any && !any.some((flag) => flags.has(flag))) {
-    return false;
   }
   return true;
 }
