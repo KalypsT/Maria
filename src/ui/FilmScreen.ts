@@ -1,4 +1,6 @@
+import type { MusicTrack } from '../config/audio';
 import { INTRO_VIEW, type IntroCamera } from '../config/intro';
+import type { SfxSlot } from '../config/sfx';
 import {
   FILM,
   FILM_IMAGES,
@@ -197,6 +199,49 @@ function drawToise(c: CanvasRenderingContext2D, toise: NonNullable<FilmShot['toi
   }
 }
 
+/** Ce que le film demande au son du jeu (D-190) : la musique d'un plan, ses bruitages. */
+export interface FilmAudio {
+  setMusic(track: MusicTrack | null): void;
+  sfx(slot: SfxSlot): void;
+}
+
+/**
+ * Les étoiles du monde étrange, un instant (le dernier signe, D-190) : des étoiles turquoise qui
+ * scintillent autour d'un point, chacune à son rythme, et un halo léger.
+ */
+function drawSparkles(
+  c: CanvasRenderingContext2D,
+  glows: ReturnType<typeof createGlows>,
+  sparkles: NonNullable<FilmShot['sparkles']>,
+  strength: number,
+  t: number,
+): void {
+  if (strength <= 0) {
+    return;
+  }
+  drawGlow(c, glows, 'teal', sparkles.x, sparkles.y, sparkles.radius * 1.3, strength * 0.35);
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  c.fillStyle = 'rgb(150, 245, 230)';
+  for (let i = 0; i < sparkles.count; i++) {
+    const angle = (i / sparkles.count) * TAU + hash(i + 7) * 0.6;
+    const r = sparkles.radius * (0.55 + hash(i + 17) * 0.45);
+    const x = sparkles.x + Math.cos(angle) * r;
+    const y = sparkles.y + Math.sin(angle) * r * 0.75;
+    const twinkle = 0.5 + 0.5 * Math.sin(t / (380 + hash(i + 27) * 420) + i);
+    const size = (7 + hash(i + 37) * 8) * (0.6 + 0.4 * twinkle);
+    c.globalAlpha = strength * (0.45 + 0.55 * twinkle);
+    c.beginPath();
+    c.moveTo(x, y - size);
+    c.quadraticCurveTo(x, y, x + size, y);
+    c.quadraticCurveTo(x, y, x, y + size);
+    c.quadraticCurveTo(x, y, x - size, y);
+    c.quadraticCurveTo(x, y, x, y - size);
+    c.fill();
+  }
+  c.restore();
+}
+
 /**
  * Un film de la fin (D-190), joué par le moteur de l'intro (D-185) : un canvas plein écran qui
  * apparaît par-dessus l'image du jeu (fondu enchaîné), déroule ses plans, puis s'y fond. Pas de
@@ -204,7 +249,7 @@ function drawToise(c: CanvasRenderingContext2D, toise: NonNullable<FilmShot['toi
  * arrière-plan. Images manquantes, trop lentes ou erreur : la promesse se résout aussitôt (le jeu
  * ne doit jamais attendre).
  */
-export function playFilm(id: FilmId): Promise<void> {
+export function playFilm(id: FilmId, audio?: FilmAudio): Promise<void> {
   return new Promise((resolve) => {
     const film: Film = FILMS[id];
     const shots = film.shots;
@@ -308,6 +353,9 @@ export function playFilm(id: FilmId): Promise<void> {
       if (shot.door) {
         drawDoor(c, keyValue(shot.door, t, 0));
       }
+      if (shot.sparkles) {
+        drawSparkles(c, glows, shot.sparkles, keyValue(shot.sparkles.strength, t, 0), t);
+      }
       if (shot.glow) {
         const g = shot.glow;
         drawGlow(c, glows, g.color, g.x, g.y, g.radius, keyValue(g.strength, t, 0));
@@ -375,9 +423,31 @@ export function playFilm(id: FilmId): Promise<void> {
       }
     };
 
+    /** La musique et les bruitages des plans, une fois chacun, quand le film les atteint. */
+    let cuedUntil = -1;
+    const cue = (now: number) => {
+      const at = elapsed(now);
+      if (!audio || at <= cuedUntil) {
+        return;
+      }
+      shots.forEach((shot, i) => {
+        const start = schedule.starts[i] ?? 0;
+        if (shot.music !== undefined && start > cuedUntil && start <= at) {
+          audio.setMusic(shot.music);
+        }
+        for (const [ms, slot] of shot.sfx ?? []) {
+          if (start + ms > cuedUntil && start + ms <= at) {
+            audio.sfx(slot);
+          }
+        }
+      });
+      cuedUntil = at;
+    };
+
     const tick = (now: number) => {
       try {
         if (images) {
+          cue(now);
           if (startAt < 0) {
             // Les images sont prêtes : le film apparaît par-dessus le jeu.
             startAt = now;

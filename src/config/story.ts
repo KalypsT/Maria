@@ -490,6 +490,19 @@ export const END_SCREEN = {
   snailMs: 48000,
   snailDelayMs: 3400,
   shellImage: 'art/shell.png',
+  /**
+   * Les affaires de Maria retrouvées (D-190), posées autour d'elle sur l'étagère (élargie) : le
+   * milieu de chacune (% de la largeur de la scène) et sa hauteur (% de sa hauteur), Maria au
+   * milieu (devant elles). Seulement celles que le joueur a trouvées. PROVISOIRE.
+   */
+  things: {
+    slipper: { left: 11, height: 8 },
+    bottle: { left: 21, height: 11 },
+    bonnet: { left: 29, height: 9 },
+    rattle: { left: 72, height: 11 },
+    spoon: { left: 81, height: 9 },
+    headband: { left: 90, height: 7 },
+  },
 } as const;
 
 /** Période du petit mouvement en boucle des personnages (ms), D-37. */

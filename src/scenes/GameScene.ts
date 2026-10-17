@@ -208,7 +208,7 @@ import { ArcadeEvent, ArcadePhase, ArcadeRun } from '../core/arcade/run';
 import { arcadeChoosable, arcadeRecord, arcadeStartTiles } from '../core/save/arcade';
 import { isGrounded, touchesHazard } from '../core/physics/gridCollision';
 import { isRecordSlot } from '../config/records';
-import { isMemory } from '../config/memories';
+import { MARIA_THINGS, isMemory } from '../config/memories';
 import { drawnCanvas, recordDrawing, treasureDrawing } from '../ui/treasureDrawing';
 import { drawSticker } from './art/stickerArt';
 import { canPlayRecords, recordShelf, type RecordChoice } from '../core/audio/records';
@@ -754,7 +754,15 @@ export class GameScene extends Phaser.Scene {
       },
       film: (id) => {
         this.filmPlaying = true;
-        void playFilm(id).then(() => {
+        // Le film règle lui-même la musique et ses bruitages (D-190) ; l'histoire reprend après.
+        void playFilm(id, {
+          setMusic: (track) => {
+            this.audio.setMusic(track);
+          },
+          sfx: (slot) => {
+            this.audio.sfx.play(slot);
+          },
+        }).then(() => {
           this.filmPlaying = false;
           this.controls.clearPressed();
           this.story.endFilm();
@@ -1947,9 +1955,12 @@ export class GameScene extends Phaser.Scene {
       .then(() => {
         // Toutes les coquilles trouvées : le petit escargot de la fin (D-148).
         const shells = this.shellCount();
+        // Les affaires de Maria retrouvées, autour d'elle (D-190).
+        const found = this.session.data.progression.memories;
         return showEndScreen(
           import.meta.env.BASE_URL,
           shells.total > 0 && shells.found === shells.total,
+          MARIA_THINGS.filter((id) => found.includes(id)),
         );
       })
       .then(() => {
@@ -3590,7 +3601,10 @@ export class GameScene extends Phaser.Scene {
     music.room = isMusicTrack(roomTrack) ? roomTrack : null;
     // L'histoire peut imposer sa musique, ou le silence (les retrouvailles, D-171).
     const told = story.music();
-    this.audio.setMusic(told !== undefined ? told : chooseMusic(music));
+    // La fin du jeu (D-145) a mis le thème de fin dans ce même pas : il reste.
+    if (!this.ended) {
+      this.audio.setMusic(told !== undefined ? told : chooseMusic(music));
+    }
   }
 
   /** Centre du fondu en cercle (D-35) : Céleste, en px CSS de la page. */

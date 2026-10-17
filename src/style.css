@@ -801,6 +801,20 @@ body {
   box-shadow: 0 6px 0 -2px #8f6a4c;
 }
 
+/* Les affaires de Maria retrouvées (D-190) : l'étagère s'élargit, elles sont posées autour d'elle. */
+.end-shelf-wide {
+  left: 2%;
+  right: 2%;
+}
+
+.end-thing {
+  position: absolute;
+  bottom: 30%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  user-select: none;
+}
+
 /*
  * Toutes les coquilles trouvées (D-148) : un petit escargot traverse lentement l'étagère vers Maria,
  * de droite à gauche, et laisse une trace argentée.

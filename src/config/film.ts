@@ -1,3 +1,5 @@
+import type { MusicTrack } from './audio';
+import type { SfxSlot } from './sfx';
 import {
   MARIA_ON_RUG,
   ROOM_CAMERA,
@@ -73,6 +75,8 @@ export const FILM_IMAGES = {
   celeste18: 'art/film/celeste-18.png',
   /** Papa à la porte (D-37, D-123), tourné vers la chambre. */
   dad: 'art/dad-door.png',
+  /** La dernière nuit, la chambre vide : le dernier signe (PR 8). */
+  age18Night: 'art/film/room-age18-night.webp',
 } as const;
 export type FilmImage = keyof typeof FILM_IMAGES;
 
@@ -217,6 +221,21 @@ export interface FilmShot {
   readonly toise?: { readonly shown: number; readonly write: number; readonly fromMs: number };
   /** La porte de la chambre : ouverte de 0 (fermée) à 1, la lumière du couloir (D-190). */
   readonly door?: IntroKeys;
+  /** La musique au début du plan (null : le silence) ; absente : inchangée. */
+  readonly music?: MusicTrack | null;
+  /** Des bruitages pendant le plan : le moment (ms) et l'emplacement. */
+  readonly sfx?: readonly (readonly [number, SfxSlot])[];
+  /**
+   * Le monde étrange, un instant (D-190, le dernier signe) : des étoiles turquoise qui scintillent
+   * autour d'un point, et un halo léger ; leur intensité au fil du plan.
+   */
+  readonly sparkles?: {
+    readonly x: number;
+    readonly y: number;
+    readonly radius: number;
+    readonly count: number;
+    readonly strength: IntroKeys;
+  };
 }
 
 /** Un film : ses plans ; `outroMs` : il finit dans le noir (sinon, il se fond dans le jeu). */
@@ -302,6 +321,8 @@ const sunAcross = (ms: number): IntroKeys => [
   [0, 1180],
   [ms, 820],
 ];
+/** La boîte à musique, sur l'étagère au-dessus du lit (la cabane partie), dans les décors. */
+const MUSIC_BOX = { x: 312, y: 612 } as const;
 /** Le téléphone, debout contre la lampe du bureau. */
 const PHONE: FilmSprite = { image: 'phone', x: 1424, bottom: 742, height: 66 };
 /**
@@ -612,6 +633,49 @@ const YEARS: readonly FilmShot[] = [
         [0, 0.05],
         [3600, 0.42],
         [7200, 0.1],
+      ],
+    },
+  },
+  {
+    // Le dernier signe (§12, choix B) : la dernière nuit, la chambre vide. La musique se tait. La
+    // boîte à musique, sur son étagère au-dessus du lit, s'éclaire en turquoise et joue seule trois
+    // notes de la berceuse ; des étoiles turquoise s'allument au mur autour de Maria. Elle ne bouge
+    // pas. Puis tout redevient normal. Le jeu s'est ouvert sur cette boîte (l'intro, plan 1).
+    id: 'last-sign',
+    scene: 'last-sign',
+    durationMs: 9400,
+    enter: dissolve(1800),
+    camera: { from: { x: 960, y: 540, zoom: 1 }, to: { x: 900, y: 560, zoom: 1.06 } },
+    backdrop: 'age18Night',
+    sprites: [],
+    music: null,
+    glow: {
+      color: 'teal',
+      x: MUSIC_BOX.x,
+      y: MUSIC_BOX.y,
+      radius: 170,
+      strength: [
+        [2300, 0],
+        [2900, 0.85],
+        [5600, 0.6],
+        [6900, 0],
+      ],
+    },
+    sfx: [
+      [2700, 'lullaby'],
+      [3400, 'lullaby'],
+      [4400, 'lullaby'],
+    ],
+    sparkles: {
+      x: 1320,
+      y: 555,
+      radius: 150,
+      count: 9,
+      strength: [
+        [3200, 0],
+        [4000, 1],
+        [6000, 1],
+        [7300, 0],
       ],
     },
   },

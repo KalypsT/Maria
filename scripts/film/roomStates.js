@@ -64,4 +64,6 @@ export const STATES = {
   'age13-night': { ...AGE12, dropFlags: MORNING },
   age15: AGE15,
   age18: AGE18,
+  // La dernière nuit, la chambre vide : le dernier signe (D-190, PR 8).
+  'age18-night': { ...AGE18, dropFlags: MORNING },
 };

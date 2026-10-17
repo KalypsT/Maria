@@ -130,7 +130,9 @@ describe('les films de la fin (D-190)', () => {
     });
     expect([...ages].sort((a, b) => a - b)).toEqual(ages);
     expect(ages.at(-1)).toBe(18);
-    expect(shots.at(-1)?.id).toBe('maria');
+    // Maria, puis le dernier signe (PR 8).
+    expect(shots.at(-2)?.id).toBe('maria');
+    expect(shots.at(-1)?.id).toBe('last-sign');
   });
 
   it('la toise : un trait par an, de 4 à 18 ans, jamais deux fois, de plus en plus haut', () => {
@@ -234,5 +236,34 @@ describe('les films de la fin (D-190)', () => {
     expect(shots.slice(i + 1).every((s) => s.sprites.every((sp) => sp.image === 'maria'))).toBe(
       true,
     );
+  });
+
+  it('le dernier signe : le silence, la boîte à musique et ses trois notes, les étoiles autour de Maria', () => {
+    const shots = FILMS.years.shots;
+    const last = shots.at(-1) as FilmShot;
+    expect(last.id).toBe('last-sign');
+    expect(shots.at(-2)?.id).toBe('maria');
+    // La nuit, la chambre vide (Maria dans le décor, à sa place : elle ne bouge pas).
+    expect(last.backdrop).toBe('age18Night');
+    expect(last.sprites).toEqual([]);
+    // Le silence, puis trois notes de la berceuse.
+    expect(last.music).toBeNull();
+    const notes = (last.sfx ?? []).map(([ms, slot]) => [ms, slot] as const);
+    expect(notes.map(([, slot]) => slot)).toEqual(['lullaby', 'lullaby', 'lullaby']);
+    expect(notes.map(([ms]) => ms)).toEqual([...notes.map(([ms]) => ms)].sort((a, b) => a - b));
+    // La boîte s'éclaire en turquoise quand elle joue ; les étoiles, autour de Maria, après elle.
+    const glow = last.glow;
+    expect(glow?.color).toBe('teal');
+    const first = notes[0]?.[0] ?? 0;
+    expect(keyValue(glow?.strength, first, 0)).toBeGreaterThan(0.5);
+    const stars = last.sparkles;
+    expect(stars?.x).toBeGreaterThan(glow?.x ?? 0);
+    expect(keyValue(stars?.strength, first, 0)).toBe(0);
+    // Puis tout redevient normal, avant la fin du plan.
+    expect(keyValue(glow?.strength, last.durationMs, 1)).toBe(0);
+    expect(keyValue(stars?.strength, last.durationMs, 1)).toBe(0);
+    for (const [ms] of notes) {
+      expect(ms).toBeLessThan(last.durationMs);
+    }
   });
 });

@@ -76,7 +76,16 @@ def morning():
 
 FILM_SRC = os.path.join(ROOT, "scripts", "film")
 FILM_OUT = os.path.join(ART, "film")
-FILM_AGES = ["age7-day", "age7-night", "age9", "age12", "age13-night", "age15", "age18"]
+FILM_AGES = [
+    "age7-day",
+    "age7-night",
+    "age9",
+    "age12",
+    "age13-night",
+    "age15",
+    "age18",
+    "age18-night",
+]
 
 
 def film_sources():

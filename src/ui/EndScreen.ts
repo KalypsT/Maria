@@ -1,3 +1,5 @@
+import { MEMORY_IMAGES } from '../config/art';
+import type { MARIA_THINGS } from '../config/memories';
 import { END_SCREEN } from '../config/story';
 import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
 
@@ -10,8 +12,14 @@ import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
  *
  * Toutes les coquilles trouvées (`snail`, D-148) : un petit escargot vivant traverse lentement
  * l'étagère vers Maria et laisse une trace argentée, sans rien expliquer.
+ *
+ * Les affaires de Maria retrouvées (`things`, D-190) : posées autour d'elle, sur l'étagère élargie.
  */
-export function showEndScreen(baseUrl: string, snail = false): Promise<void> {
+export function showEndScreen(
+  baseUrl: string,
+  snail = false,
+  things: readonly (typeof MARIA_THINGS)[number][] = [],
+): Promise<void> {
   return new Promise((resolve) => {
     const root = document.createElement('div');
     root.id = 'end-screen';
@@ -28,7 +36,27 @@ export function showEndScreen(baseUrl: string, snail = false): Promise<void> {
     maria.draggable = false;
     const shelf = document.createElement('div');
     shelf.className = 'end-shelf';
-    scene.append(light, maria, shelf);
+    scene.append(light);
+    if (things.length > 0) {
+      shelf.classList.add('end-shelf-wide');
+      for (const id of things) {
+        const file = MEMORY_IMAGES[id];
+        if (!file) {
+          continue;
+        }
+        const spot = END_SCREEN.things[id];
+        const thing = document.createElement('img');
+        thing.className = 'end-thing';
+        thing.src = `${baseUrl}art/${file}`;
+        thing.alt = '';
+        thing.draggable = false;
+        thing.style.left = `${String(spot.left)}%`;
+        thing.style.height = `${String(spot.height)}%`;
+        scene.appendChild(thing);
+      }
+    }
+    // Maria devant ses affaires.
+    scene.append(maria, shelf);
     if (snail) {
       scene.style.setProperty('--snail-ms', `${String(END_SCREEN.snailMs)}ms`);
       scene.style.setProperty('--snail-delay', `${String(END_SCREEN.snailDelayMs)}ms`);

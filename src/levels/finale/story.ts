@@ -602,10 +602,10 @@ const TRIGGERS: StoryTrigger[] = [
       // le noir : le jeu y passe aussitôt.
       { do: 'film', id: 'years' },
       { do: 'fadeOut', ms: 0 },
-      // Écrite dans le noir, à la toute fin : rien de l'après-fin (le dessin de famille, la
-      // console) n'apparaît avant (D-190).
-      { do: 'flag', id: F.FinaleGone },
       { do: 'wait', ms: S.nightBlackMs },
+      // Écrite dans le noir, à la toute fin : rien de l'après-fin (le dessin de famille, la
+      // console) n'apparaît avant, et le thème de fin continue jusqu'à l'écran de fin (D-190).
+      { do: 'flag', id: F.FinaleGone },
       // L'écran de fin, puis l'accueil (D-145).
       { do: 'end', room: AFTER_END_ROOM },
     ],
