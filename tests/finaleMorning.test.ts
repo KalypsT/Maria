@@ -249,13 +249,13 @@ describe('le dernier plan (D-144, §12)', () => {
     expect(steps[close]).toMatchObject({ exit: door.id });
   });
 
-  it('Céleste partie, la porte fermée : le film des années ; le noir ; la fin', () => {
+  it('Céleste partie, la porte fermée : quelques semaines ; le noir ; la fin', () => {
     expect(flagsOf(steps)).toEqual([F.FinaleGone]);
     const gone = index(steps, (s) => s.do === 'gone');
     expect(gone).toBeGreaterThan(index(steps, (s) => s.do === 'fadeOut'));
     const closed = index(steps, (s) => s.do === 'door' && !s.open);
     const film = index(steps, (s) => s.do === 'film');
-    expect(steps[film]).toEqual({ do: 'film', id: 'years' });
+    expect(steps[film]).toEqual({ do: 'film', id: 'weeks' });
     expect(film).toBeGreaterThan(closed);
     // Il finit dans le noir : le jeu y passe aussitôt, l'étape de la fin s'y écrit.
     expect(steps[film + 1]).toEqual({ do: 'fadeOut', ms: 0 });

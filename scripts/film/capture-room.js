@@ -1,6 +1,6 @@
 /**
- * Capture la chambre à chaque âge du film des années (D-190), dans le cadre exact des captures de
- * l'intro (1600 × 900 à l'échelle 2, donc 3200 × 1800). Outil ponctuel, hors du jeu.
+ * Capture la chambre du film de la fin (D-190, D-191), le jour et la nuit, dans le cadre exact des
+ * captures de l'intro (1600 × 900 à l'échelle 2, donc 3200 × 1800). Outil ponctuel, hors du jeu.
  *
  * Usage : npm run dev, puis
  *   node scripts/film/capture-room.js [http://localhost:5173/Maria/] [états…]
@@ -9,7 +9,7 @@
  *
  * Chaque état part de la fin du matin (Maria rangée sur l'étagère, Céleste partie) : des étapes de
  * l'histoire, des objets de mise en scène retirés, et l'habillage de la chambre changé (D-28), avec
- * les meubles dessinés du jeu. PLACEHOLDER : l'avenir de la chambre reste ouvert (§45).
+ * les meubles dessinés du jeu.
  */
 import path from 'node:path';
 import { STATES } from './roomStates.js';
@@ -71,8 +71,8 @@ for (const [name, state] of Object.entries(STATES)) {
       s.story.data.props = s.originalProps.filter((p) => !(state.removeProps ?? []).includes(p.id));
       const flags = baseFlags.filter((f) => !(state.dropFlags ?? []).includes(f));
       s.setStoryFlags([...flags, ...(state.addFlags ?? [])]);
-      // Le cadre : celui des captures de l'intro (Céleste sur son lit), ou celui du film des
-      // années (Céleste au pied du surmeuble : Maria, la fenêtre, la toise et la porte).
+      // Le cadre : celui des captures de l'intro (Céleste sur son lit), ou celui du film de la fin
+      // (Céleste au pied du surmeuble : Maria, la fenêtre, la toise et la porte).
       const at = state.frame === 'intro' ? [12, 15] : [33, 19];
       s.placeCeleste(at[0], at[1], 1);
       s.celesteGone = true;

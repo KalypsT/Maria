@@ -50,35 +50,19 @@ export const FILM_IMAGES = {
   celesteTeeSit: 'art/film/celeste-tee-sit.png',
   maria: 'art/maria.png',
   /**
-   * Le film des années (D-190) : la chambre à chaque âge, capturée dans le jeu dans un même cadre
-   * (`scripts/film/capture-room.js`) ; Maria de près sur son étagère ; le mur derrière la toise.
+   * Le film de la fin (D-190, D-191) : la chambre ce matin-là, le jour et la nuit, capturée dans le
+   * jeu dans un même cadre (`scripts/film/capture-room.js`) ; Maria de près sur son étagère.
    */
-  age7Day: 'art/film/room-age7-day.webp',
-  age7Night: 'art/film/room-age7-night.webp',
-  age9: 'art/film/room-age9.webp',
-  age12: 'art/film/room-age12.webp',
-  age15: 'art/film/room-age15.webp',
-  age18: 'art/film/room-age18.webp',
+  roomDay: 'art/film/room-day.webp',
+  roomNight: 'art/film/room-night.webp',
   mariaClose: 'art/film/maria-close.webp',
-  toiseWall: 'art/film/toise-wall.webp',
-  /** Son téléphone, sur le bureau, à 15 ans (PLACEHOLDER, dessiné par le script). */
-  phone: 'art/film/phone.png',
-  /** La chambre une nuit, à 13 ans : papa à la porte. */
-  age13Night: 'art/film/room-age13-night.webp',
   /**
-   * Céleste qui grandit (D-190, PR 7) : à 9 ans debout, son cartable ; à 12 ans assise, un casque,
-   * un livre ; à 15 ans debout, son téléphone ; à 18 ans, sa valise (l'illustration regarde vers
-   * nous : retournée, elle regarde Maria). Illustrations de l'utilisateur, détourées
-   * (`scripts/art-cutout.py`) ; prompts dans `docs/PROMPTS_PERSONNAGES.md`.
+   * Céleste qui rentre de l'école, son cartable (D-191) : illustration de l'utilisateur, détourée
+   * (`scripts/art-cutout.py`), faite pour 9 ans (D-190) ; à cette taille, elle passe pour 7 ans.
    */
-  celeste9: 'art/film/celeste-9.png',
-  celeste12: 'art/film/celeste-12.png',
-  celeste15: 'art/film/celeste-15.png',
-  celeste18: 'art/film/celeste-18.png',
-  /** Papa à la porte (D-37, D-123), tourné vers la chambre. */
-  dad: 'art/dad-door.png',
-  /** La dernière nuit, la chambre vide : le dernier signe (PR 8). */
-  age18Night: 'art/film/room-age18-night.webp',
+  celesteSchool: 'art/film/celeste-school.png',
+  /** Son cartable posé (PLACEHOLDER, dessiné par `scripts/make-intro-art.py film`). */
+  schoolbag: 'art/film/schoolbag.png',
 } as const;
 export type FilmImage = keyof typeof FILM_IMAGES;
 
@@ -99,12 +83,9 @@ export interface FilmSprite {
   readonly flip?: boolean;
 }
 
-/** Les saisons à la fenêtre de la chambre (D-190) : sa couleur, et ce qui passe derrière. */
-export type FilmSeason = 'winter' | 'spring' | 'summer' | 'autumn';
-
 /**
- * La chambre dans les décors du film des années (px du plan) : le verre de la fenêtre, le sol. Le
- * soleil tombe de la fenêtre jusqu'au sol, vers la gauche.
+ * La chambre dans les décors du film (px du plan) : le verre de la fenêtre, le sol. Le soleil tombe
+ * de la fenêtre jusqu'au sol, vers la gauche.
  */
 export const FILM_ROOM = {
   window: { x: 870, y: 156, w: 420, h: 336 },
@@ -114,68 +95,6 @@ export const FILM_ROOM = {
   /** La porte de la chambre (vers le couloir), au bas du mur de droite : sa lumière, ouverte. */
   door: { x: 1872, y: 822, w: 48, h: 150, spill: 240 },
 } as const;
-
-/** Les saisons : la teinte du verre, la couleur et le nombre de ce qui passe, sa chute (px/s). */
-export const FILM_SEASONS: Readonly<
-  Record<
-    FilmSeason,
-    {
-      readonly tint: string;
-      readonly tintAlpha: number;
-      readonly color: string;
-      readonly count: number;
-      readonly fall: number;
-    }
-  >
-> = {
-  winter: { tint: '#e8f0fa', tintAlpha: 0.4, color: '#ffffff', count: 34, fall: 70 },
-  spring: { tint: '#ffe6f0', tintAlpha: 0.2, color: '#f7b6cf', count: 18, fall: 34 },
-  summer: { tint: '#fff1b8', tintAlpha: 0.18, color: '#7fb069', count: 8, fall: 10 },
-  autumn: { tint: '#f6c48a', tintAlpha: 0.26, color: '#d9772f', count: 16, fall: 52 },
-};
-
-/**
- * La toise de la chambre en gros plan (D-190) : dessinée par le film, un trait rose à chaque âge
- * (comme les traits du jeu, D-43) et l'âge écrit au crayon à côté, de la main d'un parent. Choix de
- * l'utilisateur : 4 ans en phase 1, un an de plus à chaque phase, 7 ans à la fin ; puis un an de
- * plus à chaque trait, jusqu'à 18 ans. Les tailles (cm) ralentissent : elle a fini de grandir.
- * PROVISOIRE.
- */
-export const FILM_TOISE = {
-  firstAge: 4,
-  /** La taille à chaque âge, de 4 à 18 ans (cm). */
-  heights: [102, 109, 115, 121, 127, 133, 138, 143, 149, 155, 159, 162, 165, 167, 169],
-  /** La planche : son milieu (x), sa largeur, le haut et le bas (cm), l'échelle (px par cm). */
-  x: 960,
-  width: 150,
-  topCm: 176,
-  bottomCm: 90,
-  pxPerCm: 18,
-  /** y du plan à 0 cm (le sol, loin sous l'image). */
-  zeroY: 2700,
-  /** Le trait, puis l'âge écrit (ms chacun). */
-  lineMs: 500,
-  wordMs: 500,
-  lineColor: '#e0679a',
-  textColor: '#4a4458',
-  font: "700 46px 'Maria Hand', 'Comic Sans MS', cursive",
-  /** À partir de cet âge, les traits se serrent : l'âge s'écrit d'un côté puis de l'autre. */
-  alternateFrom: 15,
-  /** La vue se rapproche de la planche. */
-  zoom: 1.35,
-} as const;
-
-/** y du plan d'une taille sur la toise (cm). */
-export function toiseY(cm: number): number {
-  return FILM_TOISE.zeroY - cm * FILM_TOISE.pxPerCm;
-}
-
-/** La taille (cm) à un âge, sur la toise (bornée aux âges connus). */
-export function toiseHeight(age: number): number {
-  const { heights, firstAge } = FILM_TOISE;
-  const i = Math.min(heights.length - 1, Math.max(0, age - firstAge));
-  return heights[i] ?? 0;
-}
 
 /** Un plan du film. Deux plans consécutifs du même décor (`scene`) partagent son temps. */
 export interface FilmShot {
@@ -212,15 +131,8 @@ export interface FilmShot {
     readonly scale: number;
     readonly opacity: IntroKeys;
   };
-  /** La saison à la fenêtre (un décor de la chambre). */
-  readonly season?: FilmSeason;
   /** Le carré de soleil : sa place sous la fenêtre au fil du plan (x, px du plan). */
   readonly sun?: IntroKeys;
-  /**
-   * La toise en gros plan : les traits jusqu'à l'âge `shown`, puis ceux jusqu'à `write`, tracés
-   * l'un après l'autre à partir de `fromMs`. Le décor reste fixe, la vue monte avec les traits.
-   */
-  readonly toise?: { readonly shown: number; readonly write: number; readonly fromMs: number };
   /** La porte de la chambre : ouverte de 0 (fermée) à 1, la lumière du couloir (D-190). */
   readonly door?: IntroKeys;
   /** La musique au début du plan (null : le silence) ; absente : inchangée. */
@@ -321,20 +233,11 @@ const CONTRECHAMP: readonly FilmShot[] = [
   },
 ];
 
-/** Toute la chambre, immobile (le cadre des décors du film des années). */
+/** Toute la chambre, immobile (le cadre des décors du film). */
 const WHOLE: FilmShot['camera'] = {
   from: { x: 960, y: 540, zoom: 1 },
   to: { x: 960, y: 540, zoom: 1 },
 };
-/** La vue de la toise : centrée sur la taille d'un âge, entre deux âges au fil du plan. */
-function toiseCamera(fromAge: number, toAge: number): FilmShot['camera'] {
-  const at = (age: number) => ({
-    x: FILM_TOISE.x + 60,
-    y: toiseY(toiseHeight(age)) + 90,
-    zoom: FILM_TOISE.zoom,
-  });
-  return { from: at(fromAge), to: at(toAge) };
-}
 /** Une nuit (un noir) : de plus en plus courte. */
 const night = (ms: number, holdMs: number): IntroTransition => ({
   kind: 'dip',
@@ -348,51 +251,39 @@ const sunAcross = (ms: number): IntroKeys => [
   [0, 1180],
   [ms, 820],
 ];
-/** La boîte à musique, sur l'étagère au-dessus du lit (la cabane partie), dans les décors. */
+/** La boîte à musique, sur la traverse du lit cabane, dans les décors. */
 const MUSIC_BOX = { x: 312, y: 612 } as const;
-/** Le téléphone, debout contre la lampe du bureau. */
-const PHONE: FilmSprite = { image: 'phone', x: 1424, bottom: 742, height: 66 };
 /**
- * Quelqu'un passe dans les années, comme dans un time-lapse : il apparaît dans le fondu, reste,
- * puis s'efface avant la fin du plan.
+ * Céleste à l'échelle du jeu (≈ 110 px du plan à 7 ans), juste entrée par la porte, entre elle et la
+ * toise, tournée vers la chambre (l'illustration regarde à droite : retournée). Elle ne lève pas les
+ * yeux vers l'étagère. PROVISOIRE.
  */
-const passing = (ms: number): IntroKeys => [
-  [0, 0],
-  [500, 0],
-  [1100, 1],
-  [ms - 700, 1],
-  [ms - 200, 0],
-];
-/**
- * Céleste qui grandit, à l'échelle du jeu (Céleste à 7 ans ≈ 110 px du plan, papa ≈ 390) : de plus
- * en plus grande dans sa chambre d'enfant. Le sol : `FILM_ROOM.floorY`. PROVISOIRE.
- */
-const CELESTE_AT = {
-  /** Debout juste sous l'étagère de Maria, son cartable ; elle ne lève pas les yeux. */
-  9: { image: 'celeste9', x: 1300, bottom: 972, height: 150 },
-  /** Assise sur son lit, un casque, un livre, son sac à côté d'elle. */
-  12: { image: 'celeste12', x: 330, bottom: 792, height: 175 },
-  /** Debout sous la fenêtre, son téléphone. */
-  15: { image: 'celeste15', x: 760, bottom: 972, height: 260 },
-  /** À la porte, sa valise côté porte, tournée vers Maria. */
-  18: { image: 'celeste18', x: 1720, bottom: 972, height: 320, flip: true },
-} as const satisfies Record<number, FilmSprite>;
+const CELESTE_SCHOOL: FilmSprite = {
+  image: 'celesteSchool',
+  x: 1815,
+  bottom: 972,
+  height: 112,
+  flip: true,
+};
+/** Son cartable, posé sous le bureau, entre le caisson et le pied (PROVISOIRE). */
+const SCHOOLBAG: FilmSprite = { image: 'schoolbag', x: 1440, bottom: 972, height: 40 };
 
 /**
- * Le film des années (D-190), quand la porte s'est refermée : la chambre, Maria sur son étagère.
- * D'abord des nuits, lentes, des noirs de plus en plus courts ; puis les années, en fondus de plus
- * en plus rapides : le soleil qui traverse la pièce, les saisons à la fenêtre, les choses de bébé
- * qui s'en vont, les siennes qui arrivent ; entre elles, la toise : un trait plus haut, son âge.
- * Puis tout ralentit sur Maria, la même. Le noir. Céleste qui grandit et papa : la PR 7.
+ * Quelques semaines (D-191), quand la porte s'est refermée : la chambre, Maria sur son étagère.
+ * D'abord des nuits, des noirs de plus en plus courts ; puis un jour, la porte s'ouvre : Céleste
+ * rentre de l'école, son cartable ; elle s'efface, le cartable reste posé sous le bureau. Puis des
+ * jours en fondus : le cartable là, pas là, là (l'école, sa vie à elle). Maria ne bouge pas. Puis
+ * tout ralentit sur Maria, la même ; le dernier signe ; le noir. Céleste reste une enfant : la
+ * fin ne la fait pas grandir au-delà du jeu.
  */
-const YEARS: readonly FilmShot[] = [
+const WEEKS: readonly FilmShot[] = [
   {
     id: 'left',
     scene: 'room',
     durationMs: 3800,
     enter: { kind: 'cut' },
     camera: WHOLE,
-    backdrop: 'age7Day',
+    backdrop: 'roomDay',
     sprites: [],
     sun: sunAcross(3800),
   },
@@ -402,7 +293,7 @@ const YEARS: readonly FilmShot[] = [
     durationMs: 5200,
     enter: night(1800, 900),
     camera: WHOLE,
-    backdrop: 'age7Night',
+    backdrop: 'roomNight',
     sprites: [],
   },
   {
@@ -411,7 +302,7 @@ const YEARS: readonly FilmShot[] = [
     durationMs: 4000,
     enter: night(1400, 500),
     camera: WHOLE,
-    backdrop: 'age7Day',
+    backdrop: 'roomDay',
     sprites: [],
     sun: sunAcross(4000),
   },
@@ -421,7 +312,7 @@ const YEARS: readonly FilmShot[] = [
     durationMs: 2900,
     enter: night(1000, 300),
     camera: WHOLE,
-    backdrop: 'age7Night',
+    backdrop: 'roomNight',
     sprites: [],
   },
   {
@@ -430,7 +321,7 @@ const YEARS: readonly FilmShot[] = [
     durationMs: 2400,
     enter: night(800, 200),
     camera: WHOLE,
-    backdrop: 'age7Day',
+    backdrop: 'roomDay',
     sprites: [],
     sun: sunAcross(2400),
   },
@@ -440,206 +331,74 @@ const YEARS: readonly FilmShot[] = [
     durationMs: 1500,
     enter: night(600, 100),
     camera: WHOLE,
-    backdrop: 'age7Night',
+    backdrop: 'roomNight',
     sprites: [],
   },
   {
-    id: 'day-4',
-    scene: 'day-4',
-    durationMs: 1500,
+    // Un jour, la porte s'ouvre : elle rentre de l'école, son cartable sur le dos, un moment ;
+    // elle s'efface, le cartable reste, posé sous le bureau ; la porte se referme.
+    id: 'school',
+    scene: 'school',
+    durationMs: 7600,
     enter: night(400, 80),
     camera: WHOLE,
-    backdrop: 'age7Day',
-    sprites: [],
-    sun: sunAcross(1500),
-  },
-  {
-    id: 'toise-8',
-    scene: 'toise-8',
-    durationMs: 3600,
-    enter: dissolve(600),
-    camera: toiseCamera(6, 8),
-    backdrop: 'toiseWall',
-    sprites: [],
-    toise: { shown: 7, write: 8, fromMs: 1100 },
-  },
-  {
-    id: 'age9-winter',
-    scene: 'age9-winter',
-    durationMs: 2800,
-    enter: dissolve(900),
-    camera: WHOLE,
-    backdrop: 'age9',
-    sprites: [],
-    season: 'winter',
-    sun: sunAcross(2800),
-  },
-  {
-    id: 'age9-spring',
-    scene: 'age9-spring',
-    durationMs: 3400,
-    enter: dissolve(700),
-    camera: WHOLE,
-    backdrop: 'age9',
-    sprites: [{ ...CELESTE_AT[9], opacity: passing(3400) }],
-    season: 'spring',
-    sun: sunAcross(3400),
-  },
-  {
-    id: 'age9-summer',
-    scene: 'age9-summer',
-    durationMs: 2000,
-    enter: dissolve(700),
-    camera: WHOLE,
-    backdrop: 'age9',
-    sprites: [],
-    season: 'summer',
-    sun: sunAcross(2000),
-  },
-  {
-    id: 'toise-11',
-    scene: 'toise-11',
-    durationMs: 4400,
-    enter: dissolve(600),
-    camera: toiseCamera(8, 11),
-    backdrop: 'toiseWall',
-    sprites: [],
-    toise: { shown: 8, write: 11, fromMs: 700 },
-  },
-  {
-    id: 'age12-autumn',
-    scene: 'age12-autumn',
-    durationMs: 2200,
-    enter: dissolve(800),
-    camera: WHOLE,
-    backdrop: 'age12',
-    sprites: [],
-    season: 'autumn',
-    sun: sunAcross(2200),
-  },
-  {
-    id: 'age12-winter',
-    scene: 'age12-winter',
-    durationMs: 3400,
-    enter: dissolve(600),
-    camera: WHOLE,
-    backdrop: 'age12',
-    sprites: [{ ...CELESTE_AT[12], opacity: passing(3400) }],
-    season: 'winter',
-    sun: sunAcross(3400),
-  },
-  {
-    id: 'age12-spring',
-    scene: 'age12-spring',
-    durationMs: 1800,
-    enter: dissolve(600),
-    camera: WHOLE,
-    backdrop: 'age12',
-    sprites: [],
-    season: 'spring',
-    sun: sunAcross(1800),
-  },
-  {
-    // Une nuit : la porte s'entrouvre, papa regarde l'étagère, sans un mot, et referme doucement.
-    id: 'age13-night',
-    scene: 'age13-night',
-    durationMs: 7000,
-    enter: dissolve(900),
-    camera: WHOLE,
-    backdrop: 'age13Night',
+    backdrop: 'roomDay',
     sprites: [
       {
-        image: 'dad',
-        x: 1832,
-        bottom: 972,
-        height: 390,
-        flip: true,
-        opacity: [
-          [1500, 0],
-          [2200, 1],
-          [4800, 1],
-          [5400, 0],
-        ],
-      },
-    ],
-    door: [
-      [700, 0],
-      [1500, 1],
-      [5400, 1],
-      [6400, 0],
-    ],
-  },
-  {
-    id: 'toise-14',
-    scene: 'toise-14',
-    durationMs: 4200,
-    enter: dissolve(600),
-    camera: toiseCamera(11, 14),
-    backdrop: 'toiseWall',
-    sprites: [],
-    toise: { shown: 11, write: 14, fromMs: 600 },
-  },
-  {
-    id: 'age15-summer',
-    scene: 'age15-summer',
-    durationMs: 3400,
-    enter: dissolve(700),
-    camera: WHOLE,
-    backdrop: 'age15',
-    // Son téléphone à la main : pas sur le bureau.
-    sprites: [{ ...CELESTE_AT[15], opacity: passing(3400) }],
-    season: 'summer',
-    sun: sunAcross(3400),
-  },
-  {
-    id: 'age15-autumn',
-    scene: 'age15-autumn',
-    durationMs: 1800,
-    enter: dissolve(600),
-    camera: WHOLE,
-    backdrop: 'age15',
-    sprites: [PHONE],
-    season: 'autumn',
-    sun: sunAcross(1800),
-  },
-  {
-    id: 'toise-18',
-    scene: 'toise-18',
-    durationMs: 5600,
-    enter: dissolve(600),
-    camera: toiseCamera(14, 18),
-    backdrop: 'toiseWall',
-    sprites: [],
-    toise: { shown: 14, write: 18, fromMs: 700 },
-  },
-  {
-    // Le départ, à 18 ans : la porte s'ouvre ; elle est là, sa valise, tournée vers Maria, un
-    // moment ; elle s'en va ; la porte se ferme. Comme à 7 ans. Elle ne la reprend pas.
-    id: 'age18',
-    scene: 'age18',
-    durationMs: 7600,
-    enter: dissolve(900),
-    camera: WHOLE,
-    backdrop: 'age18',
-    sprites: [
-      {
-        ...CELESTE_AT[18],
+        ...CELESTE_SCHOOL,
         opacity: [
           [800, 0],
           [1500, 1],
-          [5200, 1],
-          [5900, 0],
+          [4400, 1],
+          [5100, 0],
+        ],
+      },
+      {
+        ...SCHOOLBAG,
+        opacity: [
+          [4400, 0],
+          [5100, 1],
         ],
       },
     ],
-    season: 'spring',
     sun: sunAcross(7600),
     door: [
       [0, 0],
-      [800, 1],
-      [6000, 1],
-      [7000, 0],
+      [700, 1],
+      [5200, 1],
+      [6200, 0],
     ],
+  },
+  {
+    id: 'bag-1',
+    scene: 'bag-1',
+    durationMs: 2200,
+    enter: dissolve(700),
+    camera: WHOLE,
+    backdrop: 'roomDay',
+    sprites: [SCHOOLBAG],
+    sun: sunAcross(2200),
+  },
+  {
+    // Elle est à l'école.
+    id: 'bag-0',
+    scene: 'bag-0',
+    durationMs: 1800,
+    enter: dissolve(600),
+    camera: WHOLE,
+    backdrop: 'roomDay',
+    sprites: [],
+    sun: sunAcross(1800),
+  },
+  {
+    id: 'bag-2',
+    scene: 'bag-2',
+    durationMs: 1800,
+    enter: dissolve(600),
+    camera: WHOLE,
+    backdrop: 'roomDay',
+    sprites: [SCHOOLBAG],
+    sun: sunAcross(1800),
   },
   {
     // Maria, la même : la vue s'approche lentement, le soleil passe sur elle.
@@ -673,7 +432,7 @@ const YEARS: readonly FilmShot[] = [
     durationMs: 9400,
     enter: dissolve(1800),
     camera: { from: { x: 960, y: 540, zoom: 1 }, to: { x: 900, y: 560, zoom: 1.06 } },
-    backdrop: 'age18Night',
+    backdrop: 'roomNight',
     sprites: [],
     music: null,
     glow: {
@@ -710,7 +469,7 @@ const YEARS: readonly FilmShot[] = [
 
 export const FILMS = {
   contrechamp: { shots: CONTRECHAMP },
-  years: { shots: YEARS, outroMs: 2200 },
+  weeks: { shots: WEEKS, outroMs: 2200 },
 } as const satisfies Record<string, Film>;
 export type FilmId = keyof typeof FILMS;
 

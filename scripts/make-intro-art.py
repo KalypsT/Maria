@@ -2,7 +2,7 @@
 
 Usage : python3 scripts/make-intro-art.py (tout) ; python3 scripts/make-intro-art.py morning (le
 décor du contrechamp de la fin seulement, D-190) ; python3 scripts/make-intro-art.py film (les décors
-du film des années, D-190)
+du film de la fin, « quelques semaines », D-191)
 
 Sources :
 - `scripts/intro/room-evening.webp` : la chambre du premier soir, capturée dans le jeu (build de
@@ -11,8 +11,9 @@ Sources :
 - `scripts/intro/room-morning.webp` (D-190, le contrechamp du film de la fin) : la même chambre, le
   même cadre, le matin de la fin (debug « Rejouer la fin : le matin », dev, 1600 × 900 à l'échelle
   2, les outils de debug et l'étincelle masqués) ; Céleste et Maria sur le lit, hors du cadrage ;
-- `scripts/film/room-<âge>.webp` (D-190, le film des années) : la chambre à chaque âge, capturée par
-  `scripts/film/capture-room.js` (les PNG qu'il écrit sont convertis ici en WebP, puis effacés) ;
+- `scripts/film/room-<état>.webp` (D-190, D-191, le film de la fin) : la chambre ce matin-là, le jour
+  et la nuit, capturée par `scripts/film/capture-room.js` (les PNG qu'il écrit sont convertis ici en
+  WebP, puis effacés) ;
 - les illustrations de `public/art/` (Céleste, la ville-jouet, les objets d'enfance).
 
 Tout ce qui coûte (flou, silhouettes, halos) est calculé ici, une fois : l'intro ne fait que
@@ -76,21 +77,12 @@ def morning():
 
 FILM_SRC = os.path.join(ROOT, "scripts", "film")
 FILM_OUT = os.path.join(ART, "film")
-FILM_AGES = [
-    "age7-day",
-    "age7-night",
-    "age9",
-    "age12",
-    "age13-night",
-    "age15",
-    "age18",
-    "age18-night",
-]
+FILM_ROOMS = ["day", "night"]
 
 
 def film_sources():
     """Les captures PNG de `capture-room.js` deviennent des sources WebP (plus légères)."""
-    for name in FILM_AGES:
+    for name in FILM_ROOMS:
         png = os.path.join(FILM_SRC, f"room-{name}.png")
         if os.path.exists(png):
             Image.open(png).convert("RGB").save(
@@ -105,67 +97,41 @@ def film_save(img, name, quality=84):
 
 
 def film():
-    """Le film des années (D-190) : la chambre à chaque âge, Maria de près, le mur de la toise."""
+    """Le film de la fin (D-191) : la chambre le jour et la nuit, Maria de près, le cartable."""
     os.makedirs(FILM_OUT, exist_ok=True)
     film_sources()
     rooms = {}
-    for name in FILM_AGES:
+    for name in FILM_ROOMS:
         room = Image.open(os.path.join(FILM_SRC, f"room-{name}.webp")).convert("RGB")
         rooms[name] = room
         film_save(room.resize((1920, 1080), Image.LANCZOS), f"room-{name}.webp")
     # Maria de près, sur son étagère : le surmeuble flou (profondeur de champ) ; l'illustration de
     # Maria est posée dessus par le film, sur la planche.
-    close = rooms["age18"].crop((1900, 760, 2500, 1098)).resize((1920, 1080), Image.LANCZOS)
+    close = rooms["day"].crop((1900, 760, 2500, 1098)).resize((1920, 1080), Image.LANCZOS)
     film_save(close.filter(ImageFilter.GaussianBlur(7)), "maria-close.webp")
-    # Le mur derrière la toise, très flou : la toise est dessinée par le film.
-    wall = rooms["age7-day"].crop((2250, 180, 2850, 518)).resize((1920, 1080), Image.LANCZOS)
-    film_save(wall.filter(ImageFilter.GaussianBlur(30)), "toise-wall.webp")
-    phone()
-    silhouettes()
+    schoolbag()
 
 
-def silhouettes():
-    """Céleste à 9, 12, 15 et 18 ans (D-190, PR 7), en attendant les illustrations : une silhouette
-    pleine, tirée de celle de la phase 4 (sans visage : on ne fixe pas son allure). Jamais
-    par-dessus une illustration fournie."""
-    src = art("celeste-tee.png")
-    color = (64, 54, 82, 255)
-    shade = Image.new("RGBA", src.size, color)
-    shade.putalpha(src.getchannel("A"))
-
-    def save_once(img, name):
-        path = os.path.join(FILM_OUT, name)
-        if os.path.exists(path):
-            print(f"film/{name} : déjà là, gardée")
-            return
-        img.save(path)
-        print(f"film/{name} (silhouette provisoire)")
-
-    save_once(shade, "celeste-9.png")
-    save_once(shade, "celeste-15.png")
-    # Tournée vers la gauche par le film (`flip`), comme l'illustration.
-    save_once(shade, "celeste-18.png")
-    # Assise (12 ans, sur son lit) : le haut du corps, et les jambes repliées devant elle.
-    top = shade.crop((0, 0, shade.width, int(shade.height * 0.6)))
-    seated = Image.new("RGBA", (int(shade.width * 1.5), top.height + 60), (0, 0, 0, 0))
-    seated.alpha_composite(top, (0, 0))
-    ImageDraw.Draw(seated).rounded_rectangle(
-        (shade.width * 0.2, top.height - 40, seated.width - 4, top.height + 56),
-        radius=40,
-        fill=color,
-    )
-    save_once(seated, "celeste-12.png")
-
-
-def phone():
-    """Un téléphone posé sur le bureau, à 15 ans (PLACEHOLDER) : coque rose, écran sombre."""
-    w, h = 120, 220
+def schoolbag():
+    """Son cartable posé au sol (PLACEHOLDER) : le sac beige et bleu de l'illustration de Céleste
+    qui rentre de l'école (`celeste-school.png`), un peu affaissé, ses bretelles derrière."""
+    w, h = 200, 240
     img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    d.rounded_rectangle((4, 4, w - 4, h - 4), radius=22, fill=(232, 150, 178, 255))
-    d.rounded_rectangle((14, 16, w - 14, h - 16), radius=12, fill=(44, 46, 66, 255))
-    d.polygon([(22, 28), (58, 28), (22, 92)], fill=(90, 96, 128, 255))
-    img.save(os.path.join(FILM_OUT, "phone.png"))
+    beige, beige_dark = (203, 184, 150, 255), (168, 148, 116, 255)
+    blue, blue_dark = (98, 128, 160, 255), (70, 96, 126, 255)
+    # La poignée, puis une bretelle qui dépasse derrière le sac.
+    d.rounded_rectangle((78, 4, 122, 40), radius=16, outline=blue_dark, width=9)
+    d.rounded_rectangle((150, 40, 178, 232), radius=12, fill=blue_dark)
+    # Le corps, un peu plus large en bas (posé, affaissé), et son rabat.
+    d.polygon([(34, 40), (166, 40), (186, 236), (14, 236)], fill=beige)
+    d.rounded_rectangle((24, 30, 176, 96), radius=34, fill=beige_dark)
+    d.rounded_rectangle((30, 24, 170, 86), radius=30, fill=beige)
+    # La poche de devant, bleue, et sa fermeture.
+    d.rounded_rectangle((40, 132, 160, 226), radius=20, fill=blue)
+    d.line((52, 150, 148, 150), fill=blue_dark, width=5)
+    img.save(os.path.join(FILM_OUT, "schoolbag.png"))
+    print("film/schoolbag.png")
 
 
 def cradle(room):
@@ -253,7 +219,7 @@ def main():
         morning()
         return
     if sys.argv[1:] == ["film"]:
-        # Seulement les décors du film des années (D-190).
+        # Seulement les décors du film de la fin (D-191).
         film()
         return
     room = clean_room()

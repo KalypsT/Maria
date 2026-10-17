@@ -572,8 +572,8 @@ const TRIGGERS: StoryTrigger[] = [
     // C'est le joueur qui mène Céleste à la porte (D-138). Partir (D-190) : la vue se cale sur la
     // chambre, Maria et la porte ; la porte s'ouvre, la lumière du couloir ; Céleste se retourne
     // vers Maria, un long moment ; puis elle sort, d'elle-même. La porte se ferme, la lumière
-    // s'amincit et s'éteint. Le film des années : le temps passe, Maria reste. Le noir ; l'écran de
-    // fin, puis l'accueil (D-145). Céleste ne revient pas la chercher.
+    // s'amincit et s'éteint. Le film, quelques semaines (D-191) : le temps passe, Maria reste. Le
+    // noir ; l'écran de fin, puis l'accueil (D-145). Céleste ne revient pas la chercher.
     id: 'finale-leave',
     room: 'bedroom',
     on: 'touch',
@@ -598,9 +598,9 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.lookMs },
       { do: 'door', exit: BEDROOM_DOOR, open: false, ms: S.doorCloseMs },
       { do: 'wait', ms: S.doorCloseMs + S.lookMs },
-      // Le film des années (D-190) : les nuits, puis les années ; Maria, la même. Il finit dans
-      // le noir : le jeu y passe aussitôt.
-      { do: 'film', id: 'years' },
+      // Quelques semaines (D-191) : les nuits, puis les jours, son cartable ; Maria, la même. Il
+      // finit dans le noir : le jeu y passe aussitôt.
+      { do: 'film', id: 'weeks' },
       { do: 'fadeOut', ms: 0 },
       { do: 'wait', ms: S.nightBlackMs },
       // Écrite dans le noir, à la toute fin : rien de l'après-fin (le dessin de famille, la

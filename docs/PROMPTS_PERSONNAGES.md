@@ -814,10 +814,14 @@ little pensive, the hint of a smile. Full body, plain pure white background, no 
 
 Fichier : `celeste-tee-sit.png` (fond détouré comme les autres).
 
-### Céleste qui grandit (D-190, PR 7) : 9, 12, 15 et 18 ans (reçues)
+### Céleste qui grandit (D-190, PR 7) : 9, 12, 15 et 18 ans (reçues ; 12, 15 et 18 ans retirées, D-191)
 
-Le film des années montre Céleste traverser sa chambre, de plus en plus grande. En attendant ces
-images, des silhouettes provisoires (mêmes noms, dans `public/art/film/`). **Une conversation**,
+**D-191** : la fin ne fait plus grandir Céleste au-delà du jeu (« quelques semaines »). Seule
+l'image des 9 ans reste, renommée `celeste-school.png` (elle rentre de l'école, son cartable ; à la
+taille du film, elle passe pour 7 ans). Celles de 12, 15 et 18 ans sont retirées du jeu
+(récupérables dans l'historique git). Les prompts restent ci-dessous pour mémoire.
+
+Le film des années montrait Céleste traverser sa chambre, de plus en plus grande. **Une conversation**,
 `celeste-tee.png` joint au premier message (et de nouveau si le visage dérive). Fond blanc uni : je
 détoure et je mets à l'échelle. Le visage doit rester **le sien** à chaque âge : mêmes yeux, mêmes
 taches de rousseur, **lunettes rondes roses** (un peu plus fines en grandissant), cheveux bruns.

@@ -5,15 +5,10 @@ import {
   FILM,
   FILM_IMAGES,
   FILM_ROOM,
-  FILM_SEASONS,
-  FILM_TOISE,
   FILMS,
-  toiseHeight,
-  toiseY,
   type Film,
   type FilmId,
   type FilmImage,
-  type FilmSeason,
   type FilmShot,
 } from '../config/film';
 import { UI_OVERLAY_ATTRIBUTE } from '../core/input/TouchSource';
@@ -41,10 +36,7 @@ import {
 
 type Images = ReadonlyMap<FilmImage, HTMLImageElement>;
 
-/**
- * Les images d'un film (ses décors et ses personnages), chargées une fois ; et la police de la
- * main d'un parent, pour les âges de la toise (sans elle, une autre écriture : rien ne bloque).
- */
+/** Les images d'un film (ses décors et ses personnages), chargées une fois. */
 async function loadFilmImages(film: Film): Promise<Images> {
   const backdrops = new Set<FilmImage>();
   const sprites = new Set<FilmImage>();
@@ -53,9 +45,6 @@ async function loadFilmImages(film: Film): Promise<Images> {
     for (const sprite of shot.sprites) {
       sprites.add(sprite.image);
     }
-  }
-  if (film.shots.some((shot) => shot.toise)) {
-    await document.fonts.load(FILM_TOISE.font).catch(() => undefined);
   }
   const load = async (key: FilmImage) => [key, await loadImage(FILM_IMAGES[key])] as const;
   // Sans ses décors, pas de film ; un personnage qui manque n'est simplement pas dessiné.
@@ -90,36 +79,6 @@ function drawDoor(c: CanvasRenderingContext2D, open: number): void {
   c.restore();
 }
 
-/** La saison à la fenêtre : la teinte du verre, et ce qui passe derrière (neige, pétales, feuilles). */
-function drawSeason(c: CanvasRenderingContext2D, season: FilmSeason, t: number): void {
-  const look = FILM_SEASONS[season];
-  const { x, y, w, h } = FILM_ROOM.window;
-  c.save();
-  c.beginPath();
-  c.rect(x, y, w, h);
-  c.clip();
-  c.globalAlpha = look.tintAlpha;
-  c.fillStyle = look.tint;
-  c.fillRect(x, y, w, h);
-  c.fillStyle = look.color;
-  for (let i = 0; i < look.count; i++) {
-    const a = hash(i + 11);
-    const b = hash(i + 71);
-    const phase = hash(i + 131) * TAU;
-    const px = x + a * w + Math.sin(t / (900 + a * 900) + phase) * 18;
-    const py = y + ((b * h + (t / 1000) * look.fall * (0.6 + a)) % h);
-    c.globalAlpha = 0.75;
-    c.beginPath();
-    if (season === 'winter') {
-      c.arc(px, py, 2.5 + b * 2.5, 0, TAU);
-    } else {
-      c.ellipse(px, py, 7 + b * 4, 3.5 + b * 2, phase + t / 700, 0, TAU);
-    }
-    c.fill();
-  }
-  c.restore();
-}
-
 /** Le carré de soleil : de la fenêtre au sol, vers la gauche, ajouté à l'image. */
 function drawSun(c: CanvasRenderingContext2D, left: number): void {
   const { window: win, floorY, sun } = FILM_ROOM;
@@ -136,67 +95,6 @@ function drawSun(c: CanvasRenderingContext2D, left: number): void {
   c.closePath();
   c.fill();
   c.restore();
-}
-
-/** Un trait de la toise et l'âge écrit à côté ; `k` : 0 → 1, le trait puis le mot. */
-function drawToiseMark(c: CanvasRenderingContext2D, age: number, k: number): void {
-  if (k <= 0) {
-    return;
-  }
-  const t = FILM_TOISE;
-  const lineK = Math.min(1, k * ((t.lineMs + t.wordMs) / t.lineMs));
-  const y = toiseY(toiseHeight(age));
-  const start = t.x - t.width / 2 - 14;
-  // Une main d'enfant qui tient la règle : un trait à peine penché, différent à chaque âge.
-  const tilt = (hash(age) - 0.5) * 6;
-  c.strokeStyle = t.lineColor;
-  c.lineWidth = 7;
-  c.lineCap = 'round';
-  c.beginPath();
-  c.moveTo(start, y);
-  c.lineTo(start + (t.width + 28) * lineK, y + tilt * lineK);
-  c.stroke();
-  const wordK = (k * (t.lineMs + t.wordMs) - t.lineMs) / t.wordMs;
-  if (wordK > 0) {
-    // Les traits serrés de la fin : un âge à droite, le suivant à gauche.
-    const left = age >= t.alternateFrom && (age - t.alternateFrom) % 2 === 1;
-    c.globalAlpha = Math.min(1, wordK);
-    c.fillStyle = t.textColor;
-    c.font = t.font;
-    c.textBaseline = 'middle';
-    c.textAlign = left ? 'right' : 'left';
-    const x = left ? t.x - t.width / 2 - 30 : t.x + t.width / 2 + 30;
-    c.fillText(`${String(age)} ans`, x, y + tilt);
-    c.textAlign = 'left';
-    c.globalAlpha = 1;
-  }
-}
-
-/** La toise en gros plan : la planche, ses graduations, ses traits et ses âges. */
-function drawToise(c: CanvasRenderingContext2D, toise: NonNullable<FilmShot['toise']>, t: number) {
-  const g = FILM_TOISE;
-  const top = toiseY(g.topCm);
-  const bottom = toiseY(g.bottomCm);
-  const left = g.x - g.width / 2;
-  c.fillStyle = 'rgba(40, 30, 50, 0.18)';
-  c.fillRect(left + 10, top + 12, g.width, bottom - top);
-  c.fillStyle = '#e8cc98';
-  c.fillRect(left, top, g.width, bottom - top);
-  c.fillStyle = '#d9b77c';
-  c.fillRect(left, top, 10, bottom - top);
-  c.fillStyle = '#8a6238';
-  for (let cm = Math.ceil(g.bottomCm); cm <= g.topCm; cm++) {
-    const long = cm % 10 === 0 ? 46 : cm % 5 === 0 ? 30 : 16;
-    c.fillRect(left + 10, toiseY(cm) - 1.5, long, 3);
-  }
-  for (let age = g.firstAge; age <= toise.shown; age++) {
-    drawToiseMark(c, age, 1);
-  }
-  const each = g.lineMs + g.wordMs;
-  for (let age = toise.shown + 1; age <= toise.write; age++) {
-    const start = toise.fromMs + (age - toise.shown - 1) * each;
-    drawToiseMark(c, age, Math.min(1, (t - start) / each));
-  }
 }
 
 /** Ce que le film demande au son du jeu (D-190) : la musique d'un plan, ses bruitages. */
@@ -332,23 +230,12 @@ export function playFilm(id: FilmId, audio?: FilmAudio): Promise<void> {
       c.fillStyle = '#000';
       c.fillRect(0, 0, width, height);
       const backdrop = imgs.get(shot.backdrop);
-      if (backdrop && shot.toise) {
-        // La toise : le mur reste fixe, la vue monte avec les traits.
-        c.setTransform(cover, 0, 0, cover, (width - INTRO_VIEW.width * cover) / 2, 0);
-        c.drawImage(backdrop, 0, 0, INTRO_VIEW.width, INTRO_VIEW.height);
-      }
       c.setTransform(s, 0, 0, s, width / 2 - camera.x * s, height / 2 - camera.y * s);
-      if (backdrop && !shot.toise) {
+      if (backdrop) {
         c.drawImage(backdrop, 0, 0, INTRO_VIEW.width, INTRO_VIEW.height);
-      }
-      if (shot.season) {
-        drawSeason(c, shot.season, layer.sceneMs);
       }
       if (shot.sun) {
         drawSun(c, keyValue(shot.sun, t, 0));
-      }
-      if (shot.toise) {
-        drawToise(c, shot.toise, t);
       }
       if (shot.door) {
         drawDoor(c, keyValue(shot.door, t, 0));
