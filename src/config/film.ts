@@ -59,6 +59,20 @@ export const FILM_IMAGES = {
   toiseWall: 'art/film/toise-wall.webp',
   /** Son téléphone, sur le bureau, à 15 ans (PLACEHOLDER, dessiné par le script). */
   phone: 'art/film/phone.png',
+  /** La chambre une nuit, à 13 ans : papa à la porte. */
+  age13Night: 'art/film/room-age13-night.webp',
+  /**
+   * Céleste qui grandit (D-190, PR 7) : à 9 ans debout, son cartable ; à 12 ans assise sur son lit,
+   * un casque ; à 15 ans debout, son téléphone ; à 18 ans à la porte, sa valise, tournée vers Maria.
+   * PLACEHOLDER : des silhouettes (`scripts/make-intro-art.py film`) jusqu'aux illustrations de
+   * l'utilisateur, aux mêmes noms (prompts dans `docs/PROMPTS_PERSONNAGES.md`).
+   */
+  celeste9: 'art/film/celeste-9.png',
+  celeste12: 'art/film/celeste-12.png',
+  celeste15: 'art/film/celeste-15.png',
+  celeste18: 'art/film/celeste-18.png',
+  /** Papa à la porte (D-37, D-123), tourné vers la chambre. */
+  dad: 'art/dad-door.png',
 } as const;
 export type FilmImage = keyof typeof FILM_IMAGES;
 
@@ -75,6 +89,8 @@ export interface FilmSprite {
   readonly opacity?: IntroKeys;
   /** Ombre au sol, largeur (px). */
   readonly shadow?: number;
+  /** Retournée (l'image regarde à gauche). */
+  readonly flip?: boolean;
 }
 
 /** Les saisons à la fenêtre de la chambre (D-190) : sa couleur, et ce qui passe derrière. */
@@ -89,6 +105,8 @@ export const FILM_ROOM = {
   floorY: 972,
   /** Le carré de soleil : sa largeur sous la fenêtre, son décalage au sol, son intensité. */
   sun: { width: 300, slant: 380, alpha: 0.09 },
+  /** La porte de la chambre (vers le couloir), au bas du mur de droite : sa lumière, ouverte. */
+  door: { x: 1872, y: 822, w: 48, h: 150, spill: 240 },
 } as const;
 
 /** Les saisons : la teinte du verre, la couleur et le nombre de ce qui passe, sa chute (px/s). */
@@ -197,6 +215,8 @@ export interface FilmShot {
    * l'un après l'autre à partir de `fromMs`. Le décor reste fixe, la vue monte avec les traits.
    */
   readonly toise?: { readonly shown: number; readonly write: number; readonly fromMs: number };
+  /** La porte de la chambre : ouverte de 0 (fermée) à 1, la lumière du couloir (D-190). */
+  readonly door?: IntroKeys;
 }
 
 /** Un film : ses plans ; `outroMs` : il finit dans le noir (sinon, il se fond dans le jeu). */
@@ -284,6 +304,31 @@ const sunAcross = (ms: number): IntroKeys => [
 ];
 /** Le téléphone, debout contre la lampe du bureau. */
 const PHONE: FilmSprite = { image: 'phone', x: 1424, bottom: 742, height: 66 };
+/**
+ * Quelqu'un passe dans les années, comme dans un time-lapse : il apparaît dans le fondu, reste,
+ * puis s'efface avant la fin du plan.
+ */
+const passing = (ms: number): IntroKeys => [
+  [0, 0],
+  [500, 0],
+  [1100, 1],
+  [ms - 700, 1],
+  [ms - 200, 0],
+];
+/**
+ * Céleste qui grandit, à l'échelle du jeu (Céleste à 7 ans ≈ 110 px du plan, papa ≈ 390) : de plus
+ * en plus grande dans sa chambre d'enfant. Le sol : `FILM_ROOM.floorY`. PROVISOIRE.
+ */
+const CELESTE_AT = {
+  /** Debout juste sous l'étagère de Maria, son cartable ; elle ne lève pas les yeux. */
+  9: { image: 'celeste9', x: 1300, bottom: 972, height: 150 },
+  /** Assise sur son lit, un casque. */
+  12: { image: 'celeste12', x: 330, bottom: 792, height: 150 },
+  /** Debout sous la fenêtre, son téléphone. */
+  15: { image: 'celeste15', x: 760, bottom: 972, height: 260 },
+  /** À la porte, sa valise, tournée vers Maria. */
+  18: { image: 'celeste18', x: 1720, bottom: 972, height: 320 },
+} as const satisfies Record<number, FilmSprite>;
 
 /**
  * Le film des années (D-190), quand la porte s'est refermée : la chambre, Maria sur son étagère.
@@ -384,13 +429,13 @@ const YEARS: readonly FilmShot[] = [
   {
     id: 'age9-spring',
     scene: 'age9-spring',
-    durationMs: 2000,
+    durationMs: 3400,
     enter: dissolve(700),
     camera: WHOLE,
     backdrop: 'age9',
-    sprites: [],
+    sprites: [{ ...CELESTE_AT[9], opacity: passing(3400) }],
     season: 'spring',
-    sun: sunAcross(2000),
+    sun: sunAcross(3400),
   },
   {
     id: 'age9-summer',
@@ -427,13 +472,13 @@ const YEARS: readonly FilmShot[] = [
   {
     id: 'age12-winter',
     scene: 'age12-winter',
-    durationMs: 1800,
+    durationMs: 3400,
     enter: dissolve(600),
     camera: WHOLE,
     backdrop: 'age12',
-    sprites: [],
+    sprites: [{ ...CELESTE_AT[12], opacity: passing(3400) }],
     season: 'winter',
-    sun: sunAcross(1800),
+    sun: sunAcross(3400),
   },
   {
     id: 'age12-spring',
@@ -445,6 +490,36 @@ const YEARS: readonly FilmShot[] = [
     sprites: [],
     season: 'spring',
     sun: sunAcross(1800),
+  },
+  {
+    // Une nuit : la porte s'entrouvre, papa regarde l'étagère, sans un mot, et referme doucement.
+    id: 'age13-night',
+    scene: 'age13-night',
+    durationMs: 7000,
+    enter: dissolve(900),
+    camera: WHOLE,
+    backdrop: 'age13Night',
+    sprites: [
+      {
+        image: 'dad',
+        x: 1832,
+        bottom: 972,
+        height: 390,
+        flip: true,
+        opacity: [
+          [1500, 0],
+          [2200, 1],
+          [4800, 1],
+          [5400, 0],
+        ],
+      },
+    ],
+    door: [
+      [700, 0],
+      [1500, 1],
+      [5400, 1],
+      [6400, 0],
+    ],
   },
   {
     id: 'toise-14',
@@ -459,13 +534,14 @@ const YEARS: readonly FilmShot[] = [
   {
     id: 'age15-summer',
     scene: 'age15-summer',
-    durationMs: 2200,
+    durationMs: 3400,
     enter: dissolve(700),
     camera: WHOLE,
     backdrop: 'age15',
-    sprites: [PHONE],
+    // Son téléphone à la main : pas sur le bureau.
+    sprites: [{ ...CELESTE_AT[15], opacity: passing(3400) }],
     season: 'summer',
-    sun: sunAcross(2200),
+    sun: sunAcross(3400),
   },
   {
     id: 'age15-autumn',
@@ -489,15 +565,33 @@ const YEARS: readonly FilmShot[] = [
     toise: { shown: 14, write: 18, fromMs: 700 },
   },
   {
+    // Le départ, à 18 ans : la porte s'ouvre ; elle est là, sa valise, tournée vers Maria, un
+    // moment ; elle s'en va ; la porte se ferme. Comme à 7 ans. Elle ne la reprend pas.
     id: 'age18',
     scene: 'age18',
-    durationMs: 3600,
+    durationMs: 7600,
     enter: dissolve(900),
     camera: WHOLE,
     backdrop: 'age18',
-    sprites: [PHONE],
+    sprites: [
+      {
+        ...CELESTE_AT[18],
+        opacity: [
+          [800, 0],
+          [1500, 1],
+          [5200, 1],
+          [5900, 0],
+        ],
+      },
+    ],
     season: 'spring',
-    sun: sunAcross(3600),
+    sun: sunAcross(7600),
+    door: [
+      [0, 0],
+      [800, 1],
+      [6000, 1],
+      [7000, 0],
+    ],
   },
   {
     // Maria, la même : la vue s'approche lentement, le soleil passe sur elle.

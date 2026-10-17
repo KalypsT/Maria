@@ -44,20 +44,48 @@ type Images = ReadonlyMap<FilmImage, HTMLImageElement>;
  * main d'un parent, pour les âges de la toise (sans elle, une autre écriture : rien ne bloque).
  */
 async function loadFilmImages(film: Film): Promise<Images> {
-  const keys = new Set<FilmImage>();
+  const backdrops = new Set<FilmImage>();
+  const sprites = new Set<FilmImage>();
   for (const shot of film.shots) {
-    keys.add(shot.backdrop);
+    backdrops.add(shot.backdrop);
     for (const sprite of shot.sprites) {
-      keys.add(sprite.image);
+      sprites.add(sprite.image);
     }
   }
   if (film.shots.some((shot) => shot.toise)) {
     await document.fonts.load(FILM_TOISE.font).catch(() => undefined);
   }
-  const entries = await Promise.all(
-    [...keys].map(async (key) => [key, await loadImage(FILM_IMAGES[key])] as const),
-  );
-  return new Map(entries);
+  const load = async (key: FilmImage) => [key, await loadImage(FILM_IMAGES[key])] as const;
+  // Sans ses décors, pas de film ; un personnage qui manque n'est simplement pas dessiné.
+  const [scenes, people] = await Promise.all([
+    Promise.all([...backdrops].map(load)),
+    Promise.allSettled([...sprites].filter((key) => !backdrops.has(key)).map(load)),
+  ]);
+  const found = people.flatMap((p) => (p.status === 'fulfilled' ? [p.value] : []));
+  return new Map([...scenes, ...found]);
+}
+
+/** La lumière du couloir dans la porte de la chambre, ouverte de 0 à 1, ajoutée à l'image. */
+function drawDoor(c: CanvasRenderingContext2D, open: number): void {
+  if (open <= 0) {
+    return;
+  }
+  const { x, y, w, h, spill } = FILM_ROOM.door;
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  c.fillStyle = 'rgb(255, 192, 112)';
+  // L'ouverture s'élargit avec la porte, depuis le dehors.
+  c.globalAlpha = 0.85;
+  c.fillRect(x + w * (1 - open), y, w * open, h);
+  c.globalAlpha = 0.45 * open;
+  c.beginPath();
+  c.moveTo(x, y + h);
+  c.lineTo(x - spill * open, y + h);
+  c.lineTo(x - spill * open * 0.6, y + h - 30);
+  c.lineTo(x, y + h - 30);
+  c.closePath();
+  c.fill();
+  c.restore();
 }
 
 /** La saison à la fenêtre : la teinte du verre, et ce qui passe derrière (neige, pétales, feuilles). */
@@ -277,6 +305,9 @@ export function playFilm(id: FilmId): Promise<void> {
       if (shot.toise) {
         drawToise(c, shot.toise, t);
       }
+      if (shot.door) {
+        drawDoor(c, keyValue(shot.door, t, 0));
+      }
       if (shot.glow) {
         const g = shot.glow;
         drawGlow(c, glows, g.color, g.x, g.y, g.radius, keyValue(g.strength, t, 0));
@@ -292,7 +323,15 @@ export function playFilm(id: FilmId): Promise<void> {
           drawShadow(c, sprite.x, sprite.bottom - 4, sprite.shadow);
         }
         c.globalAlpha = alpha;
+        if (sprite.flip) {
+          c.save();
+          c.translate(sprite.x * 2, 0);
+          c.scale(-1, 1);
+        }
         drawSprite(c, img, sprite, layer.sceneMs, 0, FILM.breathMs, FILM.breathAmount);
+        if (sprite.flip) {
+          c.restore();
+        }
         c.globalAlpha = 1;
       }
       if (shot.bubble) {

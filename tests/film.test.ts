@@ -171,4 +171,68 @@ describe('les films de la fin (D-190)', () => {
     expect(win.x + win.w).toBeLessThanOrEqual(1920);
     expect(win.y + win.h).toBeLessThan(FILM_ROOM.floorY);
   });
+
+  it('Céleste grandit dans les années : une fois par âge, de plus en plus grande', () => {
+    const shots = FILMS.years.shots;
+    const passes = shots.flatMap((shot) =>
+      shot.sprites
+        .filter((sp) => sp.image.startsWith('celeste'))
+        .map((sp) => ({ shot, sp, age: Number(sp.image.replace('celeste', '')) })),
+    );
+    expect(passes.map((p) => p.age)).toEqual([9, 12, 15, 18]);
+    // Dans la chambre de son âge.
+    for (const { shot, age } of passes) {
+      const room = /^age(\d+)/.exec(shot.backdrop);
+      expect(Number(room?.[1]), shot.id).toBe(age);
+    }
+    // Debout, de plus en plus grande ; jamais plus grande que papa.
+    const standing = passes.filter((p) => p.age !== 12).map((p) => p.sp.height);
+    expect([...standing].sort((a, b) => a - b)).toEqual(standing);
+    const dad = shots.flatMap((s) => s.sprites).find((sp) => sp.image === 'dad');
+    expect(standing.at(-1) ?? 0).toBeLessThan(dad?.height ?? 0);
+    // Elle apparaît et disparaît dans le plan (comme un time-lapse), sans jamais rester à la fin.
+    for (const { shot, sp } of passes) {
+      expect(keyValue(sp.opacity, 0, 1), shot.id).toBe(0);
+      expect(keyValue(sp.opacity, shot.durationMs, 1), shot.id).toBe(0);
+    }
+  });
+
+  it('papa, une nuit : la porte s’ouvre, il regarde la chambre, sans bulle ; elle se referme', () => {
+    const night = FILMS.years.shots.filter((s) => s.sprites.some((sp) => sp.image === 'dad'));
+    expect(night).toHaveLength(1);
+    const shot = night[0] as FilmShot;
+    expect(shot.backdrop).toMatch(/Night$/);
+    expect(shot.bubble).toBeUndefined();
+    const dad = shot.sprites.find((sp) => sp.image === 'dad');
+    // Tourné vers la chambre (à gauche), dans la porte.
+    expect(dad?.flip).toBe(true);
+    expect(dad?.x ?? 0).toBeGreaterThan(FILM_ROOM.door.x - 200);
+    // La porte ouverte tant qu'il est là ; fermée au début et à la fin.
+    for (let t = 0; t <= shot.durationMs; t += 50) {
+      if (keyValue(dad?.opacity, t, 1) > 0) {
+        expect(keyValue(shot.door, t, 0), String(t)).toBe(1);
+      }
+    }
+    expect(keyValue(shot.door, 0, 0)).toBe(0);
+    expect(keyValue(shot.door, shot.durationMs, 0)).toBe(0);
+  });
+
+  it('à 18 ans, elle part : à la porte, tournée vers Maria, puis la porte se ferme ; Maria reste', () => {
+    const shots = FILMS.years.shots;
+    const i = shots.findIndex((s) => s.sprites.some((sp) => sp.image === 'celeste18'));
+    const shot = shots[i] as FilmShot;
+    const her = shot.sprites.find((sp) => sp.image === 'celeste18');
+    expect(her?.x ?? 0).toBeGreaterThan(FILM_ROOM.door.x - 300);
+    for (let t = 0; t <= shot.durationMs; t += 50) {
+      if (keyValue(her?.opacity, t, 1) > 0) {
+        expect(keyValue(shot.door, t, 0), String(t)).toBe(1);
+      }
+    }
+    expect(keyValue(shot.door, shot.durationMs, 0)).toBe(0);
+    // Le dernier plan : Maria, seule.
+    expect(shots[i + 1]?.id).toBe('maria');
+    expect(shots.slice(i + 1).every((s) => s.sprites.every((sp) => sp.image === 'maria'))).toBe(
+      true,
+    );
+  });
 });

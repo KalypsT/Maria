@@ -60,6 +60,8 @@ export const STATES = {
   'age7-night': { dropFlags: MORNING },
   age9: AGE9,
   age12: AGE12,
+  // Une nuit, à 13 ans : papa à la porte (D-190, PR 7).
+  'age13-night': { ...AGE12, dropFlags: MORNING },
   age15: AGE15,
   age18: AGE18,
 };

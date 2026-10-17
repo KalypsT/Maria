@@ -76,7 +76,7 @@ def morning():
 
 FILM_SRC = os.path.join(ROOT, "scripts", "film")
 FILM_OUT = os.path.join(ART, "film")
-FILM_AGES = ["age7-day", "age7-night", "age9", "age12", "age15", "age18"]
+FILM_AGES = ["age7-day", "age7-night", "age9", "age12", "age13-night", "age15", "age18"]
 
 
 def film_sources():
@@ -112,6 +112,39 @@ def film():
     wall = rooms["age7-day"].crop((2250, 180, 2850, 518)).resize((1920, 1080), Image.LANCZOS)
     film_save(wall.filter(ImageFilter.GaussianBlur(30)), "toise-wall.webp")
     phone()
+    silhouettes()
+
+
+def silhouettes():
+    """Céleste à 9, 12, 15 et 18 ans (D-190, PR 7), en attendant les illustrations : une silhouette
+    pleine, tirée de celle de la phase 4 (sans visage : on ne fixe pas son allure). Jamais
+    par-dessus une illustration fournie."""
+    src = art("celeste-tee.png")
+    color = (64, 54, 82, 255)
+    shade = Image.new("RGBA", src.size, color)
+    shade.putalpha(src.getchannel("A"))
+
+    def save_once(img, name):
+        path = os.path.join(FILM_OUT, name)
+        if os.path.exists(path):
+            print(f"film/{name} : déjà là, gardée")
+            return
+        img.save(path)
+        print(f"film/{name} (silhouette provisoire)")
+
+    save_once(shade, "celeste-9.png")
+    save_once(shade, "celeste-15.png")
+    save_once(shade.transpose(Image.FLIP_LEFT_RIGHT), "celeste-18.png")
+    # Assise (12 ans, sur son lit) : le haut du corps, et les jambes repliées devant elle.
+    top = shade.crop((0, 0, shade.width, int(shade.height * 0.6)))
+    seated = Image.new("RGBA", (int(shade.width * 1.5), top.height + 60), (0, 0, 0, 0))
+    seated.alpha_composite(top, (0, 0))
+    ImageDraw.Draw(seated).rounded_rectangle(
+        (shade.width * 0.2, top.height - 40, seated.width - 4, top.height + 56),
+        radius=40,
+        fill=color,
+    )
+    save_once(seated, "celeste-12.png")
 
 
 def phone():
