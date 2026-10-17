@@ -249,21 +249,22 @@ describe('le dernier plan (D-144, §12)', () => {
     expect(steps[close]).toMatchObject({ exit: door.id });
   });
 
-  it('Céleste sort ; la vue reste sur Maria ; un très léger signe ; tout redevient normal ; le noir', () => {
+  it('Céleste partie, la porte fermée : le film des années ; le noir ; la fin', () => {
     expect(flagsOf(steps)).toEqual([F.FinaleGone]);
     const gone = index(steps, (s) => s.do === 'gone');
     expect(gone).toBeGreaterThan(index(steps, (s) => s.do === 'fadeOut'));
-    expect(steps).toContainEqual({ do: 'look', ...MARIA_SHELF });
-    const back = index(steps, (s) => s.do === 'fadeIn');
-    const glimmer = index(steps, (s) => s.do === 'glimmer');
-    expect(glimmer).toBeGreaterThan(back);
-    expect(steps).toContainEqual(expect.objectContaining({ do: 'sparkle' }));
-    expect(steps).toContainEqual(expect.objectContaining({ do: 'hush' }));
-    // Maria ne bouge pas : rien ne la déplace pendant le plan.
+    const closed = index(steps, (s) => s.do === 'door' && !s.open);
+    const film = index(steps, (s) => s.do === 'film');
+    expect(steps[film]).toEqual({ do: 'film', id: 'years' });
+    expect(film).toBeGreaterThan(closed);
+    // Il finit dans le noir : le jeu y passe aussitôt, l'étape de la fin s'y écrit.
+    expect(steps[film + 1]).toEqual({ do: 'fadeOut', ms: 0 });
+    const flag = index(steps, (s) => s.do === 'flag');
+    expect(flag).toBeGreaterThan(film);
+    // Maria ne bouge pas : rien ne la déplace.
     expect(steps.filter((s) => s.do === 'flag' || s.do === 'toggle')).toHaveLength(1);
-    // Le noir, puis l'écran de fin et l'accueil (D-145) : la dernière étape. « Continuer »
-    // reprendra dans le couloir ; elle ne revient pas la chercher.
-    expect(index(steps.slice(glimmer), (s) => s.do === 'fadeOut')).toBeGreaterThan(0);
+    // L'écran de fin et l'accueil (D-145) : la dernière étape. « Continuer » reprendra dans le
+    // couloir ; elle ne revient pas la chercher.
     expect(steps.at(-1)).toEqual({ do: 'end', room: AFTER_END_ROOM });
     expect(
       HOUSE_STORY.triggers

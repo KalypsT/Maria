@@ -19,6 +19,8 @@ export const FILM = {
   /** Le film apparaît par-dessus l'image du jeu (fondu enchaîné), puis s'y fond (ms). */
   fadeInMs: 1600,
   fadeOutMs: 1600,
+  /** Un film qui finit dans le noir reste ce temps à l'écran, le temps que le jeu y passe (ms). */
+  blackHoldMs: 400,
   /** Images trop longues à charger : pas de film (le jeu ne doit jamais attendre, ms). */
   loadTimeoutMs: 5000,
   /** Largeur maximale du canvas (px réels). */
@@ -43,6 +45,20 @@ export const FILM_IMAGES = {
    */
   celesteTee: 'art/celeste-tee.png',
   maria: 'art/maria.png',
+  /**
+   * Le film des années (D-190) : la chambre à chaque âge, capturée dans le jeu dans un même cadre
+   * (`scripts/film/capture-room.js`) ; Maria de près sur son étagère ; le mur derrière la toise.
+   */
+  age7Day: 'art/film/room-age7-day.webp',
+  age7Night: 'art/film/room-age7-night.webp',
+  age9: 'art/film/room-age9.webp',
+  age12: 'art/film/room-age12.webp',
+  age15: 'art/film/room-age15.webp',
+  age18: 'art/film/room-age18.webp',
+  mariaClose: 'art/film/maria-close.webp',
+  toiseWall: 'art/film/toise-wall.webp',
+  /** Son téléphone, sur le bureau, à 15 ans (PLACEHOLDER, dessiné par le script). */
+  phone: 'art/film/phone.png',
 } as const;
 export type FilmImage = keyof typeof FILM_IMAGES;
 
@@ -59,6 +75,82 @@ export interface FilmSprite {
   readonly opacity?: IntroKeys;
   /** Ombre au sol, largeur (px). */
   readonly shadow?: number;
+}
+
+/** Les saisons à la fenêtre de la chambre (D-190) : sa couleur, et ce qui passe derrière. */
+export type FilmSeason = 'winter' | 'spring' | 'summer' | 'autumn';
+
+/**
+ * La chambre dans les décors du film des années (px du plan) : le verre de la fenêtre, le sol. Le
+ * soleil tombe de la fenêtre jusqu'au sol, vers la gauche.
+ */
+export const FILM_ROOM = {
+  window: { x: 870, y: 156, w: 420, h: 336 },
+  floorY: 972,
+  /** Le carré de soleil : sa largeur sous la fenêtre, son décalage au sol, son intensité. */
+  sun: { width: 300, slant: 380, alpha: 0.09 },
+} as const;
+
+/** Les saisons : la teinte du verre, la couleur et le nombre de ce qui passe, sa chute (px/s). */
+export const FILM_SEASONS: Readonly<
+  Record<
+    FilmSeason,
+    {
+      readonly tint: string;
+      readonly tintAlpha: number;
+      readonly color: string;
+      readonly count: number;
+      readonly fall: number;
+    }
+  >
+> = {
+  winter: { tint: '#e8f0fa', tintAlpha: 0.4, color: '#ffffff', count: 34, fall: 70 },
+  spring: { tint: '#ffe6f0', tintAlpha: 0.2, color: '#f7b6cf', count: 18, fall: 34 },
+  summer: { tint: '#fff1b8', tintAlpha: 0.18, color: '#7fb069', count: 8, fall: 10 },
+  autumn: { tint: '#f6c48a', tintAlpha: 0.26, color: '#d9772f', count: 16, fall: 52 },
+};
+
+/**
+ * La toise de la chambre en gros plan (D-190) : dessinée par le film, un trait rose à chaque âge
+ * (comme les traits du jeu, D-43) et l'âge écrit au crayon à côté, de la main d'un parent. Choix de
+ * l'utilisateur : 4 ans en phase 1, un an de plus à chaque phase, 7 ans à la fin ; puis un an de
+ * plus à chaque trait, jusqu'à 18 ans. Les tailles (cm) ralentissent : elle a fini de grandir.
+ * PROVISOIRE.
+ */
+export const FILM_TOISE = {
+  firstAge: 4,
+  /** La taille à chaque âge, de 4 à 18 ans (cm). */
+  heights: [102, 109, 115, 121, 127, 133, 138, 143, 149, 155, 159, 162, 165, 167, 169],
+  /** La planche : son milieu (x), sa largeur, le haut et le bas (cm), l'échelle (px par cm). */
+  x: 960,
+  width: 150,
+  topCm: 176,
+  bottomCm: 90,
+  pxPerCm: 18,
+  /** y du plan à 0 cm (le sol, loin sous l'image). */
+  zeroY: 2700,
+  /** Le trait, puis l'âge écrit (ms chacun). */
+  lineMs: 500,
+  wordMs: 500,
+  lineColor: '#e0679a',
+  textColor: '#4a4458',
+  font: "700 46px 'Maria Hand', 'Comic Sans MS', cursive",
+  /** À partir de cet âge, les traits se serrent : l'âge s'écrit d'un côté puis de l'autre. */
+  alternateFrom: 15,
+  /** La vue se rapproche de la planche. */
+  zoom: 1.35,
+} as const;
+
+/** y du plan d'une taille sur la toise (cm). */
+export function toiseY(cm: number): number {
+  return FILM_TOISE.zeroY - cm * FILM_TOISE.pxPerCm;
+}
+
+/** La taille (cm) à un âge, sur la toise (bornée aux âges connus). */
+export function toiseHeight(age: number): number {
+  const { heights, firstAge } = FILM_TOISE;
+  const i = Math.min(heights.length - 1, Math.max(0, age - firstAge));
+  return heights[i] ?? 0;
 }
 
 /** Un plan du film. Deux plans consécutifs du même décor (`scene`) partagent son temps. */
@@ -96,6 +188,21 @@ export interface FilmShot {
     readonly scale: number;
     readonly opacity: IntroKeys;
   };
+  /** La saison à la fenêtre (un décor de la chambre). */
+  readonly season?: FilmSeason;
+  /** Le carré de soleil : sa place sous la fenêtre au fil du plan (x, px du plan). */
+  readonly sun?: IntroKeys;
+  /**
+   * La toise en gros plan : les traits jusqu'à l'âge `shown`, puis ceux jusqu'à `write`, tracés
+   * l'un après l'autre à partir de `fromMs`. Le décor reste fixe, la vue monte avec les traits.
+   */
+  readonly toise?: { readonly shown: number; readonly write: number; readonly fromMs: number };
+}
+
+/** Un film : ses plans ; `outroMs` : il finit dans le noir (sinon, il se fond dans le jeu). */
+export interface Film {
+  readonly shots: readonly FilmShot[];
+  readonly outroMs?: number;
 }
 
 /** Maria, à sa place sur le tapis, la même dans tous les plans (elle ne bouge jamais). */
@@ -148,9 +255,278 @@ const CONTRECHAMP: readonly FilmShot[] = [
   },
 ];
 
+/** Toute la chambre, immobile (le cadre des décors du film des années). */
+const WHOLE: FilmShot['camera'] = {
+  from: { x: 960, y: 540, zoom: 1 },
+  to: { x: 960, y: 540, zoom: 1 },
+};
+/** La vue de la toise : centrée sur la taille d'un âge, entre deux âges au fil du plan. */
+function toiseCamera(fromAge: number, toAge: number): FilmShot['camera'] {
+  const at = (age: number) => ({
+    x: FILM_TOISE.x + 60,
+    y: toiseY(toiseHeight(age)) + 90,
+    zoom: FILM_TOISE.zoom,
+  });
+  return { from: at(fromAge), to: at(toAge) };
+}
+/** Une nuit (un noir) : de plus en plus courte. */
+const night = (ms: number, holdMs: number): IntroTransition => ({
+  kind: 'dip',
+  ms,
+  holdMs,
+  color: '#000',
+});
+const dissolve = (ms: number): IntroTransition => ({ kind: 'dissolve', ms });
+/** Le soleil traverse la pièce pendant le plan (de droite à gauche, x sous la fenêtre). */
+const sunAcross = (ms: number): IntroKeys => [
+  [0, 1180],
+  [ms, 820],
+];
+/** Le téléphone, debout contre la lampe du bureau. */
+const PHONE: FilmSprite = { image: 'phone', x: 1424, bottom: 742, height: 66 };
+
+/**
+ * Le film des années (D-190), quand la porte s'est refermée : la chambre, Maria sur son étagère.
+ * D'abord des nuits, lentes, des noirs de plus en plus courts ; puis les années, en fondus de plus
+ * en plus rapides : le soleil qui traverse la pièce, les saisons à la fenêtre, les choses de bébé
+ * qui s'en vont, les siennes qui arrivent ; entre elles, la toise : un trait plus haut, son âge.
+ * Puis tout ralentit sur Maria, la même. Le noir. Céleste qui grandit et papa : la PR 7.
+ */
+const YEARS: readonly FilmShot[] = [
+  {
+    id: 'left',
+    scene: 'room',
+    durationMs: 3800,
+    enter: { kind: 'cut' },
+    camera: WHOLE,
+    backdrop: 'age7Day',
+    sprites: [],
+    sun: sunAcross(3800),
+  },
+  {
+    id: 'night-1',
+    scene: 'night-1',
+    durationMs: 5200,
+    enter: night(1800, 900),
+    camera: WHOLE,
+    backdrop: 'age7Night',
+    sprites: [],
+  },
+  {
+    id: 'day-2',
+    scene: 'day-2',
+    durationMs: 4000,
+    enter: night(1400, 500),
+    camera: WHOLE,
+    backdrop: 'age7Day',
+    sprites: [],
+    sun: sunAcross(4000),
+  },
+  {
+    id: 'night-2',
+    scene: 'night-2',
+    durationMs: 2900,
+    enter: night(1000, 300),
+    camera: WHOLE,
+    backdrop: 'age7Night',
+    sprites: [],
+  },
+  {
+    id: 'day-3',
+    scene: 'day-3',
+    durationMs: 2400,
+    enter: night(800, 200),
+    camera: WHOLE,
+    backdrop: 'age7Day',
+    sprites: [],
+    sun: sunAcross(2400),
+  },
+  {
+    id: 'night-3',
+    scene: 'night-3',
+    durationMs: 1500,
+    enter: night(600, 100),
+    camera: WHOLE,
+    backdrop: 'age7Night',
+    sprites: [],
+  },
+  {
+    id: 'day-4',
+    scene: 'day-4',
+    durationMs: 1500,
+    enter: night(400, 80),
+    camera: WHOLE,
+    backdrop: 'age7Day',
+    sprites: [],
+    sun: sunAcross(1500),
+  },
+  {
+    id: 'toise-8',
+    scene: 'toise-8',
+    durationMs: 3600,
+    enter: dissolve(600),
+    camera: toiseCamera(6, 8),
+    backdrop: 'toiseWall',
+    sprites: [],
+    toise: { shown: 7, write: 8, fromMs: 1100 },
+  },
+  {
+    id: 'age9-winter',
+    scene: 'age9-winter',
+    durationMs: 2800,
+    enter: dissolve(900),
+    camera: WHOLE,
+    backdrop: 'age9',
+    sprites: [],
+    season: 'winter',
+    sun: sunAcross(2800),
+  },
+  {
+    id: 'age9-spring',
+    scene: 'age9-spring',
+    durationMs: 2000,
+    enter: dissolve(700),
+    camera: WHOLE,
+    backdrop: 'age9',
+    sprites: [],
+    season: 'spring',
+    sun: sunAcross(2000),
+  },
+  {
+    id: 'age9-summer',
+    scene: 'age9-summer',
+    durationMs: 2000,
+    enter: dissolve(700),
+    camera: WHOLE,
+    backdrop: 'age9',
+    sprites: [],
+    season: 'summer',
+    sun: sunAcross(2000),
+  },
+  {
+    id: 'toise-11',
+    scene: 'toise-11',
+    durationMs: 4400,
+    enter: dissolve(600),
+    camera: toiseCamera(8, 11),
+    backdrop: 'toiseWall',
+    sprites: [],
+    toise: { shown: 8, write: 11, fromMs: 700 },
+  },
+  {
+    id: 'age12-autumn',
+    scene: 'age12-autumn',
+    durationMs: 2200,
+    enter: dissolve(800),
+    camera: WHOLE,
+    backdrop: 'age12',
+    sprites: [],
+    season: 'autumn',
+    sun: sunAcross(2200),
+  },
+  {
+    id: 'age12-winter',
+    scene: 'age12-winter',
+    durationMs: 1800,
+    enter: dissolve(600),
+    camera: WHOLE,
+    backdrop: 'age12',
+    sprites: [],
+    season: 'winter',
+    sun: sunAcross(1800),
+  },
+  {
+    id: 'age12-spring',
+    scene: 'age12-spring',
+    durationMs: 1800,
+    enter: dissolve(600),
+    camera: WHOLE,
+    backdrop: 'age12',
+    sprites: [],
+    season: 'spring',
+    sun: sunAcross(1800),
+  },
+  {
+    id: 'toise-14',
+    scene: 'toise-14',
+    durationMs: 4200,
+    enter: dissolve(600),
+    camera: toiseCamera(11, 14),
+    backdrop: 'toiseWall',
+    sprites: [],
+    toise: { shown: 11, write: 14, fromMs: 600 },
+  },
+  {
+    id: 'age15-summer',
+    scene: 'age15-summer',
+    durationMs: 2200,
+    enter: dissolve(700),
+    camera: WHOLE,
+    backdrop: 'age15',
+    sprites: [PHONE],
+    season: 'summer',
+    sun: sunAcross(2200),
+  },
+  {
+    id: 'age15-autumn',
+    scene: 'age15-autumn',
+    durationMs: 1800,
+    enter: dissolve(600),
+    camera: WHOLE,
+    backdrop: 'age15',
+    sprites: [PHONE],
+    season: 'autumn',
+    sun: sunAcross(1800),
+  },
+  {
+    id: 'toise-18',
+    scene: 'toise-18',
+    durationMs: 5600,
+    enter: dissolve(600),
+    camera: toiseCamera(14, 18),
+    backdrop: 'toiseWall',
+    sprites: [],
+    toise: { shown: 14, write: 18, fromMs: 700 },
+  },
+  {
+    id: 'age18',
+    scene: 'age18',
+    durationMs: 3600,
+    enter: dissolve(900),
+    camera: WHOLE,
+    backdrop: 'age18',
+    sprites: [PHONE],
+    season: 'spring',
+    sun: sunAcross(3600),
+  },
+  {
+    // Maria, la même : la vue s'approche lentement, le soleil passe sur elle.
+    id: 'maria',
+    scene: 'maria',
+    durationMs: 8000,
+    enter: dissolve(1800),
+    camera: { from: { x: 960, y: 560, zoom: 1 }, to: { x: 960, y: 590, zoom: 1.14 } },
+    backdrop: 'mariaClose',
+    sprites: [{ image: 'maria', x: 960, bottom: 716, height: 420 }],
+    // Le soleil passe sur elle, une fois.
+    glow: {
+      color: 'warm',
+      x: 960,
+      y: 560,
+      radius: 620,
+      strength: [
+        [0, 0.05],
+        [3600, 0.42],
+        [7200, 0.1],
+      ],
+    },
+  },
+];
+
 export const FILMS = {
-  contrechamp: CONTRECHAMP,
-} as const satisfies Record<string, readonly FilmShot[]>;
+  contrechamp: { shots: CONTRECHAMP },
+  years: { shots: YEARS, outroMs: 2200 },
+} as const satisfies Record<string, Film>;
 export type FilmId = keyof typeof FILMS;
 
 export function isFilmId(id: string): id is FilmId {

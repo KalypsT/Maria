@@ -97,7 +97,6 @@ const MARIA_RUG = { col: 19, row: 19 };
  */
 export const MARIA_SHELF = { col: 33, row: 11 };
 const SHELF_STAND = { col: 35, row: 11 };
-const SHELF_GLOW: TileArea = { col: 31, row: 9, w: 5, h: 3 };
 /** Le dernier câlin (D-190) : le cœur à tenir, au-dessus de Maria dans les bras de Céleste. */
 const SHELF_HEART = { col: 34, row: 8 };
 /** Maria posée (D-190) : la vue se rapproche d'elles deux. */
@@ -573,9 +572,8 @@ const TRIGGERS: StoryTrigger[] = [
     // C'est le joueur qui mène Céleste à la porte (D-138). Partir (D-190) : la vue se cale sur la
     // chambre, Maria et la porte ; la porte s'ouvre, la lumière du couloir ; Céleste se retourne
     // vers Maria, un long moment ; puis elle sort, d'elle-même. La porte se ferme, la lumière
-    // s'amincit et s'éteint. Le dernier plan (§12) : la vue sur Maria ; un très léger signe du monde
-    // étrange ; Maria ne bouge pas ; tout redevient normal ; le noir. L'écran de fin, puis l'accueil
-    // (D-145). Céleste ne revient pas la chercher.
+    // s'amincit et s'éteint. Le film des années : le temps passe, Maria reste. Le noir ; l'écran de
+    // fin, puis l'accueil (D-145). Céleste ne revient pas la chercher.
     id: 'finale-leave',
     room: 'bedroom',
     on: 'touch',
@@ -600,24 +598,12 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.lookMs },
       { do: 'door', exit: BEDROOM_DOOR, open: false, ms: S.doorCloseMs },
       { do: 'wait', ms: S.doorCloseMs + S.lookMs },
-      { do: 'look', ...MARIA_SHELF },
-      {
-        do: 'hush',
-        ms:
-          STORY_ZOOM.easeMs +
-          S.lastShotMs +
-          S.glimmerMs +
-          S.lookMs +
-          S.nightFadeOutMs +
-          S.nightBlackMs,
-      },
-      { do: 'wait', ms: STORY_ZOOM.easeMs + S.lastShotMs },
-      { do: 'glimmer', ms: S.glimmerMs },
-      { do: 'sparkle', area: SHELF_GLOW, ms: S.glimmerMs },
-      { do: 'wait', ms: S.glimmerMs + S.lookMs },
-      { do: 'fadeOut', ms: S.nightFadeOutMs },
+      // Le film des années (D-190) : les nuits, puis les années ; Maria, la même. Il finit dans
+      // le noir : le jeu y passe aussitôt.
+      { do: 'film', id: 'years' },
+      { do: 'fadeOut', ms: 0 },
       // Écrite dans le noir, à la toute fin : rien de l'après-fin (le dessin de famille, la
-      // console) n'apparaît pendant le dernier plan (D-190).
+      // console) n'apparaît avant (D-190).
       { do: 'flag', id: F.FinaleGone },
       { do: 'wait', ms: S.nightBlackMs },
       // L'écran de fin, puis l'accueil (D-145).

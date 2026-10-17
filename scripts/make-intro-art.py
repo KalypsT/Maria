@@ -1,7 +1,8 @@
 """Prépare les images de l'intro (D-185) dans public/art/intro/.
 
 Usage : python3 scripts/make-intro-art.py (tout) ; python3 scripts/make-intro-art.py morning (le
-décor du contrechamp de la fin seulement, D-190)
+décor du contrechamp de la fin seulement, D-190) ; python3 scripts/make-intro-art.py film (les décors
+du film des années, D-190)
 
 Sources :
 - `scripts/intro/room-evening.webp` : la chambre du premier soir, capturée dans le jeu (build de
@@ -10,6 +11,8 @@ Sources :
 - `scripts/intro/room-morning.webp` (D-190, le contrechamp du film de la fin) : la même chambre, le
   même cadre, le matin de la fin (debug « Rejouer la fin : le matin », dev, 1600 × 900 à l'échelle
   2, les outils de debug et l'étincelle masqués) ; Céleste et Maria sur le lit, hors du cadrage ;
+- `scripts/film/room-<âge>.webp` (D-190, le film des années) : la chambre à chaque âge, capturée par
+  `scripts/film/capture-room.js` (les PNG qu'il écrit sont convertis ici en WebP, puis effacés) ;
 - les illustrations de `public/art/` (Céleste, la ville-jouet, les objets d'enfance).
 
 Tout ce qui coûte (flou, silhouettes, halos) est calculé ici, une fois : l'intro ne fait que
@@ -24,7 +27,7 @@ import os
 import sys
 
 import numpy as np
-from PIL import Image, ImageChops, ImageEnhance, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ART = os.path.join(ROOT, "public", "art")
@@ -69,6 +72,57 @@ def morning():
     crop = room.crop((1150, 1060, 2350, 1735)).resize((1280, 720), Image.LANCZOS)
     crop = crop.filter(ImageFilter.GaussianBlur(2.6))
     save(ImageEnhance.Brightness(crop).enhance(0.96).convert("RGB"), "morning.webp")
+
+
+FILM_SRC = os.path.join(ROOT, "scripts", "film")
+FILM_OUT = os.path.join(ART, "film")
+FILM_AGES = ["age7-day", "age7-night", "age9", "age12", "age15", "age18"]
+
+
+def film_sources():
+    """Les captures PNG de `capture-room.js` deviennent des sources WebP (plus légères)."""
+    for name in FILM_AGES:
+        png = os.path.join(FILM_SRC, f"room-{name}.png")
+        if os.path.exists(png):
+            Image.open(png).convert("RGB").save(
+                os.path.join(FILM_SRC, f"room-{name}.webp"), quality=90, method=6
+            )
+            os.remove(png)
+
+
+def film_save(img, name, quality=84):
+    img.save(os.path.join(FILM_OUT, name), quality=quality, method=6)
+    print(f"film/{name} {img.size[0]}×{img.size[1]} {os.path.getsize(os.path.join(FILM_OUT, name)) // 1024} Ko")
+
+
+def film():
+    """Le film des années (D-190) : la chambre à chaque âge, Maria de près, le mur de la toise."""
+    os.makedirs(FILM_OUT, exist_ok=True)
+    film_sources()
+    rooms = {}
+    for name in FILM_AGES:
+        room = Image.open(os.path.join(FILM_SRC, f"room-{name}.webp")).convert("RGB")
+        rooms[name] = room
+        film_save(room.resize((1920, 1080), Image.LANCZOS), f"room-{name}.webp")
+    # Maria de près, sur son étagère : le surmeuble flou (profondeur de champ) ; l'illustration de
+    # Maria est posée dessus par le film, sur la planche.
+    close = rooms["age18"].crop((1900, 760, 2500, 1098)).resize((1920, 1080), Image.LANCZOS)
+    film_save(close.filter(ImageFilter.GaussianBlur(7)), "maria-close.webp")
+    # Le mur derrière la toise, très flou : la toise est dessinée par le film.
+    wall = rooms["age7-day"].crop((2250, 180, 2850, 518)).resize((1920, 1080), Image.LANCZOS)
+    film_save(wall.filter(ImageFilter.GaussianBlur(30)), "toise-wall.webp")
+    phone()
+
+
+def phone():
+    """Un téléphone posé sur le bureau, à 15 ans (PLACEHOLDER) : coque rose, écran sombre."""
+    w, h = 120, 220
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle((4, 4, w - 4, h - 4), radius=22, fill=(232, 150, 178, 255))
+    d.rounded_rectangle((14, 16, w - 14, h - 16), radius=12, fill=(44, 46, 66, 255))
+    d.polygon([(22, 28), (58, 28), (22, 92)], fill=(90, 96, 128, 255))
+    img.save(os.path.join(FILM_OUT, "phone.png"))
 
 
 def cradle(room):
@@ -155,6 +209,10 @@ def main():
         # Seulement le décor du contrechamp (D-190), sans refaire ceux de l'intro.
         morning()
         return
+    if sys.argv[1:] == ["film"]:
+        # Seulement les décors du film des années (D-190).
+        film()
+        return
     room = clean_room()
     evening(room)
     cradle(room)
@@ -171,6 +229,7 @@ def main():
     toy_town()
     celeste_rim()
     morning()
+    film()
 
 
 if __name__ == "__main__":

@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { FILM, FILM_IMAGES, FILMS, isFilmId, type FilmShot } from '../src/config/film';
+import {
+  FILM,
+  FILM_IMAGES,
+  FILM_ROOM,
+  FILM_TOISE,
+  FILMS,
+  isFilmId,
+  toiseHeight,
+  type Film,
+  type FilmShot,
+} from '../src/config/film';
 import { INTRO_SHOTS } from '../src/config/intro';
 import {
   createIntroFrame,
@@ -12,7 +22,7 @@ import { HOUSE_STORY } from '../src/levels/house/story';
 const ART = new Set(
   Object.keys(import.meta.glob('../public/art/**/*')).map((path) => path.replace('../public/', '')),
 );
-const ALL = Object.entries<readonly FilmShot[]>(FILMS);
+const ALL = Object.entries<Film>(FILMS).map(([id, film]) => [id, film.shots] as const);
 
 /** Maria dans un plan : sa place, ou null. */
 const mariaOf = (shot: FilmShot) => shot.sprites.find((s) => s.image === 'maria') ?? null;
@@ -46,7 +56,7 @@ describe('les films de la fin (D-190)', () => {
   });
 
   it('le contrechamp : le premier soir de l’intro, puis ce matin, Céleste plus grande', () => {
-    const [then, now] = FILMS.contrechamp;
+    const [then, now] = FILMS.contrechamp.shots;
     const evening = INTRO_SHOTS.find((s) => s.id === 'evening');
     expect(then?.backdrop).toBe('evening');
     expect(now?.backdrop).toBe('morning');
@@ -68,7 +78,7 @@ describe('les films de la fin (D-190)', () => {
   });
 
   it('le déroulé de l’intro joue aussi les films : le fondu enchaîné au bon moment', () => {
-    const shots = FILMS.contrechamp;
+    const shots = FILMS.contrechamp.shots;
     const schedule = introSchedule(shots);
     expect(schedule.totalMs).toBe(shots.reduce((t, s) => t + s.durationMs, 0));
     const frame = createIntroFrame();
@@ -88,6 +98,11 @@ describe('les films de la fin (D-190)', () => {
     );
     expect(new Set(used)).toEqual(new Set(Object.keys(FILMS)));
     expect(used.every(isFilmId)).toBe(true);
+    const leave = HOUSE_STORY.triggers.find((t) => t.id === 'finale-leave');
+    const years = leave?.steps.findIndex((s) => s.do === 'film' && s.id === 'years') ?? -1;
+    const closed = leave?.steps.findIndex((s) => s.do === 'door' && !s.open) ?? -1;
+    expect(years).toBeGreaterThan(closed);
+    expect(closed).toBeGreaterThan(-1);
     const play = HOUSE_STORY.triggers.find((t) => t.id === 'finale-play');
     const steps = play?.steps ?? [];
     const film = steps.findIndex((s) => s.do === 'film');
@@ -95,5 +110,65 @@ describe('les films de la fin (D-190)', () => {
     const putAway = steps.findIndex((s) => s.do === 'await' && s.mode === 'hold');
     expect(film).toBeGreaterThan(zoom);
     expect(film).toBeLessThan(putAway);
+  });
+
+  it('les années : des nuits de plus en plus courtes, puis les âges dans l’ordre, Maria à la fin', () => {
+    const { shots, outroMs } = FILMS.years;
+    // Il finit dans le noir : l'écran de fin suit.
+    expect(outroMs).toBeGreaterThan(0);
+    const nights = shots.filter((s) => s.enter.kind === 'dip');
+    const lengths = nights.map((s) => (s.enter.kind === 'dip' ? s.enter.ms + s.enter.holdMs : 0));
+    expect(nights.length).toBeGreaterThanOrEqual(4);
+    expect([...lengths].sort((a, b) => b - a)).toEqual(lengths);
+    // Les nuits d'abord, puis plus aucun noir : les années passent en fondus.
+    const lastNight = shots.findLastIndex((s) => s.enter.kind === 'dip');
+    expect(shots.slice(lastNight + 1).every((s) => s.enter.kind === 'dissolve')).toBe(true);
+    // Les âges de la chambre ne reviennent jamais en arrière.
+    const ages = shots.flatMap((s) => {
+      const m = /^age(\d+)/.exec(s.backdrop);
+      return m ? [Number(m[1])] : [];
+    });
+    expect([...ages].sort((a, b) => a - b)).toEqual(ages);
+    expect(ages.at(-1)).toBe(18);
+    expect(shots.at(-1)?.id).toBe('maria');
+  });
+
+  it('la toise : un trait par an, de 4 à 18 ans, jamais deux fois, de plus en plus haut', () => {
+    const toises = FILMS.years.shots.flatMap((s) => (s.toise ? [s.toise] : []));
+    let shown = 7;
+    for (const toise of toises) {
+      // Ce matin, 7 ans (phase 4) ; chaque gros plan reprend où le précédent s'est arrêté.
+      expect(toise.shown).toBe(shown);
+      expect(toise.write).toBeGreaterThan(toise.shown);
+      shown = toise.write;
+    }
+    expect(shown).toBe(18);
+    expect(FILM_TOISE.heights).toHaveLength(18 - FILM_TOISE.firstAge + 1);
+    for (let age = 5; age <= 18; age++) {
+      expect(toiseHeight(age)).toBeGreaterThan(toiseHeight(age - 1));
+    }
+    // Elle a fini de grandir : les derniers traits sont plus serrés que les premiers.
+    expect(toiseHeight(18) - toiseHeight(17)).toBeLessThan(toiseHeight(5) - toiseHeight(4));
+    // Chaque gros plan a le temps d'écrire ses âges.
+    for (const shot of FILMS.years.shots) {
+      const toise = shot.toise;
+      if (toise) {
+        const each = FILM_TOISE.lineMs + FILM_TOISE.wordMs;
+        expect(toise.fromMs + (toise.write - toise.shown) * each, shot.id).toBeLessThan(
+          shot.durationMs,
+        );
+      }
+    }
+  });
+
+  it('les saisons et le soleil : seulement dans la chambre, le soleil sous la fenêtre', () => {
+    for (const shot of FILMS.years.shots) {
+      if (shot.season || shot.sun) {
+        expect(shot.toise, shot.id).toBeUndefined();
+      }
+    }
+    const win = FILM_ROOM.window;
+    expect(win.x + win.w).toBeLessThanOrEqual(1920);
+    expect(win.y + win.h).toBeLessThan(FILM_ROOM.floorY);
   });
 });
