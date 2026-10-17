@@ -43,11 +43,17 @@ describe('le cadeau de papa', () => {
     expect(gift.area?.w).toBe((room?.width ?? 0) - 3);
   });
 
-  it('sans texte : papa appelle, la manette, l’émerveillement, la télé', () => {
+  it('sans texte : papa appelle, un cadeau, l’émerveillement, la manette, sa chambre (D-189)', () => {
     expect(gift.steps[0]).toEqual({ do: 'flag', id: F.ConsoleGift });
     expect(
       gift.steps.flatMap((s) => (s.do === 'thought' ? [`${s.by ?? 'C'}:${s.icon}`] : [])),
-    ).toEqual(['dad-garden:call', 'dad-garden:gamepad', 'C:wonder', 'dad-garden:tv']);
+    ).toEqual([
+      'dad-garden:call',
+      'dad-garden:gift',
+      'C:wonder',
+      'dad-garden:gamepad',
+      'dad-garden:tv-bedroom',
+    ]);
   });
 
   it('une partie déjà passée par le portillon reçoit la console en arrivant dans la chambre', () => {

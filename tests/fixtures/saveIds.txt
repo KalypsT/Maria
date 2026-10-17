@@ -52,6 +52,8 @@ flag growth.3
 flag growth.4
 flag hedge.done
 flag hedge.entered
+flag help.drop
+flag help.travel
 flag living.seen
 flag living.vanished
 flag maria.bonnet

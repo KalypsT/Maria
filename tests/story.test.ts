@@ -124,6 +124,50 @@ describe('StoryDirector', () => {
     expect(log).toEqual(['flag done']);
   });
 
+  it('un contact qui suspend les commandes attend les pieds au sol (D-189), sauf `airborne`', () => {
+    const { log, host } = recorder();
+    const d = new StoryDirector(story([], 'touch', true), host, HZ);
+    d.step('r', standing(3, 3), false, false, false);
+    expect(log).toEqual([]);
+    d.step('r', standing(3, 3), false, false, true);
+    expect(log).toEqual(['flag done']);
+    // Sans suspendre les commandes : il part même en l'air.
+    const free = recorder();
+    new StoryDirector(story([], 'touch', false), free.host, HZ).step(
+      'r',
+      standing(3, 3),
+      false,
+      false,
+      false,
+    );
+    expect(free.log).toEqual(['flag done']);
+    // `airborne` : il part en plein saut.
+    const air = recorder();
+    const data = story([], 'touch', true);
+    const trigger = data.triggers[0];
+    if (!trigger) {
+      throw new Error('déclencheur manquant');
+    }
+    new StoryDirector({ ...data, triggers: [{ ...trigger, airborne: true }] }, air.host, HZ).step(
+      'r',
+      standing(3, 3),
+      false,
+      false,
+      false,
+    );
+    expect(air.log).toEqual(['flag done']);
+  });
+
+  it('un script ne se termine jamais avec Céleste allongée (D-189)', () => {
+    const lying = story([{ do: 'pose', pose: 'lie' }]);
+    expect(storyProblems(lying, buildZone(HOUSE)).some((p) => p.includes('allongée'))).toBe(true);
+    const up = story([
+      { do: 'pose', pose: 'lie' },
+      { do: 'pose', pose: 'sit' },
+    ]);
+    expect(storyProblems(up, buildZone(HOUSE)).some((p) => p.includes('allongée'))).toBe(false);
+  });
+
   it('fondus : voile qui monte, étapes dans le noir, voile qui descend, commandes suspendues', () => {
     const { log, host } = recorder();
     const d = new StoryDirector(

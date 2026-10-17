@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CELESTE_PART_IMAGES, type ArtPalette } from '../config/art';
+import { CELESTE_EYELIDS, CELESTE_PART_IMAGES, type ArtPalette } from '../config/art';
 import type { CelesteOutfit, GrowthPhase } from '../config/growth';
 import type { CelestePose } from '../core/player/celestePose';
 import { CELESTE_PARTS, drawCelestePart, type CelestePart } from './art/celesteArt';
@@ -108,6 +108,10 @@ export class CelestePuppet {
   private readonly umbrella: PartImage;
   /** Parapluie replié, pendu à un câble par son crochet (D-65). */
   private readonly hook: PartImage;
+  /** La paupière dessinée sur l'œil de la tête illustrée (D-189) : Céleste évanouie. */
+  private readonly eyelid: PartImage;
+  /** L'œil de la tenue illustrée (null : dessin par code, pas de paupière). */
+  private eye: { readonly x: number; readonly y: number } | null = null;
   /** Repère courant de `place` et échelle des textures (champs : aucune allocation par image). */
   private hipX = 0;
   private hipY = 0;
@@ -136,6 +140,7 @@ export class CelestePuppet {
     this.armFront = part('arm');
     this.umbrella = part('umbrella').setVisible(false);
     this.hook = part('hook').setVisible(false);
+    this.eyelid = scene.add.image(0, 0, '__DEFAULT').setOrigin(0.5, 0.5).setVisible(false);
     this.container = scene.add
       .container(0, 0, [
         this.umbrella,
@@ -149,6 +154,7 @@ export class CelestePuppet {
         this.skirt,
         this.pigtailFront,
         this.head,
+        this.eyelid,
         this.armFront,
       ])
       .setDepth(10);
@@ -235,6 +241,24 @@ export class CelestePuppet {
         textures.remove(key);
       }
       textures.addCanvas(key, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
+    }
+    // La paupière (D-189), à la couleur de la peau de la tenue illustrée.
+    const lid = useImages ? CELESTE_EYELIDS[growth.outfit] : undefined;
+    this.eye = lid ?? null;
+    if (lid) {
+      const size = EYELID_SIZE;
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = Math.ceil(size * scale);
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.scale(scale, scale);
+        drawEyelid(ctx, size, lid.skin);
+        if (textures.exists(EYELID_KEY)) {
+          textures.remove(EYELID_KEY);
+        }
+        textures.addCanvas(EYELID_KEY, canvas)?.setFilter(Phaser.Textures.FilterMode.LINEAR);
+        this.eyelid.setTexture(EYELID_KEY).setScale(1 / scale);
+      }
     }
     const inverse = 1 / scale;
     const assign = (image: PartImage, name: CelestePart, stretch = 1) =>
@@ -340,6 +364,13 @@ export class CelestePuppet {
     this.sin = Math.sin(headRotation);
     this.hipX = this.head.x;
     this.hipY = this.head.y;
+    // Les yeux fermés (D-189) : la paupière sur l'œil, qui suit la tête.
+    const eye = this.eye;
+    const closed = eye !== null && pose.eyesClosed > 0.5;
+    this.eyelid.setVisible(closed);
+    if (closed) {
+      this.place(this.eyelid, eye.x, eye.y, headRotation);
+    }
     this.place(
       this.pigtailBack,
       layout.pigtailBack.x,
@@ -364,6 +395,32 @@ export class CelestePuppet {
       )
       .setRotation(rotation);
   }
+}
+
+/** La paupière (D-189) : sa texture et sa taille (px logiques, carrée, centrée sur l'œil). */
+const EYELID_KEY = 'celeste-eyelid';
+const EYELID_SIZE = 3;
+
+/**
+ * Une paupière fermée, vue de profil : la peau qui couvre l'œil, le trait des cils en arc vers le
+ * bas, deux petits cils.
+ */
+function drawEyelid(ctx: CanvasRenderingContext2D, size: number, skin: string): void {
+  const c = size / 2;
+  ctx.fillStyle = skin;
+  ctx.beginPath();
+  ctx.ellipse(c, c, 1.2, 1.15, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#4a2c22';
+  ctx.lineWidth = 0.28;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.arc(c, c - 0.25, 0.85, 0.15 * Math.PI, 0.85 * Math.PI);
+  ctx.moveTo(c - 0.45, c + 0.48);
+  ctx.lineTo(c - 0.6, c + 0.85);
+  ctx.moveTo(c + 0.05, c + 0.6);
+  ctx.lineTo(c + 0.05, c + 0.98);
+  ctx.stroke();
 }
 
 /** Clé d'une pièce illustrée de Céleste dans les images fournies (D-147). */

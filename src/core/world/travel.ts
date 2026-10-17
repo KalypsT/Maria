@@ -37,6 +37,19 @@ export function travelUnlocked(point: TravelLantern, flags: ReadonlySet<string>)
   return point.unlockedBy.some((flag) => flags.has(flag));
 }
 
+/**
+ * Les lanternes d'où l'on part (D-189) : seulement les veilleuses bleues débloquées, plus
+ * n'importe quelle lanterne allumée. Leur clé de sauvegarde, `salle:nom`.
+ */
+export function departureKeys(
+  points: readonly TravelPoint[],
+  flags: ReadonlySet<string>,
+): Set<string> {
+  return new Set(
+    points.filter((p) => travelUnlocked(p, flags)).map((p) => `${p.room}:${p.lantern}`),
+  );
+}
+
 /** Moment de l'histoire sans voyage (`TRAVEL_BLOCKED`). */
 export function travelBlocked(flags: ReadonlySet<string>): boolean {
   return TRAVEL_BLOCKED.some((when) => checkCondition(flags, when));

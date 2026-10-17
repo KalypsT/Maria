@@ -108,8 +108,23 @@ export const THOUGHT_ICONS = [
   'call',
   /** Une manette : la console de salon (le cadeau de papa). */
   'gamepad',
-  /** Une petite télé et sa console : elle est installée dans la chambre. */
-  'tv',
+  /** Un paquet cadeau, son ruban et son nœud (D-189) : papa a une surprise. */
+  'gift',
+  /**
+   * La chambre de Céleste dans la maison (D-189) : le toit, son lit à la couverture rose, la télé
+   * et la console sur le bureau. La console est installée là.
+   */
+  'tv-bedroom',
+  /**
+   * Aide du saut vers le bas (D-189) : une planche en pointillés et une flèche qui passe au travers,
+   * vers le bas.
+   */
+  'drop',
+  /**
+   * Le voyage (D-189) : deux lanternes à la lumière bleu lune, reliées par un fil en pointillés qui
+   * fait un arc de l'une à l'autre.
+   */
+  'travel',
   /** La mer, son soleil et une vague (D-169) : là où part le train de la classe. */
   'sea',
   /** La maison, sa fenêtre allumée (D-169) : Céleste y pense, loin de chez elle. */
@@ -122,12 +137,14 @@ export const THOUGHT_ICONS = [
 export type ThoughtIcon = (typeof THOUGHT_ICONS)[number];
 
 /**
- * Poses imposées par un script (Céleste assise pour jouer, puis au réveil). `hold` (D-143) : debout,
+ * Poses imposées par un script (Céleste assise pour jouer, puis au réveil). `lie` (D-189) : allongée,
+ * les yeux fermés, évanouie au retour d'un monde étrange ; jamais à la fin d'un script (vérifié
+ * par `storyProblems`). `hold` (D-143) : debout,
  * Maria dans les bras, immobile ; `hold-sit` (D-144) : assise, Maria dans les bras. Maria y est
  * prise et posée seulement dans le noir, jamais à la fin d'un script (Céleste ne marche jamais en la
  * portant, pilier 5 ; vérifié par `storyProblems`).
  */
-export type ScriptPose = 'sit' | 'stand' | 'hold' | 'hold-sit';
+export type ScriptPose = 'sit' | 'stand' | 'hold' | 'hold-sit' | 'lie';
 
 /** Maria dans les bras de Céleste dans cette pose (D-143, D-144). */
 export function holdsMaria(pose: ScriptPose): boolean {
@@ -257,8 +274,16 @@ export interface StoryTrigger {
   /** Tuile où une petite étincelle signale ce qu'on peut faire (déclencheur Agir). */
   readonly mark?: { readonly col: number; readonly row: number };
   readonly when: FlagCondition;
-  /** Commandes de Céleste suspendues pendant le script. */
+  /**
+   * Commandes de Céleste suspendues pendant le script. Un déclencheur `touch` qui les suspend attend
+   * qu'elle ait les pieds au sol (D-189) : en plein saut, elle retomberait sans pouvoir se rattraper.
+   */
   readonly lock: boolean;
+  /**
+   * Déclencheur `touch` qui part même en l'air (D-189) : une zone qu'un saut pourrait franchir sans
+   * s'y poser (devant une porte qu'on ne doit pas atteindre sans passer par lui).
+   */
+  readonly airborne?: boolean;
   /**
    * Rejouable (D-38) : un objet qu'on regarde autant qu'on veut. Seulement pour Agir, et avec des
    * étapes sans effet sur l'histoire (bulles, attentes, souvenir).
@@ -408,6 +433,9 @@ export const PROP_KINDS = [
   'toy-kitchen',
   'tea-table',
   'tea-cup',
+  /** Les tasses qui attendent sur la dînette, l'une dans l'autre (D-189 : trois tasses). */
+  'tea-cups-2',
+  'tea-cups-3',
   /**
    * Le reflet du miroir de la nounou (D-110) : Céleste toute petite, dans la vitre ; puis passée de
    * l'autre côté (elle change de place dans le noir).
@@ -585,6 +613,12 @@ export interface StoryProp {
   /** Tuile où il est posé : centre du bas de la tuile. */
   readonly col: number;
   readonly row: number;
+  /**
+   * Décalage fin (px logiques) depuis le centre du bas de la tuile (D-189) : un petit objet posé sur
+   * un autre, qui n'est pas aligné sur les tuiles (la tasse sur la dînette).
+   */
+  readonly dx?: number;
+  readonly dy?: number;
   /** Tourné vers la gauche. */
   readonly flip?: boolean;
   /**

@@ -27,6 +27,8 @@ export interface CelestePose {
    * jambes, quelle que soit la taille de Céleste).
    */
   lie: number;
+  /** Les yeux fermés (D-189) : 0 ouverts, 1 fermés (les paupières dessinées). */
+  eyesClosed: number;
 }
 
 /** Ce que la marionnette lit de Céleste et du combat, à chaque pas. */
@@ -45,6 +47,13 @@ const DEG = Math.PI / 180;
 const SITTING = 'Sitting';
 /** Descente de la hanche assise (px) : presque la longueur des jambes. */
 const SIT_DROP_PX = 6.5;
+/** Pseudo-état de la pose allongée (D-189). */
+const LYING = 'Lying';
+/**
+ * Allongée (D-189) : la hanche remontée (px) pour que l'arrière de la tête, plus large que le
+ * buste couché, touche le sol sans s'y enfoncer.
+ */
+const LIE_LIFT_PX = -3.6;
 
 export class CelestePoser {
   readonly pose: CelestePose = {
@@ -60,11 +69,17 @@ export class CelestePoser {
     umbrella: 0,
     hook: 0,
     lie: 0,
+    eyesClosed: 0,
   };
   /** Phase du cycle de pas (radians). */
   runPhase = 0;
   /** Assise (imposée par l'histoire : jouer avec Maria, réveil dans le lit), jambes devant. */
   sitting = false;
+  /**
+   * Allongée, les yeux fermés (D-189), imposé par l'histoire : évanouie au retour d'un monde
+   * étrange, avant de se redresser.
+   */
+  lying = false;
   /**
    * Souvenir jouable (D-89) : geste « les mains devant » en cours (remuer, verser, poser), jusqu'à
    * `gestureSteps` pas ; `carrying` : elle tient la tasse devant elle, les deux mains.
@@ -92,6 +107,7 @@ export class CelestePoser {
     umbrella: 0,
     hook: 0,
     lie: 0,
+    eyesClosed: 0,
   };
 
   constructor(
@@ -117,10 +133,12 @@ export class CelestePoser {
     pose.umbrella = 0;
     pose.hook = 0;
     pose.lie = 0;
+    pose.eyesClosed = 0;
     this.pigtailVel = 0;
     this.runPhase = 0;
     this.stateSteps = 0;
     this.sitting = false;
+    this.lying = false;
     this.gesture = null;
     this.gestureSteps = 0;
     this.carrying = false;
@@ -156,8 +174,25 @@ export class CelestePoser {
     t.umbrella = 0;
     t.hook = 0;
     t.lie = 0;
-    const state = this.sitting ? SITTING : subject.state;
+    t.eyesClosed = 0;
+    const state = this.lying ? LYING : this.sitting ? SITTING : subject.state;
     switch (state) {
+      case LYING: {
+        // Évanouie (D-189) : sur le dos, la tête du côté opposé à son regard, les jambes droites
+        // devant, les bras le long du corps, les yeux fermés ; elle respire à peine.
+        const breath = Math.sin((this.time * 1000 * Math.PI * 2) / p.breathMs);
+        t.lie = 1;
+        t.bodyY = LIE_LIFT_PX;
+        t.bodyTilt = -90 * DEG;
+        t.headTilt = -4 * DEG + breath * 1 * DEG;
+        t.legFront = 90 * DEG;
+        t.legBack = 86 * DEG;
+        t.armFront = 8 * DEG;
+        t.armBack = 4 * DEG;
+        t.eyesClosed = 1;
+        this.runPhase = 0;
+        break;
+      }
       case SITTING: {
         const breath = Math.sin((this.time * 1000 * Math.PI * 2) / p.breathMs);
         t.bodyY = SIT_DROP_PX - breath * p.breathPx * 0.5;
@@ -336,6 +371,8 @@ export class CelestePoser {
     pose.armReach += (t.armReach - pose.armReach) * k;
     // On se couche vite : la glissade part tout de suite.
     pose.lie += (t.lie - pose.lie) * Math.max(k, 0.5);
+    // Les yeux s'ouvrent et se ferment d'un coup.
+    pose.eyesClosed = t.eyesClosed;
     // Le parapluie s'ouvre et se ferme vite (on voit qu'il répond à Saut).
     pose.umbrella += (t.umbrella - pose.umbrella) * Math.max(k, 0.25);
     // Le crochet apparaît d'un coup (le parapluie se replie en s'accrochant).

@@ -1,5 +1,6 @@
 import type { GrowthPhase } from './growth';
 import type { MemoryId } from './memories';
+import { TILE_SIZE } from './display';
 import { PLAYER_HITBOX } from './movement';
 import type { StoryProp, ThoughtIcon, TileArea } from '../core/story/story';
 import type { SfxSlot } from './sfx';
@@ -50,6 +51,13 @@ export interface MemoryAction {
   };
   /** Scintillement (vapeur, thé versé) au moment du geste. */
   readonly sparkle?: TileArea;
+  /**
+   * Une lueur chaude qui palpite sur ce qu'il faut faire (D-189), en même temps que l'étincelle :
+   * son centre (px de la salle).
+   */
+  readonly glow?: { readonly x: number; readonly y: number };
+  /** Un petit cœur qui monte au geste (D-189) : une peluche servie est contente (px de la salle). */
+  readonly heart?: { readonly x: number; readonly y: number };
   /**
    * Après le geste, un clignement dans le noir (D-118) : l'étape `sets` ne vient qu'au noir. Les
    * personnages changent de place ainsi, jamais à l'écran.
@@ -111,76 +119,169 @@ export const PLAYABLE_MEMORY_TIMING = {
   promptMs: 2200,
 };
 
+/**
+ * La lueur chaude sur ce qu'il faut faire (D-189), avec l'étincelle : un halo doré, en mode additif,
+ * qui respire. PROVISOIRE, à régler sur téléphone.
+ */
+export const MEMORY_GLOW = {
+  /** Diamètre du halo (px logiques). */
+  sizePx: 30,
+  core: 'rgba(255, 236, 190, 0.9)',
+  halo: 'rgba(255, 196, 120, 0.4)',
+  /** Une respiration (ms) ; l'opacité et la taille (part en plus) y varient. */
+  pulseMs: 1400,
+  alphaMin: 0.35,
+  alphaMax: 0.85,
+  grow: 0.15,
+} as const;
+
+/** Le petit cœur d'une peluche servie (D-189) : sa durée, sa montée, sa taille (× 14 px). */
+export const MEMORY_HEART = {
+  ms: 1400,
+  risePx: 10,
+  scale: 0.8,
+} as const;
+
 /** Étapes du souvenir de la cuisine (jamais sauvegardées). */
 export const KITCHEN_MEMORY_STEP = {
   /** La casserole a été remuée : un peu de vapeur. */
   stirred: 'memory.stirred',
-  /** Le thé est versé : la tasse quitte la dînette, Céleste la porte. */
-  poured: 'memory.poured',
-  /** La tasse est posée devant Roger et ses peluches. */
-  served: 'memory.served',
+  /** Le thé est versé dans la première tasse : Céleste la porte (D-189 : trois tasses). */
+  poured1: 'memory.poured-1',
+  /** La première tasse est posée devant Roger. */
+  served1: 'memory.served-1',
+  /** La deuxième, devant le lapin. */
+  poured2: 'memory.poured-2',
+  served2: 'memory.served-2',
+  /** La troisième, devant le panda roux. */
+  poured3: 'memory.poured-3',
+  served3: 'memory.served-3',
 } as const;
 
+const K = KITCHEN_MEMORY_STEP;
 const DINETTE = { col: 11, row: 19 };
+/**
+ * Les tasses posées sur la dînette, l'une dans l'autre (px depuis le centre du bas de sa tuile) : la
+ * dînette fait 30 px de haut, son plan de travail est à 22 px du sol ; au bout, à droite de la
+ * théière (D-189 : la tasse flottait au-dessus, à côté du meuble).
+ */
+const CUPS_ON_DINETTE = { dx: 10, dy: -21 };
 const TEA_TABLE = { col: 27, row: 19 };
+/** La tuile du plateau de la petite table (la tasse posée repose dessus). */
+const TABLE_TOP = { col: TEA_TABLE.col, row: TEA_TABLE.row - 1 };
 
 /**
- * Le souvenir de la cuisine rose (D-83, D-89) : Céleste toute petite, dans un coin de la cuisine,
- * devant sa dînette rose. Elle remue la casserole, verse le thé, l'apporte à Roger et ses peluches
- * (un panda roux, un lapin) assis autour d'une petite table. Un cœur ; la petite cuisine reste
- * seule. Maria n'y est pas (pilier 5) ; aucun parent (l'histoire de la famille reste ouverte, §45).
+ * Les trois peluches autour de la petite table (D-189), servies dans l'ordre, de gauche à droite :
+ * Roger, le lapin derrière la table, le panda roux. Chacune : où se tenir pour la servir, où va sa
+ * tasse sur le plateau (px depuis le centre du plateau), où naît son petit cœur (px depuis le même
+ * point).
+ */
+const PLUSHES = [
+  {
+    serve: { col: 23, w: 4 },
+    cup: -9,
+    heart: { dx: -20, dy: -16 },
+    poured: K.poured1,
+    served: K.served1,
+    // Ce qui reste sur la dînette avant son thé : trois tasses, puis deux, puis une.
+    before: { cups: 'tea-cups-3', after: null },
+  },
+  {
+    serve: { col: 26, w: 3 },
+    cup: 0,
+    heart: { dx: 0, dy: -20 },
+    poured: K.poured2,
+    served: K.served2,
+    before: { cups: 'tea-cups-2', after: K.poured1 },
+  },
+  {
+    serve: { col: 28, w: 4 },
+    cup: 9,
+    heart: { dx: 21, dy: -16 },
+    poured: K.poured3,
+    served: K.served3,
+    before: { cups: 'tea-cup', after: K.poured2 },
+  },
+] as const;
+
+/** Le point d'une tuile (le centre de son bas, comme un objet posé), décalé de (dx, dy) px. */
+const spot = (tile: { col: number; row: number }, dx = 0, dy = 0) => ({
+  x: (tile.col + 0.5) * TILE_SIZE + dx,
+  y: (tile.row + 1) * TILE_SIZE + dy,
+});
+
+/** Devant la dînette : là où l'on remue et où l'on verse. */
+const DINETTE_AREA = { col: DINETTE.col - 1, row: DINETTE.row - 2, w: 4, h: 3 };
+
+/**
+ * Le souvenir de la cuisine rose (D-83, D-89, D-189) : Céleste toute petite, dans un coin de la
+ * cuisine, devant sa dînette rose. Elle remue la casserole, puis, trois fois, verse le thé et
+ * l'apporte à une peluche, assise autour de la petite table : Roger, le lapin, le panda roux. Un
+ * petit cœur pour chacune ; un grand à la fin ; la petite cuisine reste seule. Une lueur chaude sur
+ * ce qu'il faut faire. Maria n'y est pas (pilier 5) ; aucun parent (l'histoire de la famille reste
+ * ouverte, §45).
  */
 const KITCHEN: PlayableMemoryData = {
   room: 'memory-kitchen',
   start: { col: 17, row: 19, facing: -1 },
   actions: [
     {
-      area: { col: DINETTE.col - 1, row: DINETTE.row - 2, w: 4, h: 3 },
+      area: DINETTE_AREA,
       mark: { col: DINETTE.col - 1, row: DINETTE.row - 3 },
+      // La casserole, sur la plaque de gauche.
+      glow: spot(DINETTE, -6, -24),
       gesture: 'stir',
       carry: false,
-      sets: KITCHEN_MEMORY_STEP.stirred,
+      sets: K.stirred,
       sparkle: { col: DINETTE.col - 1, row: DINETTE.row - 3, w: 2, h: 2 },
     },
-    {
-      area: { col: DINETTE.col - 1, row: DINETTE.row - 2, w: 4, h: 3 },
-      mark: { col: DINETTE.col + 1, row: DINETTE.row - 3 },
-      gesture: 'pour',
-      carry: true,
-      sets: KITCHEN_MEMORY_STEP.poured,
-      sparkle: { col: DINETTE.col, row: DINETTE.row - 2, w: 2, h: 1 },
-    },
-    {
-      area: { col: TEA_TABLE.col - 3, row: TEA_TABLE.row - 2, w: 6, h: 3 },
-      mark: { col: TEA_TABLE.col, row: TEA_TABLE.row - 3 },
-      gesture: 'serve',
-      carry: false,
-      sets: KITCHEN_MEMORY_STEP.served,
-    },
+    ...PLUSHES.flatMap((plush): MemoryAction[] => [
+      {
+        area: DINETTE_AREA,
+        mark: { col: DINETTE.col + 1, row: DINETTE.row - 3 },
+        // La théière et les tasses, au bout du plan de travail.
+        glow: spot(DINETTE, 7, -23),
+        gesture: 'pour',
+        carry: true,
+        sets: plush.poured,
+        sparkle: { col: DINETTE.col, row: DINETTE.row - 2, w: 2, h: 1 },
+      },
+      {
+        area: { col: plush.serve.col, row: TEA_TABLE.row - 2, w: plush.serve.w, h: 3 },
+        mark: { col: TEA_TABLE.col + Math.sign(plush.cup), row: TEA_TABLE.row - 3 },
+        // Là où poser sa tasse, sur le plateau, devant elle.
+        glow: spot(TABLE_TOP, plush.cup, -2),
+        heart: spot(TABLE_TOP, plush.heart.dx, plush.heart.dy),
+        gesture: 'serve',
+        carry: false,
+        sets: plush.served,
+      },
+    ]),
   ],
   props: [
-    // La dînette rose (sans la lueur du monde étrange) ; la tasse attend dessus jusqu'au thé versé.
+    // La dînette rose (sans la lueur du monde étrange) ; les tasses attendent dessus, l'une dans
+    // l'autre, et il y en a une de moins à chaque thé versé.
     { id: 'toy-kitchen', room: 'memory-kitchen', kind: 'toy-kitchen', ...DINETTE, when: {} },
-    {
-      id: 'cup-dinette',
+    ...PLUSHES.map((plush, k): StoryProp => ({
+      id: `cups-dinette-${String(k + 1)}`,
       room: 'memory-kitchen',
-      kind: 'tea-cup',
-      col: DINETTE.col + 1,
-      row: DINETTE.row - 2,
-      when: { none: [KITCHEN_MEMORY_STEP.poured] },
+      kind: plush.before.cups,
+      ...DINETTE,
+      ...CUPS_ON_DINETTE,
+      when: { all: plush.before.after ? [plush.before.after] : [], none: [plush.poured] },
       instant: true,
-    },
-    // Roger et ses peluches autour de la petite table ; la tasse posée devant eux.
+    })),
+    // Roger et ses peluches autour de la petite table ; les tasses posées devant eux.
     { id: 'tea-table', room: 'memory-kitchen', kind: 'tea-table', ...TEA_TABLE, when: {} },
-    {
-      id: 'cup-table',
+    ...PLUSHES.map((plush, k): StoryProp => ({
+      id: `cup-table-${String(k + 1)}`,
       room: 'memory-kitchen',
       kind: 'tea-cup',
-      col: TEA_TABLE.col,
-      row: TEA_TABLE.row - 1,
-      when: { all: [KITCHEN_MEMORY_STEP.served] },
+      ...TABLE_TOP,
+      dx: plush.cup,
+      when: { all: [plush.served] },
       instant: true,
-    },
+    })),
   ],
 };
 
@@ -227,13 +328,23 @@ const SEEK_HINT_MS = 2000;
 const beside = (p: { col: number; row: number }, side: -1 | 1) => ({
   area: { col: side < 0 ? p.col - 4 : p.col, row: p.row, w: 4, h: 3 },
   mark: { col: p.col, row: p.row - 1 },
+  // La lueur sur la cachette, avec l'étincelle (après le même délai).
+  glow: spot(p, 0, -6),
 });
 const E = EDEN_MEMORY_STEP;
+/** Hauteur (px) du centre de la lueur au-dessus du sol : le tas, la tour, Eden (D-189). */
+const PILE_LIFT = 6;
+const TOWER_LIFT = 10;
+const EDEN_LIFT = 12;
 
-/** Agir sur une case (zone de 4 × 3 tuiles autour, étincelle au-dessus). */
-const at = (p: { col: number; row: number }, w = 4) => ({
+/**
+ * Agir sur une case (zone de 4 × 3 tuiles autour, étincelle au-dessus) ; la lueur sur ce qui y est
+ * posé, `lift` px au-dessus du sol (D-189).
+ */
+const at = (p: { col: number; row: number }, lift: number, w = 4) => ({
   area: { col: p.col - Math.floor(w / 2), row: p.row - 2, w, h: 3 },
   mark: { col: p.col, row: p.row - 3 },
+  glow: spot(p, 0, -lift),
 });
 
 /** Eden selon le moment (un seul à la fois) : `kind`, où, et entre quelles étapes. */
@@ -305,14 +416,28 @@ const EDEN: PlayableMemoryData = {
   carried: 'cube',
   alone: { keepCeleste: true, sets: E.gone },
   actions: [
-    { ...at(PILE), gesture: 'serve', carry: true, sets: E.cube1 },
-    { ...at(TOWER), gesture: 'serve', carry: false, shows: E.tower1, sets: E.tower2, blink: true },
-    { ...at(PILE), gesture: 'serve', carry: true, sets: E.cube2 },
-    { ...at(TOWER), gesture: 'serve', carry: false, shows: E.tower3, sets: E.fallen, blink: true },
+    { ...at(PILE, PILE_LIFT), gesture: 'serve', carry: true, sets: E.cube1 },
+    {
+      ...at(TOWER, TOWER_LIFT),
+      gesture: 'serve',
+      carry: false,
+      shows: E.tower1,
+      sets: E.tower2,
+      blink: true,
+    },
+    { ...at(PILE, PILE_LIFT), gesture: 'serve', carry: true, sets: E.cube2 },
+    {
+      ...at(TOWER, TOWER_LIFT),
+      gesture: 'serve',
+      carry: false,
+      shows: E.tower3,
+      sets: E.fallen,
+      blink: true,
+    },
     // Le cache-cache : Eden le propose (sa bulle, D-171) ; Céleste se cache les yeux et compte ;
     // dans le noir, il se cache. Elle rouvre les yeux : où est-il ? Il pouffe derrière sa cachette.
     {
-      ...at(EDEN_AT),
+      ...at(EDEN_AT, EDEN_LIFT),
       gesture: 'count',
       carry: false,
       sets: E.hideA,
@@ -330,7 +455,7 @@ const EDEN: PlayableMemoryData = {
       prompt: { icon: 'eden-where', sfx: 'eden-giggle' },
     },
     {
-      ...at(FOUND_A),
+      ...at(FOUND_A, EDEN_LIFT),
       gesture: 'count',
       carry: false,
       sets: E.hideB,

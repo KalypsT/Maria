@@ -4,8 +4,9 @@ import { StoryFlag as F } from './story';
 /**
  * Le voyage rapide (D-163) : les veilleuses qui se répondent. Une veilleuse principale par niveau,
  * une lanterne qui existe déjà (son nom fixe, D-152), choisie au carrefour du niveau. Sa lumière
- * devient bleu lune (D-179) une fois le monde étrange du niveau traversé ; depuis n'importe quelle lanterne allumée
- * du monde réel, on peut alors y aller, si on pourrait y aller à pied à ce moment-là.
+ * devient bleu lune (D-179) une fois le monde étrange du niveau traversé ; on peut alors y aller,
+ * si on pourrait y aller à pied à ce moment-là, depuis une autre veilleuse bleue (D-189 : plus
+ * depuis n'importe quelle lanterne allumée), par la page « Voyager ».
  */
 export interface TravelLantern {
   /** Le niveau (D-82). */
@@ -18,21 +19,64 @@ export interface TravelLantern {
    * posent pas toutes les étapes.
    */
   readonly unlockedBy: readonly string[];
+  /** Son nom sur la page « Voyager » (D-189). */
+  readonly title: string;
+  /** Son dessin sur la page « Voyager » (D-189) : celui de son lieu dans le sac, ou le jardin. */
+  readonly icon: TravelIcon;
 }
+
+/** Les dessins de la page « Voyager » (D-189) : les lieux du sac, et le jardin (la terrasse). */
+export type TravelIcon = 'house' | 'garden' | 'swing' | 'clock' | 'train' | 'sea';
 
 export const TRAVEL_LANTERNS: readonly TravelLantern[] = [
   // La chambre, au pied du coffre à jouets, à côté du bocal à coquilles.
-  { level: 'house', lantern: 'bedroom-toybox', unlockedBy: [F.StrangeDone] },
+  {
+    level: 'house',
+    lantern: 'bedroom-toybox',
+    unlockedBy: [F.StrangeDone],
+    title: 'Ma chambre',
+    icon: 'house',
+  },
   // La terrasse, sous la table de jardin, à la porte de la maison.
-  { level: 'garden', lantern: 'garden-terrace-table', unlockedBy: [F.HedgeDone] },
+  {
+    level: 'garden',
+    lantern: 'garden-terrace-table',
+    unlockedBy: [F.HedgeDone],
+    title: 'Le jardin',
+    icon: 'garden',
+  },
   // La rue, sous l'abribus, au milieu des portes.
-  { level: 'street', lantern: 'street-busstop', unlockedBy: [F.SchoolDone] },
+  {
+    level: 'street',
+    lantern: 'street-busstop',
+    unlockedBy: [F.SchoolDone],
+    title: 'Mon quartier',
+    icon: 'swing',
+  },
   // Le hall, sous la grande horloge.
-  { level: 'station', lantern: 'station-hall-clock', unlockedBy: [F.StationDone] },
+  {
+    level: 'station',
+    lantern: 'station-hall-clock',
+    unlockedBy: [F.StationDone],
+    title: 'La gare',
+    icon: 'clock',
+  },
   // La veilleuse du compartiment, une fois le train arrivé à quai.
-  { level: 'train', lantern: 'train-couchettes-nightlight', unlockedBy: [F.TrainArrived] },
+  {
+    level: 'train',
+    lantern: 'train-couchettes-nightlight',
+    unlockedBy: [F.TrainArrived],
+    title: 'Le train',
+    icon: 'train',
+  },
   // La promenade, d'où partent la gare, le centre, la plage et le port.
-  { level: 'sea', lantern: 'sea-promenade-balustrade', unlockedBy: [F.SeaStrangeDone, F.SeaEnd] },
+  {
+    level: 'sea',
+    lantern: 'sea-promenade-balustrade',
+    unlockedBy: [F.SeaStrangeDone, F.SeaEnd],
+    title: 'La mer',
+    icon: 'sea',
+  },
 ];
 
 /**

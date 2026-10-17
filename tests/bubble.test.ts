@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { BUBBLE_PORTRAITS, CHARACTER_IMAGES, characterFiles } from '../src/config/art';
 import { THOUGHT_ICONS } from '../src/core/story/story';
 import { bubbleKey, bubbleSide, fitScale } from '../src/core/story/bubble';
 import { PASSERBY_REACTIONS } from '../src/config/passersby';
@@ -202,6 +203,19 @@ describe('les bulles de la nounou, du monde de Maria et des passants (D-165, PR 
     expect(bubbles.length).toBe(8);
     for (const b of bubbles) {
       expect(['smile', 'wave']).toContain(b);
+    }
+  });
+});
+
+describe('les portraits des bulles (D-189)', () => {
+  it('papa, maman et Eden : une image de personnage existante, un cadre dans l’image', () => {
+    const files = new Set(Object.values(CHARACTER_IMAGES).flatMap(characterFiles));
+    for (const [who, crop] of Object.entries(BUBBLE_PORTRAITS)) {
+      expect(files.has(crop.image), who).toBe(true);
+      expect(crop.x, who).toBeGreaterThanOrEqual(0);
+      expect(crop.y, who).toBeGreaterThanOrEqual(0);
+      expect(crop.x + crop.w, who).toBeLessThanOrEqual(1);
+      expect(crop.y + crop.h, who).toBeLessThanOrEqual(1);
     }
   });
 });

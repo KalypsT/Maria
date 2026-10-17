@@ -36,6 +36,8 @@ export interface MapRoom {
    * d'ici (le voyage, depuis une lanterne).
    */
   readonly travel: (MapPoint & { readonly lantern: string; readonly open: boolean }) | null;
+  /** Quelque chose de nouveau à voir dans la salle (D-189 : la console, un jeu pas encore vu). */
+  readonly news: MapPoint | null;
 }
 
 export interface MapLink {
@@ -90,6 +92,11 @@ export interface MapProgress {
     readonly lantern: string;
     readonly open: boolean;
   }[];
+  /**
+   * Quelque chose de nouveau à voir (D-189) : la télé de la chambre tant qu'un jeu de la console
+   * n'a pas été vu. Sa salle et sa tuile.
+   */
+  readonly news?: { readonly room: string; readonly col: number; readonly row: number } | null;
 }
 
 /** Écart maximal entre deux salles pour que leur passage soit « direct » (unités de carte). */
@@ -191,8 +198,11 @@ export function buildMapModel(zone: Zone, progress: MapProgress, page: string = 
     }
     const point = isVisited ? progress.travel?.find((t) => t.room === id) : undefined;
     const center = point ? at(id, (point.col + 0.5) * T, (point.row + 0.5) * T) : null;
+    const news = progress.news;
     rooms.push({
       travel: point && center ? { ...center, lantern: point.lantern, open: point.open } : null,
+      news:
+        isVisited && news?.room === id ? at(id, (news.col + 0.5) * T, (news.row + 0.5) * T) : null,
       id,
       name: level.meta.name ?? id,
       box,

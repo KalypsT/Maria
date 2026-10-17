@@ -64,11 +64,12 @@ import {
 } from '../config/playableMemories';
 import { MemoryEvent, PlayableMemory } from '../core/memory/PlayableMemory';
 import { cubeTower, teaCup } from './art/memoryArt';
-import { DEFAULT_WORLD, type WorldParams } from '../config/world';
+import { DEFAULT_WORLD, FEAR_LOOK, type WorldParams } from '../config/world';
 import { checkpointId } from '../core/save/saveData';
 import type { SaveSession } from '../core/save/SaveSession';
 import {
   ABILITY_HELP_ICONS,
+  DROP_HELP,
   ABILITY_HINTS,
   ABILITY_HINT_MS,
   Ability,
@@ -100,6 +101,7 @@ import {
   travelOffered,
   travelOptions,
   travelPoints,
+  departureKeys,
   travelScript,
   travelUnlocked,
   type DepartureProblem,
@@ -108,6 +110,7 @@ import {
 } from '../core/world/travel';
 import { TRAVEL_LANTERNS } from '../config/travel';
 import { FlashbackView } from '../ui/FlashbackView';
+import { TravelPage } from '../ui/TravelPage';
 import { Hud } from '../ui/Hud';
 import { showEndScreen } from '../ui/EndScreen';
 import { markQuietRelaunch } from '../core/platform/quietRelaunch';
@@ -202,7 +205,7 @@ import { consoleCards } from '../core/arcade/consoleMenu';
 import { monsterChaseParams, monsterEndlessParams } from '../core/arcade/monster';
 import { ArcadeEvent, ArcadePhase, ArcadeRun } from '../core/arcade/run';
 import { arcadeChoosable, arcadeRecord, arcadeStartTiles } from '../core/save/arcade';
-import { touchesHazard } from '../core/physics/gridCollision';
+import { isGrounded, touchesHazard } from '../core/physics/gridCollision';
 import { isRecordSlot } from '../config/records';
 import { isMemory } from '../config/memories';
 import { drawnCanvas, recordDrawing, treasureDrawing } from '../ui/treasureDrawing';
@@ -449,6 +452,21 @@ export class GameScene extends Phaser.Scene {
   /** Dernier sens du joystick ou des flèches devant le tourne-disque (un pas par poussée). */
   private recordMoveDir = 0;
   /**
+   * La page « Voyager » (D-189), ouverte par Agir à une veilleuse bleue : le jeu est arrêté pendant
+   * le choix, comme devant le tourne-disque.
+   */
+  private readonly travelPage = new TravelPage(
+    (lantern) => {
+      this.closeTravel();
+      this.travelTo(lantern);
+    },
+    () => {
+      this.closeTravel();
+    },
+  );
+  /** Dernier sens du joystick ou des flèches devant la page « Voyager » (un pas par poussée). */
+  private travelMoveDir = 0;
+  /**
    * La console (D-166) : son écran (le jeu attend pendant les menus), la partie en cours, et ce
    * qu'il faut retrouver en l'éteignant (comme un souvenir jouable, hors de la partie : seuls les
    * records sont sauvegardés).
@@ -516,6 +534,8 @@ export class GameScene extends Phaser.Scene {
   private consoleMoveDir = 0;
   /** Dans la chambre, un jeu de la console pas encore vu (D-166) : l'étincelle sur la télé. */
   private consoleNews = false;
+  /** Pas passés immobile sur une planche traversable, pour l'aide du saut vers le bas (D-189). */
+  private dropHelpSteps = 0;
   /** Souvenir jouable en cours (D-89), null sinon ; et ce qu'il faut retrouver à sa fin. */
   private memoryPlay: PlayableMemory | null = null;
   private memoryReturn: {
@@ -723,6 +743,7 @@ export class GameScene extends Phaser.Scene {
       },
       pose: (pose) => {
         this.poser.sitting = pose === 'sit' || pose === 'hold-sit';
+        this.poser.lying = pose === 'lie';
         this.poser.holding = holdsMaria(pose);
       },
       think: (icon, ms, by) => {
@@ -980,6 +1001,7 @@ export class GameScene extends Phaser.Scene {
       document.removeEventListener('visibilitychange', onVisibility);
       this.backpack.destroy();
       this.recordPicker.destroy();
+      this.travelPage.destroy();
       this.consoleScreen.destroy();
       this.hud.destroy();
       this.flashbackView.destroy();
@@ -1011,6 +1033,10 @@ export class GameScene extends Phaser.Scene {
     }
     if (this.recordPicker.isOpen()) {
       this.stepRecordPicker(mapPressed || pausePressed);
+      return;
+    }
+    if (this.travelPage.isOpen()) {
+      this.stepTravelPage(mapPressed || pausePressed);
       return;
     }
     if (this.consoleScreen.isOpen()) {
@@ -1110,7 +1136,7 @@ export class GameScene extends Phaser.Scene {
       const held =
         this.controls.isHeld('Interact') ||
         (story.interactable >= 0 && this.controls.isHeld('Attack'));
-      story.step(this.level.id, this.player.box, pressed, held);
+      story.step(this.level.id, this.player.box, pressed, held, this.player.grounded);
       if (this.recordPicker.isOpen()) {
         // Le tourne-disque s'est ouvert (D-121) : le jeu s'arrête jusqu'au choix.
         this.freezeInterpolation();
@@ -1121,12 +1147,14 @@ export class GameScene extends Phaser.Scene {
         this.openDoor(this.nearDoor);
       }
       this.nearTravel = travel && !story.busy ? lantern : -1;
+      this.stepTravelHelp();
       if (this.nearTravel >= 0 && pressed && this.player.grounded) {
-        // La carte du sac, en mode voyage : le jeu s'arrête jusqu'au choix.
-        this.setPaused(true, 'travel');
+        // La page « Voyager » (D-189) : le jeu s'arrête jusqu'au choix.
+        this.openTravel();
         this.freezeInterpolation();
         break;
       }
+      this.stepDropHelp();
       const locked = story.locked;
       input.moveX = locked ? 0 : this.controls.moveX;
       input.moveY = locked ? 0 : this.controls.moveY;
@@ -1218,8 +1246,13 @@ export class GameScene extends Phaser.Scene {
     const alpha = this.clock.alpha;
     const player = this.player;
     const box = player.box;
+    // Au dernier cran de la peur (D-189) : Céleste frissonne (l'image seulement, pas la physique).
+    const shiver =
+      this.hud.shivering && !this.memoryPlay
+        ? FEAR_LOOK.shiverPx * Math.sin((this.time.now / 1000) * FEAR_LOOK.shiverHz * Math.PI * 2)
+        : 0;
     this.puppet.render(
-      player.prevX + (box.x - player.prevX) * alpha + box.width / 2,
+      player.prevX + (box.x - player.prevX) * alpha + box.width / 2 + shiver,
       player.prevY + (box.y - player.prevY) * alpha + box.height,
       player.facing,
       feel.scaleX,
@@ -1461,6 +1494,10 @@ export class GameScene extends Phaser.Scene {
           ? [{ room: cube.room, ...cube.at, color: TOWER_CUBES[k]?.color ?? '#ec8fab' }]
           : [],
       ),
+      // La console et un jeu pas encore vu (D-189) : « nouveau » sur la télé de la chambre.
+      news: this.consoleHasNews()
+        ? { room: CONSOLE_TV.room, col: CONSOLE_TV.col, row: CONSOLE_TV.row }
+        : null,
       // Les veilleuses principales débloquées (D-163) ; celles où l'on peut aller d'ici.
       travel: (() => {
         const { options, problem } = this.travelState();
@@ -1564,6 +1601,60 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * La page « Voyager » (D-189) : les six veilleuses du voyage, depuis celle-ci ; on en choisit une
+   * où l'on peut aller, puis « Partir ».
+   */
+  private openTravel(): void {
+    const { options } = this.travelState();
+    this.clock.reset();
+    this.touch?.releaseAll();
+    this.travelMoveDir = 0;
+    this.audio.sfx.stopLoops();
+    this.travelPage.open(
+      options.map(({ point, state }) => ({
+        lantern: point.lantern,
+        title: point.title,
+        icon: point.icon,
+        state,
+      })),
+    );
+    this.audio.sfx.play('map-open');
+  }
+
+  /** Devant la page « Voyager » : gauche et droite, Agir, Action ou Saut ; Pause ou Carte referment. */
+  private stepTravelPage(closePressed: boolean): void {
+    const controls = this.controls;
+    if (closePressed) {
+      this.closeTravel();
+      return;
+    }
+    const dir = controls.moveX > 0.5 ? 1 : controls.moveX < -0.5 ? -1 : 0;
+    if (dir !== 0 && dir !== this.travelMoveDir) {
+      this.travelPage.move(dir);
+    }
+    this.travelMoveDir = dir;
+    const confirm = controls.consumePressed('Interact');
+    const attack = controls.consumePressed('Attack');
+    const jump = controls.consumePressed('Jump');
+    if (confirm || attack || jump) {
+      this.travelPage.confirm();
+    }
+  }
+
+  private closeTravel(): void {
+    if (!this.travelPage.isOpen()) {
+      return;
+    }
+    this.travelPage.close();
+    this.clock.reset();
+    this.touch?.releaseAll();
+    this.controls.consumePressed('Jump');
+    this.controls.consumePressed('Interact');
+    this.controls.consumePressed('Attack');
+    this.audio.sfx.play('map-close');
+  }
+
   /** Un disque choisi joue une fois en entier, où que soit Céleste ; ou le disque s'arrête. */
   private chooseRecord(choice: RecordChoice): void {
     if (choice === 'stop') {
@@ -1619,16 +1710,7 @@ export class GameScene extends Phaser.Scene {
         void this.session.persist();
       }
       const content = this.notebookContent();
-      this.backpack.open(
-        openingPage(trigger, content.startPlace !== null),
-        content,
-        trigger === 'travel'
-          ? (lantern) => {
-              this.setPaused(false);
-              this.travelTo(lantern);
-            }
-          : null,
-      );
+      this.backpack.open(openingPage(trigger, content.startPlace !== null), content);
       // Le sac ouvert : ses trésors sont connus, son étincelle s'éteint (D-162).
       for (const id of this.session.data.progression.memories) {
         this.bagKnown.add(id);
@@ -2177,8 +2259,14 @@ export class GameScene extends Phaser.Scene {
     const zone = this.zone;
     const flags = this.story.flags;
     const lit = this.session.data.activatedCheckpoints;
-    const lantern = zone
-      ? litLanternNear(this.level, this.player.box, (key) => lit.includes(key))
+    // On part seulement d'une veilleuse bleue débloquée, allumée (D-189).
+    const departures = zone ? departureKeys(this.travelPoints(zone), flags) : null;
+    const lantern = departures
+      ? litLanternNear(
+          this.level,
+          this.player.box,
+          (key) => departures.has(key) && lit.includes(key),
+        )
       : null;
     const problem = departureProblem({
       level: zone ? this.level : null,
@@ -2240,9 +2328,14 @@ export class GameScene extends Phaser.Scene {
     const checkpoints = this.run.checkpoints;
     const box = this.player.box;
     let index = -1;
+    // Seulement la veilleuse bleue de la salle (D-189 : plus n'importe quelle lanterne allumée).
+    const departure = this.roomTravelLantern();
+    if (departure === null) {
+      return -1;
+    }
     for (let i = 0; i < checkpoints.length; i++) {
       const c = checkpoints[i];
-      if (c?.activated && nearLantern(c.col, c.row, box)) {
+      if (c?.activated && c.id === departure && nearLantern(c.col, c.row, box)) {
         index = i;
         break;
       }
@@ -2614,6 +2707,7 @@ export class GameScene extends Phaser.Scene {
     this.loadPassersby();
     this.refreshConsoleNews();
     this.poser.sitting = false;
+    this.poser.lying = false;
     this.fx.reset();
     this.fx.load(level, isStrangeRoom(level), this.palette(), this.story.timeOfDay() === 'morning');
     // Arrivée dans une salle qui roule déjà : à pleine vitesse (le départ, lui, se voit).
@@ -2721,6 +2815,67 @@ export class GameScene extends Phaser.Scene {
     if (help) {
       this.storyView.think(help, ABILITY_HINT_MS);
     }
+  }
+
+  /**
+   * L'aide du saut vers le bas (D-189) : la première fois que Céleste reste immobile sur une
+   * planche qu'on peut traverser, sa bulle (la planche en pointillés, la flèche) et l'indice. Une
+   * fois par partie (l'étape est sauvegardée).
+   */
+  private stepDropHelp(): void {
+    const player = this.player;
+    const story = this.story;
+    const box = player.box;
+    const waiting =
+      this.zone !== null &&
+      !story.busy &&
+      !story.flags.has(StoryFlag.HelpDrop) &&
+      player.grounded &&
+      Math.abs(player.vx) < 1 &&
+      isGrounded(this.level, box, true) &&
+      !isGrounded(this.level, box, false);
+    this.dropHelpSteps = waiting ? this.dropHelpSteps + 1 : 0;
+    if (this.dropHelpSteps < msToSteps(DROP_HELP.standMs, PHYSICS_STEP_HZ)) {
+      return;
+    }
+    this.dropHelpSteps = 0;
+    story.run({
+      id: 'help-drop',
+      room: this.level.id,
+      on: 'interact',
+      when: {},
+      lock: false,
+      steps: [
+        { do: 'flag', id: StoryFlag.HelpDrop },
+        { do: 'thought', icon: 'drop', ms: ABILITY_HINT_MS },
+      ],
+    });
+    this.hud.showHint(DROP_HELP.hint, ABILITY_HINT_MS);
+  }
+
+  /**
+   * La découverte du voyage (D-189) : la première fois que Céleste arrive à une veilleuse bleue
+   * d'où l'on peut voyager, la veilleuse scintille, et Céleste pense à deux lanternes reliées ;
+   * l'étincelle d'Agir montre où toucher. Une fois par partie (l'étape est sauvegardée).
+   */
+  private stepTravelHelp(): void {
+    const story = this.story;
+    const lamp = this.nearTravel >= 0 ? this.run.checkpoints[this.nearTravel] : undefined;
+    if (!lamp || story.busy || story.flags.has(StoryFlag.HelpTravel)) {
+      return;
+    }
+    story.run({
+      id: 'help-travel',
+      room: this.level.id,
+      on: 'interact',
+      when: {},
+      lock: false,
+      steps: [
+        { do: 'flag', id: StoryFlag.HelpTravel },
+        { do: 'sparkle', area: { col: lamp.col - 1, row: lamp.row - 2, w: 3, h: 3 }, ms: 1600 },
+        { do: 'thought', icon: 'travel', ms: STORY_TIMING.thoughtMs + 800 },
+      ],
+    });
   }
 
   /** La caméra peut dépasser la salle à droite de la largeur des boutons tactiles (D-183). */
@@ -3349,9 +3504,17 @@ export class GameScene extends Phaser.Scene {
     const near = memory
       ? memory.interactable >= 0
       : (story.interactable >= 0 || this.nearDoor !== 0 || this.nearTravel >= 0) && !story.busy;
-    this.touch?.setLabel('Attack', near ? 'Agir' : null);
+    // Agir maintenu (D-189) : le bouton devient un cœur qui se remplit, comme celui de la scène.
+    const holding =
+      !memory && !story.busy && story.data.triggers[story.interactable]?.hold !== undefined;
+    this.touch?.setHeart('Attack', holding ? story.holdProgress : null);
+    if (!holding) {
+      this.touch?.setLabel('Attack', near ? 'Agir' : null);
+    }
     const door = this.level.doors.find((d) => d.id === this.nearDoor);
     const mark = this.storyView.doorMark;
+    // Souvenir jouable : la lueur chaude sur ce qu'il faut faire, avec l'étincelle (D-189).
+    this.storyView.glowAt = memory?.markShown ? (memory.current?.glow ?? null) : null;
     if (memory) {
       // Souvenir jouable : l'étincelle montre l'action à faire.
       this.storyView.doorMark = memory.markShown ? (memory.current?.mark ?? null) : null;
@@ -3944,18 +4107,27 @@ export class GameScene extends Phaser.Scene {
    * niveau) et un de ses jeux, jouable, n'a pas encore été vu dans son menu.
    */
   private refreshConsoleNews(): void {
+    this.consoleNews =
+      this.zone !== null && this.level.id === CONSOLE_TV.room && this.consoleHasNews();
+  }
+
+  /**
+   * La console est dans la chambre (offerte, pas pendant le dernier niveau) et un de ses jeux,
+   * jouable, n'a pas encore été vu dans son menu : la télé scintille, la carte du sac le montre
+   * (D-189).
+   */
+  private consoleHasNews(): boolean {
     const flags = this.story.flags;
     const there =
-      this.zone !== null &&
-      this.level.id === CONSOLE_TV.room &&
-      ((flags.has(StoryFlag.ConsoleGift) && !flags.has(StoryFlag.GrownFourth)) ||
-        flags.has(StoryFlag.FinaleGone));
+      (flags.has(StoryFlag.ConsoleGift) && !flags.has(StoryFlag.GrownFourth)) ||
+      flags.has(StoryFlag.FinaleGone);
     const data = this.session.data;
-    this.consoleNews =
+    return (
       there &&
       consoleCards(new Set(data.progression.abilities), flags, data.arcade).some(
         (card) => card.isNew,
-      );
+      )
+    );
   }
 
   /** Un bip de la console (D-166, PLACEHOLDER). */
@@ -4028,6 +4200,10 @@ export class GameScene extends Phaser.Scene {
         this.poser.gestureSteps = msToSteps(PLAYABLE_MEMORY_TIMING.gestureMs, PHYSICS_STEP_HZ);
         if (action.sparkle) {
           this.fx.sparkle(action.sparkle, PLAYABLE_MEMORY_TIMING.gestureMs);
+        }
+        if (action.heart) {
+          // Une peluche servie est contente (D-189).
+          this.storyView.popHeart(action.heart.x, action.heart.y);
         }
       }
       this.poser.carrying = memory.carrying;
@@ -4193,6 +4369,7 @@ export class GameScene extends Phaser.Scene {
     this.applyGrowth();
     this.props.load(this.story.data.props, this.level.id, this.story.flags);
     this.poser.sitting = false;
+    this.poser.lying = false;
     this.poser.holding = false;
     this.redrawArt();
   }

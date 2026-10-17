@@ -301,6 +301,17 @@ export const StoryFlag = {
    * géant, Maria y dort. Elle la prend dans ses bras en maintenant Agir (`FinaleFound`).
    */
   FinaleCradleSeen: 'finale.cradle-seen',
+  /**
+   * L'aide du saut vers le bas (D-189) : la première fois que Céleste s'arrête sur une planche
+   * qu'on peut traverser, sa bulle et l'indice ; une fois par partie.
+   */
+  HelpDrop: 'help.drop',
+  /**
+   * La découverte du voyage (D-189) : la première fois que Céleste arrive à une veilleuse bleue d'où
+   * l'on peut voyager, elle scintille, et Céleste pense à deux lanternes reliées ; une fois par
+   * partie.
+   */
+  HelpTravel: 'help.travel',
 } as const;
 export type StoryFlag = (typeof StoryFlag)[keyof typeof StoryFlag];
 
@@ -352,6 +363,12 @@ export const STORY_TIMING = {
   nightFadeOutMs: 1900,
   nightBlackMs: 2000,
   nightFadeInMs: 2600,
+  /**
+   * Le retour d'un monde étrange (D-189) : Céleste reste allongée, les yeux fermés, ce temps après
+   * le retour de l'image ; puis elle se redresse, assise, et le reste un instant avant sa bulle.
+   */
+  faintLieMs: 1300,
+  faintSitMs: 600,
   /** Durée d'affichage d'une bulle de pensée. */
   thoughtMs: 3000,
   /** Apparition et disparition d'une bulle. */
@@ -479,17 +496,25 @@ export const CAT_SCALE = 2;
 export const STREET_PASSERBY_SCALE = 0.75;
 
 /**
+ * Le cœur d'Agir maintenu (D-171), au-dessus de Maria : deux fois sa taille d'origine (D-189 : il
+ * passait inaperçu), soit 28 px logiques.
+ */
+export const HOLD_HEART_SCALE = 2;
+
+/**
  * Taille des objets de mise en scène (px logiques). Maria est un peu plus grande qu'un vrai poupon à
  * côté d'une enfant, pour rester lisible à la taille du jeu.
  */
 export const PROP_SIZE = {
   'maria-sit': { w: 8, h: 13 },
   cradle: { w: 30, h: 16 },
-  'cradle-maria': { w: 30, h: 16 },
+  // Plus haut que le berceau seul, pour la tête de Maria qui dépasse du bord (D-189 : elle était
+  // coupée par le haut de l'image) ; le bas reste au même endroit.
+  'cradle-maria': { w: 30, h: 20 },
   'cradle-undone': { w: 30, h: 16 },
   // Le berceau de poupée, deux fois trop grand (la chambre grande, D-171).
   'big-cradle': { w: 60, h: 32 },
-  'big-cradle-maria': { w: 60, h: 32 },
+  'big-cradle-maria': { w: 60, h: 40 },
   'big-cradle-empty': { w: 60, h: 32 },
   // Les affaires de Maria : à la forme de leur image (D-170).
   slipper: { w: 8, h: 6 },
@@ -536,6 +561,8 @@ export const PROP_SIZE = {
   'toy-kitchen': { w: 30, h: 30 },
   'tea-table': { w: 64, h: 30 },
   'tea-cup': { w: 6, h: 5 },
+  'tea-cups-2': { w: 6, h: 7 },
+  'tea-cups-3': { w: 6, h: 9 },
   // Le reflet du miroir de la nounou (D-110) : Céleste toute petite, plus petite qu'elle.
   reflection: { w: 16, h: 26 },
   'reflection-through': { w: 16, h: 26 },

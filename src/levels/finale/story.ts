@@ -518,6 +518,8 @@ const TRIGGERS: StoryTrigger[] = [
     area: LEAVE_AREA,
     when: { all: [F.FinaleShelved], none: [F.FinaleGone] },
     lock: true,
+    // Un saut ne doit pas mener à la porte sans passer par le dernier plan (D-189).
+    airborne: true,
     steps: [
       { do: 'fadeOut', ms: S.fadeMs },
       { do: 'flag', id: F.FinaleGone },

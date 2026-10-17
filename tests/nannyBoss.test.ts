@@ -10,6 +10,7 @@ import {
   erasedLevel,
   wavePatterns,
 } from '../src/core/level/erase';
+import { PropStage } from '../src/core/story/PropStage';
 import { checkCondition } from '../src/core/story/story';
 import { storyProblems } from '../src/core/story/storyProblems';
 import { isMappedRoom } from '../src/core/world/zone';
@@ -189,6 +190,26 @@ describe('le boss, l’effacement (D-117)', () => {
       });
     },
   );
+
+  it('pris sous les yeux de Céleste, un cube ne reste pas à sa place, ni pâli ni en couleur (D-189)', () => {
+    const flags = new Set<string>([F.NannyErasure]);
+    const stage = new PropStage();
+    stage.load(HOUSE_STORY.props, PLAY, flags);
+    // Toute la salle à l'écran, en pleine lumière : seuls les objets `instant` changent.
+    const view = { x: -1e4, y: -1e4, width: 2e4, height: 2e4 };
+    const shownAt = (o: (typeof PLAY_OBJECTS)[number]) =>
+      stage.props
+        .map((p, i) => ({ p, on: stage.shown[i] }))
+        .filter(({ p, on }) => on === true && p.kind.includes('cube') && p.col === o.at.col)
+        .filter(({ p }) => p.row === o.at.row)
+        .map(({ p }) => p.kind);
+    PLAY_OBJECTS.forEach((o) => {
+      expect(shownAt(o), o.kind).toEqual([o.kind]);
+      flags.add(o.flag);
+      stage.update(flags, view, 0);
+      expect(shownAt(o), o.kind).toEqual([]);
+    });
+  });
 
   it('les cubes se rallument l’un après l’autre et montent la tour d’Eden ; l’effacement recule, accélère, puis se dissout', () => {
     const erase = need(level(PLAY).erase, 'effacement');

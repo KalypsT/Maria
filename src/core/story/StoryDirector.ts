@@ -235,9 +235,10 @@ export class StoryDirector {
 
   /**
    * Un pas : avance le script en cours ; sinon, cherche le déclencheur Agir à portée (lancé si
-   * `interact`), puis un déclencheur de contact.
+   * `interact`), puis un déclencheur de contact. `grounded` : Céleste a les pieds au sol (un
+   * contact qui suspend les commandes l'attend, D-189).
    */
-  step(room: string, box: Box, interact: boolean, held = false): void {
+  step(room: string, box: Box, interact: boolean, held = false, grounded = true): void {
     const left = this.lastRoom !== null && this.lastRoom !== room ? this.lastRoom : null;
     this.lastRoom = room;
     const triggers = this.data.triggers;
@@ -285,7 +286,12 @@ export class StoryDirector {
       }
     }
     for (const t of triggers) {
-      if (t.on === 'touch' && t.room === room && this.ready(t, box)) {
+      if (
+        t.on === 'touch' &&
+        t.room === room &&
+        (grounded || !t.lock || t.airborne === true) &&
+        this.ready(t, box)
+      ) {
         this.start(t);
         return;
       }

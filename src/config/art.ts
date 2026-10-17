@@ -1743,3 +1743,34 @@ export const LULLABY_VIEW = {
   /** Une étoile qui s'annonce : battement du vacillement (ms). */
   flickerMs: 110,
 } as const;
+
+/**
+ * Les portraits des bulles (D-189, demande de l'utilisateur) : la tête et un peu des épaules de
+ * papa, maman et Eden, découpées dans leur image (fractions de l'image : coin haut gauche, largeur,
+ * hauteur ; l'image, par son fichier, comme dans `CHARACTER_IMAGES`), à la place des têtes dessinées
+ * par le code. Le bas du portrait s'efface en douceur.
+ * Sans l'image, la tête dessinée reste.
+ */
+export const BUBBLE_PORTRAITS = {
+  dad: { image: 'dad-hall.png', x: 0.38, y: 0, w: 0.5, h: 0.21 },
+  mom: { image: 'mom-sofa.png', x: 0.02, y: 0, w: 0.62, h: 0.31 },
+  eden: { image: 'eden-small.png', x: 0.02, y: 0, w: 0.6, h: 0.47 },
+} as const;
+
+/** La part du bas d'un portrait de bulle qui s'efface (D-189). */
+export const BUBBLE_PORTRAIT_FADE = 0.3;
+
+/**
+ * Les yeux fermés de Céleste illustrée (D-189 : évanouie au retour d'un monde étrange) : une
+ * paupière dessinée par le code, posée sur l'œil de la tête de chaque tenue (px logiques depuis le
+ * point d'attache de la tête, son cou), de la couleur de sa peau. En attendant d'éventuelles têtes
+ * « yeux fermés » fournies.
+ */
+export const CELESTE_EYELIDS: Readonly<
+  Partial<Record<CelesteOutfit, { readonly x: number; readonly y: number; readonly skin: string }>>
+> = {
+  pyjama: { x: 2.8, y: -6.4, skin: '#f3ad82' },
+  tee: { x: 2.05, y: -6, skin: '#f7a677' },
+  jacket: { x: 2.55, y: -5.9, skin: '#fbac7b' },
+  dress: { x: 2.45, y: -6, skin: '#f9ab7f' },
+};

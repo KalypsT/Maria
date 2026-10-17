@@ -1,4 +1,4 @@
-import { memoryImageKey } from '../../config/art';
+import { BUBBLE_PORTRAIT_FADE, BUBBLE_PORTRAITS, memoryImageKey } from '../../config/art';
 import { PROP_SIZE, TOWER_CUBES } from '../../config/story';
 import type { PropKind, ThoughtIcon } from '../../core/story/story';
 import { fitScale, type BubbleKind, type BubbleSide, type SafeBox } from '../../core/story/bubble';
@@ -456,19 +456,20 @@ function drawQuayTrain(ctx: CanvasRenderingContext2D, w: number, h: number, day 
   ctx.fillStyle = '#26324a';
   ctx.fillRect(24, top + 8, 4, h - top - 12);
   ctx.fillRect(w - 28, top + 8, 4, h - top - 12);
-  // Fenêtres éteintes, de part et d'autre de la porte.
+  // Les fenêtres, de part et d'autre de la porte : de nuit, allumées d'une lumière chaude (D-189 :
+  // un train qui attend ses voyageurs, rien d'étrange).
   const door = { x: w / 2 - 10, w: 20, top: top + 10 };
-  ctx.fillStyle = '#9fb7cf';
+  ctx.fillStyle = day ? '#9fb7cf' : '#f3d79a';
   for (let x = x0 + 8; x < x0 + cw - 16; x += 18) {
     if (x + 12 > door.x - 4 && x < door.x + door.w + 4) {
       continue;
     }
     ctx.fillRect(x, top + 12, 12, 14);
   }
-  ctx.fillStyle = '#9fb7cf';
   ctx.fillRect(4, top + 12, 14, 14);
   ctx.fillRect(w - 18, top + 12, 14, 14);
-  // La porte ouverte : l'ombre dedans, la lueur turquoise ; de jour (D-90), l'intérieur éclairé.
+  // La porte ouverte : de jour (D-90), l'intérieur éclairé ; de nuit, la lumière chaude du couloir
+  // (D-189 : la lueur turquoise faisait croire au monde étrange).
   ctx.fillStyle = day ? '#5b5f73' : '#141a26';
   ctx.fillRect(door.x, door.top, door.w, h - door.top);
   if (day) {
@@ -478,10 +479,10 @@ function drawQuayTrain(ctx: CanvasRenderingContext2D, w: number, h: number, day 
     ctx.fillRect(door.x + door.w, door.top, 4, h - door.top);
     return;
   }
-  const glow = ctx.createRadialGradient(w / 2, h - 18, 0, w / 2, h - 18, 26);
-  glow.addColorStop(0, 'rgba(150, 245, 230, 0.95)');
-  glow.addColorStop(0.45, 'rgba(110, 228, 214, 0.55)');
-  glow.addColorStop(1, 'rgba(110, 228, 214, 0)');
+  const glow = ctx.createRadialGradient(w / 2, h - 22, 0, w / 2, h - 22, 30);
+  glow.addColorStop(0, 'rgba(255, 228, 160, 0.95)');
+  glow.addColorStop(0.5, 'rgba(242, 196, 120, 0.6)');
+  glow.addColorStop(1, 'rgba(242, 196, 120, 0.15)');
   ctx.save();
   ctx.beginPath();
   ctx.rect(door.x, door.top, door.w, h - door.top);
@@ -493,8 +494,8 @@ function drawQuayTrain(ctx: CanvasRenderingContext2D, w: number, h: number, day 
   ctx.fillStyle = '#5a7db0';
   ctx.fillRect(door.x + door.w, door.top, 4, h - door.top);
   const spill = ctx.createLinearGradient(0, h - 10, 0, h);
-  spill.addColorStop(0, 'rgba(120, 236, 220, 0)');
-  spill.addColorStop(1, 'rgba(120, 236, 220, 0.6)');
+  spill.addColorStop(0, 'rgba(242, 200, 121, 0)');
+  spill.addColorStop(1, 'rgba(242, 200, 121, 0.55)');
   ctx.fillStyle = spill;
   ctx.beginPath();
   ctx.moveTo(door.x, h - 10);
@@ -1007,11 +1008,20 @@ export function drawProp(
       drawTeaTable(ctx, w, h, images.get('roger') ?? null);
       break;
     case 'tea-cup':
-      ctx.save();
-      ctx.translate(w / 2, h / 2);
-      teaCup(ctx, Math.min(w, h));
-      ctx.restore();
+    case 'tea-cups-2':
+    case 'tea-cups-3': {
+      // Une tasse, ou deux, ou trois l'une dans l'autre (D-189), du bas vers le haut, à la place de
+      // la tasse seule (5 px de haut) ; chacune dépasse de 2 px de celle d'en dessous.
+      const cups = kind === 'tea-cup' ? 1 : kind === 'tea-cups-2' ? 2 : 3;
+      const cup = PROP_SIZE['tea-cup'];
+      for (let i = 0; i < cups; i++) {
+        ctx.save();
+        ctx.translate(w / 2, h - cup.h / 2 - i * 2);
+        teaCup(ctx, Math.min(cup.w, cup.h));
+        ctx.restore();
+      }
       break;
+    }
     case 'white-cloth':
       // Le torchon blanc (D-116), dans le petit lit de la sieste : on le regarde, on ne le prend pas.
       drawTreasureProp(ctx, memoryImageKey('white-cloth'), w, h, images, SOFT_GLOW, () => {
@@ -1329,6 +1339,68 @@ function drawCubeSlots(ctx: CanvasRenderingContext2D, cx: number, cy: number, ma
   });
 }
 
+/** La plus grande dimension d'un portrait de bulle (px logiques du pictogramme, D-189). */
+const PORTRAIT_SIZE = 19;
+/** Les portraits découpés et effacés en bas (D-189) : une fois par image, gardés. */
+const portraitCache = new Map<string, HTMLCanvasElement>();
+
+/**
+ * Un portrait de bulle (D-189) : la tête découpée dans l'image d'un personnage, le bas qui s'efface,
+ * centré en (cx, cy), sa plus grande dimension `size`. Faux si l'image manque (on dessine alors la
+ * tête du code).
+ */
+function drawPortrait(
+  ctx: CanvasRenderingContext2D,
+  images: ReadonlyMap<string, CanvasImageSource>,
+  crop: {
+    readonly image: string;
+    readonly x: number;
+    readonly y: number;
+    readonly w: number;
+    readonly h: number;
+  },
+  cx: number,
+  cy: number,
+  size: number,
+): boolean {
+  const image = images.get(crop.image);
+  if (!image) {
+    return false;
+  }
+  let portrait = portraitCache.get(crop.image);
+  const iw = (image as { width: number }).width;
+  const ih = (image as { height: number }).height;
+  if (!portrait || portrait.dataset['source'] !== `${String(iw)}x${String(ih)}`) {
+    portrait = document.createElement('canvas');
+    portrait.dataset['source'] = `${String(iw)}x${String(ih)}`;
+    portrait.width = Math.max(1, Math.round(crop.w * iw));
+    portrait.height = Math.max(1, Math.round(crop.h * ih));
+    const p = portrait.getContext('2d');
+    if (!p) {
+      return false;
+    }
+    p.drawImage(image, -crop.x * iw, -crop.y * ih);
+    // Le bas s'efface : pas de coupure nette dans la bulle.
+    const fade = p.createLinearGradient(
+      0,
+      portrait.height * (1 - BUBBLE_PORTRAIT_FADE),
+      0,
+      portrait.height,
+    );
+    fade.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    fade.addColorStop(1, 'rgba(0, 0, 0, 1)');
+    p.globalCompositeOperation = 'destination-out';
+    p.fillStyle = fade;
+    p.fillRect(0, 0, portrait.width, portrait.height);
+    portraitCache.set(crop.image, portrait);
+  }
+  const scale = size / Math.max(portrait.width, portrait.height);
+  const w = portrait.width * scale;
+  const h = portrait.height * scale;
+  ctx.drawImage(portrait, cx - w / 2, cy - h / 2, w, h);
+  return true;
+}
+
 function drawIcon(
   ctx: CanvasRenderingContext2D,
   icon: ThoughtIcon,
@@ -1535,20 +1607,23 @@ function drawIcon(
       ctx.stroke();
       break;
     case 'eden-where':
-      // Où est Eden ? (D-171) : son visage, blond à la coupe au bol (D-122), et un « ? ».
-      faceIcon(ctx, cx - 2, cy + 1);
-      ctx.fillStyle = '#e8c96a';
-      ctx.beginPath();
-      ctx.arc(cx - 2, cy + 0.6, 6.8, Math.PI, Math.PI * 2);
-      ctx.lineTo(cx + 4.8, cy + 0.2);
-      ctx.lineTo(cx - 8.8, cy + 0.2);
-      ctx.closePath();
-      ctx.fill();
-      ctx.fillStyle = INK;
-      for (const s of [-1, 1]) {
+      // Où est Eden ? (D-171) : son visage (son portrait, tiré de son image, D-189 ; sans elle,
+      // dessiné : blond à la coupe au bol, D-122), et un « ? ».
+      if (!drawPortrait(ctx, images, BUBBLE_PORTRAITS.eden, cx - 3, cy + 0.5, PORTRAIT_SIZE - 2)) {
+        faceIcon(ctx, cx - 2, cy + 1);
+        ctx.fillStyle = '#e8c96a';
         ctx.beginPath();
-        ctx.arc(cx - 2 + s * 2.4, cy + 2.2, 0.8, 0, Math.PI * 2);
+        ctx.arc(cx - 2, cy + 0.6, 6.8, Math.PI, Math.PI * 2);
+        ctx.lineTo(cx + 4.8, cy + 0.2);
+        ctx.lineTo(cx - 8.8, cy + 0.2);
+        ctx.closePath();
         ctx.fill();
+        ctx.fillStyle = INK;
+        for (const s of [-1, 1]) {
+          ctx.beginPath();
+          ctx.arc(cx - 2 + s * 2.4, cy + 2.2, 0.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
       ctx.strokeStyle = PINK;
       ctx.lineWidth = 1.5;
@@ -1613,10 +1688,15 @@ function drawIcon(
       break;
     }
     case 'mom':
-      momHead(ctx, cx, cy - 2, 4.8);
+      // Le portrait de maman, tiré de son image (D-189) ; sans elle, la tête dessinée.
+      if (!drawPortrait(ctx, images, BUBBLE_PORTRAITS.mom, cx, cy, PORTRAIT_SIZE)) {
+        momHead(ctx, cx, cy - 2, 4.8);
+      }
       break;
     case 'dad':
-      dadHead(ctx, cx, cy - 2, 4.8);
+      if (!drawPortrait(ctx, images, BUBBLE_PORTRAITS.dad, cx, cy, PORTRAIT_SIZE)) {
+        dadHead(ctx, cx, cy - 2, 4.8);
+      }
       break;
     case 'crane':
       // La grue du chantier (D-63) : mât, flèche, crochet ; un petit point jaune au bout (le parapluie).
@@ -1641,19 +1721,20 @@ function drawIcon(
       ctx.fill();
       break;
     case 'train': {
-      // Un train (D-69) : une voiture bleue, sa porte ouverte et la lueur turquoise.
+      // Un train (D-69) : une voiture bleue, sa porte ouverte et sa lumière chaude (D-189 : plus
+      // de lueur turquoise, rien d'étrange).
       ctx.fillStyle = '#3d5f8f';
       ctx.beginPath();
       ctx.roundRect(cx - 9, cy - 5, 18, 10, 2);
       ctx.fill();
       ctx.fillStyle = '#efe6d2';
       ctx.fillRect(cx - 9, cy + 2, 18, 1.2);
-      ctx.fillStyle = '#bcd0e4';
+      ctx.fillStyle = '#f3d79a';
       ctx.fillRect(cx - 7, cy - 3, 3.5, 3);
       ctx.fillRect(cx + 3.5, cy - 3, 3.5, 3);
       const glow = ctx.createRadialGradient(cx, cy + 1, 0, cx, cy + 1, 4);
-      glow.addColorStop(0, 'rgba(150, 245, 230, 1)');
-      glow.addColorStop(1, 'rgba(90, 210, 196, 0.9)');
+      glow.addColorStop(0, 'rgba(255, 236, 180, 1)');
+      glow.addColorStop(1, 'rgba(242, 196, 120, 0.95)');
       ctx.fillStyle = glow;
       ctx.fillRect(cx - 1.8, cy - 3.5, 3.6, 8.5);
       ctx.fillStyle = INK;
@@ -2109,20 +2190,129 @@ function drawIcon(
     case 'gamepad':
       drawGamepad(ctx, cx, cy, 1);
       break;
-    case 'tv':
-      // La télé et sa console : installée dans la chambre (D-166).
-      drawTv(ctx, cx - 8, cy - 7, 13, 10);
-      ctx.fillStyle = TV_BODY;
-      ctx.fillRect(cx - 3, cy + 3, 3, 2);
-      ctx.fillRect(cx - 5, cy + 5, 7, 1.5);
+    case 'gift':
+      // Un paquet cadeau (D-189) : la boîte rose, le ruban jaune en croix, le nœud.
       ctx.fillStyle = CONSOLE_PINK;
       ctx.strokeStyle = CONSOLE_DARK;
-      ctx.lineWidth = 0.6;
+      ctx.lineWidth = 0.7;
       ctx.beginPath();
-      ctx.roundRect(cx + 3, cy + 2.5, 6, 4, 1);
+      ctx.roundRect(cx - 6.5, cy - 2.5, 13, 9.5, 1);
       ctx.fill();
       ctx.stroke();
+      ctx.beginPath();
+      ctx.roundRect(cx - 7.5, cy - 4.5, 15, 3, 1);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#f2c14e';
+      ctx.fillRect(cx - 1, cy - 4.5, 2, 11.5);
+      ctx.beginPath();
+      ctx.ellipse(cx - 2.6, cy - 5.8, 2.6, 1.6, -0.5, 0, Math.PI * 2);
+      ctx.ellipse(cx + 2.6, cy - 5.8, 2.6, 1.6, 0.5, 0, Math.PI * 2);
+      ctx.fill();
       break;
+    case 'tv-bedroom':
+      // Sa chambre, dans la maison (D-189) : le toit et les murs ; dedans, son lit et sa couverture
+      // rose, la télé et la console sur le bureau.
+      ctx.fillStyle = '#f3ead7';
+      ctx.fillRect(cx - 8.5, cy - 2, 17, 9.5);
+      ctx.strokeStyle = '#d9788f';
+      ctx.lineWidth = 1.4;
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx - 10, cy - 1.5);
+      ctx.lineTo(cx, cy - 8.5);
+      ctx.lineTo(cx + 10, cy - 1.5);
+      ctx.stroke();
+      // Le lit : la tête de lit, l'oreiller, la couverture rose.
+      ctx.fillStyle = WOOD_DARK;
+      ctx.fillRect(cx - 8, cy - 0.5, 1.8, 7.5);
+      ctx.fillStyle = WOOD;
+      ctx.fillRect(cx - 6.5, cy + 4.5, 6.5, 2.5);
+      ctx.fillStyle = '#fdf8ee';
+      ctx.fillRect(cx - 6.2, cy + 2.6, 2.2, 1.9);
+      ctx.fillStyle = '#f19bb5';
+      ctx.fillRect(cx - 4, cy + 2.2, 4.2, 2.6);
+      // Le bureau, la télé (son écran pastel) et la console rose.
+      ctx.fillStyle = WOOD;
+      ctx.fillRect(cx + 1, cy + 4.3, 7.5, 1.3);
+      ctx.fillRect(cx + 1.6, cy + 5.6, 1.1, 1.9);
+      ctx.fillRect(cx + 6.8, cy + 5.6, 1.1, 1.9);
+      ctx.fillStyle = TV_BODY;
+      ctx.beginPath();
+      ctx.roundRect(cx + 1.5, cy - 1.5, 7, 5.8, 1);
+      ctx.fill();
+      ctx.fillStyle = CONSOLE_SCREEN;
+      ctx.fillRect(cx + 2.5, cy - 0.5, 5, 3.6);
+      ctx.fillStyle = CONSOLE_PINK;
+      ctx.fillRect(cx + 3, cy + 3.4, 4, 0.9);
+      break;
+    case 'travel': {
+      // Le voyage (D-189) : deux lampes-tempête à la lumière bleu lune (leur anse, leur chapeau,
+      // leur verre, leur socle), en bas ; un fil en pointillés fait un arc de l'une à l'autre, une
+      // flèche au bout.
+      for (const x of [cx - 7, cx + 7]) {
+        const glow = ctx.createRadialGradient(x, cy + 3.5, 0, x, cy + 3.5, 5);
+        glow.addColorStop(0, 'rgba(127, 168, 236, 0.7)');
+        glow.addColorStop(1, 'rgba(127, 168, 236, 0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(x - 5, cy - 1.5, 10, 10);
+        ctx.strokeStyle = INK;
+        ctx.lineWidth = 0.7;
+        ctx.beginPath();
+        ctx.arc(x, cy + 0.2, 1.5, Math.PI, 0);
+        ctx.stroke();
+        ctx.fillStyle = INK;
+        ctx.beginPath();
+        ctx.moveTo(x - 2.4, cy + 1.6);
+        ctx.lineTo(x, cy + 0.2);
+        ctx.lineTo(x + 2.4, cy + 1.6);
+        ctx.fill();
+        ctx.fillStyle = '#7fa8ec';
+        ctx.fillRect(x - 1.8, cy + 1.6, 3.6, 4.4);
+        ctx.fillStyle = '#e8f0ff';
+        ctx.fillRect(x - 0.5, cy + 2.6, 1, 2.2);
+        ctx.fillStyle = INK;
+        ctx.fillRect(x - 2.6, cy + 6, 5.2, 1.3);
+      }
+      ctx.strokeStyle = '#4f6f8f';
+      ctx.lineWidth = 1;
+      ctx.lineCap = 'round';
+      ctx.setLineDash([1.4, 1.6]);
+      ctx.beginPath();
+      ctx.moveTo(cx - 7, cy - 1.5);
+      ctx.quadraticCurveTo(cx, cy - 10, cx + 6, cy - 2.2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(cx + 3.2, cy - 3.6);
+      ctx.lineTo(cx + 6.4, cy - 1.8);
+      ctx.lineTo(cx + 6.6, cy - 5.4);
+      ctx.stroke();
+      break;
+    }
+    case 'drop': {
+      // Le saut vers le bas (D-189) : une planche fine, en pointillés là où l'on passe ; une flèche
+      // qui la traverse, vers le bas.
+      ctx.fillStyle = WOOD;
+      ctx.fillRect(cx - 9, cy - 0.8, 6, 2);
+      ctx.fillRect(cx + 3, cy - 0.8, 6, 2);
+      ctx.fillStyle = 'rgba(199,157,111,0.55)';
+      for (let x = cx - 2.5; x < cx + 2.5; x += 2) {
+        ctx.fillRect(x, cy - 0.8, 1, 2);
+      }
+      ctx.strokeStyle = PINK;
+      ctx.lineWidth = 1.6;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 7);
+      ctx.lineTo(cx, cy + 6);
+      ctx.moveTo(cx - 3, cy + 3);
+      ctx.lineTo(cx, cy + 6.5);
+      ctx.lineTo(cx + 3, cy + 3);
+      ctx.stroke();
+      break;
+    }
     case 'locked':
       // Une porte cintrée et son cadenas.
       ctx.fillStyle = WOOD_DARK;
