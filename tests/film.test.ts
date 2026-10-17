@@ -3,11 +3,10 @@ import {
   FILM,
   FILM_IMAGES,
   FILM_ROOM,
-  FILM_TOISE,
   FILMS,
   isFilmId,
-  toiseHeight,
   type Film,
+  type FilmImage,
   type FilmShot,
 } from '../src/config/film';
 import { INTRO_SHOTS } from '../src/config/intro';
@@ -108,9 +107,9 @@ describe('les films de la fin (D-190)', () => {
     expect(new Set(used)).toEqual(new Set(Object.keys(FILMS)));
     expect(used.every(isFilmId)).toBe(true);
     const leave = HOUSE_STORY.triggers.find((t) => t.id === 'finale-leave');
-    const years = leave?.steps.findIndex((s) => s.do === 'film' && s.id === 'years') ?? -1;
+    const weeks = leave?.steps.findIndex((s) => s.do === 'film' && s.id === 'weeks') ?? -1;
     const closed = leave?.steps.findIndex((s) => s.do === 'door' && !s.open) ?? -1;
-    expect(years).toBeGreaterThan(closed);
+    expect(weeks).toBeGreaterThan(closed);
     expect(closed).toBeGreaterThan(-1);
     const play = HOUSE_STORY.triggers.find((t) => t.id === 'finale-play');
     const steps = play?.steps ?? [];
@@ -121,61 +120,41 @@ describe('les films de la fin (D-190)', () => {
     expect(film).toBeLessThan(putAway);
   });
 
-  it('les années : des nuits de plus en plus courtes, puis les âges dans l’ordre, Maria à la fin', () => {
-    const { shots, outroMs } = FILMS.years;
+  it('aucune image en trop : chaque image sert à un film, chaque fichier du film est utilisé', () => {
+    const used = new Set(
+      Object.values<Film>(FILMS).flatMap((film) =>
+        film.shots.flatMap((s) => [s.backdrop, ...s.sprites.map((sp) => sp.image)]),
+      ),
+    );
+    expect(Object.keys(FILM_IMAGES).filter((key) => !used.has(key as FilmImage))).toEqual([]);
+    const files = new Set<string>(Object.values(FILM_IMAGES));
+    expect([...ART].filter((f) => f.startsWith('art/film/') && !files.has(f))).toEqual([]);
+  });
+
+  it('quelques semaines : des nuits de plus en plus courtes, puis des jours ; Maria à la fin', () => {
+    const { shots, outroMs } = FILMS.weeks;
     // Il finit dans le noir : l'écran de fin suit.
     expect(outroMs).toBeGreaterThan(0);
     const nights = shots.filter((s) => s.enter.kind === 'dip');
     const lengths = nights.map((s) => (s.enter.kind === 'dip' ? s.enter.ms + s.enter.holdMs : 0));
-    expect(nights.length).toBeGreaterThanOrEqual(4);
+    expect(nights.length).toBeGreaterThanOrEqual(3);
     expect([...lengths].sort((a, b) => b - a)).toEqual(lengths);
-    // Les nuits d'abord, puis plus aucun noir : les années passent en fondus.
+    // Les nuits d'abord, puis plus aucun noir : les jours passent en fondus.
     const lastNight = shots.findLastIndex((s) => s.enter.kind === 'dip');
     expect(shots.slice(lastNight + 1).every((s) => s.enter.kind === 'dissolve')).toBe(true);
-    // Les âges de la chambre ne reviennent jamais en arrière.
-    const ages = shots.flatMap((s) => {
-      const m = /^age(\d+)/.exec(s.backdrop);
-      return m ? [Number(m[1])] : [];
-    });
-    expect([...ages].sort((a, b) => a - b)).toEqual(ages);
-    expect(ages.at(-1)).toBe(18);
-    // Maria, puis le dernier signe (PR 8).
+    // La chambre de ce matin-là, toujours : Céleste ne grandit pas au-delà du jeu.
+    for (const shot of shots.filter((s) => s.id !== 'maria')) {
+      expect(['roomDay', 'roomNight'], shot.id).toContain(shot.backdrop);
+    }
+    // Maria, puis le dernier signe.
     expect(shots.at(-2)?.id).toBe('maria');
     expect(shots.at(-1)?.id).toBe('last-sign');
   });
 
-  it('la toise : un trait par an, de 4 à 18 ans, jamais deux fois, de plus en plus haut', () => {
-    const toises = FILMS.years.shots.flatMap((s) => (s.toise ? [s.toise] : []));
-    let shown = 7;
-    for (const toise of toises) {
-      // Ce matin, 7 ans (phase 4) ; chaque gros plan reprend où le précédent s'est arrêté.
-      expect(toise.shown).toBe(shown);
-      expect(toise.write).toBeGreaterThan(toise.shown);
-      shown = toise.write;
-    }
-    expect(shown).toBe(18);
-    expect(FILM_TOISE.heights).toHaveLength(18 - FILM_TOISE.firstAge + 1);
-    for (let age = 5; age <= 18; age++) {
-      expect(toiseHeight(age)).toBeGreaterThan(toiseHeight(age - 1));
-    }
-    // Elle a fini de grandir : les derniers traits sont plus serrés que les premiers.
-    expect(toiseHeight(18) - toiseHeight(17)).toBeLessThan(toiseHeight(5) - toiseHeight(4));
-    // Chaque gros plan a le temps d'écrire ses âges.
-    for (const shot of FILMS.years.shots) {
-      const toise = shot.toise;
-      if (toise) {
-        const each = FILM_TOISE.lineMs + FILM_TOISE.wordMs;
-        expect(toise.fromMs + (toise.write - toise.shown) * each, shot.id).toBeLessThan(
-          shot.durationMs,
-        );
-      }
-    }
-  });
-
-  it('les saisons et le soleil : seulement dans la chambre, le soleil sous la fenêtre', () => {
-    for (const shot of FILMS.years.shots) {
-      if (shot.season || shot.sun) {
-        expect(shot.toise, shot.id).toBeUndefined();
+  it('le soleil : seulement le jour, sous la fenêtre', () => {
+    for (const shot of FILMS.weeks.shots) {
+      if (shot.sun) {
+        expect(shot.backdrop, shot.id).toBe('roomDay');
       }
     }
     const win = FILM_ROOM.window;
@@ -183,77 +162,62 @@ describe('les films de la fin (D-190)', () => {
     expect(win.y + win.h).toBeLessThan(FILM_ROOM.floorY);
   });
 
-  it('Céleste grandit dans les années : une fois par âge, de plus en plus grande', () => {
-    const shots = FILMS.years.shots;
-    const passes = shots.flatMap((shot) =>
-      shot.sprites
-        .filter((sp) => sp.image.startsWith('celeste'))
-        .map((sp) => ({ shot, sp, age: Number(sp.image.replace('celeste', '')) })),
-    );
-    expect(passes.map((p) => p.age)).toEqual([9, 12, 15, 18]);
-    // Dans la chambre de son âge.
-    for (const { shot, age } of passes) {
-      const room = /^age(\d+)/.exec(shot.backdrop);
-      expect(Number(room?.[1]), shot.id).toBe(age);
-    }
-    // Debout, de plus en plus grande ; jamais plus grande que papa.
-    const standing = passes.filter((p) => p.age !== 12).map((p) => p.sp.height);
-    expect([...standing].sort((a, b) => a - b)).toEqual(standing);
-    const dad = shots.flatMap((s) => s.sprites).find((sp) => sp.image === 'dad');
-    expect(standing.at(-1) ?? 0).toBeLessThan(dad?.height ?? 0);
-    // Elle apparaît et disparaît dans le plan (comme un time-lapse), sans jamais rester à la fin.
-    for (const { shot, sp } of passes) {
-      expect(keyValue(sp.opacity, 0, 1), shot.id).toBe(0);
-      expect(keyValue(sp.opacity, shot.durationMs, 1), shot.id).toBe(0);
-    }
-  });
-
-  it('papa, une nuit : la porte s’ouvre, il regarde la chambre, sans bulle ; elle se referme', () => {
-    const night = FILMS.years.shots.filter((s) => s.sprites.some((sp) => sp.image === 'dad'));
-    expect(night).toHaveLength(1);
-    const shot = night[0] as FilmShot;
-    expect(shot.backdrop).toMatch(/Night$/);
-    expect(shot.bubble).toBeUndefined();
-    const dad = shot.sprites.find((sp) => sp.image === 'dad');
-    // Tourné vers la chambre (à gauche), dans la porte.
-    expect(dad?.flip).toBe(true);
-    expect(dad?.x ?? 0).toBeGreaterThan(FILM_ROOM.door.x - 200);
-    // La porte ouverte tant qu'il est là ; fermée au début et à la fin.
-    for (let t = 0; t <= shot.durationMs; t += 50) {
-      if (keyValue(dad?.opacity, t, 1) > 0) {
-        expect(keyValue(shot.door, t, 0), String(t)).toBe(1);
-      }
-    }
-    expect(keyValue(shot.door, 0, 0)).toBe(0);
-    expect(keyValue(shot.door, shot.durationMs, 0)).toBe(0);
-  });
-
-  it('à 18 ans, elle part : à la porte, tournée vers Maria, puis la porte se ferme ; Maria reste', () => {
-    const shots = FILMS.years.shots;
-    const i = shots.findIndex((s) => s.sprites.some((sp) => sp.image === 'celeste18'));
+  it('elle rentre de l’école, une fois : la porte ouverte tant qu’elle est là ; son cartable reste', () => {
+    const shots = FILMS.weeks.shots;
+    const sprite = (shot: FilmShot | undefined, image: FilmImage) =>
+      shot?.sprites.find((sp) => sp.image === image);
+    const passes = shots.filter((s) => sprite(s, 'celesteSchool'));
+    expect(passes).toHaveLength(1);
+    const i = shots.indexOf(passes[0] as FilmShot);
     const shot = shots[i] as FilmShot;
-    const her = shot.sprites.find((sp) => sp.image === 'celeste18');
+    const her = sprite(shot, 'celesteSchool');
+    const bag = sprite(shot, 'schoolbag');
+    // À la taille de Céleste à 7 ans dans le jeu ; à la porte, tournée vers la chambre.
+    expect(her?.height ?? 0).toBeLessThan(130);
+    expect(her?.flip).toBe(true);
     expect(her?.x ?? 0).toBeGreaterThan(FILM_ROOM.door.x - 300);
+    // Elle apparaît et s'efface dans le plan ; la porte ouverte tant qu'elle est là.
+    expect(keyValue(her?.opacity, 0, 1)).toBe(0);
+    expect(keyValue(her?.opacity, shot.durationMs, 1)).toBe(0);
     for (let t = 0; t <= shot.durationMs; t += 50) {
       if (keyValue(her?.opacity, t, 1) > 0) {
         expect(keyValue(shot.door, t, 0), String(t)).toBe(1);
       }
+      // Le cartable sur son dos tant qu'elle est là tout entière, posé ensuite.
+      if (keyValue(her?.opacity, t, 1) === 1) {
+        expect(keyValue(bag?.opacity, t, 1), String(t)).toBe(0);
+      }
     }
+    expect(keyValue(shot.door, 0, 0)).toBe(0);
     expect(keyValue(shot.door, shot.durationMs, 0)).toBe(0);
-    // Le dernier plan : Maria, seule.
-    expect(shots[i + 1]?.id).toBe('maria');
-    expect(shots.slice(i + 1).every((s) => s.sprites.every((sp) => sp.image === 'maria'))).toBe(
-      true,
+    expect(keyValue(bag?.opacity, shot.durationMs, 0)).toBe(1);
+    // Posé sous le bureau, au sol ; puis là, pas là, là : l'école, des jours qui passent.
+    expect(bag?.bottom).toBe(FILM_ROOM.floorY);
+    const days = shots.slice(
+      i + 1,
+      shots.findIndex((s) => s.id === 'maria'),
     );
+    const withBag = days.map((s) => sprite(s, 'schoolbag') !== undefined);
+    expect(withBag).toEqual([true, false, true]);
+    for (const day of days) {
+      const there = sprite(day, 'schoolbag');
+      if (there) {
+        expect({ ...there, opacity: undefined }).toEqual({ ...bag, opacity: undefined });
+      }
+    }
+    // Plus personne ensuite.
+    expect(
+      shots.slice(i + 1).every((s) => s.sprites.every((sp) => sp.image !== 'celesteSchool')),
+    ).toBe(true);
   });
 
-  it('le dernier signe : le silence, la boîte à musique et ses trois notes, les étoiles autour de Maria', () => {
-    const shots = FILMS.years.shots;
+  it('le dernier signe : le silence, la boîte à musique et ses trois notes, les étoiles autour de l’étagère', () => {
+    const shots = FILMS.weeks.shots;
     const last = shots.at(-1) as FilmShot;
     expect(last.id).toBe('last-sign');
     expect(shots.at(-2)?.id).toBe('maria');
     // La nuit, la chambre vide (Maria dans le décor, à sa place : elle ne bouge pas).
-    expect(last.backdrop).toBe('age18Night');
+    expect(last.backdrop).toBe('roomNight');
     expect(last.sprites).toEqual([]);
     // Le silence, puis trois notes de la berceuse.
     expect(last.music).toBeNull();
@@ -267,6 +231,12 @@ describe('les films de la fin (D-190)', () => {
     expect(keyValue(glow?.strength, first, 0)).toBeGreaterThan(0.5);
     const stars = last.sparkles;
     expect(stars?.x).toBeGreaterThan(glow?.x ?? 0);
+    // Autour de toute l'étagère (D-191) : Maria au milieu, les jouets d'avant de part et d'autre
+    // (l'étagère fait environ 300 px du plan) ; un ovale plus large que haut.
+    const maria = 1320;
+    expect(Math.abs((stars?.x ?? 0) - maria)).toBeLessThan((stars?.radius ?? 0) * 0.5);
+    expect((stars?.radius ?? 0) * 2).toBeGreaterThanOrEqual(360);
+    expect(stars?.flat ?? 0.75).toBeLessThan(0.75);
     expect(keyValue(stars?.strength, first, 0)).toBe(0);
     // Puis tout redevient normal, avant la fin du plan.
     expect(keyValue(glow?.strength, last.durationMs, 1)).toBe(0);

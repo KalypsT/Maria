@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_CAMERA, type CameraParams } from '../src/config/camera';
 import { GAME_HEIGHT, TILE_SIZE as T } from '../src/config/display';
 import { DEFAULT_MOVEMENT, PLAYER_HITBOX } from '../src/config/movement';
-import { CameraController, storyZoomCenter } from '../src/core/camera/CameraController';
+import { CameraController, storyGlide, storyZoomCenter } from '../src/core/camera/CameraController';
 import { spawnPosition, type LevelData } from '../src/core/level/LevelData';
 import { parseAsciiLevel } from '../src/core/level/parseAsciiLevel';
 import { PlayerPhysics, type PlayerInput } from '../src/core/player/PlayerPhysics';
@@ -388,6 +388,31 @@ describe('la vue rapprochée de l’histoire (D-182)', () => {
     // Sans rapprochement demandé, la caméra telle quelle.
     storyZoomCenter(out, 368, 176, 312, 296, 1, 1, 779, 360, 736, 352);
     expect(out).toEqual({ x: 368, y: 176 });
+  });
+});
+
+describe('le regard qui glisse (D-191)', () => {
+  it('va d’un point à l’autre en douceur, sans jamais dépasser, et s’arrête au bout', () => {
+    const out = { x: 0, y: 0 };
+    storyGlide(out, 100, 300, 500, 180, 0, 2000);
+    expect(out).toEqual({ x: 100, y: 300 });
+    // Lent au départ, à mi-chemin au milieu.
+    storyGlide(out, 100, 300, 500, 180, 200, 2000);
+    expect(out.x - 100).toBeLessThan(400 * 0.1);
+    storyGlide(out, 100, 300, 500, 180, 1000, 2000);
+    expect(out.x).toBeCloseTo(300);
+    expect(out.y).toBeCloseTo(240);
+    let last = 100;
+    for (let t = 0; t <= 2600; t += 50) {
+      storyGlide(out, 100, 300, 500, 180, t, 2000);
+      expect(out.x).toBeGreaterThanOrEqual(last);
+      expect(out.x).toBeLessThanOrEqual(500);
+      last = out.x;
+    }
+    expect(out).toEqual({ x: 500, y: 180 });
+    // Sans durée : d'un coup.
+    storyGlide(out, 100, 300, 500, 180, 0, 0);
+    expect(out).toEqual({ x: 500, y: 180 });
   });
 });
 

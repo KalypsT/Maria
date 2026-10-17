@@ -21,7 +21,7 @@ import {
   msToSteps,
   type MovementParams,
 } from '../config/movement';
-import { CameraController, storyZoomCenter } from '../core/camera/CameraController';
+import { CameraController, storyGlide, storyZoomCenter } from '../core/camera/CameraController';
 import { Chase, ChaseEvent } from '../core/boss/Chase';
 import { CombatEvent, CombatWorld, wavesOf } from '../core/combat/CombatWorld';
 import { FixedStepClock } from '../core/FixedStepClock';
@@ -208,7 +208,7 @@ import { ArcadeEvent, ArcadePhase, ArcadeRun } from '../core/arcade/run';
 import { arcadeChoosable, arcadeRecord, arcadeStartTiles } from '../core/save/arcade';
 import { isGrounded, touchesHazard } from '../core/physics/gridCollision';
 import { isRecordSlot } from '../config/records';
-import { MARIA_THINGS, isMemory } from '../config/memories';
+import { isMemory } from '../config/memories';
 import { drawnCanvas, recordDrawing, treasureDrawing } from '../ui/treasureDrawing';
 import { drawSticker } from './art/stickerArt';
 import { canPlayRecords, recordShelf, type RecordChoice } from '../core/audio/records';
@@ -569,6 +569,8 @@ export class GameScene extends Phaser.Scene {
   private storyFocusY = 0;
   private storyZoomPeak = 1;
   private readonly storyCenter = { x: 0, y: 0 };
+  /** Le regard qui glisse (D-191) : d'où, vers où, depuis quand (`time.now`), en combien de ms. */
+  private readonly storyGlide = { fromX: 0, fromY: 0, toX: 0, toY: 0, start: 0, ms: 0 };
   /** Maria dans les bras de Céleste (D-143) : l'image de Maria assise, tenue devant elle. */
   private heldMaria!: Phaser.GameObjects.Image;
   private readonly mapSeen = new Set<string>();
@@ -828,16 +830,29 @@ export class GameScene extends Phaser.Scene {
         this.poser.sitting = true;
         this.openConsole();
       },
-      look: (col, row, zoom) => {
+      look: (col, row, zoom, glideMs) => {
+        const glide = this.storyGlide;
+        glide.ms = 0;
         if (col === null || row === null) {
           this.camera.release();
           this.storyZoomTarget = 1;
         } else {
-          this.camera.focus((col + 0.5) * TILE_SIZE, (row + 0.5) * TILE_SIZE);
+          const x = (col + 0.5) * TILE_SIZE;
+          const y = (row + 0.5) * TILE_SIZE;
+          this.camera.focus(x, y);
           this.storyZoomTarget = zoom;
-          if (zoom > 1) {
-            this.storyFocusX = (col + 0.5) * TILE_SIZE;
-            this.storyFocusY = (row + 0.5) * TILE_SIZE;
+          if (zoom > 1 && glideMs > 0 && this.storyZoom > 1) {
+            // Déjà rapprochée (D-191) : la vue glisse lentement jusque-là.
+            glide.fromX = this.storyFocusX;
+            glide.fromY = this.storyFocusY;
+            glide.toX = x;
+            glide.toY = y;
+            glide.start = this.time.now;
+            glide.ms = glideMs;
+            this.storyZoomPeak = zoom;
+          } else if (zoom > 1) {
+            this.storyFocusX = x;
+            this.storyFocusY = y;
             this.storyZoomPeak = zoom;
           }
         }
@@ -1362,6 +1377,16 @@ export class GameScene extends Phaser.Scene {
     if (this.storyZoom > 1) {
       // Vue rapprochée (D-182) : centrée sur le point regardé, bornée avec la vue rapprochée.
       const center = this.storyCenter;
+      const glide = this.storyGlide;
+      if (glide.ms > 0) {
+        const elapsed = this.time.now - glide.start;
+        storyGlide(center, glide.fromX, glide.fromY, glide.toX, glide.toY, elapsed, glide.ms);
+        this.storyFocusX = center.x;
+        this.storyFocusY = center.y;
+        if (elapsed >= glide.ms) {
+          glide.ms = 0;
+        }
+      }
       storyZoomCenter(
         center,
         centerX,
@@ -1955,12 +1980,9 @@ export class GameScene extends Phaser.Scene {
       .then(() => {
         // Toutes les coquilles trouvées : le petit escargot de la fin (D-148).
         const shells = this.shellCount();
-        // Les affaires de Maria retrouvées, autour d'elle (D-190).
-        const found = this.session.data.progression.memories;
         return showEndScreen(
           import.meta.env.BASE_URL,
           shells.total > 0 && shells.found === shells.total,
-          MARIA_THINGS.filter((id) => found.includes(id)),
         );
       })
       .then(() => {

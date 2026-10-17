@@ -38,6 +38,7 @@ flag finale.rug
 flag finale.shelved
 flag finale.sky
 flag finale.together
+flag finale.toys
 flag garden.arrived
 flag garden.console-gift
 flag garden.dad

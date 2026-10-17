@@ -96,24 +96,55 @@ const MARIA_RUG = { col: 19, row: 19 };
  * Céleste debout à côté d'elle.
  */
 export const MARIA_SHELF = { col: 33, row: 11 };
-const SHELF_STAND = { col: 35, row: 11 };
+/** Au bout de l'étagère, devant les livres (D-191 : les jouets d'avant restent tous visibles). */
+const SHELF_STAND = { col: 36, row: 11 };
 /** Le dernier câlin (D-190) : le cœur à tenir, au-dessus de Maria dans les bras de Céleste. */
-const SHELF_HEART = { col: 34, row: 8 };
+const SHELF_HEART = { col: 35, row: 8 };
 /** Maria posée (D-190) : la vue se rapproche d'elles deux. */
 const SHELF_LOOK = { col: 34, row: 10 };
 /**
+ * Les jouets d'avant (D-191) : ceux du monde étrange, rangés là depuis longtemps, à leur taille.
+ * La boîte de l'étagère (fermée pendant tout le jeu), Roger, l'Educaville et le livre qui chante
+ * sur l'étagère, de part et d'autre de la place de Maria ; le torchon sur le bord de la boîte ; la
+ * cuisine rose au pied du bureau, sous l'étagère. Places PROVISOIRES.
+ */
+const TOY_BOX = { col: 35, row: 11, dx: -3 };
+const OLD_TOYS = {
+  'old-toy-town': { col: 31, row: 11, dx: 1 },
+  'old-roger': { col: 32, row: 11, dx: 1 },
+  'old-music-book': { col: 34, row: 11, dx: -5 },
+  'old-white-cloth': { col: 35, row: 11, dx: -3, dy: -6 },
+  'old-pink-kitchen': { col: 33, row: 19 },
+} as const;
+/** Le regard sur les jouets (D-191) : la cuisine rose, le bout de l'étagère, puis la boîte. */
+const TOYS_LOOK_KITCHEN = { col: 33, row: 18 };
+const TOYS_LOOK_SHELF = { col: 31, row: 11 };
+const TOYS_LOOK_BOX = { col: 35, row: 11 };
+/**
  * Ranger Maria (§11, D-190). Dans le noir, Céleste est devant l'étagère du surmeuble, là où était la
- * couverture le premier soir, Maria dans les bras. Le dernier câlin : Agir maintenu, le cœur se
- * remplit et reste plein tant qu'on tient ; **relâcher, c'est la poser** : le noir, Maria assise
- * sur l'étagère, les bras de Céleste vides. Elle la regarde, longtemps ; puis elle se tourne vers
- * la porte. Elle ne la prend et ne la pose que dans le noir (pilier 5).
+ * couverture le premier soir, Maria dans les bras. Dans le même noir, la boîte de l'étagère s'est
+ * ouverte : les jouets d'avant sont là, autour (D-191). La vue se rapproche de la cuisine rose, au
+ * pied du bureau, puis glisse lentement le long de l'étagère : ils étaient là, rangés ; elle n'y
+ * faisait plus attention. Le dernier câlin : Agir maintenu, le cœur se remplit et reste plein tant
+ * qu'on tient ; **relâcher, c'est la poser** : le noir, Maria assise parmi eux, les bras de Céleste
+ * vides. Elle la regarde, longtemps ; puis elle se tourne vers la porte. Elle ne la prend et ne la
+ * pose que dans le noir (pilier 5).
  */
 const PUT_AWAY: readonly StoryStep[] = [
   { do: 'fadeOut', ms: S.fadeMs },
+  { do: 'flag', id: F.FinaleToys },
   { do: 'place', ...SHELF_STAND, facing: -1 },
   { do: 'pose', pose: 'hold' },
   { do: 'fadeIn', ms: S.fadeMs },
   { do: 'wait', ms: S.lookMs },
+  { do: 'look', ...TOYS_LOOK_KITCHEN, zoom: STORY_ZOOM.toys },
+  { do: 'wait', ms: S.toysFirstLookMs },
+  { do: 'look', ...TOYS_LOOK_SHELF, zoom: STORY_ZOOM.toys, glideMs: S.toysGlideUpMs },
+  { do: 'wait', ms: S.toysGlideUpMs + S.lookMs },
+  { do: 'look', ...TOYS_LOOK_BOX, zoom: STORY_ZOOM.toys, glideMs: S.toysGlideAlongMs },
+  { do: 'wait', ms: S.toysGlideAlongMs + S.lookMs },
+  { do: 'look' },
+  { do: 'wait', ms: STORY_ZOOM.easeMs },
   { do: 'await', mode: 'hold', mark: SHELF_HEART, ms: S.hugHoldMs },
   { do: 'fadeOut', ms: S.letGoFadeMs },
   { do: 'flag', id: F.FinaleShelved },
@@ -150,11 +181,13 @@ const BED_SEAT = { col: 12, row: 15 };
 
 /**
  * Rejouer la fin (outil de debug, D-190) : où poser Céleste. Devant le berceau géant, avant de
- * découvrir Maria ; sur son lit, le matin, Maria à côté d'elle ; devant l'étagère, Maria rangée.
+ * découvrir Maria ; sur son lit, le matin, Maria à côté d'elle ; sur le tapis, Maria devant elle,
+ * avant de la ranger (D-191) ; devant l'étagère, Maria rangée.
  */
 export const FINALE_REPLAY = {
   reunion: { room: 'finale-big', ...BIG_CRADLE_SIDE },
   morning: { room: 'bedroom', ...BED_SEAT },
+  shelf: { room: 'bedroom', ...RUG_SEAT },
   leave: { room: 'bedroom', ...SHELF_STAND },
 } as const;
 
@@ -572,8 +605,8 @@ const TRIGGERS: StoryTrigger[] = [
     // C'est le joueur qui mène Céleste à la porte (D-138). Partir (D-190) : la vue se cale sur la
     // chambre, Maria et la porte ; la porte s'ouvre, la lumière du couloir ; Céleste se retourne
     // vers Maria, un long moment ; puis elle sort, d'elle-même. La porte se ferme, la lumière
-    // s'amincit et s'éteint. Le film des années : le temps passe, Maria reste. Le noir ; l'écran de
-    // fin, puis l'accueil (D-145). Céleste ne revient pas la chercher.
+    // s'amincit et s'éteint. Le film, quelques semaines (D-191) : le temps passe, Maria reste. Le
+    // noir ; l'écran de fin, puis l'accueil (D-145). Céleste ne revient pas la chercher.
     id: 'finale-leave',
     room: 'bedroom',
     on: 'touch',
@@ -598,9 +631,9 @@ const TRIGGERS: StoryTrigger[] = [
       { do: 'wait', ms: S.lookMs },
       { do: 'door', exit: BEDROOM_DOOR, open: false, ms: S.doorCloseMs },
       { do: 'wait', ms: S.doorCloseMs + S.lookMs },
-      // Le film des années (D-190) : les nuits, puis les années ; Maria, la même. Il finit dans
-      // le noir : le jeu y passe aussitôt.
-      { do: 'film', id: 'years' },
+      // Quelques semaines (D-191) : les nuits, puis les jours, son cartable ; Maria, la même. Il
+      // finit dans le noir : le jeu y passe aussitôt.
+      { do: 'film', id: 'weeks' },
       { do: 'fadeOut', ms: 0 },
       { do: 'wait', ms: S.nightBlackMs },
       // Écrite dans le noir, à la toute fin : rien de l'après-fin (le dessin de famille, la
@@ -739,6 +772,30 @@ const PROPS: StoryData['props'] = [
     ...MARIA_SHELF,
     when: { all: [F.FinaleShelved] },
   },
+  // Les jouets d'avant (D-191) : la boîte fermée sur l'étagère pendant tout le jeu, sans rien qui la
+  // signale ; ouverte dans le noir où Céleste vient ranger Maria, les jouets autour, pour toujours
+  // (aussi dans une partie rangée ou finie avant eux).
+  {
+    id: 'toy-box',
+    room: 'bedroom',
+    kind: 'toy-box',
+    ...TOY_BOX,
+    when: { none: [F.FinaleToys, F.FinaleShelved] },
+  },
+  {
+    id: 'toy-box-open',
+    room: 'bedroom',
+    kind: 'toy-box-open',
+    ...TOY_BOX,
+    when: { any: [F.FinaleToys, F.FinaleShelved] },
+  },
+  ...Object.entries(OLD_TOYS).map(([kind, at]) => ({
+    id: kind,
+    room: 'bedroom',
+    kind: kind as keyof typeof OLD_TOYS,
+    ...at,
+    when: { any: [F.FinaleToys, F.FinaleShelved] },
+  })),
   {
     id: 'family-drawing',
     room: 'bedroom',

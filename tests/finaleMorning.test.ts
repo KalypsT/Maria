@@ -78,8 +78,12 @@ describe('le matin (D-144)', () => {
     expect(flagsOf(trigger('finale-morning').steps)).toEqual([F.FinaleMorning, F.FinaleAwake]);
     // Le tapis mène d'une traite à l'étagère (D-190) ; une partie reprise entre les deux range
     // Maria depuis le tapis.
-    expect(flagsOf(trigger('finale-play').steps)).toEqual([F.FinalePlayed, F.FinaleShelved]);
-    expect(flagsOf(trigger('finale-shelf').steps)).toEqual([F.FinaleShelved]);
+    expect(flagsOf(trigger('finale-play').steps)).toEqual([
+      F.FinalePlayed,
+      F.FinaleToys,
+      F.FinaleShelved,
+    ]);
+    expect(flagsOf(trigger('finale-shelf').steps)).toEqual([F.FinaleToys, F.FinaleShelved]);
     expect(MILESTONES.map((m) => ('trigger' in m ? m.trigger : ''))).toEqual(
       expect.arrayContaining(['finale-play', 'finale-leave']),
     );
@@ -190,6 +194,95 @@ describe('le matin (D-144)', () => {
     expect(after.filter((s) => s.do === 'face')).toEqual([{ do: 'face', facing: 1 }]);
   });
 
+  it('les jouets d’avant (D-191) : la boîte fermée pendant le jeu ; ouverte dans le noir, les jouets autour, pour toujours', () => {
+    /** Les jouets d'avant et la boîte de la chambre à ce moment. */
+    const toys = (flags: readonly string[]) => {
+      const set = new Set(flags);
+      return HOUSE_STORY.props
+        .filter(
+          (p) =>
+            p.room === 'bedroom' &&
+            (p.kind.startsWith('old-') || p.kind.startsWith('toy-box')) &&
+            checkCondition(set, p.when),
+        )
+        .map((p) => p.kind)
+        .sort();
+    };
+    const all = [
+      'old-music-book',
+      'old-pink-kitchen',
+      'old-roger',
+      'old-toy-town',
+      'old-white-cloth',
+      'toy-box-open',
+    ];
+    // Une nouvelle partie, le premier soir, tout le jeu jusqu'au tapis : la boîte, fermée, seule.
+    for (const flags of [[], [F.EveningPlayed], SKY, TOGETHER, AWAKE, PLAYED]) {
+      expect(toys(flags)).toEqual(['toy-box']);
+    }
+    // Dans le noir de l'étagère, puis pour toujours ; aussi dans une partie rangée ou finie avant.
+    expect(toys([...PLAYED, F.FinaleToys])).toEqual(all);
+    expect(toys(SHELVED)).toEqual(all);
+    expect(toys(GONE)).toEqual(all);
+    // Ouverte à la place de la boîte fermée ; jamais rien qu'on puisse prendre ou regarder.
+    expect({ ...prop('toy-box-open'), id: '', kind: '', when: {} }).toEqual({
+      ...prop('toy-box'),
+      id: '',
+      kind: '',
+      when: {},
+    });
+    // Après la fin, aucun Agir sur eux : l'étincelle d'Agir ne se pose sur aucun.
+    const after = new Set(GONE);
+    const marks = HOUSE_STORY.triggers.flatMap((t) =>
+      t.room === 'bedroom' && t.on === 'interact' && t.mark && checkCondition(after, t.when)
+        ? [`${String(t.mark.col)},${String(t.mark.row)}`]
+        : [],
+    );
+    for (const id of all) {
+      const toy = prop(id);
+      expect(marks, id).not.toContain(`${String(toy.col)},${String(toy.row)}`);
+    }
+    // Posés : sur l'étagère du surmeuble, à côté de Maria ; la cuisine rose au sol, sous le bureau.
+    for (const id of ['old-roger', 'old-toy-town', 'old-music-book', 'toy-box']) {
+      const toy = prop(id);
+      expect(toy.row, id).toBe(MARIA_SHELF.row);
+      expect(tileAt(bedroom, toy.col, toy.row + 1), id).toBe(Tile.OneWay);
+      expect(toy.col, id).not.toBe(MARIA_SHELF.col);
+    }
+    const kitchen = prop('old-pink-kitchen');
+    expect(tileAt(bedroom, kitchen.col, kitchen.row + 1)).toBe(Tile.Solid);
+    expect(tileAt(bedroom, kitchen.col, MARIA_SHELF.row + 1)).toBe(Tile.OneWay);
+  });
+
+  it('les jouets d’avant : écrits dans le noir ; la vue les regarde, puis glisse le long de l’étagère, avant le dernier câlin', () => {
+    const steps = trigger('finale-shelf').steps;
+    const toys = index(steps, (s) => s.do === 'flag' && s.id === F.FinaleToys);
+    expect(toys).toBeGreaterThan(index(steps, (s) => s.do === 'fadeOut'));
+    expect(toys).toBeLessThan(index(steps, (s) => s.do === 'fadeIn'));
+    const hold = index(steps, (s) => s.do === 'await');
+    const looks = steps.slice(0, hold).flatMap((s) => (s.do === 'look' ? [s] : []));
+    // Rapprochée, puis deux glissements lents, puis le retour sur Céleste et Maria.
+    expect(looks[0]).toMatchObject({ zoom: STORY_ZOOM.toys });
+    expect(looks[0]).not.toHaveProperty('glideMs');
+    const glides = looks.filter((s) => (s.glideMs ?? 0) > 0);
+    expect(glides).toHaveLength(2);
+    for (const glide of glides) {
+      expect(glide).toMatchObject({ zoom: STORY_ZOOM.toys, row: MARIA_SHELF.row });
+    }
+    const along = glides.map((s) => s.col ?? 0);
+    expect(along[1]).toBeGreaterThan(along[0] ?? 0);
+    expect(looks.at(-1)).toEqual({ do: 'look' });
+    // Chaque glissement a le temps d'aller au bout avant le suivant.
+    for (const glide of glides) {
+      const i = steps.indexOf(glide);
+      const wait = steps[i + 1];
+      expect(wait?.do).toBe('wait');
+      if (wait?.do === 'wait') {
+        expect(wait.ms).toBeGreaterThanOrEqual(glide.glideMs ?? 0);
+      }
+    }
+  });
+
   it('la chambre reste fermée jusqu’à ce que Maria soit rangée ; ensuite, la porte', () => {
     expect(director(AWAKE).lockIcon('bedroom', 1)).toBe('maria');
     expect(director(PLAYED).lockIcon('bedroom', 1)).toBe('maria-shelf');
@@ -249,13 +342,13 @@ describe('le dernier plan (D-144, §12)', () => {
     expect(steps[close]).toMatchObject({ exit: door.id });
   });
 
-  it('Céleste partie, la porte fermée : le film des années ; le noir ; la fin', () => {
+  it('Céleste partie, la porte fermée : quelques semaines ; le noir ; la fin', () => {
     expect(flagsOf(steps)).toEqual([F.FinaleGone]);
     const gone = index(steps, (s) => s.do === 'gone');
     expect(gone).toBeGreaterThan(index(steps, (s) => s.do === 'fadeOut'));
     const closed = index(steps, (s) => s.do === 'door' && !s.open);
     const film = index(steps, (s) => s.do === 'film');
-    expect(steps[film]).toEqual({ do: 'film', id: 'years' });
+    expect(steps[film]).toEqual({ do: 'film', id: 'weeks' });
     expect(film).toBeGreaterThan(closed);
     // Il finit dans le noir : le jeu y passe aussitôt, l'étape de la fin s'y écrit.
     expect(steps[film + 1]).toEqual({ do: 'fadeOut', ms: 0 });
