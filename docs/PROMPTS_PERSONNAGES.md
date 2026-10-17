@@ -797,7 +797,7 @@ Toutes les images ci-dessus sont reçues et intégrées (`public/art/memory-*.we
 
 ## D-190 : la fin
 
-### Le contrechamp (facultatif) : Céleste assise devant Maria
+### Le contrechamp (facultatif) : Céleste assise devant Maria (reçue)
 
 Le film du contrechamp utilise aujourd'hui l'illustration debout de l'écran de départ
 (`celeste-tee.png`), le même cadre que Céleste en pyjama dans l'intro. Une version assise, tournée
@@ -814,7 +814,7 @@ little pensive, the hint of a smile. Full body, plain pure white background, no 
 
 Fichier : `celeste-tee-sit.png` (fond détouré comme les autres).
 
-### Céleste qui grandit (D-190, PR 7) : 9, 12, 15 et 18 ans
+### Céleste qui grandit (D-190, PR 7) : 9, 12, 15 et 18 ans (reçues)
 
 Le film des années montre Céleste traverser sa chambre, de plus en plus grande. En attendant ces
 images, des silhouettes provisoires (mêmes noms, dans `public/art/film/`). **Une conversation**,

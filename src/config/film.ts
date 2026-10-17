@@ -46,6 +46,8 @@ export const FILM_IMAGES = {
    * départ, debout ; une illustration assise, tournée vers Maria, pourra la remplacer.
    */
   celesteTee: 'art/celeste-tee.png',
+  /** Céleste en phase 4, assise, tournée vers Maria (illustration de l'utilisateur, D-190). */
+  celesteTeeSit: 'art/film/celeste-tee-sit.png',
   maria: 'art/maria.png',
   /**
    * Le film des années (D-190) : la chambre à chaque âge, capturée dans le jeu dans un même cadre
@@ -64,10 +66,10 @@ export const FILM_IMAGES = {
   /** La chambre une nuit, à 13 ans : papa à la porte. */
   age13Night: 'art/film/room-age13-night.webp',
   /**
-   * Céleste qui grandit (D-190, PR 7) : à 9 ans debout, son cartable ; à 12 ans assise sur son lit,
-   * un casque ; à 15 ans debout, son téléphone ; à 18 ans à la porte, sa valise, tournée vers Maria.
-   * PLACEHOLDER : des silhouettes (`scripts/make-intro-art.py film`) jusqu'aux illustrations de
-   * l'utilisateur, aux mêmes noms (prompts dans `docs/PROMPTS_PERSONNAGES.md`).
+   * Céleste qui grandit (D-190, PR 7) : à 9 ans debout, son cartable ; à 12 ans assise, un casque,
+   * un livre ; à 15 ans debout, son téléphone ; à 18 ans, sa valise (l'illustration regarde vers
+   * nous : retournée, elle regarde Maria). Illustrations de l'utilisateur, détourées
+   * (`scripts/art-cutout.py`) ; prompts dans `docs/PROMPTS_PERSONNAGES.md`.
    */
   celeste9: 'art/film/celeste-9.png',
   celeste12: 'art/film/celeste-12.png',
@@ -281,12 +283,37 @@ const CONTRECHAMP: readonly FilmShot[] = [
   {
     id: 'now',
     scene: 'morning',
-    durationMs: 7600,
+    durationMs: 10400,
     enter: { kind: 'dissolve', ms: 2800 },
     camera: { from: ROOM_CAMERA, to: { x: 960, y: 580, zoom: 1.12 } },
     backdrop: 'morning',
+    // Debout d'abord, à la place du premier soir : elle a grandi. Puis, en fondu (comme le pyjama
+    // et la robe de l'intro), assise devant Maria, qu'elle regarde.
     sprites: [
-      { image: 'celesteTee', x: 640, bottom: 952, height: 780, breathe: true, shadow: 290 },
+      {
+        image: 'celesteTee',
+        x: 640,
+        bottom: 952,
+        height: 780,
+        breathe: true,
+        shadow: 290,
+        opacity: [
+          [5800, 1],
+          [7000, 0],
+        ],
+      },
+      {
+        image: 'celesteTeeSit',
+        x: 760,
+        bottom: 958,
+        height: 450,
+        breathe: true,
+        shadow: 330,
+        opacity: [
+          [5000, 0],
+          [6200, 1],
+        ],
+      },
       MARIA,
     ],
     glow: { color: 'warm', x: 900, y: 700, radius: 760, strength: [[0, 0.18]] },
@@ -343,12 +370,12 @@ const passing = (ms: number): IntroKeys => [
 const CELESTE_AT = {
   /** Debout juste sous l'étagère de Maria, son cartable ; elle ne lève pas les yeux. */
   9: { image: 'celeste9', x: 1300, bottom: 972, height: 150 },
-  /** Assise sur son lit, un casque. */
-  12: { image: 'celeste12', x: 330, bottom: 792, height: 150 },
+  /** Assise sur son lit, un casque, un livre, son sac à côté d'elle. */
+  12: { image: 'celeste12', x: 330, bottom: 792, height: 175 },
   /** Debout sous la fenêtre, son téléphone. */
   15: { image: 'celeste15', x: 760, bottom: 972, height: 260 },
-  /** À la porte, sa valise, tournée vers Maria. */
-  18: { image: 'celeste18', x: 1720, bottom: 972, height: 320 },
+  /** À la porte, sa valise côté porte, tournée vers Maria. */
+  18: { image: 'celeste18', x: 1720, bottom: 972, height: 320, flip: true },
 } as const satisfies Record<number, FilmSprite>;
 
 /**

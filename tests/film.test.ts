@@ -72,6 +72,15 @@ describe('les films de la fin (D-190)', () => {
     expect(grown?.x).toBe(young?.x);
     expect(grown?.bottom).toBe(young?.bottom);
     expect(grown?.height ?? 0).toBeGreaterThan(young?.height ?? 0);
+    // Puis, en fondu, assise devant Maria, tournée vers elle, au sol comme elle.
+    const sitting = now?.sprites.find((s) => s.image === 'celesteTeeSit');
+    expect(keyValue(sitting?.opacity, 0, 1)).toBe(0);
+    expect(keyValue(sitting?.opacity, now?.durationMs ?? 0, 0)).toBe(1);
+    expect(keyValue(grown?.opacity, now?.durationMs ?? 0, 1)).toBe(0);
+    expect(sitting?.x ?? 0).toBeLessThan(mariaOf(now as FilmShot)?.x ?? 0);
+    expect(Math.abs((sitting?.bottom ?? 0) - (mariaOf(now as FilmShot)?.bottom ?? 0))).toBeLessThan(
+      20,
+    );
     // Le cœur du premier soir seulement.
     expect(then?.bubble).toBeDefined();
     expect(now?.bubble).toBeUndefined();

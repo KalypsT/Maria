@@ -143,7 +143,8 @@ def silhouettes():
 
     save_once(shade, "celeste-9.png")
     save_once(shade, "celeste-15.png")
-    save_once(shade.transpose(Image.FLIP_LEFT_RIGHT), "celeste-18.png")
+    # Tournée vers la gauche par le film (`flip`), comme l'illustration.
+    save_once(shade, "celeste-18.png")
     # Assise (12 ans, sur son lit) : le haut du corps, et les jambes repliées devant elle.
     top = shade.crop((0, 0, shade.width, int(shade.height * 0.6)))
     seated = Image.new("RGBA", (int(shade.width * 1.5), top.height + 60), (0, 0, 0, 0))
