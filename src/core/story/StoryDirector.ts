@@ -4,6 +4,7 @@ import type { HapticMoment } from '../../config/haptics';
 import type { FlashbackId } from '../../config/memories';
 import type { PlayableMemoryId } from '../../config/playableMemories';
 import { PHYSICS_STEP_HZ, msToSteps } from '../../config/movement';
+import { STORY_WALK_MAX_MS } from '../../config/story';
 import type { Box } from '../physics/gridCollision';
 import {
   areaOverlaps,
@@ -31,6 +32,8 @@ export interface StoryHost {
   pose(pose: ScriptPose): void;
   /** Céleste se tourne, sans se déplacer (D-190). */
   face?(facing: 1 | -1): void;
+  /** La lumière du couloir dans la sortie `exit` : la porte s'ouvre, ou se ferme (D-190). */
+  door?(exit: number, open: boolean, ms: number): void;
   /** Bulle au-dessus de Céleste, ou du personnage `by` (objet de mise en scène). */
   think(icon: ThoughtIcon, ms: number, by?: string): void;
   /** Scintillements étranges dans une zone (tuiles) de la salle courante. */
@@ -88,6 +91,10 @@ export class StoryDirector {
   holdProgress = 0;
   /** Un souvenir jouable est en cours (D-89) : le script attend `endPlay`. */
   playing = false;
+  /** Céleste marche dans un script (étape `walk`, D-190) : -1 ou 1 ; 0 sinon. */
+  walkX = 0;
+  /** Hitbox de Céleste au dernier pas (l'étape `walk`). */
+  private box: Box | null = null;
   private running: StoryTrigger | null = null;
   private stepIndex = 0;
   private stepElapsed = 0;
@@ -232,6 +239,7 @@ export class StoryDirector {
   /** Arrête le script en cours et lève le voile (changement de salle, réapparition). */
   cancel(): void {
     this.running = null;
+    this.walkX = 0;
     this.veil = 0;
     this.veilShape = 'plain';
     this.interactable = -1;
@@ -252,6 +260,7 @@ export class StoryDirector {
   step(room: string, box: Box, interact: boolean, held = false, grounded = true): void {
     const left = this.lastRoom !== null && this.lastRoom !== room ? this.lastRoom : null;
     this.lastRoom = room;
+    this.box = box;
     const triggers = this.data.triggers;
     if (left !== null) {
       // Salle quittée : ses déclencheurs `leave` (instantanés, ils ne bloquent rien).
@@ -333,6 +342,7 @@ export class StoryDirector {
     if (!trigger) {
       return;
     }
+    this.walkX = 0;
     for (;;) {
       this.stepIndex++;
       const step = trigger.steps[this.stepIndex];
@@ -363,6 +373,10 @@ export class StoryDirector {
           return;
         case 'await':
           this.holdProgress = 0;
+          return;
+        case 'walk':
+          this.stepTotal = msToSteps(STORY_WALK_MAX_MS, this.stepHz);
+          this.walkX = step.facing;
           return;
         default:
           this.apply(step);
@@ -401,6 +415,9 @@ export class StoryDirector {
         break;
       case 'face':
         this.host.face?.(step.facing);
+        break;
+      case 'door':
+        this.host.door?.(step.exit, step.open, step.ms);
         break;
       case 'sparkle':
         this.host.sparkle(step.area, step.ms);
@@ -478,6 +495,16 @@ export class StoryDirector {
       return;
     }
     this.stepElapsed++;
+    if (step.do === 'walk') {
+      // Arrivée quand le milieu de sa hitbox passe la colonne, ou au bout du temps permis.
+      const box = this.box;
+      const x = box ? (box.x + box.width / 2) / TILE_SIZE : step.col + 0.5;
+      if ((x - (step.col + 0.5)) * step.facing >= 0 || this.stepElapsed >= this.stepTotal) {
+        this.walkX = 0;
+        this.next();
+      }
+      return;
+    }
     const k = this.stepTotal <= 0 ? 1 : Math.min(1, this.stepElapsed / this.stepTotal);
     if (step.do === 'fadeOut') {
       this.veil = this.veilFrom + (1 - this.veilFrom) * k;

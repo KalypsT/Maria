@@ -133,6 +133,11 @@ const PUT_AWAY: readonly StoryStep[] = [
  * peut pas atteindre la porte sans y passer.
  */
 const LEAVE_AREA: TileArea = { col: 41, row: 9, w: 4, h: 11 };
+/** La porte de la chambre (sortie 1, vers le couloir), au bas du mur de droite. */
+const BEDROOM_DOOR = 1;
+/** Partir (D-190) : la vue, entre Maria et la porte ; Céleste marche jusque dans la porte. */
+const LEAVE_LOOK = { col: 38, row: 14 };
+const LEAVE_COL = 43;
 /**
  * Après la fin (D-145) : « Continuer » reprend dans le couloir, juste derrière la porte de la
  * chambre (son départ) ; Céleste ne revient pas chercher Maria.
@@ -146,11 +151,12 @@ const BED_SEAT = { col: 12, row: 15 };
 
 /**
  * Rejouer la fin (outil de debug, D-190) : où poser Céleste. Devant le berceau géant, avant de
- * découvrir Maria ; sur son lit, le matin, Maria à côté d'elle.
+ * découvrir Maria ; sur son lit, le matin, Maria à côté d'elle ; devant l'étagère, Maria rangée.
  */
 export const FINALE_REPLAY = {
   reunion: { room: 'finale-big', ...BIG_CRADLE_SIDE },
   morning: { room: 'bedroom', ...BED_SEAT },
+  leave: { room: 'bedroom', ...SHELF_STAND },
 } as const;
 
 const TRIGGERS: StoryTrigger[] = [
@@ -561,9 +567,12 @@ const TRIGGERS: StoryTrigger[] = [
     steps: PUT_AWAY,
   },
   {
-    // C'est le joueur qui fait sortir Céleste (D-138). Le dernier plan (§12) : la vue reste sur
-    // Maria ; un très léger signe du monde étrange ; Maria ne bouge pas ; tout redevient normal ; le
-    // noir. L'écran de fin, puis l'accueil (D-145). Céleste ne revient pas la chercher.
+    // C'est le joueur qui mène Céleste à la porte (D-138). Partir (D-190) : la vue se cale sur la
+    // chambre, Maria et la porte ; la porte s'ouvre, la lumière du couloir ; Céleste se retourne
+    // vers Maria, un long moment ; puis elle sort, d'elle-même. La porte se ferme, la lumière
+    // s'amincit et s'éteint. Le dernier plan (§12) : la vue sur Maria ; un très léger signe du monde
+    // étrange ; Maria ne bouge pas ; tout redevient normal ; le noir. L'écran de fin, puis l'accueil
+    // (D-145). Céleste ne revient pas la chercher.
     id: 'finale-leave',
     room: 'bedroom',
     on: 'touch',
@@ -573,26 +582,40 @@ const TRIGGERS: StoryTrigger[] = [
     // Un saut ne doit pas mener à la porte sans passer par le dernier plan (D-189).
     airborne: true,
     steps: [
+      { do: 'look', ...LEAVE_LOOK },
+      { do: 'door', exit: BEDROOM_DOOR, open: true, ms: S.doorOpenMs },
+      { do: 'wait', ms: S.doorOpenMs },
+      { do: 'face', facing: -1 },
+      { do: 'wait', ms: S.lookBackMs },
+      { do: 'face', facing: 1 },
+      { do: 'wait', ms: S.lookMs / 2 },
+      { do: 'walk', col: LEAVE_COL, facing: 1 },
       { do: 'fadeOut', ms: S.fadeMs },
-      { do: 'flag', id: F.FinaleGone },
       { do: 'gone' },
+      { do: 'wait', ms: S.leaveBlackMs },
+      { do: 'fadeIn', ms: S.fadeMs * 2 },
+      { do: 'wait', ms: S.lookMs },
+      { do: 'door', exit: BEDROOM_DOOR, open: false, ms: S.doorCloseMs },
+      { do: 'wait', ms: S.doorCloseMs + S.lookMs },
       { do: 'look', ...MARIA_SHELF },
       {
         do: 'hush',
         ms:
-          S.nightFadeInMs +
+          STORY_ZOOM.easeMs +
           S.lastShotMs +
           S.glimmerMs +
           S.lookMs +
           S.nightFadeOutMs +
           S.nightBlackMs,
       },
-      { do: 'fadeIn', ms: S.nightFadeInMs },
-      { do: 'wait', ms: S.lastShotMs },
+      { do: 'wait', ms: STORY_ZOOM.easeMs + S.lastShotMs },
       { do: 'glimmer', ms: S.glimmerMs },
       { do: 'sparkle', area: SHELF_GLOW, ms: S.glimmerMs },
       { do: 'wait', ms: S.glimmerMs + S.lookMs },
       { do: 'fadeOut', ms: S.nightFadeOutMs },
+      // Écrite dans le noir, à la toute fin : rien de l'après-fin (le dessin de famille, la
+      // console) n'apparaît pendant le dernier plan (D-190).
+      { do: 'flag', id: F.FinaleGone },
       { do: 'wait', ms: S.nightBlackMs },
       // L'écran de fin, puis l'accueil (D-145).
       { do: 'end', room: AFTER_END_ROOM },

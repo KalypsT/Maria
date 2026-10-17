@@ -3,7 +3,12 @@ import { DIFFICULTY_MIN_WINDOW_MS } from '../src/config/levelDesign';
 import { DEFAULT_MOVEMENT, PLAYER_HITBOX } from '../src/config/movement';
 import { TILE_SIZE as T } from '../src/config/display';
 import { MARIA_THINGS, MEMORIES, MEMORIES_LATER, STRANGE_THINGS } from '../src/config/memories';
-import { LEGACY_STORY_FLAGS, PROP_SIZE, StoryFlag as F } from '../src/config/story';
+import {
+  LEGACY_STORY_FLAGS,
+  PROP_SIZE,
+  STORY_WALK_MAX_MS,
+  StoryFlag as F,
+} from '../src/config/story';
 import { analyzeLevel } from '../src/core/analysis/analyzeLevel';
 import { surfaceUnder } from '../src/core/analysis/surfaces';
 import type { Box } from '../src/core/physics/gridCollision';
@@ -312,6 +317,66 @@ describe('StoryDirector', () => {
     expect(h.awaiting).toBeNull();
     expect(h.holdProgress).toBe(0);
     expect(held.log).toEqual(['flag done']);
+  });
+
+  it('Céleste marche (D-190) : vers où elle regarde, jusqu’à la colonne, ou au bout du temps', () => {
+    const { log, host } = recorder();
+    const d = new StoryDirector(story([{ do: 'walk', col: 8, facing: 1 }]), host, HZ);
+    d.step('r', standing(2, 3), true);
+    expect(d.walkX).toBe(1);
+    d.step('r', standing(5, 3), false);
+    expect(d.walkX).toBe(1);
+    d.step('r', standing(8, 3), false);
+    expect(d.walkX).toBe(0);
+    expect(log).toEqual(['flag done']);
+    // Bloquée : elle n'arrive jamais, le script reprend quand même.
+    const stuck = recorder();
+    const s = new StoryDirector(story([{ do: 'walk', col: 30, facing: 1 }]), stuck.host, HZ);
+    s.step('r', standing(2, 3), true);
+    for (let i = 0; i < (STORY_WALK_MAX_MS / 1000) * HZ + 2; i++) {
+      s.step('r', standing(2, 3), false);
+    }
+    expect(s.walkX).toBe(0);
+    expect(stuck.log).toEqual(['flag done']);
+  });
+
+  it('marcher : jamais avec Maria dans les bras, jamais dans le noir ; une porte qui existe (D-190)', () => {
+    const zone = buildZone(HOUSE);
+    const problems = (steps: StoryStep[]): string[] =>
+      storyProblems(
+        {
+          ...HOUSE_STORY,
+          triggers: [
+            {
+              id: 'w',
+              room: 'bedroom',
+              on: 'interact',
+              area: { col: 18, row: 17, w: 4, h: 3 },
+              mark: { col: 19, row: 18 },
+              when: { none: ['w'] },
+              lock: true,
+              steps: [...steps, { do: 'flag', id: 'w' }],
+            },
+          ],
+        },
+        zone,
+      ).filter((p) => p.startsWith('déclencheur w :'));
+    expect(problems([{ do: 'walk', col: 30, facing: 1 }])).toEqual([]);
+    expect(
+      problems([
+        { do: 'fadeOut', ms: 100 },
+        { do: 'pose', pose: 'hold' },
+        { do: 'fadeIn', ms: 100 },
+        { do: 'walk', col: 30, facing: 1 },
+        { do: 'fadeOut', ms: 100 },
+        { do: 'pose', pose: 'stand' },
+        { do: 'fadeIn', ms: 100 },
+      ]),
+    ).toEqual(['déclencheur w : Céleste marche avec Maria dans les bras']);
+    expect(problems([{ do: 'door', exit: 1, open: true, ms: 100 }])).toEqual([]);
+    expect(problems([{ do: 'door', exit: 7, open: true, ms: 100 }])).toEqual([
+      'déclencheur w : pas de sortie 7 dans bedroom',
+    ]);
   });
 
   it('Agir attendu : jamais dans le noir, toujours les commandes suspendues (D-190)', () => {

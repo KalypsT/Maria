@@ -205,6 +205,17 @@ export type StoryStep =
    * seulement, elle ne se déplace pas.
    */
   | { readonly do: 'face'; readonly facing: 1 | -1 }
+  /**
+   * Céleste marche (D-190, bloquant), sous les yeux du joueur, vers `facing`, jusqu'à ce que le
+   * milieu de sa hitbox passe la colonne `col` (au plus `STORY_WALK_MAX_MS`). Jamais Maria dans
+   * les bras (pilier 5, vérifié par `storyProblems`).
+   */
+  | { readonly do: 'walk'; readonly col: number; readonly facing: 1 | -1 }
+  /**
+   * La lumière du couloir dans une sortie de la salle (D-190, non bloquant) : elle s'allume en
+   * `ms` (la porte s'ouvre), ou s'amincit vers le mur et s'éteint (la porte se ferme, son bruit).
+   */
+  | { readonly do: 'door'; readonly exit: number; readonly open: boolean; readonly ms: number }
   /** Scintillements étranges dans une zone de la salle (non bloquant, D-35). */
   | { readonly do: 'sparkle'; readonly area: TileArea; readonly ms: number }
   /** Souvenir trouvé (D-38), sauvegardé aussitôt ; sans effet s'il l'est déjà. */

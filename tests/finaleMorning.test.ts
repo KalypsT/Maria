@@ -220,6 +220,35 @@ describe('le dernier plan (D-144, §12)', () => {
     }
   });
 
+  it('partir (D-190) : la porte s’ouvre, elle se retourne vers Maria, sort ; la porte se ferme', () => {
+    const door = need(
+      bedroom.exits.find((e) => e.id === 1),
+      'porte',
+    );
+    const open = index(steps, (s) => s.do === 'door' && s.open);
+    const back = index(steps, (s) => s.do === 'face' && s.facing === -1);
+    const away = index(steps, (s) => s.do === 'face' && s.facing === 1);
+    const walk = index(steps, (s) => s.do === 'walk');
+    const gone = index(steps, (s) => s.do === 'gone');
+    const close = index(steps, (s) => s.do === 'door' && !s.open);
+    expect(steps[open]).toMatchObject({ exit: door.id });
+    // Elle se retourne vers Maria (à gauche, l'étagère), longtemps, puis vers la porte.
+    expect(MARIA_SHELF.col).toBeLessThan(door.col);
+    expect(open).toBeLessThan(back);
+    expect(back).toBeLessThan(away);
+    expect(steps[back + 1]).toMatchObject({ do: 'wait' });
+    // Elle marche d'elle-même jusque dans la porte, sans la passer ; puis le noir.
+    expect(away).toBeLessThan(walk);
+    const step = steps[walk];
+    expect(step?.do === 'walk' && step.facing === 1 && step.col < door.col).toBe(true);
+    expect(step?.do === 'walk' && step.col >= need(leave.area, 'zone').col).toBe(true);
+    expect(steps[walk + 1]).toMatchObject({ do: 'fadeOut' });
+    // La porte se ferme sous les yeux du joueur, Céleste partie.
+    expect(close).toBeGreaterThan(gone);
+    expect(close).toBeGreaterThan(index(steps, (s) => s.do === 'fadeIn'));
+    expect(steps[close]).toMatchObject({ exit: door.id });
+  });
+
   it('Céleste sort ; la vue reste sur Maria ; un très léger signe ; tout redevient normal ; le noir', () => {
     expect(flagsOf(steps)).toEqual([F.FinaleGone]);
     const gone = index(steps, (s) => s.do === 'gone');

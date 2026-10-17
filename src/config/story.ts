@@ -413,6 +413,14 @@ export const STORY_TIMING = {
   letGoFadeMs: 1100,
   letGoBlackMs: 900,
   shelfLookMs: 4600,
+  /**
+   * Partir (D-190) : la porte s'ouvre (la lumière du couloir), Céleste se retourne vers Maria ce
+   * temps-là ; elle sort, le noir tenu ; la porte se ferme (la lumière s'amincit, s'éteint).
+   */
+  doorOpenMs: 700,
+  lookBackMs: 2800,
+  leaveBlackMs: 900,
+  doorCloseMs: 1800,
   /** Le dernier plan : la vue reste sur Maria, puis un très léger signe du monde étrange. */
   lastShotMs: 2600,
   glimmerMs: 2800,
@@ -432,6 +440,19 @@ export const STORY_TIMING = {
   eveningLookDelayMs: 900,
   eveningLookMs: 2400,
 } as const;
+
+/**
+ * La lumière du couloir dans la porte de la chambre (étape `door`, D-190) : l'ouverture, et ce qui
+ * déborde sur le sol (sur `spillTiles` tuiles). Ajoutée à l'image. PROVISOIRE.
+ */
+export const DOOR_LIGHT = {
+  light: { color: 0xffc070, alpha: 0.9 },
+  spill: { color: 0xffc070, alpha: 0.35 },
+  spillTiles: 3,
+} as const;
+
+/** Une marche de script (étape `walk`, D-190) ne dure jamais plus que ça (ms), arrivée ou non. */
+export const STORY_WALK_MAX_MS = 3000;
 
 /**
  * La vue qui se rapproche (étape `look` avec `zoom`, D-171) : le rapprochement au plus près, et le

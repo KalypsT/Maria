@@ -1739,6 +1739,11 @@ export function installDebugOverlay(scene: GameScene): void {
         [...together, F.FinaleMorning, F.FinaleAwake],
         FINALE_REPLAY.morning,
       ],
+      [
+        'Rejouer la fin : le départ',
+        [...together, F.FinaleMorning, F.FinaleAwake, F.FinalePlayed, F.FinaleShelved],
+        FINALE_REPLAY.leave,
+      ],
     );
   }
   const current = [...scene.story.flags].sort().join();

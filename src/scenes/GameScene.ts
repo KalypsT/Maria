@@ -749,6 +749,23 @@ export class GameScene extends Phaser.Scene {
       face: (facing) => {
         this.player.facing = facing;
       },
+      door: (id, open, ms) => {
+        const exit = this.level.exits.find((e) => e.id === id);
+        if (!exit) {
+          return;
+        }
+        this.storyView.door(
+          exit.col * TILE_SIZE,
+          exit.rowMin * TILE_SIZE,
+          (exit.rowMax - exit.rowMin + 1) * TILE_SIZE,
+          exit.side === 'right' ? -1 : 1,
+          open,
+          ms,
+        );
+        if (!open) {
+          this.audio.sfx.play('door');
+        }
+      },
       think: (icon, ms, by) => {
         this.storyView.think(icon, ms, by);
         this.audio.sfx.play('thought');
@@ -1161,7 +1178,8 @@ export class GameScene extends Phaser.Scene {
       }
       this.stepDropHelp();
       const locked = story.locked;
-      input.moveX = locked ? 0 : this.controls.moveX;
+      // Céleste marche seule dans un script (D-190).
+      input.moveX = story.walkX !== 0 ? story.walkX : locked ? 0 : this.controls.moveX;
       input.moveY = locked ? 0 : this.controls.moveY;
       input.jumpPressed = this.controls.consumePressed('Jump') && !locked;
       input.jumpHeld = this.controls.isHeld('Jump') && !locked;
@@ -2835,6 +2853,8 @@ export class GameScene extends Phaser.Scene {
       this.zone !== null &&
       !story.busy &&
       !story.flags.has(StoryFlag.HelpDrop) &&
+      // Pas au matin de la fin (D-190) : Céleste vient de ranger Maria, sur le surmeuble.
+      !(story.flags.has(StoryFlag.FinaleAwake) && !story.flags.has(StoryFlag.FinaleGone)) &&
       player.grounded &&
       Math.abs(player.vx) < 1 &&
       isGrounded(this.level, box, true) &&
