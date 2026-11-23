@@ -1,0 +1,45 @@
+name: Déploiement DomoThib
+
+# Le build de DomoThib Games (D-193, `docs/domothib.md` §7.2) : une PR le construit et le vérifie ;
+# une fusion dans `main` l'envoie sur l'hôte des jeux (dossier `maria`). Le workflow de GitHub Pages
+# (`deploy.yml`) reste à côté jusqu'à la bascule (G2 bis).
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: domothib-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  deploy:
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run test
+      - run: npm run build:domothib
+      - run: npm run check:domothib
+      - name: Envoi sur l'hôte des jeux
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          SSH_KEY: ${{ secrets.JEUX_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/jeux && chmod 600 ~/.ssh/jeux
+          rsync -rlz --delete-after --delay-updates --chmod=D755,F644 \
+            -e "ssh -i ~/.ssh/jeux" dist/ "jeux-deploy@$VPS_HOST:./"
