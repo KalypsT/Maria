@@ -260,6 +260,8 @@ export class AudioPlayer {
   private activeJingleGain = 1;
   private unlocked = false;
   private lastFrame = 0;
+  /** Tout le son coupé par la pause de DomoThib (D-193), comme quand l'appli est masquée. */
+  private silenced = false;
 
   constructor(settings: AudioSettings) {
     const { slots, unknown } = audioFileMap(FILES);
@@ -277,16 +279,7 @@ export class AudioPlayer {
     window.addEventListener('pointerdown', unlock, true);
     window.addEventListener('keydown', unlock, true);
     document.addEventListener('visibilitychange', () => {
-      for (const voice of this.voices.values()) {
-        if (document.hidden) {
-          voice.suspend();
-        } else {
-          voice.resume();
-        }
-      }
-      if (document.hidden) {
-        this.activeJingle?.pause();
-      }
+      this.applySilence();
     });
     const frame = (now: number) => {
       this.update(now);
@@ -373,6 +366,34 @@ export class AudioPlayer {
   }
 
   /**
+   * Coupe tout le son, musique, jingles et bruitages (la pause de DomoThib, D-193), ou le rend ;
+   * la musique reprend où elle en était. Masquée, l'appli reste muette.
+   */
+  setSilenced(silenced: boolean): void {
+    this.silenced = silenced;
+    this.sfx.setSilenced(silenced);
+    this.applySilence();
+  }
+
+  private get quiet(): boolean {
+    return document.hidden || this.silenced;
+  }
+
+  private applySilence(): void {
+    const quiet = this.quiet;
+    for (const voice of this.voices.values()) {
+      if (quiet) {
+        voice.suspend();
+      } else {
+        voice.resume();
+      }
+    }
+    if (quiet) {
+      this.activeJingle?.pause();
+    }
+  }
+
+  /**
    * Maria apparaît : son jingle par-dessus la musique baissée s'il existe, sinon le silence (D-94,
    * D-121).
    */
@@ -384,7 +405,7 @@ export class AudioPlayer {
   /** Joue un jingle une fois ; pendant le silence de Maria, seul le sien est joué. */
   playJingle(jingle: Jingle): void {
     const url = this.files.get(jingle);
-    if (!url || !this.unlocked || document.hidden || (this.mix.hushing && jingle !== 'maria')) {
+    if (!url || !this.unlocked || this.quiet || (this.mix.hushing && jingle !== 'maria')) {
       return;
     }
     let player = this.jingles.get(jingle);
@@ -442,7 +463,7 @@ export class AudioPlayer {
       voice.load();
       // Un disque ne repart que s'il est demandé (pas pendant son fondu de sortie).
       const wanted = !record || mix.record === slot;
-      if (wanted && !voice.playing && voice.ready && this.unlocked && !document.hidden) {
+      if (wanted && !voice.playing && voice.ready && this.unlocked && !this.quiet) {
         voice.start();
       }
       voice.update(mix.musicVolume(slot), now);

@@ -179,6 +179,7 @@ import { RideView } from './RideView';
 import { Backpack } from '../ui/Backpack';
 import { BAG_IMAGE, SPARK_ICON } from '../ui/bagIcons';
 import { notebookPlaces, openingPage, type BackpackTrigger } from '../core/world/backpack';
+import type { HostPause } from '../core/platform/hostPause';
 import { recordSpots, treasureSpots, type TreasureSpot } from '../core/world/treasures';
 import { hasNewTreasure, roomPlace, treasureBook } from '../core/world/treasureBook';
 import { MAP_PLACES, placeTitle } from '../config/places';
@@ -262,6 +263,8 @@ export const SESSION_KEY = 'maria-session';
 export const LIBRARY_KEY = 'maria-library';
 /** Clé du registre où main.ts dépose le lecteur de musique (D-57). */
 export const AUDIO_KEY = 'maria-audio';
+/** La pause de DomoThib (D-193), absente hors de DomoThib. */
+export const HOST_PAUSE_KEY = 'maria-host-pause';
 
 /** Bruitages du mouvement qui ne dépendent que de leur signal (D-127). */
 const CUE_SOUNDS: readonly (readonly [number, SfxSlot])[] = [
@@ -727,6 +730,16 @@ export class GameScene extends Phaser.Scene {
     this.session = this.registry.get(SESSION_KEY) as SaveSession;
     this.library = (this.registry.get(LIBRARY_KEY) as SaveLibrary | undefined) ?? null;
     this.audio = this.registry.get(AUDIO_KEY) as AudioPlayer;
+    const hostPause = this.registry.get(HOST_PAUSE_KEY) as HostPause | undefined;
+    // La partie prend le relais du son pour la pause de DomoThib (D-193).
+    hostPause?.setTarget({
+      pause: () => {
+        this.setHostPaused(true);
+      },
+      resume: () => {
+        this.setHostPaused(false);
+      },
+    });
     this.story = new StoryDirector(HOUSE_STORY, {
       flagCleared: (id) => {
         void this.session.removeStoryFlag(id);
@@ -959,10 +972,14 @@ export class GameScene extends Phaser.Scene {
     const keyboard = new KeyboardSource();
     this.controls.sources.push(keyboard);
     const detachKeyboard = keyboard.attach(window);
-    // Le retour d'Android presse Pause au lieu de quitter le jeu (D-186).
-    const backButton = new BackButtonSource(window.history);
-    this.controls.sources.push(backButton);
-    const detachBackButton = backButton.attach(window);
+    // Le retour d'Android presse Pause au lieu de quitter le jeu (D-186). Dans DomoThib, il reste
+    // à DomoThib (son menu, puis la sortie, D-193) : le cadre ne pose pas d'entrée d'historique.
+    let detachBackButton: (() => void) | undefined;
+    if (!__DOMOTHIB__) {
+      const backButton = new BackButtonSource(window.history);
+      this.controls.sources.push(backButton);
+      detachBackButton = backButton.attach(window);
+    }
     let detachTouch: (() => void) | undefined;
     const controlSettings = { ...this.session.settings.data.controls };
     // En dev et dans le build de debug, `?touch` force l'affichage sur ordinateur (essai à la souris).
@@ -1008,6 +1025,8 @@ export class GameScene extends Phaser.Scene {
           this.haptics.enabled = settings.vibration;
         },
         debugTools: __DEBUG_TOOLS__,
+        // Pas de build de debug sur l'hôte des jeux (D-193).
+        canSwitchDebug: !__DOMOTHIB__,
         onSwitchDebug: () => {
           // Même site, donc même sauvegarde : on reprend à la dernière lanterne dans l'autre version.
           markQuietRelaunch(sessionMarks());
@@ -1052,7 +1071,7 @@ export class GameScene extends Phaser.Scene {
     this.scale.on(Phaser.Scale.Events.RESIZE, this.onResize);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       detachKeyboard();
-      detachBackButton();
+      detachBackButton?.();
       detachTouch?.();
       document.removeEventListener('visibilitychange', onVisibility);
       this.backpack.destroy();
@@ -1803,6 +1822,29 @@ export class GameScene extends Phaser.Scene {
     } else {
       this.backpack.close();
       this.audio.sfx.play('map-close');
+      // Une pression de saut faite pendant la pause ne doit pas partir à la reprise.
+      this.controls.consumePressed('Jump');
+    }
+  }
+
+  /**
+   * La pause de DomoThib (D-193) : son menu ouvert, l'écran dans le mauvais sens… La partie se fige
+   * là où elle est (la scène arrêtée, tout le son coupé), sans ouvrir le sac ; la reprise repart
+   * d'ici. Le temps de jeu est écrit, comme à la pause du joueur.
+   */
+  private setHostPaused(paused: boolean): void {
+    this.audio.setSilenced(paused);
+    this.audio.sfx.stopLoops();
+    this.clock.reset();
+    this.touch?.releaseAll();
+    if (paused) {
+      if (this.statsUnsavedMs > 0) {
+        this.statsUnsavedMs = 0;
+        void this.session.persist();
+      }
+      this.scene.pause();
+    } else {
+      this.scene.resume();
       // Une pression de saut faite pendant la pause ne doit pas partir à la reprise.
       this.controls.consumePressed('Jump');
     }

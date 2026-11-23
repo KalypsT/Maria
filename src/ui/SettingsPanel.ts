@@ -33,6 +33,8 @@ export interface SettingsPanelOptions {
    * n'apparaissent qu'avec eux.
    */
   debugTools: boolean;
+  /** Le passage discret au mode debug existe (faux dans DomoThib, sans build de debug, D-193). */
+  canSwitchDebug: boolean;
   /** Passer au mode debug, ou le quitter (autre adresse, même sauvegarde). */
   onSwitchDebug: () => void;
   /** Parcours d'essai proposés (build de debug seulement). */
@@ -114,7 +116,7 @@ export class SettingsPanel {
     }
     // Retour à l'accueil, en bas des réglages (choix de l'utilisateur, D-159).
     this.addQuit(panel);
-    if (!options.debugTools) {
+    if (!options.debugTools && options.canSwitchDebug) {
       this.addDiscreetDebug(panel);
     }
   }

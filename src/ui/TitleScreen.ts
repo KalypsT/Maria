@@ -49,6 +49,8 @@ export interface TitleOptions {
    * Céleste, puis le menu. Un toucher (ou une touche) montre tout aussitôt.
    */
   entrance?: boolean;
+  /** Dans DomoThib (D-193) : « Quitter » revient à la bibliothèque de jeux. */
+  quit?: () => void;
 }
 
 const TITLE_LETTERS = 'MARIA';
@@ -305,6 +307,10 @@ export function showTitleScreen(
       renderPwa();
       if (pwa) {
         unsubscribe = pwa.subscribe(renderPwa);
+      }
+      const quit = options.quit;
+      if (quit) {
+        element('button', panel, 'title-small', 'Quitter').addEventListener('click', quit);
       }
     };
 
