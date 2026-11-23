@@ -2,3 +2,5 @@ dist/
 coverage/
 package-lock.json
 docs/MARIA_Specifications.md
+docs/domothib.md
+src/domothib/domothib-games.ts
