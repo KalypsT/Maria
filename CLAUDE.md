@@ -45,6 +45,8 @@ npm run build         # build de production dans dist/ (sans outils de debug)
 npm run build:debug   # build de debug dans dist/debug/ (à lancer après build, publié sur /Maria/debug/, D-12)
 npm run check:no-debug # vérifie l'absence d'outils de debug dans le build principal
 npm run check:pwa     # vérifie la PWA (service worker du build principal, aucun en debug, D-23)
+npm run build:domothib # build de DomoThib Games dans dist/ (servi sous /maria/, sans service worker, D-193)
+npm run check:domothib # vérifie ce build d'après le contrat (docs/domothib.md)
 npm run preview       # sert dist/ localement (http://<ip-locale>:4173/Maria/)
 npm run typecheck     # tsc --noEmit
 npm run lint          # ESLint (typescript-eslint strictTypeChecked)
@@ -55,6 +57,7 @@ npm run test:watch    # Vitest en mode watch
 ```
 
 Le déploiement se fait via GitHub Pages (`.github/workflows/deploy.yml`) : chaque push sur `main` lance typecheck, lint, format, tests, build puis publie sur https://kalypst.github.io/Maria/ (build de debug sur https://kalypst.github.io/Maria/debug/). Les PR lancent les mêmes vérifications sans déployer.
+Un second workflow (`.github/workflows/domothib.yml`) construit le build de DomoThib Games et, sur `main`, l'envoie sur l'hôte des jeux (`https://games.loragif.fr/maria/`, D-193). Le contrat (`docs/domothib.md`) et la bibliothèque du pont (`src/domothib/domothib-games.ts`) sont des copies du dépôt DomoThibv3 : ne pas les modifier, les recopier pour les mettre à jour.
 
 ## Conventions de code
 
