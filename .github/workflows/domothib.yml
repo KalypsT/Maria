@@ -1,38 +1,50 @@
 name: Déploiement DomoThib
 
-# Le build de DomoThib Games (D-193, `docs/domothib.md` §7.2) : une PR le construit et le vérifie ;
-# une fusion dans `main` l'envoie sur l'hôte des jeux (dossier `maria`). Le workflow de GitHub Pages
-# (`deploy.yml`) reste à côté jusqu'à la bascule (G2 bis).
+# Le build de DomoThib Games (D-193, `docs/domothib.md` §7.2), à côté du workflow de GitHub Pages
+# (`deploy.yml`) jusqu'à la bascule (G2 bis). Une PR construit et vérifie le build. Le déploiement
+# vers l'hôte des jeux (dossier `maria`) part quand le workflow de GitHub Pages a réussi sur `main` :
+# ses tests (≈ 1 h) ne sont pas refaits ici. À la bascule, quand `deploy.yml` disparaît, remettre
+# typecheck, lint, format et tests dans ce workflow et le déclencher sur `push` vers `main`.
 on:
   pull_request:
-  push:
+  workflow_run:
+    workflows: ['CI et déploiement GitHub Pages']
+    types: [completed]
     branches: [main]
+  # Redéployer `main` à la main (sans refaire les tests).
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: domothib-${{ github.ref }}
+  group: domothib-${{ github.event.workflow_run.head_branch || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   deploy:
-    if: github.actor != 'dependabot[bot]'
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: npm run test
       - run: npm run build:domothib
       - run: npm run check:domothib
       - name: Envoi sur l'hôte des jeux
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        if: >-
+          github.event_name == 'workflow_run' ||
+          (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
         env:
           SSH_KEY: ${{ secrets.JEUX_SSH_KEY }}
           KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}

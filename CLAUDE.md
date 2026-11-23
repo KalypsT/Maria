@@ -57,7 +57,7 @@ npm run test:watch    # Vitest en mode watch
 ```
 
 Le déploiement se fait via GitHub Pages (`.github/workflows/deploy.yml`) : chaque push sur `main` lance typecheck, lint, format, tests, build puis publie sur https://kalypst.github.io/Maria/ (build de debug sur https://kalypst.github.io/Maria/debug/). Les PR lancent les mêmes vérifications sans déployer.
-Un second workflow (`.github/workflows/domothib.yml`) construit le build de DomoThib Games et, sur `main`, l'envoie sur l'hôte des jeux (`https://games.loragif.fr/maria/`, D-193). Le contrat (`docs/domothib.md`) et la bibliothèque du pont (`src/domothib/domothib-games.ts`) sont des copies du dépôt DomoThibv3 : ne pas les modifier, les recopier pour les mettre à jour.
+Un second workflow (`.github/workflows/domothib.yml`) construit le build de DomoThib Games et, après le succès du workflow de GitHub Pages sur `main`, l'envoie sur l'hôte des jeux (`https://games.loragif.fr/maria/`, D-193). Le contrat (`docs/domothib.md`) et la bibliothèque du pont (`src/domothib/domothib-games.ts`) sont des copies du dépôt DomoThibv3 : ne pas les modifier, les recopier pour les mettre à jour.
 
 ## Conventions de code
 
