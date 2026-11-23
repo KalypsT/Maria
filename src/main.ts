@@ -13,6 +13,7 @@ import {
   AUDIO_KEY,
   DISPLAY_SETTINGS_EVENT,
   GameScene,
+  HOST_PAUSE_KEY,
   LIBRARY_KEY,
   SESSION_KEY,
 } from './scenes/GameScene';
@@ -29,6 +30,8 @@ import { errorDetail, looksFrozen } from './core/platform/crashGuard';
 import { consumeQuietRelaunch, markQuietRelaunch } from './core/platform/quietRelaunch';
 import { sessionMarks } from './platform/sessionMarks';
 import { keepScreenAwake } from './platform/screenWake';
+import { connectHost } from './platform/domothib';
+import { HostPause } from './core/platform/hostPause';
 
 function getParent(): HTMLElement {
   const element = document.getElementById('game');
@@ -59,6 +62,7 @@ function startGame(
   session: SaveSession,
   audio: AudioPlayer,
   library: SaveLibrary,
+  hostPause: HostPause | null,
 ): Phaser.Game {
   let display: DisplaySettings = session.settings.data.display;
   /** Taille du canvas : largeur logique (D-01) × échelle de rendu (D-18). */
@@ -87,6 +91,9 @@ function startGame(
   game.registry.set(SESSION_KEY, session);
   game.registry.set(LIBRARY_KEY, library);
   game.registry.set(AUDIO_KEY, audio);
+  if (hostPause) {
+    game.registry.set(HOST_PAUSE_KEY, hostPause);
+  }
   const fitGameSize = () => {
     const { width, height } = canvasSize();
     if (width !== game.scale.gameSize.width || height !== game.scale.gameSize.height) {
@@ -174,11 +181,27 @@ async function openLibraryStorage(): Promise<SaveLibraryStorage> {
 
 async function boot(): Promise<void> {
   const parent = getParent();
-  // L'écran reste allumé pendant l'intro, les scènes et le jeu (D-186).
-  keepScreenAwake();
-  // Service worker (build principal seulement, D-23) : enregistré au plus tôt.
-  const pwa = new Pwa();
-  pwa.start();
+  // DomoThib Games (D-193) : le pont, demandé au plus tôt (null hors du build de DomoThib). Sa
+  // pause est suivie dès la connexion : le son la prend en charge une fois créé.
+  const hostConnection = connectHost().then((host) => ({
+    host,
+    hostPause: host
+      ? new HostPause(host, { pause: () => undefined, resume: () => undefined })
+      : null,
+  }));
+  if (__DOMOTHIB__) {
+    // L'orientation est déclarée à DomoThib, qui affiche son propre voile « Tourne ton écran ».
+    document.getElementById('rotate-hint')?.remove();
+  }
+  // L'écran reste allumé pendant l'intro, les scènes et le jeu (D-186). Dans DomoThib, le cadre ne
+  // permet pas de le demander : la veille y suit l'activité que le pont signale (D-193).
+  if (!__DOMOTHIB__) {
+    keepScreenAwake();
+  }
+  // Service worker (build principal seulement, D-23) : enregistré au plus tôt. Aucun dans
+  // DomoThib, ni installation (D-193).
+  const pwa = __DOMOTHIB__ ? null : new Pwa();
+  pwa?.start();
   // Les parties de l'appareil (D-184) : l'ancienne sauvegarde unique est reprise dans la partie 1.
   const library = new SaveLibrary(await openLibraryStorage());
   const opened = await library.open(legacySettings);
@@ -190,6 +213,16 @@ async function boot(): Promise<void> {
   );
   const managerOf = (slot: number): SaveManager => managers.get(slot) ?? library.slotManager(slot);
   const audio = new AudioPlayer(settings.data.audio);
+  const { host, hostPause } = await hostConnection;
+  // La pause de DomoThib (D-193) : le son pendant l'intro et l'accueil, la partie ensuite.
+  hostPause?.setTarget({
+    pause: () => {
+      audio.setSilenced(true);
+    },
+    resume: () => {
+      audio.setSilenced(false);
+    },
+  });
   // L'intro (D-185), à chaque lancement, sauf après « Oups ! » ou « Mettre à jour » (D-186) ;
   // `?nointro` la saute en dev et dans le build de debug.
   const quiet = consumeQuietRelaunch(sessionMarks());
@@ -217,9 +250,19 @@ async function boot(): Promise<void> {
           ),
     },
     pwa,
-    installHint(installEnvironment()),
-    // Le plan 8 de l'intro : le titre s'écrit, seulement après l'intro vue en entier.
-    { entrance: intro.completed },
+    pwa ? installHint(installEnvironment()) : 'none',
+    {
+      // Le plan 8 de l'intro : le titre s'écrit, seulement après l'intro vue en entier.
+      entrance: intro.completed,
+      // Dans DomoThib (D-193) : « Quitter » revient à la bibliothèque de jeux.
+      ...(host
+        ? {
+            quit: () => {
+              host.quit();
+            },
+          }
+        : {}),
+    },
   );
   // L'écran titre est posé sous l'intro (le même papier) : on peut la retirer sans éclair.
   intro.close();
@@ -235,7 +278,7 @@ async function boot(): Promise<void> {
     await session.persist();
   }
   void library.setLastSlot(choice.slot);
-  const game = startGame(parent, session, audio, library);
+  const game = startGame(parent, session, audio, library, hostPause);
   crash.session = session;
   crash.game = game;
   game.events.on(Phaser.Core.Events.POST_RENDER, () => {

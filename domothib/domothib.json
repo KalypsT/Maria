@@ -1,0 +1,14 @@
+{
+  "protocole": 1,
+  "id": "maria",
+  "nom": "Maria",
+  "description": "Céleste cherche son poupon, Maria.",
+  "version": "dev",
+  "jaquette": "jaquette.webp",
+  "orientation": "paysage",
+  "ecrans": ["telephone", "tablette"],
+  "commandes": ["tactile", "clavier"],
+  "sauvegarde": "integree",
+  "poignee": "haut-droite",
+  "pleinEcran": true
+}

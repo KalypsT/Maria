@@ -44,6 +44,8 @@ export class SfxPlayer {
   private readonly lastVariant = new Map<SfxSlot, number>();
   private settings: AudioSettings;
   private strange = false;
+  /** Tout le son coupé par la pause de DomoThib (D-193), comme quand l'appli est masquée. */
+  private silenced = false;
   private voices = 0;
   /** Boucles en cours (glisser, poursuite, D-127) : de quoi les arrêter en fondu. */
   private readonly loops = new Map<SfxSlot, () => void>();
@@ -63,12 +65,22 @@ export class SfxPlayer {
     window.addEventListener('pointerdown', unlock, true);
     window.addEventListener('keydown', unlock, true);
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        void this.context?.suspend();
-      } else {
-        void this.context?.resume();
-      }
+      this.applySilence();
     });
+  }
+
+  /** Coupe ou rend le son (la pause de DomoThib, D-193) ; masquée, l'appli reste muette. */
+  setSilenced(silenced: boolean): void {
+    this.silenced = silenced;
+    this.applySilence();
+  }
+
+  private applySilence(): void {
+    if (document.hidden || this.silenced) {
+      void this.context?.suspend();
+    } else {
+      void this.context?.resume();
+    }
   }
 
   /** Emplacements qui ont au moins un fichier. */
@@ -102,7 +114,7 @@ export class SfxPlayer {
    */
   play(slot: SfxSlot, volume = 1): void {
     const context = this.context;
-    if (!context || context.state !== 'running' || document.hidden) {
+    if (!context || context.state !== 'running' || document.hidden || this.silenced) {
       return;
     }
     const now = context.currentTime * 1000;
@@ -154,7 +166,14 @@ export class SfxPlayer {
     }
     const context = this.context;
     const bus = this.strange ? this.strangeIn : this.dry;
-    if (stop || !context || !bus || context.state !== 'running' || document.hidden) {
+    if (
+      stop ||
+      !context ||
+      !bus ||
+      context.state !== 'running' ||
+      document.hidden ||
+      this.silenced
+    ) {
       return;
     }
     let gain = SFX_GAIN[slot] ?? 1;
@@ -222,7 +241,7 @@ export class SfxPlayer {
   /** Crée le contexte audio au premier geste, le circuit (direct, étrange) et décode les sons. */
   private start(): void {
     if (this.context) {
-      void this.context.resume();
+      this.applySilence();
       return;
     }
     if (typeof AudioContext === 'undefined') {
@@ -309,6 +328,7 @@ export class SfxPlayer {
       !context ||
       context.state !== 'running' ||
       document.hidden ||
+      this.silenced ||
       this.voices >= SFX_MIX.maxVoices
     ) {
       return;

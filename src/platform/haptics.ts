@@ -1,8 +1,13 @@
 import { HAPTICS, HAPTIC_MIN_GAP_MS, type HapticMoment } from '../config/haptics';
 
-/** Le navigateur sait-il vibrer (Chrome sur Android) ? */
+/**
+ * Le navigateur sait-il vibrer (Chrome sur Android) ? Pas dans DomoThib (D-193) : Chrome bloque les
+ * vibrations dans un cadre d'une autre origine ; le réglage n'est pas proposé.
+ */
 export function canVibrate(): boolean {
-  return typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
+  return (
+    !__DOMOTHIB__ && typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function'
+  );
 }
 
 /**
